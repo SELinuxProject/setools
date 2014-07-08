@@ -1,0 +1,110 @@
+#!/usr/bin/python
+# Copyright 2014, Tresys Technology, LLC
+#
+# This file is part of SETools.
+#
+# SETools is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# SETools is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with SETools.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+from __future__ import print_function
+import libapol
+import argparse
+import sys
+
+parser = argparse.ArgumentParser(
+    description="SELinux policy information tool.")
+parser.add_argument("--version", action="version", version=libapol.__version__)
+parser.add_argument("policy", help="Path to the SELinux policy to query.")
+parser.add_argument(
+    "-x", "--expand", help="Print additional information about the specified components.", action="store_true")
+
+queries = parser.add_argument_group("Component Queries")
+queries.add_argument("-c", "--class", help="Print object classes.",
+                     dest="classquery", default="", nargs='?', const=True, metavar="CLASS")
+queries.add_argument("-t", "--type",  help="Print types.",
+                     dest="typequery",  default="", nargs='?', const=True, metavar="TYPE")
+queries.add_argument("-a", "--attribute",  help="Print type attributes.",
+                     dest="attrquery",  default="", nargs='?', const=True, metavar="ATTR")
+queries.add_argument("-r", "--role",  help="Print roles.",
+                     dest="rolequery",  default="", nargs='?', const=True, metavar="ROLE")
+queries.add_argument("-u", "--user",  help="Print users.",
+                     dest="userquery",  default="", nargs='?', const=True, metavar="USER")
+queries.add_argument("-b", "--bool",  help="Print Booleans.",
+                     dest="boolquery",  default="", nargs='?', const=True, metavar="BOOL")
+queries.add_argument("--sensitivity",  help="Print MLS sensitivities.",
+                     dest="mlssensquery",  default="", nargs='?', const=True, metavar="SENS")
+queries.add_argument("--category",  help="Print MLS categories.",
+                     dest="mlssensquery",  default="", nargs='?', const=True, metavar="CAT")
+queries.add_argument("--constrain",  help="Print constraints.",
+                     dest="constraintquery",  default="", nargs='?', const=True, metavar="CLASS")
+queries.add_argument("--initialsid",  help="Print initial SIDs (contexts).",
+                     dest="initialsidquery",  default="", nargs='?', const=True, metavar="NAME")
+queries.add_argument("--fs_use",  help="Print fs_use statements.",
+                     dest="fsusequery",  default="", nargs='?', const=True, metavar="FS_TYPE")
+queries.add_argument("--genfscon",  help="Print genfscon statements.",
+                     dest="genfsconquery",  default="", nargs='?', const=True, metavar="FS_TYPE")
+queries.add_argument("--netifcon",  help="Print netifcon statements.",
+                     dest="netifconquery",  default="", nargs='?', const=True, metavar="DEVICE")
+queries.add_argument("--nodecon",  help="Print nodecon statements.",
+                     dest="nodeconquery",  default="", nargs='?', const=True, metavar="ADDR")
+queries.add_argument("--portcon",  help="Print portcon statements.",
+                     dest="portconquery",  default="", nargs='?', const=True, metavar="PORT_NUM")
+queries.add_argument("--permissive",  help="Print permissive statements.",
+                     dest="permissivequery", default="", nargs='?', const=True, metavar="TYPE")
+queries.add_argument("--polcap",  help="Print policy capabilities.",
+                     dest="polcapquery", default="", nargs='?', const=True, metavar="NAME")
+
+args = parser.parse_args()
+
+try:
+    p = libapol.SELinuxPolicy(args.policy)
+except RuntimeError as err:
+    print(err)
+    sys.exit(-1)
+
+if args.typequery:
+    if isinstance(args.typequery, str):
+        q = libapol.typequery.TypeQuery(p, args.typequery)
+    else:
+        q = libapol.typequery.TypeQuery(p)
+
+    for t in sorted(q.results()):
+        if args.expand:
+            print(t.statement())
+        else:
+            print(t)
+
+if args.boolquery:
+    if isinstance(args.boolquery, str):
+        q = libapol.boolquery.BoolQuery(p, args.boolquery)
+    else:
+        q = libapol.boolquery.BoolQuery(p)
+
+    for b in sorted(q.results()):
+        if args.expand:
+            print(b.statement())
+        else:
+            print(b)
+
+if args.polcapquery:
+    if isinstance(args.polcapquery, str):
+        q = libapol.polcapquery.PolCapQuery(p, args.polcapquery)
+    else:
+        q = libapol.polcapquery.PolCapQuery(p)
+
+    for cap in sorted(q.results()):
+        if args.expand:
+            print(cap.statement())
+        else:
+            print(cap)

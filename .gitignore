@@ -1,0 +1,4 @@
+/build
+/setools.egg-info
+*.pyc
+*.pyo

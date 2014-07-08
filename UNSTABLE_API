@@ -1,0 +1,6 @@
+Warning:
+
+SETools 4.0 is still in early development.  The API, classes, package names,
+etc. should be considered unstable, and should not be used for external
+applications yet.  Of particular note, the libapol package will be
+renamed to setools once the SETools 3.3 dependency is eliminated.

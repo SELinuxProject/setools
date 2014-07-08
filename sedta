@@ -1,0 +1,138 @@
+#!/usr/bin/python
+# Copyright 2014, Tresys Technology, LLC
+#
+# This file is part of SETools.
+#
+# SETools is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# SETools is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with SETools.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+from __future__ import print_function
+import sys
+import argparse
+
+import libapol
+
+
+def print_transition(trans, entrypoints, setexec, dyntrans, setcur):
+    if trans:
+        print("Domain transition rule(s):")
+        for t in trans:
+            print(t)
+
+        if setexec:
+            print("\nSet execution context rule(s):")
+            for s in setexec:
+                print(s)
+
+        for name, entry, exe, type_trans in entrypoints:
+            print("\nEntrypoint {0}:".format(name))
+
+            print("\tDomain entrypoint rule(s):")
+            for e in entry:
+                print("\t{0}".format(e))
+
+            print("\n\tFile execute rule(s):")
+            for e in exe:
+                print("\t{0}".format(e))
+
+            if type_trans:
+                print("\n\tType transition rule(s):")
+                for t in type_trans:
+                    print("\t{0}".format(t))
+
+            print()
+
+    if dyntrans:
+        print("Dynamic transition rule(s):")
+        for d in dyntrans:
+            print(d)
+
+        print("\nSet current process context rule(s):")
+        for s in setcur:
+            print(s)
+
+        print()
+
+    print()
+
+parser = argparse.ArgumentParser(description="SELinux policy domain transition analysis tool.",
+                                 epilog="If no analysis algorithm is selected, all transitions out of a domain will be calculated.")
+parser.add_argument("--version", action="version", version=libapol.__version__)
+parser.add_argument(
+    "-p", "--policy", help="Path to SELinux policy to analyze.", required=True)
+parser.add_argument(
+    "-s", "--source", help="Source type of the analysis.", required=True, default="")
+parser.add_argument(
+    "-t", "--target", help="Target type of the analysis.", default="")
+parser.add_argument("--stats", action="store_true",
+                    help="Display statistics at the end of the analysis.")
+
+alg = parser.add_argument_group("Analysis algorithm")
+alg.add_argument("-S", "--shortest_path", action="store_true",
+                 help="Calculate all shortest paths.")
+alg.add_argument("-A", "--all_paths",
+                 help="Calculate all paths, with the specified maximum path length. (Expensive)", type=int, metavar="MAX_STEPS")
+
+args = parser.parse_args()
+
+if not args.target and (args.shortest_path or args.all_paths):
+    parser.error("The target type must be specified to determine a path.")
+
+try:
+    p = libapol.SELinuxPolicy(args.policy)
+    g = libapol.dta.DomainTransitionAnalysis(p)
+except Exception as err:
+    print(err)
+    sys.exit(1)
+
+if args.shortest_path or args.all_paths:
+    try:
+        if args.shortest_path:
+            paths = g.all_shortest_paths(args.source, args.target)
+        else:
+            paths = g.all_paths(args.source, args.target, args.all_paths)
+    except Exception as err:
+        print(err)
+        sys.exit(1)
+
+    i = 0
+    for i, path in enumerate(paths, start=1):
+        print("Domain transition path {0}:".format(i))
+
+        for step, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path, start=1):
+            print("Step {0}: {1} -> {2}\n".format(step, src, tgt))
+            print_transition(trans, entrypoints, setexec, dyntrans, setcur)
+
+    print(i, "domain transition path(s) found.")
+
+else:  # single transition
+    try:
+        transitions = g.transitions(args.source)
+    except Exception as err:
+        print(err)
+        sys.exit(1)
+
+    i = 0
+    for i, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(transitions, start=1):
+        print("Transition {0}: {1} -> {2}\n".format(i, src, tgt))
+        print_transition(trans, entrypoints, setexec, dyntrans, setcur)
+
+
+    print(i, "domain transition(s) found.")
+
+if args.stats:
+    print("Domain transition graph size:")
+    nnodes, nedges = g.get_stats()
+    print(" Nodes:", nnodes)
+    print(" Edges:", nedges)
