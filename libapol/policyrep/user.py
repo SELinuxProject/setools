@@ -53,25 +53,26 @@ class User(symbol.PolicySymbol):
         return r
 
     @property
-    def mls_default(self):
+    def mls_level(self):
         """The user's default MLS level."""
-        return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+        return mls.MLSLevel(self.policy, self.qpol_symbol.get_dfltlevel(self.policy))
 
     @property
     def mls_range(self):
         """The user's MLS range."""
-        return mls.MLSLevel(self.policy, self.qpol_symbol.get_dfltlevel(self.policy))
+        return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+
 
     def statement(self):
-        roles = list(self.roles)
-        stmt = "user {0} ".format(self)
+        roles = list(str(r) for r in self.roles)
+        stmt = "user {0} roles ".format(self)
         if (len(roles) > 1):
-            stmt += "{{ {0} }}".format(string.join(str(r) for r in roles))
+            stmt += "{{ {0} }}".format(string.join(roles))
         else:
-            stmt += str(roles[0])
+            stmt += roles[0]
 
         try:
-            stmt += " level {0.mls_default} range {0.mls_range};".format(self)
+            stmt += " level {0.mls_level} range {0.mls_range};".format(self)
         except AttributeError:
             stmt += ";"
 
