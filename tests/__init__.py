@@ -21,3 +21,4 @@ import polcapquery
 import infoflow
 import terulequery
 import typequery
+import userquery

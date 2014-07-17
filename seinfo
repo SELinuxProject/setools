@@ -108,3 +108,15 @@ if args.polcapquery:
             print(cap.statement())
         else:
             print(cap)
+
+if args.userquery:
+    if isinstance(args.userquery, str):
+        q = libapol.userquery.UserQuery(p, args.userquery)
+    else:
+        q = libapol.userquery.UserQuery(p)
+
+    for u in sorted(q.results()):
+        if args.expand:
+            print(u.statement())
+        else:
+            print(u)

@@ -16,11 +16,63 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+
+import string
+
 import setools.qpol as qpol
+
+import role
+import mls
 import symbol
 
 
 class User(symbol.PolicySymbol):
 
     """A user."""
-    pass
+
+    @property
+    def roles(self):
+        """The user's set of roles."""
+
+        r = set()
+
+        aiter = self.qpol_symbol.get_role_iter(self.policy)
+        while not aiter.end():
+            item = role.Role(
+                self.policy, qpol.qpol_role_from_void(aiter.get_item()))
+
+            # object_r is implicitly added to all roles by the compiler.
+            # technically it is incorrect to skip it, but policy writers
+            # and analysts don't expect to see it in results, and it
+            # will confuse, especially for set equality user queries.
+            if item != "object_r":
+                r.add(item)
+
+            aiter.next()
+
+        return r
+
+    @property
+    def mls_default(self):
+        """The user's default MLS level."""
+        return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+
+    @property
+    def mls_range(self):
+        """The user's MLS range."""
+        return mls.MLSLevel(self.policy, self.qpol_symbol.get_dfltlevel(self.policy))
+
+    def statement(self):
+        roles = list(self.roles)
+        stmt = "user {0} ".format(self)
+        if (len(roles) > 1):
+            stmt += "{{ {0} }}".format(string.join(str(r) for r in roles))
+        else:
+            stmt += str(roles[0])
+
+        try:
+            stmt += " level {0.mls_default} range {0.mls_range};".format(self)
+        except AttributeError:
+            stmt += ";"
+
+        return stmt
