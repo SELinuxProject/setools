@@ -26,6 +26,7 @@ from policyrep import SELinuxPolicy
 
 # Component Queries
 import typequery
+import rolequery
 import userquery
 import boolquery
 import polcapquery
