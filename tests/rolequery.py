@@ -37,7 +37,7 @@ class RoleQueryTest(unittest.TestCase):
             pass
 
         # numroles-1 as object_r is skipped from the role query
-        self.assertEqual(numroles-1, q_numroles)
+        self.assertEqual(numroles - 1, q_numroles)
 
     def test_001_name_exact(self):
         """Role query with exact name match."""
