@@ -21,4 +21,5 @@ import polcapquery
 import infoflow
 import terulequery
 import typequery
+import rolequery
 import userquery

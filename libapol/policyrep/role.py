@@ -16,8 +16,11 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import string
+
 import setools.qpol as qpol
 import symbol
+import typeattr
 
 
 class Role(symbol.PolicySymbol):
@@ -37,3 +40,25 @@ class Role(symbol.PolicySymbol):
         """(T/F) this is an attribute."""
         # Role attributes are already expanded in the binary policy
         return False
+
+    def types(self):
+        """Generator which yields the role's set of types."""
+
+        titer = self.qpol_symbol.get_type_iter(self.policy)
+        while not titer.end():
+            yield typeattr.TypeAttr(
+                self.policy, qpol.qpol_type_from_void(titer.get_item()))
+            titer.next()
+
+    def statement(self):
+        types = list(str(t) for t in self.types())
+        stmt = "role {0}".format(self)
+        if (len(types) > 1):
+            stmt += " types {{ {0} }};".format(string.join(types))
+        else:
+            try:
+                stmt += " types {0};".format(types[0])
+            except IndexError:
+                stmt += ";"
+
+        return stmt

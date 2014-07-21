@@ -120,3 +120,15 @@ if args.userquery:
             print(u.statement())
         else:
             print(u)
+
+if args.rolequery:
+    if isinstance(args.rolequery, str):
+        q = libapol.rolequery.RoleQuery(p, args.rolequery)
+    else:
+        q = libapol.rolequery.RoleQuery(p)
+
+    for r in sorted(q.results()):
+        if args.expand:
+            print(r.statement())
+        else:
+            print(r)

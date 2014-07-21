@@ -91,6 +91,14 @@ class SELinuxPolicy(object):
                 yield t
             qiter.next()
 
+    def roles(self):
+        """Generator which yields all roles."""
+
+        qiter = self.policy.get_role_iter()
+        while not qiter.end():
+            yield role.Role(self.policy, qpol.qpol_role_from_void(qiter.get_item()))
+            qiter.next()
+
     def users(self):
         """Generator which yields all users."""
 
