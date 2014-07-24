@@ -55,23 +55,23 @@ class TERule(rule.PolicyRule):
         rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(
             self)
 
-        if isinstance(self.qpol_symbol, qpol.qpol_avrule_t):
+        try:
             perms = self.perms
+        except rule.InvalidRuleUse:
+            # type_* rules
+            rule_string += str(self.default)
 
+            try:
+                rule_string += " \"{0}\";".format(self.filename)
+            except TERuleNoFilename:
+                rule_string += ";"
+        else:
+            # allow/dontaudit/auditallow/neverallow rules
             if len(perms) > 1:
                 rule_string += "{{ {0} }};".format(string.join(perms))
             else:
                 # convert to list since sets cannot be indexed
                 rule_string += "{0};".format(list(perms)[0])
-        else:
-            rule_string += str(self.default)
-
-            try:
-                rule_string += " \"{0}\"".format(self.filename)
-            except TERuleNoFilename:
-                pass
-
-            rule_string += ";"
 
         try:
             cond = self.conditional
