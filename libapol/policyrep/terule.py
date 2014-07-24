@@ -20,6 +20,7 @@ import string
 
 import setools.qpol as qpol
 
+import symbol
 import rule
 import typeattr
 import objclass
@@ -149,13 +150,10 @@ class TERule(rule.PolicyRule):
     def conditional(self):
         """The rule's conditional expression."""
         try:
-            qpol_cond = self.qpol_symbol.get_cond(self.policy)
-        except AttributeError:
-            # name filetrans rules cannot be conditional (so no member
-            # function)
+            return boolcond.ConditionalExpr(self.policy, self.qpol_symbol.get_cond(self.policy))
+        except (AttributeError, symbol.InvalidSymbol):
+            # AttributeError: name filetrans rules cannot be conditional
+            #                 so no member function
+            # InvalidSymbol:  The rule does not have a conditional,
+            #                 so qpol returns a bad symbol (a None)
             raise rule.RuleNotConditional
-
-        if not qpol_cond:
-            raise rule.RuleNotConditional
-
-        return boolcond.ConditionalExpr(self.policy, qpol_cond)

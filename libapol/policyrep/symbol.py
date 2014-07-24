@@ -18,6 +18,13 @@
 #
 import setools.qpol as qpol
 
+class InvalidSymbol(Exception):
+    """
+    Exception for invalid symbols.  Typically this is the case when
+    one symbol optionally relates to another, such as object classes
+    optionally inheriting a common.
+    """
+    pass
 
 class PolicySymbol(object):
 
@@ -29,6 +36,12 @@ class PolicySymbol(object):
         policy        The low-level policy object.
         qpol_symbol	  The low-level policy symbol object.
         """
+
+        if not qpol_symbol:
+            # Some qpol functions will return None instead of
+            # raising exceptions, e.g. if getting the conditional
+            # expression for an unconditional rule
+            raise InvalidSymbol
 
         self.policy = policy
         self.qpol_symbol = qpol_symbol
