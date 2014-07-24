@@ -79,6 +79,23 @@ class SELinuxPolicy(object):
     #
     # Policy components generators
     #
+
+    def classes(self):
+        """Generator which yields all object classes."""
+
+        qiter = self.policy.get_class_iter()
+        while not qiter.end():
+            yield objclass.ObjClass(self.policy, qpol.qpol_class_from_void(qiter.get_item()))
+            qiter.next()
+
+    def commons(self):
+        """Generator which yields all commons."""
+
+        qiter = self.policy.get_common_iter()
+        while not qiter.end():
+            yield objclass.Common(self.policy, qpol.qpol_common_from_void(qiter.get_item()))
+            qiter.next()
+
     def types(self):
         """Generator which yields all types."""
 
