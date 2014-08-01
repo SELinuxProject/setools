@@ -40,10 +40,10 @@ class Common(symbol.PolicySymbol):
         """The list of the common's permissions."""
 
         piter = self.qpol_symbol.get_perm_iter(self.policy)
-        p = []
+        p = set()
 
         while not piter.end():
-            p.append(qpol.to_str(piter.get_item()))
+            p.add(qpol.to_str(piter.get_item()))
             piter.next()
 
         return p
