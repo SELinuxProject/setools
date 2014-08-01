@@ -29,99 +29,60 @@ class TypeQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Type query with no criteria."""
         # query with no parameters gets all types.
-        for numtypes, t in enumerate(self.p.types(), start=1):
-            pass
+        alltypes = sorted(str(t) for t in self.p.types())
 
         q = TypeQuery(self.p)
-        for q_numtypes, t in enumerate(q.results(), start=1):
-            pass
+        qtypes = sorted(str(t) for t in q.results())
 
-        self.assertEqual(numtypes, q_numtypes)
+        self.assertListEqual(alltypes, qtypes)
 
     def test_001_name_exact(self):
         """Type query with exact name match."""
         q = TypeQuery(self.p, name="test1")
 
-        # manually consume the generator:
-        types = q.results()
-        t = types.next()
-
-        self.assertEqual(t, "test1")
-
-        self.assertRaises(StopIteration, types.next)
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test1"], types)
 
     def test_002_name_regex(self):
         """Type query with regex name match."""
         q = TypeQuery(self.p, name="test2(a|b)", name_regex=True)
 
-        # manually consume the generator:
-        t = sorted(q.results())
-        self.assertEqual(len(t), 2)
-
-        self.assertEqual(t[0], "test2a")
-        self.assertEqual(t[1], "test2b")
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test2a", "test2b"], types)
 
     def test_010_attr_intersect(self):
         """Type query with attribute set intersection."""
         q = TypeQuery(self.p, attrs=["test10a", "test10b"])
 
-        # manually consume the generator:
-        t = sorted(q.results())
-        self.assertEqual(len(t), 6)
-
-        self.assertEqual(t[0], "test10t1")
-        self.assertEqual(t[1], "test10t2")
-        self.assertEqual(t[2], "test10t3")
-        self.assertEqual(t[3], "test10t4")
-        self.assertEqual(t[4], "test10t5")
-        self.assertEqual(t[5], "test10t6")
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test10t1", "test10t2", "test10t3",
+                              "test10t4", "test10t5", "test10t6"], types)
 
     def test_011_attr_equality(self):
         """Type query with attribute set equality."""
         q = TypeQuery(self.p, attrs=["test11a", "test11b"], attrs_equal=True)
 
-        # manually consume the generator:
-        types = q.results()
-        t = types.next()
-
-        self.assertEqual(t, "test11t2")
-
-        self.assertRaises(StopIteration, types.next)
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test11t2"], types)
 
     def test_012_attr_regex(self):
         """Type query with attribute regex match."""
         q = TypeQuery(self.p, attrs="test12(a|b)", attrs_regex=True)
 
-        # manually consume the generator:
-        t = sorted(q.results())
-        self.assertEqual(len(t), 6)
-
-        self.assertEqual(t[0], "test12t1")
-        self.assertEqual(t[1], "test12t2")
-        self.assertEqual(t[2], "test12t3")
-        self.assertEqual(t[3], "test12t4")
-        self.assertEqual(t[4], "test12t5")
-        self.assertEqual(t[5], "test12t6")
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test12t1", "test12t2", "test12t3",
+                              "test12t4", "test12t5", "test12t6"], types)
 
     def test_020_alias_exact(self):
         """Type query with exact alias match."""
         q = TypeQuery(self.p, alias="test20a")
 
-        # manually consume the generator:
-        types = q.results()
-        t = types.next()
-
-        self.assertEqual(t, "test20t1")
-
-        self.assertRaises(StopIteration, types.next)
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test20t1"], types)
 
     def test_021_alias_regex(self):
         """Type query with regex alias match."""
         q = TypeQuery(self.p, alias="test21(a|b)", alias_regex=True)
 
-        # manually consume the generator:
-        t = sorted(q.results())
-        self.assertEqual(len(t), 2)
-
-        self.assertEqual(t[0], "test21t1")
-        self.assertEqual(t[1], "test21t2")
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test21t1", "test21t2"], types)

@@ -38,23 +38,23 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         a._build_graph()
 
         nodes = sorted(list(a.G.nodes_iter()))
-        self.assertListEqual(nodes, ["disconnected1", "disconnected2", "node1",
-                                     "node2", "node3", "node4", "node5",
-                                     "node6", "node7", "node8", "node9"])
+        self.assertListEqual(["disconnected1", "disconnected2", "node1",
+                              "node2", "node3", "node4", "node5",
+                              "node6", "node7", "node8", "node9"], nodes)
 
         edges = sorted(list(a.G.out_edges_iter()))
-        self.assertListEqual(edges, [("disconnected1", "disconnected2"),
-                                     ("disconnected2", "disconnected1"),
-                                     ("node1", "node2"),
-                                     ("node1", "node3"),
-                                     ("node2", "node4"),
-                                     ("node3", "node5"),
-                                     ("node4", "node6"),
-                                     ("node5", "node8"),
-                                     ("node6", "node5"),
-                                     ("node6", "node7"),
-                                     ("node8", "node9"),
-                                     ("node9", "node8")])
+        self.assertListEqual([("disconnected1", "disconnected2"),
+                              ("disconnected2", "disconnected1"),
+                              ("node1", "node2"),
+                              ("node1", "node3"),
+                              ("node2", "node4"),
+                              ("node3", "node5"),
+                              ("node4", "node6"),
+                              ("node5", "node8"),
+                              ("node6", "node5"),
+                              ("node6", "node7"),
+                              ("node8", "node9"),
+                              ("node9", "node8")], edges)
 
         r = a.G.edge["disconnected1"]["disconnected2"]["rules"]
         self.assertEqual(len(r), 1)
@@ -178,22 +178,22 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         a._build_graph()
 
         nodes = sorted(list(a.G.nodes_iter()))
-        self.assertListEqual(nodes, ["disconnected1", "disconnected2", "node1",
-                                     "node2", "node3", "node4", "node5",
-                                     "node6", "node7", "node8", "node9"])
+        self.assertListEqual(["disconnected1", "disconnected2", "node1",
+                              "node2", "node3", "node4", "node5",
+                              "node6", "node7", "node8", "node9"], nodes)
 
         edges = sorted(list(a.G.out_edges_iter()))
-        self.assertListEqual(edges, [("disconnected1", "disconnected2"),
-                                     ("disconnected2", "disconnected1"),
-                                     ("node1", "node2"),
-                                     ("node1", "node3"),
-                                     ("node2", "node4"),
-                                     ("node4", "node6"),
-                                     ("node5", "node8"),
-                                     ("node6", "node5"),
-                                     ("node6", "node7"),
-                                     ("node8", "node9"),
-                                     ("node9", "node8")])
+        self.assertListEqual([("disconnected1", "disconnected2"),
+                              ("disconnected2", "disconnected1"),
+                              ("node1", "node2"),
+                              ("node1", "node3"),
+                              ("node2", "node4"),
+                              ("node4", "node6"),
+                              ("node5", "node8"),
+                              ("node6", "node5"),
+                              ("node6", "node7"),
+                              ("node8", "node9"),
+                              ("node9", "node8")], edges)
 
         r = a.G.edge["disconnected1"]["disconnected2"]["rules"]
         self.assertEqual(len(r), 1)
@@ -308,20 +308,20 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         a._build_graph()
 
         nodes = sorted(list(a.G.nodes_iter()))
-        self.assertListEqual(nodes, ["disconnected1", "disconnected2", "node1",
-                                     "node2", "node4", "node5",
-                                     "node6", "node7", "node8", "node9"])
+        self.assertListEqual(["disconnected1", "disconnected2", "node1",
+                              "node2", "node4", "node5",
+                              "node6", "node7", "node8", "node9"], nodes)
 
         edges = sorted(list(a.G.out_edges_iter()))
-        self.assertListEqual(edges, [("disconnected1", "disconnected2"),
-                                     ("disconnected2", "disconnected1"),
-                                     ("node1", "node2"),
-                                     ("node2", "node4"),
-                                     ("node4", "node6"),
-                                     ("node5", "node8"),
-                                     ("node6", "node7"),
-                                     ("node8", "node9"),
-                                     ("node9", "node8")])
+        self.assertListEqual([("disconnected1", "disconnected2"),
+                              ("disconnected2", "disconnected1"),
+                              ("node1", "node2"),
+                              ("node2", "node4"),
+                              ("node4", "node6"),
+                              ("node5", "node8"),
+                              ("node6", "node7"),
+                              ("node8", "node9"),
+                              ("node9", "node8")], edges)
 
         r = a.G.edge["disconnected1"]["disconnected2"]["rules"]
         self.assertEqual(len(r), 1)

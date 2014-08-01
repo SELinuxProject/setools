@@ -37,12 +37,12 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         # removed after removing invalid domain transitions
 
         edges = sorted(list(self.a.G.out_edges_iter()))
-        self.assertListEqual(edges, [("dyntrans100", "bothtrans200"),
-                                     ("start", "dyntrans100"),
-                                     ("start", "trans1"),
-                                     ("trans1", "trans2"),
-                                     ("trans2", "trans3"),
-                                     ("trans3", "trans5")])
+        self.assertListEqual([("dyntrans100", "bothtrans200"),
+                              ("start", "dyntrans100"),
+                              ("start", "trans1"),
+                              ("trans1", "trans2"),
+                              ("trans2", "trans3"),
+                              ("trans3", "trans5")], edges)
 
     def test_001_bothtrans(self):
         """DTA: type_transition, setexeccon(), and setcon() transitions."""

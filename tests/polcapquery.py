@@ -29,35 +29,23 @@ class PolCapQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Policy capability query with no criteria"""
         # query with no parameters gets all capabilities.
-        for numcaps, c in enumerate(self.p.polcaps(), start=1):
-            pass
+        allcaps = sorted(str(c) for c in self.p.polcaps())
 
         q = PolCapQuery(self.p)
-        for q_numcaps, c in enumerate(q.results(), start=1):
-            pass
+        qcaps = sorted(str(c) for c in q.results())
 
-        self.assertEqual(numcaps, q_numcaps)
+        self.assertListEqual(allcaps, qcaps)
 
     def test_001_name_exact(self):
         """Policy capability query with exact match"""
         q = PolCapQuery(self.p, name="open_perms", name_regex=False)
 
-        # manually consume the generator:
-        caps = q.results()
-        c = caps.next()
-
-        self.assertEqual(c, "open_perms")
-
-        self.assertRaises(StopIteration, caps.next)
+        caps = sorted(str(c) for c in q.results())
+        self.assertListEqual(["open_perms"], caps)
 
     def test_002_name_regex(self):
         """Policy capability query with regex match"""
-
         q = PolCapQuery(self.p, name="pe?er", name_regex=True)
 
-        # manually consume the generator:
-        c = sorted(q.results())
-        self.assertEqual(len(c), 2)
-
-        self.assertEqual(c[0], "network_peer_controls")
-        self.assertEqual(c[1], "open_perms")
+        caps = sorted(str(c) for c in q.results())
+        self.assertListEqual(["network_peer_controls", "open_perms"], caps)

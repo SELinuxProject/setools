@@ -29,73 +29,47 @@ class UserQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """User query with no criteria."""
         # query with no parameters gets all types.
-        for numusers, u in enumerate(self.p.users(), start=1):
-            pass
+        allusers = sorted(str(u) for u in self.p.users())
 
         q = UserQuery(self.p)
-        for q_numusers, u in enumerate(q.results(), start=1):
-            pass
+        qusers = sorted(str(u) for u in q.results())
 
-        self.assertEqual(numusers, q_numusers)
+        self.assertListEqual(allusers, qusers)
 
     def test_001_name_exact(self):
         """User query with exact name match."""
         q = UserQuery(self.p, name="test1_u")
 
-        # manually consume the generator:
-        u = sorted(q.results())
-        self.assertEqual(len(u), 1)
-
-        self.assertEqual(u[0], "test1_u")
+        users = sorted(str(u) for u in q.results())
+        self.assertListEqual(["test1_u"], users)
 
     def test_002_name_regex(self):
         """User query with regex name match."""
         q = UserQuery(self.p, name="test2_u(1|2)", name_regex=True)
 
-        # manually consume the generator:
-        u = sorted(q.results())
-        self.assertEqual(len(u), 2)
-
-        self.assertEqual(u[0], "test2_u1")
-        self.assertEqual(u[1], "test2_u2")
+        users = sorted(str(u) for u in q.results())
+        self.assertListEqual(["test2_u1", "test2_u2"], users)
 
     def test_010_role_intersect(self):
         """User query with role set intersection."""
         q = UserQuery(self.p, roles=["test10a_r", "test10b_r"])
 
-        # manually consume the generator:
-        u = sorted(q.results())
-        self.assertEqual(len(u), 6)
-
-        self.assertEqual(u[0], "test10_u1")
-        self.assertEqual(u[1], "test10_u2")
-        self.assertEqual(u[2], "test10_u3")
-        self.assertEqual(u[3], "test10_u4")
-        self.assertEqual(u[4], "test10_u5")
-        self.assertEqual(u[5], "test10_u6")
+        users = sorted(str(u) for u in q.results())
+        self.assertListEqual(["test10_u1", "test10_u2", "test10_u3",
+                              "test10_u4", "test10_u5", "test10_u6"], users)
 
     def test_011_role_equality(self):
         """User query with role set equality."""
         q = UserQuery(
             self.p, roles=["test11a_r", "test11b_r"], roles_equal=True)
 
-        # manually consume the generator:
-        u = sorted(q.results())
-        self.assertEqual(len(u), 1)
-
-        self.assertEqual(u[0], "test11_u2")
+        users = sorted(str(u) for u in q.results())
+        self.assertListEqual(["test11_u2"], users)
 
     def test_012_role_regex(self):
         """User query with role regex match."""
         q = UserQuery(self.p, roles="test12(a|b)_r", roles_regex=True)
 
-        # manually consume the generator:
-        u = sorted(q.results())
-        self.assertEqual(len(u), 6)
-
-        self.assertEqual(u[0], "test12_u1")
-        self.assertEqual(u[1], "test12_u2")
-        self.assertEqual(u[2], "test12_u3")
-        self.assertEqual(u[3], "test12_u4")
-        self.assertEqual(u[4], "test12_u5")
-        self.assertEqual(u[5], "test12_u6")
+        users = sorted(str(u) for u in q.results())
+        self.assertListEqual(["test12_u1", "test12_u2", "test12_u3",
+                              "test12_u4", "test12_u5", "test12_u6"], users)

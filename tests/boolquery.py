@@ -29,45 +29,30 @@ class BoolQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Boolean query with no criteria."""
         # query with no parameters gets all Booleans.
-        for numbools, b in enumerate(self.p.bools(), start=1):
-            pass
+        allbools = sorted(str(b) for b in self.p.bools())
 
         q = BoolQuery(self.p)
-        for q_numbools, b in enumerate(q.results(), start=1):
-            pass
+        qbools = sorted(str(b) for b in q.results())
 
-        self.assertEqual(numbools, q_numbools)
+        self.assertListEqual(allbools, qbools)
 
     def test_001_name_exact(self):
         """Boolean query with exact match"""
         q = BoolQuery(self.p, name="test1")
 
-        # manually consume the generator:
-        bools = q.results()
-        b = bools.next()
-
-        self.assertEqual(b, "test1")
-
-        self.assertRaises(StopIteration, bools.next)
+        bools = sorted(str(b) for b in q.results())
+        self.assertListEqual(["test1"], bools)
 
     def test_002_name_regex(self):
         """Boolean query with regex match."""
         q = BoolQuery(self.p, name="test2(a|b)", name_regex=True)
 
-        # manually consume the generator:
-        b = sorted(q.results())
-        self.assertEqual(len(b), 2)
-
-        self.assertEqual(b[0], "test2a")
-        self.assertEqual(b[1], "test2b")
+        bools = sorted(str(b) for b in q.results())
+        self.assertListEqual(["test2a", "test2b"], bools)
 
     def test_010_default(self):
         """Boolean query with default state match."""
         q = BoolQuery(self.p, match_default=True, default=False)
 
-        # manually consume the generator:
-        b = sorted(q.results())
-        self.assertEqual(len(b), 2)
-
-        self.assertEqual(b[0], "test10a")
-        self.assertEqual(b[1], "test10b")
+        bools = sorted(str(b) for b in q.results())
+        self.assertListEqual(["test10a", "test10b"], bools)
