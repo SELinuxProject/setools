@@ -25,6 +25,8 @@ import policyrep
 from policyrep import SELinuxPolicy
 
 # Component Queries
+import commonquery
+import objclassquery
 import typequery
 import rolequery
 import userquery

@@ -132,3 +132,15 @@ if args.rolequery:
             print(r.statement())
         else:
             print(r)
+
+if args.classquery:
+    if isinstance(args.classquery, str):
+        q = libapol.objclassquery.ObjClassQuery(p, args.classquery)
+    else:
+        q = libapol.objclassquery.ObjClassQuery(p)
+
+    for c in sorted(q.results()):
+        if args.expand:
+            print(c.statement())
+        else:
+            print(c)

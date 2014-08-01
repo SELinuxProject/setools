@@ -16,7 +16,9 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import boolquery
+import commonquery
 import dta
+import objclassquery
 import polcapquery
 import infoflow
 import terulequery
