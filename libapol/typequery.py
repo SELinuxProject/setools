@@ -44,7 +44,8 @@ class TypeQuery(compquery.ComponentQuery):
                      match.  Otherwise, any intersection
                      will match.
         attrs_regex  If true, regular expression matching
-                     will be used on the attribute names.
+                     will be used on the attribute names instead
+                     of set logic.
         """
 
         self.policy = policy
@@ -115,7 +116,8 @@ class TypeQuery(compquery.ComponentQuery):
         alias 		Name to match the component's attributes.
 
         Keyword Options:
-        regex       If true, regular expression matching will be used.
+        regex       If true, regular expression matching will be used
+                    instead of set logic.
         equal		If true, the attribute set of the type
                     must equal the attributes criteria to
                     match. If false, any intersection in the

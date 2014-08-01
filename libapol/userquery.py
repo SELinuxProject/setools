@@ -40,7 +40,8 @@ class UserQuery(compquery.ComponentQuery):
                      match.  Otherwise, any intersection
                      will match.
         roles_regex  If true, regular expression matching
-                     will be used on the role names.
+                     will be used on the role names instead
+                     of set logic.
         """
 
         self.policy = policy
@@ -78,7 +79,8 @@ class UserQuery(compquery.ComponentQuery):
         roles 		Name to match the component's attributes.
 
         Keyword Options:
-        regex       If true, regular expression matching will be used.
+        regex       If true, regular expression matching will be used
+                    instead of set logic.
         equal		If true, the role set of the user
                     must equal the attributes criteria to
                     match. If false, any intersection in the
