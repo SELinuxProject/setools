@@ -62,7 +62,6 @@ class User(symbol.PolicySymbol):
         """The user's MLS range."""
         return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
 
-
     def statement(self):
         roles = list(str(r) for r in self.roles)
         stmt = "user {0} roles ".format(self)

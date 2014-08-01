@@ -124,7 +124,6 @@ class SELinuxPolicy(object):
             yield user.User(self.policy, qpol.qpol_user_from_void(qiter.get_item()))
             qiter.next()
 
-
     def bools(self):
         """Generator which yields all Booleans."""
 

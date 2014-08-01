@@ -18,13 +18,16 @@
 #
 import setools.qpol as qpol
 
+
 class InvalidSymbol(Exception):
+
     """
     Exception for invalid symbols.  Typically this is the case when
     one symbol optionally relates to another, such as object classes
     optionally inheriting a common.
     """
     pass
+
 
 class PolicySymbol(object):
 
