@@ -50,7 +50,6 @@ import mlsrule
 
 # Constraints
 import constraint
-import mlsconstraint
 
 # In-policy Labeling
 import initsid
@@ -188,6 +187,26 @@ class SELinuxPolicy(object):
     #
     # Constraints generators
     #
+
+    def constraints(self):
+        """Generator which yields all constraints."""
+
+        qiter = self.policy.get_constraint_iter()
+        while not qiter.end():
+            c = constraint.Constraint(self.policy, qpol.qpol_constraint_from_void(qiter.get_item()))
+            if not c.ismls:
+                yield c
+            qiter.next()
+
+    def mlsconstraints(self):
+        """Generator which yields all MLS constraints."""
+
+        qiter = self.policy.get_constraint_iter()
+        while not qiter.end():
+            c = constraint.Constraint(self.policy, qpol.qpol_constraint_from_void(qiter.get_item()))
+            if c.ismls:
+                yield c
+            qiter.next()
 
     #
     # In-policy Labeling statement generators
