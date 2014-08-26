@@ -30,14 +30,10 @@ class Context(symbol.PolicySymbol):
     """A SELinux security context/security attribute."""
 
     def __str__(self):
-        ctx = "{0.user}:{0.role}:{0.type_}".format(self)
-
-        # TODO qpol doesn't currently export a way to check if
-        # MLS is enabled.  It also will segfault if we try to get
-        # a range on a policy w/o MLS
-        # if mls:
-        #	ctx += ":{0}".format(self.mls)
-        return ctx
+        try:
+            return "{0.user}:{0.role}:{0.type_}:{0.mls}".format(self)
+        except mls.MLSDisabled:
+            return "{0.user}:{0.role}:{0.type_}".format(self)
 
     @property
     def user(self):
@@ -57,4 +53,9 @@ class Context(symbol.PolicySymbol):
     @property
     def mls(self):
         """The MLS portion (range) of the context."""
-        return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+
+        # without this check, qpol will segfault on MLS-disabled policies
+        if self.policy.has_capability(qpol.QPOL_CAP_MLS):
+            return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+        else:
+            raise mls.MLSDisabled("MLS is disabled, the context has no range.")

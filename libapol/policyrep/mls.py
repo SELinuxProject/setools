@@ -20,6 +20,14 @@ import setools.qpol as qpol
 import symbol
 
 
+class MLSDisabled(symbol.InvalidSymbol):
+
+    """
+    Exception when MLS is disabled.
+    """
+    pass
+
+
 class MLSCategory(symbol.PolicySymbol):
 
     """An MLS category."""
