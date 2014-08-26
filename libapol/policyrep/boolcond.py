@@ -54,6 +54,19 @@ class ConditionalExpr(symbol.PolicySymbol):
         qpol.QPOL_COND_EXPR_EQ: 4,
         qpol.QPOL_COND_EXPR_NEQ: 4}
 
+    def __contains__(self, other):
+        qpol_iter = self.qpol_symbol.get_expr_node_iter(self.policy)
+
+        while not qpol_iter.end():
+            expr_node = qpol.qpol_cond_expr_node_from_void(
+                qpol_iter.get_item())
+            expr_node_type = expr_node.get_expr_type(self.policy)
+
+            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == Boolean(self.policy, expr_node.get_bool(self.policy)):
+                return True
+
+        return False
+
     def __str__(self):
         qpol_iter = self.qpol_symbol.get_expr_node_iter(self.policy)
 
