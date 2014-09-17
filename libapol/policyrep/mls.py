@@ -16,6 +16,9 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import itertools
+import string
+
 import setools.qpol as qpol
 import symbol
 
@@ -37,6 +40,19 @@ class MLSCategory(symbol.PolicySymbol):
         """(T/F) this is an alias."""
         return self.qpol_symbol.get_isalias(self.policy)
 
+    @property
+    def value(self):
+        """
+        The value of the category.
+
+        This is a low-level policy detail exposed so that categories can
+        be sorted based on their policy declaration order instead of
+        by their name.  This has no other use.
+
+        Example usage: sorted(self.categories(), key=lambda k: k.value)
+        """
+        return self.qpol_symbol.get_value(self.policy)
+
     def aliases(self):
         """Generator that yields all aliases for this category."""
 
@@ -55,8 +71,24 @@ class MLSLevel(symbol.PolicySymbol):
     """An MLS level."""
 
     def __str__(self):
-        # TODO: add compact category notation
-        return self.qpol_symbol.get_sens_name(self.policy)
+        lvl = str(self.qpol_symbol.get_sens_name(self.policy))
+
+        # sort by policy declaration order
+        cats = sorted(self.categories(), key=lambda k: k.value)
+
+        if cats:
+            # generate short category notation
+            shortlist = []
+            for k, g in itertools.groupby(cats, key=lambda k, c=itertools.count(): k.value - next(c)):
+                group = list(g)
+                if len(group) > 1:
+                    shortlist.append("{0}.{1}".format(group[0], group[-1]))
+                else:
+                    shortlist.append(str(group[0]))
+
+            lvl += ":" + string.join(shortlist, ",")
+
+        return lvl
 
     def categories(self):
         """
