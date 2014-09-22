@@ -139,6 +139,14 @@ class SELinuxPolicy(object):
             yield polcap.PolicyCapability(self.policy, qpol.qpol_polcap_from_void(qiter.get_item()))
             qiter.next()
 
+    def permissives(self):
+        """Generator which yields all permissive types."""
+
+        qiter = self.policy.get_permissive_iter()
+        while not qiter.end():
+            yield typeattr.TypeAttr(self.policy, qpol.qpol_type_from_void(qiter.get_item()))
+            qiter.next()
+
     #
     # Policy rules generators
     #
