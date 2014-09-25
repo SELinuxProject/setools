@@ -70,6 +70,18 @@ class MLSLevel(symbol.PolicySymbol):
 
     """An MLS level."""
 
+    def __eq__(self, other):
+        if self.policy == other.policy:
+            if (self.qpol_symbol.get_sens_name(self.policy) != other.qpol_symbol.get_sens_name(self.policy)):
+                return False
+
+            selfcats = set(str(c) for c in self.categories())
+            othercats = set(str(c) for c in other.categories())
+            return (not selfcats ^ othercats)
+
+        else:
+            raise NotImplementedError
+
     def __str__(self):
         lvl = str(self.qpol_symbol.get_sens_name(self.policy))
 
