@@ -30,9 +30,7 @@ class RBACRule(rule.PolicyRule):
 
     def __str__(self):
         try:
-            # qpol doesnt currently support role transitons
-            # with an object class specified (v26+)
-            return "role_transition {0.source} {0.target} {0.default};".format(self)
+            return "role_transition {0.source} {0.target}:{0.tclass} {0.default};".format(self)
         except rule.InvalidRuleUse:
             return "allow {0.source} {0.target};".format(self)
 
@@ -63,12 +61,8 @@ class RBACRule(rule.PolicyRule):
     @property
     def tclass(self):
         """The rule's object class."""
-        # qpol doesnt currently support role transitions
-        # with an object class specified (v26+)
-        raise NotImplementedError
-
         try:
-            return objclass.ObjClass(self.policy, self.qpol_symbol.get_target_class(self.policy))
+            return objclass.ObjClass(self.policy, self.qpol_symbol.get_object_class(self.policy))
         except AttributeError:
             raise rule.InvalidRuleUse(
                 "Role allow rules do not have an object class.")
