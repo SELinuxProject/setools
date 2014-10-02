@@ -75,11 +75,9 @@ class TERule(rule.PolicyRule):
                 rule_string += "{0};".format(list(perms)[0])
 
         try:
-            cond = self.conditional
+            rule_string += " [ {0} ]".format(self.conditional)
         except rule.RuleNotConditional:
             pass
-        else:
-            rule_string += " [ {0} ]".format(cond)
 
         return rule_string
 
