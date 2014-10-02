@@ -32,6 +32,7 @@ import rolequery
 import userquery
 import boolquery
 import polcapquery
+import permissivequery
 
 # Rule Queries
 import terulequery

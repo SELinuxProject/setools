@@ -20,6 +20,7 @@ import commonquery
 import dta
 import objclassquery
 import polcapquery
+import permissivequery
 import infoflow
 import terulequery
 import rbacrulequery
