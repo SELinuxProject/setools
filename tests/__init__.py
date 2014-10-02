@@ -22,6 +22,7 @@ import objclassquery
 import polcapquery
 import infoflow
 import terulequery
+import rbacrulequery
 import typequery
 import rolequery
 import userquery
