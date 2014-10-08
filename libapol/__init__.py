@@ -39,6 +39,9 @@ import terulequery
 import rbacrulequery
 import mlsrulequery
 
+# In-policy Context Queries
+import initsidquery
+
 # Information Flow Analysis
 import infoflow
 import permmap

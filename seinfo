@@ -144,3 +144,15 @@ if args.classquery:
             print(c.statement())
         else:
             print(c)
+
+if args.initialsidquery:
+    if isinstance(args.initialsidquery, str):
+        q = libapol.initsidquery.InitialSIDQuery(p, args.initialsidquery)
+    else:
+        q = libapol.initsidquery.InitialSIDQuery(p)
+
+    for i in sorted(q.results()):
+        if args.expand:
+            print(i.statement())
+        else:
+            print(i)
