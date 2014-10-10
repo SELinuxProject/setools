@@ -18,6 +18,7 @@
 import boolquery
 import commonquery
 import dta
+import initsidquery
 import objclassquery
 import polcapquery
 import permissivequery
