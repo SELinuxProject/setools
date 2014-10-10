@@ -99,7 +99,7 @@ class ContextQuery(query.PolicyQuery):
                 raise NameError("Invalid name option: {0}".format(k))
 
         if self.user_regex:
-            self.user_cmp = re.compile(self.name)
+            self.user_cmp = re.compile(self.user)
         else:
             self.user_cmp = None
 
@@ -124,7 +124,7 @@ class ContextQuery(query.PolicyQuery):
                 raise NameError("Invalid name option: {0}".format(k))
 
         if self.role_regex:
-            self.role_cmp = re.compile(self.name)
+            self.role_cmp = re.compile(self.role)
         else:
             self.role_cmp = None
 
@@ -149,7 +149,7 @@ class ContextQuery(query.PolicyQuery):
                 raise NameError("Invalid name option: {0}".format(k))
 
         if self.type_regex:
-            self.type_cmp = re.compile(self.name)
+            self.type_cmp = re.compile(self.type_)
         else:
             self.type_cmp = None
 
