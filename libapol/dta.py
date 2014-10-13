@@ -360,8 +360,6 @@ class DomainTransitionAnalysis(object):
                         (str(s) for s in r.source.expand()),
                         (str(t) for t in r.target.expand())):
                     type_trans[s][t][d].append(r)
-            else:
-                continue
 
         invalid_edge = []
         clear_transition = []
