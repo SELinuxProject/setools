@@ -2,3 +2,6 @@
 /setools.egg-info
 *.pyc
 *.pyo
+libapol/policyrep/qpol_wrap.c
+libapol/policyrep/qpol.py
+*.so

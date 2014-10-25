@@ -44,7 +44,6 @@ To run SETools, the following packages are required:
   Python 2.7
   sepolgen
   NetworkX
-  SETools 3 (git version) libraries w/Python SWIG wrappers
 
 
 2.1. building SETools
