@@ -19,7 +19,7 @@
 import itertools
 import string
 
-import setools.qpol as qpol
+import qpol
 import symbol
 
 
@@ -38,7 +38,7 @@ class MLSCategory(symbol.PolicySymbol):
     @property
     def isalias(self):
         """(T/F) this is an alias."""
-        return self.qpol_symbol.get_isalias(self.policy)
+        return self.qpol_symbol.isalias(self.policy)
 
     @property
     def value(self):
@@ -51,17 +51,19 @@ class MLSCategory(symbol.PolicySymbol):
 
         Example usage: sorted(self.categories(), key=lambda k: k.value)
         """
-        return self.qpol_symbol.get_value(self.policy)
+        return self.qpol_symbol.value(self.policy)
 
     def aliases(self):
         """Generator that yields all aliases for this category."""
 
-        aiter = self.qpol_symbol.get_alias_iter(self.policy)
-        while not aiter.end():
-            yield qpol.to_str(aiter.get_item())
+        aiter = self.qpol_symbol.alias_iter(self.policy)
+        while not aiter.isend():
+            yield qpol.to_str(aiter.item())
             aiter.next()
 
 # libqpol does not expose sensitivities as an individual component
+
+
 class MLSSensitivity(symbol.PolicySymbol):
     pass
 
@@ -72,7 +74,7 @@ class MLSLevel(symbol.PolicySymbol):
 
     def __eq__(self, other):
         if self.policy == other.policy:
-            if (self.qpol_symbol.get_sens_name(self.policy) != other.qpol_symbol.get_sens_name(self.policy)):
+            if (self.qpol_symbol.sens_name(self.policy) != other.qpol_symbol.get_sens_name(self.policy)):
                 return False
 
             selfcats = set(str(c) for c in self.categories())
@@ -83,7 +85,7 @@ class MLSLevel(symbol.PolicySymbol):
             raise NotImplementedError
 
     def __str__(self):
-        lvl = str(self.qpol_symbol.get_sens_name(self.policy))
+        lvl = str(self.qpol_symbol.sens_name(self.policy))
 
         # sort by policy declaration order
         cats = sorted(self.categories(), key=lambda k: k.value)
@@ -109,9 +111,9 @@ class MLSLevel(symbol.PolicySymbol):
         c0.c255
         """
 
-        citer = self.qpol_symbol.get_cat_iter(self.policy)
-        while not citer.end():
-            yield MLSCategory(self.policy, qpol.qpol_cat_from_void(citer.get_item()))
+        citer = self.qpol_symbol.cat_iter(self.policy)
+        while not citer.isend():
+            yield MLSCategory(self.policy, qpol.qpol_cat_from_void(citer.item()))
             citer.next()
 
 
@@ -130,9 +132,9 @@ class MLSRange(symbol.PolicySymbol):
     @property
     def high(self):
         """The high end/clearance level of this range."""
-        return MLSLevel(self.policy, self.qpol_symbol.get_high_level(self.policy))
+        return MLSLevel(self.policy, self.qpol_symbol.high_level(self.policy))
 
     @property
     def low(self):
         """The low end/current level of this range."""
-        return MLSLevel(self.policy, self.qpol_symbol.get_low_level(self.policy))
+        return MLSLevel(self.policy, self.qpol_symbol.low_level(self.policy))

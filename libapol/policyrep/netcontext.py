@@ -18,8 +18,7 @@
 #
 import socket
 
-from setools import qpol
-
+import qpol
 import symbol
 import context
 
@@ -34,7 +33,7 @@ class NetContext(symbol.PolicySymbol):
     @property
     def context(self):
         """The context for this statement."""
-        return context.Context(self.policy, self.qpol_symbol.get_context(self.policy))
+        return context.Context(self.policy, self.qpol_symbol.context(self.policy))
 
     def statement(self):
         return str(self)
@@ -50,17 +49,17 @@ class Netifcon(NetContext):
     @property
     def netif(self):
         """The network interface name."""
-        return self.qpol_symbol.get_name(self.policy)
+        return self.qpol_symbol.name(self.policy)
 
     @property
     def context(self):
         """The context for the interface."""
-        return context.Context(self.policy, self.qpol_symbol.get_if_con(self.policy))
+        return context.Context(self.policy, self.qpol_symbol.if_con(self.policy))
 
     @property
     def packet(self):
         """The context for the packets."""
-        return context.Context(self.policy, self.qpol_symbol.get_msg_con(self.policy))
+        return context.Context(self.policy, self.qpol_symbol.msg_con(self.policy))
 
 
 class Nodecon(NetContext):
@@ -81,7 +80,7 @@ class Nodecon(NetContext):
         The IP version for the nodecon (socket.AF_INET or
         socket.AF_INET6).
         """
-        if self.qpol_symbol.get_protocol(self.policy) == qpol.QPOL_IPV6:
+        if self.qpol_symbol.protocol(self.policy) == qpol.QPOL_IPV6:
             return socket.AF_INET6
 
         return socket.AF_INET
@@ -93,11 +92,11 @@ class Nodecon(NetContext):
         # converted into the human-readable string version.
         # IPv(4|6)Network looks good for this (with mask below)
         # but it is limited to Python >= 3.3
-        return self.qpol_symbol.get_addr(self.policy)
+        return self.qpol_symbol.addr(self.policy)
 
     @property
     def netmask(self):
-        return self.qpol_symbol.get_mask(self.policy)
+        return self.qpol_symbol.mask(self.policy)
 
 
 class Portcon(NetContext):
@@ -122,7 +121,7 @@ class Portcon(NetContext):
         The protocol number for the portcon (socket.IPPROTO_TCP
         or socket.IPPROTO_UDP).
         """
-        return self.qpol_symbol.get_protocol(self.policy)
+        return self.qpol_symbol.protocol(self.policy)
 
     @property
     def ports(self):
@@ -133,6 +132,6 @@ class Portcon(NetContext):
         low	The low port of the range.
         high	The high port of the range.
         """
-        low = self.qpol_symbol.get_low_port(self.policy)
-        high = self.qpol_symbol.get_high_port(self.policy)
+        low = self.qpol_symbol.low_port(self.policy)
+        high = self.qpol_symbol.high_port(self.policy)
         return (low, high)

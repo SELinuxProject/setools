@@ -18,8 +18,7 @@
 #
 import string
 
-import setools.qpol as qpol
-
+import qpol
 import symbol
 
 
@@ -35,12 +34,12 @@ class TypeAttr(symbol.PolicySymbol):
     @property
     def isattr(self):
         """(T/F) this is an attribute."""
-        return self.qpol_symbol.get_isattr(self.policy)
+        return self.qpol_symbol.isattr(self.policy)
 
     @property
     def isalias(self):
         """(T/F) this is an alias."""
-        return self.qpol_symbol.get_isalias(self.policy)
+        return self.qpol_symbol.isalias(self.policy)
 
     def expand(self):
         """
@@ -51,10 +50,10 @@ class TypeAttr(symbol.PolicySymbol):
         if not self.isattr:
             yield self
         else:
-            aiter = self.qpol_symbol.get_type_iter(self.policy)
-            while not aiter.end():
-                yield TypeAttr(self.policy, qpol.qpol_type_from_void(aiter.get_item()))
-                aiter.next()
+            aiter = self.qpol_symbol.type_iter(self.policy)
+            while not aiter.isend():
+                yield TypeAttr(self.policy, qpol.qpol_type_from_void(aiter.item()))
+                aiter.next_()
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
@@ -62,10 +61,10 @@ class TypeAttr(symbol.PolicySymbol):
             raise TypeError(
                 "{0} is an attribute, thus does not have attributes.".format(self))
 
-        aiter = self.qpol_symbol.get_attr_iter(self.policy)
-        while not aiter.end():
-            yield TypeAttr(self.policy, qpol.qpol_type_from_void(aiter.get_item()))
-            aiter.next()
+        aiter = self.qpol_symbol.attr_iter(self.policy)
+        while not aiter.isend():
+            yield TypeAttr(self.policy, qpol.qpol_type_from_void(aiter.item()))
+            aiter.next_()
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
@@ -73,10 +72,10 @@ class TypeAttr(symbol.PolicySymbol):
             raise TypeError(
                 "{0} is an attribute, thus does not have aliases.".format(self))
 
-        aiter = self.qpol_symbol.get_alias_iter(self.policy)
-        while not aiter.end():
-            yield qpol.to_str(aiter.get_item())
-            aiter.next()
+        aiter = self.qpol_symbol.alias_iter(self.policy)
+        while not aiter.isend():
+            yield qpol.to_str(aiter.item())
+            aiter.next_()
 
     def statement(self):
         if self.isattr:

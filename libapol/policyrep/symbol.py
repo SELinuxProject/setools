@@ -16,7 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import setools.qpol as qpol
+import qpol
 
 
 class InvalidSymbol(Exception):
@@ -50,7 +50,7 @@ class PolicySymbol(object):
         self.qpol_symbol = qpol_symbol
 
     def __str__(self):
-        return self.qpol_symbol.get_name(self.policy)
+        return self.qpol_symbol.name(self.policy)
 
     def __hash__(self):
         return hash(self.qpol_symbol)

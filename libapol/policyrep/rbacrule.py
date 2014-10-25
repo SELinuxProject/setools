@@ -16,8 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import setools.qpol as qpol
-
+import qpol
 import rule
 import role
 import typeattr
@@ -45,7 +44,7 @@ class RBACRule(rule.PolicyRule):
     @property
     def source(self):
         """The rule's source role."""
-        return role.Role(self.policy, self.qpol_symbol.get_source_role(self.policy))
+        return role.Role(self.policy, self.qpol_symbol.source_role(self.policy))
 
     @property
     def target(self):
@@ -54,15 +53,15 @@ class RBACRule(rule.PolicyRule):
         (role_transition).
         """
         try:
-            return role.Role(self.policy, self.qpol_symbol.get_target_role(self.policy))
+            return role.Role(self.policy, self.qpol_symbol.target_role(self.policy))
         except AttributeError:
-            return typeattr.TypeAttr(self.policy, self.qpol_symbol.get_target_type(self.policy))
+            return typeattr.TypeAttr(self.policy, self.qpol_symbol.target_type(self.policy))
 
     @property
     def tclass(self):
         """The rule's object class."""
         try:
-            return objclass.ObjClass(self.policy, self.qpol_symbol.get_object_class(self.policy))
+            return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
         except AttributeError:
             raise rule.InvalidRuleUse(
                 "Role allow rules do not have an object class.")
@@ -71,7 +70,7 @@ class RBACRule(rule.PolicyRule):
     def default(self):
         """The rule's default role."""
         try:
-            return role.Role(self.policy, self.qpol_symbol.get_default_role(self.policy))
+            return role.Role(self.policy, self.qpol_symbol.default_role(self.policy))
         except AttributeError:
             raise rule.InvalidRuleUse(
                 "Role allow rules do not have a default role.")

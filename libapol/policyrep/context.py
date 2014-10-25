@@ -16,8 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import setools.qpol as qpol
-
+import qpol
 import symbol
 import user
 import role
@@ -38,17 +37,17 @@ class Context(symbol.PolicySymbol):
     @property
     def user(self):
         """The user portion of the context."""
-        return user.User(self.policy, self.qpol_symbol.get_user(self.policy))
+        return user.User(self.policy, self.qpol_symbol.user(self.policy))
 
     @property
     def role(self):
         """The role portion of the context."""
-        return role.Role(self.policy, self.qpol_symbol.get_role(self.policy))
+        return role.Role(self.policy, self.qpol_symbol.role(self.policy))
 
     @property
     def type_(self):
         """The type portion of the context."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.get_type(self.policy))
+        return typeattr.TypeAttr(self.policy, self.qpol_symbol.type_(self.policy))
 
     @property
     def mls(self):
@@ -56,6 +55,6 @@ class Context(symbol.PolicySymbol):
 
         # without this check, qpol will segfault on MLS-disabled policies
         if self.policy.has_capability(qpol.QPOL_CAP_MLS):
-            return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+            return mls.MLSRange(self.policy, self.qpol_symbol.range(self.policy))
         else:
             raise mls.MLSDisabled("MLS is disabled, the context has no range.")

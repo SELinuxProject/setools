@@ -19,8 +19,7 @@
 
 import string
 
-import setools.qpol as qpol
-
+import qpol
 import role
 import mls
 import symbol
@@ -36,10 +35,10 @@ class User(symbol.PolicySymbol):
 
         r = set()
 
-        aiter = self.qpol_symbol.get_role_iter(self.policy)
-        while not aiter.end():
+        aiter = self.qpol_symbol.role_iter(self.policy)
+        while not aiter.isend():
             item = role.Role(
-                self.policy, qpol.qpol_role_from_void(aiter.get_item()))
+                self.policy, qpol.qpol_role_from_void(aiter.item()))
 
             # object_r is implicitly added to all roles by the compiler.
             # technically it is incorrect to skip it, but policy writers
@@ -48,19 +47,19 @@ class User(symbol.PolicySymbol):
             if item != "object_r":
                 r.add(item)
 
-            aiter.next()
+            aiter.next_()
 
         return r
 
     @property
     def mls_level(self):
         """The user's default MLS level."""
-        return mls.MLSLevel(self.policy, self.qpol_symbol.get_dfltlevel(self.policy))
+        return mls.MLSLevel(self.policy, self.qpol_symbol.dfltlevel(self.policy))
 
     @property
     def mls_range(self):
         """The user's MLS range."""
-        return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+        return mls.MLSRange(self.policy, self.qpol_symbol.range(self.policy))
 
     def statement(self):
         roles = list(str(r) for r in self.roles)

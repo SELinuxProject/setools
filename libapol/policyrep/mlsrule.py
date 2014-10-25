@@ -16,8 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import setools.qpol as qpol
-
+import qpol
 import rule
 import typeattr
 import mls
@@ -41,19 +40,19 @@ class MLSRule(rule.PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.get_source_type(self.policy))
+        return typeattr.TypeAttr(self.policy, self.qpol_symbol.source_type(self.policy))
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.get_target_type(self.policy))
+        return typeattr.TypeAttr(self.policy, self.qpol_symbol.target_type(self.policy))
 
     @property
     def tclass(self):
         """The rule's object class."""
-        return objclass.ObjClass(self.policy, self.qpol_symbol.get_target_class(self.policy))
+        return objclass.ObjClass(self.policy, self.qpol_symbol.target_class(self.policy))
 
     @property
     def default(self):
         """The rule's default range."""
-        return mls.MLSRange(self.policy, self.qpol_symbol.get_range(self.policy))
+        return mls.MLSRange(self.policy, self.qpol_symbol.range(self.policy))

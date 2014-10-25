@@ -16,7 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import setools.qpol as qpol
+import qpol
 import string
 import symbol
 
@@ -27,7 +27,7 @@ class Boolean(symbol.PolicySymbol):
 
     def state(self):
         """The default state of the Boolean."""
-        return bool(self.qpol_symbol.get_state(self.policy))
+        return bool(self.qpol_symbol.state(self.policy))
 
     def statement(self):
         """The policy statement."""
@@ -55,20 +55,20 @@ class ConditionalExpr(symbol.PolicySymbol):
         qpol.QPOL_COND_EXPR_NEQ: 4}
 
     def __contains__(self, other):
-        qpol_iter = self.qpol_symbol.get_expr_node_iter(self.policy)
+        qpol_iter = self.qpol_symbol.expr_node_iter(self.policy)
 
-        while not qpol_iter.end():
+        while not qpol_iter.isend():
             expr_node = qpol.qpol_cond_expr_node_from_void(
-                qpol_iter.get_item())
-            expr_node_type = expr_node.get_expr_type(self.policy)
+                qpol_iter.item())
+            expr_node_type = expr_node.expr_type(self.policy)
 
-            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == Boolean(self.policy, expr_node.get_bool(self.policy)):
+            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == Boolean(self.policy, expr_node.bool(self.policy)):
                 return True
 
         return False
 
     def __str__(self):
-        qpol_iter = self.qpol_symbol.get_expr_node_iter(self.policy)
+        qpol_iter = self.qpol_symbol.expr_node_iter(self.policy)
 
         # qpol representation is in postfix notation.  This code
         # converts it to infix notation.  Parentheses are added
@@ -78,15 +78,15 @@ class ConditionalExpr(symbol.PolicySymbol):
         # operator, no parentheses are output
         stack = []
         prev_oper = qpol.QPOL_COND_EXPR_NOT
-        while not qpol_iter.end():
+        while not qpol_iter.isend():
             expr_node = qpol.qpol_cond_expr_node_from_void(
-                qpol_iter.get_item())
-            expr_node_type = expr_node.get_expr_type(self.policy)
+                qpol_iter.item())
+            expr_node_type = expr_node.expr_type(self.policy)
 
             if expr_node_type == qpol.QPOL_COND_EXPR_BOOL:
                 # append the boolean name
                 nodebool = Boolean(
-                    self.policy, expr_node.get_bool(self.policy))
+                    self.policy, expr_node.get_boolean(self.policy))
                 stack.append(str(nodebool))
             elif expr_node_type == qpol.QPOL_COND_EXPR_NOT:  # unary operator
                 operand = stack.pop()
@@ -119,7 +119,7 @@ class ConditionalExpr(symbol.PolicySymbol):
                 stack.append(subexpr)
                 prev_oper = expr_node_type
 
-            qpol_iter.next()
+            qpol_iter.next_()
 
         return self.__unwind_subexpression(stack)
 

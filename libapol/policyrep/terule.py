@@ -18,8 +18,7 @@
 #
 import string
 
-import setools.qpol as qpol
-
+import qpol
 import symbol
 import rule
 import typeattr
@@ -85,7 +84,7 @@ class TERule(rule.PolicyRule):
     def ruletype(self):
         """The rule type."""
         try:
-            return self._teruletype_val_to_text[self.qpol_symbol.get_rule_type(self.policy)]
+            return self._teruletype_val_to_text[self.qpol_symbol.rule_type(self.policy)]
         except AttributeError:
             # qpol does not have a rule type function for name filetrans rules
             return "type_transition"
@@ -93,33 +92,33 @@ class TERule(rule.PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.get_source_type(self.policy))
+        return typeattr.TypeAttr(self.policy, self.qpol_symbol.source_type(self.policy))
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.get_target_type(self.policy))
+        return typeattr.TypeAttr(self.policy, self.qpol_symbol.target_type(self.policy))
 
     @property
     def tclass(self):
         """The rule's object class."""
-        return objclass.ObjClass(self.policy, self.qpol_symbol.get_object_class(self.policy))
+        return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
 
     @property
     def perms(self):
         """The rule's permission set."""
         try:
             # create permission list
-            iter = self.qpol_symbol.get_perm_iter(self.policy)
+            qiter = self.qpol_symbol.perm_iter(self.policy)
         except AttributeError:
             raise rule.InvalidRuleUse(
                 "{0} rules do not have a permission set.".format(self.ruletype))
 
         p = set()
 
-        while not iter.end():
-            p.add(qpol.to_str(iter.get_item()))
-            iter.next()
+        while not qiter.isend():
+            p.add(qpol.to_str(qiter.item()))
+            qiter.next_()
 
         return p
 
@@ -127,7 +126,7 @@ class TERule(rule.PolicyRule):
     def default(self):
         """The rule's default type."""
         try:
-            return typeattr.TypeAttr(self.policy, self.qpol_symbol.get_default_type(self.policy))
+            return typeattr.TypeAttr(self.policy, self.qpol_symbol.default_type(self.policy))
         except AttributeError:
             raise rule.InvalidRuleUse(
                 "{0} rules do not have a default type.".format(self.ruletype))
@@ -136,7 +135,7 @@ class TERule(rule.PolicyRule):
     def filename(self):
         """The type_transition rule's file name."""
         try:
-            return self.qpol_symbol.get_filename(self.policy)
+            return self.qpol_symbol.filename(self.policy)
         except AttributeError:
             if self.ruletype == "type_transition":
                 raise TERuleNoFilename
@@ -148,7 +147,7 @@ class TERule(rule.PolicyRule):
     def conditional(self):
         """The rule's conditional expression."""
         try:
-            return boolcond.ConditionalExpr(self.policy, self.qpol_symbol.get_cond(self.policy))
+            return boolcond.ConditionalExpr(self.policy, self.qpol_symbol.cond(self.policy))
         except (AttributeError, symbol.InvalidSymbol):
             # AttributeError: name filetrans rules cannot be conditional
             #                 so no member function

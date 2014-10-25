@@ -16,8 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import setools.qpol as qpol
-
+import qpol
 import symbol
 import context
 
@@ -29,7 +28,7 @@ class InitialSID(symbol.PolicySymbol):
     @property
     def context(self):
         """The context for this initial SID."""
-        return context.Context(self.policy, self.qpol_symbol.get_context(self.policy))
+        return context.Context(self.policy, self.qpol_symbol.context(self.policy))
 
     def statement(self):
         return "sid {0} {1}".format(self, self.context)

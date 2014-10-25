@@ -16,8 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from setools import qpol
-
+import qpol
 import symbol
 import context
 
@@ -32,12 +31,12 @@ class FSContext(symbol.PolicySymbol):
     @property
     def fs(self):
         """The filesystem type for this statement."""
-        return self.qpol_symbol.get_name(self.policy)
+        return self.qpol_symbol.name(self.policy)
 
     @property
     def context(self):
         """The context for this statement."""
-        return context.Context(self.policy, self.qpol_symbol.get_context(self.policy))
+        return context.Context(self.policy, self.qpol_symbol.context(self.policy))
 
     def statement(self):
         return str(self)
@@ -53,7 +52,7 @@ class Genfscon(FSContext):
     @property
     def path(self):
         """The path for this genfscon statement."""
-        return self.qpol_symbol.get_path(self.policy)
+        return self.qpol_symbol.path(self.policy)
 
 
 class FSUse(FSContext):
@@ -73,4 +72,4 @@ class FSUse(FSContext):
     @property
     def ruletype(self):
         """The rule type for this fs_use_* statement."""
-        return self._ruletype_to_text[self.qpol_symbol.get_behavior(self.policy)]
+        return self._ruletype_to_text[self.qpol_symbol.behavior(self.policy)]

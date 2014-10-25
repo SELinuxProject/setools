@@ -18,8 +18,7 @@
 #
 import string
 
-import setools.qpol as qpol
-
+import qpol
 import symbol
 import objclass
 
@@ -94,17 +93,17 @@ class Constraint(symbol.PolicySymbol):
         # operator, no parentheses are output
 
         expr_string = ""
-        qpol_iter = self.qpol_symbol.get_expr_iter(self.policy)
+        qpol_iter = self.qpol_symbol.expr_iter(self.policy)
 
         stack = []
         prev_oper = self._expr_op_precedence
-        while not qpol_iter.end():
+        while not qpol_iter.isend():
             expr_node = qpol.qpol_constraint_expr_node_from_void(
-                qpol_iter.get_item())
+                qpol_iter.item())
 
-            op = expr_node.get_op(self.policy)
-            sym_type = expr_node.get_sym_type(self.policy)
-            expr_type = expr_node.get_expr_type(self.policy)
+            op = expr_node.op(self.policy)
+            sym_type = expr_node.sym_type(self.policy)
+            expr_type = expr_node.expr_type(self.policy)
 
             if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR:
                 stack.append([self._sym_to_text[sym_type],
@@ -113,9 +112,9 @@ class Constraint(symbol.PolicySymbol):
                 prev_oper = self._expr_op_precedence
             elif expr_type == qpol.QPOL_CEXPR_TYPE_NAMES:
                 names = []
-                names_iter = expr_node.get_names_iter(self.policy)
-                while not names_iter.end():
-                    names.append(qpol.to_str(names_iter.get_item()))
+                names_iter = expr_node.names_iter(self.policy)
+                while not names_iter.isend():
+                    names.append(qpol.to_str(names_iter.item()))
                     names_iter.next()
 
                 if not names:
@@ -179,13 +178,13 @@ class Constraint(symbol.PolicySymbol):
         except AttributeError:
             self._ismls = False
 
-            qpol_iter = self.qpol_symbol.get_expr_iter(self.policy)
-            while not qpol_iter.end():
+            qpol_iter = self.qpol_symbol.expr_iter(self.policy)
+            while not qpol_iter.isend():
                 expr_node = qpol.qpol_constraint_expr_node_from_void(
-                    qpol_iter.get_item())
+                    qpol_iter.item())
 
-                sym_type = expr_node.get_sym_type(self.policy)
-                expr_type = expr_node.get_expr_type(self.policy)
+                sym_type = expr_node.sym_type(self.policy)
+                expr_type = expr_node.expr_type(self.policy)
 
                 if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR and sym_type >= qpol.QPOL_CEXPR_SYM_L1L2:
                     self._ismls = True
@@ -199,11 +198,11 @@ class Constraint(symbol.PolicySymbol):
     def perms(self):
         """The constraint's permission set."""
 
-        iter = self.qpol_symbol.get_perm_iter(self.policy)
+        iter = self.qpol_symbol.perm_iter(self.policy)
 
         p = set()
-        while not iter.end():
-            p.add(qpol.to_str(iter.get_item()))
+        while not iter.isend():
+            p.add(qpol.to_str(iter.item()))
             iter.next()
 
         return p
@@ -214,7 +213,7 @@ class Constraint(symbol.PolicySymbol):
     @property
     def tclass(self):
         """Object class for this constraint."""
-        return objclass.ObjClass(self.policy, self.qpol_symbol.get_class(self.policy))
+        return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
 
 
 class ValidateTrans(symbol.PolicySymbol):

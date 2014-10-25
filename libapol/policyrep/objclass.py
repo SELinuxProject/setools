@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 import symbol
-import setools.qpol as qpol
+import qpol
 
 
 class Common(symbol.PolicySymbol):
@@ -25,10 +25,10 @@ class Common(symbol.PolicySymbol):
     """A common permission set."""
 
     def __contains__(self, other):
-        piter = self.qpol_symbol.get_perm_iter(self.policy)
+        piter = self.qpol_symbol.perm_iter(self.policy)
 
-        while not piter.end():
-            if other == qpol.to_str(piter.get_item()):
+        while not piter.isend():
+            if other == qpol.to_str(piter.item()):
                 return True
 
             piter.next()
@@ -39,12 +39,12 @@ class Common(symbol.PolicySymbol):
     def perms(self):
         """The list of the common's permissions."""
 
-        piter = self.qpol_symbol.get_perm_iter(self.policy)
+        piter = self.qpol_symbol.perm_iter(self.policy)
         p = set()
 
-        while not piter.end():
-            p.add(qpol.to_str(piter.get_item()))
-            piter.next()
+        while not piter.isend():
+            p.add(qpol.to_str(piter.item()))
+            piter.next_()
 
         return p
 
@@ -62,7 +62,7 @@ class Common(symbol.PolicySymbol):
 
         Example usage: sorted(policy.commons(), key=lambda k: k.value)
         """
-        return self.qpol_symbol.get_value(self.policy)
+        return self.qpol_symbol.value(self.policy)
 
 
 class NoCommon(symbol.InvalidSymbol):
@@ -87,7 +87,7 @@ class ObjClass(Common):
         """
 
         try:
-            return Common(self.policy, self.qpol_symbol.get_common(self.policy))
+            return Common(self.policy, self.qpol_symbol.common(self.policy))
         except symbol.InvalidSymbol:
             raise NoCommon("{0} does not inherit a common.".format(self))
 
