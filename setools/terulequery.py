@@ -16,8 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from policyrep.rule import InvalidRuleUse
-import rulequery
+from .policyrep.rule import InvalidRuleUse
+from . import rulequery
 
 
 class TERuleQuery(rulequery.RuleQuery):

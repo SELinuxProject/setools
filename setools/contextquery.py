@@ -18,7 +18,7 @@
 #
 import re
 
-import query
+from . import query
 
 
 class ContextQuery(query.PolicyQuery):

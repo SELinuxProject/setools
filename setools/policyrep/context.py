@@ -16,12 +16,12 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import qpol
-import symbol
-import user
-import role
-import typeattr
-import mls
+from . import qpol
+from . import symbol
+from . import user
+from . import role
+from . import typeattr
+from . import mls
 
 
 class Context(symbol.PolicySymbol):

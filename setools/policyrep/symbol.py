@@ -16,7 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import qpol
+from . import qpol
 
 
 class InvalidSymbol(Exception):

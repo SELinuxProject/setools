@@ -18,12 +18,12 @@
 #
 import string
 
-import qpol
-import symbol
-import rule
-import typeattr
-import objclass
-import boolcond
+from . import qpol
+from . import symbol
+from . import rule
+from . import typeattr
+from . import objclass
+from . import boolcond
 
 
 class TERuleNoFilename(Exception):

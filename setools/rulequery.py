@@ -18,7 +18,7 @@
 #
 import re
 
-from query import PolicyQuery
+from .query import PolicyQuery
 
 
 class RuleQuery(PolicyQuery):

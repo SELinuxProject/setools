@@ -16,8 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import qpol
-import symbol
+from . import qpol
+from . import symbol
 
 
 class PolicyCapability(symbol.PolicySymbol):

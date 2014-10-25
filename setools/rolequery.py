@@ -18,7 +18,7 @@
 #
 import re
 
-import compquery
+from . import compquery
 
 
 class RoleQuery(compquery.ComponentQuery):

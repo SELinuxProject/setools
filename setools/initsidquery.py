@@ -16,8 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import compquery
-import contextquery
+from . import compquery
+from . import contextquery
 
 
 class InitialSIDQuery(compquery.ComponentQuery, contextquery.ContextQuery):

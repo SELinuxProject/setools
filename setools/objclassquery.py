@@ -18,8 +18,8 @@
 #
 import re
 
-import compquery
-from policyrep.objclass import NoCommon
+from . import compquery
+from .policyrep.objclass import NoCommon
 
 
 class ObjClassQuery(compquery.ComponentQuery):

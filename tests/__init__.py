@@ -15,16 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
-import boolquery
-import commonquery
-import dta
-import initsidquery
-import objclassquery
-import polcapquery
-import permissivequery
-import infoflow
-import terulequery
-import rbacrulequery
-import typequery
-import rolequery
-import userquery
+from . import boolquery
+from . import commonquery
+from . import dta
+from . import initsidquery
+from . import objclassquery
+from . import polcapquery
+from . import permissivequery
+from . import infoflow
+from . import terulequery
+from . import rbacrulequery
+from . import typequery
+from . import rolequery
+from . import userquery

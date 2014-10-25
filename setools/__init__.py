@@ -24,30 +24,30 @@ except:
     __version__ = "unknown"
 
 # Python classes for policy representation
-import policyrep
-from policyrep import SELinuxPolicy
+from . import policyrep
+from .policyrep import SELinuxPolicy
 
 # Component Queries
-import commonquery
-import objclassquery
-import typequery
-import rolequery
-import userquery
-import boolquery
-import polcapquery
-import permissivequery
+from . import commonquery
+from . import objclassquery
+from . import typequery
+from . import rolequery
+from . import userquery
+from . import boolquery
+from . import polcapquery
+from . import permissivequery
 
 # Rule Queries
-import terulequery
-import rbacrulequery
-import mlsrulequery
+from . import terulequery
+from . import rbacrulequery
+from . import mlsrulequery
 
 # In-policy Context Queries
-import initsidquery
+from . import initsidquery
 
 # Information Flow Analysis
-import infoflow
-import permmap
+from . import infoflow
+from . import permmap
 
 # Domain Transition Analysis
-import dta
+from . import dta

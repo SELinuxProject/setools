@@ -18,9 +18,9 @@
 #
 import socket
 
-import qpol
-import symbol
-import context
+from . import qpol
+from . import symbol
+from . import context
 
 
 class NetContext(symbol.PolicySymbol):

@@ -18,9 +18,10 @@
 #
 import itertools
 
-import policyrep
-import permmap
 import networkx as nx
+
+from . import policyrep
+from . import permmap
 
 
 class InfoFlowAnalysis(object):

@@ -18,9 +18,9 @@
 #
 import string
 
-import qpol
-import symbol
-import objclass
+from . import qpol
+from . import symbol
+from . import objclass
 
 
 class Constraint(symbol.PolicySymbol):

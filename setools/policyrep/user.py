@@ -19,10 +19,10 @@
 
 import string
 
-import qpol
-import role
-import mls
-import symbol
+from . import qpol
+from . import role
+from . import mls
+from . import symbol
 
 
 class User(symbol.PolicySymbol):

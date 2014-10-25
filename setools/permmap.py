@@ -18,7 +18,8 @@
 #
 
 from sepolgen import objectmodel as om
-import policyrep
+
+from . import policyrep
 
 # build off of sepolgen perm map implementation
 

@@ -17,9 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import string
-import qpol
-import symbol
-import typeattr
+
+from . import qpol
+from . import symbol
+from . import typeattr
 
 
 class Role(symbol.PolicySymbol):

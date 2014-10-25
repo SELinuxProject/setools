@@ -16,12 +16,12 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import qpol
-import rule
-import typeattr
-import mls
-import objclass
-import boolcond
+from . import qpol
+from . import rule
+from . import typeattr
+from . import mls
+from . import objclass
+from . import boolcond
 
 
 class MLSRule(rule.PolicyRule):

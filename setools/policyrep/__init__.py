@@ -21,7 +21,7 @@
 # abstractions and methods for accessing the policy
 # structures.
 
-import qpol
+from . import qpol
 
 # The libqpol SWIG class is not quite natural for
 # Python, since void* are passed around from the
@@ -35,26 +35,26 @@ import qpol
 # be valid for the policy it comes from.
 
 # Components
-import objclass
-import typeattr
-import boolcond
-import role
-import user
-import mls
-import polcap
+from . import objclass
+from . import typeattr
+from . import boolcond
+from . import role
+from . import user
+from . import mls
+from . import polcap
 
 # Rules
-import terule
-import rbacrule
-import mlsrule
+from . import terule
+from . import rbacrule
+from . import mlsrule
 
 # Constraints
-import constraint
+from . import constraint
 
 # In-policy Labeling
-import initsid
-import fscontext
-import netcontext
+from . import initsid
+from . import fscontext
+from . import netcontext
 
 
 class SELinuxPolicy(object):

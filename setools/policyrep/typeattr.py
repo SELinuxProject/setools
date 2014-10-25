@@ -18,8 +18,8 @@
 #
 import string
 
-import qpol
-import symbol
+from . import qpol
+from . import symbol
 
 
 class TypeAttr(symbol.PolicySymbol):

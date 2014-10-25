@@ -19,8 +19,8 @@
 import itertools
 import string
 
-import qpol
-import symbol
+from . import qpol
+from . import symbol
 
 
 class MLSDisabled(symbol.InvalidSymbol):
