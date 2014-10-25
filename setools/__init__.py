@@ -17,8 +17,11 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-
-__version__ = "4.0.0-alpha"
+try:
+    import pkg_resources
+    __version__ = pkg_resources.get_distribution("setools").version
+except:
+    __version__ = "unknown"
 
 # Python classes for policy representation
 import policyrep
