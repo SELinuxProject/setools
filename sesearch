@@ -18,13 +18,13 @@
 #
 
 from __future__ import print_function
-import libapol
+import setools
 import argparse
 import sys
 
 parser = argparse.ArgumentParser(description="SELinux policy rule search tool.",
                                  epilog="TE/MLS rule searches cannot be mixed with RBAC rule searches.")
-parser.add_argument("--version", action="version", version=libapol.__version__)
+parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument(
     "policy", type=str, help="Path to the SELinux policy to search.")
 
@@ -93,13 +93,13 @@ if (args.tertypes or args.mlsrtypes) and args.rbacrtypes:
         "TE/MLS rule searches cannot be mixed with RBAC rule searches.")
 
 try:
-    p = libapol.SELinuxPolicy(args.policy)
+    p = setools.SELinuxPolicy(args.policy)
 except RuntimeError as err:
     print(err)
     sys.exit(-1)
 
 if args.tertypes:
-    q = libapol.terulequery.TERuleQuery(p, ruletype=args.tertypes,
+    q = setools.terulequery.TERuleQuery(p, ruletype=args.tertypes,
                                         source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
                                         target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
                                         tclass_regex=args.tclass_regex,	perms_equal=args.perms_equal,
@@ -120,7 +120,7 @@ if args.tertypes:
         print(r)
 
 if args.rbacrtypes:
-    q = libapol.rbacrulequery.RBACRuleQuery(p, ruletype=args.rbacrtypes,
+    q = setools.rbacrulequery.RBACRuleQuery(p, ruletype=args.rbacrtypes,
                                             source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
                                             target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
                                             default=args.default, default_regex=args.default_regex,
@@ -138,7 +138,7 @@ if args.rbacrtypes:
         print(r)
 
 if args.mlsrtypes:
-    q = libapol.mlsrulequery.MLSRuleQuery(p, ruletype=args.mlsrtypes,
+    q = setools.mlsrulequery.MLSRuleQuery(p, ruletype=args.mlsrtypes,
                                           source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
                                           target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
                                           tclass_regex=args.tclass_regex)

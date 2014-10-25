@@ -57,7 +57,7 @@ and perform the following:
   $ python setup.py install
 
 This will put the applications in /usr/bin, data files in /usr/share/setools,
-and libraries in /usr/lib/pythonX.Y/site-packages/libapol.
+and libraries in /usr/lib/pythonX.Y/site-packages/setools.
 
 
 2.2. setup.py flags

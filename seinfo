@@ -18,13 +18,13 @@
 #
 
 from __future__ import print_function
-import libapol
+import setools
 import argparse
 import sys
 
 parser = argparse.ArgumentParser(
     description="SELinux policy information tool.")
-parser.add_argument("--version", action="version", version=libapol.__version__)
+parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("policy", help="Path to the SELinux policy to query.")
 parser.add_argument(
     "-x", "--expand", help="Print additional information about the specified components.", action="store_true")
@@ -68,16 +68,16 @@ queries.add_argument("--polcap",  help="Print policy capabilities.",
 args = parser.parse_args()
 
 try:
-    p = libapol.SELinuxPolicy(args.policy)
+    p = setools.SELinuxPolicy(args.policy)
 except RuntimeError as err:
     print(err)
     sys.exit(-1)
 
 if args.typequery:
     if isinstance(args.typequery, str):
-        q = libapol.typequery.TypeQuery(p, args.typequery)
+        q = setools.typequery.TypeQuery(p, args.typequery)
     else:
-        q = libapol.typequery.TypeQuery(p)
+        q = setools.typequery.TypeQuery(p)
 
     for t in sorted(q.results()):
         if args.expand:
@@ -87,9 +87,9 @@ if args.typequery:
 
 if args.boolquery:
     if isinstance(args.boolquery, str):
-        q = libapol.boolquery.BoolQuery(p, args.boolquery)
+        q = setools.boolquery.BoolQuery(p, args.boolquery)
     else:
-        q = libapol.boolquery.BoolQuery(p)
+        q = setools.boolquery.BoolQuery(p)
 
     for b in sorted(q.results()):
         if args.expand:
@@ -99,9 +99,9 @@ if args.boolquery:
 
 if args.polcapquery:
     if isinstance(args.polcapquery, str):
-        q = libapol.polcapquery.PolCapQuery(p, args.polcapquery)
+        q = setools.polcapquery.PolCapQuery(p, args.polcapquery)
     else:
-        q = libapol.polcapquery.PolCapQuery(p)
+        q = setools.polcapquery.PolCapQuery(p)
 
     for cap in sorted(q.results()):
         if args.expand:
@@ -111,9 +111,9 @@ if args.polcapquery:
 
 if args.userquery:
     if isinstance(args.userquery, str):
-        q = libapol.userquery.UserQuery(p, args.userquery)
+        q = setools.userquery.UserQuery(p, args.userquery)
     else:
-        q = libapol.userquery.UserQuery(p)
+        q = setools.userquery.UserQuery(p)
 
     for u in sorted(q.results()):
         if args.expand:
@@ -123,9 +123,9 @@ if args.userquery:
 
 if args.rolequery:
     if isinstance(args.rolequery, str):
-        q = libapol.rolequery.RoleQuery(p, args.rolequery)
+        q = setools.rolequery.RoleQuery(p, args.rolequery)
     else:
-        q = libapol.rolequery.RoleQuery(p)
+        q = setools.rolequery.RoleQuery(p)
 
     for r in sorted(q.results()):
         if args.expand:
@@ -135,9 +135,9 @@ if args.rolequery:
 
 if args.classquery:
     if isinstance(args.classquery, str):
-        q = libapol.objclassquery.ObjClassQuery(p, args.classquery)
+        q = setools.objclassquery.ObjClassQuery(p, args.classquery)
     else:
-        q = libapol.objclassquery.ObjClassQuery(p)
+        q = setools.objclassquery.ObjClassQuery(p)
 
     for c in sorted(q.results()):
         if args.expand:
@@ -147,9 +147,9 @@ if args.classquery:
 
 if args.initialsidquery:
     if isinstance(args.initialsidquery, str):
-        q = libapol.initsidquery.InitialSIDQuery(p, args.initialsidquery)
+        q = setools.initsidquery.InitialSIDQuery(p, args.initialsidquery)
     else:
-        q = libapol.initsidquery.InitialSIDQuery(p)
+        q = setools.initsidquery.InitialSIDQuery(p)
 
     for i in sorted(q.results()):
         if args.expand:

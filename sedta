@@ -21,7 +21,7 @@ from __future__ import print_function
 import sys
 import argparse
 
-import libapol
+import setools
 
 
 def print_transition(trans, entrypoints, setexec, dyntrans, setcur):
@@ -68,7 +68,7 @@ def print_transition(trans, entrypoints, setexec, dyntrans, setcur):
 
 parser = argparse.ArgumentParser(description="SELinux policy domain transition analysis tool.",
                                  epilog="If no analysis algorithm is selected, all transitions out of a domain will be calculated.")
-parser.add_argument("--version", action="version", version=libapol.__version__)
+parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument(
     "-p", "--policy", help="Path to SELinux policy to analyze.", required=True)
 parser.add_argument(
@@ -90,8 +90,8 @@ if not args.target and (args.shortest_path or args.all_paths):
     parser.error("The target type must be specified to determine a path.")
 
 try:
-    p = libapol.SELinuxPolicy(args.policy)
-    g = libapol.dta.DomainTransitionAnalysis(p)
+    p = setools.SELinuxPolicy(args.policy)
+    g = setools.dta.DomainTransitionAnalysis(p)
 except Exception as err:
     print(err)
     sys.exit(1)

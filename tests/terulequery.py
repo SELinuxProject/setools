@@ -17,9 +17,9 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.terulequery import TERuleQuery
-from libapol.policyrep.rule import RuleNotConditional
+from setools import SELinuxPolicy
+from setools.terulequery import TERuleQuery
+from setools.policyrep.rule import RuleNotConditional
 
 
 class TERuleQueryTest(unittest.TestCase):

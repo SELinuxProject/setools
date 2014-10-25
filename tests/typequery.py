@@ -17,8 +17,8 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.typequery import TypeQuery
+from setools import SELinuxPolicy
+from setools.typequery import TypeQuery
 
 
 class TypeQueryTest(unittest.TestCase):

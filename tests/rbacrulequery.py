@@ -17,9 +17,9 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.rbacrulequery import RBACRuleQuery
-from libapol.policyrep.rule import InvalidRuleUse, RuleNotConditional
+from setools import SELinuxPolicy
+from setools.rbacrulequery import RBACRuleQuery
+from setools.policyrep.rule import InvalidRuleUse, RuleNotConditional
 
 
 class RBACRuleQueryTest(unittest.TestCase):

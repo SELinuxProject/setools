@@ -17,8 +17,8 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.boolquery import BoolQuery
+from setools import SELinuxPolicy
+from setools.boolquery import BoolQuery
 
 
 class BoolQueryTest(unittest.TestCase):

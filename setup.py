@@ -8,8 +8,8 @@ from distutils.core import Extension
 # using the following commands:
 # bison -y -d policy_parse.y -o policy_parse.c
 # flex -o policy_scan.c policy_scan.l
-ext_py_mods=[Extension('libapol.policyrep._qpol',
-                       ['libapol/policyrep/qpol.i',
+ext_py_mods=[Extension('setools.policyrep._qpol',
+                       ['setools/policyrep/qpol.i',
                         'libqpol/avrule_query.c',
                         'libqpol/bool_query.c',
                         'libqpol/bounds_query.c',
@@ -58,7 +58,7 @@ setup(name='setools',
 	author='Tresys Technology, LLC',
 	author_email='setools@tresys.com',
 	url='https://github.com/TresysTechnology/setools',
-	packages=['libapol', 'libapol.policyrep'],
+	packages=['setools', 'setools.policyrep'],
 	scripts = ['seinfo', 'seinfoflow', 'sesearch', 'sedta'],
 	data_files=[('/usr/share/setools', ['data/perm_map'])],
 	ext_modules=ext_py_mods,

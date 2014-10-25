@@ -17,8 +17,8 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.userquery import UserQuery
+from setools import SELinuxPolicy
+from setools.userquery import UserQuery
 
 
 class UserQueryTest(unittest.TestCase):

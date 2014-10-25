@@ -19,10 +19,10 @@ import unittest
 
 import networkx as nx
 
-from libapol import SELinuxPolicy
-from libapol.infoflow import InfoFlowAnalysis
-from libapol.permmap import PermissionMap
-from libapol.policyrep.rule import RuleNotConditional
+from setools import SELinuxPolicy
+from setools.infoflow import InfoFlowAnalysis
+from setools.permmap import PermissionMap
+from setools.policyrep.rule import RuleNotConditional
 
 
 class InfoFlowAnalysisTest(unittest.TestCase):

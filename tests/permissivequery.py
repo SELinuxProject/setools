@@ -17,8 +17,8 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.permissivequery import PermissiveQuery
+from setools import SELinuxPolicy
+from setools.permissivequery import PermissiveQuery
 
 
 class PolCapQueryTest(unittest.TestCase):

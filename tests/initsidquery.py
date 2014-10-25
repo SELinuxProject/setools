@@ -17,8 +17,8 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.initsidquery import InitialSIDQuery
+from setools import SELinuxPolicy
+from setools.initsidquery import InitialSIDQuery
 
 
 class InitialSIDQueryTest(unittest.TestCase):

@@ -17,8 +17,8 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.objclassquery import ObjClassQuery
+from setools import SELinuxPolicy
+from setools.objclassquery import ObjClassQuery
 
 
 class ObjClassQueryTest(unittest.TestCase):

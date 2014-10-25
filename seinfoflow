@@ -18,13 +18,13 @@
 #
 
 from __future__ import print_function
-import libapol
+import setools
 import argparse
 import sys
 
 parser = argparse.ArgumentParser(description="SELinux policy information flow analysis tool.",
                                  epilog="If no analysis algorithm is selected, all information flow out of the source domain will be calculated.")
-parser.add_argument("--version", action="version", version=libapol.__version__)
+parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")
 
@@ -61,8 +61,8 @@ if args.limit_flows < 0:
     parser.error("Limit on information flows cannot be negative.")
 
 try:
-    p = libapol.SELinuxPolicy(args.policy)
-    g = libapol.infoflow.InfoFlowAnalysis(
+    p = setools.SELinuxPolicy(args.policy)
+    g = setools.infoflow.InfoFlowAnalysis(
         p, args.map, minweight=args.min_weight, exclude=args.exclude)
 except Exception as err:
     print(err)

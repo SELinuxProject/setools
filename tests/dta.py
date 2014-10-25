@@ -19,9 +19,9 @@ import unittest
 
 import networkx as nx
 
-from libapol import SELinuxPolicy
-from libapol.dta import DomainTransitionAnalysis
-from libapol.policyrep.rule import RuleNotConditional
+from setools import SELinuxPolicy
+from setools.dta import DomainTransitionAnalysis
+from setools.policyrep.rule import RuleNotConditional
 
 
 class InfoFlowAnalysisTest(unittest.TestCase):

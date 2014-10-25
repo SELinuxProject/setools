@@ -17,8 +17,8 @@
 #
 import unittest
 
-from libapol import SELinuxPolicy
-from libapol.commonquery import CommonQuery
+from setools import SELinuxPolicy
+from setools.commonquery import CommonQuery
 
 
 class CommonQueryTest(unittest.TestCase):
