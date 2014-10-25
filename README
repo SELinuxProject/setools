@@ -42,7 +42,6 @@ To build SETools' graphical tools, the following packages are required:
 
 To run SETools, the following packages are required:
   Python 2.7
-  sepolgen
   NetworkX
   setuptools
 
