@@ -61,12 +61,10 @@ class PolicySymbol(object):
         # handle the comparison as there is insufficient
         # information here.
 
-        if isinstance(other, str):
-            return (str(self) == other)
-        elif isinstance(other, self.__class__):
-            return (self.qpol_symbol == other.qpol_symbol)
-        else:
-            raise NotImplementedError
+        try:
+            return (self.qpol_symbol.this == other.qpol_symbol.this)
+        except AttributeError:
+            return (str(self) == str(other))
 
     __ne__ = lambda self, other: not self == other
 
