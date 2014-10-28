@@ -94,7 +94,7 @@ if (args.tertypes or args.mlsrtypes) and args.rbacrtypes:
 
 try:
     p = setools.SELinuxPolicy(args.policy)
-except RuntimeError as err:
+except Exception as err:
     print(err)
     sys.exit(-1)
 

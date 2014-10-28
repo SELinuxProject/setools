@@ -64,16 +64,13 @@ class SELinuxPolicy(object):
     def __init__(self, policyfile):
         """
         Parameter:
-        policyfile	str	Path to a policy to open.
+        policyfile  Path to a policy to open.
         """
 
-        self.policy = qpol.qpol_policy_t(policyfile, 0)
-
-        # libqpol's SWIG wrapper doesn't throw exceptions, so we don't
-        # know what kind of error there was when opening the policy
-        if not self.policy.this:
-            raise RuntimeError(
-                "Error opening policy file \"{0}\"".format(policyfile))
+        try:
+            self.policy = qpol.qpol_policy_t(policyfile, 0)
+        except OSError as err:
+            raise OSError("Error opening policy file \"{0}\": {1}".format(policyfile,err))
 
     #
     # Policy components generators

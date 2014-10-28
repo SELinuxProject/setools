@@ -221,18 +221,18 @@ typedef enum qpol_capability
 	QPOL_CAP_FILENAME_TRANS,
 	QPOL_CAP_ROLETRANS
 } qpol_capability_e;
-
+%exception qpol_policy {
+  $action
+  if (!result) {
+    PyErr_SetFromErrno(PyExc_OSError);
+    return NULL;
+  }
+}
 %extend qpol_policy {
 	qpol_policy(const char *path, const int options) {
 		qpol_policy_t *p;
-		BEGIN_EXCEPTION
-		if (qpol_policy_open_from_file(path, &p, qpol_swig_message_callback, qpol_swig_message_callback_arg, options) < 0) {
-			SWIG_exception(SWIG_IOError, "Error opening policy");
-		}
-		END_EXCEPTION
+		qpol_policy_open_from_file(path, &p, qpol_swig_message_callback, qpol_swig_message_callback_arg, options);
 		return p;
-	fail:
-		return NULL;
 	}
 	~qpol_policy() {
 		qpol_policy_destroy(&self);

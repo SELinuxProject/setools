@@ -69,7 +69,7 @@ args = parser.parse_args()
 
 try:
     p = setools.SELinuxPolicy(args.policy)
-except RuntimeError as err:
+except Exception as err:
     print(err)
     sys.exit(-1)
 
