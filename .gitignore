@@ -2,6 +2,9 @@
 /setools.egg-info
 *.pyc
 *.pyo
+libqpol/policy_parse.c
+libqpol/policy_parse.h
+libqpol/policy_scan.c
 setools/policyrep/qpol_wrap.c
 setools/policyrep/qpol.py
 *.so

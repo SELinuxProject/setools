@@ -1,13 +1,51 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+import distutils.log as log
 from distutils.core import Extension
+from distutils.cmd import Command
+from setuptools.command.build_ext import build_ext
+import subprocess
 
-# setuptools/distutils does not support processing
-# lex/yacc, so the source files are manually generated
-# using the following commands:
-# bison -y -d policy_parse.y -o policy_parse.c
-# flex -o policy_scan.c policy_scan.l
+
+class YaccCommand(Command):
+    description = "Build yacc parsers."
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        command = ['bison','-y','-d','libqpol/policy_parse.y','-o','libqpol/policy_parse.c']
+        self.announce("Generating parser",level=log.INFO)
+        self.announce(' '.join(command), level=log.INFO)
+        subprocess.check_call(command)
+
+class LexCommand(Command):
+    description = "Build lex scanners."
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        command = ['flex','-o','libqpol/policy_scan.c','libqpol/policy_scan.l']
+        self.announce("Generating scanner",level=log.INFO)
+        self.announce(' '.join(command), level=log.INFO)
+        subprocess.check_call(command)
+
+class BuildExtCommand(build_ext):
+    def run(self):
+        self.run_command('build_yacc')
+        self.run_command('build_lex')
+        build_ext.run(self)
+
 ext_py_mods=[Extension('setools.policyrep._qpol',
                        ['setools/policyrep/qpol.i',
                         'libqpol/avrule_query.c',
@@ -58,6 +96,9 @@ setup(name='setools',
 	author='Tresys Technology, LLC',
 	author_email='setools@tresys.com',
 	url='https://github.com/TresysTechnology/setools',
+    cmdclass={'build_yacc': YaccCommand,
+              'build_lex': LexCommand,
+              'build_ext': BuildExtCommand},
 	packages=['setools', 'setools.policyrep'],
 	scripts = ['seinfo', 'seinfoflow', 'sesearch', 'sedta'],
 	data_files=[('/usr/share/setools', ['data/perm_map'])],
