@@ -1,0 +1,9 @@
+include data/*
+include libqpol/*.h
+include libqpol/*.l
+include libqpol/*.y
+include libqpol/libqpol.map
+include libqpol/include/qpol/*.h
+include tests/*.conf
+include tests/*.py
+include tests/perm_map
