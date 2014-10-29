@@ -1,3 +1,5 @@
+include COPYING*
+include UNSTABLE_API
 include data/*
 include libqpol/*.h
 include libqpol/*.l
