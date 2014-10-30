@@ -97,7 +97,7 @@ class RoleQuery(compquery.ComponentQuery):
 
         self.types = types
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.types_regex = opts[k]
             elif k == "equal":

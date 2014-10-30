@@ -39,7 +39,7 @@ class ComponentQuery(query.PolicyQuery):
 
         self.name = str(name)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.name_regex = opts[k]
             else:

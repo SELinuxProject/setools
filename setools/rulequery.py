@@ -100,7 +100,7 @@ class RuleQuery(PolicyQuery):
 
         self.source = source
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "indirect":
                 self.source_indirect = opts[k]
             elif k == "regex":
@@ -132,7 +132,7 @@ class RuleQuery(PolicyQuery):
 
         self.target = target
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "indirect":
                 self.target_indirect = opts[k]
             elif k == "regex":
@@ -168,7 +168,7 @@ class RuleQuery(PolicyQuery):
         else:
             self.tclass = set(tclass)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.tclass_regex = opts[k]
             else:
@@ -195,7 +195,7 @@ class RuleQuery(PolicyQuery):
 
         self.default = default
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.default_regex = opts[k]
             else:

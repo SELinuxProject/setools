@@ -71,7 +71,7 @@ class PolicyQuery(object):
         """
 
         if regex:
-            return bool(filter(recomp.search, (str(m) for m in obj)))
+            return bool(list(filter(recomp.search, (str(m) for m in obj))))
         else:
             return (criteria in obj)
 
@@ -94,7 +94,7 @@ class PolicyQuery(object):
         """
 
         if regex:
-            return bool(filter(recomp.search, (str(m) for m in obj)))
+            return bool(list(filter(recomp.search, (str(m) for m in obj))))
         else:
             return PolicyQuery._match_set(obj, set(criteria), equal)
 

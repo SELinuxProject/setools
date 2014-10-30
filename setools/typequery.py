@@ -97,7 +97,7 @@ class TypeQuery(compquery.ComponentQuery):
 
         self.alias = alias
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.alias_regex = opts[k]
             else:
@@ -129,7 +129,7 @@ class TypeQuery(compquery.ComponentQuery):
 
         self.attrs = attrs
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.attrs_regex = opts[k]
             elif k == "equal":

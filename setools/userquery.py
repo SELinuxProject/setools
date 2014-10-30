@@ -92,7 +92,7 @@ class UserQuery(compquery.ComponentQuery):
 
         self.roles = roles
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.roles_regex = opts[k]
             elif k == "equal":

@@ -164,7 +164,7 @@ class TERuleQuery(rulequery.RuleQuery):
         else:
             self.perms = set(perms)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "equal":
                 self.perms_equal = opts[k]
             else:

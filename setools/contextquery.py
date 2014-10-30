@@ -92,7 +92,7 @@ class ContextQuery(query.PolicyQuery):
 
         self.user = str(user)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.user_regex = opts[k]
             else:
@@ -117,7 +117,7 @@ class ContextQuery(query.PolicyQuery):
 
         self.role = str(role)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.role_regex = opts[k]
             else:
@@ -142,7 +142,7 @@ class ContextQuery(query.PolicyQuery):
 
         self.type_ = str(type_)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.type_regex = opts[k]
             else:

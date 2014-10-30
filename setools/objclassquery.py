@@ -116,7 +116,7 @@ class ObjClassQuery(compquery.ComponentQuery):
 
         self.common = str(common)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.common_regex = opts[k]
             else:
@@ -149,7 +149,7 @@ class ObjClassQuery(compquery.ComponentQuery):
 
         self.perms = perms
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "regex":
                 self.perms_regex = opts[k]
             elif k == "equal":

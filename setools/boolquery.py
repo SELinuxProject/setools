@@ -72,7 +72,7 @@ class BoolQuery(compquery.ComponentQuery):
 
         self.match_default = bool(match)
 
-        for k in opts.keys():
+        for k in list(opts.keys()):
             if k == "default":
                 self.default = bool(opts[k])
             else:
