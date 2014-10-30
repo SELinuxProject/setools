@@ -31,7 +31,7 @@ class Common(symbol.PolicySymbol):
             if other == qpol.to_str(piter.item()):
                 return True
 
-            piter.next()
+            piter.next_()
 
         return False
 

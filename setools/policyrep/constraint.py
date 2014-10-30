@@ -113,7 +113,7 @@ class Constraint(symbol.PolicySymbol):
                 names_iter = expr_node.names_iter(self.policy)
                 while not names_iter.isend():
                     names.append(qpol.to_str(names_iter.item()))
-                    names_iter.next()
+                    names_iter.next_()
 
                 if not names:
                     names_str = "<empty set>"
@@ -153,7 +153,7 @@ class Constraint(symbol.PolicySymbol):
 
                 prev_oper = self._expr_type_to_precedence[expr_type]
 
-            qpol_iter.next()
+            qpol_iter.next_()
 
         return self.__unwind_subexpression(stack)
 
@@ -188,7 +188,7 @@ class Constraint(symbol.PolicySymbol):
                     self._ismls = True
                     break
 
-                qpol_iter.next()
+                qpol_iter.next_()
 
             return self._ismls
 
@@ -201,7 +201,7 @@ class Constraint(symbol.PolicySymbol):
         p = set()
         while not iter.isend():
             p.add(qpol.to_str(iter.item()))
-            iter.next()
+            iter.next_()
 
         return p
 
