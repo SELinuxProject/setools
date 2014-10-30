@@ -54,7 +54,7 @@ class Context(symbol.PolicySymbol):
         """The MLS portion (range) of the context."""
 
         # without this check, qpol will segfault on MLS-disabled policies
-        if self.policy.has_capability(qpol.QPOL_CAP_MLS):
+        if self.policy.capability(qpol.QPOL_CAP_MLS):
             return mls.MLSRange(self.policy, self.qpol_symbol.range(self.policy))
         else:
             raise mls.MLSDisabled("MLS is disabled, the context has no range.")

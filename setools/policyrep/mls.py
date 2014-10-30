@@ -58,7 +58,7 @@ class MLSCategory(symbol.PolicySymbol):
         aiter = self.qpol_symbol.alias_iter(self.policy)
         while not aiter.isend():
             yield qpol.to_str(aiter.item())
-            aiter.next()
+            aiter.next_()
 
 # libqpol does not expose sensitivities as an individual component
 
@@ -73,7 +73,7 @@ class MLSLevel(symbol.PolicySymbol):
 
     def __eq__(self, other):
         if self.policy == other.policy:
-            if (self.qpol_symbol.sens_name(self.policy) != other.qpol_symbol.get_sens_name(self.policy)):
+            if (self.qpol_symbol.sens_name(self.policy) != other.qpol_symbol.sens_name(self.policy)):
                 return False
 
             selfcats = set(str(c) for c in self.categories())
@@ -113,7 +113,7 @@ class MLSLevel(symbol.PolicySymbol):
         citer = self.qpol_symbol.cat_iter(self.policy)
         while not citer.isend():
             yield MLSCategory(self.policy, qpol.qpol_cat_from_void(citer.item()))
-            citer.next()
+            citer.next_()
 
 
 class MLSRange(symbol.PolicySymbol):
