@@ -42,7 +42,7 @@ class TypeAttr(symbol.PolicySymbol):
     def expand(self):
         """
         Generator that expands this attribute into its member types.
-        If this	is a type, the type itself will be yielded.
+        If this is a type, the type itself will be yielded.
         """
         # if this is not an attribute, yield only the type itself
         if not self.isattr:

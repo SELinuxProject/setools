@@ -28,7 +28,7 @@ class Role(symbol.PolicySymbol):
     def expand(self):
         """
         Generator that expands this attribute into its member roles.
-        If this	is a role, the role itself will be yielded.
+        If this is a role, the role itself will be yielded.
         """
         # Role attributes are already expanded in the binary policy
         yield self
