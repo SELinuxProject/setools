@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import string
-
 from . import qpol
 from . import symbol
 
@@ -86,7 +84,7 @@ class TypeAttr(symbol.PolicySymbol):
             stmt = "type {0}".format(self)
             if aliases:
                 if len(aliases) > 1:
-                    stmt += " alias {{ {0} }}".format(string.join(aliases))
+                    stmt += " alias {{ {0} }}".format(' '.join(aliases))
                 else:
                     stmt += " alias {0}".format(aliases[0])
             for a in attrs:

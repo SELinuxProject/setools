@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import string
-
 from . import qpol
 from . import symbol
 
@@ -134,4 +132,4 @@ class ConditionalExpr(symbol.PolicySymbol):
             else:
                 ret.append(i)
 
-        return string.join(ret)
+        return ' '.join(ret)

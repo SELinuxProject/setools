@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import string
-
 from . import qpol
 from . import symbol
 from . import typeattr
@@ -54,7 +52,7 @@ class Role(symbol.PolicySymbol):
         types = list(str(t) for t in self.types())
         stmt = "role {0}".format(self)
         if (len(types) > 1):
-            stmt += " types {{ {0} }};".format(string.join(types))
+            stmt += " types {{ {0} }};".format(' '.join(types))
         else:
             try:
                 stmt += " types {0};".format(types[0])

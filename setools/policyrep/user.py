@@ -16,9 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-
-import string
-
 from . import qpol
 from . import role
 from . import mls
@@ -65,7 +62,7 @@ class User(symbol.PolicySymbol):
         roles = list(str(r) for r in self.roles)
         stmt = "user {0} roles ".format(self)
         if (len(roles) > 1):
-            stmt += "{{ {0} }}".format(string.join(roles))
+            stmt += "{{ {0} }}".format(' '.join(roles))
         else:
             stmt += roles[0]
 

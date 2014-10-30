@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 import itertools
-import string
 
 from . import qpol
 from . import symbol
@@ -100,7 +99,7 @@ class MLSLevel(symbol.PolicySymbol):
                 else:
                     shortlist.append(str(group[0]))
 
-            lvl += ":" + string.join(shortlist, ",")
+            lvl += ":" + ','.join(shortlist)
 
         return lvl
 

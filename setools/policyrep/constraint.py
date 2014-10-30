@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import string
-
 from . import qpol
 from . import symbol
 from . import objclass
@@ -75,7 +73,7 @@ class Constraint(symbol.PolicySymbol):
 
         perms = self.perms
         if len(perms) > 1:
-            rule_string += "{{ {0} }} (\n".format(string.join(perms))
+            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
         else:
             # convert to list since sets cannot be indexed
             rule_string += "{0} (\n".format(list(perms)[0])
@@ -122,7 +120,7 @@ class Constraint(symbol.PolicySymbol):
                 elif len(names) == 1:
                     names_str = names[0]
                 else:
-                    names_str = "{{ {0} }}".format(string.join(names))
+                    names_str = "{{ {0} }}".format(' '.join(names))
 
                 stack.append([self._sym_to_text[sym_type],
                               self._expr_op_to_text[op],
@@ -169,7 +167,7 @@ class Constraint(symbol.PolicySymbol):
             else:
                 ret.append(i)
 
-        return string.join(ret)
+        return ' '.join(ret)
 
     @property
     def ismls(self):

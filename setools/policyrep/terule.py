@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import string
-
 from . import qpol
 from . import symbol
 from . import rule
@@ -68,7 +66,7 @@ class TERule(rule.PolicyRule):
         else:
             # allow/dontaudit/auditallow/neverallow rules
             if len(perms) > 1:
-                rule_string += "{{ {0} }};".format(string.join(perms))
+                rule_string += "{{ {0} }};".format(' '.join(perms))
             else:
                 # convert to list since sets cannot be indexed
                 rule_string += "{0};".format(list(perms)[0])
