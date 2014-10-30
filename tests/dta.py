@@ -36,7 +36,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         # don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        edges = sorted(list(self.a.G.out_edges_iter()))
+        edges = sorted(self.a.G.out_edges_iter())
         self.assertListEqual([("dyntrans100", "bothtrans200"),
                               ("start", "dyntrans100"),
                               ("start", "trans1"),
@@ -72,7 +72,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # exec perms
-        k = self.a.G.edge[s][t]["execute"].keys()
+        k = sorted(self.a.G.edge[s][t]["execute"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["execute"][e]
@@ -85,7 +85,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # entrypoint perms
-        k = self.a.G.edge[s][t]["entrypoint"].keys()
+        k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
@@ -98,7 +98,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # type_transition
-        k = self.a.G.edge[s][t]["type_transition"].keys()
+        k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["type_transition"][e]
@@ -145,15 +145,15 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertEqual(len(r), 0)
 
         # exec perms
-        k = self.a.G.edge[s][t]["execute"].keys()
+        k = sorted(self.a.G.edge[s][t]["execute"].keys())
         self.assertEqual(len(k), 0)
 
         # entrypoint perms
-        k = self.a.G.edge[s][t]["entrypoint"].keys()
+        k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
         self.assertEqual(len(k), 0)
 
         # type_transition
-        k = self.a.G.edge[s][t]["type_transition"].keys()
+        k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
         self.assertEqual(len(k), 0)
 
         # dynamic transition
@@ -198,7 +198,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertEqual(len(r), 0)
 
         # exec perms
-        k = self.a.G.edge[s][t]["execute"].keys()
+        k = sorted(self.a.G.edge[s][t]["execute"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["execute"][e]
@@ -211,7 +211,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # entrypoint perms
-        k = self.a.G.edge[s][t]["entrypoint"].keys()
+        k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
@@ -224,7 +224,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # type_transition
-        k = self.a.G.edge[s][t]["type_transition"].keys()
+        k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["type_transition"][e]
@@ -272,7 +272,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # exec perms
-        k = self.a.G.edge[s][t]["execute"].keys()
+        k = sorted(self.a.G.edge[s][t]["execute"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["execute"][e]
@@ -285,7 +285,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # entrypoint perms
-        k = self.a.G.edge[s][t]["entrypoint"].keys()
+        k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
@@ -298,7 +298,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # type_transition
-        k = self.a.G.edge[s][t]["type_transition"].keys()
+        k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
         self.assertEqual(len(k), 0)
 
         # dynamic transition
@@ -337,7 +337,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # exec perms
-        k = self.a.G.edge[s][t]["execute"].keys()
+        k = sorted(self.a.G.edge[s][t]["execute"].keys())
         self.assertEqual(k, e)
 
         r = self.a.G.edge[s][t]["execute"][e[0]]
@@ -359,7 +359,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # entrypoint perms
-        k = self.a.G.edge[s][t]["entrypoint"].keys()
+        k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
         self.assertEqual(k, e)
 
         r = self.a.G.edge[s][t]["entrypoint"][e[0]]
@@ -381,7 +381,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # type_transition
-        k = self.a.G.edge[s][t]["type_transition"].keys()
+        k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
         self.assertEqual(k, [e[0]])
 
         r = self.a.G.edge[s][t]["type_transition"][e[0]]
@@ -423,7 +423,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertEqual(len(r), 0)
 
         # exec perms
-        k = self.a.G.edge[s][t]["execute"].keys()
+        k = sorted(self.a.G.edge[s][t]["execute"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["execute"][e]
@@ -436,7 +436,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # entrypoint perms
-        k = self.a.G.edge[s][t]["entrypoint"].keys()
+        k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
@@ -449,7 +449,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         # type_transition
-        k = self.a.G.edge[s][t]["type_transition"].keys()
+        k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
         self.assertEqual(k, [e])
 
         r = self.a.G.edge[s][t]["type_transition"][e]
