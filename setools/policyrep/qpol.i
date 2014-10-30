@@ -24,6 +24,7 @@
 %module qpol
 
 %{
+#include <arpa/inet.h>
 #include "include/qpol/avrule_query.h"
 #include "include/qpol/bool_query.h"
 #include "include/qpol/class_perm_query.h"
@@ -1714,27 +1715,51 @@ typedef struct qpol_nodecon {} qpol_nodecon_t;
 	~qpol_nodecon() {
 		free(self);
 	};
-	uint32_t *addr(qpol_policy_t *p) {
+	char *addr(qpol_policy_t *p) {
 		uint32_t *a;
+		unsigned char proto;
+		char *addr = NULL;
+
 		BEGIN_EXCEPTION
-		unsigned char proto; /* currently dropped; stores the protocol - call get_protocol() */
+		addr = malloc(INET6_ADDRSTRLEN * sizeof(char));
+		if(!addr)
+			SWIG_exception(SWIG_MemoryError, "Out of memory");
+
 		if (qpol_nodecon_get_addr(p, self, &a, &proto)) {
 			SWIG_exception(SWIG_ValueError, "Could not get address of nodecon statement");
 		}
+
+		if(proto == QPOL_IPV4) {
+			inet_ntop(AF_INET, a, addr, INET6_ADDRSTRLEN);
+		} else {
+			inet_ntop(AF_INET6, a, addr, INET6_ADDRSTRLEN);
+		}
+
 		END_EXCEPTION
 	fail:
-		return a;
+		return addr;
 	};
-	uint32_t *mask(qpol_policy_t *p) {
+	char *mask(qpol_policy_t *p) {
 		uint32_t *m;
+		unsigned char proto;
+		char *mask;
 		BEGIN_EXCEPTION
-		unsigned char proto; /* currently dropped; stores the protocol - call get_protocol() */
+		mask = malloc(INET6_ADDRSTRLEN * sizeof(char));
+		if (!mask)
+			SWIG_exception(SWIG_MemoryError, "Out of memory");
+
 		if (qpol_nodecon_get_mask(p, self, &m, &proto)) {
 			SWIG_exception(SWIG_ValueError, "Could not get mask of nodecon statement");
 		}
+
+		if(proto == QPOL_IPV4) {
+			inet_ntop(AF_INET, m, mask, INET6_ADDRSTRLEN);
+		} else {
+			inet_ntop(AF_INET6, m, mask, INET6_ADDRSTRLEN);
+		}
 		END_EXCEPTION
 	fail:
-			return m;
+			return mask;
 	};
 	int protocol(qpol_policy_t *p) {
 		unsigned char proto;
@@ -1744,7 +1769,11 @@ typedef struct qpol_nodecon {} qpol_nodecon_t;
 		}
 		END_EXCEPTION
 	fail:
-		return proto;
+		if(proto == QPOL_IPV4) {
+			return AF_INET;
+		} else {
+			return AF_INET6;
+		}
 	};
 	const qpol_context_t *context(qpol_policy_t *p) {
 		const qpol_context_t *ctx;

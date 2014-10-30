@@ -67,12 +67,7 @@ class Nodecon(NetContext):
     """A nodecon statement."""
 
     def __str__(self):
-        # TODO: not sure the SWIG is functional on these addresses.
-        #ver = self.ip_version()
-        #subnet = socket.inet_ntop(ver, self.subnet)
-        #netmask = socket.inet_ntop(ver, self.netmask)
-        #return "nodecon {0} {1} {2}".format(subnet, netmask, self.context)
-        return "nodecon - - {0.context}".format(self)
+        return "nodecon {0.subnet} {0.netmask} {0.context}".format(self)
 
     @property
     def ip_version(self):
@@ -80,18 +75,10 @@ class Nodecon(NetContext):
         The IP version for the nodecon (socket.AF_INET or
         socket.AF_INET6).
         """
-        if self.qpol_symbol.protocol(self.policy) == qpol.QPOL_IPV6:
-            return socket.AF_INET6
-
-        return socket.AF_INET
+        return self.qpol_symbol.protocol(self.policy)
 
     @property
     def subnet(self):
-        # TODO: determine if this packed byte representation
-        # should be used here and below, or if it should be
-        # converted into the human-readable string version.
-        # IPv(4|6)Network looks good for this (with mask below)
-        # but it is limited to Python >= 3.3
         return self.qpol_symbol.addr(self.policy)
 
     @property
