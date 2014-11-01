@@ -159,7 +159,6 @@ int qpol_default_object_get_range_default(const qpol_policy_t *policy, const qpo
 	*value = NULL;
 
 	/* The range default started in ver 27 */
-	int policy_version;
 	if (!qpol_policy_has_capability(policy, QPOL_CAP_DEFAULT_OBJECTS))
 		return STATUS_SUCCESS;
 

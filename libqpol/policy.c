@@ -339,7 +339,6 @@ int qpol_is_file_binpol(FILE * fp)
 
 int qpol_is_data_mod_pkg(char * data)
 {
-	size_t sz;
 	__u32 ubuf;
 
 	memcpy(&ubuf, data, sizeof(__u32));
