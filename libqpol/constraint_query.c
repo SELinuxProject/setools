@@ -779,7 +779,7 @@ int qpol_constraint_expr_node_get_names_iter(const qpol_policy_t * policy, const
 		return STATUS_ERR;
 	}
 
-	int policy_version;
+	unsigned int policy_version;
 	if (qpol_policy_get_policy_version(policy, &policy_version))
 		return STATUS_ERR;
 
