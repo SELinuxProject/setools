@@ -55,10 +55,8 @@ class MLSCategory(symbol.PolicySymbol):
     def aliases(self):
         """Generator that yields all aliases for this category."""
 
-        aiter = self.qpol_symbol.alias_iter(self.policy)
-        while not aiter.isend():
-            yield qpol.to_str(aiter.item())
-            aiter.next_()
+        for alias in self.qpol_symbol.alias_iter(self.policy):
+            yield alias
 
 # libqpol does not expose sensitivities as an individual component
 
@@ -110,10 +108,8 @@ class MLSLevel(symbol.PolicySymbol):
         c0.c255
         """
 
-        citer = self.qpol_symbol.cat_iter(self.policy)
-        while not citer.isend():
-            yield MLSCategory(self.policy, qpol.qpol_cat_from_void(citer.item()))
-            citer.next_()
+        for cat in self.qpol_symbol.cat_iter(self.policy):
+            yield MLSCategory(self.policy, cat)
 
 
 class MLSRange(symbol.PolicySymbol):

@@ -79,70 +79,53 @@ class SELinuxPolicy(object):
     def classes(self):
         """Generator which yields all object classes."""
 
-        qiter = self.policy.class_iter()
-        while not qiter.isend():
-            yield objclass.ObjClass(self.policy, qpol.qpol_class_from_void(qiter.item()))
-            qiter.next_()
+        for class_ in self.policy.class_iter():
+            yield objclass.ObjClass(self.policy, class_)
 
     def commons(self):
         """Generator which yields all commons."""
 
-        qiter = self.policy.common_iter()
-        while not qiter.isend():
-            yield objclass.Common(self.policy, qpol.qpol_common_from_void(qiter.item()))
-            qiter.next_()
+        for common in self.policy.common_iter():
+            yield objclass.Common(self.policy, common)
 
     def types(self):
         """Generator which yields all types."""
 
         # libqpol unfortunately iterates over attributes and aliases
-        qiter = self.policy.type_iter()
-        while not qiter.isend():
-            t = typeattr.TypeAttr(
-                self.policy, qpol.qpol_type_from_void(qiter.item()))
+        for type_ in self.policy.type_iter():
+            t = typeattr.TypeAttr(self.policy, type_)
             if not t.isattr and not t.isalias:
                 yield t
-            qiter.next_()
 
     def roles(self):
         """Generator which yields all roles."""
 
-        qiter = self.policy.role_iter()
-        while not qiter.isend():
-            yield role.Role(self.policy, qpol.qpol_role_from_void(qiter.item()))
-            qiter.next_()
+        for role_ in self.policy.role_iter():
+            yield role.Role(self.policy, role_)
 
     def users(self):
         """Generator which yields all users."""
 
-        qiter = self.policy.user_iter()
-        while not qiter.isend():
-            yield user.User(self.policy, qpol.qpol_user_from_void(qiter.item()))
-            qiter.next_()
+        for user_ in self.policy.user_iter():
+            yield user.User(self.policy, user_)
 
     def bools(self):
         """Generator which yields all Booleans."""
 
-        qiter = self.policy.bool_iter()
-        while not qiter.isend():
-            yield boolcond.Boolean(self.policy, qpol.qpol_bool_from_void(qiter.item()))
-            qiter.next_()
+        for bool_ in self.policy.bool_iter():
+            yield boolcond.Boolean(self.policy, bool_)
 
     def polcaps(self):
         """Generator which yields all policy capabilities."""
 
-        qiter = self.policy.polcap_iter()
-        while not qiter.isend():
-            yield polcap.PolicyCapability(self.policy, qpol.qpol_polcap_from_void(qiter.item()))
-            qiter.next_()
+        for cap in self.policy.polcap_iter():
+            yield polcap.PolicyCapability(self.policy, cap)
 
     def permissives(self):
         """Generator which yields all permissive types."""
 
-        qiter = self.policy.permissive_iter()
-        while not qiter.isend():
-            yield typeattr.TypeAttr(self.policy, qpol.qpol_type_from_void(qiter.item()))
-            qiter.next_()
+        for type_ in self.policy.permissive_iter():
+            yield typeattr.TypeAttr(self.policy, type_)
 
     #
     # Policy rules generators
@@ -150,44 +133,29 @@ class SELinuxPolicy(object):
     def terules(self):
         """Generator which yields all type enforcement rules."""
 
-        av_ruletype = qpol.QPOL_RULE_ALLOW | qpol.QPOL_RULE_AUDITALLOW | qpol.QPOL_RULE_DONTAUDIT
-        te_ruletype = qpol.QPOL_RULE_TYPE_TRANS | qpol.QPOL_RULE_TYPE_CHANGE | qpol.QPOL_RULE_TYPE_MEMBER
+        for rule in self.policy.avrule_iter():
+            yield terule.TERule(self.policy, rule)
 
-        qiter = self.policy.avrule_iter(av_ruletype)
-        while not qiter.isend():
-            yield terule.TERule(self.policy, qpol.qpol_avrule_from_void(qiter.item()))
-            qiter.next_()
+        for rule in self.policy.terule_iter():
+            yield terule.TERule(self.policy, rule)
 
-        qiter = self.policy.terule_iter(te_ruletype)
-        while not qiter.isend():
-            yield terule.TERule(self.policy, qpol.qpol_terule_from_void(qiter.item()))
-            qiter.next_()
-
-        qiter = self.policy.filename_trans_iter()
-        while not qiter.isend():
-            yield terule.TERule(self.policy, qpol.qpol_filename_trans_from_void(qiter.item()))
-            qiter.next_()
+        for rule in self.policy.filename_trans_iter():
+            yield terule.TERule(self.policy, rule)
 
     def rbacrules(self):
         """Generator which yields all RBAC rules."""
 
-        qiter = self.policy.role_allow_iter()
-        while not qiter.isend():
-            yield rbacrule.RBACRule(self.policy, qpol.qpol_role_allow_from_void(qiter.item()))
-            qiter.next_()
+        for rule in self.policy.role_allow_iter():
+            yield rbacrule.RBACRule(self.policy, rule)
 
-        qiter = self.policy.role_trans_iter()
-        while not qiter.isend():
-            yield rbacrule.RBACRule(self.policy, qpol.qpol_role_trans_from_void(qiter.item()))
-            qiter.next_()
+        for rule in self.policy.role_trans_iter():
+            yield rbacrule.RBACRule(self.policy, rule)
 
     def mlsrules(self):
         """Generator which yields all MLS rules."""
 
-        qiter = self.policy.range_trans_iter()
-        while not qiter.isend():
-            yield mlsrule.MLSRule(self.policy, qpol.qpol_range_trans_from_void(qiter.item()))
-            qiter.next_()
+        for rule in self.policy.range_trans_iter():
+            yield mlsrule.MLSRule(self.policy, rule)
 
     #
     # Constraints generators
@@ -196,24 +164,18 @@ class SELinuxPolicy(object):
     def constraints(self):
         """Generator which yields all constraints."""
 
-        qiter = self.policy.constraint_iter()
-        while not qiter.isend():
-            c = constraint.Constraint(
-                self.policy, qpol.qpol_constraint_from_void(qiter.item()))
+        for constraint_ in self.policy.constraint_iter():
+            c = constraint.Constraint(self.policy, constraint_)
             if not c.ismls:
                 yield c
-            qiter.next_()
 
     def mlsconstraints(self):
         """Generator which yields all MLS constraints."""
 
-        qiter = self.policy.constraint_iter()
-        while not qiter.isend():
-            c = constraint.Constraint(
-                self.policy, qpol.qpol_constraint_from_void(qiter.item()))
+        for constraint_ in self.policy.constraint_iter():
+            c = constraint.Constraint(self.policy, constraint_)
             if c.ismls:
                 yield c
-            qiter.next_()
 
     #
     # In-policy Labeling statement generators
@@ -221,47 +183,35 @@ class SELinuxPolicy(object):
     def initialsids(self):
         """Generator which yields all initial SID statements."""
 
-        qiter = self.policy.isid_iter()
-        while not qiter.isend():
-            yield initsid.InitialSID(self.policy, qpol.qpol_isid_from_void(qiter.item()))
-            qiter.next_()
+        for sid in self.policy.isid_iter():
+            yield initsid.InitialSID(self.policy, sid)
 
     def fs_uses(self):
         """Generator which yields all fs_use_* statements."""
 
-        qiter = self.policy.fs_use_iter()
-        while not qiter.isend():
-            yield fscontext.FSUse(self.policy, qpol.qpol_fs_use_from_void(qiter.item()))
-            qiter.next_()
+        for fs_use in self.policy.fs_use_iter():
+            yield fscontext.FSUse(self.policy, fs_use)
 
     def genfscons(self):
         """Generator which yields all genfscon statements."""
 
-        qiter = self.policy.genfscon_iter()
-        while not qiter.isend():
-            yield fscontext.Genfscon(self.policy, qpol.qpol_genfscon_from_void(qiter.item()))
-            qiter.next_()
+        for fscon in self.policy.genfscon_iter():
+            yield fscontext.Genfscon(self.policy, fscon)
 
     def netifcons(self):
         """Generator which yields all netifcon statements."""
 
-        qiter = self.policy.netifcon_iter()
-        while not qiter.isend():
-            yield netcontext.Netifcon(self.policy, qpol.qpol_netifcon_from_void(qiter.item()))
-            qiter.next_()
+        for ifcon in self.policy.netifcon_iter():
+            yield netcontext.Netifcon(self.policy, ifcon)
 
     def nodecons(self):
         """Generator which yields all nodecon statements."""
 
-        qiter = self.policy.nodecon_iter()
-        while not qiter.isend():
-            yield netcontext.Nodecon(self.policy, qpol.qpol_nodecon_from_void(qiter.item()))
-            qiter.next_()
+        for node in self.policy.nodecon_iter():
+            yield netcontext.Nodecon(self.policy, node)
 
     def portcons(self):
         """Generator which yields all portcon statements."""
 
-        qiter = self.policy.portcon_iter()
-        while not qiter.isend():
-            yield netcontext.Portcon(self.policy, qpol.qpol_portcon_from_void(qiter.item()))
-            qiter.next_()
+        for port in self.policy.portcon_iter():
+            yield netcontext.Portcon(self.policy, port)

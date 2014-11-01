@@ -54,11 +54,7 @@ class ConditionalExpr(symbol.PolicySymbol):
         qpol.QPOL_COND_EXPR_NEQ: 4}
 
     def __contains__(self, other):
-        qpol_iter = self.qpol_symbol.expr_node_iter(self.policy)
-
-        while not qpol_iter.isend():
-            expr_node = qpol.qpol_cond_expr_node_from_void(
-                qpol_iter.item())
+        for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
             expr_node_type = expr_node.expr_type(self.policy)
 
             if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == Boolean(self.policy, expr_node.bool(self.policy)):
@@ -67,8 +63,6 @@ class ConditionalExpr(symbol.PolicySymbol):
         return False
 
     def __str__(self):
-        qpol_iter = self.qpol_symbol.expr_node_iter(self.policy)
-
         # qpol representation is in postfix notation.  This code
         # converts it to infix notation.  Parentheses are added
         # to ensure correct expressions, though they may end up
@@ -77,9 +71,7 @@ class ConditionalExpr(symbol.PolicySymbol):
         # operator, no parentheses are output
         stack = []
         prev_oper = qpol.QPOL_COND_EXPR_NOT
-        while not qpol_iter.isend():
-            expr_node = qpol.qpol_cond_expr_node_from_void(
-                qpol_iter.item())
+        for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
             expr_node_type = expr_node.expr_type(self.policy)
 
             if expr_node_type == qpol.QPOL_COND_EXPR_BOOL:
@@ -117,8 +109,6 @@ class ConditionalExpr(symbol.PolicySymbol):
 
                 stack.append(subexpr)
                 prev_oper = expr_node_type
-
-            qpol_iter.next_()
 
         return self.__unwind_subexpression(stack)
 

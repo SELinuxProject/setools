@@ -42,11 +42,8 @@ class Role(symbol.PolicySymbol):
     def types(self):
         """Generator which yields the role's set of types."""
 
-        titer = self.qpol_symbol.type_iter(self.policy)
-        while not titer.isend():
-            yield typeattr.TypeAttr(
-                self.policy, qpol.qpol_type_from_void(titer.item()))
-            titer.next_()
+        for type_ in self.qpol_symbol.type_iter(self.policy):
+            yield typeattr.TypeAttr(self.policy, type_)
 
     def statement(self):
         types = list(str(t) for t in self.types())

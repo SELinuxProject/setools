@@ -107,18 +107,10 @@ class TERule(rule.PolicyRule):
         """The rule's permission set."""
         try:
             # create permission list
-            qiter = self.qpol_symbol.perm_iter(self.policy)
+            return set(self.qpol_symbol.perm_iter(self.policy))
         except AttributeError:
             raise rule.InvalidRuleUse(
                 "{0} rules do not have a permission set.".format(self.ruletype))
-
-        p = set()
-
-        while not qiter.isend():
-            p.add(qpol.to_str(qiter.item()))
-            qiter.next_()
-
-        return p
 
     @property
     def default(self):

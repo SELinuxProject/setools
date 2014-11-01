@@ -25,28 +25,13 @@ class Common(symbol.PolicySymbol):
     """A common permission set."""
 
     def __contains__(self, other):
-        piter = self.qpol_symbol.perm_iter(self.policy)
-
-        while not piter.isend():
-            if other == qpol.to_str(piter.item()):
-                return True
-
-            piter.next_()
-
-        return False
+        return (other in (self.qpol_symbol.perm_iter(self.policy)))
 
     @property
     def perms(self):
         """The list of the common's permissions."""
 
-        piter = self.qpol_symbol.perm_iter(self.policy)
-        p = set()
-
-        while not piter.isend():
-            p.add(qpol.to_str(piter.item()))
-            piter.next_()
-
-        return p
+        return set(self.qpol_symbol.perm_iter(self.policy))
 
     def statement(self):
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))

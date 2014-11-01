@@ -48,10 +48,8 @@ class TypeAttr(symbol.PolicySymbol):
         if not self.isattr:
             yield self
         else:
-            aiter = self.qpol_symbol.type_iter(self.policy)
-            while not aiter.isend():
-                yield TypeAttr(self.policy, qpol.qpol_type_from_void(aiter.item()))
-                aiter.next_()
+            for type_ in self.qpol_symbol.type_iter(self.policy):
+                yield TypeAttr(self.policy, type_)
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
@@ -59,10 +57,8 @@ class TypeAttr(symbol.PolicySymbol):
             raise TypeError(
                 "{0} is an attribute, thus does not have attributes.".format(self))
 
-        aiter = self.qpol_symbol.attr_iter(self.policy)
-        while not aiter.isend():
-            yield TypeAttr(self.policy, qpol.qpol_type_from_void(aiter.item()))
-            aiter.next_()
+        for attr in self.qpol_symbol.attr_iter(self.policy):
+            yield TypeAttr(self.policy, attr)
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
@@ -70,10 +66,8 @@ class TypeAttr(symbol.PolicySymbol):
             raise TypeError(
                 "{0} is an attribute, thus does not have aliases.".format(self))
 
-        aiter = self.qpol_symbol.alias_iter(self.policy)
-        while not aiter.isend():
-            yield qpol.to_str(aiter.item())
-            aiter.next_()
+        for alias in self.qpol_symbol.alias_iter(self.policy):
+            yield alias
 
     def statement(self):
         if self.isattr:

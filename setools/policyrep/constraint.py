@@ -91,14 +91,9 @@ class Constraint(symbol.PolicySymbol):
         # operator, no parentheses are output
 
         expr_string = ""
-        qpol_iter = self.qpol_symbol.expr_iter(self.policy)
-
         stack = []
         prev_oper = self._expr_op_precedence
-        while not qpol_iter.isend():
-            expr_node = qpol.qpol_constraint_expr_node_from_void(
-                qpol_iter.item())
-
+        for expr_node in self.qpol_symbol.expr_iter(self.policy):
             op = expr_node.op(self.policy)
             sym_type = expr_node.sym_type(self.policy)
             expr_type = expr_node.expr_type(self.policy)
@@ -109,11 +104,7 @@ class Constraint(symbol.PolicySymbol):
                               self._sym_to_text[sym_type + qpol.QPOL_CEXPR_SYM_TARGET]])
                 prev_oper = self._expr_op_precedence
             elif expr_type == qpol.QPOL_CEXPR_TYPE_NAMES:
-                names = []
-                names_iter = expr_node.names_iter(self.policy)
-                while not names_iter.isend():
-                    names.append(qpol.to_str(names_iter.item()))
-                    names_iter.next_()
+                names = list(expr_node.names_iter(self.policy))
 
                 if not names:
                     names_str = "<empty set>"
@@ -153,8 +144,6 @@ class Constraint(symbol.PolicySymbol):
 
                 prev_oper = self._expr_type_to_precedence[expr_type]
 
-            qpol_iter.next_()
-
         return self.__unwind_subexpression(stack)
 
     def __unwind_subexpression(self, expr):
@@ -176,11 +165,7 @@ class Constraint(symbol.PolicySymbol):
         except AttributeError:
             self._ismls = False
 
-            qpol_iter = self.qpol_symbol.expr_iter(self.policy)
-            while not qpol_iter.isend():
-                expr_node = qpol.qpol_constraint_expr_node_from_void(
-                    qpol_iter.item())
-
+            for expr_node in self.qpol_symbol.expr_iter(self.policy):
                 sym_type = expr_node.sym_type(self.policy)
                 expr_type = expr_node.expr_type(self.policy)
 
@@ -188,22 +173,13 @@ class Constraint(symbol.PolicySymbol):
                     self._ismls = True
                     break
 
-                qpol_iter.next_()
-
             return self._ismls
 
     @property
     def perms(self):
         """The constraint's permission set."""
 
-        iter = self.qpol_symbol.perm_iter(self.policy)
-
-        p = set()
-        while not iter.isend():
-            p.add(qpol.to_str(iter.item()))
-            iter.next_()
-
-        return p
+        return set(self.qpol_symbol.perm_iter(self.policy))
 
     def statement(self):
         return str(self)
