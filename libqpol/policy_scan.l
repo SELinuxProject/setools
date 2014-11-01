@@ -48,6 +48,7 @@ typedef int (* require_func_t)(int pass);
 static char linebuf[2][255];
 static unsigned int lno = 0;
 int yywarn(const char *msg);
+int yyerror(const char *msg);
 
 void set_source_file(const char *name);
 
@@ -294,7 +295,7 @@ LOW				{ return(LOW); }
 "*"				{ return(yytext[0]); } 
 .                               { yywarn("unrecognized character");}
 %%
-int yyerror(char *msg)
+int yyerror(const char *msg)
 {
 	if (source_file[0])
 		fprintf(stderr, "%s:%ld:",
