@@ -49,7 +49,7 @@ int qpol_policy_get_role_by_name(const qpol_policy_t * policy, const char *name,
 	}
 
 	db = &policy->p->p;
-	internal_datum = hashtab_search(db->p_roles.table, (const hashtab_key_t)name);
+	internal_datum = hashtab_search(db->p_roles.table, (hashtab_key_t)name);
 	if (internal_datum == NULL) {
 		*datum = NULL;
 		ERR(policy, "could not find datum for role %s", name);

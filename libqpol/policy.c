@@ -503,7 +503,7 @@ static int infer_policy_version(qpol_policy_t * policy)
 	}
 
 	/* 18 : the netlink_audit_socket class added */
-	else if (hashtab_search(db->p_classes.table, (const hashtab_key_t)"netlink_audit_socket")) {
+	else if (hashtab_search(db->p_classes.table, (hashtab_key_t)"netlink_audit_socket")) {
 		db->policyvers = 18;
 	}
 
@@ -664,7 +664,7 @@ static int union_multiply_declared_symbols(qpol_policy_t * policy) {
 			avrule_decl_t *decl = blk->enabled;
 			if (!decl)
 				continue; /* disabled */
-			type_datum_t *internal_datum = hashtab_search(decl->symtab[SYM_TYPES].table, (const hashtab_key_t)name);
+			type_datum_t *internal_datum = hashtab_search(decl->symtab[SYM_TYPES].table, (hashtab_key_t)name);
 			if (internal_datum == NULL) {
 				continue; /* not declared here */
 			}
@@ -695,7 +695,7 @@ static int union_multiply_declared_symbols(qpol_policy_t * policy) {
 			goto err;
 		}
 		policydb_t *db = &policy->p->p;
-		scope_datum_t* scope_datum = hashtab_search(db->scope[SYM_ROLES].table, (const hashtab_key_t)name);
+		scope_datum_t* scope_datum = hashtab_search(db->scope[SYM_ROLES].table, (hashtab_key_t)name);
 		if (scope_datum == NULL) {
 			ERR(policy, "could not find scope datum for role %s", name);
 			error = ENOENT;
@@ -705,7 +705,7 @@ static int union_multiply_declared_symbols(qpol_policy_t * policy) {
 		{
 			if (db->decl_val_to_struct[scope_datum->decl_ids[i] - 1]->enabled == 0)
 				continue; /* block is disabled */
-			role_datum_t *internal_datum = hashtab_search(db->decl_val_to_struct[scope_datum->decl_ids[i] - 1]->symtab[SYM_ROLES].table, (const hashtab_key_t)name);
+			role_datum_t *internal_datum = hashtab_search(db->decl_val_to_struct[scope_datum->decl_ids[i] - 1]->symtab[SYM_ROLES].table, (hashtab_key_t)name);
 			if (internal_datum == NULL) {
 				continue; /* not declared here */
 			}
@@ -736,7 +736,7 @@ static int union_multiply_declared_symbols(qpol_policy_t * policy) {
 			goto err;
 		}
 		policydb_t *db = &policy->p->p;
-		scope_datum_t* scope_datum = hashtab_search(db->scope[SYM_USERS].table, (const hashtab_key_t)name);
+		scope_datum_t* scope_datum = hashtab_search(db->scope[SYM_USERS].table, (hashtab_key_t)name);
 		if (scope_datum == NULL) {
 			ERR(policy, "could not find scope datum for user %s", name);
 			error = ENOENT;
@@ -746,7 +746,7 @@ static int union_multiply_declared_symbols(qpol_policy_t * policy) {
 		{
 			if (db->decl_val_to_struct[scope_datum->decl_ids[i] - 1]->enabled == 0)
 				continue; /* block is disabled */
-			user_datum_t *internal_datum = hashtab_search(db->decl_val_to_struct[scope_datum->decl_ids[i] -1 ]->symtab[SYM_USERS].table, (const hashtab_key_t)name);
+			user_datum_t *internal_datum = hashtab_search(db->decl_val_to_struct[scope_datum->decl_ids[i] -1 ]->symtab[SYM_USERS].table, (hashtab_key_t)name);
 			if (internal_datum == NULL) {
 				continue; /* not declared here */
 			}

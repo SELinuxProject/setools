@@ -1257,7 +1257,7 @@ int is_id_in_scope(uint32_t symbol_type, hashtab_key_t id)
 {
 	scope_datum_t *scope =
 	    (scope_datum_t *) hashtab_search(policydbp->scope[symbol_type].
-					     table, id);
+					     table, (hashtab_key_t)id);
 	if (scope == NULL) {
 		return 1;	/* id is not known, so return success */
 	}
@@ -1304,13 +1304,13 @@ int is_perm_in_scope(hashtab_key_t perm_id, hashtab_key_t class_id)
 {
 	class_datum_t *cladatum =
 	    (class_datum_t *) hashtab_search(policydbp->p_classes.table,
-					     class_id);
+					     (hashtab_key_t)class_id);
 	perm_datum_t *perdatum;
 	if (cladatum == NULL) {
 		return 1;
 	}
 	perdatum = (perm_datum_t *) hashtab_search(cladatum->permissions.table,
-						   perm_id);
+						   (hashtab_key_t)perm_id);
 	if (perdatum == NULL) {
 		return 1;
 	}

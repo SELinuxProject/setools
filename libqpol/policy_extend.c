@@ -471,7 +471,7 @@ static int qpol_policy_add_object_r(qpol_policy_t * policy)
 
 	db = &policy->p->p;
 
-	hashtab_datum_t datum = hashtab_search(db->p_roles.table, (const hashtab_key_t)OBJECT_R);
+	hashtab_datum_t datum = hashtab_search(db->p_roles.table, (hashtab_key_t)OBJECT_R);
 	if (datum == NULL) {
 		ERR(policy, "%s", OBJECT_R " not found in policy!");
 		errno = EIO;

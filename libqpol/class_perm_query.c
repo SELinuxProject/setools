@@ -376,7 +376,7 @@ int qpol_policy_get_class_by_name(const qpol_policy_t * policy, const char *name
 	}
 
 	db = &policy->p->p;
-	internal_datum = hashtab_search(db->p_classes.table, (const hashtab_key_t)name);
+	internal_datum = hashtab_search(db->p_classes.table, (hashtab_key_t)name);
 	if (internal_datum == NULL) {
 		*obj_class = NULL;
 		ERR(policy, "could not find class %s", name);
@@ -541,7 +541,7 @@ int qpol_policy_get_common_by_name(const qpol_policy_t * policy, const char *nam
 	}
 
 	db = &policy->p->p;
-	internal_datum = hashtab_search(db->p_commons.table, (const hashtab_key_t)name);
+	internal_datum = hashtab_search(db->p_commons.table, (hashtab_key_t)name);
 	if (internal_datum == NULL) {
 		*common = NULL;
 		ERR(policy, "could not find common %s", name);

@@ -1389,7 +1389,7 @@ static int define_typebounds_helper(char *bounds_id, char *type_id)
 		return -1;
 	}
 
-	bounds = hashtab_search(policydbp->p_types.table, bounds_id);
+	bounds = hashtab_search(policydbp->p_types.table, (hashtab_key_t)bounds_id);
 	if (!bounds || bounds->flavor == TYPE_ATTRIB) {
 		yyerror2("hoge unknown type %s", bounds_id);
 		return -1;
@@ -1400,7 +1400,7 @@ static int define_typebounds_helper(char *bounds_id, char *type_id)
 		return -1;
 	}
 
-	type = hashtab_search(policydbp->p_types.table, type_id);
+	type = hashtab_search(policydbp->p_types.table, (hashtab_key_t)type_id);
 	if (!type || type->flavor == TYPE_ATTRIB) {
 		yyerror2("type %s is not declared", type_id);
 		return -1;
@@ -1508,7 +1508,7 @@ int define_type(int alias)
 			free(id);
 			return -1;
 		}
-		attr = hashtab_search(policydbp->p_types.table, id);
+		attr = hashtab_search(policydbp->p_types.table, (hashtab_key_t)id);
 		if (!attr) {
 			/* treat it as a fatal error */
 			yyerror2("attribute %s is not declared", id);
@@ -1581,7 +1581,7 @@ static int set_types(type_set_t * set, char *id, int *add, char starallowed)
 		free(id);
 		return -1;
 	}
-	t = hashtab_search(policydbp->p_types.table, id);
+	t = hashtab_search(policydbp->p_types.table, (hashtab_key_t)id);
 	if (!t) {
 		yyerror2("unknown type %s", id);
 		free(id);
@@ -2494,7 +2494,7 @@ int define_role_trans(int class_specified)
 			return -1;
 	} else {
 		cladatum = hashtab_search(policydbp->p_classes.table,
-					  "process");
+					  (hashtab_key_t)"process");
 		if (!cladatum) {
 			yyerror2("could not find process class for "
 				 "legacy role_transition statement");
@@ -4889,7 +4889,7 @@ int define_range_trans(int class_specified)
 			goto out;
 	} else {
 		cladatum = hashtab_search(policydbp->p_classes.table,
-		                          "process");
+		                          (hashtab_key_t)"process");
 		if (!cladatum) {
 			yyerror2("could not find process class for "
 			         "legacy range_transition statement");
