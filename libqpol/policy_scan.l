@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef int (* require_func_t)();
+typedef int (* require_func_t)(int pass);
 
 /* For SETools libqpol services leave this as policy_parse.h */
 /* #ifdef ANDROID */

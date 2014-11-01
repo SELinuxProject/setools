@@ -79,7 +79,7 @@ extern int yylex(void);
 extern int yywarn(const char *msg);
 extern int yyerror(const char *msg);
 
-typedef int (* require_func_t)();
+typedef int (* require_func_t)(int pass);
 
 /* Add for SETools libqpol */
 /* redefine input so we can read from a string */
