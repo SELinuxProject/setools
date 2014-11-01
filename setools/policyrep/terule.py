@@ -61,7 +61,8 @@ class TERule(rule.PolicyRule):
 
             try:
                 rule_string += " \"{0}\";".format(self.filename)
-            except TERuleNoFilename:
+            except (TERuleNoFilename, rule.InvalidRuleUse):
+                # invalid use for type_change/member
                 rule_string += ";"
         else:
             # allow/dontaudit/auditallow/neverallow rules
