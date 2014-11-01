@@ -1216,7 +1216,7 @@ int qpol_avrule_get_syn_avrule_iter(const qpol_policy_t * policy, const struct q
 	/* build key */
 	if (!(key = calloc(1, sizeof(qpol_syn_rule_key_t)))) {
 		error = errno;
-		ERR(policy, "%S", strerror(error));
+		ERR(policy, "%s", strerror(error));
 		goto err;
 	}
 
@@ -1317,7 +1317,7 @@ int qpol_terule_get_syn_terule_iter(const qpol_policy_t * policy, const struct q
 	/* build key */
 	if (!(key = calloc(1, sizeof(qpol_syn_rule_key_t)))) {
 		error = errno;
-		ERR(policy, "%S", strerror(error));
+		ERR(policy, "%s", strerror(error));
 		goto err;
 	}
 
