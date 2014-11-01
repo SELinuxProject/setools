@@ -120,7 +120,6 @@ int qpol_role_get_value(const qpol_policy_t * policy, const qpol_role_t * datum,
 int qpol_role_get_dominate_iter(const qpol_policy_t * policy, const qpol_role_t * datum, qpol_iterator_t ** dominates)
 {
 	role_datum_t *internal_datum = NULL;
-	policydb_t *db = NULL;
 	int error;
 	ebitmap_state_t *es = NULL;
 
@@ -133,7 +132,6 @@ int qpol_role_get_dominate_iter(const qpol_policy_t * policy, const qpol_role_t 
 	}
 
 	internal_datum = (role_datum_t *) datum;
-	db = &policy->p->p;
 
 	if (!(es = calloc(1, sizeof(ebitmap_state_t)))) {
 		error = errno;

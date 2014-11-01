@@ -694,7 +694,6 @@ void *perm_state_get_cur(const qpol_iterator_t * iter)
 {
 	const policydb_t *db = NULL;
 	class_datum_t *obj_class = NULL;
-	common_datum_t *comm = NULL;
 	perm_state_t *ps = NULL;
 	unsigned int perm_max = 0;
 	char *tmp = NULL;
@@ -706,7 +705,6 @@ void *perm_state_get_cur(const qpol_iterator_t * iter)
 	}
 
 	obj_class = db->class_val_to_struct[ps->obj_class_val - 1];
-	comm = obj_class->comdatum;
 
 	/* permission max is number of permissions in the class which includes
 	 * the number of permissions in its common if it inherits one */

@@ -917,7 +917,6 @@ static size_t class_constr_state_size(const qpol_iterator_t * iter)
 
 int qpol_class_get_constraint_iter(const qpol_policy_t * policy, const qpol_class_t * obj_class, qpol_iterator_t ** constr)
 {
-	const policydb_t *db = NULL;
 	class_constr_state_t *ccs = NULL;
 	class_datum_t *internal_class = NULL;
 	int error = 0;
@@ -931,7 +930,6 @@ int qpol_class_get_constraint_iter(const qpol_policy_t * policy, const qpol_clas
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	internal_class = (class_datum_t *) obj_class;
 
 	ccs = calloc(1, sizeof(class_constr_state_t));
@@ -954,7 +952,6 @@ int qpol_class_get_constraint_iter(const qpol_policy_t * policy, const qpol_clas
 
 int qpol_class_get_validatetrans_iter(const qpol_policy_t * policy, const qpol_class_t * obj_class, qpol_iterator_t ** vtrans)
 {
-	const policydb_t *db = NULL;
 	class_constr_state_t *ccs = NULL;
 	class_datum_t *internal_class = NULL;
 	int error = 0;
@@ -968,7 +965,6 @@ int qpol_class_get_validatetrans_iter(const qpol_policy_t * policy, const qpol_c
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	internal_class = (class_datum_t *) obj_class;
 
 	ccs = calloc(1, sizeof(class_constr_state_t));

@@ -156,7 +156,6 @@ int qpol_avrule_get_object_class(const qpol_policy_t * policy, const qpol_avrule
 
 int qpol_avrule_get_perm_iter(const qpol_policy_t * policy, const qpol_avrule_t * rule, qpol_iterator_t ** perms)
 {
-	policydb_t *db = NULL;
 	avtab_ptr_t avrule = NULL;
 	perm_state_t *ps = NULL;
 
@@ -170,7 +169,6 @@ int qpol_avrule_get_perm_iter(const qpol_policy_t * policy, const qpol_avrule_t 
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	avrule = (avtab_ptr_t) rule;
 	ps = calloc(1, sizeof(perm_state_t));
 	if (!ps) {
@@ -196,7 +194,6 @@ int qpol_avrule_get_perm_iter(const qpol_policy_t * policy, const qpol_avrule_t 
 
 int qpol_avrule_get_rule_type(const qpol_policy_t * policy, const qpol_avrule_t * rule, uint32_t * rule_type)
 {
-	policydb_t *db = NULL;
 	avtab_ptr_t avrule = NULL;
 
 	if (rule_type) {
@@ -209,7 +206,6 @@ int qpol_avrule_get_rule_type(const qpol_policy_t * policy, const qpol_avrule_t 
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	avrule = (avtab_ptr_t) rule;
 
 	*rule_type =

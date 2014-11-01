@@ -173,7 +173,6 @@ int qpol_terule_get_default_type(const qpol_policy_t * policy, const qpol_terule
 
 int qpol_terule_get_rule_type(const qpol_policy_t * policy, const qpol_terule_t * rule, uint32_t * rule_type)
 {
-	policydb_t *db = NULL;
 	avtab_ptr_t terule = NULL;
 
 	if (rule_type) {
@@ -186,7 +185,6 @@ int qpol_terule_get_rule_type(const qpol_policy_t * policy, const qpol_terule_t 
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	terule = (avtab_ptr_t) rule;
 
 	*rule_type = (terule->key.specified & (QPOL_RULE_TYPE_TRANS | QPOL_RULE_TYPE_CHANGE | QPOL_RULE_TYPE_MEMBER));
