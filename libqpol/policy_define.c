@@ -3344,7 +3344,7 @@ int define_conditional(cond_expr_t * expr, avrule_t * t, avrule_t * f)
 	tmp = cn.avtrue_list;
 	last_tmp = NULL;
 	while (tmp) {
-		if (!tmp->specified & AVRULE_TRANSITION)
+		if (!(tmp->specified & AVRULE_TRANSITION))
 			continue;
 		retval = insert_check_type_rule(tmp, &policydbp->te_cond_avtab, &cn_old->true_list, &cn_old->false_list);
 		switch (retval) {
