@@ -539,7 +539,7 @@ static int qpol_policy_match_system(qpol_policy_t * policy)
 		errno = error;
 		return -1;
 	}
-	if (policy->p->p.policyvers > kernvers) {
+	if (policy->p->p.policyvers > (unsigned)kernvers) {
 		if (sepol_policydb_set_vers(policy->p, kernvers)) {
 			error = errno;
 			ERR(policy, "Could not downgrade policy to version %d.", kernvers);
