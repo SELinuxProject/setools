@@ -76,7 +76,7 @@ int qpol_policy_get_genfscon_by_name(const qpol_policy_t * policy, const char *n
 		if (!(*genfscon)) {
 			error = errno;
 			ERR(policy, "%s", strerror(ENOMEM));
-			errno = errno;
+			errno = error;
 			return STATUS_ERR;
 		}
 		/* shallow copy only the struct pointer (genfscon) should be free()'ed */
