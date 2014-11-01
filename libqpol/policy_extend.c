@@ -367,7 +367,7 @@ static int qpol_policy_fill_attr_holes(qpol_policy_t * policy)
 	return STATUS_ERR;
 }
 
-static char *sidnames[] = {
+static const char *const sidnames[] = {
 	"undefined",
 	"kernel",
 	"security",

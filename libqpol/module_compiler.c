@@ -1253,7 +1253,7 @@ static int is_scope_in_stack(scope_datum_t * scope, scope_stack_t * stack)
 	return is_scope_in_stack(scope, stack->parent);
 }
 
-int is_id_in_scope(uint32_t symbol_type, hashtab_key_t id)
+int is_id_in_scope(uint32_t symbol_type, const char *id)
 {
 	scope_datum_t *scope =
 	    (scope_datum_t *) hashtab_search(policydbp->scope[symbol_type].
@@ -1300,7 +1300,7 @@ static int is_perm_in_stack(uint32_t perm_value, uint32_t class_value,
 	return is_perm_in_stack(perm_value, class_value, stack->parent);
 }
 
-int is_perm_in_scope(hashtab_key_t perm_id, hashtab_key_t class_id)
+int is_perm_in_scope(hashtab_key_t perm_id, const char *class_id)
 {
 	class_datum_t *cladatum =
 	    (class_datum_t *) hashtab_search(policydbp->p_classes.table,

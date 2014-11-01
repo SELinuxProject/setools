@@ -177,7 +177,7 @@ static void qpol_handle_default_callback(void *varg __attribute__ ((unused)), co
 	fprintf(stderr, "\n");
 }
 
-static int read_source_policy(qpol_policy_t * qpolicy, char *progname, int options)
+static int read_source_policy(qpol_policy_t * qpolicy, const char *progname, int options)
 {
 	int load_rules = 1;
 	if (options & QPOL_POLICY_OPTION_NO_RULES)

@@ -87,7 +87,7 @@ extern int yyerror(const char *msg);
 #define ERRORMSG_LEN 255
 static char errormsg[ERRORMSG_LEN + 1] = {0};
 
-static int id_has_dot(char *id);
+static int id_has_dot(const char *id);
 static int parse_security_context(context_struct_t *c);
 
 /* initialize all of the state variables for the scanner/parser */
@@ -167,7 +167,7 @@ int insert_separator(int push)
 	return 0;
 }
 
-int insert_id(char *id, int push)
+int insert_id(const char *id, int push)
 {
 	char *newid = 0;
 	int error;
@@ -193,7 +193,7 @@ int insert_id(char *id, int push)
 
 /* If the identifier has a dot within it and that its first character
    is not a dot then return 1, else return 0. */
-static int id_has_dot(char *id)
+static int id_has_dot(const char *id)
 {
 	if (strchr(id, '.') >= id + 1) {
 		return 1;
@@ -1380,7 +1380,7 @@ int define_typeattribute(void)
 	return 0;
 }
 
-static int define_typebounds_helper(char *bounds_id, char *type_id)
+static int define_typebounds_helper(const char *bounds_id, const char *type_id)
 {
 	type_datum_t *bounds, *type;
 
