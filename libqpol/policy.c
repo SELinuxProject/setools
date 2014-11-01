@@ -97,6 +97,7 @@ typedef struct fbuf
 	int err;
 } qpol_fbuf_t;
 
+__attribute__ ((format(printf, 4, 0)))
 static void qpol_handle_route_to_callback(void *varg
 					  __attribute__ ((unused)), const qpol_policy_t * p, int level, const char *fmt,
 					  va_list va_args)
@@ -110,6 +111,7 @@ static void qpol_handle_route_to_callback(void *varg
 	p->fn(p->varg, p, level, fmt, va_args);
 }
 
+__attribute__ ((format(printf, 3, 4)))
 static void sepol_handle_route_to_callback(void *varg, sepol_handle_t * sh, const char *fmt, ...)
 {
 	va_list ap;
@@ -128,6 +130,7 @@ static void sepol_handle_route_to_callback(void *varg, sepol_handle_t * sh, cons
 	va_end(ap);
 }
 
+__attribute__ ((format(printf, 3, 4)))
 void qpol_handle_msg(const qpol_policy_t * p, int level, const char *fmt, ...)
 {
 	va_list ap;
@@ -146,6 +149,7 @@ void qpol_handle_msg(const qpol_policy_t * p, int level, const char *fmt, ...)
 	va_end(ap);
 }
 
+__attribute__ ((format(printf, 4, 0)))
 static void qpol_handle_default_callback(void *varg __attribute__ ((unused)), const qpol_policy_t * p
 					 __attribute__ ((unused)), int level, const char *fmt, va_list va_args)
 {

@@ -93,6 +93,7 @@ extern "C"
  */
 	int policy_extend(qpol_policy_t * policy);
 
+	__attribute__ ((format(printf, 3, 4)))
 	extern void qpol_handle_msg(const qpol_policy_t * policy, int level, const char *fmt, ...);
 	int qpol_is_file_binpol(FILE * fp);
 	int qpol_is_file_mod_pkg(FILE * fp);
