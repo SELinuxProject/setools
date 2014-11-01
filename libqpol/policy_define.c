@@ -244,7 +244,7 @@ int define_class(void)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -845,7 +845,7 @@ int define_sens(void)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 
@@ -884,7 +884,7 @@ int define_sens(void)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 	}
@@ -1014,7 +1014,7 @@ int define_category(void)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -1056,7 +1056,7 @@ int define_category(void)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 	}
@@ -1273,7 +1273,7 @@ static int add_aliases_to_type(type_datum_t * type)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 	}
@@ -1722,7 +1722,7 @@ int define_compute_type(int which)
 		return -1;
 	}
 	default:{
-		assert(0);	       /* should never get here */
+		abort();	       /* should never get here */
 	}
 	}
 }
@@ -1803,7 +1803,7 @@ int define_bool_tunable(int is_tunable)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -2331,7 +2331,7 @@ role_datum_t *define_role_dom(role_datum_t * r)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 		if (ebitmap_set_bit(&role->dominates, role->s.value - 1, TRUE)) {
@@ -3376,7 +3376,7 @@ int define_conditional(cond_expr_t * expr, avrule_t * t, avrule_t * f)
 			return 0;
 		}
 		default:{
-			assert(0);     /* should never get here */
+			abort();     /* should never get here */
 		}
 		}
 	}
@@ -3415,7 +3415,7 @@ int define_conditional(cond_expr_t * expr, avrule_t * t, avrule_t * f)
 			return 0;
 		}
 		default:{
-			assert(0);     /* should never get here */
+			abort();     /* should never get here */
 		}
 		}
 	}
