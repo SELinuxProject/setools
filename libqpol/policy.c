@@ -647,7 +647,7 @@ static int union_multiply_declared_symbols(qpol_policy_t * policy) {
 			goto err;
 		}
 		unsigned char isattr = 0;
-		if (qpol_type_get_isattr(policy, attr, &isattr)) {
+		if (qpol_type_get_isattr(policy, (qpol_type_t*)attr, &isattr)) {
 			error = errno;
 			goto err;
 		}
