@@ -650,7 +650,7 @@ void *ebitmap_state_get_cur_polcap(const qpol_iterator_t * iter)
 		return NULL;
 	}
 
-	return sepol_polcap_getname(es->cur);
+	return (void *)sepol_polcap_getname(es->cur);
 }
 
 void ebitmap_state_destroy(void *es)
