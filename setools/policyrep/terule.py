@@ -82,11 +82,7 @@ class TERule(rule.PolicyRule):
     @property
     def ruletype(self):
         """The rule type."""
-        try:
-            return self._teruletype_val_to_text[self.qpol_symbol.rule_type(self.policy)]
-        except AttributeError:
-            # qpol does not have a rule type function for name filetrans rules
-            return "type_transition"
+        return self._teruletype_val_to_text[self.qpol_symbol.rule_type(self.policy)]
 
     @property
     def source(self):

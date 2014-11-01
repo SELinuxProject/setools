@@ -3085,6 +3085,11 @@ typedef struct qpol_filename_trans {} qpol_filename_trans_t;
         /* no op */
         return;
     };
+    %pythoncode %{
+    def rule_type(self,policy):
+        return QPOL_RULE_TYPE_TRANS
+    %}
+
     const qpol_type_t *source_type (qpol_policy_t *p) {
         const qpol_type_t *t;
         BEGIN_EXCEPTION
