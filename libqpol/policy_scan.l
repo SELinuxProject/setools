@@ -36,7 +36,7 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef int (* require_func_t)();
+typedef int (* require_func_t)(int pass);
 
 /* For SETools libqpol services leave this as policy_parse.h */
 /* #ifdef ANDROID */
@@ -47,7 +47,8 @@ typedef int (* require_func_t)();
 
 static char linebuf[2][255];
 static unsigned int lno = 0;
-int yywarn(char *msg);
+int yywarn(const char *msg);
+int yyerror(const char *msg);
 
 void set_source_file(const char *name);
 
@@ -294,7 +295,7 @@ LOW				{ return(LOW); }
 "*"				{ return(yytext[0]); } 
 .                               { yywarn("unrecognized character");}
 %%
-int yyerror(char *msg)
+int yyerror(const char *msg)
 {
 	if (source_file[0])
 		fprintf(stderr, "%s:%ld:",
@@ -310,7 +311,7 @@ int yyerror(char *msg)
 	return -1;
 }
 
-int yywarn(char *msg)
+int yywarn(const char *msg)
 {
 	if (source_file[0])
 		fprintf(stderr, "%s:%ld:",

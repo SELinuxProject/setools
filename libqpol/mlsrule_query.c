@@ -208,7 +208,6 @@ int qpol_range_trans_get_target_class(const qpol_policy_t * policy, const qpol_r
 
 int qpol_range_trans_get_range(const qpol_policy_t * policy, const qpol_range_trans_t * rule, const qpol_mls_range_t ** range)
 {
-	policydb_t *db = NULL;
 	range_trans_t *rt = NULL;
 
 	if (range) {
@@ -221,7 +220,6 @@ int qpol_range_trans_get_range(const qpol_policy_t * policy, const qpol_range_tr
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	rt = (range_trans_t *) rule;
 
 	*range = (qpol_mls_range_t *) & rt->target_range;

@@ -81,13 +81,13 @@ extern unsigned long policydb_lineno;
 extern unsigned long source_lineno;
 extern unsigned int policydb_errors;
 
-extern int yywarn(char *msg);
-extern int yyerror(char *msg);
+extern int yywarn(const char *msg);
+extern int yyerror(const char *msg);
 
 #define ERRORMSG_LEN 255
 static char errormsg[ERRORMSG_LEN + 1] = {0};
 
-static int id_has_dot(char *id);
+static int id_has_dot(const char *id);
 static int parse_security_context(context_struct_t *c);
 
 /* initialize all of the state variables for the scanner/parser */
@@ -104,7 +104,8 @@ void init_parser(int pass_number, int do_rules)
 	num_rules = 0;
 }
 
-void yyerror2(char *fmt, ...)
+__attribute__ ((format(printf, 1, 2)))
+void yyerror2(const char *fmt, ...)
 {
 	va_list ap;
 	va_start(ap, fmt);
@@ -166,7 +167,7 @@ int insert_separator(int push)
 	return 0;
 }
 
-int insert_id(char *id, int push)
+int insert_id(const char *id, int push)
 {
 	char *newid = 0;
 	int error;
@@ -192,7 +193,7 @@ int insert_id(char *id, int push)
 
 /* If the identifier has a dot within it and that its first character
    is not a dot then return 1, else return 0. */
-static int id_has_dot(char *id)
+static int id_has_dot(const char *id)
 {
 	if (strchr(id, '.') >= id + 1) {
 		return 1;
@@ -243,7 +244,7 @@ int define_class(void)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -844,7 +845,7 @@ int define_sens(void)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 
@@ -883,7 +884,7 @@ int define_sens(void)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 	}
@@ -914,7 +915,7 @@ int define_sens(void)
 int define_dominance(void)
 {
 	level_datum_t *datum;
-	int order;
+	uint32_t order;
 	char *id;
 
 	if (!mlspol) {
@@ -1013,7 +1014,7 @@ int define_category(void)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -1055,7 +1056,7 @@ int define_category(void)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 	}
@@ -1272,7 +1273,7 @@ static int add_aliases_to_type(type_datum_t * type)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 	}
@@ -1379,7 +1380,7 @@ int define_typeattribute(void)
 	return 0;
 }
 
-static int define_typebounds_helper(char *bounds_id, char *type_id)
+static int define_typebounds_helper(const char *bounds_id, const char *type_id)
 {
 	type_datum_t *bounds, *type;
 
@@ -1388,7 +1389,7 @@ static int define_typebounds_helper(char *bounds_id, char *type_id)
 		return -1;
 	}
 
-	bounds = hashtab_search(policydbp->p_types.table, bounds_id);
+	bounds = hashtab_search(policydbp->p_types.table, (hashtab_key_t)bounds_id);
 	if (!bounds || bounds->flavor == TYPE_ATTRIB) {
 		yyerror2("hoge unknown type %s", bounds_id);
 		return -1;
@@ -1399,7 +1400,7 @@ static int define_typebounds_helper(char *bounds_id, char *type_id)
 		return -1;
 	}
 
-	type = hashtab_search(policydbp->p_types.table, type_id);
+	type = hashtab_search(policydbp->p_types.table, (hashtab_key_t)type_id);
 	if (!type || type->flavor == TYPE_ATTRIB) {
 		yyerror2("type %s is not declared", type_id);
 		return -1;
@@ -1507,7 +1508,7 @@ int define_type(int alias)
 			free(id);
 			return -1;
 		}
-		attr = hashtab_search(policydbp->p_types.table, id);
+		attr = hashtab_search(policydbp->p_types.table, (hashtab_key_t)id);
 		if (!attr) {
 			/* treat it as a fatal error */
 			yyerror2("attribute %s is not declared", id);
@@ -1580,7 +1581,7 @@ static int set_types(type_set_t * set, char *id, int *add, char starallowed)
 		free(id);
 		return -1;
 	}
-	t = hashtab_search(policydbp->p_types.table, id);
+	t = hashtab_search(policydbp->p_types.table, (hashtab_key_t)id);
 	if (!t) {
 		yyerror2("unknown type %s", id);
 		free(id);
@@ -1721,7 +1722,7 @@ int define_compute_type(int which)
 		return -1;
 	}
 	default:{
-		assert(0);	       /* should never get here */
+		abort();	       /* should never get here */
 	}
 	}
 }
@@ -1802,7 +1803,7 @@ int define_bool_tunable(int is_tunable)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -2330,7 +2331,7 @@ role_datum_t *define_role_dom(role_datum_t * r)
 				break;
 			}
 		default:{
-				assert(0);	/* should never get here */
+				abort();	/* should never get here */
 			}
 		}
 		if (ebitmap_set_bit(&role->dominates, role->s.value - 1, TRUE)) {
@@ -2493,7 +2494,7 @@ int define_role_trans(int class_specified)
 			return -1;
 	} else {
 		cladatum = hashtab_search(policydbp->p_classes.table,
-					  "process");
+					  (hashtab_key_t)"process");
 		if (!cladatum) {
 			yyerror2("could not find process class for "
 				 "legacy role_transition statement");
@@ -3375,7 +3376,7 @@ int define_conditional(cond_expr_t * expr, avrule_t * t, avrule_t * f)
 			return 0;
 		}
 		default:{
-			assert(0);     /* should never get here */
+			abort();     /* should never get here */
 		}
 		}
 	}
@@ -3414,7 +3415,7 @@ int define_conditional(cond_expr_t * expr, avrule_t * t, avrule_t * f)
 			return 0;
 		}
 		default:{
-			assert(0);     /* should never get here */
+			abort();     /* should never get here */
 		}
 		}
 	}
@@ -4161,7 +4162,7 @@ int define_iomem_context(unsigned long low, unsigned long high)
 	newc->u.iomem.high_iomem = high;
 
 	if (low > high) {
-		yyerror2("low memory 0x%x exceeds high memory 0x%x", low, high);
+		yyerror2("low memory 0x%lx exceeds high memory 0x%lx", low, high);
 		free(newc);
 		return -1;
 	}
@@ -4178,7 +4179,7 @@ int define_iomem_context(unsigned long low, unsigned long high)
 		low2 = c->u.iomem.low_iomem;
 		high2 = c->u.iomem.high_iomem;
 		if (low <= high2 && low2 <= high) {
-			yyerror2("iomemcon entry for 0x%x-0x%x overlaps with "
+			yyerror2("iomemcon entry for 0x%lx-0x%lx overlaps with "
 				"earlier entry 0x%x-0x%x", low, high,
 				low2, high2);
 			goto bad;
@@ -4225,7 +4226,7 @@ int define_ioport_context(unsigned long low, unsigned long high)
 	newc->u.ioport.high_ioport = high;
 
 	if (low > high) {
-		yyerror2("low ioport 0x%x exceeds high ioport 0x%x", low, high);
+		yyerror2("low ioport 0x%lx exceeds high ioport 0x%lx", low, high);
 		free(newc);
 		return -1;
 	}
@@ -4242,7 +4243,7 @@ int define_ioport_context(unsigned long low, unsigned long high)
 		low2 = c->u.ioport.low_ioport;
 		high2 = c->u.ioport.high_ioport;
 		if (low <= high2 && low2 <= high) {
-			yyerror2("ioportcon entry for 0x%x-0x%x overlaps with"
+			yyerror2("ioportcon entry for 0x%lx-0x%lx overlaps with"
 				"earlier entry 0x%x-0x%x", low, high,
 				low2, high2);
 			goto bad;
@@ -4298,7 +4299,7 @@ int define_pcidevice_context(unsigned long device)
 
 		device2 = c->u.device;
 		if (device == device2) {
-			yyerror2("duplicate pcidevicecon entry for 0x%x ",
+			yyerror2("duplicate pcidevicecon entry for 0x%lx ",
 				 device);
 			goto bad;
 		}
@@ -4463,7 +4464,7 @@ int define_netif_context(void)
 	return 0;
 }
 
-int define_ipv4_node_context()
+int define_ipv4_node_context(void)
 {	
 	char *id;
 	int rc = 0;
@@ -4888,7 +4889,7 @@ int define_range_trans(int class_specified)
 			goto out;
 	} else {
 		cladatum = hashtab_search(policydbp->p_classes.table,
-		                          "process");
+		                          (hashtab_key_t)"process");
 		if (!cladatum) {
 			yyerror2("could not find process class for "
 			         "legacy range_transition statement");

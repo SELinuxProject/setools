@@ -47,8 +47,9 @@ typedef struct scope_stack {
 
 extern policydb_t *policydbp;
 extern queue_t id_queue;
-extern int yyerror(char *msg);
-extern void yyerror2(char *fmt, ...);
+extern int yyerror(const char *msg);
+__attribute__ ((format(printf, 1, 2)))
+extern void yyerror2(const char *fmt, ...);
 
 static int push_stack(int stack_type, ...);
 static void pop_stack(void);
@@ -307,7 +308,7 @@ role_datum_t *declare_role(unsigned char isattr)
 			return dest_role;	/* role already declared for this block */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -370,7 +371,7 @@ type_datum_t *declare_type(unsigned char primary, unsigned char isattr)
 			return typdatum;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -506,7 +507,7 @@ user_datum_t *declare_user(void)
 			return dest_user;	/* user already declared for this block */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -708,7 +709,7 @@ int add_perm_to_class(uint32_t perm_value, uint32_t class_value)
 	assert(class_value >= 1);
 	scope = &decl->required;
 	if (class_value > scope->class_perms_len) {
-		int i;
+		uint32_t i;
 		ebitmap_t *new_map = realloc(scope->class_perms_map,
 					     class_value * sizeof(*new_map));
 		if (new_map == NULL) {
@@ -811,7 +812,7 @@ int require_class(int pass)
 			break;
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 
@@ -924,7 +925,7 @@ static int require_role_or_attribute(int pass, unsigned char isattr)
 			return 0;	/* role already required */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -987,7 +988,7 @@ static int require_type_or_attribute(int pass, unsigned char isattr)
 			return 0;	/* type already required */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1048,7 +1049,7 @@ int require_user(int pass)
 			return 0;	/* user already required */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1099,7 +1100,7 @@ static int require_bool_tunable(int pass, int is_tunable)
 			return 0;	/* boolean already required */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1172,7 +1173,7 @@ int require_sens(int pass)
 			return 0;	/* sensitivity already required */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1225,14 +1226,14 @@ int require_cat(int pass)
 			return 0;	/* category already required */
 		}
 	default:{
-			assert(0);	/* should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
 
 static int is_scope_in_stack(scope_datum_t * scope, scope_stack_t * stack)
 {
-	int i;
+	uint32_t i;
 	if (stack == NULL) {
 		return 0;	/* no matching scope found */
 	}
@@ -1252,11 +1253,11 @@ static int is_scope_in_stack(scope_datum_t * scope, scope_stack_t * stack)
 	return is_scope_in_stack(scope, stack->parent);
 }
 
-int is_id_in_scope(uint32_t symbol_type, hashtab_key_t id)
+int is_id_in_scope(uint32_t symbol_type, const char *id)
 {
 	scope_datum_t *scope =
 	    (scope_datum_t *) hashtab_search(policydbp->scope[symbol_type].
-					     table, id);
+					     table, (hashtab_key_t)id);
 	if (scope == NULL) {
 		return 1;	/* id is not known, so return success */
 	}
@@ -1299,17 +1300,17 @@ static int is_perm_in_stack(uint32_t perm_value, uint32_t class_value,
 	return is_perm_in_stack(perm_value, class_value, stack->parent);
 }
 
-int is_perm_in_scope(hashtab_key_t perm_id, hashtab_key_t class_id)
+int is_perm_in_scope(hashtab_key_t perm_id, const char *class_id)
 {
 	class_datum_t *cladatum =
 	    (class_datum_t *) hashtab_search(policydbp->p_classes.table,
-					     class_id);
+					     (hashtab_key_t)class_id);
 	perm_datum_t *perdatum;
 	if (cladatum == NULL) {
 		return 1;
 	}
 	perdatum = (perm_datum_t *) hashtab_search(cladatum->permissions.table,
-						   perm_id);
+						   (hashtab_key_t)perm_id);
 	if (perdatum == NULL) {
 		return 1;
 	}
@@ -1489,7 +1490,7 @@ int begin_optional_else(int pass)
 
 static int copy_requirements(avrule_decl_t * dest, scope_stack_t * stack)
 {
-	int i;
+	uint32_t i;
 	if (stack == NULL) {
 		return 0;
 	}
@@ -1587,7 +1588,7 @@ static int push_stack(int stack_type, ...)
 		}
 	default:
 		/* invalid stack type given */
-		assert(0);
+		abort();
 	}
 	va_end(ap);
 	s->parent = stack_top;

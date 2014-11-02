@@ -367,7 +367,7 @@ static int qpol_policy_fill_attr_holes(qpol_policy_t * policy)
 	return STATUS_ERR;
 }
 
-static char *sidnames[] = {
+static const char *const sidnames[] = {
 	"undefined",
 	"kernel",
 	"security",
@@ -471,7 +471,7 @@ static int qpol_policy_add_object_r(qpol_policy_t * policy)
 
 	db = &policy->p->p;
 
-	hashtab_datum_t datum = hashtab_search(db->p_roles.table, (const hashtab_key_t)OBJECT_R);
+	hashtab_datum_t datum = hashtab_search(db->p_roles.table, (hashtab_key_t)OBJECT_R);
 	if (datum == NULL) {
 		ERR(policy, "%s", OBJECT_R " not found in policy!");
 		errno = EIO;
@@ -539,7 +539,7 @@ static int qpol_policy_match_system(qpol_policy_t * policy)
 		errno = error;
 		return -1;
 	}
-	if (policy->p->p.policyvers > kernvers) {
+	if (policy->p->p.policyvers > (unsigned)kernvers) {
 		if (sepol_policydb_set_vers(policy->p, kernvers)) {
 			error = errno;
 			ERR(policy, "Could not downgrade policy to version %d.", kernvers);
@@ -1216,7 +1216,7 @@ int qpol_avrule_get_syn_avrule_iter(const qpol_policy_t * policy, const struct q
 	/* build key */
 	if (!(key = calloc(1, sizeof(qpol_syn_rule_key_t)))) {
 		error = errno;
-		ERR(policy, "%S", strerror(error));
+		ERR(policy, "%s", strerror(error));
 		goto err;
 	}
 
@@ -1317,7 +1317,7 @@ int qpol_terule_get_syn_terule_iter(const qpol_policy_t * policy, const struct q
 	/* build key */
 	if (!(key = calloc(1, sizeof(qpol_syn_rule_key_t)))) {
 		error = errno;
-		ERR(policy, "%S", strerror(error));
+		ERR(policy, "%s", strerror(error));
 		goto err;
 	}
 

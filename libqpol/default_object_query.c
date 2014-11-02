@@ -60,7 +60,6 @@ int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_defaul
 int qpol_default_object_get_user_default(const qpol_policy_t *policy, const qpol_default_object_t * datum, const char **value)
 {
 	class_datum_t *internal_datum = NULL;
-	policydb_t *db = NULL;
 	
 	if (policy == NULL || datum == NULL || value == NULL) {
 		if (value != NULL)
@@ -75,7 +74,6 @@ int qpol_default_object_get_user_default(const qpol_policy_t *policy, const qpol
 	if (!qpol_policy_has_capability(policy, QPOL_CAP_DEFAULT_OBJECTS))
 		return STATUS_SUCCESS;
 
-	db = &policy->p->p;
 	internal_datum = (class_datum_t *)datum;
 
 	if (internal_datum->default_user == DEFAULT_SOURCE) {
@@ -89,7 +87,6 @@ int qpol_default_object_get_user_default(const qpol_policy_t *policy, const qpol
 int qpol_default_object_get_role_default(const qpol_policy_t *policy, const qpol_default_object_t * datum, const char **value)
 {
 	class_datum_t *internal_datum = NULL;
-	policydb_t *db = NULL;
 	
 	if (policy == NULL || datum == NULL || value == NULL) {
 		if (value != NULL)
@@ -104,7 +101,6 @@ int qpol_default_object_get_role_default(const qpol_policy_t *policy, const qpol
 	if (!qpol_policy_has_capability(policy, QPOL_CAP_DEFAULT_OBJECTS))
 		return STATUS_SUCCESS;
 
-	db = &policy->p->p;
 	internal_datum = (class_datum_t *)datum;
 
 	if (internal_datum->default_role == DEFAULT_SOURCE) {
@@ -118,8 +114,7 @@ int qpol_default_object_get_role_default(const qpol_policy_t *policy, const qpol
 int qpol_default_object_get_type_default(const qpol_policy_t *policy, const qpol_default_object_t * datum, const char **value)
 {
 	class_datum_t *internal_datum = NULL;
-	policydb_t *db = NULL;
-	
+
 	if (policy == NULL || datum == NULL || value == NULL) {
 		if (value != NULL)
 			*value = NULL;
@@ -133,7 +128,6 @@ int qpol_default_object_get_type_default(const qpol_policy_t *policy, const qpol
 	if (!qpol_policy_has_capability(policy, QPOL_CAP_DEFAULT_TYPE))
 		return STATUS_SUCCESS;
 
-	db = &policy->p->p;
 	internal_datum = (class_datum_t *)datum;
 
 	if (internal_datum->default_type == DEFAULT_SOURCE) {
@@ -147,8 +141,7 @@ int qpol_default_object_get_type_default(const qpol_policy_t *policy, const qpol
 int qpol_default_object_get_range_default(const qpol_policy_t *policy, const qpol_default_object_t * datum, const char **value)
 {
 	class_datum_t *internal_datum = NULL;
-	policydb_t *db = NULL;
-	
+
 	if (policy == NULL || datum == NULL || value == NULL) {
 		if (value != NULL)
 			*value = NULL;
@@ -159,11 +152,9 @@ int qpol_default_object_get_range_default(const qpol_policy_t *policy, const qpo
 	*value = NULL;
 
 	/* The range default started in ver 27 */
-	int policy_version;
 	if (!qpol_policy_has_capability(policy, QPOL_CAP_DEFAULT_OBJECTS))
 		return STATUS_SUCCESS;
 
-	db = &policy->p->p;
 	internal_datum = (class_datum_t *)datum;
 
 	switch (internal_datum->default_range) {

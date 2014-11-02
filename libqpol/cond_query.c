@@ -219,7 +219,6 @@ int qpol_cond_get_expr_node_iter(const qpol_policy_t * policy, const qpol_cond_t
 	int error = 0;
 	cond_expr_state_t *ces = NULL;
 	cond_node_t *internal_cond = NULL;
-	policydb_t *db = NULL;
 
 	if (iter)
 		*iter = NULL;
@@ -230,7 +229,6 @@ int qpol_cond_get_expr_node_iter(const qpol_policy_t * policy, const qpol_cond_t
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	internal_cond = (cond_node_t *) cond;
 
 	if (!(ces = calloc(1, sizeof(cond_expr_state_t)))) {
@@ -332,7 +330,6 @@ int qpol_cond_get_av_true_iter(const qpol_policy_t * policy, const qpol_cond_t *
 	int error = 0;
 	cond_rule_state_t *crs = NULL;
 	cond_node_t *internal_cond = NULL;
-	policydb_t *db = NULL;
 
 	if (iter)
 		*iter = NULL;
@@ -349,7 +346,6 @@ int qpol_cond_get_av_true_iter(const qpol_policy_t * policy, const qpol_cond_t *
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	internal_cond = (cond_node_t *) cond;
 
 	if (!(crs = calloc(1, sizeof(cond_rule_state_t)))) {
@@ -384,7 +380,6 @@ int qpol_cond_get_te_true_iter(const qpol_policy_t * policy, const qpol_cond_t *
 	int error = 0;
 	cond_rule_state_t *crs = NULL;
 	cond_node_t *internal_cond = NULL;
-	policydb_t *db = NULL;
 
 	if (iter)
 		*iter = NULL;
@@ -401,7 +396,6 @@ int qpol_cond_get_te_true_iter(const qpol_policy_t * policy, const qpol_cond_t *
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	internal_cond = (cond_node_t *) cond;
 
 	if (!(crs = calloc(1, sizeof(cond_rule_state_t)))) {
@@ -436,7 +430,6 @@ int qpol_cond_get_av_false_iter(const qpol_policy_t * policy, const qpol_cond_t 
 	int error = 0;
 	cond_rule_state_t *crs = NULL;
 	cond_node_t *internal_cond = NULL;
-	policydb_t *db = NULL;
 
 	if (iter)
 		*iter = NULL;
@@ -453,7 +446,6 @@ int qpol_cond_get_av_false_iter(const qpol_policy_t * policy, const qpol_cond_t 
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	internal_cond = (cond_node_t *) cond;
 
 	if (!(crs = calloc(1, sizeof(cond_rule_state_t)))) {
@@ -488,7 +480,6 @@ int qpol_cond_get_te_false_iter(const qpol_policy_t * policy, const qpol_cond_t 
 	int error = 0;
 	cond_rule_state_t *crs = NULL;
 	cond_node_t *internal_cond = NULL;
-	policydb_t *db = NULL;
 
 	if (iter)
 		*iter = NULL;
@@ -505,7 +496,6 @@ int qpol_cond_get_te_false_iter(const qpol_policy_t * policy, const qpol_cond_t 
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	internal_cond = (cond_node_t *) cond;
 
 	if (!(crs = calloc(1, sizeof(cond_rule_state_t)))) {

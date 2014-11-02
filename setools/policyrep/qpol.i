@@ -91,7 +91,7 @@ const char *libqpol_get_version(void);
         return (const char *)x;
     }
 
-    char * wrap_qpol_default_policy_find() {
+    char * wrap_qpol_default_policy_find(void) {
         char *path;
         int retv;
         BEGIN_EXCEPTION
