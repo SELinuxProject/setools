@@ -102,7 +102,7 @@ if args.tertypes:
     q = setools.terulequery.TERuleQuery(p, ruletype=args.tertypes,
                                         source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
                                         target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
-                                        tclass_regex=args.tclass_regex,	perms_equal=args.perms_equal,
+                                        tclass_regex=args.tclass_regex, perms_equal=args.perms_equal,
                                         default=args.default, default_regex=args.default_regex)
 
     # these are broken out from the above statement to prevent making a list
