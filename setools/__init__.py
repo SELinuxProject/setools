@@ -43,6 +43,7 @@ from . import rbacrulequery
 from . import mlsrulequery
 
 # In-policy Context Queries
+from . import genfsconquery
 from . import initsidquery
 
 # Information Flow Analysis

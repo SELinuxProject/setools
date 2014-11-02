@@ -156,3 +156,15 @@ if args.initialsidquery:
             print(i.statement())
         else:
             print(i)
+
+if args.genfsconquery:
+    if isinstance(args.genfsconquery, str):
+        q = setools.genfsconquery.GenfsconQuery(p, args.genfsconquery)
+    else:
+        q = setools.genfsconquery.GenfsconQuery(p)
+
+    for g in sorted(q.results()):
+        if args.expand:
+            print(g.statement())
+        else:
+            print(g)

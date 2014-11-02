@@ -18,6 +18,7 @@
 from . import boolquery
 from . import commonquery
 from . import dta
+from . import genfsconquery
 from . import initsidquery
 from . import objclassquery
 from . import polcapquery
