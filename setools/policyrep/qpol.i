@@ -110,17 +110,34 @@ const char *libqpol_get_version(void);
 %}
 
 %pythoncode %{
-def QpolIterator(qpol_iter, cast):
+from functools import wraps
+
+def QpolGenerator(cast):
     """
-    Create a Python generator to serve as a qpol iterator.
+    A decorator which converts qpol iterators into Python generators.
 
     Qpol iterators use void* to be generic about their contents.
     The purpose of the _from_void functions below is to wrap
     the pointer casting, hence the "cast" variable name here.
+
+    Decorator parameter:
+    cast    A wrapper function which casts the qpol iterator return pointer
+            to the proper C data type pointer.  The Python function
+            reference to the C Python extension is used, for example:
+
+            @QpolGenerator(_qpol.qpol_type_from_void)
     """
-    while not qpol_iter.isend():
-        yield cast(qpol_iter.item())
-        qpol_iter.next_()
+
+    def decorate(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            qpol_iter = func(*args)
+            while not qpol_iter.isend():
+                yield cast(qpol_iter.item())
+                qpol_iter.next_()
+
+        return wrapper
+    return decorate
 %}
 
 /* qpol_module */
@@ -321,6 +338,7 @@ typedef enum qpol_capability
         return NULL;
     };
     %newobject type_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_type_from_void) %}
     qpol_iterator_t *type_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -332,12 +350,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def type_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_type_iter(self),_qpol.qpol_type_from_void)
-    %}
 
     %newobject role_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_role_from_void) %}
     qpol_iterator_t *role_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -349,10 +364,6 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def role_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_role_iter(self),_qpol.qpol_role_from_void)
-    %}
 
     %newobject level_iter();
     qpol_iterator_t *level_iter() {
@@ -379,6 +390,7 @@ typedef enum qpol_capability
         return NULL;
     };
     %newobject user_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_user_from_void) %}
     qpol_iterator_t *user_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -390,12 +402,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def user_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_user_iter(self),_qpol.qpol_user_from_void)
-    %}
 
     %newobject bool_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_bool_from_void) %}
     qpol_iterator_t *bool_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -407,12 +416,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def bool_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_bool_iter(self),_qpol.qpol_bool_from_void)
-    %}
 
     %newobject class_iter(char*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_class_from_void) %}
     qpol_iterator_t *class_iter(char *perm=NULL) {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -430,12 +436,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def class_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_class_iter(self),_qpol.qpol_class_from_void)
-    %}
 
     %newobject common_iter(char*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_common_from_void) %}
     qpol_iterator_t *common_iter(char *perm=NULL) {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -453,12 +456,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def common_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_common_iter(self),_qpol.qpol_common_from_void)
-    %}
 
     %newobject fs_use_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_fs_use_from_void) %}
     qpol_iterator_t *fs_use_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -470,12 +470,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def fs_use_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_fs_use_iter(self),_qpol.qpol_fs_use_from_void)
-    %}
 
     %newobject genfscon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_genfscon_from_void) %}
     qpol_iterator_t *genfscon_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -487,12 +484,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def genfscon_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_genfscon_iter(self),_qpol.qpol_genfscon_from_void)
-    %}
 
     %newobject isid_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_isid_from_void) %}
     qpol_iterator_t *isid_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -504,12 +498,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def isid_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_isid_iter(self),_qpol.qpol_isid_from_void)
-    %}
 
     %newobject netifcon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_netifcon_from_void) %}
     qpol_iterator_t *netifcon_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -521,12 +512,9 @@ typedef enum qpol_capability
     fail:
             return NULL;
     };
-    %pythoncode %{
-    def netifcon_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_netifcon_iter(self),_qpol.qpol_netifcon_from_void)
-    %}
 
     %newobject nodecon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_nodecon_from_void) %}
     qpol_iterator_t *nodecon_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -538,12 +526,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def nodecon_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_nodecon_iter(self),_qpol.qpol_nodecon_from_void)
-    %}
 
     %newobject portcon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_portcon_from_void) %}
     qpol_iterator_t *portcon_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -555,12 +540,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def portcon_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_portcon_iter(self),_qpol.qpol_portcon_from_void)
-    %}
 
     %newobject constraint_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_constraint_from_void) %}
     qpol_iterator_t *constraint_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -572,12 +554,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def constraint_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_constraint_iter(self),_qpol.qpol_constraint_from_void)
-    %}
 
     %newobject validatetrans_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_validatetrans_from_void) %}
     qpol_iterator_t *validatetrans_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -589,7 +568,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
+
     %newobject role_allow_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_role_allow_from_void) %}
     qpol_iterator_t *role_allow_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -601,12 +582,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def role_allow_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_role_allow_iter(self),_qpol.qpol_role_allow_from_void)
-    %}
 
     %newobject role_trans_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_role_trans_from_void) %}
     qpol_iterator_t *role_trans_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -618,12 +596,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def role_trans_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_role_trans_iter(self),_qpol.qpol_role_trans_from_void)
-    %}
 
     %newobject range_trans_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_range_trans_from_void) %}
     qpol_iterator_t *range_trans_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -635,15 +610,17 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def range_trans_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_range_trans_iter(self),_qpol.qpol_range_trans_from_void)
-    %}
 
     %newobject avrule_iter(int);
-    qpol_iterator_t *avrule_iter(int rule_types) {
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_avrule_from_void) %}
+    qpol_iterator_t *avrule_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
+        uint32_t rule_types = QPOL_RULE_ALLOW | QPOL_RULE_AUDITALLOW | QPOL_RULE_DONTAUDIT;
+
+        if (qpol_policy_has_capability(self, QPOL_CAP_NEVERALLOW))
+            rule_types |= QPOL_RULE_NEVERALLOW;
+
         if (qpol_policy_get_avrule_iter(self, rule_types, &iter)) {
             SWIG_exception(SWIG_MemoryError, "Out of Memory");
         }
@@ -652,18 +629,14 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def avrule_iter(self):
-        av_ruletype = QPOL_RULE_ALLOW | QPOL_RULE_AUDITALLOW | QPOL_RULE_DONTAUDIT
-        if self.capability(QPOL_CAP_NEVERALLOW):
-            av_ruletype |= QPOL_RULE_NEVERALLOW
-        return QpolIterator(_qpol.qpol_policy_t_avrule_iter(self,av_ruletype),_qpol.qpol_avrule_from_void)
-    %}
 
     %newobject terule_iter(int);
-    qpol_iterator_t *terule_iter(int rule_types) {
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_terule_from_void) %}
+    qpol_iterator_t *terule_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
+        uint32_t rule_types = QPOL_RULE_TYPE_TRANS | QPOL_RULE_TYPE_CHANGE | QPOL_RULE_TYPE_MEMBER;
+
         if (qpol_policy_get_terule_iter(self, rule_types, &iter)) {
             SWIG_exception(SWIG_MemoryError, "Out of Memory");
         }
@@ -672,11 +645,6 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def terule_iter(self):
-        te_ruletype = QPOL_RULE_TYPE_TRANS | QPOL_RULE_TYPE_CHANGE | QPOL_RULE_TYPE_MEMBER
-        return QpolIterator(_qpol.qpol_policy_t_terule_iter(self,te_ruletype),_qpol.qpol_terule_from_void)
-    %}
 
     %newobject cond_iter();
     qpol_iterator_t *cond_iter() {
@@ -691,6 +659,7 @@ typedef enum qpol_capability
         return NULL;
     };
     %newobject filename_trans_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_filename_trans_from_void) %}
     qpol_iterator_t *filename_trans_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -702,12 +671,9 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def filename_trans_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_filename_trans_iter(self),_qpol.qpol_filename_trans_from_void)
-    %}
 
     %newobject permissive_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_type_from_void) %}
     qpol_iterator_t *permissive_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -719,10 +685,6 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def permissive_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_permissive_iter(self),_qpol.qpol_type_from_void)
-    %}
 
     %newobject typebounds_iter();
     qpol_iterator_t *typebounds_iter() {
@@ -737,6 +699,7 @@ typedef enum qpol_capability
         return NULL;
     };
     %newobject polcap_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_polcap_from_void) %}
     qpol_iterator_t *polcap_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -748,10 +711,6 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
-    %pythoncode %{
-    def polcap_iter(self):
-        return QpolIterator(_qpol.qpol_policy_t_polcap_iter(self),_qpol.qpol_polcap_from_void)
-    %}
 };
 
 /* qpol iterator */
@@ -875,6 +834,7 @@ typedef struct qpol_type {} qpol_type_t;
     };
 
     %newobject type_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_type_from_void) %}
     qpol_iterator_t *type_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -888,12 +848,9 @@ typedef struct qpol_type {} qpol_type_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def type_iter(self, policy):
-        return QpolIterator(_qpol.qpol_type_t_type_iter(self,policy),_qpol.qpol_type_from_void)
-    %}
 
     %newobject attr_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_type_from_void) %}
     qpol_iterator_t *attr_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -907,12 +864,9 @@ typedef struct qpol_type {} qpol_type_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def attr_iter(self, policy):
-        return QpolIterator(_qpol.qpol_type_t_attr_iter(self,policy),_qpol.qpol_type_from_void)
-    %}
 
     %newobject alias_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *alias_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -923,10 +877,6 @@ typedef struct qpol_type {} qpol_type_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def alias_iter(self, policy):
-        return QpolIterator(_qpol.qpol_type_t_alias_iter(self,policy),_qpol.to_str)
-    %}
 
     const char *name(qpol_policy_t *p) {
         BEGIN_EXCEPTION
@@ -987,6 +937,7 @@ typedef struct qpol_role {} qpol_role_t;
     };
 
     %newobject type_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_type_from_void) %}
     qpol_iterator_t *type_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -997,10 +948,6 @@ typedef struct qpol_role {} qpol_role_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def type_iter(self,policy):
-        return QpolIterator(_qpol.qpol_role_t_type_iter(self,policy),_qpol.qpol_type_from_void)
-    %}
 
     %newobject dominate_iter(qpol_policy_t*);
     qpol_iterator_t *dominate_iter(qpol_policy_t *p) {
@@ -1071,6 +1018,7 @@ typedef struct qpol_level {} qpol_level_t;
     };
 
     %newobject cat_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_cat_from_void) %}
     qpol_iterator_t *cat_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1081,12 +1029,9 @@ typedef struct qpol_level {} qpol_level_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def cat_iter(self,policy):
-        return QpolIterator(_qpol.qpol_level_t_cat_iter(self,policy),_qpol.qpol_cat_from_void)
-    %}
 
     %newobject alias_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *alias_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1097,10 +1042,6 @@ typedef struct qpol_level {} qpol_level_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def alias_iter(self,policy):
-        return QpolIterator(_qpol.qpol_level_t_alias_iter(self,policy),_qpol.to_str)
-    %}
 };
 %inline %{
     qpol_level_t *qpol_level_from_void(void *x) {
@@ -1242,6 +1183,7 @@ typedef struct qpol_mls_level {} qpol_mls_level_t;
     };
 
     %newobject cat_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_cat_from_void) %}
     qpol_iterator_t *cat_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1252,10 +1194,6 @@ typedef struct qpol_mls_level {} qpol_mls_level_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def cat_iter(self,policy):
-        return QpolIterator(_qpol.qpol_mls_level_t_cat_iter(self,policy),_qpol.qpol_cat_from_void)
-    %}
 };
 %inline %{
     qpol_mls_level_t *qpol_mls_level_from_void(void *x) {
@@ -1293,6 +1231,7 @@ typedef struct qpol_user {} qpol_user_t;
     };
 
     %newobject role_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_role_from_void) %}
     qpol_iterator_t *role_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1303,10 +1242,6 @@ typedef struct qpol_user {} qpol_user_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def role_iter(self,policy):
-        return QpolIterator(_qpol.qpol_user_t_role_iter(self,policy),_qpol.qpol_role_from_void)
-    %}
 
     const qpol_mls_range_t *range(qpol_policy_t *p) {
         const qpol_mls_range_t *r;
@@ -1516,6 +1451,7 @@ typedef struct qpol_class {} qpol_class_t;
         return c;
     };
     %newobject perm_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *perm_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1526,12 +1462,9 @@ typedef struct qpol_class {} qpol_class_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def perm_iter(self,policy):
-        return QpolIterator(_qpol.qpol_class_t_perm_iter(self,policy),_qpol.to_str)
-    %}
 
     %newobject constraint_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_constraint_from_void) %}
     qpol_iterator_t *constraint_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1542,12 +1475,9 @@ typedef struct qpol_class {} qpol_class_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def constraint_iter(self,policy):
-        return QpolIterator(_qpol.qpol_class_t_constraint_iter(self,policy),_qpol.qpol_constraint_from_void)
-    %}
 
     %newobject validatetrans_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_validatetrans_from_void) %}
     qpol_iterator_t *validatetrans_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1558,10 +1488,6 @@ typedef struct qpol_class {} qpol_class_t;
     fail:
             return iter;
     };
-    %pythoncode %{
-    def validatetrans_iter(self,policy):
-        return QpolIterator(_qpol.qpol_class_t_validatetrans_iter(self,policy),_qpol.qpol_validatetrans_from_void)
-    %}
 
     const char *name(qpol_policy_t *p) {
         const char *name;
@@ -1609,6 +1535,7 @@ typedef struct qpol_common {} qpol_common_t;
     };
 
     %newobject perm_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *perm_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -1619,10 +1546,6 @@ typedef struct qpol_common {} qpol_common_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def perm_iter(self,policy):
-        return QpolIterator(_qpol.qpol_common_t_perm_iter(self,policy),_qpol.to_str)
-    %}
 
     const char *name(qpol_policy_t *p) {
         const char *name;
@@ -2070,6 +1993,7 @@ typedef struct qpol_constraint {} qpol_constraint_t;
     };
 
     %newobject perm_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *perm_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -2080,12 +2004,9 @@ typedef struct qpol_constraint {} qpol_constraint_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def perm_iter(self,policy):
-        return QpolIterator(_qpol.qpol_constraint_t_perm_iter(self,policy),_qpol.to_str)
-    %}
 
     %newobject expr_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_constraint_expr_node_from_void) %}
     qpol_iterator_t *expr_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -2096,10 +2017,6 @@ typedef struct qpol_constraint {} qpol_constraint_t;
     fail:
             return iter;
     };
-    %pythoncode %{
-    def expr_iter(self,policy):
-        return QpolIterator(_qpol.qpol_constraint_t_expr_iter(self,policy),_qpol.qpol_constraint_expr_node_from_void)
-    %}
 };
 %inline %{
     qpol_constraint_t *qpol_constraint_from_void(void *x) {
@@ -2131,6 +2048,7 @@ typedef struct qpol_validatetrans {} qpol_validatetrans_t;
         return cls;
     };
     %newobject expr_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_constraint_expr_node_from_void) %}
     qpol_iterator_t *expr_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -2141,10 +2059,6 @@ typedef struct qpol_validatetrans {} qpol_validatetrans_t;
     fail:
             return iter;
     };
-    %pythoncode %{
-    def expr_iter(self,policy):
-        return QpolIterator(_qpol.qpol_validatetrans_t_expr_iter(self,policy),_qpol.qpol_constraint_expr_node_from_void)
-    %}
 };
 %inline %{
     qpol_validatetrans_t *qpol_validatetrans_from_void(void *x) {
@@ -2221,6 +2135,7 @@ typedef struct qpol_constraint_expr_node {} qpol_constraint_expr_node_t;
         return (int) op;
     };
     %newobject names_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *names_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -2231,10 +2146,6 @@ typedef struct qpol_constraint_expr_node {} qpol_constraint_expr_node_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def names_iter(self,policy):
-        return QpolIterator(_qpol.qpol_constraint_expr_node_t_names_iter(self,policy),_qpol.to_str)
-    %}
 };
 %inline %{
     qpol_constraint_expr_node_t *qpol_constraint_expr_node_from_void(void *x) {
@@ -2463,6 +2374,7 @@ typedef struct qpol_avrule {} qpol_avrule_t;
     };
 
     %newobject perm_iter(qpol_policy_t *p);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *perm_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -2473,10 +2385,6 @@ typedef struct qpol_avrule {} qpol_avrule_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def perm_iter(self,policy):
-        return QpolIterator(_qpol.qpol_avrule_t_perm_iter(self,policy),_qpol.to_str)
-    %}
 
     const qpol_cond_t *cond(qpol_policy_t *p) {
         const qpol_cond_t *c;
@@ -2665,6 +2573,7 @@ typedef struct qpol_cond {} qpol_cond_t;
     };
 
     %newobject expr_node_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_cond_expr_node_from_void) %}
     qpol_iterator_t *expr_node_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION
@@ -2675,10 +2584,6 @@ typedef struct qpol_cond {} qpol_cond_t;
     fail:
         return iter;
     };
-    %pythoncode %{
-    def expr_node_iter(self,policy):
-        return QpolIterator(_qpol.qpol_cond_t_expr_node_iter(self,policy),_qpol.qpol_cond_expr_node_from_void)
-    %}
 
     %newobject av_true_iter(qpol_policy_t*, int);
     qpol_iterator_t *av_true_iter(qpol_policy_t *p, int rule_types) {
