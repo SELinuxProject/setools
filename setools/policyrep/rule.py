@@ -48,11 +48,8 @@ class PolicyRule(symbol.PolicySymbol):
 
     @property
     def ruletype(self):
-        """
-        The rule type for the rule. This should be overridden by
-        subclasses.
-        """
-        raise NotImplementedError
+        """The rule type for the rule."""
+        return self.qpol_symbol.rule_type(self.policy)
 
     @property
     def source(self):

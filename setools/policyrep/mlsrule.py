@@ -33,11 +33,6 @@ class MLSRule(rule.PolicyRule):
         return "range_transition {0.source} {0.target}:{0.tclass} {0.default};".format(self)
 
     @property
-    def ruletype(self):
-        """The rule type."""
-        return "range_transition"
-
-    @property
     def source(self):
         """The rule's source type/attribute."""
         return typeattr.TypeAttr(self.policy, self.qpol_symbol.source_type(self.policy))

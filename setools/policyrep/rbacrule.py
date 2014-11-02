@@ -34,14 +34,6 @@ class RBACRule(rule.PolicyRule):
             return "allow {0.source} {0.target};".format(self)
 
     @property
-    def ruletype(self):
-        """The rule type."""
-        if isinstance(self.qpol_symbol, qpol.qpol_role_allow_t):
-            return "allow"
-        else:
-            return "role_transition"
-
-    @property
     def source(self):
         """The rule's source role."""
         return role.Role(self.policy, self.qpol_symbol.source_role(self.policy))

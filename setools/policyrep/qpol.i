@@ -2167,6 +2167,10 @@ typedef struct qpol_role_allow {} qpol_role_allow_t;
         /* no op */
         return;
     };
+    %pythoncode %{
+    def rule_type(self,policy):
+        return "allow"
+    %}
     const qpol_role_t *source_role(qpol_policy_t *p) {
         const qpol_role_t *r;
         BEGIN_EXCEPTION
@@ -2208,6 +2212,10 @@ typedef struct qpol_role_trans {} qpol_role_trans_t;
         /* no op */
         return;
     };
+    %pythoncode %{
+    def rule_type(self,policy):
+        return "role_transition"
+    %}
     const qpol_role_t *source_role(qpol_policy_t *p) {
         const qpol_role_t *r;
         BEGIN_EXCEPTION
@@ -2269,6 +2277,11 @@ typedef struct qpol_range_trans {} qpol_range_trans_t;
         /* no op */
         return;
     };
+    %pythoncode %{
+    def rule_type(self,policy):
+        return "range_transition"
+    %}
+
     const qpol_type_t *source_type (qpol_policy_t *p) {
         const qpol_type_t *t;
         BEGIN_EXCEPTION
@@ -2332,15 +2345,21 @@ typedef struct qpol_avrule {} qpol_avrule_t;
         /* no op */
         return;
     };
-    int rule_type(qpol_policy_t *p) {
+    const char * rule_type(qpol_policy_t *p) {
         uint32_t rt;
         BEGIN_EXCEPTION
         if (qpol_avrule_get_rule_type(p, self, &rt)) {
             SWIG_exception(SWIG_ValueError, "Could not get rule type for av rule");
         }
+        switch (rt) {
+            case QPOL_RULE_ALLOW: return "allow"; break;
+            case QPOL_RULE_NEVERALLOW: return "neverallow"; break;
+            case QPOL_RULE_AUDITALLOW: return "auditallow"; break;
+            case QPOL_RULE_DONTAUDIT: return "dontaudit"; break;
+        }
         END_EXCEPTION
     fail:
-        return (int) rt;
+        return NULL;
     };
     const qpol_type_t *source_type(qpol_policy_t *p) {
         const qpol_type_t *t;
@@ -2455,15 +2474,20 @@ typedef struct qpol_terule {} qpol_terule_t;
         /* no op */
         return;
     };
-    int rule_type(qpol_policy_t *p) {
+    const char * rule_type(qpol_policy_t *p) {
         uint32_t rt;
         BEGIN_EXCEPTION
         if (qpol_terule_get_rule_type(p, self, &rt)) {
             SWIG_exception(SWIG_ValueError, "Could not get rule type for te rule");
         }
+        switch (rt) {
+            case QPOL_RULE_TYPE_TRANS: return "type_transition"; break;
+            case QPOL_RULE_TYPE_CHANGE: return "type_change"; break;
+            case QPOL_RULE_TYPE_MEMBER: return "type_member"; break;
+        }
         END_EXCEPTION
     fail:
-        return (int) rt;
+        return NULL;
     };
     const qpol_type_t *source_type(qpol_policy_t *p) {
         const qpol_type_t *t;
@@ -2992,7 +3016,7 @@ typedef struct qpol_filename_trans {} qpol_filename_trans_t;
     };
     %pythoncode %{
     def rule_type(self,policy):
-        return QPOL_RULE_TYPE_TRANS
+        return "type_transition"
     %}
 
     const qpol_type_t *source_type (qpol_policy_t *p) {

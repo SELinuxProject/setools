@@ -40,15 +40,6 @@ class TERule(rule.PolicyRule):
     # This class abstracts away the policydb implementation detail
     # that 'AV' rules and 'TE' rules are in separate tables
 
-    _teruletype_val_to_text = {
-        qpol.QPOL_RULE_ALLOW: 'allow',
-        qpol.QPOL_RULE_NEVERALLOW: 'neverallow',
-        qpol.QPOL_RULE_DONTAUDIT: 'dontaudit',
-        qpol.QPOL_RULE_AUDITALLOW: 'auditallow',
-        qpol.QPOL_RULE_TYPE_TRANS: 'type_transition',
-        qpol.QPOL_RULE_TYPE_CHANGE: 'type_change',
-        qpol.QPOL_RULE_TYPE_MEMBER: 'type_member'}
-
     def __str__(self):
         rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(
             self)
@@ -78,11 +69,6 @@ class TERule(rule.PolicyRule):
             pass
 
         return rule_string
-
-    @property
-    def ruletype(self):
-        """The rule type."""
-        return self._teruletype_val_to_text[self.qpol_symbol.rule_type(self.policy)]
 
     @property
     def source(self):
