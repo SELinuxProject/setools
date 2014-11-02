@@ -49,6 +49,7 @@ class Genfscon(FSContext):
     def __str__(self):
         return "genfscon {0.fs} {0.path} {0.context}".format(self)
 
+    @property
     def filetype(self):
         """The file type for this genfscon statement."""
         raise NotImplementedError
