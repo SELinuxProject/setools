@@ -54,6 +54,7 @@ static int hash_state_next_class_w_perm(qpol_iterator_t * iter)
 	sepol_policydb_t sp;
 	qpol_policy_t qp;
 	char *tmp = NULL;
+	const policydb_t *p;
 
 	hs = (perm_hash_state_t *) qpol_iterator_state(iter);
 	if (hs == NULL) {
@@ -67,7 +68,12 @@ static int hash_state_next_class_w_perm(qpol_iterator_t * iter)
 	}
 
 	/* shallow copy ok here as only internal values are used */
-	sp.p = *qpol_iterator_policy(iter);
+	p = qpol_iterator_policy(iter);
+	if (p == NULL) {
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+	sp.p = *p;
 	qp.p = &sp;
 	qp.fn = NULL;
 
@@ -101,6 +107,7 @@ static size_t hash_perm_state_size_common(const qpol_iterator_t * iter)
 	qpol_iterator_t *internal_perms;
 	common_datum_t *internal_common;
 	char *tmp = NULL;
+	const policydb_t *p;
 
 	if (iter == NULL || qpol_iterator_state(iter) == NULL) {
 		errno = EINVAL;
@@ -112,11 +119,12 @@ static size_t hash_perm_state_size_common(const qpol_iterator_t * iter)
 		return STATUS_ERR;
 	}
 	/* shallow copy ok here as only internal values are used */
-	sp.p = *qpol_iterator_policy(iter);
-	if (&sp.p == NULL) {
+	p = qpol_iterator_policy(iter);
+	if (p == NULL) {
 		errno = EINVAL;
 		return STATUS_ERR;
 	}
+	sp.p = *p;
 	qp.p = &sp;
 	qp.fn = NULL;
 	for (tmp_bucket = 0; tmp_bucket < (*(hs->table))->size; tmp_bucket++) {
@@ -148,6 +156,7 @@ static size_t hash_perm_state_size_class(const qpol_iterator_t * iter)
 	qpol_iterator_t *internal_perms;
 	class_datum_t *internal_class;
 	char *tmp = NULL;
+	const policydb_t *p;
 
 	if (iter == NULL || qpol_iterator_state(iter) == NULL) {
 		errno = EINVAL;
@@ -159,7 +168,12 @@ static size_t hash_perm_state_size_class(const qpol_iterator_t * iter)
 		return STATUS_ERR;
 	}
 	/* shallow copy ok here as only internal values are used */
-	sp.p = *qpol_iterator_policy(iter);
+	p = qpol_iterator_policy(iter);
+	if (p == NULL) {
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+	sp.p = *p;
 	qp.p = &sp;
 	qp.fn = NULL;
 	if (&sp.p == NULL) {
@@ -193,6 +207,7 @@ static int hash_state_next_common_w_perm(qpol_iterator_t * iter)
 	sepol_policydb_t sp;
 	qpol_policy_t qp;
 	char *tmp = NULL;
+	const policydb_t *p;
 
 	hs = (perm_hash_state_t *) qpol_iterator_state(iter);
 	if (hs == NULL) {
@@ -206,7 +221,12 @@ static int hash_state_next_common_w_perm(qpol_iterator_t * iter)
 	}
 
 	/* shallow copy ok here as only internal values are used */
-	sp.p = *qpol_iterator_policy(iter);
+	p = qpol_iterator_policy(iter);
+	if (p == NULL) {
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+	sp.p = *p;
 	qp.p = &sp;
 	qp.fn = NULL;
 
