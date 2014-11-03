@@ -157,6 +157,18 @@ if args.initialsidquery:
         else:
             print(i)
 
+if args.fsusequery:
+    if isinstance(args.fsusequery, str):
+        q = setools.fsusequery.FSUseQuery(p, fs=args.fsusequery)
+    else:
+        q = setools.fsusequery.FSUseQuery(p)
+
+    for f in sorted(q.results()):
+        if args.expand:
+            print(f.statement())
+        else:
+            print(f)
+
 if args.genfsconquery:
     if isinstance(args.genfsconquery, str):
         q = setools.genfsconquery.GenfsconQuery(p, args.genfsconquery)
