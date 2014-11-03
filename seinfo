@@ -75,7 +75,7 @@ except Exception as err:
 
 if args.typequery:
     if isinstance(args.typequery, str):
-        q = setools.typequery.TypeQuery(p, args.typequery)
+        q = setools.typequery.TypeQuery(p, name=args.typequery)
     else:
         q = setools.typequery.TypeQuery(p)
 
@@ -87,7 +87,7 @@ if args.typequery:
 
 if args.boolquery:
     if isinstance(args.boolquery, str):
-        q = setools.boolquery.BoolQuery(p, args.boolquery)
+        q = setools.boolquery.BoolQuery(p, name=args.boolquery)
     else:
         q = setools.boolquery.BoolQuery(p)
 
@@ -99,7 +99,7 @@ if args.boolquery:
 
 if args.polcapquery:
     if isinstance(args.polcapquery, str):
-        q = setools.polcapquery.PolCapQuery(p, args.polcapquery)
+        q = setools.polcapquery.PolCapQuery(p, name=args.polcapquery)
     else:
         q = setools.polcapquery.PolCapQuery(p)
 
@@ -111,7 +111,7 @@ if args.polcapquery:
 
 if args.userquery:
     if isinstance(args.userquery, str):
-        q = setools.userquery.UserQuery(p, args.userquery)
+        q = setools.userquery.UserQuery(p, name=args.userquery)
     else:
         q = setools.userquery.UserQuery(p)
 
@@ -123,7 +123,7 @@ if args.userquery:
 
 if args.rolequery:
     if isinstance(args.rolequery, str):
-        q = setools.rolequery.RoleQuery(p, args.rolequery)
+        q = setools.rolequery.RoleQuery(p, name=args.rolequery)
     else:
         q = setools.rolequery.RoleQuery(p)
 
@@ -135,7 +135,7 @@ if args.rolequery:
 
 if args.classquery:
     if isinstance(args.classquery, str):
-        q = setools.objclassquery.ObjClassQuery(p, args.classquery)
+        q = setools.objclassquery.ObjClassQuery(p, name=args.classquery)
     else:
         q = setools.objclassquery.ObjClassQuery(p)
 
@@ -147,7 +147,7 @@ if args.classquery:
 
 if args.initialsidquery:
     if isinstance(args.initialsidquery, str):
-        q = setools.initsidquery.InitialSIDQuery(p, args.initialsidquery)
+        q = setools.initsidquery.InitialSIDQuery(p, name=args.initialsidquery)
     else:
         q = setools.initsidquery.InitialSIDQuery(p)
 
@@ -171,7 +171,7 @@ if args.fsusequery:
 
 if args.genfsconquery:
     if isinstance(args.genfsconquery, str):
-        q = setools.genfsconquery.GenfsconQuery(p, args.genfsconquery)
+        q = setools.genfsconquery.GenfsconQuery(p, fs=args.genfsconquery)
     else:
         q = setools.genfsconquery.GenfsconQuery(p)
 
