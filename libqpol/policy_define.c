@@ -1612,7 +1612,8 @@ int define_compute_type_helper(int which, avrule_t ** rule)
 	ebitmap_node_t *node;
 	avrule_t *avrule;
 	class_perm_node_t *perm;
-	unsigned int i, add = 1;
+	unsigned int i;
+	int add = 1;
 
 	avrule = malloc(sizeof(avrule_t));
 	if (!avrule) {
