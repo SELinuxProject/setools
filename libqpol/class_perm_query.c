@@ -176,10 +176,6 @@ static size_t hash_perm_state_size_class(const qpol_iterator_t * iter)
 	sp.p = *p;
 	qp.p = &sp;
 	qp.fn = NULL;
-	if (&sp.p == NULL) {
-		errno = EINVAL;
-		return STATUS_ERR;
-	}
 	for (tmp_bucket = 0; tmp_bucket < (*(hs->table))->size; tmp_bucket++) {
 		for (tmp_node = (*(hs->table))->htable[tmp_bucket]; tmp_node; tmp_node = tmp_node->next) {
 			internal_class = tmp_node ? ((class_datum_t *) tmp_node->datum) : NULL;
