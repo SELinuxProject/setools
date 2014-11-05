@@ -46,6 +46,7 @@ from . import mlsrulequery
 from . import fsusequery
 from . import genfsconquery
 from . import initsidquery
+from . import nodeconquery
 
 # Information Flow Analysis
 from . import infoflow

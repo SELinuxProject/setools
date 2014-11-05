@@ -67,7 +67,7 @@ class Nodecon(NetContext):
     """A nodecon statement."""
 
     def __str__(self):
-        return "nodecon {0.subnet} {0.netmask} {0.context}".format(self)
+        return "nodecon {0.address} {0.netmask} {0.context}".format(self)
 
     @property
     def ip_version(self):
@@ -78,11 +78,13 @@ class Nodecon(NetContext):
         return self.qpol_symbol.protocol(self.policy)
 
     @property
-    def subnet(self):
+    def address(self):
+        """The network address for the nodecon."""
         return self.qpol_symbol.addr(self.policy)
 
     @property
     def netmask(self):
+        """The network mask for the nodecon."""
         return self.qpol_symbol.mask(self.policy)
 
 

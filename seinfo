@@ -180,3 +180,15 @@ if args.genfsconquery:
             print(g.statement())
         else:
             print(g)
+
+if args.nodeconquery:
+    if isinstance(args.nodeconquery, str):
+        q = setools.nodeconquery.NodeconQuery(p, net=args.nodeconquery)
+    else:
+        q = setools.nodeconquery.NodeconQuery(p)
+
+    for n in sorted(q.results()):
+        if args.expand:
+            print(n.statement())
+        else:
+            print(n)
