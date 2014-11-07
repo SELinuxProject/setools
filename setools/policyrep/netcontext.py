@@ -118,8 +118,8 @@ class Portcon(NetContext):
         The port range for this portcon.
 
         Return: Tuple(low, high)
-        low	The low port of the range.
-        high	The high port of the range.
+        low     The low port of the range.
+        high    The high port of the range.
         """
         low = self.qpol_symbol.low_port(self.policy)
         high = self.qpol_symbol.high_port(self.policy)
