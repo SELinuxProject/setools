@@ -29,7 +29,7 @@ from . import contextquery
 
 class NodeconQuery(contextquery.ContextQuery):
 
-    """Nodecon query."""
+    """Query nodecon statements."""
 
     def __init__(self, policy,
                  net="", net_overlap=False,
@@ -65,7 +65,7 @@ class NodeconQuery(contextquery.ContextQuery):
         self.set_range(range_)
 
     def results(self):
-        """Generator which yields all matching genfscons."""
+        """Generator which yields all matching nodecons."""
 
         for n in self.policy.nodecons():
 

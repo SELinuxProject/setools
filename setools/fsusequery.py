@@ -24,7 +24,7 @@ from . import contextquery
 
 class FSUseQuery(contextquery.ContextQuery):
 
-    """fs_use_* query."""
+    """Query fs_use_* statements."""
 
     def __init__(self, policy,
                  ruletype=[],
@@ -63,7 +63,7 @@ class FSUseQuery(contextquery.ContextQuery):
         self.set_range(range_)
 
     def results(self):
-        """Generator which yields all matching genfscons."""
+        """Generator which yields all matching fs_use_* statements."""
 
         for fsu in self.policy.fs_uses():
             if self.ruletype and not fsu.ruletype in self.ruletype:

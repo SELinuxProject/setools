@@ -24,7 +24,7 @@ from . import contextquery
 
 class GenfsconQuery(contextquery.ContextQuery):
 
-    """Genfscon query."""
+    """Query genfscon statements."""
 
     def __init__(self, policy,
                  fs="", fs_regex=False,
