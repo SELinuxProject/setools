@@ -25,25 +25,19 @@ class MLSRuleQuery(rulequery.RuleQuery):
 
     def __init__(self, policy,
                  ruletype=[],
-                 source="", source_indirect=True, source_regex=False,
-                 target="", target_indirect=True, target_regex=False,
+                 source="", source_regex=False,
+                 target="", target_regex=False,
                  tclass="", tclass_regex=False):
         """
         Parameters:
         policy           The policy to query.
         ruletype         The rule type(s) to match.
         source           The name of the source type/attribute to match.
-        source_indirect  If true, members of an attribute will be
-                         matched rather than the attribute itself.
         source_regex     If true, regular expression matching will
                          be used on the source type/attribute.
-                         Obeys the source_indirect option.
         target           The name of the target type/attribute to match.
-        target_indirect  If true, members of an attribute will be
-                         matched rather than the attribute itself.
         target_regex     If true, regular expression matching will
                          be used on the target type/attribute.
-                         Obeys target_indirect option.
         tclass           The object class(es) to match.
         tclass_regex     If true, use a regular expression for
                          matching the rule's object class.
@@ -52,8 +46,8 @@ class MLSRuleQuery(rulequery.RuleQuery):
         self.policy = policy
 
         self.set_ruletype(ruletype)
-        self.set_source(source, indirect=source_indirect, regex=source_regex)
-        self.set_target(target, indirect=target_indirect, regex=target_regex)
+        self.set_source(source, regex=source_regex)
+        self.set_target(target, regex=target_regex)
         self.set_tclass(tclass, regex=tclass_regex)
 
     def results(self):
@@ -70,10 +64,9 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             # Matching on source type
             #
-            if self.source and not self._match_indirect_regex(
+            if self.source and not self._match_regex(
                     r.source,
                     self.source,
-                    self.source_indirect,
                     self.source_regex,
                     self.source_cmp):
                 continue
@@ -81,10 +74,9 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             # Matching on target type
             #
-            if self.target and not self._match_indirect_regex(
+            if self.target and not self._match_regex(
                     r.target,
                     self.target,
-                    self.target_indirect,
                     self.target_regex,
                     self.target_cmp):
                 continue

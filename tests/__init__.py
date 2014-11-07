@@ -21,6 +21,7 @@ from . import dta
 from . import fsusequery
 from . import genfsconquery
 from . import initsidquery
+from . import mlsrulequery
 from . import nodeconquery
 from . import objclassquery
 from . import polcapquery
