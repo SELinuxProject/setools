@@ -53,7 +53,10 @@ class PolicySymbol(object):
         return self.qpol_symbol.name(self.policy)
 
     def __hash__(self):
-        return hash(self.qpol_symbol)
+        try:
+            return hash(self.qpol_symbol.value(self.policy))
+        except:
+            return NotImplemented
 
     def __eq__(self, other):
         # this assumes the policy for both objects is the same.
@@ -71,6 +74,9 @@ class PolicySymbol(object):
     def __lt__(self, other):
         """Comparison used by Python sorting functions."""
         return (str(self) < str(other))
+
+    def __repr__(self):
+        return "<{0.__class__.__name__}(<qpol_policy_t id={1}>,\"{0}\")>".format(self, id(self.policy))
 
     def statement(self):
         """
