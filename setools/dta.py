@@ -115,12 +115,15 @@ class DomainTransitionAnalysis(object):
                 source, target, and rules for each
                 domain transition.
         """
+        s = self.policy.lookup_type(source)
+        t = self.policy.lookup_type(target)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        if source in self.G and target in self.G:
+        if s in self.G and t in self.G:
             try:
-                path = nx.shortest_path(self.G, source, target)
+                path = nx.shortest_path(self.G, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -143,12 +146,15 @@ class DomainTransitionAnalysis(object):
                  source, target, and rules for each
                  domain transition.
         """
+        s = self.policy.lookup_type(source)
+        t = self.policy.lookup_type(target)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        if source in self.G and target in self.G:
+        if s in self.G and t in self.G:
             try:
-                paths = nx.all_simple_paths(self.G, source, target, maxlen)
+                paths = nx.all_simple_paths(self.G, s, t, maxlen)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -170,25 +176,28 @@ class DomainTransitionAnalysis(object):
                  source, target, and rules for each
                  domain transition.
         """
+        s = self.policy.lookup_type(source)
+        t = self.policy.lookup_type(target)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        if source in self.G and target in self.G:
+        if s in self.G and t in self.G:
             try:
-                paths = nx.all_shortest_paths(self.G, source, target)
+                paths = nx.all_shortest_paths(self.G, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
                 for p in paths:
                     yield self.__get_steps(p)
 
-    def transitions(self, source):
+    def transitions(self, type_):
         """
         Generator which yields all domain transitions out of a
         specified source type.
 
         Parameters:
-        source  The starting type.
+        type_   The starting type.
 
         Yield: generator(steps)
 
@@ -196,10 +205,12 @@ class DomainTransitionAnalysis(object):
                 source, target, and rules for each
                 domain transition.
         """
+        s = self.policy.lookup_type(type_)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        for source, target in self.G.out_edges_iter(source):
+        for source, target in self.G.out_edges_iter(s):
             yield source, target, \
                 self.G.edge[source][target]['transition'], \
                 self.__get_entrypoints(source, target), \
@@ -289,8 +300,6 @@ class DomainTransitionAnalysis(object):
     #	3. if the edge has an invalid dyntrans, clear the related
     #	   lists on the edge.
     #
-    # Note: strings are used for node names temporarily, until the
-    # string->TypeAttr object lookup code is implemented.
     def _build_graph(self):
         self.G.clear()
 
@@ -310,7 +319,7 @@ class DomainTransitionAnalysis(object):
 
         for r in self.policy.terules():
             if r.ruletype == "allow":
-                if str(r.tclass) not in ["process", "file"]:
+                if r.tclass not in ["process", "file"]:
                     continue
 
                 perms = r.perms
@@ -318,47 +327,47 @@ class DomainTransitionAnalysis(object):
                 if r.tclass == "process":
                     if "transition" in perms:
                         for s, t in itertools.product(
-                                (str(s) for s in r.source.expand()),
-                                (str(t) for t in r.target.expand())):
+                                r.source.expand(),
+                                r.target.expand()):
                             self.__add_edge(s, t)
                             self.G[s][t]['transition'].append(r)
 
                     if "dyntransition" in perms:
                         for s, t in itertools.product(
-                                (str(s) for s in r.source.expand()),
-                                (str(t) for t in r.target.expand())):
+                                r.source.expand(),
+                                r.target.expand()):
                             self.__add_edge(s, t)
                             self.G[s][t]['dyntransition'].append(r)
 
                     if "setexec" in perms:
                         for s in r.source.expand():
-                            setexec[str(s)].append(r)
+                            setexec[s].append(r)
 
                     if "setcurrent" in perms:
                         for s in r.source.expand():
-                            setcurrent[str(s)].append(r)
+                            setcurrent[s].append(r)
 
                 else:
                     if "execute" in perms:
                         for s, t in itertools.product(
-                                (str(s) for s in r.source.expand()),
-                                (str(t) for t in r.target.expand())):
+                                r.source.expand(),
+                                r.target.expand()):
                             execute[s][t].append(r)
 
                     if "entrypoint" in perms:
                         for s, t in itertools.product(
-                                (str(s) for s in r.source.expand()),
-                                (str(t) for t in r.target.expand())):
+                                r.source.expand(),
+                                r.target.expand()):
                             entrypoint[s][t].append(r)
 
             elif r.ruletype == "type_transition":
                 if r.tclass != "process":
                     continue
 
-                d = str(r.default)
+                d = r.default
                 for s, t in itertools.product(
-                        (str(s) for s in r.source.expand()),
-                        (str(t) for t in r.target.expand())):
+                        r.source.expand(),
+                        r.target.expand()):
                     type_trans[s][t][d].append(r)
 
         invalid_edge = []

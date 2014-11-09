@@ -36,20 +36,29 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         # don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        edges = sorted(self.a.G.out_edges_iter())
-        self.assertListEqual([("dyntrans100", "bothtrans200"),
-                              ("start", "dyntrans100"),
-                              ("start", "trans1"),
-                              ("trans1", "trans2"),
-                              ("trans2", "trans3"),
-                              ("trans3", "trans5")], edges)
+        start = self.p.lookup_type("start")
+        trans1 = self.p.lookup_type("trans1")
+        trans2 = self.p.lookup_type("trans2")
+        trans3 = self.p.lookup_type("trans3")
+        trans4 = self.p.lookup_type("trans4")
+        trans5 = self.p.lookup_type("trans5")
+        dyntrans100 = self.p.lookup_type("dyntrans100")
+        bothtrans200 = self.p.lookup_type("bothtrans200")
+
+        edges = set(self.a.G.out_edges_iter())
+        self.assertSetEqual(set([(dyntrans100, bothtrans200),
+                                 (start, dyntrans100),
+                                 (start, trans1),
+                                 (trans1, trans2),
+                                 (trans2, trans3),
+                                 (trans3, trans5)]), edges)
 
     def test_001_bothtrans(self):
         """DTA: type_transition, setexeccon(), and setcon() transitions."""
 
-        s = "dyntrans100"
-        t = "bothtrans200"
-        e = "bothtrans200_exec"
+        s = self.p.lookup_type("dyntrans100")
+        t = self.p.lookup_type("bothtrans200")
+        e = self.p.lookup_type("bothtrans200_exec")
 
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
@@ -133,8 +142,8 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_010_dyntrans(self):
         """DTA: setcon() transition."""
 
-        s = "start"
-        t = "dyntrans100"
+        s = self.p.lookup_type("start")
+        t = self.p.lookup_type("dyntrans100")
 
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
@@ -179,9 +188,9 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_020_trans(self):
         """DTA: type_transition transition."""
 
-        s = "start"
-        t = "trans1"
-        e = "trans1_exec"
+        s = self.p.lookup_type("start")
+        t = self.p.lookup_type("trans1")
+        e = self.p.lookup_type("trans1_exec")
 
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
@@ -247,9 +256,9 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_030_setexec(self):
         """DTA: setexec() transition."""
 
-        s = "trans1"
-        t = "trans2"
-        e = "trans2_exec"
+        s = self.p.lookup_type("trans1")
+        t = self.p.lookup_type("trans2")
+        e = self.p.lookup_type("trans2_exec")
 
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
@@ -312,9 +321,9 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_040_two_entrypoint(self):
         """DTA: 2 entrypoints, only one by type_transition."""
 
-        s = "trans2"
-        t = "trans3"
-        e = ["trans3_exec1", "trans3_exec2"]
+        s = self.p.lookup_type("trans2")
+        t = self.p.lookup_type("trans3")
+        e = [self.p.lookup_type("trans3_exec1"), self.p.lookup_type("trans3_exec2")]
 
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
@@ -404,9 +413,9 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_050_cond_type_trans(self):
         """DTA: conditional type_transition."""
 
-        s = "trans3"
-        t = "trans5"
-        e = "trans5_exec"
+        s = self.p.lookup_type("trans3")
+        t = self.p.lookup_type("trans5")
+        e = self.p.lookup_type("trans5_exec")
 
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
