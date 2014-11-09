@@ -181,6 +181,18 @@ if args.genfsconquery:
         else:
             print(g)
 
+if args.netifconquery:
+    if isinstance(args.netifconquery, str):
+        q = setools.netifconquery.NetifconQuery(p, name=args.netifconquery)
+    else:
+        q = setools.netifconquery.NetifconQuery(p)
+
+    for n in sorted(q.results()):
+        if args.expand:
+            print(n.statement())
+        else:
+            print(n)
+
 if args.nodeconquery:
     if isinstance(args.nodeconquery, str):
         q = setools.nodeconquery.NodeconQuery(p, net=args.nodeconquery)
