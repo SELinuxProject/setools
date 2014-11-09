@@ -22,6 +22,7 @@ from . import fsusequery
 from . import genfsconquery
 from . import initsidquery
 from . import mlsrulequery
+from . import netifconquery
 from . import nodeconquery
 from . import objclassquery
 from . import polcapquery
