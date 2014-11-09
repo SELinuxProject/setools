@@ -112,9 +112,9 @@ extern "C"
  */
 	int qpol_is_data_mod_pkg(char * data);
 
-#define ERR(policy, format, ...) qpol_handle_msg(policy, QPOL_MSG_ERR, format, __VA_ARGS__)
-#define WARN(policy, format, ...) qpol_handle_msg(policy, QPOL_MSG_WARN, format, __VA_ARGS__)
-#define INFO(policy, format, ...) qpol_handle_msg(policy, QPOL_MSG_INFO, format, __VA_ARGS__)
+#define ERR(policy, format, ...)
+#define WARN(policy, format, ...)
+#define INFO(policy, format, ...)
 
 #ifdef	__cplusplus
 }
