@@ -37,26 +37,37 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         a = InfoFlowAnalysis(self.p, self.m)
         a._build_graph()
 
-        nodes = sorted(list(a.G.nodes_iter()))
-        self.assertListEqual(["disconnected1", "disconnected2", "node1",
-                              "node2", "node3", "node4", "node5",
-                              "node6", "node7", "node8", "node9"], nodes)
+        disconnected1 = self.p.lookup_type("disconnected1")
+        disconnected2 = self.p.lookup_type("disconnected2")
+        node1 = self.p.lookup_type("node1")
+        node2 = self.p.lookup_type("node2")
+        node3 = self.p.lookup_type("node3")
+        node4 = self.p.lookup_type("node4")
+        node5 = self.p.lookup_type("node5")
+        node6 = self.p.lookup_type("node6")
+        node7 = self.p.lookup_type("node7")
+        node8 = self.p.lookup_type("node8")
+        node9 = self.p.lookup_type("node9")
 
-        edges = sorted(list(a.G.out_edges_iter()))
-        self.assertListEqual([("disconnected1", "disconnected2"),
-                              ("disconnected2", "disconnected1"),
-                              ("node1", "node2"),
-                              ("node1", "node3"),
-                              ("node2", "node4"),
-                              ("node3", "node5"),
-                              ("node4", "node6"),
-                              ("node5", "node8"),
-                              ("node6", "node5"),
-                              ("node6", "node7"),
-                              ("node8", "node9"),
-                              ("node9", "node8")], edges)
+        nodes = set(a.G.nodes_iter())
+        self.assertSetEqual(set(
+            [disconnected1, disconnected2, node1, node2, node3, node4, node5, node6, node7, node8, node9]), nodes)
 
-        r = a.G.edge["disconnected1"]["disconnected2"]["rules"]
+        edges = set(a.G.out_edges_iter())
+        self.assertSetEqual(set([(disconnected1, disconnected2),
+                                 (disconnected2, disconnected1),
+                                 (node1, node2),
+                                 (node1, node3),
+                                 (node2, node4),
+                                 (node3, node5),
+                                 (node4, node6),
+                                 (node5, node8),
+                                 (node6, node5),
+                                 (node6, node7),
+                                 (node8, node9),
+                                 (node9, node8)]), edges)
+
+        r = a.G.edge[disconnected1][disconnected2]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -65,7 +76,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = a.G.edge["disconnected2"]["disconnected1"]["rules"]
+        r = a.G.edge[disconnected2][disconnected1]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -74,7 +85,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node1"]["node2"]["rules"])
+        r = sorted(a.G.edge[node1][node2]["rules"])
         self.assertEqual(len(r), 2)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node1")
@@ -90,7 +101,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_r"]), r[1].perms)
         self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
 
-        r = sorted(a.G.edge["node1"]["node3"]["rules"])
+        r = sorted(a.G.edge[node1][node3]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node3")
@@ -99,7 +110,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["low_r", "med_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node2"]["node4"]["rules"])
+        r = sorted(a.G.edge[node2][node4]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node2")
@@ -108,7 +119,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node3"]["node5"]["rules"])
+        r = sorted(a.G.edge[node3][node5]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -117,7 +128,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["low_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node4"]["node6"]["rules"])
+        r = sorted(a.G.edge[node4][node6]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node4")
@@ -126,7 +137,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node5"]["node8"]["rules"])
+        r = sorted(a.G.edge[node5][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -135,7 +146,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node6"]["node5"]["rules"])
+        r = sorted(a.G.edge[node6][node5]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -144,7 +155,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["med_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node6"]["node7"]["rules"])
+        r = sorted(a.G.edge[node6][node7]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node6")
@@ -153,7 +164,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node8"]["node9"]["rules"])
+        r = sorted(a.G.edge[node8][node9]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")
@@ -162,7 +173,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node9"]["node8"]["rules"])
+        r = sorted(a.G.edge[node9][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")
@@ -177,25 +188,37 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         a = InfoFlowAnalysis(self.p, self.m, minweight=3)
         a._build_graph()
 
-        nodes = sorted(list(a.G.nodes_iter()))
-        self.assertListEqual(["disconnected1", "disconnected2", "node1",
-                              "node2", "node3", "node4", "node5",
-                              "node6", "node7", "node8", "node9"], nodes)
+        disconnected1 = self.p.lookup_type("disconnected1")
+        disconnected2 = self.p.lookup_type("disconnected2")
+        node1 = self.p.lookup_type("node1")
+        node2 = self.p.lookup_type("node2")
+        node3 = self.p.lookup_type("node3")
+        node4 = self.p.lookup_type("node4")
+        node5 = self.p.lookup_type("node5")
+        node6 = self.p.lookup_type("node6")
+        node7 = self.p.lookup_type("node7")
+        node8 = self.p.lookup_type("node8")
+        node9 = self.p.lookup_type("node9")
 
-        edges = sorted(list(a.G.out_edges_iter()))
-        self.assertListEqual([("disconnected1", "disconnected2"),
-                              ("disconnected2", "disconnected1"),
-                              ("node1", "node2"),
-                              ("node1", "node3"),
-                              ("node2", "node4"),
-                              ("node4", "node6"),
-                              ("node5", "node8"),
-                              ("node6", "node5"),
-                              ("node6", "node7"),
-                              ("node8", "node9"),
-                              ("node9", "node8")], edges)
+        nodes = set(a.G.nodes_iter())
+        self.assertSetEqual(set([disconnected1, disconnected2, node1,
+                                 node2, node3, node4, node5,
+                                 node6, node7, node8, node9]), nodes)
 
-        r = a.G.edge["disconnected1"]["disconnected2"]["rules"]
+        edges = set(a.G.out_edges_iter())
+        self.assertSetEqual(set([(disconnected1, disconnected2),
+                                 (disconnected2, disconnected1),
+                                 (node1, node2),
+                                 (node1, node3),
+                                 (node2, node4),
+                                 (node4, node6),
+                                 (node5, node8),
+                                 (node6, node5),
+                                 (node6, node7),
+                                 (node8, node9),
+                                 (node9, node8)]), edges)
+
+        r = a.G.edge[disconnected1][disconnected2]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -204,7 +227,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = a.G.edge["disconnected2"]["disconnected1"]["rules"]
+        r = a.G.edge[disconnected2][disconnected1]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -213,7 +236,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node1"]["node2"]["rules"])
+        r = sorted(a.G.edge[node1][node2]["rules"])
         self.assertEqual(len(r), 2)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node1")
@@ -229,7 +252,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_r"]), r[1].perms)
         self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
 
-        r = sorted(a.G.edge["node1"]["node3"]["rules"])
+        r = sorted(a.G.edge[node1][node3]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node3")
@@ -238,7 +261,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["low_r", "med_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node2"]["node4"]["rules"])
+        r = sorted(a.G.edge[node2][node4]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node2")
@@ -247,7 +270,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node4"]["node6"]["rules"])
+        r = sorted(a.G.edge[node4][node6]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node4")
@@ -256,7 +279,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node5"]["node8"]["rules"])
+        r = sorted(a.G.edge[node5][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -265,7 +288,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node6"]["node5"]["rules"])
+        r = sorted(a.G.edge[node6][node5]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -274,7 +297,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["med_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node6"]["node7"]["rules"])
+        r = sorted(a.G.edge[node6][node7]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node6")
@@ -283,7 +306,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node8"]["node9"]["rules"])
+        r = sorted(a.G.edge[node8][node9]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")
@@ -292,7 +315,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node9"]["node8"]["rules"])
+        r = sorted(a.G.edge[node9][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")
@@ -307,23 +330,35 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         a = InfoFlowAnalysis(self.p, self.m, minweight=8)
         a._build_graph()
 
-        nodes = sorted(list(a.G.nodes_iter()))
-        self.assertListEqual(["disconnected1", "disconnected2", "node1",
-                              "node2", "node4", "node5",
-                              "node6", "node7", "node8", "node9"], nodes)
+        disconnected1 = self.p.lookup_type("disconnected1")
+        disconnected2 = self.p.lookup_type("disconnected2")
+        node1 = self.p.lookup_type("node1")
+        node2 = self.p.lookup_type("node2")
+        node3 = self.p.lookup_type("node3")
+        node4 = self.p.lookup_type("node4")
+        node5 = self.p.lookup_type("node5")
+        node6 = self.p.lookup_type("node6")
+        node7 = self.p.lookup_type("node7")
+        node8 = self.p.lookup_type("node8")
+        node9 = self.p.lookup_type("node9")
 
-        edges = sorted(list(a.G.out_edges_iter()))
-        self.assertListEqual([("disconnected1", "disconnected2"),
-                              ("disconnected2", "disconnected1"),
-                              ("node1", "node2"),
-                              ("node2", "node4"),
-                              ("node4", "node6"),
-                              ("node5", "node8"),
-                              ("node6", "node7"),
-                              ("node8", "node9"),
-                              ("node9", "node8")], edges)
+        nodes = set(a.G.nodes_iter())
+        self.assertSetEqual(set([disconnected1, disconnected2, node1,
+                                 node2, node4, node5,
+                                 node6, node7, node8, node9]), nodes)
 
-        r = a.G.edge["disconnected1"]["disconnected2"]["rules"]
+        edges = set(a.G.out_edges_iter())
+        self.assertSetEqual(set([(disconnected1, disconnected2),
+                                 (disconnected2, disconnected1),
+                                 (node1, node2),
+                                 (node2, node4),
+                                 (node4, node6),
+                                 (node5, node8),
+                                 (node6, node7),
+                                 (node8, node9),
+                                 (node9, node8)]), edges)
+
+        r = a.G.edge[disconnected1][disconnected2]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -332,7 +367,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = a.G.edge["disconnected2"]["disconnected1"]["rules"]
+        r = a.G.edge[disconnected2][disconnected1]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -341,7 +376,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node1"]["node2"]["rules"])
+        r = sorted(a.G.edge[node1][node2]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node2")
@@ -350,7 +385,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node2"]["node4"]["rules"])
+        r = sorted(a.G.edge[node2][node4]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node2")
@@ -359,7 +394,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node4"]["node6"]["rules"])
+        r = sorted(a.G.edge[node4][node6]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node4")
@@ -368,7 +403,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node5"]["node8"]["rules"])
+        r = sorted(a.G.edge[node5][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -377,7 +412,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node6"]["node7"]["rules"])
+        r = sorted(a.G.edge[node6][node7]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node6")
@@ -386,7 +421,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node8"]["node9"]["rules"])
+        r = sorted(a.G.edge[node8][node9]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")
@@ -395,7 +430,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge["node9"]["node8"]["rules"])
+        r = sorted(a.G.edge[node9][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")

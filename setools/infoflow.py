@@ -134,12 +134,15 @@ class InfoFlowAnalysis(object):
         target   The target type for this step of the information flow.
         rules    The list of rules creating this information flow step.
         """
+        s = self.policy.lookup_type(source)
+        t = self.policy.lookup_type(target)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        if source in self.G and target in self.G:
+        if s in self.G and t in self.G:
             try:
-                path = nx.shortest_path(self.G, source, target)
+                path = nx.shortest_path(self.G, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -167,12 +170,15 @@ class InfoFlowAnalysis(object):
         target    The target type for this step of the information flow.
         rules     The list of rules creating this information flow step.
         """
+        s = self.policy.lookup_type(source)
+        t = self.policy.lookup_type(target)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        if source in self.G and target in self.G:
+        if s in self.G and t in self.G:
             try:
-                paths = nx.all_simple_paths(self.G, source, target, maxlen)
+                paths = nx.all_simple_paths(self.G, s, t, maxlen)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -196,19 +202,22 @@ class InfoFlowAnalysis(object):
         target   The target type for this step of the information flow.
         rules    The list of rules creating this information flow step.
         """
+        s = self.policy.lookup_type(source)
+        t = self.policy.lookup_type(target)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        if source in self.G and target in self.G:
+        if s in self.G and t in self.G:
             try:
-                paths = nx.all_shortest_paths(self.G, source, target)
+                paths = nx.all_shortest_paths(self.G, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
                 for p in paths:
                     yield self.__get_steps(p)
 
-    def infoflows(self, source):
+    def infoflows(self, type_):
         """
         Generator which yields all information flows out of a
         specified source type.
@@ -222,10 +231,12 @@ class InfoFlowAnalysis(object):
                 source, target, and rules for each
                 information flow.
         """
+        s = self.policy.lookup_type(type_)
+
         if self.rebuildgraph:
             self._build_graph()
 
-        for source, target, data in self.G.out_edges_iter(source, data=True):
+        for source, target, data in self.G.out_edges_iter(s, data=True):
             yield source, target, data["rules"]
 
     def get_stats(self):
@@ -292,6 +303,6 @@ class InfoFlowAnalysis(object):
             if max(rweight, wweight) >= self.minweight:
                 for s, t in itertools.product(r.source.expand(), r.target.expand()):
                     if s not in self.exclude and t not in self.exclude:
-                        self.__add_flow(str(s), str(t), r, wweight, rweight)
+                        self.__add_flow(s, t, r, wweight, rweight)
 
         self.rebuildgraph = False
