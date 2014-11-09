@@ -74,6 +74,14 @@ class SELinuxPolicy(object):
                 "Error opening policy file \"{0}\": {1}".format(policyfile, err))
 
     #
+    # Policy components lookup functions
+    #
+
+    def lookup_type(self, name):
+        """Look up a type by name."""
+        return typeattr.TypeAttr(self.policy, name)
+
+    #
     # Policy components generators
     #
 

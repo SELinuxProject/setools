@@ -766,14 +766,17 @@ typedef struct qpol_iterator {} qpol_iterator_t;
 /* qpol type */
 typedef struct qpol_type {} qpol_type_t;
 %extend qpol_type {
+    %exception qpol_type {
+      $action
+      if (!result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid type or attribute.");
+        return NULL;
+      }
+    }
     qpol_type(qpol_policy_t *p, const char *name) {
-        BEGIN_EXCEPTION
         const qpol_type_t *t;
-        if (qpol_policy_get_type_by_name(p, name, &t)) {
-            SWIG_exception(SWIG_RuntimeError, "Type does not exist");
-        }
+        qpol_policy_get_type_by_name(p, name, &t);
         return (qpol_type_t*)t;
-        END_EXCEPTION
     fail:
         return NULL;
     };

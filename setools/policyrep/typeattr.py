@@ -20,9 +20,38 @@ from . import qpol
 from . import symbol
 
 
+class InvalidType(symbol.InvalidSymbol):
+
+    """Exception for invalid types and attributes."""
+    pass
+
+
 class TypeAttr(symbol.PolicySymbol):
 
-    """A type or attribute."""
+    """
+    A type or attribute.
+
+    Parameters:
+    policy          The low-level policy.
+    symbol          The low-level type/attribute reference or a
+                    string to look up a type.
+
+    Exceptions:
+    InvalidType     The specified type/attribute name does not exist in
+                    the policy.
+    """
+
+    def __init__(self, policy, symbol):
+        self.policy = policy
+
+        if isinstance(symbol, str):
+            try:
+                self.qpol_symbol = qpol.qpol_type_t(policy, symbol)
+            except ValueError:
+                raise InvalidType(
+                    "{0} is not a valid type or attribute".format(symbol))
+        else:
+            self.qpol_symbol = symbol
 
     @property
     def ispermissive(self):
