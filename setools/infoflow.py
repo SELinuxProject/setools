@@ -94,9 +94,7 @@ class InfoFlowAnalysis(object):
         exclude         A list of types.
         """
 
-        # TODO: a list comprehension that turns the strings into
-        # Type objects
-        self.exclude = exclude
+        self.exclude = [self.policy.lookup_type(t) for t in exclude]
 
     def __get_steps(self, path):
         """
