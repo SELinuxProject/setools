@@ -149,10 +149,7 @@ class PermissionMap(object):
         for perm_name in rule.perms:
             mapping = self.permmap[class_name][perm_name]
 
-            if mapping[0] == "u":
-                raise UnmappedPermission(
-                    "{0}:{1} is not mapped.".format(class_name, perm_name))
-            elif mapping[0] == "r":
+            if mapping[0] == "r":
                 read_weight = max(read_weight, mapping[1])
             elif mapping[0] == "w":
                 write_weight = max(write_weight, mapping[1])
