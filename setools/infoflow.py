@@ -45,6 +45,7 @@ class InfoFlowAnalysis(object):
         self.set_perm_map(perm_map)
         self.set_exclude(exclude)
         self.rebuildgraph = True
+        self.rebuildsubgraph = True
 
         self.G = nx.DiGraph()
 
@@ -63,7 +64,7 @@ class InfoFlowAnalysis(object):
                 "Min information flow weight must be an integer 1-10.")
 
         self.minweight = w
-        self.rebuildgraph = True
+        self.rebuildsubgraph = True
 
     def set_perm_map(self, perm_map):
         """
@@ -85,6 +86,7 @@ class InfoFlowAnalysis(object):
             self.perm_map = perm_map
 
         self.rebuildgraph = True
+        self.rebuildsubgraph = True
 
     def set_exclude(self, exclude):
         """
@@ -95,6 +97,8 @@ class InfoFlowAnalysis(object):
         """
 
         self.exclude = [self.policy.lookup_type(t) for t in exclude]
+
+        self.rebuildsubgraph = True
 
     def __get_steps(self, path):
         """
@@ -135,12 +139,12 @@ class InfoFlowAnalysis(object):
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        if s in self.G and t in self.G:
+        if s in self.subG and t in self.subG:
             try:
-                path = nx.shortest_path(self.G, s, t)
+                path = nx.shortest_path(self.subG, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -171,12 +175,12 @@ class InfoFlowAnalysis(object):
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        if s in self.G and t in self.G:
+        if s in self.subG and t in self.subG:
             try:
-                paths = nx.all_simple_paths(self.G, s, t, maxlen)
+                paths = nx.all_simple_paths(self.subG, s, t, maxlen)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -203,12 +207,12 @@ class InfoFlowAnalysis(object):
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        if s in self.G and t in self.G:
+        if s in self.subG and t in self.subG:
             try:
-                paths = nx.all_shortest_paths(self.G, s, t)
+                paths = nx.all_shortest_paths(self.subG, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -231,10 +235,10 @@ class InfoFlowAnalysis(object):
         """
         s = self.policy.lookup_type(type_)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        for source, target, data in self.G.out_edges_iter(s, data=True):
+        for source, target, data in self.subG.out_edges_iter(s, data=True):
             yield source, target, data["rules"]
 
     def get_stats(self):
@@ -254,13 +258,18 @@ class InfoFlowAnalysis(object):
     # (Internal) Graph building functions
     #
     #
-    # 1. __build_graph determines the flow in each direction for each TE
-    #    rule and then expands the rule (ignoring excluded types)
-    # 2. __add_flow Simply creates edges in the appropriate direction.
-    #    (decrease chance of coding errors for graph operations)
-    # 3. __add_edge does the actual graph insertions.  Nodes are implictly
+    # 1. _build_graph determines the flow in each direction for each TE
+    #    rule and then expands the rule.  All information flows are
+    #    included in this main graph: memory is traded off for efficiency
+    #    as the main graph should only need to be rebuilt if permission
+    #    weights change.
+    # 2. __add_edge does the actual graph insertions.  Nodes are implictly
     #    created by the edge additions, i.e. types that have no info flow
-    #    due to permission weights or are excluded do not appear in the graph.
+    #    do not appear in the graph.
+    # 3. _build_subgraph derives a subgraph which removes all excluded
+    #    types (nodes) and edges (information flows) which are below the
+    #    minimum weight. This subgraph is rebuilt only if the main graph
+    #    is rebuilt or the minimum weight or excluded types change.
     def __add_edge(self, source, target, rule, weight):
         # use capacity to store the info flow weight so
         # we can use network flow algorithms naturally.
@@ -274,18 +283,6 @@ class InfoFlowAnalysis(object):
             self.G.add_edge(
                 source, target, capacity=weight, weight=1, rules=[rule])
 
-    def __add_flow(self, source, target, rule, ww, rw):
-        assert max(ww, rw) >= self.minweight
-
-        # only add flows if they actually flow
-        # in our out of the source type type
-        if source != target:
-            if ww >= self.minweight:
-                self.__add_edge(source, target, rule, ww)
-
-            if rw >= self.minweight:
-                self.__add_edge(target, source, rule, rw)
-
     def _build_graph(self):
         self.G.clear()
 
@@ -295,12 +292,33 @@ class InfoFlowAnalysis(object):
 
             (rweight, wweight) = self.perm_map.rule_weight(r)
 
-            # 1. only proceed if weight meets or exceeds the minimum weight
-            # 2. expand source and target to handle attributes
-            # 3. ignore flow if one of the types is in the exclude list
-            if max(rweight, wweight) >= self.minweight:
-                for s, t in itertools.product(r.source.expand(), r.target.expand()):
-                    if s not in self.exclude and t not in self.exclude:
-                        self.__add_flow(s, t, r, wweight, rweight)
+            for s, t in itertools.product(r.source.expand(), r.target.expand()):
+                # only add flows if they actually flow
+                # in or out of the source type type
+                if s != t:
+                    if wweight:
+                        self.__add_edge(s, t, r, wweight)
+
+                    if rweight:
+                        self.__add_edge(t, s, r, rweight)
 
         self.rebuildgraph = False
+        self.rebuildsubgraph = True
+
+    def _build_subgraph(self):
+        if self.rebuildgraph:
+            self._build_graph()
+
+        # delete excluded types from subgraph
+        nodes = [n for n in self.G.nodes() if n not in self.exclude]
+        self.subG = self.G.subgraph(nodes)
+
+        # delete edges below minimum weight
+        delete_list = []
+        for s, t, data in self.subG.edges_iter(data=True):
+            if data['capacity'] < self.minweight:
+                delete_list.append((s, t))
+
+        self.subG.remove_edges_from(delete_list)
+
+        self.rebuildsubgraph = False
