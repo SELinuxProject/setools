@@ -102,3 +102,25 @@ class NodeconQueryTest(unittest.TestCase):
 
             nodecons = sorted(n.address for n in q.results())
             self.assertListEqual(["10.1.101.0"], nodecons)
+
+    def test_110_v6network_equal(self):
+        """Nodecon query with IPv6 equal network"""
+        if sys.version_info < (3, 3):
+            self.assertRaises(
+                RuntimeError, NodeconQuery, self.p, net="1100::/16", net_overlap=False)
+        else:
+            q = NodeconQuery(self.p, net="1100::/16", net_overlap=False)
+
+            nodecons = sorted(n.address for n in q.results())
+            self.assertListEqual(["1100::"], nodecons)
+
+    def test_111_v6network_overlap(self):
+        """Nodecon query with IPv6 network overlap"""
+        if sys.version_info < (3, 3):
+            self.assertRaises(
+                RuntimeError, NodeconQuery, self.p, net="1110:8000::/17", net_overlap=True)
+        else:
+            q = NodeconQuery(self.p, net="1110:8000::/17", net_overlap=True)
+
+            nodecons = sorted(n.address for n in q.results())
+            self.assertListEqual(["1110::"], nodecons)

@@ -71,13 +71,26 @@ class NodeconQuery(contextquery.ContextQuery):
 
             if self.network:
                 try:
-                    net = ipaddress.ip_network(
-                        '{0.address}/{0.netmask}'.format(n))
+                    netmask = ipaddress.ip_address(n.netmask)
                 except NameError:
                     # Should never actually hit this since the self.network
                     # setter raises the same exception.
                     raise RuntimeError(
                         "IP address/network functions require Python 3.3+.")
+
+                # Python 3.3's IPv6Network constructor does not support
+                # expanded netmasks, only CIDR numbers. Convert netmask
+                # into CIDR.
+                # This is Brian Kernighan's method for counting set bits.
+                # If the netmask happens to be invalid, this will
+                # not detect it.
+                CIDR = 0
+                int_netmask = int(netmask)
+                while int_netmask:
+                    int_netmask &= int_netmask - 1
+                    CIDR += 1
+
+                net = ipaddress.ip_network('{0}/{1}'.format(n.address, CIDR))
 
                 if self.network_overlap:
                     if not self.network.overlaps(net):
