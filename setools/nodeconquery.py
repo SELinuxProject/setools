@@ -22,6 +22,7 @@ except ImportError:
     pass
 
 import re
+from socket import AF_INET, AF_INET6
 
 from . import compquery
 from . import contextquery
@@ -33,6 +34,7 @@ class NodeconQuery(contextquery.ContextQuery):
 
     def __init__(self, policy,
                  net="", net_overlap=False,
+                 version=0,
                  user="", user_regex=False,
                  role="", role_regex=False,
                  type_="", type_regex=False,
@@ -59,6 +61,7 @@ class NodeconQuery(contextquery.ContextQuery):
         self.policy = policy
 
         self.set_network(net, overlap=net_overlap)
+        self.set_ip_version(version)
         self.set_user(user, regex=user_regex)
         self.set_role(role, regex=role_regex)
         self.set_type(type_, regex=type_regex)
@@ -98,6 +101,9 @@ class NodeconQuery(contextquery.ContextQuery):
                 else:
                     if not net == self.network:
                         continue
+
+            if self.version and self.version != n.ip_version:
+                continue
 
             if not self._match_context(
                     n.context,
@@ -147,3 +153,25 @@ class NodeconQuery(contextquery.ContextQuery):
                 self.network_overlap = opts[k]
             else:
                 raise NameError("Invalid name option: {0}".format(k))
+
+    def set_ip_version(self, version):
+        """
+        Set the criteria for matching the IP version.
+
+        Parameter:
+        version     The address family to match.  (socket.AF_INET for
+                    IPv4 or socket.AF_INET6 for IPv6)
+
+        Exceptions:
+        ValueError  Invalid address family number.
+        """
+
+        if version:
+            if not (version == AF_INET or version == AF_INET6):
+                raise ValueError(
+                    "The address family must be {0} for IPv4 or {1} for IPv6.".format(AF_INET, AF_INET6))
+
+            self.version = version
+
+        else:
+            self.version = None

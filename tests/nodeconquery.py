@@ -17,6 +17,7 @@
 #
 import sys
 import unittest
+from socket import AF_INET6
 
 from setools import SELinuxPolicy
 from setools.nodeconquery import NodeconQuery
@@ -38,6 +39,13 @@ class NodeconQueryTest(unittest.TestCase):
             pass
 
         self.assertEqual(numrules, q_numrules)
+
+    def test_001_ip_version(self):
+        """Nodecon query with IP version match."""
+        q = NodeconQuery(self.p, version=AF_INET6)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["1100::", "1110::"], nodecons)
 
     def test_020_user_exact(self):
         """Nodecon query with context user exact match"""
