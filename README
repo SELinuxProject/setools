@@ -31,10 +31,10 @@ KNOWN-BUGS file prior to reporting bugs.
 ---------------
 
 SETools uses the Python setuptools build system to build, and install.
-As such it contains a setup.py script that will install the setools.
+As such it contains a setup.py script that will install the tools.
 
 SETools requires the following development packages for building:
-  Python 2.7
+  Python 2.7 or 3.3
   setuptools
   gcc
   bison
@@ -47,7 +47,7 @@ To build SETools' graphical tools, the following packages are required:
   TBD
 
 To run SETools, the following packages are required:
-  Python 2.7
+  Python 2.7 or 3.3
   NetworkX
   setuptools
   libselinux
@@ -131,14 +131,16 @@ maintain API stability.
 4. Obtaining SETools
 --------------------
 
-Official releases of SETools may be freely downloaded from TBD.
+Official releases of SETools may be freely downloaded from:
 
-SETools source code is maintained within a github repository.
+https://github.com/TresysTechnology/setools/releases
+
+SETools source code is maintained within a GitHub repository.
 From the command line do:
 
   $ git clone https://github.com/TresysTechnology/setools.git
 
-You may also browse the github repository at
+You may also browse the GitHub repository at
 https://github.com/TresysTechnology/setools.
 
 SETools included in most Linux distributions which enable
@@ -149,7 +151,9 @@ and Debian.
 5. Reporting bugs
 -----------------
 
-TBD
+Bugs can be reported in the SETools GitHub issues tracker:
+
+https://github.com/TresysTechnology/setools/issues
 
 
 6. Copyright license
