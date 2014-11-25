@@ -59,7 +59,7 @@ queries.add_argument("--netifcon",  help="Print netifcon statements.",
 queries.add_argument("--nodecon",  help="Print nodecon statements.",
                      dest="nodeconquery",  default="", nargs='?', const=True, metavar="ADDR")
 queries.add_argument("--portcon",  help="Print portcon statements.",
-                     dest="portconquery",  default="", nargs='?', const=True, metavar="PORT_NUM")
+                     dest="portconquery",  default="", nargs='?', const=True, metavar="PORT_RANGE")
 queries.add_argument("--permissive",  help="Print permissive statements.",
                      dest="permissivequery", default="", nargs='?', const=True, metavar="TYPE")
 queries.add_argument("--polcap",  help="Print policy capabilities.",
@@ -204,3 +204,28 @@ if args.nodeconquery:
             print(n.statement())
         else:
             print(n)
+
+if args.portconquery:
+    if isinstance(args.portconquery, str):
+        q = setools.portconquery.PortconQuery(p)
+
+        try:
+            ports = [int(i) for i in args.portconquery.split("-")]
+        except:
+            parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
+
+        if len(ports) == 2:
+            q.set_ports((ports[0], ports[1]))
+        elif len(ports) == 1:
+            q.set_ports((ports[0], ports[0]))
+        else:
+            parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
+
+    else:
+        q = setools.portconquery.PortconQuery(p)
+
+    for port in sorted(q.results()):
+        if args.expand:
+            print(port.statement())
+        else:
+            print(port)

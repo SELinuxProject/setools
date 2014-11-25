@@ -48,6 +48,7 @@ from . import genfsconquery
 from . import initsidquery
 from . import netifconquery
 from . import nodeconquery
+from . import portconquery
 
 # Information Flow Analysis
 from . import infoflow
