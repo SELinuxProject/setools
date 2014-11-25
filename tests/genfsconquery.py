@@ -29,14 +29,12 @@ class GenfsconQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Genfscon query with no criteria"""
         # query with no parameters gets all genfs.
-        for numrules, s in enumerate(self.p.genfscons(), start=1):
-            pass
+        genfs = sorted(self.p.genfscons())
 
         q = GenfsconQuery(self.p)
-        for q_numrules, s in enumerate(q.results(), start=1):
-            pass
+        q_genfs = sorted(q.results())
 
-        self.assertEqual(numrules, q_numrules)
+        self.assertListEqual(genfs, q_genfs)
 
     def test_001_fs_exact(self):
         """Genfscon query with exact fs match"""

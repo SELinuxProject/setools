@@ -29,14 +29,12 @@ class PolCapQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Policy capability query with no criteria"""
         # query with no parameters gets all permissives
-        for numtypes, t in enumerate(self.p.permissives(), start=1):
-            pass
+        types = sorted(self.p.permissives())
 
         q = PermissiveQuery(self.p)
-        for q_numtypes, t in enumerate(q.results(), start=1):
-            pass
+        q_types = sorted(q.results())
 
-        self.assertEqual(numtypes, q_numtypes)
+        self.assertListEqual(types, q_types)
 
     def test_001_name_exact(self):
         """Permissive query with exact match"""

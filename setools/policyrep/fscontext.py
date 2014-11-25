@@ -49,6 +49,17 @@ class Genfscon(FSContext):
     def __str__(self):
         return "genfscon {0.fs} {0.path} {0.context}".format(self)
 
+    def __eq__(self, other):
+        # Libqpol allocates new C objects in the
+        # genfscons iterator, so pointer comparison
+        # in the PolicySymbol object doesn't work.
+        try:
+            return (self.fs == other.fs and
+                    self.path == other.path and
+                    self.context == other.context)
+        except AttributeError:
+            return (str(self) == str(other))
+
     @property
     def filetype(self):
         """The file type for this genfscon statement."""

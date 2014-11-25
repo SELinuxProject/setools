@@ -31,14 +31,12 @@ class NodeconQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Nodecon query with no criteria"""
         # query with no parameters gets all nodecons.
-        for numrules, s in enumerate(self.p.nodecons(), start=1):
-            pass
+        nodecons = sorted(self.p.nodecons())
 
         q = NodeconQuery(self.p)
-        for q_numrules, s in enumerate(q.results(), start=1):
-            pass
+        q_nodecons = sorted(q.results())
 
-        self.assertEqual(numrules, q_numrules)
+        self.assertListEqual(nodecons, q_nodecons)
 
     def test_001_ip_version(self):
         """Nodecon query with IP version match."""

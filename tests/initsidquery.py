@@ -29,14 +29,12 @@ class InitialSIDQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Initial SID query with no criteria"""
         # query with no parameters gets all SIDs.
-        for numrules, s in enumerate(self.p.initialsids(), start=1):
-            pass
+        sids = sorted(self.p.initialsids())
 
         q = InitialSIDQuery(self.p)
-        for q_numrules, s in enumerate(q.results(), start=1):
-            pass
+        q_sids = sorted(q.results())
 
-        self.assertEqual(numrules, q_numrules)
+        self.assertListEqual(sids, q_sids)
 
     def test_001_name_exact(self):
         """Initial SID query with exact match"""

@@ -69,6 +69,17 @@ class Nodecon(NetContext):
     def __str__(self):
         return "nodecon {0.address} {0.netmask} {0.context}".format(self)
 
+    def __eq__(self, other):
+        # Libqpol allocates new C objects in the
+        # nodecons iterator, so pointer comparison
+        # in the PolicySymbol object doesn't work.
+        try:
+            return (self.address == other.address and
+                    self.netmask == other.netmask and
+                    self.context == other.context)
+        except AttributeError:
+            return (str(self) == str(other))
+
     @property
     def ip_version(self):
         """

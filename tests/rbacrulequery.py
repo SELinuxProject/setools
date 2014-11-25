@@ -30,14 +30,12 @@ class RBACRuleQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """RBAC rule query with no criteria."""
         # query with no parameters gets all RBAC rules.
-        for numrules, r in enumerate(self.p.rbacrules(), start=1):
-            pass
+        rules = sorted(self.p.rbacrules())
 
         q = RBACRuleQuery(self.p)
-        for q_numrules, r in enumerate(q.results(), start=1):
-            pass
+        q_rules = sorted(q.results())
 
-        self.assertEqual(numrules, q_numrules)
+        self.assertListEqual(rules, q_rules)
 
     def test_001_source_direct(self):
         """RBAC rule query with exact, direct, source match."""

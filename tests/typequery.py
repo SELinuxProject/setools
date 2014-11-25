@@ -29,10 +29,10 @@ class TypeQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Type query with no criteria."""
         # query with no parameters gets all types.
-        alltypes = sorted(str(t) for t in self.p.types())
+        alltypes = sorted(self.p.types())
 
         q = TypeQuery(self.p)
-        qtypes = sorted(str(t) for t in q.results())
+        qtypes = sorted(q.results())
 
         self.assertListEqual(alltypes, qtypes)
 

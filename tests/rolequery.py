@@ -29,15 +29,14 @@ class RoleQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Role query with no criteria."""
         # query with no parameters gets all types.
-        for numroles, r in enumerate(self.p.roles(), start=1):
-            pass
+        roles = sorted(self.p.roles())
+        # remove object_r, as it is skipped from the role query
+        roles.remove("object_r")
 
         q = RoleQuery(self.p)
-        for q_numroles, t in enumerate(q.results(), start=1):
-            pass
+        q_roles = sorted(q.results())
 
-        # numroles-1 as object_r is skipped from the role query
-        self.assertEqual(numroles - 1, q_numroles)
+        self.assertListEqual(roles, q_roles)
 
     def test_001_name_exact(self):
         """Role query with exact name match."""

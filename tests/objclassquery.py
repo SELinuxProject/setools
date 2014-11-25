@@ -29,14 +29,12 @@ class ObjClassQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Class query with no criteria."""
         # query with no parameters gets all types.
-        for numclasses, c in enumerate(self.p.classes(), start=1):
-            pass
+        classes = sorted(self.p.classes())
 
         q = ObjClassQuery(self.p)
-        for q_numclasses, u in enumerate(q.results(), start=1):
-            pass
+        q_classes = sorted(q.results())
 
-        self.assertEqual(numclasses, q_numclasses)
+        self.assertListEqual(classes, q_classes)
 
     def test_001_name_exact(self):
         """Class query with exact name match."""

@@ -29,10 +29,10 @@ class PolCapQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Policy capability query with no criteria"""
         # query with no parameters gets all capabilities.
-        allcaps = sorted(str(c) for c in self.p.polcaps())
+        allcaps = sorted(self.p.polcaps())
 
         q = PolCapQuery(self.p)
-        qcaps = sorted(str(c) for c in q.results())
+        qcaps = sorted(q.results())
 
         self.assertListEqual(allcaps, qcaps)
 

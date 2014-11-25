@@ -29,10 +29,10 @@ class UserQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """User query with no criteria."""
         # query with no parameters gets all types.
-        allusers = sorted(str(u) for u in self.p.users())
+        allusers = sorted(self.p.users())
 
         q = UserQuery(self.p)
-        qusers = sorted(str(u) for u in q.results())
+        qusers = sorted(q.results())
 
         self.assertListEqual(allusers, qusers)
 

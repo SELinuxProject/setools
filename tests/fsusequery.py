@@ -29,14 +29,12 @@ class FSUseQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """fs_use_* query with no criteria"""
         # query with no parameters gets all fs_use_*.
-        for numrules, s in enumerate(self.p.fs_uses(), start=1):
-            pass
+        fsu = sorted(self.p.fs_uses())
 
         q = FSUseQuery(self.p)
-        for q_numrules, s in enumerate(q.results(), start=1):
-            pass
+        q_fsu = sorted(q.results())
 
-        self.assertEqual(numrules, q_numrules)
+        self.assertListEqual(fsu, q_fsu)
 
     def test_001_fs_exact(self):
         """fs_use_* query with exact fs match"""

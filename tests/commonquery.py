@@ -29,14 +29,12 @@ class CommonQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Common query with no criteria."""
         # query with no parameters gets all types.
-        for numcommons, c in enumerate(self.p.commons(), start=1):
-            pass
+        commons = sorted(self.p.commons())
 
         q = CommonQuery(self.p)
-        for q_numcommons, u in enumerate(q.results(), start=1):
-            pass
+        q_commons = sorted(q.results())
 
-        self.assertEqual(numcommons, q_numcommons)
+        self.assertListEqual(commons, q_commons)
 
     def test_001_name_exact(self):
         """Common query with exact name match."""

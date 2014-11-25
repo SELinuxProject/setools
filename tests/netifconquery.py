@@ -29,14 +29,12 @@ class NetifconQueryTest(unittest.TestCase):
     def test_000_unset(self):
         """Netifcon query with no criteria"""
         # query with no parameters gets all netifs.
-        for numrules, s in enumerate(self.p.netifcons(), start=1):
-            pass
+        netifs = sorted(self.p.netifcons())
 
         q = NetifconQuery(self.p)
-        for q_numrules, s in enumerate(q.results(), start=1):
-            pass
+        q_netifs = sorted(q.results())
 
-        self.assertEqual(numrules, q_numrules)
+        self.assertListEqual(netifs, q_netifs)
 
     def test_001_name_exact(self):
         """Netifcon query with exact match"""
