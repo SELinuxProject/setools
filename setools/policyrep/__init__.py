@@ -79,7 +79,7 @@ class SELinuxPolicy(object):
 
     def lookup_type(self, name):
         """Look up a type by name."""
-        return typeattr.TypeAttr(self.policy, name)
+        return typeattr.typeattr_factory(self.policy, name)
 
     #
     # Policy components generators

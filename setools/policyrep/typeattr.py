@@ -26,6 +26,17 @@ class InvalidType(symbol.InvalidSymbol):
     pass
 
 
+def typeattr_factory(qpol_policy, name):
+    """Factory function for creating TypeAttr objects."""
+
+    try:
+        qpol_symbol = qpol.qpol_type_t(qpol_policy, name)
+    except ValueError:
+        raise InvalidType("{0} is not a valid type/attribute".format(name))
+
+    return TypeAttr(qpol_policy, qpol_symbol)
+
+
 class TypeAttr(symbol.PolicySymbol):
 
     """
@@ -40,18 +51,6 @@ class TypeAttr(symbol.PolicySymbol):
     InvalidType     The specified type/attribute name does not exist in
                     the policy.
     """
-
-    def __init__(self, policy, symbol):
-        self.policy = policy
-
-        if isinstance(symbol, str):
-            try:
-                self.qpol_symbol = qpol.qpol_type_t(policy, symbol)
-            except ValueError:
-                raise InvalidType(
-                    "{0} is not a valid type or attribute".format(symbol))
-        else:
-            self.qpol_symbol = symbol
 
     @property
     def ispermissive(self):
