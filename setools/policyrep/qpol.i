@@ -903,13 +903,16 @@ typedef struct qpol_type {} qpol_type_t;
 /* qpol role */
 typedef struct qpol_role {} qpol_role_t;
 %extend qpol_role {
+    %exception qpol_role {
+      $action
+      if (!result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid type or attribute.");
+        return NULL;
+      }
+    }
     qpol_role(qpol_policy_t *p, const char *name) {
         const qpol_role_t *r;
-        BEGIN_EXCEPTION
-        if (qpol_policy_get_role_by_name(p, name, &r)) {
-            SWIG_exception(SWIG_RuntimeError, "Role does not exist");
-        }
-        END_EXCEPTION
+        qpol_policy_get_role_by_name(p, name, &r);
         return (qpol_role_t*)r;
     fail:
         return NULL;
@@ -1208,13 +1211,16 @@ typedef struct qpol_mls_level {} qpol_mls_level_t;
 /* qpol user */
 typedef struct qpol_user {} qpol_user_t;
 %extend qpol_user {
+    %exception qpol_user {
+      $action
+      if (!result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid user.");
+        return NULL;
+      }
+    }
     qpol_user(qpol_policy_t *p, const char *name) {
         const qpol_user_t *u;
-        BEGIN_EXCEPTION
-        if (qpol_policy_get_user_by_name(p, name, &u)) {
-            SWIG_exception(SWIG_RuntimeError, "User does not exist");
-        }
-        END_EXCEPTION
+        qpol_policy_get_user_by_name(p, name, &u);
         return (qpol_user_t*)u;
     fail:
         return NULL;

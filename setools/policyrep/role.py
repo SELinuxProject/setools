@@ -21,6 +21,23 @@ from . import symbol
 from . import typeattr
 
 
+class InvalidRole(symbol.InvalidSymbol):
+
+    """Exception for invalid roles."""
+    pass
+
+
+def role_factory(qpol_policy, name):
+    """Factory function for creating Role objects."""
+
+    try:
+        symbol = qpol.qpol_role_t(qpol_policy, name)
+    except ValueError:
+        raise InvalidRole("{0} is not a valid role".format(name))
+
+    return Role(qpol_policy, symbol)
+
+
 class Role(symbol.PolicySymbol):
 
     """A role."""

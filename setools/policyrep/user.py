@@ -22,6 +22,23 @@ from . import mls
 from . import symbol
 
 
+class InvalidUser(symbol.InvalidSymbol):
+
+    """Exception for invalid users."""
+    pass
+
+
+def user_factory(qpol_policy, name):
+    """Factory function for creating User objects."""
+
+    try:
+        symbol = qpol.qpol_user_t(qpol_policy, name)
+    except ValueError:
+        raise InvalidUser("{0} is not a valid user".format(name))
+
+    return User(qpol_policy, symbol)
+
+
 class User(symbol.PolicySymbol):
 
     """A user."""

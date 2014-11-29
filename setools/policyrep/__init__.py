@@ -77,9 +77,17 @@ class SELinuxPolicy(object):
     # Policy components lookup functions
     #
 
+    def lookup_role (self, name):
+        """Look up a role by name."""
+        return role.role_factory(self.policy, name)
+
     def lookup_type(self, name):
         """Look up a type by name."""
         return typeattr.typeattr_factory(self.policy, name)
+
+    def lookup_user(self, name):
+        """Look up a user by name."""
+        return user.user_factory(self.policy, name)
 
     #
     # Policy components generators
