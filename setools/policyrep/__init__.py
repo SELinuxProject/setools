@@ -74,7 +74,7 @@ class SELinuxPolicy(object):
     # Policy components lookup functions
     #
 
-    def lookup_role (self, name):
+    def lookup_role(self, name):
         """Look up a role by name."""
         return role.role_factory(self.policy, name)
 
