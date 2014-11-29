@@ -24,10 +24,7 @@
 from . import qpol
 
 # The libqpol SWIG class is not quite natural for
-# Python, since void* are passed around from the
-# generic C iterator implementation in libqpol
-# (note the _from_void calls).  Additionally,
-# the policy is repeatedly referenced in the
+# Python the policy is repeatedly referenced in the
 # function calls, which makes sense for C code
 # but not for python code, so each object keeps
 # a reference to the policy for internal use.
