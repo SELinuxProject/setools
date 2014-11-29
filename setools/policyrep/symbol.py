@@ -40,11 +40,7 @@ class PolicySymbol(object):
         qpol_symbol	  The low-level policy symbol object.
         """
 
-        if not qpol_symbol:
-            # Some qpol functions will return None instead of
-            # raising exceptions, e.g. if getting the conditional
-            # expression for an unconditional rule
-            raise InvalidSymbol
+        assert qpol_symbol
 
         self.policy = policy
         self.qpol_symbol = qpol_symbol

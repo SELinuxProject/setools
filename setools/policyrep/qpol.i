@@ -1450,13 +1450,19 @@ typedef struct qpol_class {} qpol_class_t;
     fail:
         return (int) v;
     };
+
+    %exception common {
+        $action
+        if (!result) {
+            PyErr_SetString(PyExc_ValueError, "Class does not inherit a common.");
+            return NULL;
+        }
+    }
     const qpol_common_t *common(qpol_policy_t *p) {
         const qpol_common_t *c;
-        BEGIN_EXCEPTION
         if(qpol_class_get_common(p, self, &c)) {
             SWIG_exception(SWIG_ValueError, "Could not get common for class");
         }
-        END_EXCEPTION
     fail:
         return c;
     };
@@ -2423,13 +2429,18 @@ typedef struct qpol_avrule {} qpol_avrule_t;
         return iter;
     };
 
+    %exception cond {
+        $action
+        if (!result) {
+            PyErr_SetString(PyExc_ValueError, "Rule is not conditional.");
+            return NULL;
+        }
+    }
     const qpol_cond_t *cond(qpol_policy_t *p) {
         const qpol_cond_t *c;
-        BEGIN_EXCEPTION
         if (qpol_avrule_get_cond(p, self, &c)) {
             SWIG_exception(SWIG_ValueError, "Could not get conditional for av rule");
         }
-        END_EXCEPTION
     fail:
         return c;
     };
@@ -2547,13 +2558,19 @@ typedef struct qpol_terule {} qpol_terule_t;
     fail:
         return t;
     };
+
+    %exception cond {
+        $action
+        if (!result) {
+            PyErr_SetString(PyExc_ValueError, "Rule is not conditional.");
+            return NULL;
+        }
+    }
     const qpol_cond_t *cond(qpol_policy_t *p) {
         const qpol_cond_t *c;
-        BEGIN_EXCEPTION
         if (qpol_terule_get_cond(p, self, &c)) {
             SWIG_exception(SWIG_ValueError, "Could not get conditional for te rule");
         }
-        END_EXCEPTION
     fail:
         return c;
     };

@@ -121,9 +121,8 @@ class TERule(rule.PolicyRule):
         """The rule's conditional expression."""
         try:
             return boolcond.ConditionalExpr(self.policy, self.qpol_symbol.cond(self.policy))
-        except (AttributeError, symbol.InvalidSymbol):
+        except (AttributeError, ValueError):
             # AttributeError: name filetrans rules cannot be conditional
             #                 so no member function
-            # InvalidSymbol:  The rule does not have a conditional,
-            #                 so qpol returns a bad symbol (a None)
+            # ValueError:     The rule is not conditional
             raise rule.RuleNotConditional

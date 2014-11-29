@@ -73,7 +73,7 @@ class ObjClass(Common):
 
         try:
             return Common(self.policy, self.qpol_symbol.common(self.policy))
-        except symbol.InvalidSymbol:
+        except ValueError:
             raise NoCommon("{0} does not inherit a common.".format(self))
 
     def statement(self):
