@@ -24,6 +24,7 @@
 %module qpol
 
 %{
+#include <sys/stat.h>
 #include <arpa/inet.h>
 #include "include/qpol/avrule_query.h"
 #include "include/qpol/bool_query.h"
@@ -1679,15 +1680,23 @@ typedef struct qpol_genfscon {} qpol_genfscon_t;
     fail:
         return path;
     };
-    int object_class(qpol_policy_t *p) {
+    unsigned int object_class(qpol_policy_t *p) {
         uint32_t cls;
-        BEGIN_EXCEPTION
         if (qpol_genfscon_get_class(p, self, &cls)) {
             SWIG_exception(SWIG_ValueError, "Could not get genfscon statement class");
         }
-        END_EXCEPTION
+        switch (cls) {
+            case QPOL_CLASS_BLK_FILE: return S_IFBLK;
+            case QPOL_CLASS_CHR_FILE: return S_IFCHR;
+            case QPOL_CLASS_DIR: return S_IFDIR;
+            case QPOL_CLASS_FIFO_FILE: return S_IFIFO;
+            case QPOL_CLASS_FILE: return S_IFREG;
+            case QPOL_CLASS_LNK_FILE: return S_IFLNK;
+            case QPOL_CLASS_SOCK_FILE: return S_IFSOCK;
+            default: return 0; /* all file types */
+        }
     fail:
-        return (int) cls;
+        return 0;
     };
     const qpol_context_t *context(qpol_policy_t *p) {
         const qpol_context_t *ctx;
