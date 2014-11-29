@@ -16,6 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
+import stat
 
 from setools import SELinuxPolicy
 from setools.genfsconquery import GenfsconQuery
@@ -105,3 +106,10 @@ class GenfsconQueryTest(unittest.TestCase):
 
         genfs = sorted(s.fs for s in q.results())
         self.assertListEqual(["test41b", "test41c"], genfs)
+
+    def test_050_file_type(self):
+        """Genfscon query with file type match"""
+        q = GenfsconQuery(self.p, filetype=stat.S_IFBLK)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test50b"], genfs)

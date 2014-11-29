@@ -29,6 +29,7 @@ class GenfsconQuery(contextquery.ContextQuery):
     def __init__(self, policy,
                  fs="", fs_regex=False,
                  path="", path_regex=False,
+                 filetype=0,
                  user="", user_regex=False,
                  role="", role_regex=False,
                  type_="", type_regex=False,
@@ -59,6 +60,7 @@ class GenfsconQuery(contextquery.ContextQuery):
 
         self.set_fs(fs, regex=fs_regex)
         self.set_path(path, regex=path_regex)
+        self.set_filetype(filetype)
         self.set_user(user, regex=user_regex)
         self.set_role(role, regex=role_regex)
         self.set_type(type_, regex=type_regex)
@@ -80,6 +82,9 @@ class GenfsconQuery(contextquery.ContextQuery):
                     self.path,
                     self.path_regex,
                     self.path_cmp):
+                continue
+
+            if self.filetype and not self.filetype == g.filetype:
                 continue
 
             if not self._match_context(
@@ -122,6 +127,16 @@ class GenfsconQuery(contextquery.ContextQuery):
             self.fs_cmp = re.compile(self.fs)
         else:
             self.fs_cmp = None
+
+    def set_filetype(self, filetype):
+        """
+        Set the criteria for matching the file type.
+
+        Parameter:
+        filetype    File type to match (e.g. stat.S_IFBLK or stat.S_IFREG).
+        """
+
+        self.filetype = filetype
 
     def set_path(self, path, **opts):
         """
