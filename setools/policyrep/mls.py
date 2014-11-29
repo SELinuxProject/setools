@@ -22,7 +22,7 @@ from . import qpol
 from . import symbol
 
 
-class MLSDisabled(symbol.InvalidSymbol):
+class MLSDisabled(Exception):
 
     """
     Exception when MLS is disabled.

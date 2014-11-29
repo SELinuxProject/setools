@@ -50,7 +50,7 @@ class Common(symbol.PolicySymbol):
         return self.qpol_symbol.value(self.policy)
 
 
-class NoCommon(symbol.InvalidSymbol):
+class NoCommon(Exception):
 
     """
     Exception when a class does not inherit a common permission set.
