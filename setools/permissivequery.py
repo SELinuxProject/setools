@@ -29,7 +29,7 @@ class PermissiveQuery(compquery.ComponentQuery):
                  name="", name_regex=False):
         """
         Parameters:
-        name        The name of the policy capability to match.
+        name        The name of the permissive type to match.
         name_regex  If true, regular expression matching will
                     be used for matching the name.
         """
