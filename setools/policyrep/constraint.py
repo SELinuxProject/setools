@@ -190,7 +190,7 @@ class Constraint(symbol.PolicySymbol):
         return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
 
 
-class ValidateTrans(symbol.PolicySymbol):
+class ValidateTrans(Constraint):
 
     """A validate transition rule."""
     pass

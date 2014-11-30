@@ -359,6 +359,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t type_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_type_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject role_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_role_from_void) %}
     qpol_iterator_t *role_iter() {
@@ -373,6 +385,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t role_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_role_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject level_iter();
     qpol_iterator_t *level_iter() {
         BEGIN_EXCEPTION
@@ -385,6 +409,19 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
+
+    size_t level_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_level_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject cat_iter();
     qpol_iterator_t *cat_iter() {
         BEGIN_EXCEPTION
@@ -397,6 +434,19 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
+
+    size_t cat_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_cat_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject user_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_user_from_void) %}
     qpol_iterator_t *user_iter() {
@@ -411,6 +461,19 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t user_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_user_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+
     %newobject bool_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_bool_from_void) %}
     qpol_iterator_t *bool_iter() {
@@ -423,6 +486,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t bool_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_bool_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject class_iter(char*);
@@ -445,6 +520,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t class_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_class_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject common_iter(char*);
     %pythoncode %{ @QpolGenerator(_qpol.qpol_common_from_void) %}
     qpol_iterator_t *common_iter(char *perm=NULL) {
@@ -465,6 +552,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t common_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_common_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject fs_use_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_fs_use_from_void) %}
     qpol_iterator_t *fs_use_iter() {
@@ -477,6 +576,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t fs_use_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_fs_use_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject genfscon_iter();
@@ -493,6 +604,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t genfscon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_genfscon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject isid_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_isid_from_void) %}
     qpol_iterator_t *isid_iter() {
@@ -505,6 +628,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t isid_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_isid_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject netifcon_iter();
@@ -521,6 +656,18 @@ typedef enum qpol_capability
             return NULL;
     };
 
+    size_t netifcon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_netifcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject nodecon_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_nodecon_from_void) %}
     qpol_iterator_t *nodecon_iter() {
@@ -533,6 +680,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t nodecon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_nodecon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject portcon_iter();
@@ -549,6 +708,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t portcon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_portcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject constraint_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_constraint_from_void) %}
     qpol_iterator_t *constraint_iter() {
@@ -561,6 +732,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t constraint_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_constraint_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject validatetrans_iter();
@@ -577,6 +760,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t validatetrans_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_validatetrans_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject role_allow_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_role_allow_from_void) %}
     qpol_iterator_t *role_allow_iter() {
@@ -589,6 +784,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t role_allow_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_role_allow_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject role_trans_iter();
@@ -605,6 +812,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t role_trans_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_role_trans_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject range_trans_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_range_trans_from_void) %}
     qpol_iterator_t *range_trans_iter() {
@@ -617,6 +836,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t range_trans_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_range_trans_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject avrule_iter(int);
@@ -638,6 +869,58 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t avrule_allow_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_avrule_iter(self, QPOL_RULE_ALLOW, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    size_t avrule_auditallow_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_avrule_iter(self, QPOL_RULE_AUDITALLOW, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    size_t avrule_neverallow_count() {
+        if (qpol_policy_has_capability(self, QPOL_CAP_NEVERALLOW)) {
+            qpol_iterator_t *iter;
+            size_t count = 0;
+            if (qpol_policy_get_avrule_iter(self, QPOL_RULE_NEVERALLOW, &iter)) {
+                SWIG_exception(SWIG_MemoryError, "Out of Memory");
+            }
+            qpol_iterator_get_size(iter, &count);
+            return count;
+        } else {
+            return 0;
+        }
+    fail:
+        return 0;
+    };
+
+    size_t avrule_dontaudit_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_avrule_iter(self, QPOL_RULE_DONTAUDIT, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject terule_iter(int);
     %pythoncode %{ @QpolGenerator(_qpol.qpol_terule_from_void) %}
     qpol_iterator_t *terule_iter() {
@@ -654,6 +937,42 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t terule_trans_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_terule_iter(self, QPOL_RULE_TYPE_TRANS, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    size_t terule_change_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_terule_iter(self, QPOL_RULE_TYPE_CHANGE, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    size_t terule_member_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_terule_iter(self, QPOL_RULE_TYPE_MEMBER, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject cond_iter();
     qpol_iterator_t *cond_iter() {
         BEGIN_EXCEPTION
@@ -666,6 +985,19 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
+
+    size_t cond_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_cond_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject filename_trans_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_filename_trans_from_void) %}
     qpol_iterator_t *filename_trans_iter() {
@@ -678,6 +1010,18 @@ typedef enum qpol_capability
         END_EXCEPTION
     fail:
         return NULL;
+    };
+
+    size_t filename_trans_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_filename_trans_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 
     %newobject permissive_iter();
@@ -694,6 +1038,18 @@ typedef enum qpol_capability
         return NULL;
     };
 
+    size_t permissive_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_permissive_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject typebounds_iter();
     qpol_iterator_t *typebounds_iter() {
         BEGIN_EXCEPTION
@@ -706,6 +1062,19 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
+
+    size_t typebounds_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_typebounds_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject polcap_iter();
     %pythoncode %{ @QpolGenerator(_qpol.qpol_polcap_from_void) %}
     qpol_iterator_t *polcap_iter() {
@@ -719,6 +1088,19 @@ typedef enum qpol_capability
     fail:
         return NULL;
     };
+
+    size_t polcap_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_polcap_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
 };
 
 /* qpol iterator */

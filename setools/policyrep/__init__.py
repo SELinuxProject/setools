@@ -20,6 +20,7 @@
 # The idea is that this is module provides convenient
 # abstractions and methods for accessing the policy
 # structures.
+from itertools import chain
 
 from . import qpol
 
@@ -70,6 +71,10 @@ class SELinuxPolicy(object):
             raise OSError(
                 "Error opening policy file \"{0}\": {1}".format(policyfile, err))
 
+    #
+    # Policy properties
+    #
+
     @property
     def handle_unknown(self):
         """The handle unknown permissions setting (allow,deny,reject)"""
@@ -84,6 +89,175 @@ class SELinuxPolicy(object):
     def version(self):
         """The policy database version (e.g. v29)"""
         return self.policy.version()
+
+    #
+    # Policy statistics
+    #
+
+    @property
+    def allow_count(self):
+        """The number of (type) allow rules."""
+        return self.policy.avrule_allow_count()
+
+    @property
+    def attribute_count(self):
+        """The number of (type) attributes."""
+        return sum(1 for _ in self.attributes())
+
+    @property
+    def auditallow_count(self):
+        """The number of auditallow rules."""
+        return self.policy.avrule_auditallow_count()
+
+    @property
+    def boolean_count(self):
+        """The number of Booleans."""
+        return self.policy.bool_count()
+
+    @property
+    def category_count(self):
+        """The number of categories."""
+        return self.policy.cat_count()
+
+    @property
+    def class_count(self):
+        """The number of object classes."""
+        return self.policy.class_count()
+
+    @property
+    def common_count(self):
+        """The number of common permission sets."""
+        return self.policy.common_count()
+
+    @property
+    def conditional_count(self):
+        """The number of conditionals."""
+        return self.policy.cond_count()
+
+    @property
+    def constraint_count(self):
+        """The number of standard constraints."""
+        return sum(1 for _ in self.constraints())
+
+    @property
+    def dontaudit_count(self):
+        """The number of dontaudit rules."""
+        return self.policy.avrule_dontaudit_count()
+
+    @property
+    def fs_use_count(self):
+        """fs_use_* statements."""
+        return self.policy.fs_use_count()
+
+    @property
+    def genfscon_count(self):
+        """The number of genfscon statements."""
+        return self.policy.genfscon_count()
+
+    @property
+    def initialsids_count(self):
+        """The number of initial sid statements."""
+        return self.policy.isid_count()
+
+    @property
+    def level_count(self):
+        """The number of levels."""
+        return self.policy.level_count()
+
+    @property
+    def mlsconstraint_count(self):
+        """The number of MLS constraints."""
+        return sum(1 for _ in self.mlsconstraints())
+
+    @property
+    def mlsvalidatetrans_count(self):
+        """The number of MLS validatetrans."""
+        return sum(1 for _ in self.mlsvalidatetrans())
+
+    @property
+    def netifcon_count(self):
+        """The number of netifcon statements."""
+        return self.policy.netifcon_count()
+
+    @property
+    def neverallow_count(self):
+        """The number of neverallow rules."""
+        return self.policy.avrule_neverallow_count()
+
+    @property
+    def nodecon_count(self):
+        """The number of nodecon statements."""
+        return self.policy.nodecon_count()
+
+    @property
+    def permission_count(self):
+        """The number of permissions."""
+        return sum(len(c.perms) for c in chain(self.commons(), self.classes()))
+
+    @property
+    def permissives_count(self):
+        """The number of permissive types."""
+        return self.policy.permissive_count()
+
+    @property
+    def polcap_count(self):
+        """The number of policy capabilities."""
+        return self.policy.polcap_count()
+
+    @property
+    def portcon_count(self):
+        """The number of portcon statements."""
+        return self.policy.portcon_count()
+
+    @property
+    def range_transition_count(self):
+        """The number of range_transition rules."""
+        return self.policy.range_trans_count()
+
+    @property
+    def role_count(self):
+        """The number of roles."""
+        return self.policy.role_count()
+
+    @property
+    def role_allow_count(self):
+        """The number of (role) allow rules."""
+        return self.policy.role_allow_count()
+
+    @property
+    def role_transition_count(self):
+        """The number of role_transition rules."""
+        return self.policy.role_trans_count()
+
+    @property
+    def type_count(self):
+        """The number of types."""
+        return sum(1 for _ in self.types())
+
+    @property
+    def type_change_count(self):
+        """The number of type_change rules."""
+        return self.policy.terule_change_count()
+
+    @property
+    def type_member_count(self):
+        """The number of type_member rules."""
+        return self.policy.terule_member_count()
+
+    @property
+    def type_transition_count(self):
+        """The number of type_transition rules."""
+        return self.policy.terule_trans_count() + self.policy.filename_trans_count()
+
+    @property
+    def user_count(self):
+        """The number of users."""
+        return self.policy.user_count()
+
+    @property
+    def validatetrans_count(self):
+        """The number of validatetrans."""
+        return sum(1 for _ in self.validatetrans())
 
     #
     # Policy components lookup functions
@@ -104,6 +278,15 @@ class SELinuxPolicy(object):
     #
     # Policy components generators
     #
+
+    def attributes(self):
+        """Generator which yields all (type) attributes."""
+
+        # libqpol unfortunately iterates over attributes and aliases
+        for type_ in self.policy.type_iter():
+            t = typeattr.TypeAttr(self.policy, type_)
+            if t.isattr:
+                yield t
 
     def classes(self):
         """Generator which yields all object classes."""
@@ -205,6 +388,22 @@ class SELinuxPolicy(object):
             c = constraint.Constraint(self.policy, constraint_)
             if c.ismls:
                 yield c
+
+    def mlsvalidatetrans(self):
+        """Generator which yields all mlsvalidatetrans."""
+
+        for validatetrans in self.policy.validatetrans_iter():
+            v = constraint.ValidateTrans(self.policy, validatetrans)
+            if v.ismls:
+                yield v
+
+    def validatetrans(self):
+        """Generator which yields all validatetrans."""
+
+        for validatetrans in self.policy.validatetrans_iter():
+            v = constraint.ValidateTrans(self.policy, validatetrans)
+            if not v.ismls:
+                yield v
 
     #
     # In-policy Labeling statement generators

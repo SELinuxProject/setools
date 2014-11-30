@@ -155,6 +155,48 @@ try:
         else:
             q = setools.userquery.UserQuery(p)
 
+    else:
+        if p.mls:
+            mls = "enabled"
+        else:
+            mls = "disabled"
+
+        print("Statistics for policy file: {0}".format(args.policy))
+        print("Policy Version: {0} (MLS {1})".format(p.version, mls))
+        print("  Classes:       {0:7}    Permissions:   {1:7}".format(
+            p.class_count, p.permission_count))
+        print("  Sensitivities: {0:7}    Categories:    {1:7}".format(
+            p.level_count, p.category_count))
+        print("  Types:         {0:7}    Attributes:    {1:7}".format(
+            p.type_count, p.attribute_count))
+        print("  Users:         {0:7}    Roles:         {1:7}".format(
+            p.user_count, p.role_count))
+        print("  Booleans:      {0:7}    Cond. Expr.:   {1:7}".format(
+            p.boolean_count, p.conditional_count))
+        print("  Allow:         {0:7}    Neverallow:    {1:7}".format(
+            p.allow_count, p.neverallow_count))
+        print("  Auditallow:    {0:7}    Dontaudit:     {1:7}".format(
+            p.auditallow_count, p.dontaudit_count))
+        print("  Type_trans:    {0:7}    Type_change:   {1:7}".format(
+            p.type_transition_count, p.type_change_count))
+        print("  Type_member:   {0:7}    Range_trans:   {1:7}".format(
+            p.type_member_count, p.range_transition_count))
+        print("  Role allow:    {0:7}    Role_trans:    {1:7}".format(
+            p.role_allow_count, p.role_transition_count))
+        print("  Constraints:   {0:7}    Validatetrans: {1:7}".format(
+            p.constraint_count, p.validatetrans_count))
+        print("  MLS Constrain: {0:7}    MLS Val. Tran: {1:7}".format(
+            p.mlsconstraint_count, p.mlsvalidatetrans_count))
+        print("  Initial SIDs:  {0:7}    Fs_use:        {1:7}".format(
+            p.initialsids_count, p.fs_use_count))
+        print("  Genfscon:      {0:7}    Portcon:       {1:7}".format(
+            p.genfscon_count, p.portcon_count))
+        print("  Netifcon:      {0:7}    Nodecon:       {1:7}".format(
+            p.netifcon_count, p.nodecon_count))
+        print("  Permissives:   {0:7}    Polcap:        {1:7}".format(
+            p.permissives_count, p.polcap_count))
+        sys.exit(0)
+
     for item in sorted(q.results()):
         if args.expand:
             print(item.statement())
