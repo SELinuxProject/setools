@@ -59,7 +59,7 @@ queries.add_argument("--netifcon",  help="Print netifcon statements.",
 queries.add_argument("--nodecon",  help="Print nodecon statements.",
                      dest="nodeconquery",  default="", nargs='?', const=True, metavar="ADDR")
 queries.add_argument("--portcon",  help="Print portcon statements.",
-                     dest="portconquery",  default="", nargs='?', const=True, metavar="PORT_RANGE")
+                     dest="portconquery",  default="", nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
 queries.add_argument("--permissive",  help="Print permissive statements.",
                      dest="permissivequery", default="", nargs='?', const=True, metavar="TYPE")
 queries.add_argument("--polcap",  help="Print policy capabilities.",
@@ -69,163 +69,98 @@ args = parser.parse_args()
 
 try:
     p = setools.SELinuxPolicy(args.policy)
+
+    if args.boolquery:
+        if isinstance(args.boolquery, str):
+            q = setools.boolquery.BoolQuery(p, name=args.boolquery)
+        else:
+            q = setools.boolquery.BoolQuery(p)
+
+    elif args.classquery:
+        if isinstance(args.classquery, str):
+            q = setools.objclassquery.ObjClassQuery(p, name=args.classquery)
+        else:
+            q = setools.objclassquery.ObjClassQuery(p)
+
+    elif args.fsusequery:
+        if isinstance(args.fsusequery, str):
+            q = setools.fsusequery.FSUseQuery(p, fs=args.fsusequery)
+        else:
+            q = setools.fsusequery.FSUseQuery(p)
+
+    elif args.genfsconquery:
+        if isinstance(args.genfsconquery, str):
+            q = setools.genfsconquery.GenfsconQuery(p, fs=args.genfsconquery)
+        else:
+            q = setools.genfsconquery.GenfsconQuery(p)
+
+    elif args.initialsidquery:
+        if isinstance(args.initialsidquery, str):
+            q = setools.initsidquery.InitialSIDQuery(p, name=args.initialsidquery)
+        else:
+            q = setools.initsidquery.InitialSIDQuery(p)
+
+    elif args.netifconquery:
+        if isinstance(args.netifconquery, str):
+            q = setools.netifconquery.NetifconQuery(p, name=args.netifconquery)
+        else:
+            q = setools.netifconquery.NetifconQuery(p)
+
+    elif args.nodeconquery:
+        if isinstance(args.nodeconquery, str):
+            q = setools.nodeconquery.NodeconQuery(p, net=args.nodeconquery)
+        else:
+            q = setools.nodeconquery.NodeconQuery(p)
+
+    elif args.polcapquery:
+        if isinstance(args.polcapquery, str):
+            q = setools.polcapquery.PolCapQuery(p, name=args.polcapquery)
+        else:
+            q = setools.polcapquery.PolCapQuery(p)
+
+    elif args.portconquery:
+        if isinstance(args.portconquery, str):
+            q = setools.portconquery.PortconQuery(p)
+
+            try:
+                ports = [int(i) for i in args.portconquery.split("-")]
+            except:
+                parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
+
+            if len(ports) == 2:
+                q.set_ports((ports[0], ports[1]))
+            elif len(ports) == 1:
+                q.set_ports((ports[0], ports[0]))
+            else:
+                parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
+
+        else:
+            q = setools.portconquery.PortconQuery(p)
+
+    elif args.rolequery:
+        if isinstance(args.rolequery, str):
+            q = setools.rolequery.RoleQuery(p, name=args.rolequery)
+        else:
+            q = setools.rolequery.RoleQuery(p)
+
+    elif args.typequery:
+        if isinstance(args.typequery, str):
+            q = setools.typequery.TypeQuery(p, name=args.typequery)
+        else:
+            q = setools.typequery.TypeQuery(p)
+
+    elif args.userquery:
+        if isinstance(args.userquery, str):
+            q = setools.userquery.UserQuery(p, name=args.userquery)
+        else:
+            q = setools.userquery.UserQuery(p)
+
+    for item in sorted(q.results()):
+        if args.expand:
+            print(item.statement())
+        else:
+            print(item)
+
 except Exception as err:
     print(err)
     sys.exit(-1)
-
-if args.typequery:
-    if isinstance(args.typequery, str):
-        q = setools.typequery.TypeQuery(p, name=args.typequery)
-    else:
-        q = setools.typequery.TypeQuery(p)
-
-    for t in sorted(q.results()):
-        if args.expand:
-            print(t.statement())
-        else:
-            print(t)
-
-if args.boolquery:
-    if isinstance(args.boolquery, str):
-        q = setools.boolquery.BoolQuery(p, name=args.boolquery)
-    else:
-        q = setools.boolquery.BoolQuery(p)
-
-    for b in sorted(q.results()):
-        if args.expand:
-            print(b.statement())
-        else:
-            print(b)
-
-if args.polcapquery:
-    if isinstance(args.polcapquery, str):
-        q = setools.polcapquery.PolCapQuery(p, name=args.polcapquery)
-    else:
-        q = setools.polcapquery.PolCapQuery(p)
-
-    for cap in sorted(q.results()):
-        if args.expand:
-            print(cap.statement())
-        else:
-            print(cap)
-
-if args.userquery:
-    if isinstance(args.userquery, str):
-        q = setools.userquery.UserQuery(p, name=args.userquery)
-    else:
-        q = setools.userquery.UserQuery(p)
-
-    for u in sorted(q.results()):
-        if args.expand:
-            print(u.statement())
-        else:
-            print(u)
-
-if args.rolequery:
-    if isinstance(args.rolequery, str):
-        q = setools.rolequery.RoleQuery(p, name=args.rolequery)
-    else:
-        q = setools.rolequery.RoleQuery(p)
-
-    for r in sorted(q.results()):
-        if args.expand:
-            print(r.statement())
-        else:
-            print(r)
-
-if args.classquery:
-    if isinstance(args.classquery, str):
-        q = setools.objclassquery.ObjClassQuery(p, name=args.classquery)
-    else:
-        q = setools.objclassquery.ObjClassQuery(p)
-
-    for c in sorted(q.results()):
-        if args.expand:
-            print(c.statement())
-        else:
-            print(c)
-
-if args.initialsidquery:
-    if isinstance(args.initialsidquery, str):
-        q = setools.initsidquery.InitialSIDQuery(p, name=args.initialsidquery)
-    else:
-        q = setools.initsidquery.InitialSIDQuery(p)
-
-    for i in sorted(q.results()):
-        if args.expand:
-            print(i.statement())
-        else:
-            print(i)
-
-if args.fsusequery:
-    if isinstance(args.fsusequery, str):
-        q = setools.fsusequery.FSUseQuery(p, fs=args.fsusequery)
-    else:
-        q = setools.fsusequery.FSUseQuery(p)
-
-    for f in sorted(q.results()):
-        if args.expand:
-            print(f.statement())
-        else:
-            print(f)
-
-if args.genfsconquery:
-    if isinstance(args.genfsconquery, str):
-        q = setools.genfsconquery.GenfsconQuery(p, fs=args.genfsconquery)
-    else:
-        q = setools.genfsconquery.GenfsconQuery(p)
-
-    for g in sorted(q.results()):
-        if args.expand:
-            print(g.statement())
-        else:
-            print(g)
-
-if args.netifconquery:
-    if isinstance(args.netifconquery, str):
-        q = setools.netifconquery.NetifconQuery(p, name=args.netifconquery)
-    else:
-        q = setools.netifconquery.NetifconQuery(p)
-
-    for n in sorted(q.results()):
-        if args.expand:
-            print(n.statement())
-        else:
-            print(n)
-
-if args.nodeconquery:
-    if isinstance(args.nodeconquery, str):
-        q = setools.nodeconquery.NodeconQuery(p, net=args.nodeconquery)
-    else:
-        q = setools.nodeconquery.NodeconQuery(p)
-
-    for n in sorted(q.results()):
-        if args.expand:
-            print(n.statement())
-        else:
-            print(n)
-
-if args.portconquery:
-    if isinstance(args.portconquery, str):
-        q = setools.portconquery.PortconQuery(p)
-
-        try:
-            ports = [int(i) for i in args.portconquery.split("-")]
-        except:
-            parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
-
-        if len(ports) == 2:
-            q.set_ports((ports[0], ports[1]))
-        elif len(ports) == 1:
-            q.set_ports((ports[0], ports[0]))
-        else:
-            parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
-
-    else:
-        q = setools.portconquery.PortconQuery(p)
-
-    for port in sorted(q.results()):
-        if args.expand:
-            print(port.statement())
-        else:
-            print(port)
