@@ -45,7 +45,7 @@ queries.add_argument("-b", "--bool",  help="Print Booleans.",
 queries.add_argument("--sensitivity",  help="Print MLS sensitivities.",
                      dest="mlssensquery",  default="", nargs='?', const=True, metavar="SENS")
 queries.add_argument("--category",  help="Print MLS categories.",
-                     dest="mlssensquery",  default="", nargs='?', const=True, metavar="CAT")
+                     dest="mlscatsquery",  default="", nargs='?', const=True, metavar="CAT")
 queries.add_argument("--constrain",  help="Print constraints.",
                      dest="constraintquery",  default="", nargs='?', const=True, metavar="CLASS")
 queries.add_argument("--initialsid",  help="Print initial SIDs (contexts).",
