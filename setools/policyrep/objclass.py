@@ -30,7 +30,6 @@ class Common(symbol.PolicySymbol):
     @property
     def perms(self):
         """The list of the common's permissions."""
-
         return set(self.qpol_symbol.perm_iter(self.policy))
 
     def statement(self):
