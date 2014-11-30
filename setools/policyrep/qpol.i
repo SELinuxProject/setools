@@ -26,6 +26,7 @@
 %{
 #include <sys/stat.h>
 #include <arpa/inet.h>
+#include <sepol/policydb.h>
 #include "include/qpol/avrule_query.h"
 #include "include/qpol/bool_query.h"
 #include "include/qpol/class_perm_query.h"
@@ -303,10 +304,16 @@ typedef enum qpol_capability
         return (int) v;
     };
 
-    int handle_unknown () {
+    const char *handle_unknown () {
         unsigned int h;
-        (void)qpol_policy_get_policy_handle_unknown(self, &h);
-        return (int) h;
+        qpol_policy_get_policy_handle_unknown(self, &h);
+
+        switch (h) {
+            case SEPOL_DENY_UNKNOWN: return "deny";
+            case SEPOL_REJECT_UNKNOWN: return "reject";
+            case SEPOL_ALLOW_UNKNOWN: return "allow";
+            default: return "unknown";
+        }
     };
 
     int policy_type () {

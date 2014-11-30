@@ -70,6 +70,21 @@ class SELinuxPolicy(object):
             raise OSError(
                 "Error opening policy file \"{0}\": {1}".format(policyfile, err))
 
+    @property
+    def handle_unknown(self):
+        """The handle unknown permissions setting (allow,deny,reject)"""
+        return self.policy.handle_unknown()
+
+    @property
+    def mls(self):
+        """(T/F) The policy has MLS enabled."""
+        return bool(self.policy.capability(qpol.QPOL_CAP_MLS))
+
+    @property
+    def version(self):
+        """The policy database version (e.g. v29)"""
+        return self.policy.version()
+
     #
     # Policy components lookup functions
     #
