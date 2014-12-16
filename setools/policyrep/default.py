@@ -108,8 +108,12 @@ class TypeDefault(Default):
 class RangeDefault(Default):
 
     def __str__(self):
-        return "default_range {0.object_class} {0.default};".format(self)
+        return "default_range {0.object_class} {0.default} {0.default_range};".format(self)
 
     @property
     def default(self):
-        return self.qpol_symbol.range_default(self.policy)
+        return self.qpol_symbol.range_default(self.policy).split()[0]
+
+    @property
+    def default_range(self):
+        return self.qpol_symbol.range_default(self.policy).split()[1]
