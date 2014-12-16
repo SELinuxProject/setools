@@ -31,19 +31,19 @@
 #include "qpol_internal.h"
 #include "iterator_internal.h"
 
-int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_default_object_t * datum, const char **name)
+int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_default_object_t * datum, const qpol_class_t **cls)
 {
 	class_datum_t *internal_datum = NULL;
 	policydb_t *db = NULL;
 	
-	if (policy == NULL || datum == NULL || name == NULL) {
-		if (name != NULL)
-			*name = NULL;
+	if (policy == NULL || datum == NULL || cls == NULL) {
+		if (cls != NULL)
+			*cls = NULL;
 		ERR(policy, "%s", strerror(EINVAL));
 		errno = EINVAL;
 		return STATUS_ERR;
 	}
-	*name = NULL;
+	*cls = NULL;
 
 	db = &policy->p->p;
 	internal_datum = (class_datum_t *)datum;
@@ -52,7 +52,7 @@ int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_defaul
 	if (internal_datum->default_user || internal_datum->default_role ||
 				internal_datum->default_type ||
 				 internal_datum->default_range) {
-		*name = db->p_class_val_to_name[internal_datum->s.value - 1];
+		*cls = (const qpol_class_t *) datum;
 	}
 	return STATUS_SUCCESS;
 }

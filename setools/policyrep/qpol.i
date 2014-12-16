@@ -3668,16 +3668,17 @@ typedef struct qpol_default_object {} qpol_default_object_t;
         /* no op */
         return;
     };
-    const char *class_name(qpol_policy_t *p) {
-        const char *name;
-        BEGIN_EXCEPTION
-        if (qpol_default_object_get_class(p, self, &name)) {
-            SWIG_exception(SWIG_ValueError, "Could not get class name");
+
+    %newobject object_class();
+    const qpol_class_t *object_class(qpol_policy_t *p) {
+        const qpol_class_t *cls;
+        if (qpol_default_object_get_class(p, self, &cls)) {
+            SWIG_exception(SWIG_ValueError, "Could not get class");
         }
-        END_EXCEPTION
     fail:
-        return name;
+        return cls;
     };
+
     const char *user_default(qpol_policy_t *p) {
         const char *value;
         BEGIN_EXCEPTION

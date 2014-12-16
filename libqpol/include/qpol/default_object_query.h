@@ -54,12 +54,12 @@ extern "C"
  *  Get the name which identifies a default_object class from its datum.
  *  @param policy The policy with which class is associated.
  *  @param datum default_object datum for which to get the name. Must be non-NULL.
- *  @param name Pointer to the string in which to store the name.
+ *  @param cls Pointer to the class object.
  *  Must be non-NULL. The caller should not free the string.
  *  @return Returns 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *name will be NULL.
  */
-	extern int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_default_object_t *datum, const char **name);
+	extern int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_default_object_t *datum, const qpol_class_t **cls);
 
 /**
  *  Get the value of a default user source/dest from its datum.
