@@ -28,7 +28,7 @@ class NoDefaults(symbol.InvalidSymbol):
 
 
 def default_factory(policy, symbol):
-    """Factory generator for creating default objects."""
+    """Factory generator for creating default_* statement objects."""
 
     # The low level policy groups default_* settings by object class.
     # Since each class can have up to four default_* statements,
@@ -65,6 +65,7 @@ class Default(symbol.PolicySymbol):
 
     @property
     def object_class(self):
+        """The object class."""
         return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
 
     @property
@@ -77,43 +78,56 @@ class Default(symbol.PolicySymbol):
 
 class UserDefault(Default):
 
+    """A default_user statement."""
+
     def __str__(self):
         return "default_user {0.object_class} {0.default};".format(self)
 
     @property
     def default(self):
+        """The default user location (source/target)."""
         return self.qpol_symbol.user_default(self.policy)
 
 
 class RoleDefault(Default):
+
+    """A default_role statement."""
 
     def __str__(self):
         return "default_role {0.object_class} {0.default};".format(self)
 
     @property
     def default(self):
+        """The default role location (source/target)."""
         return self.qpol_symbol.role_default(self.policy)
 
 
 class TypeDefault(Default):
+
+    """A default_type statement."""
 
     def __str__(self):
         return "default_type {0.object_class} {0.default};".format(self)
 
     @property
     def default(self):
+        """The default type location (source/target)."""
         return self.qpol_symbol.type_default(self.policy)
 
 
 class RangeDefault(Default):
+
+    """A default_range statement."""
 
     def __str__(self):
         return "default_range {0.object_class} {0.default} {0.default_range};".format(self)
 
     @property
     def default(self):
+        """The default range location (source/target)."""
         return self.qpol_symbol.range_default(self.policy).split()[0]
 
     @property
     def default_range(self):
+        """The default range setting (low/high/low_high)."""
         return self.qpol_symbol.range_default(self.policy).split()[1]
