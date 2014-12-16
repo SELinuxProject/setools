@@ -1101,6 +1101,17 @@ typedef enum qpol_capability
         return 0;
     };
 
+    %newobject default_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_default_object_from_void) %}
+    qpol_iterator_t *default_iter() {
+        qpol_iterator_t *iter;
+        if (qpol_policy_get_default_object_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+    }
+        return iter;
+    fail:
+        return NULL;
+    };
 };
 
 /* qpol iterator */
