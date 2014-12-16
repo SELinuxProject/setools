@@ -33,6 +33,7 @@ from . import qpol
 # be valid for the policy it comes from.
 
 # Components
+from . import default
 from . import objclass
 from . import typeattr
 from . import boolcond
@@ -299,6 +300,18 @@ class SELinuxPolicy(object):
 
         for common in self.policy.common_iter():
             yield objclass.Common(self.policy, common)
+
+    def defaults(self):
+        """Generator which yields all default_* statements."""
+
+        for default_ in self.policy.default_iter():
+            try:
+                for d in default.default_factory(self.policy, default_):
+                    yield d
+            except default.NoDefaults:
+                # qpol iterates over all classes. Handle case
+                # where a class has no default_* settings.
+                pass
 
     def types(self):
         """Generator which yields all types."""
