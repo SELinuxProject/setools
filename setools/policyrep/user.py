@@ -31,6 +31,9 @@ class InvalidUser(symbol.InvalidSymbol):
 def user_factory(qpol_policy, name):
     """Factory function for creating User objects."""
 
+    if isinstance(name, qpol.qpol_user_t):
+        return User(qpol_policy, name)
+
     try:
         symbol = qpol.qpol_user_t(qpol_policy, name)
     except ValueError:
@@ -50,7 +53,7 @@ class User(symbol.PolicySymbol):
         r = set()
 
         for role_ in self.qpol_symbol.role_iter(self.policy):
-            item = role.Role(self.policy, role_)
+            item = role.role_factory(self.policy, role_)
 
             # object_r is implicitly added to all roles by the compiler.
             # technically it is incorrect to skip it, but policy writers
@@ -64,12 +67,12 @@ class User(symbol.PolicySymbol):
     @property
     def mls_level(self):
         """The user's default MLS level."""
-        return mls.MLSLevel(self.policy, self.qpol_symbol.dfltlevel(self.policy))
+        return mls.level_factory(self.policy, self.qpol_symbol.dfltlevel(self.policy))
 
     @property
     def mls_range(self):
         """The user's MLS range."""
-        return mls.MLSRange(self.policy, self.qpol_symbol.range(self.policy))
+        return mls.range_factory(self.policy, self.qpol_symbol.range(self.policy))
 
     def statement(self):
         roles = list(str(r) for r in self.roles)

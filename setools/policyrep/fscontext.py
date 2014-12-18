@@ -23,6 +23,24 @@ from . import symbol
 from . import context
 
 
+def genfscon_factory(policy, symbol):
+    """Factory function for creating genfscon objects."""
+
+    if not isinstance(symbol, qpol.qpol_genfscon_t):
+        raise TypeError("Genfscons cannot be looked-up.")
+
+    return Genfscon(policy, symbol)
+
+
+def fs_use_factory(policy, symbol):
+    """Factory function for creating fs_use_* objects."""
+
+    if not isinstance(symbol, qpol.qpol_fs_use_t):
+        raise TypeError("fs_use_* cannot be looked-up.")
+
+    return FSUse(policy, symbol)
+
+
 class FSContext(symbol.PolicySymbol):
 
     """Abstract base class for in-policy labeling rules."""
@@ -38,7 +56,7 @@ class FSContext(symbol.PolicySymbol):
     @property
     def context(self):
         """The context for this statement."""
-        return context.Context(self.policy, self.qpol_symbol.context(self.policy))
+        return context.context_factory(self.policy, self.qpol_symbol.context(self.policy))
 
     def statement(self):
         return str(self)

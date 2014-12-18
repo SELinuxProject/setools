@@ -30,6 +30,36 @@ class MLSDisabled(Exception):
     pass
 
 
+def category_factory(policy, symbol):
+    """Factory function for creating MLS category objects."""
+
+    if not isinstance(symbol, qpol.qpol_cat_t):
+        raise NotImplementedError
+
+    return MLSCategory(policy, symbol)
+
+
+def sensitivity_factory(policy, symbol):
+    """Factory function for creating MLS sensitivity objects."""
+    raise NotImplementedError
+
+
+def level_factory(policy, symbol):
+    """Factory function for creating MLS level objects."""
+    if not isinstance(symbol, qpol.qpol_mls_level_t):
+        raise TypeError("MLS levels cannot be looked-up.")
+
+    return MLSLevel(policy, symbol)
+
+
+def range_factory(policy, symbol):
+    """Factory function for creating MLS range objects."""
+    if not isinstance(symbol, qpol.qpol_mls_range_t):
+        raise TypeError("MLS ranges cannot be looked up.")
+
+    return MLSRange(policy, symbol)
+
+
 class MLSCategory(symbol.PolicySymbol):
 
     """An MLS category."""
@@ -109,7 +139,7 @@ class MLSLevel(symbol.PolicySymbol):
         """
 
         for cat in self.qpol_symbol.cat_iter(self.policy):
-            yield MLSCategory(self.policy, cat)
+            yield category_factory(self.policy, cat)
 
 
 class MLSRange(symbol.PolicySymbol):
@@ -127,9 +157,9 @@ class MLSRange(symbol.PolicySymbol):
     @property
     def high(self):
         """The high end/clearance level of this range."""
-        return MLSLevel(self.policy, self.qpol_symbol.high_level(self.policy))
+        return level_factory(self.policy, self.qpol_symbol.high_level(self.policy))
 
     @property
     def low(self):
         """The low end/current level of this range."""
-        return MLSLevel(self.policy, self.qpol_symbol.low_level(self.policy))
+        return level_factory(self.policy, self.qpol_symbol.low_level(self.policy))

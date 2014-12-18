@@ -20,6 +20,15 @@ from . import qpol
 from . import symbol
 
 
+def polcap_factory(policy, symbol):
+    """Factory function for creating policy capability objects."""
+
+    if not isinstance(symbol, qpol.qpol_polcap_t):
+        raise NotImplementedError
+
+    return PolicyCapability(policy, symbol)
+
+
 class PolicyCapability(symbol.PolicySymbol):
 
     """A policy capability."""

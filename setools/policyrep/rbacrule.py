@@ -20,49 +20,67 @@ from . import qpol
 from . import rule
 from . import role
 from . import typeattr
-from . import objclass
 
 
-class RBACRule(rule.PolicyRule):
+def rbac_rule_factory(policy, symbol):
+    """Factory function for creating RBAC rule objects."""
 
-    """An RBAC rule."""
+    if isinstance(symbol, qpol.qpol_role_allow_t):
+        return RoleAllow(policy, symbol)
+    elif isinstance(symbol, qpol.qpol_role_trans_t):
+        return RoleTransition(policy, symbol)
+    else:
+        raise TypeError("RBAC rules cannot be looked up.")
+
+
+class RoleAllow(rule.PolicyRule):
+
+    """A role allow rule."""
 
     def __str__(self):
-        try:
-            return "role_transition {0.source} {0.target}:{0.tclass} {0.default};".format(self)
-        except rule.InvalidRuleUse:
-            return "allow {0.source} {0.target};".format(self)
+        return "allow {0.source} {0.target};".format(self)
 
     @property
     def source(self):
         """The rule's source role."""
-        return role.Role(self.policy, self.qpol_symbol.source_role(self.policy))
+        return role.role_factory(self.policy, self.qpol_symbol.source_role(self.policy))
 
     @property
     def target(self):
-        """
-        The rule's target role (role allow) or target type/attribute
-        (role_transition).
-        """
-        try:
-            return role.Role(self.policy, self.qpol_symbol.target_role(self.policy))
-        except AttributeError:
-            return typeattr.TypeAttr(self.policy, self.qpol_symbol.target_type(self.policy))
+        """The rule's target role."""
+        return role.role_factory(self.policy, self.qpol_symbol.target_role(self.policy))
 
     @property
     def tclass(self):
         """The rule's object class."""
-        try:
-            return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
-        except AttributeError:
-            raise rule.InvalidRuleUse(
-                "Role allow rules do not have an object class.")
+        raise rule.InvalidRuleUse(
+            "Role allow rules do not have an object class.")
 
     @property
     def default(self):
         """The rule's default role."""
-        try:
-            return role.Role(self.policy, self.qpol_symbol.default_role(self.policy))
-        except AttributeError:
-            raise rule.InvalidRuleUse(
-                "Role allow rules do not have a default role.")
+        raise rule.InvalidRuleUse(
+            "Role allow rules do not have a default role.")
+
+
+class RoleTransition(rule.PolicyRule):
+
+    """A role_transition rule."""
+
+    def __str__(self):
+        return "role_transition {0.source} {0.target}:{0.tclass} {0.default};".format(self)
+
+    @property
+    def source(self):
+        """The rule's source role."""
+        return role.role_factory(self.policy, self.qpol_symbol.source_role(self.policy))
+
+    @property
+    def target(self):
+        """The rule's target type/attribute."""
+        return typeattr.typeattr_factory(self.policy, self.qpol_symbol.target_type(self.policy))
+
+    @property
+    def default(self):
+        """The rule's default role."""
+        return role.role_factory(self.policy, self.qpol_symbol.default_role(self.policy))

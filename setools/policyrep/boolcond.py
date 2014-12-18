@@ -20,6 +20,33 @@ from . import qpol
 from . import symbol
 
 
+class InvalidBoolean(symbol.InvalidSymbol):
+
+    """Exception for invalid Booleans."""
+    pass
+
+
+def boolean_factory(policy, symbol):
+    """Factory function for creating Boolean statement objects."""
+
+    if isinstance(symbol, qpol.qpol_bool_t):
+        return Boolean(policy, symbol)
+
+    try:
+        return qpol.qpol_bool_t(qpol_policy, symbol)
+    except ValueError:
+        raise InvalidBoolean("{0} is not a valid Boolean".format(symbol))
+
+
+def condexpr_factory(policy, symbol):
+    """Factory function for creating conditional expression objects."""
+
+    if not isinstance(symbol, qpol.qpol_cond_t):
+        raise TypeError("Conditional expressions cannot be looked up.")
+
+    return ConditionalExpr(policy, symbol)
+
+
 class Boolean(symbol.PolicySymbol):
 
     """A Boolean."""
@@ -57,7 +84,7 @@ class ConditionalExpr(symbol.PolicySymbol):
         for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
             expr_node_type = expr_node.expr_type(self.policy)
 
-            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == Boolean(self.policy, expr_node.bool(self.policy)):
+            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == boolean_factory(self.policy, expr_node.bool(self.policy)):
                 return True
 
         return False
@@ -76,7 +103,7 @@ class ConditionalExpr(symbol.PolicySymbol):
 
             if expr_node_type == qpol.QPOL_COND_EXPR_BOOL:
                 # append the boolean name
-                nodebool = Boolean(
+                nodebool = boolean_factory(
                     self.policy, expr_node.get_boolean(self.policy))
                 stack.append(str(nodebool))
             elif expr_node_type == qpol.QPOL_COND_EXPR_NOT:  # unary operator

@@ -24,6 +24,15 @@ from . import typeattr
 from . import mls
 
 
+def context_factory(policy, symbol):
+    """Factory function for creating context objects."""
+
+    if not isinstance(symbol, qpol.qpol_context_t):
+        raise TypeError("Contexts cannot be looked-up.")
+
+    return Context(policy, symbol)
+
+
 class Context(symbol.PolicySymbol):
 
     """A SELinux security context/security attribute."""
@@ -37,17 +46,17 @@ class Context(symbol.PolicySymbol):
     @property
     def user(self):
         """The user portion of the context."""
-        return user.User(self.policy, self.qpol_symbol.user(self.policy))
+        return user.user_factory(self.policy, self.qpol_symbol.user(self.policy))
 
     @property
     def role(self):
         """The role portion of the context."""
-        return role.Role(self.policy, self.qpol_symbol.role(self.policy))
+        return role.role_factory(self.policy, self.qpol_symbol.role(self.policy))
 
     @property
     def type_(self):
         """The type portion of the context."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.type_(self.policy))
+        return typeattr.type_factory(self.policy, self.qpol_symbol.type_(self.policy))
 
     @property
     def mls(self):
@@ -55,6 +64,6 @@ class Context(symbol.PolicySymbol):
 
         # without this check, qpol will segfault on MLS-disabled policies
         if self.policy.capability(qpol.QPOL_CAP_MLS):
-            return mls.MLSRange(self.policy, self.qpol_symbol.range(self.policy))
+            return mls.range_factory(self.policy, self.qpol_symbol.range(self.policy))
         else:
             raise mls.MLSDisabled("MLS is disabled, the context has no range.")

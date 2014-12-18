@@ -2725,7 +2725,7 @@ typedef struct qpol_range_trans {} qpol_range_trans_t;
     fail:
         return t;
     };
-    const qpol_class_t *target_class(qpol_policy_t *p) {
+    const qpol_class_t *object_class(qpol_policy_t *p) {
         const qpol_class_t *cls;
         BEGIN_EXCEPTION
         if (qpol_range_trans_get_target_class(p, self, &cls)) {

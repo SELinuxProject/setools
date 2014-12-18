@@ -20,7 +20,6 @@ from . import qpol
 from . import symbol
 from . import rule
 from . import typeattr
-from . import objclass
 from . import boolcond
 
 
@@ -33,35 +32,63 @@ class TERuleNoFilename(Exception):
     pass
 
 
-class TERule(rule.PolicyRule):
+def te_rule_factory(policy, symbol):
+    """Factory function for creating TE rule objects."""
+
+    if isinstance(symbol, qpol.qpol_avrule_t):
+        return AVRule(policy, symbol)
+    elif isinstance(symbol, (qpol.qpol_terule_t, qpol.qpol_filename_trans_t)):
+        return TERule(policy, symbol)
+    else:
+        raise TypeError("TE rules cannot be looked-up.")
+
+
+class BaseTERule(rule.PolicyRule):
 
     """A type enforcement rule."""
 
-    # This class abstracts away the policydb implementation detail
-    # that 'AV' rules and 'TE' rules are in separate tables
+    @property
+    def source(self):
+        """The rule's source type/attribute."""
+        return typeattr.typeattr_factory(self.policy, self.qpol_symbol.source_type(self.policy))
+
+    @property
+    def target(self):
+        """The rule's target type/attribute."""
+        return typeattr.typeattr_factory(self.policy, self.qpol_symbol.target_type(self.policy))
+
+    @property
+    def filename(self):
+        raise NotImplementedError
+
+    @property
+    def conditional(self):
+        """The rule's conditional expression."""
+        try:
+            return boolcond.condexpr_factory(self.policy, self.qpol_symbol.cond(self.policy))
+        except (AttributeError, ValueError):
+            # AttributeError: name filetrans rules cannot be conditional
+            #                 so no member function
+            # ValueError:     The rule is not conditional
+            raise rule.RuleNotConditional
+
+
+class AVRule(BaseTERule):
+
+    """An access vector type enforcement rule."""
 
     def __str__(self):
         rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(
             self)
 
-        try:
-            perms = self.perms
-        except rule.InvalidRuleUse:
-            # type_* rules
-            rule_string += str(self.default)
+        perms = self.perms
 
-            try:
-                rule_string += " \"{0}\";".format(self.filename)
-            except (TERuleNoFilename, rule.InvalidRuleUse):
-                # invalid use for type_change/member
-                rule_string += ";"
+        # allow/dontaudit/auditallow/neverallow rules
+        if len(perms) > 1:
+            rule_string += "{{ {0} }};".format(' '.join(perms))
         else:
-            # allow/dontaudit/auditallow/neverallow rules
-            if len(perms) > 1:
-                rule_string += "{{ {0} }};".format(' '.join(perms))
-            else:
-                # convert to list since sets cannot be indexed
-                rule_string += "{0};".format(list(perms)[0])
+            # convert to list since sets cannot be indexed
+            rule_string += "{0};".format(list(perms)[0])
 
         try:
             rule_string += " [ {0} ]".format(self.conditional)
@@ -71,35 +98,54 @@ class TERule(rule.PolicyRule):
         return rule_string
 
     @property
-    def source(self):
-        """The rule's source type/attribute."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.source_type(self.policy))
+    def perms(self):
+        """The rule's permission set."""
+        return set(self.qpol_symbol.perm_iter(self.policy))
 
     @property
-    def target(self):
-        """The rule's target type/attribute."""
-        return typeattr.TypeAttr(self.policy, self.qpol_symbol.target_type(self.policy))
+    def default(self):
+        """The rule's default type."""
+        raise rule.InvalidRuleUse(
+            "{0} rules do not have a default type.".format(self.ruletype))
 
     @property
-    def tclass(self):
-        """The rule's object class."""
-        return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
+    def filename(self):
+        raise rule.InvalidRuleUse(
+            "{0} rules do not have file names".format(self.ruletype))
+
+
+class TERule(BaseTERule):
+
+    """A type_* type enforcement rule."""
+
+    def __str__(self):
+        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default}".format(
+            self)
+
+        try:
+            rule_string += " \"{0}\";".format(self.filename)
+        except (TERuleNoFilename, rule.InvalidRuleUse):
+            # invalid use for type_change/member
+            rule_string += ";"
+
+        try:
+            rule_string += " [ {0} ]".format(self.conditional)
+        except rule.RuleNotConditional:
+            pass
+
+        return rule_string
 
     @property
     def perms(self):
         """The rule's permission set."""
-        try:
-            # create permission list
-            return set(self.qpol_symbol.perm_iter(self.policy))
-        except AttributeError:
-            raise rule.InvalidRuleUse(
-                "{0} rules do not have a permission set.".format(self.ruletype))
+        raise rule.InvalidRuleUse(
+            "{0} rules do not have a permission set.".format(self.ruletype))
 
     @property
     def default(self):
         """The rule's default type."""
         try:
-            return typeattr.TypeAttr(self.policy, self.qpol_symbol.default_type(self.policy))
+            return typeattr.type_factory(self.policy, self.qpol_symbol.default_type(self.policy))
         except AttributeError:
             raise rule.InvalidRuleUse(
                 "{0} rules do not have a default type.".format(self.ruletype))
@@ -115,14 +161,3 @@ class TERule(rule.PolicyRule):
             else:
                 raise rule.InvalidRuleUse(
                     "{0} rules do not have file names".format(self.ruletype))
-
-    @property
-    def conditional(self):
-        """The rule's conditional expression."""
-        try:
-            return boolcond.ConditionalExpr(self.policy, self.qpol_symbol.cond(self.policy))
-        except (AttributeError, ValueError):
-            # AttributeError: name filetrans rules cannot be conditional
-            #                 so no member function
-            # ValueError:     The rule is not conditional
-            raise rule.RuleNotConditional

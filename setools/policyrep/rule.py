@@ -18,6 +18,7 @@
 #
 from . import qpol
 from . import symbol
+from . import objclass
 
 
 class InvalidRuleUse(Exception):
@@ -69,11 +70,8 @@ class PolicyRule(symbol.PolicySymbol):
 
     @property
     def tclass(self):
-        """
-        The object class for the rule. This should be overridden by
-        subclasses.
-        """
-        raise NotImplementedError
+        """The object class for the rule."""
+        return objclass.class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
 
     @property
     def default(self):

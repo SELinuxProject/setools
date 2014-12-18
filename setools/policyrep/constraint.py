@@ -21,9 +21,72 @@ from . import symbol
 from . import objclass
 
 
+def _is_mls(policy, symbol):
+    # determine if this is a regular or MLS constraint/validatetrans.
+    # this can only be determined by inspecting the expression.
+    for expr_node in symbol.expr_iter(policy):
+        sym_type = expr_node.sym_type(policy)
+        expr_type = expr_node.expr_type(policy)
+
+        if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR and sym_type >= qpol.QPOL_CEXPR_SYM_L1L2:
+            return True
+
+    return False
+
+
+def constraint_factory(policy, symbol):
+    """Factory function for creating regular (non-MLS) constraint objects."""
+
+    try:
+        if _is_mls(policy, symbol):
+            raise TypeError(
+                "Constraint symbol is not a regular (non-MLS) constraint.")
+    except AttributeError:
+        raise TypeError("Constraints cannot be looked-up.")
+
+    return Constraint(policy, symbol)
+
+
+def mlsconstraint_factory(policy, symbol):
+    """Factory function for creating MLS constraint objects."""
+
+    try:
+        if not _is_mls(policy, symbol):
+            raise TypeError("Constraint symbol is not a MLS constraint.")
+    except AttributeError:
+        raise TypeError("MLS constraints cannot be looked-up.")
+
+    return MLSConstraint(policy, symbol)
+
+
+def validatetrans_factory(policy, symbol):
+    """Factory function for creating regular (non-MLS) validatetrans objects."""
+
+    try:
+        if _is_mls(policy, symbol):
+            raise TypeError(
+                "Validatetrans symbol is not a regular (non-MLS) constraint.")
+    except AttributeError:
+        raise TypeError("Validatetrans cannot be looked-up.")
+
+    return ValidateTrans(policy, symbol)
+
+
+def mlsvalidatetrans_factory(policy, symbol):
+    """Factory function for creating MLS validatetrans objects."""
+
+    try:
+        if not _is_mls(policy, symbol):
+            raise TypeError("Validatetrans symbol is not a MLS validatetrans.")
+    except AttributeError:
+        raise TypeError("MLS validatetrans cannot be looked-up.")
+
+    return MLSValidateTrans(policy, symbol)
+
+
 class Constraint(symbol.PolicySymbol):
 
-    """A constraint rule (regular or MLS)."""
+    """A regular (non-MLS) constraint rule."""
 
     _expr_type_to_text = {
         qpol.QPOL_CEXPR_TYPE_NOT: "not",
@@ -66,10 +129,7 @@ class Constraint(symbol.PolicySymbol):
     _expr_op_precedence = 4
 
     def __str__(self):
-        if self.ismls:
-            rule_string = "mlsconstrain {0.tclass} ".format(self)
-        else:
-            rule_string = "constrain {0.tclass} ".format(self)
+        rule_string = "constrain {0.tclass} ".format(self)
 
         perms = self.perms
         if len(perms) > 1:
@@ -159,23 +219,6 @@ class Constraint(symbol.PolicySymbol):
         return ' '.join(ret)
 
     @property
-    def ismls(self):
-        try:
-            return self._ismls
-        except AttributeError:
-            self._ismls = False
-
-            for expr_node in self.qpol_symbol.expr_iter(self.policy):
-                sym_type = expr_node.sym_type(self.policy)
-                expr_type = expr_node.expr_type(self.policy)
-
-                if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR and sym_type >= qpol.QPOL_CEXPR_SYM_L1L2:
-                    self._ismls = True
-                    break
-
-            return self._ismls
-
-    @property
     def perms(self):
         """The constraint's permission set."""
 
@@ -187,10 +230,59 @@ class Constraint(symbol.PolicySymbol):
     @property
     def tclass(self):
         """Object class for this constraint."""
-        return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
+        return objclass.class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
+
+
+class MLSConstraint(Constraint):
+
+    def __str__(self):
+        rule_string = "mlsconstrain {0.tclass} ".format(self)
+
+        perms = self.perms
+        if len(perms) > 1:
+            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
+        else:
+            # convert to list since sets cannot be indexed
+            rule_string += "{0} (\n".format(list(perms)[0])
+
+        rule_string += "\t{0}\n);".format(self.__build_expression())
+
+        return rule_string
 
 
 class ValidateTrans(Constraint):
 
-    """A validate transition rule."""
-    pass
+    """A regular validate transition rule."""
+
+    def __str__(self):
+        rule_string = "validatetrans {0.tclass} ".format(self)
+
+        perms = self.perms
+        if len(perms) > 1:
+            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
+        else:
+            # convert to list since sets cannot be indexed
+            rule_string += "{0} (\n".format(list(perms)[0])
+
+        rule_string += "\t{0}\n);".format(self.__build_expression())
+
+        return rule_string
+
+
+class MLSValidateTrans(Constraint):
+
+    """A MLS validate transition rule."""
+
+    def __str__(self):
+        rule_string = "mlsvalidatetrans {0.tclass} ".format(self)
+
+        perms = self.perms
+        if len(perms) > 1:
+            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
+        else:
+            # convert to list since sets cannot be indexed
+            rule_string += "{0} (\n".format(list(perms)[0])
+
+        rule_string += "\t{0}\n);".format(self.__build_expression())
+
+        return rule_string

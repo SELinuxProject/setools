@@ -264,13 +264,17 @@ class SELinuxPolicy(object):
     # Policy components lookup functions
     #
 
+    def lookup_attribute(self, name):
+        """Look up an attribute by name."""
+        return typeattr.attribute_factory(self.policy, name)
+
     def lookup_role(self, name):
         """Look up a role by name."""
         return role.role_factory(self.policy, name)
 
     def lookup_type(self, name):
         """Look up a type by name."""
-        return typeattr.typeattr_factory(self.policy, name)
+        return typeattr.type_factory(self.policy, name, deref=True)
 
     def lookup_user(self, name):
         """Look up a user by name."""
@@ -283,23 +287,24 @@ class SELinuxPolicy(object):
     def attributes(self):
         """Generator which yields all (type) attributes."""
 
-        # libqpol unfortunately iterates over attributes and aliases
         for type_ in self.policy.type_iter():
-            t = typeattr.TypeAttr(self.policy, type_)
-            if t.isattr:
-                yield t
+            try:
+                yield typeattr.attribute_factory(self.policy, type_)
+            except TypeError:
+                # libqpol unfortunately iterates over attributes and aliases
+                pass
 
     def classes(self):
         """Generator which yields all object classes."""
 
         for class_ in self.policy.class_iter():
-            yield objclass.ObjClass(self.policy, class_)
+            yield objclass.class_factory(self.policy, class_)
 
     def commons(self):
         """Generator which yields all commons."""
 
         for common in self.policy.common_iter():
-            yield objclass.Common(self.policy, common)
+            yield objclass.common_factory(self.policy, common)
 
     def defaults(self):
         """Generator which yields all default_* statements."""
@@ -316,41 +321,42 @@ class SELinuxPolicy(object):
     def types(self):
         """Generator which yields all types."""
 
-        # libqpol unfortunately iterates over attributes and aliases
         for type_ in self.policy.type_iter():
-            t = typeattr.TypeAttr(self.policy, type_)
-            if not t.isattr and not t.isalias:
-                yield t
+            try:
+                yield typeattr.type_factory(self.policy, type_)
+            except TypeError:
+                # libqpol unfortunately iterates over attributes and aliases
+                pass
 
     def roles(self):
         """Generator which yields all roles."""
 
         for role_ in self.policy.role_iter():
-            yield role.Role(self.policy, role_)
+            yield role.role_factory(self.policy, role_)
 
     def users(self):
         """Generator which yields all users."""
 
         for user_ in self.policy.user_iter():
-            yield user.User(self.policy, user_)
+            yield user.user_factory(self.policy, user_)
 
     def bools(self):
         """Generator which yields all Booleans."""
 
         for bool_ in self.policy.bool_iter():
-            yield boolcond.Boolean(self.policy, bool_)
+            yield boolcond.boolean_factory(self.policy, bool_)
 
     def polcaps(self):
         """Generator which yields all policy capabilities."""
 
         for cap in self.policy.polcap_iter():
-            yield polcap.PolicyCapability(self.policy, cap)
+            yield polcap.polcap_factory(self.policy, cap)
 
     def permissives(self):
         """Generator which yields all permissive types."""
 
         for type_ in self.policy.permissive_iter():
-            yield typeattr.TypeAttr(self.policy, type_)
+            yield typeattr.type_factory(self.policy, type_)
 
     #
     # Policy rules generators
@@ -359,19 +365,19 @@ class SELinuxPolicy(object):
         """Generator which yields all type enforcement rules."""
 
         for rule in chain(self.policy.avrule_iter(), self.policy.terule_iter(), self.policy.filename_trans_iter()):
-            yield terule.TERule(self.policy, rule)
+            yield terule.te_rule_factory(self.policy, rule)
 
     def rbacrules(self):
         """Generator which yields all RBAC rules."""
 
         for rule in chain(self.policy.role_allow_iter(), self.policy.role_trans_iter()):
-            yield rbacrule.RBACRule(self.policy, rule)
+            yield rbacrule.rbac_rule_factory(self.policy, rule)
 
     def mlsrules(self):
         """Generator which yields all MLS rules."""
 
         for rule in self.policy.range_trans_iter():
-            yield mlsrule.MLSRule(self.policy, rule)
+            yield mlsrule.mls_rule_factory(self.policy, rule)
 
     #
     # Constraints generators
@@ -381,33 +387,37 @@ class SELinuxPolicy(object):
         """Generator which yields all constraints."""
 
         for constraint_ in self.policy.constraint_iter():
-            c = constraint.Constraint(self.policy, constraint_)
-            if not c.ismls:
-                yield c
+            try:
+                yield constraint.constraint_factory(self.policy, constraint_)
+            except TypeError:
+                pass
 
     def mlsconstraints(self):
         """Generator which yields all MLS constraints."""
 
         for constraint_ in self.policy.constraint_iter():
-            c = constraint.Constraint(self.policy, constraint_)
-            if c.ismls:
-                yield c
+            try:
+                yield constraint.mlsconstraint_factory(self.policy, constraint_)
+            except TypeError:
+                pass
 
     def mlsvalidatetrans(self):
         """Generator which yields all mlsvalidatetrans."""
 
         for validatetrans in self.policy.validatetrans_iter():
-            v = constraint.ValidateTrans(self.policy, validatetrans)
-            if v.ismls:
-                yield v
+            try:
+                yield constraint.mlsvalidatetrans_factory(self.policy, validatetrans)
+            except TypeError:
+                pass
 
     def validatetrans(self):
         """Generator which yields all validatetrans."""
 
         for validatetrans in self.policy.validatetrans_iter():
-            v = constraint.ValidateTrans(self.policy, validatetrans)
-            if not v.ismls:
-                yield v
+            try:
+                yield constraint.validatetrans_factory(self.policy, validatetrans)
+            except TypeError:
+                pass
 
     #
     # In-policy Labeling statement generators
@@ -416,34 +426,34 @@ class SELinuxPolicy(object):
         """Generator which yields all initial SID statements."""
 
         for sid in self.policy.isid_iter():
-            yield initsid.InitialSID(self.policy, sid)
+            yield initsid.initialsid_factory(self.policy, sid)
 
     def fs_uses(self):
         """Generator which yields all fs_use_* statements."""
 
         for fs_use in self.policy.fs_use_iter():
-            yield fscontext.FSUse(self.policy, fs_use)
+            yield fscontext.fs_use_factory(self.policy, fs_use)
 
     def genfscons(self):
         """Generator which yields all genfscon statements."""
 
         for fscon in self.policy.genfscon_iter():
-            yield fscontext.Genfscon(self.policy, fscon)
+            yield fscontext.genfscon_factory(self.policy, fscon)
 
     def netifcons(self):
         """Generator which yields all netifcon statements."""
 
         for ifcon in self.policy.netifcon_iter():
-            yield netcontext.Netifcon(self.policy, ifcon)
+            yield netcontext.netifcon_factory(self.policy, ifcon)
 
     def nodecons(self):
         """Generator which yields all nodecon statements."""
 
         for node in self.policy.nodecon_iter():
-            yield netcontext.Nodecon(self.policy, node)
+            yield netcontext.nodecon_factory(self.policy, node)
 
     def portcons(self):
         """Generator which yields all portcon statements."""
 
         for port in self.policy.portcon_iter():
-            yield netcontext.Portcon(self.policy, port)
+            yield netcontext.portcon_factory(self.policy, port)

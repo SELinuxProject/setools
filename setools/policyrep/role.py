@@ -30,6 +30,9 @@ class InvalidRole(symbol.InvalidSymbol):
 def role_factory(qpol_policy, name):
     """Factory function for creating Role objects."""
 
+    if isinstance(name, qpol.qpol_role_t):
+        return Role(qpol_policy, name)
+
     try:
         symbol = qpol.qpol_role_t(qpol_policy, name)
     except ValueError:
@@ -38,29 +41,30 @@ def role_factory(qpol_policy, name):
     return Role(qpol_policy, symbol)
 
 
-class Role(symbol.PolicySymbol):
+class BaseRole(symbol.PolicySymbol):
+
+    """Role/role attribute base class."""
+
+    def expand(self):
+        raise NotImplementedError
+
+    def types(self):
+        raise NotImplementedError
+
+
+class Role(BaseRole):
 
     """A role."""
 
     def expand(self):
-        """
-        Generator that expands this attribute into its member roles.
-        If this is a role, the role itself will be yielded.
-        """
-        # Role attributes are already expanded in the binary policy
+        """Generator that expands this into its member roles."""
         yield self
-
-    @property
-    def isattr(self):
-        """(T/F) this is an attribute."""
-        # Role attributes are already expanded in the binary policy
-        return False
 
     def types(self):
         """Generator which yields the role's set of types."""
 
         for type_ in self.qpol_symbol.type_iter(self.policy):
-            yield typeattr.TypeAttr(self.policy, type_)
+            yield typeattr.typeattr_factory(self.policy, type_)
 
     def statement(self):
         types = list(str(t) for t in self.types())
@@ -74,3 +78,10 @@ class Role(symbol.PolicySymbol):
                 stmt += ";"
 
         return stmt
+
+
+class RoleAttribute(BaseRole):
+
+    """A role attribute."""
+
+    pass

@@ -23,6 +23,33 @@ from . import symbol
 from . import context
 
 
+def netifcon_factory(policy, symbol):
+    """Factory function for creating netifcon objects."""
+
+    if not isinstance(symbol, qpol.qpol_netifcon_t):
+        raise NotImplementedError
+
+    return Netifcon(policy, symbol)
+
+
+def nodecon_factory(policy, symbol):
+    """Factory function for creating nodecon objects."""
+
+    if not isinstance(symbol, qpol.qpol_nodecon_t):
+        raise NotImplementedError
+
+    return Nodecon(policy, symbol)
+
+
+def portcon_factory(policy, symbol):
+    """Factory function for creating portcon objects."""
+
+    if not isinstance(symbol, qpol.qpol_portcon_t):
+        raise NotImplementedError
+
+    return Portcon(policy, symbol)
+
+
 class NetContext(symbol.PolicySymbol):
 
     """Abstract base class for in-policy network labeling rules."""
@@ -33,7 +60,7 @@ class NetContext(symbol.PolicySymbol):
     @property
     def context(self):
         """The context for this statement."""
-        return context.Context(self.policy, self.qpol_symbol.context(self.policy))
+        return context.context_factory(self.policy, self.qpol_symbol.context(self.policy))
 
     def statement(self):
         return str(self)
@@ -54,12 +81,12 @@ class Netifcon(NetContext):
     @property
     def context(self):
         """The context for the interface."""
-        return context.Context(self.policy, self.qpol_symbol.if_con(self.policy))
+        return context.context_factory(self.policy, self.qpol_symbol.if_con(self.policy))
 
     @property
     def packet(self):
         """The context for the packets."""
-        return context.Context(self.policy, self.qpol_symbol.msg_con(self.policy))
+        return context.context_factory(self.policy, self.qpol_symbol.msg_con(self.policy))
 
 
 class Nodecon(NetContext):

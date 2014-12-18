@@ -20,6 +20,24 @@ from . import symbol
 from . import qpol
 
 
+def common_factory(policy, symbol):
+    """Factory function for creating common permission set objects."""
+
+    if not isinstance(symbol, qpol.qpol_common_t):
+        raise NotImplementedError
+
+    return Common(policy, symbol)
+
+
+def class_factory(policy, symbol):
+    """Factory function for creating object class objects."""
+
+    if not isinstance(symbol, qpol.qpol_class_t):
+        raise NotImplementedError
+
+    return ObjClass(policy, symbol)
+
+
 class Common(symbol.PolicySymbol):
 
     """A common permission set."""
@@ -71,7 +89,7 @@ class ObjClass(Common):
         """
 
         try:
-            return Common(self.policy, self.qpol_symbol.common(self.policy))
+            return common_factory(self.policy, self.qpol_symbol.common(self.policy))
         except ValueError:
             raise NoCommon("{0} does not inherit a common.".format(self))
 

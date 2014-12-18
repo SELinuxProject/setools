@@ -66,7 +66,7 @@ class Default(symbol.PolicySymbol):
     @property
     def object_class(self):
         """The object class."""
-        return objclass.ObjClass(self.policy, self.qpol_symbol.object_class(self.policy))
+        return objclass.class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
 
     @property
     def default(self):

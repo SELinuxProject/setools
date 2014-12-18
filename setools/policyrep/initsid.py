@@ -21,6 +21,15 @@ from . import symbol
 from . import context
 
 
+def initialsid_factory(policy, symbol):
+    """Factory function for creating initial sid objects."""
+
+    if not isinstance(symbol, qpol.qpol_isid_t):
+        raise NotImplementedError
+
+    return InitialSID(policy, symbol)
+
+
 class InitialSID(symbol.PolicySymbol):
 
     """An initial SID statement."""
@@ -28,7 +37,7 @@ class InitialSID(symbol.PolicySymbol):
     @property
     def context(self):
         """The context for this initial SID."""
-        return context.Context(self.policy, self.qpol_symbol.context(self.policy))
+        return context.context_factory(self.policy, self.qpol_symbol.context(self.policy))
 
     def statement(self):
         return "sid {0} {1}".format(self, self.context)
