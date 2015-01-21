@@ -531,7 +531,7 @@ static int qpol_policy_add_object_r(qpol_policy_t * policy)
 static int qpol_policy_match_system(qpol_policy_t * policy)
 {
 	int kernvers = security_policyvers();
-	int currentvers = policy->p->p.policyvers;
+	unsigned int currentvers = policy->p->p.policyvers;
 	int error;
 	if (kernvers < 0) {
 		error = errno;
@@ -539,7 +539,7 @@ static int qpol_policy_match_system(qpol_policy_t * policy)
 		errno = error;
 		return -1;
 	}
-	if (policy->p->p.policyvers > (unsigned)kernvers) {
+	if (currentvers > (unsigned)kernvers) {
 		if (sepol_policydb_set_vers(policy->p, kernvers)) {
 			error = errno;
 			ERR(policy, "Could not downgrade policy to version %d.", kernvers);
