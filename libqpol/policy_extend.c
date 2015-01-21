@@ -781,7 +781,7 @@ static int qpol_syn_rule_table_insert_entry(qpol_policy_t * policy,
 		table_node->next = table->buckets[hash];
 		table->buckets[hash] = table_node;
 	}
-	return 0;
+	return error;
 }
 
 /**
@@ -868,9 +868,9 @@ static int qpol_syn_rule_table_insert_sepol_avrule(qpol_policy_t * policy, qpol_
 	ebitmap_destroy(&source_types2);
 	ebitmap_destroy(&target_types);
 	ebitmap_destroy(&target_types2);
-	return 0;
+	return error;
 
-      err:
+	err:
 	ebitmap_destroy(&source_types);
 	ebitmap_destroy(&source_types2);
 	ebitmap_destroy(&target_types);
