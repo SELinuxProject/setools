@@ -1178,8 +1178,6 @@ typedef struct qpol_type {} qpol_type_t;
         const qpol_type_t *t;
         qpol_policy_get_type_by_name(p, name, &t);
         return (qpol_type_t*)t;
-    fail:
-        return NULL;
     };
     ~qpol_type() {
         /* no op */
@@ -1314,8 +1312,6 @@ typedef struct qpol_role {} qpol_role_t;
         const qpol_role_t *r;
         qpol_policy_get_role_by_name(p, name, &r);
         return (qpol_role_t*)r;
-    fail:
-        return NULL;
     };
     ~qpol_role() {
         /* no op */
@@ -1622,8 +1618,6 @@ typedef struct qpol_user {} qpol_user_t;
         const qpol_user_t *u;
         qpol_policy_get_user_by_name(p, name, &u);
         return (qpol_user_t*)u;
-    fail:
-        return NULL;
     };
     ~qpol_user() {
         /* no op */

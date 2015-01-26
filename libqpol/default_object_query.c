@@ -34,8 +34,7 @@
 int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_default_object_t * datum, const qpol_class_t **cls)
 {
 	class_datum_t *internal_datum = NULL;
-	policydb_t *db = NULL;
-	
+
 	if (policy == NULL || datum == NULL || cls == NULL) {
 		if (cls != NULL)
 			*cls = NULL;
@@ -45,7 +44,6 @@ int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_defaul
 	}
 	*cls = NULL;
 
-	db = &policy->p->p;
 	internal_datum = (class_datum_t *)datum;
 
 	/* These will be zero if no default_objects set */
