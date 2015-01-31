@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -26,7 +26,6 @@ from . import netifconquery
 from . import nodeconquery
 from . import objclassquery
 from . import polcapquery
-from . import permissivequery
 from . import infoflow
 from . import terulequery
 from . import rbacrulequery

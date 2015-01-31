@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -86,3 +86,10 @@ class TypeQueryTest(unittest.TestCase):
 
         types = sorted(str(t) for t in q.results())
         self.assertListEqual(["test21t1", "test21t2"], types)
+
+    def test_030_permissive(self):
+        """Type query with permissive match"""
+        q = TypeQuery(self.p, match_permissive=True, permissive=True)
+
+        types = sorted(str(t) for t in q.results())
+        self.assertListEqual(["test30"], types)

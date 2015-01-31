@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -28,30 +28,34 @@ class TypeQuery(compquery.ComponentQuery):
     def __init__(self, policy,
                  name="", name_regex=False,
                  alias="", alias_regex=False,
-                 attrs=set(), attrs_equal=False, attrs_regex=False):
+                 attrs=set(), attrs_equal=False, attrs_regex=False,
+                 permissive=False, match_permissive=False):
         """
         Parameter:
-        policy	     The policy to query.
-        name         The type name to match.
-        name_regex   If true, regular expression matching
-                     will be used on the type names.
-        alias        The alias name to match.
-        alias_regex  If true, regular expression matching
-                     will be used on the alias names.
-        attrs        The attribute to match.
-        attrs_equal  If true, only types with attribute sets
-                     that are equal to the criteria will
-                     match.  Otherwise, any intersection
-                     will match.
-        attrs_regex  If true, regular expression matching
-                     will be used on the attribute names instead
-                     of set logic.
+        policy	            The policy to query.
+        name                The type name to match.
+        name_regex          If true, regular expression matching
+                            will be used on the type names.
+        alias               The alias name to match.
+        alias_regex         If true, regular expression matching
+                            will be used on the alias names.
+        attrs               The attribute to match.
+        attrs_equal         If true, only types with attribute sets
+                            that are equal to the criteria will
+                            match.  Otherwise, any intersection
+                            will match.
+        attrs_regex         If true, regular expression matching
+                            will be used on the attribute names instead
+                            of set logic.
+        match_permissive    If true, the permissive state will be matched.
+        permissive          The permissive state to match.
         """
 
         self.policy = policy
         self.set_name(name, regex=name_regex)
         self.set_alias(alias, regex=alias_regex)
         self.set_attrs(attrs, regex=attrs_regex, equal=attrs_equal)
+        self.set_permissive(match_permissive, permissive=permissive)
 
     def results(self):
         """Generator which yields all matching types."""
@@ -77,6 +81,9 @@ class TypeQuery(compquery.ComponentQuery):
                     self.attrs_equal,
                     self.attrs_regex,
                     self.attrs_cmp):
+                continue
+
+            if self.match_permissive and t.ispermissive != self.permissive:
                 continue
 
             yield t
@@ -141,3 +148,24 @@ class TypeQuery(compquery.ComponentQuery):
             self.attrs_cmp = re.compile(self.attrs)
         else:
             self.attrs_cmp = None
+
+    def set_permissive(self, match, **opts):
+        """
+        Set if the permissive state should be matched.
+
+        Parameter:
+        match       If true, the permissive state will be matched.
+        permissive  If true, permissive types will match, otherwise
+                    enforcing types will match.
+
+        Exceptions:
+        NameError   Invalid keyword option.
+        """
+
+        self.match_permissive = bool(match)
+
+        for k in list(opts.keys()):
+            if k == "permissive":
+                self.permissive = bool(opts[k])
+            else:
+                raise NameError("Invalid permissive option: {0}".format(k))

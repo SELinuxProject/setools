@@ -1,5 +1,5 @@
 """The SETools SELinux policy analysis library."""
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -35,7 +35,6 @@ from . import rolequery
 from . import userquery
 from . import boolquery
 from . import polcapquery
-from . import permissivequery
 
 # Rule Queries
 from . import terulequery
