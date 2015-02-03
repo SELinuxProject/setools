@@ -18,7 +18,7 @@
 #
 try:
     import ipaddress
-except ImportError:
+except ImportError: # pragma: no cover
     pass
 
 import re
@@ -75,7 +75,7 @@ class NodeconQuery(contextquery.ContextQuery):
             if self.network:
                 try:
                     netmask = ipaddress.ip_address(n.netmask)
-                except NameError:
+                except NameError: # pragma: no cover
                     # Should never actually hit this since the self.network
                     # setter raises the same exception.
                     raise RuntimeError(
@@ -141,7 +141,7 @@ class NodeconQuery(contextquery.ContextQuery):
         if net:
             try:
                 self.network = ipaddress.ip_network(net)
-            except NameError:
+            except NameError: # pragma: no cover
                 raise RuntimeError(
                     "IP address/network functions require Python 3.3+.")
         else:

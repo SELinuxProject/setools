@@ -20,7 +20,7 @@
 try:
     import pkg_resources
     __version__ = pkg_resources.get_distribution("setools").version
-except:
+except: # pragma: no cover
     __version__ = "unknown"
 
 # Python classes for policy representation
