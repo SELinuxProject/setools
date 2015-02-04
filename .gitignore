@@ -9,3 +9,4 @@ libqpol/policy_scan.c
 setools/policyrep/qpol_wrap.c
 setools/policyrep/qpol.py
 *.so
+/.tox
