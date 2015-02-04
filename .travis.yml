@@ -4,6 +4,8 @@ python:
   - "3.3"
   - "3.4"
 
-install: pip install 'networkx>=1.8' --use-mirrors
+install:
+  - pip install 'networkx>=1.8' --use-mirrors
+  - sudo apt-get install swig
 
 script: python setup.py test
