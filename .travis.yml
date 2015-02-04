@@ -28,7 +28,7 @@ install:
   - export CFLAGS="-O2 -pipe -fPIC -Wall"
 
   # Download current SELinux userspace tools and libraries
-  - wget https://github.com/SELinuxProject/selinux/archive/20150202.zip
+  - wget https://github.com/SELinuxProject/selinux/archive/20150202.tar.gz
   - tar -xzf 20150202.tar.gz
   - mv selinux-20150202 selinux-src
 
