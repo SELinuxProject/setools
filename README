@@ -40,7 +40,7 @@ SETools requires the following development packages for building:
   bison
   flex
   libselinux
-  libsepol
+  libsepol 2.4
   libbz2
 
 To build SETools' graphical tools, the following packages are required:
@@ -51,7 +51,7 @@ To run SETools, the following packages are required:
   NetworkX
   setuptools
   libselinux
-  libsepol
+  libsepol 2.4
   libbz2
 
 2.1. building SETools
