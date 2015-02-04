@@ -43,6 +43,6 @@ install:
   # Now that the libraries are installed, use them to compile the tools
   - export CFLAGS="$CFLAGS -I$DESTDIR/usr/include"
   - export LDFLAGS="$LDFLAGS -L$DESTDIR/usr/lib"
-  - sed -i -e 's:/usr/lib/libsepol.a:$DESTDIR/usr/lib/libsepol.a:' setup.py
+  - sed -i -e "s:/usr/lib/libsepol.a:$DESTDIR/usr/lib/libsepol.a:" setup.py
 
 script: python setup.py test
