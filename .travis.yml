@@ -1,11 +1,47 @@
+# SELinux userspace portions originally by Nicolas Iooss
+# from: https://github.com/fishilico/selinux-refpolicy-patched/blob/travis-upstream/.travis.yml
+
 language: python
 python:
   - "2.7"
   - "3.3"
   - "3.4"
 
+# Install SELinux userspace utilities dependencies
+before_install:
+  - lsb_release -a
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libaudit-dev libcap-ng-dev libustr-dev swig
+
 install:
   - pip install 'networkx>=1.8' --use-mirrors
-  - sudo apt-get install swig
+
+  # Setup the directory where SELinux utilities will be installed
+  - export DESTDIR="$HOME/selinux-project"
+  - mkdir "$DESTDIR"
+  - export PATH="$DESTDIR/usr/bin:$DESTDIR/usr/sbin:$DESTDIR/bin:$DESTDIR/sbin:$PATH"
+  - export LD_LIBRARY_PATH="$DESTDIR/usr/lib:$DESTDIR/lib:$LD_LIBRARY_PATH"
+
+  # On Ubuntu 12.04, default CFLAGS make the build fail in libsepol/cil with:
+  #    error: declaration of 'index' shadows a global declarationo
+  # So define our own CFLAGS
+  - export CFLAGS="-O2 -pipe -fPIC -Wall"
+
+  # Download current SELinux userspace tools and libraries
+  - wget https://github.com/SELinuxProject/selinux/archive/20150202.zip
+  - tar -xzf 20150202.tar.gz
+  - mv selinux-20150202 selinux-src
+
+  # Ubuntu 12.04 coreutils is too old to provide "ln --relative" :(
+  - sed 's/ln -sf --relative /ln -sf /' -i selinux-src/libsepol/src/Makefile
+  - sed 's/ln -sf --relative /ln -sf /' -i selinux-src/libselinux/src/Makefile
+
+  # Compile and install SELinux libraries first
+  - make -C selinux-src/libsepol install
+  - make -C selinux-src/libselinux install
+
+  # Now that the libraries are installed, use them to compile the tools
+  - export CFLAGS="$CFLAGS -I$DESTDIR/usr/include"
+  - export LDFLAGS="$LDFLAGS -L$DESTDIR/usr/lib"
 
 script: python setup.py test
