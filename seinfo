@@ -66,6 +66,8 @@ queries.add_argument("--polcap",  help="Print policy capabilities.",
                      dest="polcapquery", default=None, nargs='?', const=True, metavar="NAME")
 queries.add_argument("--all",  help="Print all of the above.",
                      dest="all", default=False, action="store_true")
+queries.add_argument("--flat",  help="Print without item count nor indentation.",
+                     dest="flat", default=False, action="store_true")
 
 args = parser.parse_args()
 
@@ -173,7 +175,7 @@ try:
             q = setools.userquery.UserQuery(p)
         components.append(("Users", q))
 
-    if not components or args.all:
+    if (not components or args.all) and not args.flat:
         if p.mls:
             mls = "enabled"
         else:
@@ -216,13 +218,12 @@ try:
 
     for desc, component in components:
         results = sorted(component.results())
-        print("\n{0}: {1}".format(desc, len(results)))
+        if not args.flat:
+            print("\n{0}: {1}".format(desc, len(results)))
         for item in results:
-            if args.expand:
-                result = item.statement()
-            else:
-                result = item
-            print("   {0}".format(result))
+            result = item.statement() if args.expand else item
+            strfmt = "   {0}" if not args.flat else"{0}"
+            print(strfmt.format(result))
 
     sys.exit(0)
 
