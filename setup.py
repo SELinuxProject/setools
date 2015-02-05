@@ -6,6 +6,8 @@ from distutils.core import Extension
 from distutils.cmd import Command
 from setuptools.command.build_ext import build_ext
 import subprocess
+import sys
+from os.path import join
 
 
 class YaccCommand(Command):
@@ -126,7 +128,7 @@ setup(name='setools',
                 'build_ext': BuildExtCommand},
       packages=['setools', 'setools.policyrep'],
       scripts=['seinfo', 'seinfoflow', 'sesearch', 'sedta'],
-      data_files=[('/usr/share/setools', ['data/perm_map'])],
+      data_files=[(join(sys.prefix, 'share/setools'), ['data/perm_map'])],
       ext_modules=ext_py_mods,
       test_suite='tests',
       license='GPLv2+, LGPLv2.1+',
