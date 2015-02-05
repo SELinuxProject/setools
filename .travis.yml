@@ -56,4 +56,7 @@ install:
   - export LDFLAGS="$LDFLAGS -L$DESTDIR/usr/lib"
   - sudo ln -sf "$DESTDIR/usr/lib/libsepol.a" /usr/lib/libsepol.a
 
+  # Ubuntu 12.04's flex generates a redundant decl
+  - sed -i -e "/Wwrite-strings/s/,/, '-Wno-redundant-decls',/" setup.py
+
 script: python setup.py test
