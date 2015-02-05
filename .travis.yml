@@ -10,11 +10,22 @@ python:
 # Install SELinux userspace utilities dependencies
 before_install:
   - lsb_release -a
+  - bison -V
+  - flex -V
   - sudo apt-get update -qq
   - sudo apt-get install -qq libaudit-dev libcap-ng-dev libustr-dev swig
 
 install:
-  - pip install 'networkx>=1.8' --use-mirrors
+  - pip install 'networkx>=1.8'
+
+  # install newer swig
+  - wget http://download.sourceforge.net/project/swig/swig/swig-2.0.12/swig-2.0.12.tar.gz
+  - tar zxf swig-2.0.12.tar.gz
+  - cd swig-2.0.12
+  - ./configure
+  - make
+  - sudo make install
+  - cd ..
 
   # Setup the directory where SELinux utilities will be installed
   - export DESTDIR="$HOME/selinux-project"
@@ -43,6 +54,6 @@ install:
   # Now that the libraries are installed, use them to compile the tools
   - export CFLAGS="$CFLAGS -I$DESTDIR/usr/include"
   - export LDFLAGS="$LDFLAGS -L$DESTDIR/usr/lib"
-  - sed -i -e "s:/usr/lib/libsepol.a:$DESTDIR/usr/lib/libsepol.a:" setup.py
+  - sudo ln -sf "$DESTDIR/usr/lib/libsepol.a" /usr/lib/libsepol.a
 
 script: python setup.py test
