@@ -200,8 +200,6 @@ netifcon |
 NETIFCON			{ return(NETIFCON);}
 nodecon |                     
 NODECON				{ return(NODECON);}
-fs_use_psid |
-FS_USE_PSID			{ return(FSUSEPSID);}
 pirqcon |
 PIRQCON  		        { return(PIRQCON);}
 iomemcon |

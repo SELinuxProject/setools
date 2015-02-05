@@ -293,12 +293,9 @@ int define_permissive(void)
 		rc = -1;
 		goto out;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_PERMISSIVE_TYPES
+
 	t->flags |= TYPE_FLAGS_PERMISSIVE;
-#else
-	yyerror("This version of SETools does not have permissive types enabled.");
-#endif
+
 out:
 	free(type);
 	return rc;
@@ -320,8 +317,7 @@ int define_polcap(void)
 		yyerror("no capability name for policycap definition?");
 		goto bad;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_POLICYCAPS
+
 	/* Check for valid cap name -> number mapping */
 	capnum = sepol_polcap_getnum(id);
 	if (capnum < 0) {
@@ -334,9 +330,6 @@ int define_polcap(void)
 		yyerror("out of memory");
 		goto bad;
 	}
-#else
-	yyerror("This version of SETools does not have policycap enabled.");
-#endif
 
 	free(id);
 	return 0;
@@ -424,15 +417,13 @@ static int read_classes(ebitmap_t *e_classes)
 int define_default_user(int which)
 {
 	char *id;
+	class_datum_t *cladatum;
 
 	if (pass == 1) {
 		while ((id = queue_remove(id_queue)))
 			free(id);
 		return 0;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_NEW_OBJECT_DEFAULTS
-	class_datum_t *cladatum;
 
 	while ((id = queue_remove(id_queue))) {
 		if (!is_id_in_scope(SYM_CLASSES, id)) {
@@ -453,23 +444,18 @@ int define_default_user(int which)
 	}
 
 	return 0;
-#else
-	yyerror("This version of SETools does not have default_user enabled.");
-#endif
 }
 
 int define_default_role(int which)
 {
 	char *id;
+	class_datum_t *cladatum;
 
 	if (pass == 1) {
 		while ((id = queue_remove(id_queue)))
 			free(id);
 		return 0;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_NEW_OBJECT_DEFAULTS
-	class_datum_t *cladatum;
 
 	while ((id = queue_remove(id_queue))) {
 		if (!is_id_in_scope(SYM_CLASSES, id)) {
@@ -490,23 +476,18 @@ int define_default_role(int which)
 	}
 
 	return 0;
-#else
-	yyerror("This version of SETools does not have default_role enabled.");
-#endif
 }
 
 int define_default_type(int which)
 {
 	char *id;
+	class_datum_t *cladatum;
 
 	if (pass == 1) {
 		while ((id = queue_remove(id_queue)))
 			free(id);
 		return 0;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_DEFAULT_TYPE
-	class_datum_t *cladatum;
 
 	while ((id = queue_remove(id_queue))) {
 		if (!is_id_in_scope(SYM_CLASSES, id)) {
@@ -527,23 +508,18 @@ int define_default_type(int which)
 	}
 
 	return 0;
-#else
-	yyerror("This version of SETools does not have default_type enabled.");
-#endif
 }
 
 int define_default_range(int which)
 {
 	char *id;
+	class_datum_t *cladatum;
 
 	if (pass == 1) {
 		while ((id = queue_remove(id_queue)))
 			free(id);
 		return 0;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_NEW_OBJECT_DEFAULTS
-	class_datum_t *cladatum;
 
 	while ((id = queue_remove(id_queue))) {
 		if (!is_id_in_scope(SYM_CLASSES, id)) {
@@ -564,9 +540,6 @@ int define_default_range(int which)
 	}
 
 	return 0;
-#else
-	yyerror("This version of SETools does not have default_range enabled.");
-#endif
 }
 
 int define_common_perms(void)
@@ -1082,7 +1055,7 @@ int define_category(void)
 	return -1;
 }
 
-static int clone_level(hashtab_key_t key, hashtab_datum_t datum, void *arg)
+static int clone_level(hashtab_key_t key __attribute__ ((unused)), hashtab_datum_t datum, void *arg)
 {
 	level_datum_t *levdatum = (level_datum_t *) datum;
 	mls_level_t *level = (mls_level_t *) arg, *newlevel;
@@ -1427,16 +1400,13 @@ static int define_typebounds_helper(const char *bounds_id, const char *type_id)
 
 int define_typebounds(void)
 {
-	char *id;
+	char *bounds, *id;
 
 	if (pass == 1) {
 		while ((id = queue_remove(id_queue)))
 			free(id);
 		return 0;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_BOUNDARY
-	char *bounds;
 
 	bounds = (char *) queue_remove(id_queue);
 	if (!bounds) {
@@ -1452,9 +1422,6 @@ int define_typebounds(void)
 	free(bounds);
 
 	return 0;
-#else
-	yyerror("This version of SETools does not have typebounds enabled.");
-#endif
 }
 
 int define_type(int alias)
@@ -2234,8 +2201,8 @@ role_datum_t *merge_roles_dom(role_datum_t * r1, role_datum_t * r2)
 }
 
 /* This function eliminates the ordering dependency of role dominance rule */
-static int dominate_role_recheck(hashtab_key_t key, hashtab_datum_t datum,
-				 void *arg)
+static int dominate_role_recheck(hashtab_key_t key __attribute__ ((unused)),
+				 hashtab_datum_t datum, void *arg)
 {
 	role_datum_t *rdp = (role_datum_t *) arg;
 	role_datum_t *rdatum = (role_datum_t *) datum;
@@ -2530,14 +2497,7 @@ int define_role_trans(int class_specified)
 	}
 
 	/* This ebitmap business is just to ensure that there are not conflicting role_trans rules */
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_ROLE_ATTRS
 	if (role_set_expand(&roles, &e_roles, policydbp, NULL, NULL))
-#elif HAVE_SEPOL_USER_ROLE_MAPPING
-	if (role_set_expand(&roles, &e_roles, policydbp, NULL))
-#else
-	if (role_set_expand(&roles, &e_roles, policydbp))
-#endif
 		goto bad;
 
 	if (type_set_expand(&types, &e_types, policydbp, 1))
@@ -2652,7 +2612,17 @@ avrule_t *define_cond_filename_trans(void)
 
 int define_filename_trans(void)
 {
-	char *id;
+	char *id, *name = NULL;
+	type_set_t stypes, ttypes;
+	ebitmap_t e_stypes, e_ttypes;
+	ebitmap_t e_tclasses;
+	ebitmap_node_t *snode, *tnode, *cnode;
+	filename_trans_t *ft;
+	filename_trans_rule_t *ftr;
+	type_datum_t *typdatum;
+	uint32_t otype;
+	unsigned int c, s, t;
+	int add;
 
 	if (pass == 1) {
 		/* stype */
@@ -2672,19 +2642,7 @@ int define_filename_trans(void)
 		free(id);
 		return 0;
 	}
-/* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_FILENAME_TRANS
-	char *name = NULL;
-	type_set_t stypes, ttypes;
-	ebitmap_t e_stypes, e_ttypes;
-	ebitmap_t e_tclasses;
-	ebitmap_node_t *snode, *tnode, *cnode;
-	filename_trans_t *ft;
-	filename_trans_rule_t *ftr;
-	type_datum_t *typdatum;
-	uint32_t otype;
-	unsigned int c, s, t;
-	int add;
+
 
 	add = 1;
 	type_set_init(&stypes);
@@ -2761,7 +2719,8 @@ int define_filename_trans(void)
 							 policydbp->p_class_val_to_name[c]);
 						goto bad;
 					}
-				}	
+				}
+	
 				ft = malloc(sizeof(*ft));
 				if (!ft) {
 					yyerror("out of memory");
@@ -2783,6 +2742,7 @@ int define_filename_trans(void)
 				ft->otype = otype;
 			}
 		}
+	
 		/* Now add the real rule since we didn't find any duplicates */
 		ftr = malloc(sizeof(*ftr));
 		if (!ftr) {
@@ -2809,9 +2769,6 @@ int define_filename_trans(void)
 bad:
 	free(name);
 	return -1;
-#else
-	yyerror("This version of SETools does not have filename type_transition rules enabled.");
-#endif
 }
 
 static constraint_expr_t *constraint_expr_clone(constraint_expr_t * expr)
@@ -3646,7 +3603,7 @@ static int parse_categories(char *id, level_datum_t * levdatum, ebitmap_t * cats
 	return 0;
 }
 
-static int parse_semantic_categories(char *id, level_datum_t * levdatum,
+static int parse_semantic_categories(char *id, level_datum_t * levdatum __attribute__ ((unused)),
 				     mls_semantic_cat_t ** cats)
 {
 	cat_datum_t *cdatum;
@@ -4300,7 +4257,7 @@ int define_pcidevice_context(unsigned long device)
 
 		device2 = c->u.device;
 		if (device == device2) {
-			yyerror2("duplicate pcidevicecon entry for 0x%lx ",
+			yyerror2("duplicate pcidevicecon entry for 0x%lx",
 				 device);
 			goto bad;
 		}
@@ -4656,9 +4613,7 @@ int define_fs_use(int behavior)
 
 	if (pass == 1) {
 		free(queue_remove(id_queue));
-		/* Required for SETools libqpol */
-		if (behavior != SECURITY_FS_USE_PSIDS)
-			parse_security_context(NULL);
+		parse_security_context(NULL);
 		return 0;
 	}
 
@@ -4675,15 +4630,11 @@ int define_fs_use(int behavior)
 		return -1;
 	}
 	newc->v.behavior = behavior;
-	/* Required for SETools libqpol */
-	if (newc->v.behavior != SECURITY_FS_USE_PSIDS) {
-		if (parse_security_context(&newc->context[0])) {
-			free(newc->u.name);
-			free(newc);
-			return -1;
-		}
-	} else
-		memset(&newc->context[0], 0, sizeof(context_struct_t) * 2);
+	if (parse_security_context(&newc->context[0])) {
+		free(newc->u.name);
+		free(newc);
+		return -1;
+	}
 
 	head = policydbp->ocontexts[OCON_FSUSE];
 

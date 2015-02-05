@@ -153,7 +153,7 @@ extern char *qpol_src_inputlim;/* end of data */
 %token SAMEUSER
 %token FSCON PORTCON NETIFCON NODECON 
 %token PIRQCON IOMEMCON IOPORTCON PCIDEVICECON
-%token FSUSEXATTR FSUSETASK FSUSETRANS FSUSEPSID
+%token FSUSEXATTR FSUSETASK FSUSETRANS
 %token GENFSCON
 %token U1 U2 U3 R1 R2 R3 T1 T2 T3 L1 L2 H1 H2
 %token NOT AND OR XOR
@@ -389,6 +389,7 @@ cond_else		: ELSE '{' cond_pol_list '}'
 			{ $$ = $3; }
 			| /* empty */ 
 			{ $$ = NULL; }
+			;
 cond_expr               : '(' cond_expr ')'
 			{ $$ = $2;}
 			| NOT cond_expr
@@ -745,8 +746,6 @@ fs_use_def              : FSUSEXATTR filesystem security_context_def ';'
                         {if (define_fs_use(SECURITY_FS_USE_TASK)) return -1;}
                         | FSUSETRANS identifier security_context_def ';'
                         {if (define_fs_use(SECURITY_FS_USE_TRANS)) return -1;}
-                        | FSUSEPSID identifier ';'
-                        {if (define_fs_use(SECURITY_FS_USE_PSIDS)) return -1;}
                         ;
 opt_genfs_contexts      : genfs_contexts
                         |

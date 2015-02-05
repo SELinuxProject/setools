@@ -308,7 +308,7 @@ role_datum_t *declare_role(unsigned char isattr)
 			return dest_role;	/* role already declared for this block */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -371,7 +371,7 @@ type_datum_t *declare_type(unsigned char primary, unsigned char isattr)
 			return typdatum;
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -507,7 +507,7 @@ user_datum_t *declare_user(void)
 			return dest_user;	/* user already declared for this block */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -812,7 +812,7 @@ int require_class(int pass)
 			break;
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 
@@ -925,7 +925,7 @@ static int require_role_or_attribute(int pass, unsigned char isattr)
 			return 0;	/* role already required */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -988,7 +988,7 @@ static int require_type_or_attribute(int pass, unsigned char isattr)
 			return 0;	/* type already required */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -1049,7 +1049,7 @@ int require_user(int pass)
 			return 0;	/* user already required */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -1100,7 +1100,7 @@ static int require_bool_tunable(int pass, int is_tunable)
 			return 0;	/* boolean already required */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -1173,7 +1173,7 @@ int require_sens(int pass)
 			return 0;	/* sensitivity already required */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -1226,7 +1226,7 @@ int require_cat(int pass)
 			return 0;	/* category already required */
 		}
 	default:{
-			abort();	/* should never get here */
+			assert(0);	/* should never get here */
 		}
 	}
 }
@@ -1454,7 +1454,7 @@ int begin_optional(int pass)
 	return -1;
 }
 
-int end_optional(int pass)
+int end_optional(int pass __attribute__ ((unused)))
 {
 	/* once nested conditionals are allowed, do the stack unfolding here */
 	pop_stack();
@@ -1588,7 +1588,7 @@ static int push_stack(int stack_type, ...)
 		}
 	default:
 		/* invalid stack type given */
-		abort();
+		assert(0);
 	}
 	va_end(ap);
 	s->parent = stack_top;
