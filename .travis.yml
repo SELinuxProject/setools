@@ -1,26 +1,27 @@
 # SELinux userspace portions originally by Nicolas Iooss
 # from: https://github.com/fishilico/selinux-refpolicy-patched/blob/travis-upstream/.travis.yml
+---
 
 language: python
-python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
 
-# Install SELinux userspace utilities dependencies
+env:
+  - TOX_ENV=py27
+  - TOX_ENV=py33
+  - TOX_ENV=py34
+  - TOX_ENV=coverage
+  - TOX_ENV=pep8
+
 before_install:
   - lsb_release -a
   - bison -V
   - flex -V
   - sudo apt-get update -qq
-  - sudo apt-get install -qq libaudit-dev libcap-ng-dev libustr-dev swig
 
-install:
-  - pip install 'networkx==1.9'
+  # Install SELinux userspace utilities dependencies
+  - sudo apt-get install -qq libaudit-dev libcap-ng-dev libustr-dev libpcre3-dev
 
-  # install newer swig
-  - wget http://downloads.sourceforge.net/project/swig/swig/swig-2.0.12/swig-2.0.12.tar.gz
-  - tar zxf swig-2.0.12.tar.gz
+  # Install newer swig
+  - curl -sS -L http://prdownloads.sourceforge.net/swig/swig-2.0.12.tar.gz | tar xz
   - cd swig-2.0.12
   - ./configure
   - make
@@ -39,8 +40,7 @@ install:
   - export CFLAGS="-O2 -pipe -fPIC -Wall"
 
   # Download current SELinux userspace tools and libraries
-  - wget https://github.com/SELinuxProject/selinux/archive/20150202.tar.gz
-  - tar -xzf 20150202.tar.gz
+  - curl -sS -L https://github.com/SELinuxProject/selinux/archive/20150202.tar.gz | tar xz
   - mv selinux-20150202 selinux-src
 
   # Ubuntu 12.04 coreutils is too old to provide "ln --relative" :(
@@ -59,4 +59,8 @@ install:
   # Ubuntu 12.04's flex generates a redundant decl
   - sed -i -e "/Wwrite-strings/s/,/, '-Wno-redundant-decls',/" setup.py
 
-script: python setup.py test
+install:
+  - pip install tox
+
+script:
+  - tox -e $TOX_ENV
