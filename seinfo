@@ -28,6 +28,8 @@ parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("policy", help="Path to the SELinux policy to query.")
 parser.add_argument(
     "-x", "--expand", help="Print additional information about the specified components.", action="store_true")
+parser.add_argument("--flat",  help="Print without item count nor indentation.",
+                    dest="flat", default=False, action="store_true")
 
 queries = parser.add_argument_group("Component Queries")
 queries.add_argument("-c", "--class", help="Print object classes.",
@@ -66,8 +68,6 @@ queries.add_argument("--polcap",  help="Print policy capabilities.",
                      dest="polcapquery", default=None, nargs='?', const=True, metavar="NAME")
 queries.add_argument("--all",  help="Print all of the above.",
                      dest="all", default=False, action="store_true")
-queries.add_argument("--flat",  help="Print without item count nor indentation.",
-                     dest="flat", default=False, action="store_true")
 
 args = parser.parse_args()
 
