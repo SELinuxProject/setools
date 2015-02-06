@@ -222,7 +222,7 @@ try:
             print("\n{0}: {1}".format(desc, len(results)))
         for item in results:
             result = item.statement() if args.expand else item
-            strfmt = "   {0}" if not args.flat else"{0}"
+            strfmt = "   {0}" if not args.flat else "{0}"
             print(strfmt.format(result))
 
     sys.exit(0)
