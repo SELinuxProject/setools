@@ -176,10 +176,7 @@ try:
         components.append(("Users", q))
 
     if (not components or args.all) and not args.flat:
-        if p.mls:
-            mls = "enabled"
-        else:
-            mls = "disabled"
+        mls = "enabled" if p.mls else "disabled"
 
         print("Statistics for policy file: {0}".format(args.policy))
         print("Policy Version: {0} (MLS {1})".format(p.version, mls))
