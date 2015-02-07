@@ -89,6 +89,9 @@ args = parser.parse_args()
 if not args.target and (args.shortest_path or args.all_paths):
     parser.error("The target type must be specified to determine a path.")
 
+if args.target and not (args.shortest_path or args.all_paths):
+    parser.error("An algorithm must be specified to determine a path.")
+
 try:
     p = setools.SELinuxPolicy(args.policy)
     g = setools.dta.DomainTransitionAnalysis(p)
