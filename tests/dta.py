@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -477,3 +477,162 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         # setcurrent
         r = self.a.G.edge[s][t]["setcurrent"]
         self.assertEqual(len(r), 0)
+
+    def test_100_forward_subgraph_structure(self):
+        """DTA: verify forward subgraph structure."""
+        # The purpose is to ensure the subgraph is reversed
+        # only when the reverse option is set, not that
+        # graph reversal is correct (assumed that NetworkX
+        # does it correctly).
+        # Don't check node list since the disconnected nodes are not
+        # removed after removing invalid domain transitions
+
+        self.a.set_reverse(False)
+        self.a._build_subgraph()
+
+        start = self.p.lookup_type("start")
+        trans1 = self.p.lookup_type("trans1")
+        trans2 = self.p.lookup_type("trans2")
+        trans3 = self.p.lookup_type("trans3")
+        trans4 = self.p.lookup_type("trans4")
+        trans5 = self.p.lookup_type("trans5")
+        dyntrans100 = self.p.lookup_type("dyntrans100")
+        bothtrans200 = self.p.lookup_type("bothtrans200")
+
+        edges = set(self.a.subG.out_edges_iter())
+        self.assertSetEqual(set([(dyntrans100, bothtrans200),
+                                 (start, dyntrans100),
+                                 (start, trans1),
+                                 (trans1, trans2),
+                                 (trans2, trans3),
+                                 (trans3, trans5)]), edges)
+
+    def test_101_reverse_subgraph_structure(self):
+        """DTA: verify reverse subgraph structure."""
+        # The purpose is to ensure the subgraph is reversed
+        # only when the reverse option is set, not that
+        # graph reversal is correct (assumed that NetworkX
+        # does it correctly).
+        # Don't check node list since the disconnected nodes are not
+        # removed after removing invalid domain transitions
+
+        self.a.set_reverse(True)
+        self.a._build_subgraph()
+
+        start = self.p.lookup_type("start")
+        trans1 = self.p.lookup_type("trans1")
+        trans2 = self.p.lookup_type("trans2")
+        trans3 = self.p.lookup_type("trans3")
+        trans4 = self.p.lookup_type("trans4")
+        trans5 = self.p.lookup_type("trans5")
+        dyntrans100 = self.p.lookup_type("dyntrans100")
+        bothtrans200 = self.p.lookup_type("bothtrans200")
+
+        edges = set(self.a.subG.out_edges_iter())
+        self.assertSetEqual(set([(bothtrans200, dyntrans100),
+                                 (dyntrans100, start),
+                                 (trans1, start),
+                                 (trans2, trans1),
+                                 (trans3, trans2),
+                                 (trans5, trans3)]), edges)
+
+    def test_200_exclude_domain(self):
+        """DTA: exclude domain type."""
+        # Don't check node list since the disconnected nodes are not
+        # removed after removing invalid domain transitions
+
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans1"])
+        self.a._build_subgraph()
+
+        start = self.p.lookup_type("start")
+        trans1 = self.p.lookup_type("trans1")
+        trans2 = self.p.lookup_type("trans2")
+        trans3 = self.p.lookup_type("trans3")
+        trans4 = self.p.lookup_type("trans4")
+        trans5 = self.p.lookup_type("trans5")
+        dyntrans100 = self.p.lookup_type("dyntrans100")
+        bothtrans200 = self.p.lookup_type("bothtrans200")
+
+        edges = set(self.a.subG.out_edges_iter())
+        self.assertSetEqual(set([(dyntrans100, bothtrans200),
+                                 (start, dyntrans100),
+                                 (trans2, trans3),
+                                 (trans3, trans5)]), edges)
+
+    def test_201_exclude_entryoint_with_2entrypoints(self):
+        """DTA: exclude entrypoint type without transition deletion (other entrypoints)."""
+        # Don't check node list since the disconnected nodes are not
+        # removed after removing invalid domain transitions
+
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans3_exec1"])
+        self.a._build_subgraph()
+
+        start = self.p.lookup_type("start")
+        trans1 = self.p.lookup_type("trans1")
+        trans2 = self.p.lookup_type("trans2")
+        trans3 = self.p.lookup_type("trans3")
+        trans4 = self.p.lookup_type("trans4")
+        trans5 = self.p.lookup_type("trans5")
+        dyntrans100 = self.p.lookup_type("dyntrans100")
+        bothtrans200 = self.p.lookup_type("bothtrans200")
+
+        edges = set(self.a.subG.out_edges_iter())
+        self.assertSetEqual(set([(dyntrans100, bothtrans200),
+                                 (start, dyntrans100),
+                                 (start, trans1),
+                                 (trans1, trans2),
+                                 (trans2, trans3),
+                                 (trans3, trans5)]), edges)
+
+    def test_202_exclude_entryoint_with_dyntrans(self):
+        """DTA: exclude entrypoint type without transition deletion (dyntrans)."""
+        # Don't check node list since the disconnected nodes are not
+        # removed after removing invalid domain transitions
+
+        self.a.set_reverse(False)
+        self.a.set_exclude(["bothtrans200_exec"])
+        self.a._build_subgraph()
+
+        start = self.p.lookup_type("start")
+        trans1 = self.p.lookup_type("trans1")
+        trans2 = self.p.lookup_type("trans2")
+        trans3 = self.p.lookup_type("trans3")
+        trans4 = self.p.lookup_type("trans4")
+        trans5 = self.p.lookup_type("trans5")
+        dyntrans100 = self.p.lookup_type("dyntrans100")
+        bothtrans200 = self.p.lookup_type("bothtrans200")
+
+        edges = set(self.a.subG.out_edges_iter())
+        self.assertSetEqual(set([(dyntrans100, bothtrans200),
+                                 (start, dyntrans100),
+                                 (start, trans1),
+                                 (trans1, trans2),
+                                 (trans2, trans3),
+                                 (trans3, trans5)]), edges)
+
+    def test_203_exclude_entryoint_delete_transition(self):
+        """DTA: exclude entrypoint type with transition deletion."""
+        # Don't check node list since the disconnected nodes are not
+        # removed after removing invalid domain transitions
+
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans2_exec"])
+        self.a._build_subgraph()
+
+        start = self.p.lookup_type("start")
+        trans1 = self.p.lookup_type("trans1")
+        trans2 = self.p.lookup_type("trans2")
+        trans3 = self.p.lookup_type("trans3")
+        trans4 = self.p.lookup_type("trans4")
+        trans5 = self.p.lookup_type("trans5")
+        dyntrans100 = self.p.lookup_type("dyntrans100")
+        bothtrans200 = self.p.lookup_type("bothtrans200")
+
+        edges = set(self.a.subG.out_edges_iter())
+        self.assertSetEqual(set([(dyntrans100, bothtrans200),
+                                 (start, dyntrans100),
+                                 (start, trans1),
+                                 (trans2, trans3),
+                                 (trans3, trans5)]), edges)

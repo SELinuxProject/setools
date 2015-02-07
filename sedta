@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -84,6 +84,12 @@ alg.add_argument("-S", "--shortest_path", action="store_true",
 alg.add_argument("-A", "--all_paths",
                  help="Calculate all paths, with the specified maximum path length. (Expensive)", type=int, metavar="MAX_STEPS")
 
+opts = parser.add_argument_group("Analysis options")
+opts.add_argument("-r", "--reverse", action="store_true", default=False,
+                 help="Perform a reverse DTA.")
+opts.add_argument(
+    "exclude", help="List of excluded types in the analysis.", nargs="*")
+
 args = parser.parse_args()
 
 if not args.target and (args.shortest_path or args.all_paths):
@@ -94,7 +100,7 @@ if args.target and not (args.shortest_path or args.all_paths):
 
 try:
     p = setools.SELinuxPolicy(args.policy)
-    g = setools.dta.DomainTransitionAnalysis(p)
+    g = setools.dta.DomainTransitionAnalysis(p, reverse=args.reverse, exclude=args.exclude)
 except Exception as err:
     print(err)
     sys.exit(1)
@@ -130,7 +136,6 @@ else:  # single transition
     for i, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(transitions, start=1):
         print("Transition {0}: {1} -> {2}\n".format(i, src, tgt))
         print_transition(trans, entrypoints, setexec, dyntrans, setcur)
-
 
     print(i, "domain transition(s) found.")
 

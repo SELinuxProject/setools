@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -26,13 +26,16 @@ class DomainTransitionAnalysis(object):
 
     """Domain transition analysis."""
 
-    def __init__(self, policy):
+    def __init__(self, policy, reverse=False, exclude=[]):
         """
         Parameter:
         policy   The policy to analyze.
         """
         self.policy = policy
+        self.set_exclude(exclude)
+        self.set_reverse(reverse)
         self.rebuildgraph = True
+        self.rebuildsubgraph = True
         self.G = nx.DiGraph()
 
     def __get_entrypoints(self, source, target):
@@ -51,24 +54,18 @@ class DomainTransitionAnalysis(object):
         exec     The execute rules.
         trans    The type_transition rules.
         """
-        for e in self.G.edge[source][target]['entrypoint']:
-            if self.G.edge[source][target]['type_transition'][e]:
+        for e in self.subG.edge[source][target]['entrypoint']:
+            if self.subG.edge[source][target]['type_transition'][e]:
                 yield e, \
-                    self.G.edge[source][target]['entrypoint'][e], \
-                    self.G.edge[source][target]['execute'][e], \
-                    self.G.edge[source][target]['type_transition'][e]
+                    self.subG.edge[source][target]['entrypoint'][e], \
+                    self.subG.edge[source][target]['execute'][e], \
+                    self.subG.edge[source][target]['type_transition'][e]
             else:
                 yield e, \
-                    self.G.edge[source][target]['entrypoint'][e], \
-                    self.G.edge[source][target]['execute'][e], \
+                    self.subG.edge[source][target]['entrypoint'][e], \
+                    self.subG.edge[source][target]['execute'][e], \
                     []
 
-    # TODO: consider making sure source and target are valid
-    # both as types and also in graph
-    # TODO: make reverse an option. on that option,
-    # simply reverse the graph. Will probably have to fix up
-    # __get_steps to output correctly so sedta doesn't have to
-    # change.
     def __get_steps(self, path):
         """
         Generator which returns the source, target, and associated rules
@@ -93,12 +90,43 @@ class DomainTransitionAnalysis(object):
             source = path[s - 1]
             target = path[s]
 
-            yield source, target, \
-                self.G.edge[source][target]['transition'], \
-                self.__get_entrypoints(source, target), \
-                self.G.edge[source][target]['setexec'], \
-                self.G.edge[source][target]['dyntransition'], \
-                self.G.edge[source][target]['setcurrent']
+            if self.reverse:
+                real_source, real_target = target, source
+            else:
+                real_source, real_target = source, target
+
+            # It seems that NetworkX does not reverse the dictionaries
+            # that store the attributes, so real_* is used everywhere
+            # below, rather than just the first line.
+            yield real_source, real_target, \
+                self.subG.edge[real_source][real_target]['transition'], \
+                self.__get_entrypoints(real_source, real_target), \
+                self.subG.edge[real_source][real_target]['setexec'], \
+                self.subG.edge[real_source][real_target]['dyntransition'], \
+                self.subG.edge[real_source][real_target]['setcurrent']
+
+    def set_reverse(self, reverse):
+        """
+        Set forward/reverse DTA direction.
+
+        Parameter:
+        reverse     If true, a reverse DTA is performed, otherwise a
+                    forward DTA is performed.
+        """
+
+        self.reverse = bool(reverse)
+        self.rebuildsubgraph = True
+
+    def set_exclude(self, exclude):
+        """
+        Set the domains to exclude from the domain transition analysis.
+
+        Parameter:
+        exclude         A list of types.
+        """
+
+        self.exclude = [self.policy.lookup_type(t) for t in exclude]
+        self.rebuildsubgraph = True
 
     def shortest_path(self, source, target):
         """
@@ -118,12 +146,12 @@ class DomainTransitionAnalysis(object):
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        if s in self.G and t in self.G:
+        if s in self.subG and t in self.subG:
             try:
-                path = nx.shortest_path(self.G, s, t)
+                path = nx.shortest_path(self.subG, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -149,12 +177,12 @@ class DomainTransitionAnalysis(object):
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        if s in self.G and t in self.G:
+        if s in self.subG and t in self.subG:
             try:
-                paths = nx.all_simple_paths(self.G, s, t, maxlen)
+                paths = nx.all_simple_paths(self.subG, s, t, maxlen)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -179,12 +207,12 @@ class DomainTransitionAnalysis(object):
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        if s in self.G and t in self.G:
+        if s in self.subG and t in self.subG:
             try:
-                paths = nx.all_shortest_paths(self.G, s, t)
+                paths = nx.all_shortest_paths(self.subG, s, t)
             except nx.exception.NetworkXNoPath:
                 pass
             else:
@@ -207,16 +235,24 @@ class DomainTransitionAnalysis(object):
         """
         s = self.policy.lookup_type(type_)
 
-        if self.rebuildgraph:
-            self._build_graph()
+        if self.rebuildsubgraph:
+            self._build_subgraph()
 
-        for source, target in self.G.out_edges_iter(s):
-            yield source, target, \
-                self.G.edge[source][target]['transition'], \
-                self.__get_entrypoints(source, target), \
-                self.G.edge[source][target]['setexec'], \
-                self.G.edge[source][target]['dyntransition'], \
-                self.G.edge[source][target]['setcurrent']
+        for source, target in self.subG.out_edges_iter(s):
+            if self.reverse:
+                real_source, real_target = target, source
+            else:
+                real_source, real_target = source, target
+
+            # It seems that NetworkX does not reverse the dictionaries
+            # that store the attributes, so real_* is used everywhere
+            # below, rather than just the first line.
+            yield real_source, real_target, \
+                self.subG.edge[real_source][real_target]['transition'], \
+                self.__get_entrypoints(real_source, real_target), \
+                self.subG.edge[real_source][real_target]['setexec'], \
+                self.subG.edge[real_source][real_target]['dyntransition'], \
+                self.subG.edge[real_source][real_target]['setcurrent']
 
     def get_stats(self):
         """
@@ -442,3 +478,46 @@ class DomainTransitionAnalysis(object):
             del self.G[s][t]['setcurrent'][:]
 
         self.rebuildgraph = False
+        self.rebuildsubgraph = True
+
+    def _build_subgraph(self):
+        if self.rebuildgraph:
+            self._build_graph()
+
+        # delete excluded domains from subgraph
+        nodes = [n for n in self.G.nodes() if n not in self.exclude]
+        # subgraph created this way to get copies of the edge
+        # attributes. otherwise the edge attributes point to the
+        # original graph, and the entrypoint removal below would also
+        # affect the main graph.
+        self.subG = nx.DiGraph(self.G.subgraph(nodes))
+
+        # delete excluded entrypoints from subgraph
+        invalid_edge = []
+        for source, target in self.subG.edges_iter():
+            # can't change a dictionary that you're iterating over
+            entrypoints = list(self.subG.edge[source][target]['entrypoint'])
+
+            for e in entrypoints:
+                # clear the entrypoint data
+                if e in self.exclude:
+                    del self.subG.edge[source][target]['entrypoint'][e]
+                    del self.subG.edge[source][target]['execute'][e]
+
+                    try:
+                        del self.subG.edge[source][
+                            target]['type_transition'][e]
+                    except KeyError:  # setexec
+                        pass
+
+                # cannot change the edges while iterating over them
+                if len(self.subG.edge[source][target]['entrypoint']) == 0 and len(self.subG.edge[source][target]['dyntransition']) == 0:
+                    invalid_edge.append((source, target))
+
+        self.subG.remove_edges_from(invalid_edge)
+
+        # reverse graph for reverse DTA
+        if self.reverse:
+            self.subG.reverse(copy=False)
+
+        self.rebuildsubgraph = False
