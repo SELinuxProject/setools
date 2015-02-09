@@ -480,6 +480,35 @@ class DomainTransitionAnalysis(object):
         self.rebuildgraph = False
         self.rebuildsubgraph = True
 
+    def __remove_excluded_entrypoints(self):
+        invalid_edges = []
+        for source, target in self.subG.edges_iter():
+            entrypoints = set(self.subG.edge[source][target]['entrypoint'])
+            entrypoints.intersection_update(self.exclude)
+
+            if not entrypoints:
+                # short circuit if there are no
+                # excluded entrypoint types on
+                # this edge.
+                continue
+
+            for e in entrypoints:
+                # clear the entrypoint data
+                del self.subG.edge[source][target]['entrypoint'][e]
+                del self.subG.edge[source][target]['execute'][e]
+
+                try:
+                    del self.subG.edge[source][target]['type_transition'][e]
+                except KeyError:  # setexec
+                    pass
+
+            # cannot change the edges while iterating over them
+            if len(self.subG.edge[source][target]['entrypoint']) == 0 and \
+                    len(self.subG.edge[source][target]['dyntransition']) == 0:
+                invalid_edges.append((source, target))
+
+        self.subG.remove_edges_from(invalid_edges)
+
     def _build_subgraph(self):
         if self.rebuildgraph:
             self._build_graph()
@@ -493,28 +522,8 @@ class DomainTransitionAnalysis(object):
         self.subG = nx.DiGraph(self.G.subgraph(nodes))
 
         # delete excluded entrypoints from subgraph
-        invalid_edge = []
-        for source, target in self.subG.edges_iter():
-            # can't change a dictionary that you're iterating over
-            entrypoints = list(self.subG.edge[source][target]['entrypoint'])
-
-            for e in entrypoints:
-                # clear the entrypoint data
-                if e in self.exclude:
-                    del self.subG.edge[source][target]['entrypoint'][e]
-                    del self.subG.edge[source][target]['execute'][e]
-
-                    try:
-                        del self.subG.edge[source][
-                            target]['type_transition'][e]
-                    except KeyError:  # setexec
-                        pass
-
-                # cannot change the edges while iterating over them
-                if len(self.subG.edge[source][target]['entrypoint']) == 0 and len(self.subG.edge[source][target]['dyntransition']) == 0:
-                    invalid_edge.append((source, target))
-
-        self.subG.remove_edges_from(invalid_edge)
+        if self.exclude:
+            self.__remove_excluded_entrypoints()
 
         # reverse graph for reverse DTA
         if self.reverse:
