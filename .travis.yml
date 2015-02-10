@@ -19,7 +19,7 @@ install:
   - pip install 'networkx>=1.8'
 
   # install newer swig
-  - wget http://download.sourceforge.net/project/swig/swig/swig-2.0.12/swig-2.0.12.tar.gz
+  - wget http://downloads.sourceforge.net/project/swig/swig/swig-2.0.12/swig-2.0.12.tar.gz
   - tar zxf swig-2.0.12.tar.gz
   - cd swig-2.0.12
   - ./configure
