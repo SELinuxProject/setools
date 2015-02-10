@@ -18,11 +18,6 @@
 
 #define TRUE 1
 #define FALSE 0
-
-/* Used by SETools libqpol */
-/** parser used to support fs_use_psid declarations, so revert that bit
- *  of code here */
-#define SECURITY_FS_USE_PSIDS 6
 /* Used by SETools to determine if source MLS or not */
 int define_mls(void);
 

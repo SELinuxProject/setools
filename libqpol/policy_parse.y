@@ -58,11 +58,7 @@
 #include <sepol/policydb/conditional.h>
 #include <sepol/policydb/flask.h>
 #include <sepol/policydb/hierarchy.h>
-/* Add for SETools libqpol */
-#ifdef HAVE_SEPOL_POLICYCAPS
 #include <sepol/policydb/polcaps.h>
-#endif
-
 #include "queue.h"
 
 /* #include "checkpolicy.h" - Remove for setools and replace with: */

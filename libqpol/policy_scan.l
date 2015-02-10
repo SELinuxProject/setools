@@ -39,11 +39,7 @@
 typedef int (* require_func_t)(int pass);
 
 /* For SETools libqpol services leave this as policy_parse.h */
-/* #ifdef ANDROID */
 #include "policy_parse.h"
-/*#else
-#include "y.tab.h"
-#endif */
 
 static char linebuf[2][255];
 static unsigned int lno = 0;

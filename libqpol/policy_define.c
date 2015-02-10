@@ -57,12 +57,8 @@
 #include <sepol/policydb/flask.h>
 #include <sepol/policydb/hierarchy.h>
 /* Required for SETools libqpol */
-#ifdef HAVE_SEPOL_POLICYCAPS
 #include <sepol/policydb/polcaps.h>
-#endif
-#ifdef HAVE_SEPOL_ERRCODES
 #include <sepol/errcodes.h>
-#endif
 
 #include "queue.h"
 /* Required for SETools libqpol - Removed #include "checkpolicy.h"*/
@@ -91,17 +87,12 @@ static int id_has_dot(const char *id);
 static int parse_security_context(context_struct_t *c);
 
 /* initialize all of the state variables for the scanner/parser */
-/* Modified for SETools libqpol */
-static int load_rules;
-static unsigned int num_rules = 0;
-void init_parser(int pass_number, int do_rules)
+void init_parser(int pass_number)
 {
 	policydb_lineno = 1;
 	source_lineno = 1;
 	policydb_errors = 0;
 	pass = pass_number;
-	load_rules = do_rules;
-	num_rules = 0;
 }
 
 __attribute__ ((format(printf, 1, 2)))
@@ -121,34 +112,6 @@ int define_mls(void)
 	policydbp->mls = 1;
 
 	return 0;
-}
-
-/* Required for SETools libqpol */
-/* Add a rule onto an avtab hash table only if it does not already
- * exist.  (Note that the avtab is discarded afterwards; it will be
- * regenerated during expansion.)  Return 1 if rule was added (or
- * otherwise handled successfully), 0 if it conflicted with something,
- * 2 if the rule is not to be added, or -1 on error.
- */
-static int insert_check_type_rule(avrule_t * rule, avtab_t * avtab, cond_av_list_t ** list, cond_av_list_t ** other)
-{
-	int ret;
-
-	if (num_rules && !load_rules)
-		return 2;
-
-#ifdef SEPOL_DYNAMIC_AVTAB
-	if (!avtab->htable)
-		if (avtab_alloc(avtab, MAX_AVTAB_SIZE))
-			return -1;
-#endif
-
-	ret = expand_rule(NULL, policydbp, rule, avtab, list, other, 0);
-
-	if (ret < 0) {
-		yyerror("Failed on expanding rule");
-	}
-	return ret;
 }
 
 int insert_separator(int push)
@@ -1651,9 +1614,8 @@ int define_compute_type(int which)
 {
 	char *id;
 	avrule_t *avrule;
-	int retval;
 
-	if (pass == 1 || (num_rules && !load_rules)) { /* Required for SETools libqpol */
+	if (pass == 1) {
 		while ((id = queue_remove(id_queue)))
 			free(id);
 		while ((id = queue_remove(id_queue)))
@@ -1665,42 +1627,19 @@ int define_compute_type(int which)
 		return 0;
 	}
 
-	num_rules++;
-
 	if (define_compute_type_helper(which, &avrule))
 		return -1;
 
-	retval = insert_check_type_rule(avrule, &policydbp->te_avtab, NULL, NULL);
-	switch (retval) {
-	case 1:{
-		/* append this avrule to the end of the current rules list */
 	append_avrule(avrule);
 	return 0;
 	}
-	case 2:		       /* FALLTHROUGH */
-	case 0:{
-		/* rule conflicted, so don't actually add this rule */
-		avrule_destroy(avrule);
-		free(avrule);
-		return 0;
-	}
-	case -1:{
-		avrule_destroy(avrule);
-		free(avrule);
-		return -1;
-	}
-	default:{
-		abort();	       /* should never get here */
-	}
-	}
-}
 
 avrule_t *define_cond_compute_type(int which)
 {
 	char *id;
 	avrule_t *avrule;
 
-	if (pass == 1 || (num_rules && !load_rules)) { /* Required for SETools libqpol */
+	if (pass == 1) {
 		while ((id = queue_remove(id_queue)))
 			free(id);
 		while ((id = queue_remove(id_queue)))
@@ -1711,8 +1650,6 @@ avrule_t *define_cond_compute_type(int which)
 		free(id);
 		return (avrule_t *) 1;
 	}
-
-	num_rules++;
 
 	if (define_compute_type_helper(which, &avrule))
 		return COND_ERR;
@@ -1792,7 +1729,7 @@ int define_bool_tunable(int is_tunable)
 
 avrule_t *define_cond_pol_list(avrule_t * avlist, avrule_t * sl)
 {
-	if (pass == 1 || (num_rules && !load_rules)) { /* Required for SETools libqpol */
+	if (pass == 1) {
 		/* return something so we get through pass 1 */
 		return (avrule_t *) 1;
 	}
@@ -1950,15 +1887,13 @@ avrule_t *define_cond_te_avtab(int which)
 	avrule_t *avrule;
 	int i;
 
-	if (pass == 1 || (num_rules && !load_rules)) { /* Required for SETools libqpol */
+	if (pass == 1) {
 		for (i = 0; i < 4; i++) {
 			while ((id = queue_remove(id_queue)))
 				free(id);
 		}
 		return (avrule_t *) 1;	/* any non-NULL value */
 	}
-
-	num_rules++;
 
 	if (define_te_avtab_helper(which, &avrule))
 		return COND_ERR;
@@ -1972,15 +1907,13 @@ int define_te_avtab(int which)
 	avrule_t *avrule;
 	int i;
 
-	if (pass == 1 || (num_rules && !load_rules)) { /* Required for SETools libqpol */
+	if (pass == 1) {
 		for (i = 0; i < 4; i++) {
 			while ((id = queue_remove(id_queue)))
 				free(id);
 		}
 		return 0;
 	}
-
-	num_rules++;
 
 	if (define_te_avtab_helper(which, &avrule))
 		return -1;
@@ -3294,88 +3227,6 @@ int define_conditional(cond_expr_t * expr, avrule_t * t, avrule_t * f)
 	cn_old = get_current_cond_list(&cn);
 	if (!cn_old) {
 		return -1;
-	}
-
-	/* Required for SETools libqpol */
-	avrule_t *tmp, *last_tmp;
-	int retval;
-	/* verify te rules -- both true and false branches of conditional */
-	tmp = cn.avtrue_list;
-	last_tmp = NULL;
-	while (tmp) {
-		if (!(tmp->specified & AVRULE_TRANSITION))
-			continue;
-		retval = insert_check_type_rule(tmp, &policydbp->te_cond_avtab, &cn_old->true_list, &cn_old->false_list);
-		switch (retval) {
-		case 1:{
-			last_tmp = tmp;
-			tmp = tmp->next;
-			break;
-		}
-		case 0:{
-			/* rule conflicted, so remove it from consideration */
-			if (last_tmp == NULL) {
-				cn.avtrue_list = cn.avtrue_list->next;
-				avrule_destroy(tmp);
-				free(tmp);
-				tmp = cn.avtrue_list;
-			} else {
-				last_tmp->next = tmp->next;
-				avrule_destroy(tmp);
-				free(tmp);
-				tmp = last_tmp->next;
-			}
-			break;
-		}
-		case -1:{
-			return -1;
-		}
-		case 2:{
-			return 0;
-		}
-		default:{
-			abort();     /* should never get here */
-		}
-		}
-	}
-
-	tmp = cn.avfalse_list;
-	last_tmp = NULL;
-	while (tmp) {
-		if (!(tmp->specified & AVRULE_TRANSITION))
-			continue;
-		retval = insert_check_type_rule(tmp, &policydbp->te_cond_avtab, &cn_old->false_list, &cn_old->true_list);
-		switch (retval) {
-		case 1:{
-			last_tmp = tmp;
-			tmp = tmp->next;
-			break;
-		}
-		case 0:{
-			/* rule conflicted, so remove it from consideration  */
-			if (last_tmp == NULL) {
-				cn.avfalse_list = cn.avfalse_list->next;
-				avrule_destroy(tmp);
-				free(tmp);
-				tmp = cn.avfalse_list;
-			} else {
-				last_tmp->next = tmp->next;
-				avrule_destroy(tmp);
-				free(tmp);
-				tmp = last_tmp->next;
-			}
-			break;
-		}
-		case -1:{
-			return -1;
-		}
-		case 2:{
-			return 0;
-		}
-		default:{
-			abort();     /* should never get here */
-		}
-		}
 	}
 
 	append_cond_list(&cn);
