@@ -34,25 +34,25 @@ SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
 SETools requires the following development packages for building:
-  Python 2.7 or 3.3
+  Python 2.7 or 3.3+
   setuptools
   gcc
   bison
   flex
   libselinux
-  libsepol 2.4
+  libsepol 2.4+
   libbz2
-  SWIG 2.0.12 or 3.0
+  SWIG 2.0.12+ or 3.0+
 
 To build SETools' graphical tools, the following packages are required:
   TBD
 
 To run SETools, the following packages are required:
-  Python 2.7 or 3.3
-  NetworkX 1.8
+  Python 2.7 or 3.3+
+  NetworkX 1.8+
   setuptools
   libselinux
-  libsepol 2.4
+  libsepol 2.4+
   libbz2
 
 2.1. building SETools
