@@ -343,3 +343,54 @@ class TERuleQueryTest(unittest.TestCase):
         self.assertEqual(r[1].tclass, "infoflow7")
         self.assertEqual(r[1].default, "test101d")
         self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+
+    def test_200_boolean_intersection(self):
+        """TE rule query with intersection Boolean set match."""
+        q = TERuleQuery(self.p, boolean=["test200"])
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+
+        self.assertEqual(r[0].ruletype, "allow")
+        self.assertEqual(r[0].source, "test200t1")
+        self.assertEqual(r[0].target, "test200t1")
+        self.assertEqual(r[0].tclass, "infoflow7")
+        self.assertSetEqual(set(["super_w"]), r[0].perms)
+
+        self.assertEqual(r[1].ruletype, "allow")
+        self.assertEqual(r[1].source, "test200t2")
+        self.assertEqual(r[1].target, "test200t2")
+        self.assertEqual(r[1].tclass, "infoflow7")
+        self.assertSetEqual(set(["super_w"]), r[1].perms)
+
+    def test_201_boolean_equal(self):
+        """TE rule query with equal Boolean set match."""
+        q = TERuleQuery(self.p, boolean=["test201a", "test201b"], boolean_equal=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "allow")
+        self.assertEqual(r[0].source, "test201t1")
+        self.assertEqual(r[0].target, "test201t1")
+        self.assertEqual(r[0].tclass, "infoflow7")
+        self.assertSetEqual(set(["super_unmapped"]), r[0].perms)
+
+    def test_202_boolean_regex(self):
+        """TE rule query with regex Boolean match."""
+        q = TERuleQuery(self.p, boolean="test202(a|b)", boolean_regex=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+
+        self.assertEqual(r[0].ruletype, "allow")
+        self.assertEqual(r[0].source, "test202t1")
+        self.assertEqual(r[0].target, "test202t1")
+        self.assertEqual(r[0].tclass, "infoflow7")
+        self.assertSetEqual(set(["super_none"]), r[0].perms)
+
+        self.assertEqual(r[1].ruletype, "allow")
+        self.assertEqual(r[1].source, "test202t2")
+        self.assertEqual(r[1].target, "test202t2")
+        self.assertEqual(r[1].tclass, "infoflow7")
+        self.assertSetEqual(set(["super_unmapped"]), r[1].perms)

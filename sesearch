@@ -64,11 +64,13 @@ expr.add_argument(
     "-p", "--perms", help="Comma separated list of permissions.", metavar="PERMS", default="")
 expr.add_argument(
     "-D", "--default", help="Default type of the TE/RBAC rule.", default="")
-expr.add_argument("-b", "--bool", help="Conditional rules with the Boolean in the expression.",
-                  dest="boolname", metavar="BOOL", default="")
+expr.add_argument("-b", "--bool", help="Comma separated list of Booleans in the conditional expression.",
+                  dest="boolean", metavar="BOOL", default="")
 
 opts = parser.add_argument_group("Search options")
-opts.add_argument("-e", action="store_true",
+opts.add_argument("-eb", action="store_true",
+                  help="Match Boolean list exactly instead of matching any listed Boolean.", dest="boolean_equal")
+opts.add_argument("-ep", action="store_true",
                   help="Match permission set exactly instead of matching any listed permission.", dest="perms_equal")
 opts.add_argument("-ds", action="store_false",
                   help="Match source attributes directly instead of matching member types/roles.", dest="source_indirect")
@@ -82,6 +84,8 @@ opts.add_argument("-rc", action="store_true",
                   help="Use regular expression matching for the object class.", dest="tclass_regex")
 opts.add_argument("-rd", action="store_true",
                   help="Use regular expression matching for the default type/role.", dest="default_regex")
+opts.add_argument("-rb", action="store_true",
+                  help="Use regular expression matching for Booleans.", dest="boolean_regex")
 
 args = parser.parse_args()
 
@@ -103,7 +107,8 @@ if args.tertypes:
                                         source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
                                         target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
                                         tclass_regex=args.tclass_regex, perms_equal=args.perms_equal,
-                                        default=args.default, default_regex=args.default_regex)
+                                        default=args.default, default_regex=args.default_regex,
+                                        boolean_regex=args.boolean_regex, boolean_equal=args.boolean_equal)
 
     # these are broken out from the above statement to prevent making a list
     # with an empty string in it (split on empty string)
@@ -115,6 +120,12 @@ if args.tertypes:
 
     if args.perms:
         q.set_perms(args.perms.split(","))
+
+    if args.boolean:
+        if args.boolean_regex:
+            q.set_boolean(args.boolean)
+        else:
+            q.set_boolean(args.boolean.split(","))
 
     for r in sorted(q.results()):
         print(r)

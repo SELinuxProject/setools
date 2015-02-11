@@ -33,7 +33,7 @@ def boolean_factory(policy, symbol):
         return Boolean(policy, symbol)
 
     try:
-        return qpol.qpol_bool_t(qpol_policy, symbol)
+        return Boolean(policy, qpol.qpol_bool_t(policy, symbol))
     except ValueError:
         raise InvalidBoolean("{0} is not a valid Boolean".format(symbol))
 
@@ -84,7 +84,7 @@ class ConditionalExpr(symbol.PolicySymbol):
         for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
             expr_node_type = expr_node.expr_type(self.policy)
 
-            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == boolean_factory(self.policy, expr_node.bool(self.policy)):
+            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == boolean_factory(self.policy, expr_node.get_boolean(self.policy)):
                 return True
 
         return False
@@ -150,3 +150,17 @@ class ConditionalExpr(symbol.PolicySymbol):
                 ret.append(i)
 
         return ' '.join(ret)
+
+    @property
+    def booleans(self):
+        """The set of Booleans in the expression."""
+
+        bools = set()
+
+        for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
+            expr_node_type = expr_node.expr_type(self.policy)
+
+            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL:
+                bools.add(boolean_factory(self.policy, expr_node.get_boolean(self.policy)))
+
+        return bools

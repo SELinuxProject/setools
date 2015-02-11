@@ -16,7 +16,9 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from .policyrep.rule import InvalidRuleUse
+import re
+
+from .policyrep.rule import InvalidRuleUse, RuleNotConditional
 from . import rulequery
 
 
@@ -30,7 +32,8 @@ class TERuleQuery(rulequery.RuleQuery):
                  target="", target_regex=False, target_indirect=True,
                  tclass="", tclass_regex=False,
                  perms=set(), perms_equal=False,
-                 default="", default_regex=False):
+                 default="", default_regex=False,
+                 boolean=set(), boolean_regex=False, boolean_equal=False):
         """
         Parameter:
         policy            The policy to query.
@@ -68,6 +71,7 @@ class TERuleQuery(rulequery.RuleQuery):
         self.set_tclass(tclass, regex=tclass_regex)
         self.set_perms(perms, equal=perms_equal)
         self.set_default(default, regex=default_regex)
+        self.set_boolean(boolean, regex=boolean_regex, equal=boolean_equal)
 
     def results(self):
         """Generator which yields all matching TE rules."""
@@ -139,8 +143,53 @@ class TERuleQuery(rulequery.RuleQuery):
                 except InvalidRuleUse:
                     continue
 
+            #
+            # Match on Boolean in conditional expression
+            #
+            if self.boolean:
+                try:
+                    if not self._match_regex_or_set(
+                            set(str(b) for b in r.conditional.booleans),
+                            self.boolean,
+                            self.boolean_equal,
+                            self.boolean_regex,
+                            self.boolean_cmp):
+                        continue
+                except RuleNotConditional:
+                    continue
+
             # if we get here, we have matched all available criteria
             yield r
+
+    def set_boolean(self, boolean, **opts):
+        """
+        Set the Boolean for the TE rule query.
+
+        Parameter:
+        boolean     The Boolean names to match in the TE rule
+                    conditional expression.
+
+        Options:
+        regex       If true, regular expression matching will be used.
+
+        Exceptions:
+        NameError   Invalid permission set keyword option.
+        """
+
+        self.boolean = boolean
+
+        for k in list(opts.keys()):
+            if k == "regex":
+                self.boolean_regex = opts[k]
+            elif k == "equal":
+                self.boolean_equal = opts[k]
+            else:
+                raise NameError("Invalid permission set option: {0}".format(k))
+
+        if self.boolean_regex:
+            self.boolean_cmp = re.compile(self.boolean)
+        else:
+            self.boolean_cmp = None
 
     def set_perms(self, perms, **opts):
         """
