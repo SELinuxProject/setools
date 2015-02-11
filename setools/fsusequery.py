@@ -66,7 +66,7 @@ class FSUseQuery(contextquery.ContextQuery):
         """Generator which yields all matching fs_use_* statements."""
 
         for fsu in self.policy.fs_uses():
-            if self.ruletype and not fsu.ruletype in self.ruletype:
+            if self.ruletype and fsu.ruletype not in self.ruletype:
                 continue
 
             if self.fs and not self._match_regex(

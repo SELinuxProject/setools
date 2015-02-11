@@ -81,7 +81,7 @@ class TERuleQuery(rulequery.RuleQuery):
             # Matching on rule type
             #
             if self.ruletype:
-                if not r.ruletype in self.ruletype:
+                if r.ruletype not in self.ruletype:
                     continue
 
             #

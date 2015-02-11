@@ -271,19 +271,19 @@ class DomainTransitionAnalysis(object):
     # it is a dictionary keyed on the entrypoint type.
     def __add_edge(self, source, target):
         self.G.add_edge(source, target)
-        if not 'transition' in self.G[source][target]:
+        if 'transition' not in self.G[source][target]:
             self.G[source][target]['transition'] = []
-        if not 'entrypoint' in self.G[source][target]:
+        if 'entrypoint' not in self.G[source][target]:
             self.G[source][target]['entrypoint'] = defaultdict(list)
-        if not 'execute' in self.G[source][target]:
+        if 'execute' not in self.G[source][target]:
             self.G[source][target]['execute'] = defaultdict(list)
-        if not 'type_transition'in self.G[source][target]:
+        if 'type_transition' not in self.G[source][target]:
             self.G[source][target]['type_transition'] = defaultdict(list)
-        if not 'setexec' in self.G[source][target]:
+        if 'setexec' not in self.G[source][target]:
             self.G[source][target]['setexec'] = []
-        if not 'dyntransition' in self.G[source][target]:
+        if 'dyntransition' not in self.G[source][target]:
             self.G[source][target]['dyntransition'] = []
-        if not 'setcurrent' in self.G[source][target]:
+        if 'setcurrent' not in self.G[source][target]:
             self.G[source][target]['setcurrent'] = []
 
     # Domain transition requirements:
