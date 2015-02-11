@@ -42,13 +42,14 @@ SETools requires the following development packages for building:
   libselinux
   libsepol 2.4
   libbz2
+  SWIG 2.0.12 or 3.0
 
 To build SETools' graphical tools, the following packages are required:
   TBD
 
 To run SETools, the following packages are required:
   Python 2.7 or 3.3
-  NetworkX
+  NetworkX 1.8
   setuptools
   libselinux
   libsepol 2.4

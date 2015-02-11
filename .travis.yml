@@ -16,7 +16,7 @@ before_install:
   - sudo apt-get install -qq libaudit-dev libcap-ng-dev libustr-dev swig
 
 install:
-  - pip install 'networkx>=1.8'
+  - pip install 'networkx==1.8'
 
   # install newer swig
   - wget http://downloads.sourceforge.net/project/swig/swig/swig-2.0.12/swig-2.0.12.tar.gz
