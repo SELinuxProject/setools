@@ -26,67 +26,74 @@ parser = argparse.ArgumentParser(
     description="SELinux policy rule search tool.",
     epilog="TE/MLS rule searches cannot be mixed with RBAC rule searches.")
 parser.add_argument("--version", action="version", version=setools.__version__)
-parser.add_argument(
-    "policy", type=str, help="Path to the SELinux policy to search.")
+parser.add_argument("policy", help="Path to the SELinux policy to search.")
 
 rtypes = parser.add_argument_group("TE Rule Types")
 rtypes.add_argument("-A", "--allow", action="append_const",
-                    const="allow", dest="tertypes", help="Search allow rules.")
-#rtypes.add_argument("--neverallow", action="append_const", const="neverallow", dest="tertypes", help="Search neverallow rules.")
+                    const="allow", dest="tertypes",
+                    help="Search allow rules.")
 rtypes.add_argument("--auditallow", action="append_const",
-                    const="auditallow", dest="tertypes", help="Search auditallow rules.")
+                    const="auditallow", dest="tertypes",
+                    help="Search auditallow rules.")
 rtypes.add_argument("--dontaudit", action="append_const",
-                    const="dontaudit", dest="tertypes", help="Search dontaudit rules.")
+                    const="dontaudit", dest="tertypes",
+                    help="Search dontaudit rules.")
 rtypes.add_argument("-T", "--type_trans", action="append_const",
-                    const="type_transition", dest="tertypes", help="Search type_transition rules.")
+                    const="type_transition", dest="tertypes",
+                    help="Search type_transition rules.")
 rtypes.add_argument("--type_change", action="append_const",
-                    const="type_change", dest="tertypes", help="Search type_change rules.")
+                    const="type_change", dest="tertypes",
+                    help="Search type_change rules.")
 rtypes.add_argument("--type_member", action="append_const",
-                    const="type_member", dest="tertypes", help="Search type_member rules.")
+                    const="type_member", dest="tertypes",
+                    help="Search type_member rules.")
 
 rbacrtypes = parser.add_argument_group("RBAC Rule Types")
 rbacrtypes.add_argument("--role_allow", action="append_const",
-                        const="allow", dest="rbacrtypes", help="Search role allow rules.")
+                        const="allow", dest="rbacrtypes",
+                        help="Search role allow rules.")
 rbacrtypes.add_argument("--role_trans", action="append_const",
-                        const="role_transition", dest="rbacrtypes", help="Search role_transition rules.")
+                        const="role_transition", dest="rbacrtypes",
+                        help="Search role_transition rules.")
 
 mlsrtypes = parser.add_argument_group("MLS Rule Types")
 mlsrtypes.add_argument("--range_trans", action="append_const",
-                       const="range_transition", dest="mlsrtypes", help="Search range_transition rules.")
+                       const="range_transition", dest="mlsrtypes",
+                       help="Search range_transition rules.")
 
 expr = parser.add_argument_group("Expressions")
-expr.add_argument("-s", "--source", type=str,
+expr.add_argument("-s", "--source", default="",
                   help="Source type/role of the TE/RBAC rule.", default="")
-expr.add_argument("-t", "--target", type=str,
-                  help="Target type/role of the TE/RBAC rule.", default="")
-expr.add_argument(
-    "-c", "--class", help="Comma separated list of object classes", dest="tclass", default="")
-expr.add_argument(
-    "-p", "--perms", help="Comma separated list of permissions.", metavar="PERMS", default="")
-expr.add_argument(
-    "-D", "--default", help="Default type of the TE/RBAC rule.", default="")
-expr.add_argument("-b", "--bool", help="Comma separated list of Booleans in the conditional expression.",
-                  dest="boolean", metavar="BOOL", default="")
+expr.add_argument("-t", "--target", default="",
+                  help="Target type/role of the TE/RBAC rule.")
+expr.add_argument("-c", "--class", dest="tclass", default="",
+                  help="Comma separated list of object classes")
+expr.add_argument("-p", "--perms", metavar="PERMS", default="",
+                  help="Comma separated list of permissions.")
+expr.add_argument("-D", "--default", default=""
+                  help="Default type of the TE/RBAC rule.")
+expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL", default="",
+                  help="Comma separated list of Booleans in the conditional expression.")
 
 opts = parser.add_argument_group("Search options")
-opts.add_argument("-eb", action="store_true",
-                  help="Match Boolean list exactly instead of matching any listed Boolean.", dest="boolean_equal")
-opts.add_argument("-ep", action="store_true",
-                  help="Match permission set exactly instead of matching any listed permission.", dest="perms_equal")
-opts.add_argument("-ds", action="store_false",
-                  help="Match source attributes directly instead of matching member types/roles.", dest="source_indirect")
-opts.add_argument("-dt", action="store_false",
-                  help="Match target attributes directly instead of matching member types/roles.", dest="target_indirect")
-opts.add_argument("-rs", action="store_true",
-                  help="Use regular expression matching for the source type/role.", dest="source_regex")
-opts.add_argument("-rt", action="store_true",
-                  help="Use regular expression matching for the target type/role.", dest="target_regex")
-opts.add_argument("-rc", action="store_true",
-                  help="Use regular expression matching for the object class.", dest="tclass_regex")
-opts.add_argument("-rd", action="store_true",
-                  help="Use regular expression matching for the default type/role.", dest="default_regex")
-opts.add_argument("-rb", action="store_true",
-                  help="Use regular expression matching for Booleans.", dest="boolean_regex")
+opts.add_argument("-eb", action="store_true", dest="boolean_equal",
+                  help="Match Boolean list exactly instead of matching any listed Boolean.")
+opts.add_argument("-ep", action="store_true", dest="perms_equal",
+                  help="Match permission set exactly instead of matching any listed permission.")
+opts.add_argument("-ds", action="store_false", dest="source_indirect"
+                  help="Match source attributes directly instead of matching member types/roles.")
+opts.add_argument("-dt", action="store_false", dest="target_indirect",
+                  help="Match target attributes directly instead of matching member types/roles.")
+opts.add_argument("-rs", action="store_true", dest="source_regex",
+                  help="Use regular expression matching for the source type/role.")
+opts.add_argument("-rt", action="store_true", dest="target_regex"
+                  help="Use regular expression matching for the target type/role.")
+opts.add_argument("-rc", action="store_true", dest="tclass_regex"
+                  help="Use regular expression matching for the object class.")
+opts.add_argument("-rd", action="store_true", dest="default_regex"
+                  help="Use regular expression matching for the default type/role.")
+opts.add_argument("-rb", action="store_true", dest="boolean_regex"
+                  help="Use regular expression matching for Booleans.")
 
 args = parser.parse_args()
 

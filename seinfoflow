@@ -29,28 +29,28 @@ parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")
 
 settings = parser.add_argument_group("Analysis settings")
-settings.add_argument(
-    "-p", "--policy", help="Path to SELinux policy to analyze.", required=True)
-settings.add_argument(
-    "-m", "--map", help="Path to permission map file.", required=True)
-settings.add_argument(
-    "-s", "--source", help="Source type of the analysis.", required=True, default="")
-settings.add_argument(
-    "-t", "--target", help="Target type of the analysis.", default="")
+settings.add_argument("-p", "--policy", required=True,
+                      help="Path to SELinux policy to analyze.")
+settings.add_argument("-m", "--map", required=True,
+                      help="Path to permission map file.")
+settings.add_argument("-s", "--source", required=True, default="",
+                      help="Source type of the analysis.")
+settings.add_argument("-t", "--target", default="",
+                      help="Target type of the analysis.")
 
 alg = parser.add_argument_group("Analysis algorithm")
 alg.add_argument("-S", "--shortest_path", action="store_true",
                  help="Calculate all shortest paths.")
-alg.add_argument("-A", "--all_paths",
-                 help="Calculate all paths, with the specified maximum path length. (Expensive)", type=int, metavar="MAX_STEPS")
+alg.add_argument("-A", "--all_paths", type=int, metavar="MAX_STEPS",
+                 help="Calculate all paths, with the specified maximum path length. (Expensive)")
 
 opts = parser.add_argument_group("Analysis options")
-opts.add_argument("-w", "--min_weight",
-                  help="Minimum permission weight.  Default is 3.", default=3, type=int)
-opts.add_argument("-l", "--limit_flows",
-                  help="Limit to the specified number of flows.  Default is unlimited.", default=0, type=int)
-opts.add_argument(
-    "exclude", help="List of excluded types in the analysis.", nargs="*")
+opts.add_argument("-w", "--min_weight", default=3, type=int,
+                  help="Minimum permission weight.  Default is 3.")
+opts.add_argument("-l", "--limit_flows", default=0, type=int,
+                  help="Limit to the specified number of flows.  Default is unlimited.")
+opts.add_argument("exclude", nargs="*",
+                  help="List of excluded types in the analysis.")
 
 args = parser.parse_args()
 

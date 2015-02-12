@@ -81,8 +81,8 @@ parser.add_argument("--stats", action="store_true",
 alg = parser.add_argument_group("Analysis algorithm")
 alg.add_argument("-S", "--shortest_path", action="store_true",
                  help="Calculate all shortest paths.")
-alg.add_argument("-A", "--all_paths",
-                 help="Calculate all paths, with the specified maximum path length. (Expensive)", type=int, metavar="MAX_STEPS")
+alg.add_argument("-A", "--all_paths", type=int, metavar="MAX_STEPS",
+                 help="Calculate all paths, with the specified maximum path length. (Expensive)")
 
 opts = parser.add_argument_group("Analysis options")
 opts.add_argument("-r", "--reverse", action="store_true", default=False,
