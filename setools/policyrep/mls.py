@@ -101,7 +101,8 @@ class MLSLevel(symbol.PolicySymbol):
 
     def __eq__(self, other):
         if self.policy == other.policy:
-            if (self.qpol_symbol.sens_name(self.policy) != other.qpol_symbol.sens_name(self.policy)):
+            if (self.qpol_symbol.sens_name(self.policy) !=
+                    other.qpol_symbol.sens_name(self.policy)):
                 return False
 
             selfcats = set(str(c) for c in self.categories())
@@ -120,7 +121,8 @@ class MLSLevel(symbol.PolicySymbol):
         if cats:
             # generate short category notation
             shortlist = []
-            for k, g in itertools.groupby(cats, key=lambda k, c=itertools.count(): k.value - next(c)):
+            for k, g in itertools.groupby(cats, key=lambda k,
+                                          c=itertools.count(): k.value - next(c)):
                 group = list(g)
                 if len(group) > 1:
                     shortlist.append("{0}.{1}".format(group[0], group[-1]))

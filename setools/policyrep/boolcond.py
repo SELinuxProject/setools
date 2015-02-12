@@ -113,7 +113,8 @@ class ConditionalExpr(symbol.PolicySymbol):
                 # parentheses if the operand is a subexpression
                 if isinstance(operand, list):
                     subexpr = [
-                        self._cond_expr_val_to_text[expr_node_type], "(", operand, ")"]
+                        self._cond_expr_val_to_text[expr_node_type],
+                        "(", operand, ")"]
                 else:
                     subexpr = [
                         self._cond_expr_val_to_text[expr_node_type], operand]
@@ -129,10 +130,12 @@ class ConditionalExpr(symbol.PolicySymbol):
                     # if previous operator is of higher precedence
                     # no parentheses are needed.
                     subexpr = [
-                        operand1, self._cond_expr_val_to_text[expr_node_type], operand2]
+                        operand1, self._cond_expr_val_to_text[expr_node_type],
+                        operand2]
                 else:
-                    subexpr = [
-                        "(", operand1, self._cond_expr_val_to_text[expr_node_type], operand2, ")"]
+                    subexpr = ["(", operand1,
+                               self._cond_expr_val_to_text[expr_node_type],
+                               operand2, ")"]
 
                 stack.append(subexpr)
                 prev_oper = expr_node_type

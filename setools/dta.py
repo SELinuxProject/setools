@@ -303,38 +303,38 @@ class DomainTransitionAnalysis(object):
     #
     # Algorithm summary:
     # 1. iterate over all rules
-    #	1. skip non allow/type_transition rules
-    #	2. if process transition or dyntransition, create edge,
-    #	   initialize rule lists, add the (dyn)transition rule
-    #	3. if process setexec or setcurrent, add to appropriate dict
-    #	   keyed on the subject
-    #	4. if file exec, entrypoint, or type_transition:process,
-    #	   add to appropriate dict keyed on subject,object.
+    #   1. skip non allow/type_transition rules
+    #   2. if process transition or dyntransition, create edge,
+    #      initialize rule lists, add the (dyn)transition rule
+    #   3. if process setexec or setcurrent, add to appropriate dict
+    #      keyed on the subject
+    #   4. if file exec, entrypoint, or type_transition:process,
+    #      add to appropriate dict keyed on subject,object.
     # 2. Iterate over all graph edges:
-    #	1. if there is a transition rule (else add to invalid
-    #	   transition list):
-    #		1. use set intersection to find matching exec
-    #		   and entrypoint rules. If none, add to invalid
-    #		   transition list.
-    #		2. for each valid entrypoint, add rules to the
-    #		   edge's lists if there is either a
-    #		   type_transition for it or the source process
-    #		   has setexec permissions.
-    #		3. If there are neither type_transitions nor
-    #		   setexec permissions, add to the invalid
-    #		   transition list
-    #	2. if there is a dyntransition rule (else add to invalid
-    #	   dyntrans list):
-    #		1. If the source has a setcurrent rule, add it
-    #		   to the edge's list, else add to invalid
-    #		   dyntransition list.
+    #   1. if there is a transition rule (else add to invalid
+    #      transition list):
+    #       1. use set intersection to find matching exec
+    #          and entrypoint rules. If none, add to invalid
+    #          transition list.
+    #       2. for each valid entrypoint, add rules to the
+    #          edge's lists if there is either a
+    #          type_transition for it or the source process
+    #          has setexec permissions.
+    #       3. If there are neither type_transitions nor
+    #          setexec permissions, add to the invalid
+    #          transition list
+    #   2. if there is a dyntransition rule (else add to invalid
+    #      dyntrans list):
+    #       1. If the source has a setcurrent rule, add it
+    #          to the edge's list, else add to invalid
+    #          dyntransition list.
     # 3. Iterate over all graph edges:
-    #	1. if the edge has an invalid trans and dyntrans, delete
-    #	   the edge.
-    #	2. if the edge has an invalid trans, clear the related
-    #	   lists on the edge.
-    #	3. if the edge has an invalid dyntrans, clear the related
-    #	   lists on the edge.
+    #   1. if the edge has an invalid trans and dyntrans, delete
+    #      the edge.
+    #   2. if the edge has an invalid trans, clear the related
+    #      lists on the edge.
+    #   3. if the edge has an invalid dyntrans, clear the related
+    #      lists on the edge.
     #
     def _build_graph(self):
         self.G.clear()

@@ -18,7 +18,7 @@
 #
 try:
     import ipaddress
-except ImportError: # pragma: no cover
+except ImportError:  # pragma: no cover
     pass
 
 import re
@@ -75,7 +75,7 @@ class NodeconQuery(contextquery.ContextQuery):
             if self.network:
                 try:
                     netmask = ipaddress.ip_address(n.netmask)
-                except NameError: # pragma: no cover
+                except NameError:  # pragma: no cover
                     # Should never actually hit this since the self.network
                     # setter raises the same exception.
                     raise RuntimeError(
@@ -141,7 +141,7 @@ class NodeconQuery(contextquery.ContextQuery):
         if net:
             try:
                 self.network = ipaddress.ip_network(net)
-            except NameError: # pragma: no cover
+            except NameError:  # pragma: no cover
                 raise RuntimeError(
                     "IP address/network functions require Python 3.3+.")
         else:
@@ -169,7 +169,8 @@ class NodeconQuery(contextquery.ContextQuery):
         if version:
             if not (version == AF_INET or version == AF_INET6):
                 raise ValueError(
-                    "The address family must be {0} for IPv4 or {1} for IPv6.".format(AF_INET, AF_INET6))
+                    "The address family must be {0} for IPv4 or {1} for IPv6.".
+                    format(AF_INET, AF_INET6))
 
             self.version = version
 

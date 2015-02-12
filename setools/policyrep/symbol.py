@@ -72,7 +72,8 @@ class PolicySymbol(object):
         return (str(self) < str(other))
 
     def __repr__(self):
-        return "<{0.__class__.__name__}(<qpol_policy_t id={1}>,\"{0}\")>".format(self, id(self.policy))
+        return "<{0.__class__.__name__}(<qpol_policy_t id={1}>,\"{0}\")>".format(
+            self, id(self.policy))
 
     def statement(self):
         """

@@ -86,7 +86,7 @@ alg.add_argument("-A", "--all_paths",
 
 opts = parser.add_argument_group("Analysis options")
 opts.add_argument("-r", "--reverse", action="store_true", default=False,
-                 help="Perform a reverse DTA.")
+                  help="Perform a reverse DTA.")
 opts.add_argument(
     "exclude", help="List of excluded types in the analysis.", nargs="*")
 
@@ -119,7 +119,8 @@ if args.shortest_path or args.all_paths:
     for i, path in enumerate(paths, start=1):
         print("Domain transition path {0}:".format(i))
 
-        for step, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path, start=1):
+        for step, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path,
+                                                                                         start=1):
             print("Step {0}: {1} -> {2}\n".format(step, src, tgt))
             print_transition(trans, entrypoints, setexec, dyntrans, setcur)
 
@@ -133,7 +134,8 @@ else:  # single transition
         sys.exit(1)
 
     i = 0
-    for i, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(transitions, start=1):
+    for i, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(transitions,
+                                                                                  start=1):
         print("Transition {0}: {1} -> {2}\n".format(i, src, tgt))
         print_transition(trans, entrypoints, setexec, dyntrans, setcur)
 

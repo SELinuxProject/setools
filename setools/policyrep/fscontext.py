@@ -77,7 +77,8 @@ class Genfscon(FSContext):
         stat.S_IFSOCK: "-s"}
 
     def __str__(self):
-        return "genfscon {0.fs} {0.path} {1} {0.context}".format(self, self._filetype_to_text[self.filetype])
+        return "genfscon {0.fs} {0.path} {1} {0.context}".format(
+            self, self._filetype_to_text[self.filetype])
 
     def __eq__(self, other):
         # Libqpol allocates new C objects in the

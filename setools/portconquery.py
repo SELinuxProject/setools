@@ -28,7 +28,8 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
 
     def __init__(self, policy,
                  protocol=0,
-                 ports=(0, 0), ports_subset=False, ports_overlap=False, ports_superset=False, ports_proper=False,
+                 ports=(0, 0), ports_subset=False, ports_overlap=False,
+                 ports_superset=False, ports_proper=False,
                  user="", user_regex=False,
                  role="", role_regex=False,
                  type_="", type_regex=False,
@@ -86,21 +87,30 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
                 low, high = p.ports
 
                 if self.overlap:
-                    if not ((low <= self.ports[0] <= high) or (low <= self.ports[1] <= high) or (self.ports[0] <= low and high <= self.ports[1])):
+                    if not (
+                        (low <= self.ports[0] <= high) or (
+                            low <= self.ports[1] <= high) or (
+                            self.ports[0] <= low and high <= self.ports[1])):
                         continue
                 elif self.subset:
                     if self.proper:
-                        if not ((low < self.ports[0] and self.ports[1] <= high) or (low <= self.ports[0] and self.ports[1] < high)):
+                        if not (
+                            (low < self.ports[0] and self.ports[1] <= high) or (
+                                low <= self.ports[0] and self.ports[1] < high)):
                             continue
                     else:
-                        if not (low <= self.ports[0] and self.ports[1] <= high):
+                        if not (
+                                low <= self.ports[0] and self.ports[1] <= high):
                             continue
                 elif self.superset:
                     if self.proper:
-                        if not ((self.ports[0] < low and high <= self.ports[1]) or (self.ports[0] <= low and high < self.ports[1])):
+                        if not (
+                            (self.ports[0] < low and high <= self.ports[1]) or (
+                                self.ports[0] <= low and high < self.ports[1])):
                             continue
                     else:
-                        if not (self.ports[0] <= low and high <= self.ports[1]):
+                        if not (
+                                self.ports[0] <= low and high <= self.ports[1]):
                             continue
                 else:
                     if not (self.ports[0] == low and self.ports[1] == high):
@@ -183,7 +193,8 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
         if protocol:
             if not (protocol == IPPROTO_TCP or protocol == IPPROTO_UDP):
                 raise ValueError(
-                    "The protocol must be {0} for TCP or {1} for UDP.".format(IPPROTO_TCP, IPPROTO_UDP))
+                    "The protocol must be {0} for TCP or {1} for UDP.".
+                    format(IPPROTO_TCP, IPPROTO_UDP))
 
             self.protocol = protocol
 

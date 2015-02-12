@@ -22,8 +22,9 @@ import setools
 import argparse
 import sys
 
-parser = argparse.ArgumentParser(description="SELinux policy rule search tool.",
-                                 epilog="TE/MLS rule searches cannot be mixed with RBAC rule searches.")
+parser = argparse.ArgumentParser(
+    description="SELinux policy rule search tool.",
+    epilog="TE/MLS rule searches cannot be mixed with RBAC rule searches.")
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument(
     "policy", type=str, help="Path to the SELinux policy to search.")
@@ -103,12 +104,20 @@ except Exception as err:
     sys.exit(-1)
 
 if args.tertypes:
-    q = setools.terulequery.TERuleQuery(p, ruletype=args.tertypes,
-                                        source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
-                                        target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
-                                        tclass_regex=args.tclass_regex, perms_equal=args.perms_equal,
-                                        default=args.default, default_regex=args.default_regex,
-                                        boolean_regex=args.boolean_regex, boolean_equal=args.boolean_equal)
+    q = setools.terulequery.TERuleQuery(p,
+                                        ruletype=args.tertypes,
+                                        source=args.source,
+                                        source_indirect=args.source_indirect,
+                                        source_regex=args.source_regex,
+                                        target=args.target,
+                                        target_indirect=args.target_indirect,
+                                        target_regex=args.target_regex,
+                                        tclass_regex=args.tclass_regex,
+                                        perms_equal=args.perms_equal,
+                                        default=args.default,
+                                        default_regex=args.default_regex,
+                                        boolean_regex=args.boolean_regex,
+                                        boolean_equal=args.boolean_equal)
 
     # these are broken out from the above statement to prevent making a list
     # with an empty string in it (split on empty string)
@@ -131,10 +140,16 @@ if args.tertypes:
         print(r)
 
 if args.rbacrtypes:
-    q = setools.rbacrulequery.RBACRuleQuery(p, ruletype=args.rbacrtypes,
-                                            source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
-                                            target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
-                                            default=args.default, default_regex=args.default_regex,
+    q = setools.rbacrulequery.RBACRuleQuery(p,
+                                            ruletype=args.rbacrtypes,
+                                            source=args.source,
+                                            source_indirect=args.source_indirect,
+                                            source_regex=args.source_regex,
+                                            target=args.target,
+                                            target_indirect=args.target_indirect,
+                                            target_regex=args.target_regex,
+                                            default=args.default,
+                                            default_regex=args.default_regex,
                                             tclass_regex=args.tclass_regex)
 
     # these are broken out from the above statement to prevent making a list
@@ -149,9 +164,14 @@ if args.rbacrtypes:
         print(r)
 
 if args.mlsrtypes:
-    q = setools.mlsrulequery.MLSRuleQuery(p, ruletype=args.mlsrtypes,
-                                          source=args.source, source_indirect=args.source_indirect, source_regex=args.source_regex,
-                                          target=args.target, target_indirect=args.target_indirect, target_regex=args.target_regex,
+    q = setools.mlsrulequery.MLSRuleQuery(p,
+                                          ruletype=args.mlsrtypes,
+                                          source=args.source,
+                                          source_indirect=args.source_indirect,
+                                          source_regex=args.source_regex,
+                                          target=args.target,
+                                          target_indirect=args.target_indirect,
+                                          target_regex=args.target_regex,
                                           tclass_regex=args.tclass_regex)
 
     # these are broken out from the above statement to prevent making a list

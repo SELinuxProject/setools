@@ -72,8 +72,9 @@ class PermissionMap(object):
                     try:
                         num_classes = int(entry[0])
                     except ValueError:
-                        raise SyntaxError("{0}:{1}:Invalid number of classes: {2}".format(
-                            permmapfile, line_num, entry[0]))
+                        raise SyntaxError(
+                            "{0}:{1}:Invalid number of classes: {2}".
+                            format(permmapfile, line_num, entry[0]))
 
                     if num_classes < 1:
                         SyntaxError("{0}:{1}:Number of classes must be positive: {2}".format(
@@ -84,7 +85,8 @@ class PermissionMap(object):
                 elif state == 2:
                     if len(entry) != 3 or entry[0] != "class":
                         raise SyntaxError(
-                            "{0}:{1}:Invalid class declaration: {2}".format(permmapfile, line_num, entry))
+                            "{0}:{1}:Invalid class declaration: {2}".
+                            format(permmapfile, line_num, entry))
 
                     class_name = str(entry[1])
 
@@ -107,8 +109,9 @@ class PermissionMap(object):
 
                     flow_direction = str(entry[1])
                     if flow_direction not in self.valid_infoflow_directions:
-                        raise SyntaxError("{0}:{1}:Invalid information flow direction: {2}".format(
-                            permmapfile, line_num, entry[1]))
+                        raise SyntaxError(
+                            "{0}:{1}:Invalid information flow direction: {2}".
+                            format(permmapfile, line_num, entry[1]))
 
                     try:
                         weight = int(entry[2])

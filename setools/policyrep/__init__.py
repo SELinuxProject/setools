@@ -364,13 +364,16 @@ class SELinuxPolicy(object):
     def terules(self):
         """Generator which yields all type enforcement rules."""
 
-        for rule in chain(self.policy.avrule_iter(), self.policy.terule_iter(), self.policy.filename_trans_iter()):
+        for rule in chain(self.policy.avrule_iter(),
+                          self.policy.terule_iter(),
+                          self.policy.filename_trans_iter()):
             yield terule.te_rule_factory(self.policy, rule)
 
     def rbacrules(self):
         """Generator which yields all RBAC rules."""
 
-        for rule in chain(self.policy.role_allow_iter(), self.policy.role_trans_iter()):
+        for rule in chain(self.policy.role_allow_iter(),
+                          self.policy.role_trans_iter()):
             yield rbacrule.rbac_rule_factory(self.policy, rule)
 
     def mlsrules(self):

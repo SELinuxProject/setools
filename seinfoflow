@@ -97,7 +97,7 @@ if args.shortest_path or args.all_paths:
 
         print()
 
-else: # single direct info flow
+else:  # single direct info flow
     flownum = 0
     for flownum, (src, tgt, rules) in enumerate(g.infoflows(args.source), start=1):
         print("Flow {0}: {1} -> {2}".format(flownum, src, tgt))

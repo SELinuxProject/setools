@@ -119,8 +119,7 @@ class TERule(BaseTERule):
     """A type_* type enforcement rule."""
 
     def __str__(self):
-        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default}".format(
-            self)
+        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default}".format(self)
 
         try:
             rule_string += " \"{0}\";".format(self.filename)
