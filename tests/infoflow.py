@@ -209,8 +209,8 @@ class InfoFlowAnalysisTest(unittest.TestCase):
 
         # don't test nodes, as disconnected nodes
         # are not removed by subgraph generation
-        #nodes = set(a.subG.nodes_iter())
-        #self.assertSetEqual(set([disconnected1, disconnected2, node1,
+        # nodes = set(a.subG.nodes_iter())
+        # self.assertSetEqual(set([disconnected1, disconnected2, node1,
         #                         node2, node3, node4, node5,
         #                         node6, node7, node8, node9]), nodes)
 
@@ -247,8 +247,8 @@ class InfoFlowAnalysisTest(unittest.TestCase):
 
         # don't test nodes, as disconnected nodes
         # are not removed by subgraph generation
-        #nodes = set(a.subG.nodes_iter())
-        #self.assertSetEqual(set([disconnected1, disconnected2, node1,
+        # nodes = set(a.subG.nodes_iter())
+        # self.assertSetEqual(set([disconnected1, disconnected2, node1,
         #                         node2, node4, node5,
         #                         node6, node7, node8, node9]), nodes)
 

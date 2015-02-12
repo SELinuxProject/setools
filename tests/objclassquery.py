@@ -84,7 +84,8 @@ class ObjClassQueryTest(unittest.TestCase):
     def test_022_perm_indirect_equal(self):
         """Class query with indirect, equal permission name patch."""
         q = ObjClassQuery(self.p, perms=set(
-            ["low_w", "med_w", "hi_w", "low_r", "med_r", "hi_r", "unmapped"]), perms_indirect=True, perms_equal=True)
+            ["low_w", "med_w", "hi_w", "low_r", "med_r", "hi_r", "unmapped"]),
+            perms_indirect=True, perms_equal=True)
 
         classes = sorted(str(c) for c in q.results())
         self.assertListEqual(["infoflow7"], classes)
