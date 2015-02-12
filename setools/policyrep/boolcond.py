@@ -84,7 +84,8 @@ class ConditionalExpr(symbol.PolicySymbol):
         for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
             expr_node_type = expr_node.expr_type(self.policy)
 
-            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == boolean_factory(self.policy, expr_node.get_boolean(self.policy)):
+            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL and other == \
+                    boolean_factory(self.policy, expr_node.get_boolean(self.policy)):
                 return True
 
         return False

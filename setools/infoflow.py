@@ -78,7 +78,7 @@ class InfoFlowAnalysis(object):
         """
         if not isinstance(perm_map, (str, permmap.PermissionMap)):
             raise TypeError(
-                "Permission map must be a permission map object or a path to a permission map file.")
+                "Permission map must be an object or a path to a file.")
 
         if isinstance(perm_map, str):
             self.perm_map = permmap.PermissionMap(perm_map)

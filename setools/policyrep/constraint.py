@@ -28,7 +28,8 @@ def _is_mls(policy, symbol):
         sym_type = expr_node.sym_type(policy)
         expr_type = expr_node.expr_type(policy)
 
-        if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR and sym_type >= qpol.QPOL_CEXPR_SYM_L1L2:
+        if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR and \
+                sym_type >= qpol.QPOL_CEXPR_SYM_L1L2:
             return True
 
     return False

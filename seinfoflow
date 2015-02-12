@@ -22,8 +22,9 @@ import setools
 import argparse
 import sys
 
-parser = argparse.ArgumentParser(description="SELinux policy information flow analysis tool.",
-                                 epilog="If no analysis algorithm is selected, all information flow out of the source domain will be calculated.")
+parser = argparse.ArgumentParser(
+    description="SELinux policy information flow analysis tool.",
+    epilog="If no analysis is selected, all information flow out of the source will be printed.")
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")

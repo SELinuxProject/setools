@@ -77,8 +77,9 @@ class PermissionMap(object):
                             format(permmapfile, line_num, entry[0]))
 
                     if num_classes < 1:
-                        SyntaxError("{0}:{1}:Number of classes must be positive: {2}".format(
-                            permmapfile, line_num, entry[2]))
+                        SyntaxError(
+                            "{0}:{1}:Number of classes must be 1-32: {2}".
+                            format(permmapfile, line_num, entry[2]))
 
                     state = 2
 
@@ -93,12 +94,14 @@ class PermissionMap(object):
                     try:
                         num_perms = int(entry[2])
                     except ValueError:
-                        raise SyntaxError("{0}:{1}:Invalid number of permissions: {2}".format(
-                            permmapfile, line_num, entry[2]))
+                        raise SyntaxError(
+                            "{0}:{1}:Invalid number of permissions: {2}".
+                            format(permmapfile, line_num, entry[2]))
 
                     if num_perms < 1:
-                        SyntaxError("{0}:{1}:Number of permissions must be positive: {2}".format(
-                            permmapfile, line_num, entry[2]))
+                        SyntaxError(
+                            "{0}:{1}:Number of permissions must be 1-32: {2}".
+                            format(permmapfile, line_num, entry[2]))
 
                     class_count += 1
                     perm_count = 0
@@ -116,12 +119,14 @@ class PermissionMap(object):
                     try:
                         weight = int(entry[2])
                     except ValueError:
-                        SyntaxError("{0}:{1}:Invalid information flow weight: {2}".format(
-                            permmapfile, line_num, entry[2]))
+                        SyntaxError(
+                            "{0}:{1}:Invalid permission weight: {2}".
+                            format(permmapfile, line_num, entry[2]))
 
                     if not self.min_weight <= weight <= self.max_weight:
                         SyntaxError(
-                            "{0}:{1}:Information flow weight must be 1-10: {2}".format(permmapfile, line_num, entry[2]))
+                            "{0}:{1}:Permission weight must be 1-10: {2}".
+                            format(permmapfile, line_num, entry[2]))
 
                     self.permmap[class_name][perm_name] = (
                         flow_direction, weight)

@@ -162,7 +162,7 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
 
         if (pending_ports[0] > pending_ports[1]):
             raise ValueError(
-                "The low port of the range must be smaller than the high port: {0[0]}-{0[1]}".format(ports))
+                "The low port must be smaller than the high port: {0[0]}-{0[1]}".format(ports))
 
         self.ports = pending_ports
 

@@ -66,8 +66,9 @@ def print_transition(trans, entrypoints, setexec, dyntrans, setcur):
 
     print()
 
-parser = argparse.ArgumentParser(description="SELinux policy domain transition analysis tool.",
-                                 epilog="If no analysis algorithm is selected, all transitions out of a domain will be calculated.")
+parser = argparse.ArgumentParser(
+    description="SELinux policy domain transition analysis tool.",
+    epilog="If no analysis is selected, all forward transitions out of the source will be printed.")
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument(
     "-p", "--policy", help="Path to SELinux policy to analyze.", required=True)
