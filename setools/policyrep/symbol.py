@@ -65,7 +65,8 @@ class PolicySymbol(object):
         except AttributeError:
             return (str(self) == str(other))
 
-    __ne__ = lambda self, other: not self == other
+    def __ne__(self, other):
+        return not self == other
 
     def __lt__(self, other):
         """Comparison used by Python sorting functions."""
