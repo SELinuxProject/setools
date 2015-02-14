@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -28,24 +28,22 @@ def _is_mls(policy, symbol):
         sym_type = expr_node.sym_type(policy)
         expr_type = expr_node.expr_type(policy)
 
-        if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR and \
-                sym_type >= qpol.QPOL_CEXPR_SYM_L1L2:
+        if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR and sym_type >= qpol.QPOL_CEXPR_SYM_L1L2:
             return True
 
     return False
 
 
 def constraint_factory(policy, symbol):
-    """Factory function for creating regular (non-MLS) constraint objects."""
+    """Factory function for creating regular constraint objects."""
 
     try:
         if _is_mls(policy, symbol):
-            raise TypeError(
-                "Constraint symbol is not a regular (non-MLS) constraint.")
+            raise TypeError("Symbol is not a constrain.")
     except AttributeError:
         raise TypeError("Constraints cannot be looked-up.")
 
-    return Constraint(policy, symbol)
+    return Constraint(policy, symbol, "constrain")
 
 
 def mlsconstraint_factory(policy, symbol):
@@ -53,24 +51,23 @@ def mlsconstraint_factory(policy, symbol):
 
     try:
         if not _is_mls(policy, symbol):
-            raise TypeError("Constraint symbol is not a MLS constraint.")
+            raise TypeError("Symbol is not a mlsconstrain.")
     except AttributeError:
-        raise TypeError("MLS constraints cannot be looked-up.")
+        raise TypeError("mlsconstrain cannot be looked-up.")
 
-    return MLSConstraint(policy, symbol)
+    return Constraint(policy, symbol, "mlsconstrain")
 
 
 def validatetrans_factory(policy, symbol):
-    """Factory function for creating regular (non-MLS) validatetrans objects."""
+    """Factory function for creating regular validatetrans objects."""
 
     try:
         if _is_mls(policy, symbol):
-            raise TypeError(
-                "Validatetrans symbol is not a regular (non-MLS) constraint.")
+            raise TypeError("Symbol is not a validatetrans.")
     except AttributeError:
-        raise TypeError("Validatetrans cannot be looked-up.")
+        raise TypeError("validatetrans cannot be looked-up.")
 
-    return ValidateTrans(policy, symbol)
+    return Validatetrans(policy, symbol, "validatetrans")
 
 
 def mlsvalidatetrans_factory(policy, symbol):
@@ -78,16 +75,16 @@ def mlsvalidatetrans_factory(policy, symbol):
 
     try:
         if not _is_mls(policy, symbol):
-            raise TypeError("Validatetrans symbol is not a MLS validatetrans.")
+            raise TypeError("Symbol is not a mlsvalidatetrans.")
     except AttributeError:
-        raise TypeError("MLS validatetrans cannot be looked-up.")
+        raise TypeError("mlsvalidatetrans cannot be looked-up.")
 
-    return MLSValidateTrans(policy, symbol)
+    return Validatetrans(policy, symbol, "mlsvalidatetrans")
 
 
-class Constraint(symbol.PolicySymbol):
+class BaseConstraint(symbol.PolicySymbol):
 
-    """A regular (non-MLS) constraint rule."""
+    """Abstract base class for constraint rules."""
 
     _expr_type_to_text = {
         qpol.QPOL_CEXPR_TYPE_NOT: "not",
@@ -108,6 +105,9 @@ class Constraint(symbol.PolicySymbol):
         qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_TARGET: "u2",
         qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_TARGET: "r2",
         qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_TARGET: "t2",
+        qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_XTARGET: "u3",
+        qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_XTARGET: "r3",
+        qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_XTARGET: "t3",
         qpol.QPOL_CEXPR_SYM_L1L2: "l1",
         qpol.QPOL_CEXPR_SYM_L1H2: "l1",
         qpol.QPOL_CEXPR_SYM_H1L2: "h1",
@@ -121,29 +121,23 @@ class Constraint(symbol.PolicySymbol):
         qpol.QPOL_CEXPR_SYM_L1H1 + qpol.QPOL_CEXPR_SYM_TARGET: "h1",
         qpol.QPOL_CEXPR_SYM_L2H2 + qpol.QPOL_CEXPR_SYM_TARGET: "h2"}
 
+    # Boolean operators
     _expr_type_to_precedence = {
         qpol.QPOL_CEXPR_TYPE_NOT: 3,
         qpol.QPOL_CEXPR_TYPE_AND: 2,
         qpol.QPOL_CEXPR_TYPE_OR: 1}
 
-    # all operators have the same precedence
-    _expr_op_precedence = 4
+    # Logical operators have the same precedence
+    _logical_op_precedence = 4
+
+    def __init__(self, policy, qpol_symbol, ruletype):
+        symbol.PolicySymbol.__init__(self, policy, qpol_symbol)
+        self.ruletype = ruletype
 
     def __str__(self):
-        rule_string = "constrain {0.tclass} ".format(self)
+        raise NotImplementedError
 
-        perms = self.perms
-        if len(perms) > 1:
-            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
-        else:
-            # convert to list since sets cannot be indexed
-            rule_string += "{0} (\n".format(list(perms)[0])
-
-        rule_string += "\t{0}\n);".format(self.__build_expression())
-
-        return rule_string
-
-    def __build_expression(self):
+    def _build_expression(self):
         # qpol representation is in postfix notation.  This code
         # converts it to infix notation.  Parentheses are added
         # to ensure correct expressions, though they may end up
@@ -153,57 +147,61 @@ class Constraint(symbol.PolicySymbol):
 
         expr_string = ""
         stack = []
-        prev_oper = self._expr_op_precedence
+        prev_op_precedence = self._logical_op_precedence
         for expr_node in self.qpol_symbol.expr_iter(self.policy):
             op = expr_node.op(self.policy)
             sym_type = expr_node.sym_type(self.policy)
             expr_type = expr_node.expr_type(self.policy)
 
             if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR:
-                stack.append([self._sym_to_text[sym_type],
-                              self._expr_op_to_text[op],
-                              self._sym_to_text[sym_type + qpol.QPOL_CEXPR_SYM_TARGET]])
-                prev_oper = self._expr_op_precedence
+                # logical operator with symbol (e.g. u1 == u2)
+                operand1 = self._sym_to_text[sym_type]
+                operand2 = self._sym_to_text[sym_type + qpol.QPOL_CEXPR_SYM_TARGET]
+                operator = self._expr_op_to_text[op]
+
+                stack.append([operand1, operator, operand2])
+
+                prev_op_precedence = self._logical_op_precedence
             elif expr_type == qpol.QPOL_CEXPR_TYPE_NAMES:
+                # logical operator with type or attribute list (e.g. t1 == { spam_t eggs_t })
+                operand1 = self._sym_to_text[sym_type]
+                operator = self._expr_op_to_text[op]
+
                 names = list(expr_node.names_iter(self.policy))
 
                 if not names:
-                    names_str = "<empty set>"
+                    operand2 = "<empty set>"
                 elif len(names) == 1:
-                    names_str = names[0]
+                    operand2 = names[0]
                 else:
-                    names_str = "{{ {0} }}".format(' '.join(names))
+                    operand2 = "{{ {0} }}".format(' '.join(names))
 
-                stack.append([self._sym_to_text[sym_type],
-                              self._expr_op_to_text[op],
-                              names_str])
-                prev_oper = self._expr_op_precedence
+                stack.append([operand1, operator, operand2])
+
+                prev_op_precedence = self._logical_op_precedence
             elif expr_type == qpol.QPOL_CEXPR_TYPE_NOT:
-                # unary operator
+                # unary operator (not)
                 operand = stack.pop()
-                stack.append([self._expr_type_to_text[expr_type],
-                              "(",
-                              operand,
-                              ")"])
-                prev_oper = self._expr_type_to_precedence[expr_type]
+                operator = self._expr_type_to_text[expr_type]
+
+                stack.append([operator, "(", operand, ")"])
+
+                prev_op_precedence = self._expr_type_to_precedence[expr_type]
             else:
+                # binary operator (and/or)
                 operand1 = stack.pop()
                 operand2 = stack.pop()
+                operator = self._expr_type_to_text[expr_type]
+                op_precedence = self._expr_type_to_precedence[expr_type]
 
                 # if previous operator is of higher precedence
                 # no parentheses are needed.
-                if self._expr_type_to_precedence[expr_type] < prev_oper:
-                    stack.append([operand1,
-                                  self._expr_type_to_text[expr_type],
-                                  operand2])
+                if op_precedence < prev_op_precedence:
+                    stack.append([operand1, operator, operand2])
                 else:
-                    stack.append(["(",
-                                  operand1,
-                                  self._expr_type_to_text[expr_type],
-                                  operand2,
-                                  ")"])
+                    stack.append(["(", operand1, operator, operand2, ")"])
 
-                prev_oper = self._expr_type_to_precedence[expr_type]
+                prev_op_precedence = op_precedence
 
         return self.__unwind_subexpression(stack)
 
@@ -219,12 +217,6 @@ class Constraint(symbol.PolicySymbol):
 
         return ' '.join(ret)
 
-    @property
-    def perms(self):
-        """The constraint's permission set."""
-
-        return set(self.qpol_symbol.perm_iter(self.policy))
-
     def statement(self):
         return str(self)
 
@@ -234,10 +226,10 @@ class Constraint(symbol.PolicySymbol):
         return objclass.class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
 
 
-class MLSConstraint(Constraint):
+class Constraint(BaseConstraint):
 
     def __str__(self):
-        rule_string = "mlsconstrain {0.tclass} ".format(self)
+        rule_string = "{0.ruletype} {0.tclass} ".format(self)
 
         perms = self.perms
         if len(perms) > 1:
@@ -246,44 +238,17 @@ class MLSConstraint(Constraint):
             # convert to list since sets cannot be indexed
             rule_string += "{0} (\n".format(list(perms)[0])
 
-        rule_string += "\t{0}\n);".format(self.__build_expression())
+        rule_string += "\t{0}\n);".format(self._build_expression())
 
         return rule_string
 
+    @property
+    def perms(self):
+        """The constraint's permission set."""
+        return set(self.qpol_symbol.perm_iter(self.policy))
 
-class ValidateTrans(Constraint):
 
-    """A regular validate transition rule."""
+class Validatetrans(BaseConstraint):
 
     def __str__(self):
-        rule_string = "validatetrans {0.tclass} ".format(self)
-
-        perms = self.perms
-        if len(perms) > 1:
-            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
-        else:
-            # convert to list since sets cannot be indexed
-            rule_string += "{0} (\n".format(list(perms)[0])
-
-        rule_string += "\t{0}\n);".format(self.__build_expression())
-
-        return rule_string
-
-
-class MLSValidateTrans(Constraint):
-
-    """A MLS validate transition rule."""
-
-    def __str__(self):
-        rule_string = "mlsvalidatetrans {0.tclass} ".format(self)
-
-        perms = self.perms
-        if len(perms) > 1:
-            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
-        else:
-            # convert to list since sets cannot be indexed
-            rule_string += "{0} (\n".format(list(perms)[0])
-
-        rule_string += "\t{0}\n);".format(self.__build_expression())
-
-        return rule_string
+        return "{0.ruletype} {0.tclass}\n\t{1}\n);".format(self, self._build_expression())
