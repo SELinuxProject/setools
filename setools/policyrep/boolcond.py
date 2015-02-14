@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -98,7 +98,7 @@ class ConditionalExpr(symbol.PolicySymbol):
         # highest precedence (NOT) so if there is a single binary
         # operator, no parentheses are output
         stack = []
-        prev_oper = qpol.QPOL_COND_EXPR_NOT
+        prev_op_precedence = self._cond_expr_val_to_precedence[qpol.QPOL_COND_EXPR_NOT]
         for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
             expr_node_type = expr_node.expr_type(self.policy)
 
@@ -109,37 +109,33 @@ class ConditionalExpr(symbol.PolicySymbol):
                 stack.append(str(nodebool))
             elif expr_node_type == qpol.QPOL_COND_EXPR_NOT:  # unary operator
                 operand = stack.pop()
+                operator = self._cond_expr_val_to_text[expr_node_type]
+                op_precedence = self._cond_expr_val_to_precedence[expr_node_type]
 
                 # NOT is the highest precedence, so only need
                 # parentheses if the operand is a subexpression
                 if isinstance(operand, list):
-                    subexpr = [
-                        self._cond_expr_val_to_text[expr_node_type],
-                        "(", operand, ")"]
+                    subexpr = [operator, "(", operand, ")"]
                 else:
-                    subexpr = [
-                        self._cond_expr_val_to_text[expr_node_type], operand]
+                    subexpr = [operator, operand]
 
                 stack.append(subexpr)
-                prev_oper = expr_node_type
+                prev_op_precedence = op_precedence
             else:
                 operand1 = stack.pop()
                 operand2 = stack.pop()
+                operator = self._cond_expr_val_to_text[expr_node_type]
+                op_precedence = self._cond_expr_val_to_precedence[expr_node_type]
 
-                if self._cond_expr_val_to_precedence[prev_oper] > \
-                        self._cond_expr_val_to_precedence[expr_node_type]:
+                if prev_op_precedence > op_precedence:
                     # if previous operator is of higher precedence
                     # no parentheses are needed.
-                    subexpr = [
-                        operand1, self._cond_expr_val_to_text[expr_node_type],
-                        operand2]
+                    subexpr = [operand1, operator, operand2]
                 else:
-                    subexpr = ["(", operand1,
-                               self._cond_expr_val_to_text[expr_node_type],
-                               operand2, ")"]
+                    subexpr = ["(", operand1, operator, operand2, ")"]
 
                 stack.append(subexpr)
-                prev_oper = expr_node_type
+                prev_op_precedence = op_precedence
 
         return self.__unwind_subexpression(stack)
 
