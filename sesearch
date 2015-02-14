@@ -101,8 +101,7 @@ if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
     parser.error("At least one rule type must be specified.")
 
 if (args.tertypes or args.mlsrtypes) and args.rbacrtypes:
-    parser.error(
-        "TE/MLS rule searches cannot be mixed with RBAC rule searches.")
+    parser.error("TE/MLS rule searches cannot be mixed with RBAC rule searches.")
 
 try:
     p = setools.SELinuxPolicy(args.policy)

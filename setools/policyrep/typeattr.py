@@ -48,8 +48,7 @@ def attribute_factory(qpol_policy, name):
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
     if not qpol_symbol.isattr(qpol_policy):
-        raise TypeError(
-            "{0} is not an attribute".format(qpol_symbol.name(qpol_policy)))
+        raise TypeError("{0} is not an attribute".format(qpol_symbol.name(qpol_policy)))
 
     return TypeAttribute(qpol_policy, qpol_symbol)
 
@@ -60,14 +59,12 @@ def type_factory(qpol_policy, name, deref=False):
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
     if qpol_symbol.isattr(qpol_policy):
-        raise TypeError(
-            "{0} is a not an attribute type".format(qpol_symbol.name(qpol_policy)))
+        raise TypeError("{0} is a not an attribute type".format(qpol_symbol.name(qpol_policy)))
     elif qpol_symbol.isalias(qpol_policy):
         if deref:
             qpol_symbol = _dereference_alias(qpol_policy, qpol_symbol)
         else:
-            raise TypeError(
-                "{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
+            raise TypeError("{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
 
     return Type(qpol_policy, qpol_symbol)
 
@@ -81,8 +78,7 @@ def typeattr_factory(qpol_policy, name, deref=False):
         if deref:
             qpol_symbol = _dereference_alias(qpol_policy, qpol_symbol)
         else:
-            raise TypeError(
-                "{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
+            raise TypeError("{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
 
     if qpol_symbol.isattr(qpol_policy):
         return TypeAttribute(qpol_policy, qpol_symbol)
@@ -163,13 +159,11 @@ class TypeAttribute(BaseType):
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
-        raise TypeError(
-            "{0} is an attribute, thus does not have attributes.".format(self))
+        raise TypeError("{0} is an attribute, thus does not have attributes.".format(self))
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        raise TypeError(
-            "{0} is an attribute, thus does not have aliases.".format(self))
+        raise TypeError("{0} is an attribute, thus does not have aliases.".format(self))
 
     def statement(self):
         return "attribute {0};".format(self)

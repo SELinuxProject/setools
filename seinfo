@@ -105,8 +105,7 @@ try:
 
     if args.initialsidquery or args.all:
         if isinstance(args.initialsidquery, str):
-            q = setools.initsidquery.InitialSIDQuery(
-                p, name=args.initialsidquery)
+            q = setools.initsidquery.InitialSIDQuery(p, name=args.initialsidquery)
         else:
             q = setools.initsidquery.InitialSIDQuery(p)
         components.append(("Initial SIDs", q))
@@ -139,16 +138,14 @@ try:
             try:
                 ports = [int(i) for i in args.portconquery.split("-")]
             except:
-                parser.error(
-                    "Enter a port number or range, e.g. 22 or 6000-6020")
+                parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
             if len(ports) == 2:
                 q.set_ports((ports[0], ports[1]))
             elif len(ports) == 1:
                 q.set_ports((ports[0], ports[0]))
             else:
-                parser.error(
-                    "Enter a port number or range, e.g. 22 or 6000-6020")
+                parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
         else:
             q = setools.portconquery.PortconQuery(p)

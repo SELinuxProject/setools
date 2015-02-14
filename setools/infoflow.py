@@ -280,8 +280,7 @@ class InfoFlowAnalysis(object):
             edgecap = self.G.edge[source][target]['capacity']
             self.G.edge[source][target]['capacity'] = max(edgecap, weight)
         else:
-            self.G.add_edge(
-                source, target, capacity=weight, weight=1, rules=[rule])
+            self.G.add_edge(source, target, capacity=weight, weight=1, rules=[rule])
 
     def _build_graph(self):
         self.G.clear()

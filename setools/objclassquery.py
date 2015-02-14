@@ -56,10 +56,7 @@ class ObjClassQuery(compquery.ComponentQuery):
         self.policy = policy
         self.set_name(name, regex=name_regex)
         self.set_common(common, regex=common_regex)
-        self.set_perms(perms,
-                       regex=perms_regex,
-                       equal=perms_equal,
-                       indirect=perms_indirect)
+        self.set_perms(perms, regex=perms_regex, equal=perms_equal, indirect=perms_indirect)
 
     def results(self):
         """Generator which yields all matching object classes."""

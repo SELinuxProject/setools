@@ -94,23 +94,19 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
                         continue
                 elif self.subset:
                     if self.proper:
-                        if not (
-                            (low < self.ports[0] and self.ports[1] <= high) or (
-                                low <= self.ports[0] and self.ports[1] < high)):
+                        if not ((low < self.ports[0] and self.ports[1] <= high) or (
+                                 low <= self.ports[0] and self.ports[1] < high)):
                             continue
                     else:
-                        if not (
-                                low <= self.ports[0] and self.ports[1] <= high):
+                        if not (low <= self.ports[0] and self.ports[1] <= high):
                             continue
                 elif self.superset:
                     if self.proper:
-                        if not (
-                            (self.ports[0] < low and high <= self.ports[1]) or (
-                                self.ports[0] <= low and high < self.ports[1])):
+                        if not ((self.ports[0] < low and high <= self.ports[1]) or (
+                                 self.ports[0] <= low and high < self.ports[1])):
                             continue
                     else:
-                        if not (
-                                self.ports[0] <= low and high <= self.ports[1]):
+                        if not (self.ports[0] <= low and high <= self.ports[1]):
                             continue
                 else:
                     if not (self.ports[0] == low and self.ports[1] == high):
@@ -157,8 +153,7 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
         pending_ports = (int(ports[0]), int(ports[1]))
 
         if (pending_ports[0] < 0 or pending_ports[1] < 0):
-            raise ValueError(
-                "Port numbers must be positive: {0[0]}-{0[1]}".format(ports))
+            raise ValueError("Port numbers must be positive: {0[0]}-{0[1]}".format(ports))
 
         if (pending_ports[0] > pending_ports[1]):
             raise ValueError(

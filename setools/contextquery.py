@@ -73,8 +73,7 @@ class ContextQuery(query.PolicyQuery):
             return False
 
         if range_:
-            raise NotImplementedError(
-                "Context range queries are not yet implemented.")
+            raise NotImplementedError
 
         return True
 

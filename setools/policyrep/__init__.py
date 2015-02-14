@@ -69,8 +69,7 @@ class SELinuxPolicy(object):
         try:
             self.policy = qpol.qpol_policy_t(policyfile, 0)
         except OSError as err:
-            raise OSError(
-                "Error opening policy file \"{0}\": {1}".format(policyfile, err))
+            raise OSError("Error opening policy file \"{0}\": {1}".format(policyfile, err))
 
     #
     # Policy properties

@@ -350,8 +350,7 @@ class DomainTransitionAnalysis(object):
         entrypoint = defaultdict(lambda: defaultdict(list))
 
         # hash table keyed on (domain, entrypoint, target domain)
-        type_trans = defaultdict(
-            lambda: defaultdict(lambda: defaultdict(list)))
+        type_trans = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         for r in self.policy.terules():
             if r.ruletype == "allow":
@@ -362,16 +361,12 @@ class DomainTransitionAnalysis(object):
 
                 if r.tclass == "process":
                     if "transition" in perms:
-                        for s, t in itertools.product(
-                                r.source.expand(),
-                                r.target.expand()):
+                        for s, t in itertools.product(r.source.expand(), r.target.expand()):
                             self.__add_edge(s, t)
                             self.G[s][t]['transition'].append(r)
 
                     if "dyntransition" in perms:
-                        for s, t in itertools.product(
-                                r.source.expand(),
-                                r.target.expand()):
+                        for s, t in itertools.product(r.source.expand(), r.target.expand()):
                             self.__add_edge(s, t)
                             self.G[s][t]['dyntransition'].append(r)
 
@@ -391,9 +386,7 @@ class DomainTransitionAnalysis(object):
                             execute[s][t].append(r)
 
                     if "entrypoint" in perms:
-                        for s, t in itertools.product(
-                                r.source.expand(),
-                                r.target.expand()):
+                        for s, t in itertools.product(r.source.expand(), r.target.expand()):
                             entrypoint[s][t].append(r)
 
             elif r.ruletype == "type_transition":
@@ -401,9 +394,7 @@ class DomainTransitionAnalysis(object):
                     continue
 
                 d = r.default
-                for s, t in itertools.product(
-                        r.source.expand(),
-                        r.target.expand()):
+                for s, t in itertools.product(r.source.expand(), r.target.expand()):
                     type_trans[s][t][d].append(r)
 
         invalid_edge = []
@@ -433,8 +424,7 @@ class DomainTransitionAnalysis(object):
                             self.G[s][t]['execute'][m] += execute[s][m]
 
                         if type_trans[s][m][t]:
-                            self.G[s][t]['type_transition'][
-                                m] += type_trans[s][m][t]
+                            self.G[s][t]['type_transition'][m] += type_trans[s][m][t]
 
                     if s in setexec:
                         self.G[s][t]['setexec'] += setexec[s]
