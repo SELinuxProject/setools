@@ -63,14 +63,14 @@ mlsrtypes.add_argument("--range_trans", action="append_const",
 
 expr = parser.add_argument_group("Expressions")
 expr.add_argument("-s", "--source", default="",
-                  help="Source type/role of the TE/RBAC rule.", default="")
+                  help="Source type/role of the TE/RBAC rule.")
 expr.add_argument("-t", "--target", default="",
                   help="Target type/role of the TE/RBAC rule.")
 expr.add_argument("-c", "--class", dest="tclass", default="",
                   help="Comma separated list of object classes")
 expr.add_argument("-p", "--perms", metavar="PERMS", default="",
                   help="Comma separated list of permissions.")
-expr.add_argument("-D", "--default", default=""
+expr.add_argument("-D", "--default", default="",
                   help="Default type of the TE/RBAC rule.")
 expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL", default="",
                   help="Comma separated list of Booleans in the conditional expression.")
@@ -80,19 +80,19 @@ opts.add_argument("-eb", action="store_true", dest="boolean_equal",
                   help="Match Boolean list exactly instead of matching any listed Boolean.")
 opts.add_argument("-ep", action="store_true", dest="perms_equal",
                   help="Match permission set exactly instead of matching any listed permission.")
-opts.add_argument("-ds", action="store_false", dest="source_indirect"
+opts.add_argument("-ds", action="store_false", dest="source_indirect",
                   help="Match source attributes directly instead of matching member types/roles.")
 opts.add_argument("-dt", action="store_false", dest="target_indirect",
                   help="Match target attributes directly instead of matching member types/roles.")
 opts.add_argument("-rs", action="store_true", dest="source_regex",
                   help="Use regular expression matching for the source type/role.")
-opts.add_argument("-rt", action="store_true", dest="target_regex"
+opts.add_argument("-rt", action="store_true", dest="target_regex",
                   help="Use regular expression matching for the target type/role.")
-opts.add_argument("-rc", action="store_true", dest="tclass_regex"
+opts.add_argument("-rc", action="store_true", dest="tclass_regex",
                   help="Use regular expression matching for the object class.")
-opts.add_argument("-rd", action="store_true", dest="default_regex"
+opts.add_argument("-rd", action="store_true", dest="default_regex",
                   help="Use regular expression matching for the default type/role.")
-opts.add_argument("-rb", action="store_true", dest="boolean_regex"
+opts.add_argument("-rb", action="store_true", dest="boolean_regex",
                   help="Use regular expression matching for Booleans.")
 
 args = parser.parse_args()
