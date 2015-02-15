@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from . import policyrep
 
 
@@ -57,7 +55,7 @@ class PermissionMap(object):
             num_classes = 0
             state = 1
 
-            self.permmap = defaultdict(lambda: defaultdict(lambda: ('u', 1)))
+            self.permmap = dict()
 
             for line_num, line in enumerate(fd, start=1):
                 entry = line.split()
@@ -103,6 +101,7 @@ class PermissionMap(object):
                             "{0}:{1}:Number of permissions must be 1-32: {2}".
                             format(permmapfile, line_num, entry[2]))
 
+                    self.permmap[class_name] = dict()
                     class_count += 1
                     perm_count = 0
                     state = 3
@@ -128,8 +127,9 @@ class PermissionMap(object):
                             "{0}:{1}:Permission weight must be 1-10: {2}".
                             format(permmapfile, line_num, entry[2]))
 
-                    self.permmap[class_name][perm_name] = (
-                        flow_direction, weight)
+                    self.permmap[class_name][perm_name] = {'direction': flow_direction,
+                                                           'weight': weight,
+                                                           'enabled': True}
 
                     perm_count += 1
                     if perm_count >= num_perms:
@@ -157,12 +157,15 @@ class PermissionMap(object):
         for perm_name in rule.perms:
             mapping = self.permmap[class_name][perm_name]
 
-            if mapping[0] == "r":
-                read_weight = max(read_weight, mapping[1])
-            elif mapping[0] == "w":
-                write_weight = max(write_weight, mapping[1])
-            elif mapping[0] == "b":
-                read_weight = max(read_weight, mapping[1])
-                write_weight = max(write_weight, mapping[1])
+            if not mapping['enabled']:
+                continue
+
+            if mapping['direction'] == "r":
+                read_weight = max(read_weight, mapping['weight'])
+            elif mapping['direction'] == "w":
+                write_weight = max(write_weight, mapping['weight'])
+            elif mapping['direction'] == "b":
+                read_weight = max(read_weight, mapping['weight'])
+                write_weight = max(write_weight, mapping['weight'])
 
         return (read_weight, write_weight)
