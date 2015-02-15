@@ -228,6 +228,8 @@ class BaseConstraint(symbol.PolicySymbol):
 
 class Constraint(BaseConstraint):
 
+    """A constraint rule (constrain/mlsconstrain)."""
+
     def __str__(self):
         rule_string = "{0.ruletype} {0.tclass} ".format(self)
 
@@ -249,6 +251,8 @@ class Constraint(BaseConstraint):
 
 
 class Validatetrans(BaseConstraint):
+
+    """A validatetrans rule (validatetrans/mlsvalidatetrans)."""
 
     def __str__(self):
         return "{0.ruletype} {0.tclass}\n\t{1}\n);".format(self, self._build_expression())
