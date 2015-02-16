@@ -5,9 +5,9 @@
 language: python
 
 env:
-  - TOX_ENV=py27,py27-coverage
-  - TOX_ENV=py33,py33-coverage
-  - TOX_ENV=py34,py34-coverage
+  - TOX_ENV=py27-coverage
+  - TOX_ENV=py33-coverage
+  - TOX_ENV=py34-coverage
   - TOX_ENV=pep8
 
 before_install:
