@@ -25,6 +25,7 @@ from . import mlsrulequery
 from . import netifconquery
 from . import nodeconquery
 from . import objclassquery
+from . import permmap
 from . import polcapquery
 from . import infoflow
 from . import terulequery
