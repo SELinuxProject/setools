@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2005, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -84,33 +84,14 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
         for p in self.policy.portcons():
 
             if any(self.ports):
-                low, high = p.ports
-
-                if self.overlap:
-                    if not (
-                        (low <= self.ports[0] <= high) or (
-                            low <= self.ports[1] <= high) or (
-                            self.ports[0] <= low and high <= self.ports[1])):
-                        continue
-                elif self.subset:
-                    if self.proper:
-                        if not ((low < self.ports[0] and self.ports[1] <= high) or (
-                                 low <= self.ports[0] and self.ports[1] < high)):
-                            continue
-                    else:
-                        if not (low <= self.ports[0] and self.ports[1] <= high):
-                            continue
-                elif self.superset:
-                    if self.proper:
-                        if not ((self.ports[0] < low and high <= self.ports[1]) or (
-                                 self.ports[0] <= low and high < self.ports[1])):
-                            continue
-                    else:
-                        if not (self.ports[0] <= low and high <= self.ports[1]):
-                            continue
-                else:
-                    if not (self.ports[0] == low and self.ports[1] == high):
-                        continue
+                if not self._match_range(
+                        p.ports,
+                        self.ports,
+                        self.subset,
+                        self.overlap,
+                        self.superset,
+                        self.proper):
+                    continue
 
             if self.protocol and self.protocol != p.protocol:
                 continue

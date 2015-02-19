@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -97,6 +97,44 @@ class PolicyQuery(object):
             return bool(list(filter(recomp.search, (str(m) for m in obj))))
         else:
             return PolicyQuery._match_set(obj, set(criteria), equal)
+
+    @staticmethod
+    def _match_range(obj, criteria, subset, overlap, superset, proper):
+        """
+        Match ranges of objects.
+
+        obj         A 2-tuple of the range to match.
+        criteria    A 2-tuple of the criteria to match.
+        subset      If true, the criteria will match if it is a subset obj's range.
+        overlap     If true, the criteria will match if it overlaps any of the obj's range.
+        superset    If true, the criteria will match if it is a superset of the obj's range.
+        proper      If true, use proper superset/subset operations.
+                    No effect if not using set operations.
+        """
+        # use nicer names to make the below conditions easier to read.
+        obj_low = obj[0]
+        obj_high = obj[1]
+        crit_low = criteria[0]
+        crit_high = criteria[1]
+
+        if overlap:
+            return ((obj_low <= crit_low <= obj_high) or (
+                     obj_low <= crit_high <= obj_high) or (
+                     crit_low <= obj_low and obj_high <= crit_high))
+        elif subset:
+            if proper:
+                return ((obj_low < crit_low and crit_high <= obj_high) or (
+                         obj_low <= crit_low and crit_high < obj_high))
+            else:
+                return (obj_low <= crit_low and crit_high <= obj_high)
+        elif superset:
+            if proper:
+                return ((crit_low < obj_low and obj_high <= crit_high) or (
+                         crit_low <= obj_low and obj_high < crit_high))
+            else:
+                return (crit_low <= obj_low and obj_high <= crit_high)
+        else:
+            return (crit_low == obj_low and obj_high == crit_high)
 
     def results(self):
         """
