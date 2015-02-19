@@ -53,19 +53,6 @@ class Common(symbol.PolicySymbol):
     def statement(self):
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
 
-    @property
-    def value(self):
-        """
-        The value of the common.
-
-        This is a low-level policy detail exposed so that commons can
-        be sorted based on their policy declaration order instead of
-        by their name.  This has no other use.
-
-        Example usage: sorted(policy.commons(), key=lambda k: k.value)
-        """
-        return self.qpol_symbol.value(self.policy)
-
 
 class NoCommon(Exception):
 
