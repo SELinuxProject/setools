@@ -398,6 +398,7 @@ typedef enum qpol_capability
     };
 
     %newobject level_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_level_from_void) %}
     qpol_iterator_t *level_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;

@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -21,6 +21,35 @@ import itertools
 from . import qpol
 from . import symbol
 
+# qpol does not expose an equivalent of a sensitivity declaration.
+# qpol_level_t is equivalent to the level declaration:
+#   level s0:c0.c1023;
+
+# qpol_mls_level_t represents a level as used in contexts,
+# such as range_transitions or labeling statements such as
+# portcon and nodecon.
+
+# Here qpol_level_t is also used for MLSSensitivity
+# since it has the sensitivity name, dominance, and there
+# is a 1:1 correspondence between the sensitivity declarations
+# and level declarations.
+
+
+class InvalidSensitivity(symbol.InvalidSymbol):
+
+    """
+    Exception for an invalid sensitivity.
+    """
+    pass
+
+
+class InvalidLevel(symbol.InvalidSymbol):
+
+    """
+    Exception for an invalid level.
+    """
+    pass
+
 
 class MLSDisabled(Exception):
 
@@ -41,15 +70,39 @@ def category_factory(policy, symbol):
 
 def sensitivity_factory(policy, symbol):
     """Factory function for creating MLS sensitivity objects."""
-    raise NotImplementedError
+    if isinstance(symbol, qpol.qpol_level_t):
+        return MLSSensitivity(policy, symbol)
+
+    try:
+        return MLSSensitivity(policy, qpol.qpol_level_t(policy, symbol))
+    except ValueError:
+        raise InvalidSensitivity("{0} is not a valid sensitivity".format(symbol))
 
 
 def level_factory(policy, symbol):
-    """Factory function for creating MLS level objects."""
+    """
+    Factory function for creating MLS level objects (e.g. levels used
+    in contexts of labeling statements)
+    """
     if not isinstance(symbol, qpol.qpol_mls_level_t):
         raise TypeError("MLS levels cannot be looked-up.")
 
     return MLSLevel(policy, symbol)
+
+
+def level_decl_factory(policy, symbol):
+    """
+    Factory function for creating MLS level declaration objects.
+    (level statements) Lookups are only by sensitivity name.
+    """
+
+    if isinstance(symbol, qpol.qpol_level_t):
+        return MLSLevelDecl(policy, symbol)
+
+    try:
+        return MLSLevelDecl(policy, qpol.qpol_level_t(policy, symbol))
+    except ValueError:
+        raise InvalidLevel("{0} is not a valid sensitivity".format(symbol))
 
 
 def range_factory(policy, symbol):
@@ -65,12 +118,7 @@ class MLSCategory(symbol.PolicySymbol):
     """An MLS category."""
 
     @property
-    def isalias(self):
-        """(T/F) this is an alias."""
-        return self.qpol_symbol.isalias(self.policy)
-
-    @property
-    def value(self):
+    def _value(self):
         """
         The value of the category.
 
@@ -78,7 +126,7 @@ class MLSCategory(symbol.PolicySymbol):
         be sorted based on their policy declaration order instead of
         by their name.  This has no other use.
 
-        Example usage: sorted(self.categories(), key=lambda k: k.value)
+        Example usage: sorted(self.categories(), key=lambda k: k._value)
         """
         return self.qpol_symbol.value(self.policy)
 
@@ -88,41 +136,83 @@ class MLSCategory(symbol.PolicySymbol):
         for alias in self.qpol_symbol.alias_iter(self.policy):
             yield alias
 
-# libqpol does not expose sensitivities as an individual component
+    def statement(self):
+        return "category {0};".format(self)
 
 
 class MLSSensitivity(symbol.PolicySymbol):
-    pass
 
-
-class MLSLevel(symbol.PolicySymbol):
-
-    """An MLS level."""
+    """An MLS sensitivity"""
 
     def __eq__(self, other):
-        if self.policy == other.policy:
-            if (self.qpol_symbol.sens_name(self.policy) !=
-                    other.qpol_symbol.sens_name(self.policy)):
-                return False
+        return (self._value == other._value)
 
-            selfcats = set(str(c) for c in self.categories())
-            othercats = set(str(c) for c in other.categories())
-            return (not selfcats ^ othercats)
+    def __ge__(self, other):
+        return (self._value >= other._value)
 
-        else:
-            raise NotImplementedError
+    def __gt__(self, other):
+        return (self._value > other._value)
+
+    def __le__(self, other):
+        return (self._value <= other._value)
+
+    def __lt__(self, other):
+        return (self._value < other._value)
+
+    @property
+    def _value(self):
+        """
+        The value of the sensitivity.
+
+        This is a low-level policy detail exposed so that sensitivities can
+        be compared based on their dominance.  This has no other use.
+        """
+        return self.qpol_symbol.value(self.policy)
+
+    def statement(self):
+        return "sensitivity {0};".format(self)
+
+
+class BaseMLSLevel(symbol.PolicySymbol):
+
+    """Abstract base class for MLS levels."""
+
+    def __eq__(self, other):
+        selfcats = set(str(c) for c in self.categories())
+        othercats = set(str(c) for c in other.categories())
+        return (self.sensitivity == other.sensitivity and selfcats == othercats)
+
+    def __ge__(self, other):
+        selfcats = set(str(c) for c in self.categories())
+        othercats = set(str(c) for c in other.categories())
+        return (self.sensitivity >= other.sensitivity and selfcats >= othercats)
+
+    def __gt__(self, other):
+        selfcats = set(str(c) for c in self.categories())
+        othercats = set(str(c) for c in other.categories())
+        return (self.sensitivity > other.sensitivity and selfcats > othercats)
+
+    def __le__(self, other):
+        selfcats = set(str(c) for c in self.categories())
+        othercats = set(str(c) for c in other.categories())
+        return (self.sensitivity <= other.sensitivity and selfcats <= othercats)
+
+    def __lt__(self, other):
+        selfcats = set(str(c) for c in self.categories())
+        othercats = set(str(c) for c in other.categories())
+        return (self.sensitivity < other.sensitivity and selfcats < othercats)
 
     def __str__(self):
-        lvl = str(self.qpol_symbol.sens_name(self.policy))
+        lvl = str(self.sensitivity)
 
         # sort by policy declaration order
-        cats = sorted(self.categories(), key=lambda k: k.value)
+        cats = sorted(self.categories(), key=lambda k: k._value)
 
         if cats:
             # generate short category notation
             shortlist = []
             for k, g in itertools.groupby(cats, key=lambda k,
-                                          c=itertools.count(): k.value - next(c)):
+                                          c=itertools.count(): k._value - next(c)):
                 group = list(g)
                 if len(group) > 1:
                     shortlist.append("{0}.{1}".format(group[0], group[-1]))
@@ -133,6 +223,10 @@ class MLSLevel(symbol.PolicySymbol):
 
         return lvl
 
+    @property
+    def sensitivity(self):
+        raise NotImplementedError
+
     def categories(self):
         """
         Generator that yields all individual categories for this level.
@@ -142,6 +236,35 @@ class MLSLevel(symbol.PolicySymbol):
 
         for cat in self.qpol_symbol.cat_iter(self.policy):
             yield category_factory(self.policy, cat)
+
+
+class MLSLevelDecl(BaseMLSLevel):
+
+    """
+    The declaration statement for MLS levels, e.g:
+
+    level s7:c0.c1023;
+    """
+
+    @property
+    def sensitivity(self):
+        """The sensitivity of the level."""
+        # since the qpol symbol for levels is also used for
+        # MLSSensitivity objects, use self's qpol symbol
+        return sensitivity_factory(self.policy, self.qpol_symbol)
+
+    def statement(self):
+        return "level {0};".format(self)
+
+
+class MLSLevel(BaseMLSLevel):
+
+    """An MLS level used in contexts."""
+
+    @property
+    def sensitivity(self):
+        """The sensitivity of the level."""
+        return sensitivity_factory(self.policy, self.qpol_symbol.sens_name(self.policy))
 
 
 class MLSRange(symbol.PolicySymbol):

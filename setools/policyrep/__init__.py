@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -316,6 +316,12 @@ class SELinuxPolicy(object):
                 # qpol iterates over all classes. Handle case
                 # where a class has no default_* settings.
                 pass
+
+    def levels(self):
+        """Generator which yields all level declarations."""
+
+        for level in self.policy.level_iter():
+            yield mls.level_decl_factory(self.policy, level)
 
     def types(self):
         """Generator which yields all types."""

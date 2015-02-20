@@ -22,9 +22,8 @@ from . import qpol
 class InvalidSymbol(Exception):
 
     """
-    Exception for invalid symbols.  Typically this is the case when
-    one symbol optionally relates to another, such as object classes
-    optionally inheriting a common.
+    Exception for invalid symbols.  Typically this is attempting to
+    look up an object in the policy, but it does not exist.
     """
     pass
 

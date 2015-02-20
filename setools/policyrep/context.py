@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -39,7 +39,7 @@ class Context(symbol.PolicySymbol):
 
     def __str__(self):
         try:
-            return "{0.user}:{0.role}:{0.type_}:{0.mls}".format(self)
+            return "{0.user}:{0.role}:{0.type_}:{0.range_}".format(self)
         except mls.MLSDisabled:
             return "{0.user}:{0.role}:{0.type_}".format(self)
 
@@ -59,8 +59,8 @@ class Context(symbol.PolicySymbol):
         return typeattr.type_factory(self.policy, self.qpol_symbol.type_(self.policy))
 
     @property
-    def mls(self):
-        """The MLS portion (range) of the context."""
+    def range_(self):
+        """The MLS range of the context."""
 
         # without this check, qpol will segfault on MLS-disabled policies
         if self.policy.capability(qpol.QPOL_CAP_MLS):
