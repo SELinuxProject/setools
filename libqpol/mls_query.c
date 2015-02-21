@@ -6,7 +6,7 @@
  *  @author Jeremy A. Mowery jmowery@tresys.com
  *  @author Jason Tang jtang@tresys.com
  *
- *  Copyright (C) 2006-2007 Tresys Technology, LLC
+ *  Copyright (C) 2006-2007. 2015 Tresys Technology, LLC
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -636,4 +636,140 @@ int qpol_mls_level_get_cat_iter(const qpol_policy_t * policy, const qpol_mls_lev
 		ebitmap_state_next(*cats);
 
 	return STATUS_SUCCESS;
+}
+
+int qpol_mls_level_from_semantic_level(const qpol_policy_t * policy, const qpol_semantic_level_t * src, qpol_mls_level_t **dest)
+{
+	policydb_t *db = NULL;
+	mls_semantic_level_t *internal_semantic = NULL;
+	mls_level_t *internal_level = NULL;
+
+	if (policy == NULL || src == NULL || dest == NULL) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		*dest = NULL;
+		return STATUS_ERR;
+	}
+
+	internal_semantic = (mls_semantic_level_t*) src;
+	db = &policy->p->p;
+
+	internal_level = malloc(sizeof(mls_level_t));
+	if (!internal_level) {
+		return STATUS_ERR;
+	}
+	mls_level_init(internal_level);
+
+	if(mls_semantic_level_expand(internal_semantic, internal_level, db, policy->sh) < 0) {
+		mls_level_destroy(internal_level);
+		free(internal_level);
+		errno = EINVAL;
+		*dest = NULL;
+		return STATUS_ERR;
+	}
+
+	*dest = (qpol_mls_level_t*) internal_level;
+
+	return STATUS_SUCCESS;
+}
+
+/* semantic level */
+int qpol_policy_get_semantic_level_by_name(const qpol_policy_t * policy, const char *name, const qpol_semantic_level_t ** datum)
+{
+	policydb_t *db = NULL;
+	hashtab_datum_t internal_datum = NULL;
+	mls_semantic_level_t *internal_semantic = NULL;
+
+	if (policy == NULL || name == NULL || datum == NULL) {
+		if (datum != NULL)
+			*datum = NULL;
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	internal_semantic = malloc(sizeof(mls_semantic_level_t));
+	if (!internal_semantic) {
+		return STATUS_ERR;
+	}
+	mls_semantic_level_init(internal_semantic);
+
+	db = &policy->p->p;
+	internal_datum = hashtab_search(db->p_levels.table, (hashtab_key_t)name);
+	if (internal_datum == NULL) {
+		mls_semantic_level_destroy(internal_semantic);
+		free(internal_semantic);
+		*datum = NULL;
+		ERR(policy, "could not find datum for level %s", name);
+		errno = ENOENT;
+		return STATUS_ERR;
+	}
+
+	internal_semantic->sens = ((level_datum_t*)internal_datum)->level->sens;
+
+	*datum = (qpol_semantic_level_t *) internal_semantic;
+
+	return STATUS_SUCCESS;
+}
+
+int qpol_semantic_level_add_cats_by_name(const qpol_policy_t * policy, const qpol_semantic_level_t * level, const char *low, const char *high)
+{
+	hashtab_datum_t internal_datum;
+	policydb_t *db = NULL;
+	mls_semantic_level_t *internal_level = NULL;
+	mls_semantic_cat_t *internal_cat = NULL;
+
+	if (policy == NULL || level == NULL || low == NULL || high == NULL) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	internal_cat = malloc(sizeof(mls_semantic_cat_t));
+	if (!internal_cat) {
+		return STATUS_ERR;
+	}
+	mls_semantic_cat_init(internal_cat);
+
+	db = &policy->p->p;
+	internal_level = (mls_semantic_level_t*) level;
+
+	internal_datum = hashtab_search(db->p_cats.table, (hashtab_key_t)low);
+	if (internal_datum == NULL) {
+		ERR(policy, "could not find datum for cat %s", low);
+		goto err;
+	}
+	internal_cat->low = ((cat_datum_t*)internal_datum)->s.value;
+
+	internal_datum = hashtab_search(db->p_cats.table, (hashtab_key_t)high);
+	if (internal_datum == NULL) {
+		ERR(policy, "could not find datum for cat %s", high);
+		goto err;
+	}
+	internal_cat->high = ((cat_datum_t*)internal_datum)->s.value;
+
+	if (internal_cat->low > internal_cat->high) {
+		ERR(policy, "invalid semantic category range: %s.%s", low, high);
+		goto err;
+	}
+
+	if (!(internal_level->cat)) {
+		internal_level->cat = internal_cat;
+	} else {
+		mls_semantic_cat_t *curr = internal_level->cat;
+
+		while(curr->next) {
+			curr = curr->next;
+		}
+
+		curr->next = internal_cat;
+	}
+
+	return STATUS_SUCCESS;
+
+  err:
+	mls_semantic_cat_destroy(internal_cat);
+	free(internal_cat);
+	errno = ENOENT;
+	return STATUS_ERR;
 }

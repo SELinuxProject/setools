@@ -84,10 +84,47 @@ def level_factory(policy, symbol):
     Factory function for creating MLS level objects (e.g. levels used
     in contexts of labeling statements)
     """
-    if not isinstance(symbol, qpol.qpol_mls_level_t):
-        raise TypeError("MLS levels cannot be looked-up.")
+    if isinstance(symbol, qpol.qpol_mls_level_t):
+        return MLSLevel(policy, symbol)
 
-    return MLSLevel(policy, symbol)
+    # parse the level string and construct a semantic representation
+    sens_split = symbol.split(":")
+
+    sens = sens_split[0]
+    try:
+        semantic_level = qpol.qpol_semantic_level_t(policy, sens)
+    except ValueError:
+        raise InvalidLevel("{0} is not a valid sensitivity".format(sens))
+
+    try:
+        cats = sens_split[1]
+    except IndexError:
+        pass
+    else:
+        for group in cats.split(","):
+            catrange = group.split(".")
+
+            if len(catrange) == 2:
+                try:
+                    semantic_level.add_cats(policy, catrange[0], catrange[1])
+                except ValueError:
+                    raise InvalidLevel("{0} is not a valid category range".format(group))
+            elif len(catrange) == 1:
+                try:
+                    semantic_level.add_cats(policy, catrange[0], catrange[0])
+                except ValueError:
+                    raise InvalidLevel("{0} is not a valid category".format(group))
+            else:
+                # may not be possible to get here
+                raise InvalidLevel("{0} is not a valid category range".format(group))
+
+    # convert to level object
+    try:
+        policy_level = qpol.qpol_mls_level_t(policy, semantic_level)
+    except ValueError:
+        raise InvalidLevel("{0} is not a valid level".format(symbol))
+
+    return MLSLevel(policy, policy_level)
 
 
 def level_decl_factory(policy, symbol):

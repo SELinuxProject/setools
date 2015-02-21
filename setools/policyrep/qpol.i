@@ -1561,16 +1561,57 @@ typedef struct qpol_mls_range {} qpol_mls_range_t;
     };
 %}
 
+/* qpol semantic mls level */
+typedef struct qpol_semantic_level {} qpol_semantic_level_t;
+%extend qpol_semantic_level {
+    %exception qpol_semantic_level {
+      $action
+      if (!result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid sensitivity name.");
+        return NULL;
+      }
+    }
+
+    qpol_semantic_level(qpol_policy_t *p, const char *name) {
+        const qpol_semantic_level_t *l;
+        qpol_policy_get_semantic_level_by_name(p, name, &l);
+        return (qpol_semantic_level_t*)l;
+    };
+
+    ~qpol_semantic_level() {
+        /* mls_semantic_level_destroy(self); */
+        return;
+    };
+
+    %exception add_cats {
+      $action
+      if (result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid category name or category range.");
+        return NULL;
+      }
+    }
+    int add_cats(qpol_policy_t *p, const char *low, const char *high) {
+        return qpol_semantic_level_add_cats_by_name(p, self, low, high);
+    }
+};
+
 /* qpol mls level */
 typedef struct qpol_mls_level {} qpol_mls_level_t;
 %extend qpol_mls_level {
-    qpol_mls_level() {
-        BEGIN_EXCEPTION
-        SWIG_exception(SWIG_RuntimeError, "Cannot directly create qpol_mls_level_t objects");
-        END_EXCEPTION
-    fail:
+    %exception qpol_mls_level {
+      $action
+      if (!result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid level.");
         return NULL;
+      }
     }
+
+    qpol_mls_level(qpol_policy_t *p, qpol_semantic_level_t *l) {
+        qpol_mls_level_t *level;
+        qpol_mls_level_from_semantic_level(p, l, &level);
+        return level;
+    }
+
     ~qpol_mls_level() {
         /* no op */
         return;
