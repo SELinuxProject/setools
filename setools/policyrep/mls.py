@@ -186,6 +186,7 @@ def range_factory(policy, symbol):
 
     return MLSRange(policy, policy_range)
 
+
 class MLSCategory(symbol.PolicySymbol):
 
     """An MLS category."""
