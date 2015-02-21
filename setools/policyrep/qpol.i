@@ -1523,13 +1523,20 @@ typedef struct qpol_cat {} qpol_cat_t;
 /* qpol mls range */
 typedef struct qpol_mls_range {} qpol_mls_range_t;
 %extend qpol_mls_range {
-    qpol_mls_range() {
-        BEGIN_EXCEPTION
-        SWIG_exception(SWIG_RuntimeError, "Cannot directly create qpol_mls_range_t objects");
-        END_EXCEPTION
-    fail:
+    %exception qpol_mls_range {
+      $action
+      if (!result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid range.");
         return NULL;
+      }
     }
+
+    qpol_mls_range(qpol_policy_t *p, qpol_semantic_level_t *l, qpol_semantic_level_t *h) {
+        qpol_mls_range_t *range;
+        qpol_policy_get_mls_range_from_semantic_levels(p, l, h, &range);
+        return range;
+    }
+
     ~qpol_mls_range() {
         /* no op */
         return;

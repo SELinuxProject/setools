@@ -259,6 +259,9 @@ extern "C"
 	extern int qpol_semantic_level_add_cats_by_name(const qpol_policy_t * policy, const qpol_semantic_level_t * level, const char *low, const char *high);
 	extern int qpol_mls_level_from_semantic_level(const qpol_policy_t * policy, const qpol_semantic_level_t * src, qpol_mls_level_t **dest);
 
+/* semantic ranges */
+	extern int qpol_policy_get_mls_range_from_semantic_levels(const qpol_policy_t * policy, const qpol_semantic_level_t * low, const qpol_semantic_level_t *high, qpol_mls_range_t **dest);
+
 #ifdef	__cplusplus
 }
 #endif

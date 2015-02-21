@@ -51,6 +51,14 @@ class InvalidLevel(symbol.InvalidSymbol):
     pass
 
 
+class InvalidRange(symbol.InvalidSymbol):
+
+    """
+    Exception for an invalid range.
+    """
+    pass
+
+
 class MLSDisabled(Exception):
 
     """
@@ -79,16 +87,9 @@ def sensitivity_factory(policy, symbol):
         raise InvalidSensitivity("{0} is not a valid sensitivity".format(symbol))
 
 
-def level_factory(policy, symbol):
-    """
-    Factory function for creating MLS level objects (e.g. levels used
-    in contexts of labeling statements)
-    """
-    if isinstance(symbol, qpol.qpol_mls_level_t):
-        return MLSLevel(policy, symbol)
-
-    # parse the level string and construct a semantic representation
-    sens_split = symbol.split(":")
+def _build_semantic_level(policy, level):
+    """Parse the level string and construct a qpol semantic representation."""
+    sens_split = level.split(":")
 
     sens = sens_split[0]
     try:
@@ -118,6 +119,19 @@ def level_factory(policy, symbol):
                 # may not be possible to get here
                 raise InvalidLevel("{0} is not a valid category range".format(group))
 
+    return semantic_level
+
+
+def level_factory(policy, symbol):
+    """
+    Factory function for creating MLS level objects (e.g. levels used
+    in contexts of labeling statements)
+    """
+    if isinstance(symbol, qpol.qpol_mls_level_t):
+        return MLSLevel(policy, symbol)
+
+    semantic_level = _build_semantic_level(policy, symbol)
+
     # convert to level object
     try:
         policy_level = qpol.qpol_mls_level_t(policy, semantic_level)
@@ -144,11 +158,33 @@ def level_decl_factory(policy, symbol):
 
 def range_factory(policy, symbol):
     """Factory function for creating MLS range objects."""
-    if not isinstance(symbol, qpol.qpol_mls_range_t):
-        raise TypeError("MLS ranges cannot be looked up.")
+    if isinstance(symbol, qpol.qpol_mls_range_t):
+        return MLSRange(policy, symbol)
 
-    return MLSRange(policy, symbol)
+    # build range:
+    levels = symbol.split("-")
 
+    try:
+        low = _build_semantic_level(policy, levels[0])
+    except InvalidLevel as e:
+        raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
+
+    try:
+        high = _build_semantic_level(policy, levels[1])
+    except InvalidLevel as e:
+        raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
+    except IndexError:
+        high = low
+
+    # convert to range object
+    try:
+        policy_range = qpol.qpol_mls_range_t(policy, low, high)
+    except ValueError:
+        # this can be due to one of the semantic levels being invalid (category not allowed in
+        # level) or the high level does not dominate the low level. Can't tell which one.
+        raise InvalidLevel("{0} is not a valid range".format(symbol))
+
+    return MLSRange(policy, policy_range)
 
 class MLSCategory(symbol.PolicySymbol):
 
