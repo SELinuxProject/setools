@@ -267,6 +267,14 @@ class SELinuxPolicy(object):
         """Look up an attribute by name."""
         return typeattr.attribute_factory(self.policy, name)
 
+    def lookup_level(self, level):
+        """Look up a MLS level."""
+        return mls.level_factory(self.policy, level)
+
+    def lookup_range(self, range_):
+        """Look up a MLS range."""
+        return mls.range_factory(self.policy, range_)
+
     def lookup_role(self, name):
         """Look up a role by name."""
         return role.role_factory(self.policy, name)

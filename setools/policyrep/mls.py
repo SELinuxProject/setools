@@ -252,6 +252,7 @@ class BaseMLSLevel(symbol.PolicySymbol):
         return (self.sensitivity == other.sensitivity and selfcats == othercats)
 
     def __ge__(self, other):
+        """Dom operator."""
         selfcats = set(str(c) for c in self.categories())
         othercats = set(str(c) for c in other.categories())
         return (self.sensitivity >= other.sensitivity and selfcats >= othercats)
@@ -262,6 +263,7 @@ class BaseMLSLevel(symbol.PolicySymbol):
         return (self.sensitivity > other.sensitivity and selfcats > othercats)
 
     def __le__(self, other):
+        """Domby operator."""
         selfcats = set(str(c) for c in self.categories())
         othercats = set(str(c) for c in other.categories())
         return (self.sensitivity <= other.sensitivity and selfcats <= othercats)
@@ -270,6 +272,10 @@ class BaseMLSLevel(symbol.PolicySymbol):
         selfcats = set(str(c) for c in self.categories())
         othercats = set(str(c) for c in other.categories())
         return (self.sensitivity < other.sensitivity and selfcats < othercats)
+
+    def __xor__(self, other):
+        """Incomp operator."""
+        return (not self >= other and not self <= other)
 
     def __str__(self):
         lvl = str(self.sensitivity)
