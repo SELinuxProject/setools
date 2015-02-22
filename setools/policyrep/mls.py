@@ -87,15 +87,21 @@ def sensitivity_factory(policy, symbol):
         raise InvalidSensitivity("{0} is not a valid sensitivity".format(symbol))
 
 
-def _build_semantic_level(policy, level):
-    """Parse the level string and construct a qpol semantic representation."""
-    sens_split = level.split(":")
+def level_factory(policy, symbol):
+    """
+    Factory function for creating MLS level objects (e.g. levels used
+    in contexts of labeling statements)
+    """
+    if isinstance(symbol, qpol.qpol_mls_level_t):
+        return MLSLevel(policy, symbol)
+
+    sens_split = symbol.split(":")
 
     sens = sens_split[0]
     try:
         semantic_level = qpol.qpol_semantic_level_t(policy, sens)
     except ValueError:
-        raise InvalidLevel("{0} is not a valid sensitivity".format(sens))
+        raise InvalidLevel("{0} is invalid ({1} is not a valid sensitivity)".format(symbol, sens))
 
     try:
         cats = sens_split[1]
@@ -109,34 +115,24 @@ def _build_semantic_level(policy, level):
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[1])
                 except ValueError:
-                    raise InvalidLevel("{0} is not a valid category range".format(group))
+                    raise InvalidLevel("{0} is invalid ({1} is not a valid category range)".
+                                       format(symbol, group))
             elif len(catrange) == 1:
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[0])
                 except ValueError:
-                    raise InvalidLevel("{0} is not a valid category".format(group))
+                    raise InvalidLevel("{0} is invalid  ({1} is not a valid category)".
+                                       format(symbol, group))
             else:
-                # may not be possible to get here
-                raise InvalidLevel("{0} is not a valid category range".format(group))
-
-    return semantic_level
-
-
-def level_factory(policy, symbol):
-    """
-    Factory function for creating MLS level objects (e.g. levels used
-    in contexts of labeling statements)
-    """
-    if isinstance(symbol, qpol.qpol_mls_level_t):
-        return MLSLevel(policy, symbol)
-
-    semantic_level = _build_semantic_level(policy, symbol)
+                raise InvalidLevel("{0} is invalid (level parsing error)".format(symbol))
 
     # convert to level object
     try:
         policy_level = qpol.qpol_mls_level_t(policy, semantic_level)
     except ValueError:
-        raise InvalidLevel("{0} is not a valid level".format(symbol))
+        raise InvalidLevel(
+            "{0} is invalid (one or more categories are not associated with the sensitivity)".
+            format(symbol))
 
     return MLSLevel(policy, policy_level)
 
@@ -165,12 +161,12 @@ def range_factory(policy, symbol):
     levels = symbol.split("-")
 
     try:
-        low = _build_semantic_level(policy, levels[0])
+        low = level_factory(policy, levels[0])
     except InvalidLevel as e:
         raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
 
     try:
-        high = _build_semantic_level(policy, levels[1])
+        high = level_factory(policy, levels[1])
     except InvalidLevel as e:
         raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
     except IndexError:
@@ -178,11 +174,10 @@ def range_factory(policy, symbol):
 
     # convert to range object
     try:
-        policy_range = qpol.qpol_mls_range_t(policy, low, high)
+        policy_range = qpol.qpol_mls_range_t(policy, low.qpol_symbol, high.qpol_symbol)
     except ValueError:
-        # this can be due to one of the semantic levels being invalid (category not allowed in
-        # level) or the high level does not dominate the low level. Can't tell which one.
-        raise InvalidLevel("{0} is not a valid range".format(symbol))
+        raise InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
+                           format(symbol, levels[0], levels[1]))
 
     return MLSRange(policy, policy_range)
 

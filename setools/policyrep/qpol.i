@@ -1523,17 +1523,25 @@ typedef struct qpol_cat {} qpol_cat_t;
 /* qpol mls range */
 typedef struct qpol_mls_range {} qpol_mls_range_t;
 %extend qpol_mls_range {
+    # TODO: determine how to conditionally destroy this range.
+    # It should only be destroyed if it was looked up (user-entered)
+    # Otherwise qpol will destroy the others when the policy closes.
     %exception qpol_mls_range {
       $action
       if (!result) {
-        PyErr_SetString(PyExc_ValueError, "Invalid range.");
+        if (errno == EINVAL) {
+            PyErr_SetString(PyExc_ValueError, "Invalid range.");
+        } else {
+            PyErr_SetFromErrno(PyExc_OSError);
+        }
+
         return NULL;
       }
     }
 
-    qpol_mls_range(qpol_policy_t *p, qpol_semantic_level_t *l, qpol_semantic_level_t *h) {
+    qpol_mls_range(qpol_policy_t *p, qpol_mls_level_t *l, qpol_mls_level_t *h) {
         qpol_mls_range_t *range;
-        qpol_policy_get_mls_range_from_semantic_levels(p, l, h, &range);
+        qpol_policy_get_mls_range_from_mls_levels(p, l, h, &range);
         return range;
     }
 
@@ -1586,7 +1594,7 @@ typedef struct qpol_semantic_level {} qpol_semantic_level_t;
     };
 
     ~qpol_semantic_level() {
-        /* mls_semantic_level_destroy(self); */
+        qpol_semantic_level_destroy(self);
         return;
     };
 

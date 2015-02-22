@@ -541,12 +541,11 @@ int qpol_cat_get_alias_iter(const qpol_policy_t * policy, const qpol_cat_t * dat
 }
 
 /* mls range */
-int qpol_policy_get_mls_range_from_semantic_levels(const qpol_policy_t * policy, const qpol_semantic_level_t *low, const qpol_semantic_level_t *high, qpol_mls_range_t **dest)
+int qpol_policy_get_mls_range_from_mls_levels(const qpol_policy_t * policy, const qpol_mls_level_t *low, const qpol_mls_level_t *high, qpol_mls_range_t **dest)
 {
 	policydb_t *db = NULL;
 	mls_range_t *internal_range = NULL;
-	mls_semantic_range_t *internal_semantic = NULL;
-	mls_semantic_level_t *internal_low = NULL, *internal_high = NULL;
+	mls_level_t *internal_low = NULL, *internal_high = NULL;
 
 	if (policy == NULL || low == NULL || high == NULL || dest == NULL) {
 		if (dest != NULL)
@@ -556,50 +555,40 @@ int qpol_policy_get_mls_range_from_semantic_levels(const qpol_policy_t * policy,
 		return STATUS_ERR;
 	}
 
-	internal_low = (mls_semantic_level_t*)low;
-	internal_high = (mls_semantic_level_t*)high;
+	db = &policy->p->p;
 	*dest = NULL;
+	internal_low = (mls_level_t*)low;
+	internal_high = (mls_level_t*)high;
 
-	internal_semantic = malloc(sizeof(mls_semantic_range_t));
-	if (!internal_semantic) {
+	if (!mls_level_dom(internal_high, internal_low)) {
 		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
 		return STATUS_ERR;
 	}
-	mls_semantic_range_init(internal_semantic);
 
 	internal_range = malloc(sizeof(mls_range_t));
 	if (!internal_range) {
-		mls_semantic_range_destroy(internal_semantic);
-		ERR(policy, "%s", strerror(EINVAL));
+		ERR(policy, "%s", strerror(errno));
 		return STATUS_ERR;
 	}
 	mls_range_init(internal_range);
 
-	db = &policy->p->p;
-	if(mls_semantic_level_cpy(&internal_semantic->level[0], internal_low) < 0) {
-		goto err;
-	}
-	if (mls_semantic_level_cpy(&internal_semantic->level[1], internal_high) < 0) {
+	if (mls_level_cpy(&internal_range->level[0], internal_low) < 0) {
 		goto err;
 	}
 
-	if(mls_semantic_range_expand(internal_semantic, internal_range, db, policy->sh) < 0) {
-		ERR(policy, "%s", strerror(EINVAL));
+	if (mls_level_cpy(&internal_range->level[1], internal_high) < 0) {
 		goto err;
 	}
 
 	*dest = (qpol_mls_range_t*) internal_range;
 
-	mls_semantic_range_destroy(internal_semantic);
-	free(internal_semantic);
 	return STATUS_SUCCESS;
 
   err:
 	mls_range_destroy(internal_range);
-	mls_semantic_range_destroy(internal_semantic);
 	free(internal_range);
-	free(internal_semantic);
-	errno = EINVAL;
+	errno = ENOMEM;
 	return STATUS_ERR;
 }
 
@@ -834,4 +823,15 @@ int qpol_semantic_level_add_cats_by_name(const qpol_policy_t * policy, const qpo
 	free(internal_cat);
 	errno = ENOENT;
 	return STATUS_ERR;
+}
+
+void qpol_semantic_level_destroy(qpol_semantic_level_t * level)
+{
+
+	if (level == NULL) {
+		return;
+	}
+
+	mls_semantic_level_destroy((mls_semantic_level_t*) level);
+	free(level);
 }
