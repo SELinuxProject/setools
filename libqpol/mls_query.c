@@ -543,7 +543,6 @@ int qpol_cat_get_alias_iter(const qpol_policy_t * policy, const qpol_cat_t * dat
 /* mls range */
 int qpol_policy_get_mls_range_from_mls_levels(const qpol_policy_t * policy, const qpol_mls_level_t *low, const qpol_mls_level_t *high, qpol_mls_range_t **dest)
 {
-	policydb_t *db = NULL;
 	mls_range_t *internal_range = NULL;
 	mls_level_t *internal_low = NULL, *internal_high = NULL;
 
@@ -555,7 +554,6 @@ int qpol_policy_get_mls_range_from_mls_levels(const qpol_policy_t * policy, cons
 		return STATUS_ERR;
 	}
 
-	db = &policy->p->p;
 	*dest = NULL;
 	internal_low = (mls_level_t*)low;
 	internal_high = (mls_level_t*)high;
