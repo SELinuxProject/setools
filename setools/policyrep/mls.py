@@ -160,13 +160,15 @@ def range_factory(policy, symbol):
     # build range:
     levels = symbol.split("-")
 
+    # strip() levels to handle ranges with spaces in them,
+    # e.g. s0:c1 - s0:c0.c255
     try:
-        low = level_factory(policy, levels[0])
+        low = level_factory(policy, levels[0].strip())
     except InvalidLevel as e:
         raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
 
     try:
-        high = level_factory(policy, levels[1])
+        high = level_factory(policy, levels[1].strip())
     except InvalidLevel as e:
         raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
     except IndexError:
@@ -177,7 +179,7 @@ def range_factory(policy, symbol):
         policy_range = qpol.qpol_mls_range_t(policy, low.qpol_symbol, high.qpol_symbol)
     except ValueError:
         raise InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
-                           format(symbol, levels[0], levels[1]))
+                           format(symbol, low, high))
 
     return MLSRange(policy, policy_range)
 
