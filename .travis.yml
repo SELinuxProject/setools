@@ -41,7 +41,7 @@ before_install:
   # Download current SELinux userspace tools and libraries
   - curl -sS -L https://github.com/SELinuxProject/selinux/archive/20150202.tar.gz | tar xz
   - mv selinux-20150202 selinux-src
-  - patch -p1 -d selinux-src < patches/sepol-2.4-mls-semantic-level-expand.patch
+  - patch -p1 -d selinux-src < patches/libsepol-2.4-mls-semantic-level-expand.patch
 
   # Ubuntu 12.04 coreutils is too old to provide "ln --relative" :(
   - sed 's/ln -sf --relative /ln -sf /' -i selinux-src/libsepol/src/Makefile
