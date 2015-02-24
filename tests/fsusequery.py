@@ -98,3 +98,129 @@ class FSUseQueryTest(unittest.TestCase):
 
         fsu = sorted(s.fs for s in q.results())
         self.assertListEqual(["test41b", "test41c"], fsu)
+
+    def test_050_range_exact(self):
+        """fs_use_* query with context range exact match"""
+        q = FSUseQuery(self.p, range_="s0:c1 - s0:c0.c4")
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test50"], fsu)
+
+    def test_051_range_overlap1(self):
+        """fs_use_* query with context range overlap match (equal)"""
+        q = FSUseQuery(self.p, range_="s1:c1 - s1:c0.c4", range_overlap=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test51"], fsu)
+
+    def test_051_range_overlap2(self):
+        """fs_use_* query with context range overlap match (subset)"""
+        q = FSUseQuery(self.p, range_="s1:c1,c2 - s1:c0.c3", range_overlap=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test51"], fsu)
+
+    def test_051_range_overlap3(self):
+        """fs_use_* query with context range overlap match (superset)"""
+        q = FSUseQuery(self.p, range_="s1 - s1:c0.c4", range_overlap=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test51"], fsu)
+
+    def test_051_range_overlap4(self):
+        """fs_use_* query with context range overlap match (overlap low level)"""
+        q = FSUseQuery(self.p, range_="s1 - s1:c1,c2", range_overlap=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test51"], fsu)
+
+    def test_051_range_overlap5(self):
+        """fs_use_* query with context range overlap match (overlap high level)"""
+        q = FSUseQuery(self.p, range_="s1:c1,c2 - s1:c0.c4", range_overlap=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test51"], fsu)
+
+    def test_052_range_subset1(self):
+        """fs_use_* query with context range subset match"""
+        q = FSUseQuery(self.p, range_="s2:c1,c2 - s2:c0.c3", range_overlap=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test52"], fsu)
+
+    def test_052_range_subset2(self):
+        """fs_use_* query with context range subset match (equal)"""
+        q = FSUseQuery(self.p, range_="s2:c1 - s2:c1.c3", range_overlap=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test52"], fsu)
+
+    def test_053_range_superset1(self):
+        """fs_use_* query with context range superset match"""
+        q = FSUseQuery(self.p, range_="s3 - s3:c0.c4", range_superset=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test53"], fsu)
+
+    def test_053_range_superset2(self):
+        """fs_use_* query with context range superset match (equal)"""
+        q = FSUseQuery(self.p, range_="s3:c1 - s3:c1.c3", range_superset=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test53"], fsu)
+
+    def test_054_range_proper_subset1(self):
+        """fs_use_* query with context range proper subset match"""
+        q = FSUseQuery(self.p, range_="s4:c1,c2", range_subset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test54"], fsu)
+
+    def test_054_range_proper_subset2(self):
+        """fs_use_* query with context range proper subset match (equal)"""
+        q = FSUseQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual([], fsu)
+
+    def test_054_range_proper_subset3(self):
+        """fs_use_* query with context range proper subset match (equal low only)"""
+        q = FSUseQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test54"], fsu)
+
+    def test_054_range_proper_subset4(self):
+        """fs_use_* query with context range proper subset match (equal high only)"""
+        q = FSUseQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test54"], fsu)
+
+    def test_055_range_proper_superset1(self):
+        """fs_use_* query with context range proper superset match"""
+        q = FSUseQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test55"], fsu)
+
+    def test_055_range_proper_superset2(self):
+        """fs_use_* query with context range proper superset match (equal)"""
+        q = FSUseQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual([], fsu)
+
+    def test_055_range_proper_superset3(self):
+        """fs_use_* query with context range proper superset match (equal low)"""
+        q = FSUseQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test55"], fsu)
+
+    def test_055_range_proper_superset4(self):
+        """fs_use_* query with context range proper superset match (equal high)"""
+        q = FSUseQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        fsu = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test55"], fsu)

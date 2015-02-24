@@ -30,7 +30,7 @@ class ContextQuery(query.PolicyQuery):
                        user, user_regex, user_recomp,
                        role, role_regex, role_recomp,
                        type_, type_regex, type_recomp,
-                       range_):
+                       range_, range_subset, range_overlap, range_superset, range_proper):
         """
         Match the context with optional regular expression.
 
@@ -49,6 +49,15 @@ class ContextQuery(query.PolicyQuery):
                         will be used on the type.
         type_recomp     The compiled type regular expression.
         range_          The range to match in the context.
+        range_subset    If true, the criteria will match if it
+                        is a subset of the context's range.
+        range_overlap   If true, the criteria will match if it
+                        overlaps any of the context's range.
+        range_superset  If true, the criteria will match if it
+                        is a superset of the context's range.
+        range_proper    If true, use proper superset/subset
+                        on range matching operations.
+                        No effect if not using set operations.
         """
 
         if user and not query.PolicyQuery._match_regex(
@@ -72,8 +81,14 @@ class ContextQuery(query.PolicyQuery):
                 type_recomp):
             return False
 
-        if range_:
-            raise NotImplementedError
+        if range_ and not query.PolicyQuery._match_range(
+                (context.range_.low, context.range_.high),
+                (range_.low, range_.high),
+                range_subset,
+                range_overlap,
+                range_superset,
+                range_proper):
+            return False
 
         return True
 
@@ -157,10 +172,35 @@ class ContextQuery(query.PolicyQuery):
         Set the criteria for matching the context's range.
 
         Parameter:
-        range_     Range to match the context's range.
+        range_          Criteria to match the context's range.
+
+        Keyword Parameters:
+        range_subset    If true, the criteria will match if it is a subset
+                        of the context's range.
+        range_overlap   If true, the criteria will match if it overlaps
+                        any of the context's range.
+        range_superset  If true, the criteria will match if it is a superset
+                        of the context's range.
+        range_proper    If true, use proper superset/subset operations.
+                        No effect if not using set operations.
 
         Exceptions:
-        NameError  Invalid keyword option.
+        NameError       Invalid keyword option.
         """
 
-        self.range_ = range_
+        if range_:
+            self.range_ = self.policy.lookup_range(range_)
+        else:
+            self.range_ = None
+
+        for k in list(opts.keys()):
+            if k == "subset":
+                self.range_subset = opts[k]
+            elif k == "overlap":
+                self.range_overlap = opts[k]
+            elif k == "superset":
+                self.range_superset = opts[k]
+            elif k == "proper":
+                self.range_proper = opts[k]
+            else:
+                raise NameError("Invalid name option: {0}".format(k))

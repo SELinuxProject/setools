@@ -33,7 +33,8 @@ class GenfsconQuery(contextquery.ContextQuery):
                  user="", user_regex=False,
                  role="", role_regex=False,
                  type_="", type_regex=False,
-                 range_=""):
+                 range_="", range_overlap=False, range_subset=False,
+                 range_superset=False, range_proper=False):
         """
         Parameters:
         policy          The policy to query.
@@ -54,6 +55,14 @@ class GenfsconQuery(contextquery.ContextQuery):
         type_regex      If true, regular expression matching
                         will be used on the type.
         range_          The criteria to match the context's range.
+        range_subset    If true, the criteria will match if it is a subset
+                        of the context's range.
+        range_overlap   If true, the criteria will match if it overlaps
+                        any of the context's range.
+        range_superset  If true, the criteria will match if it is a superset
+                        of the context's range.
+        range_proper    If true, use proper superset/subset operations.
+                        No effect if not using set operations.
         """
 
         self.policy = policy
@@ -64,7 +73,8 @@ class GenfsconQuery(contextquery.ContextQuery):
         self.set_user(user, regex=user_regex)
         self.set_role(role, regex=role_regex)
         self.set_type(type_, regex=type_regex)
-        self.set_range(range_)
+        self.set_range(range_, overlap=range_overlap, subset=range_subset,
+                       superset=range_superset, proper=range_proper)
 
     def results(self):
         """Generator which yields all matching genfscons."""
@@ -98,7 +108,11 @@ class GenfsconQuery(contextquery.ContextQuery):
                     self.type_,
                     self.type_regex,
                     self.type_cmp,
-                    self.range_):
+                    self.range_,
+                    self.range_subset,
+                    self.range_overlap,
+                    self.range_superset,
+                    self.range_proper):
                 continue
 
             yield g
