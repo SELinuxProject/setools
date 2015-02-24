@@ -86,6 +86,132 @@ class PortconQueryTest(unittest.TestCase):
         ports = sorted(p.ports for p in q.results())
         self.assertListEqual([(31000, 31000), (31001, 31001)], ports)
 
+    def test_040_range_exact(self):
+        """Portcon query with context range exact match"""
+        q = PortconQuery(self.p, range_="s0:c1 - s0:c0.c4")
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(40, 40)], ports)
+
+    def test_041_range_overlap1(self):
+        """Portcon query with context range overlap match (equal)"""
+        q = PortconQuery(self.p, range_="s1:c1 - s1:c0.c4", range_overlap=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(41, 41)], ports)
+
+    def test_041_range_overlap2(self):
+        """Portcon query with context range overlap match (subset)"""
+        q = PortconQuery(self.p, range_="s1:c1,c2 - s1:c0.c3", range_overlap=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(41, 41)], ports)
+
+    def test_041_range_overlap3(self):
+        """Portcon query with context range overlap match (superset)"""
+        q = PortconQuery(self.p, range_="s1 - s1:c0.c4", range_overlap=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(41, 41)], ports)
+
+    def test_041_range_overlap4(self):
+        """Portcon query with context range overlap match (overlap low level)"""
+        q = PortconQuery(self.p, range_="s1 - s1:c1,c2", range_overlap=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(41, 41)], ports)
+
+    def test_041_range_overlap5(self):
+        """Portcon query with context range overlap match (overlap high level)"""
+        q = PortconQuery(self.p, range_="s1:c1,c2 - s1:c0.c4", range_overlap=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(41, 41)], ports)
+
+    def test_042_range_subset1(self):
+        """Portcon query with context range subset match"""
+        q = PortconQuery(self.p, range_="s2:c1,c2 - s2:c0.c3", range_overlap=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(42, 42)], ports)
+
+    def test_042_range_subset2(self):
+        """Portcon query with context range subset match (equal)"""
+        q = PortconQuery(self.p, range_="s2:c1 - s2:c1.c3", range_overlap=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(42, 42)], ports)
+
+    def test_043_range_superset1(self):
+        """Portcon query with context range superset match"""
+        q = PortconQuery(self.p, range_="s3 - s3:c0.c4", range_superset=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(43, 43)], ports)
+
+    def test_043_range_superset2(self):
+        """Portcon query with context range superset match (equal)"""
+        q = PortconQuery(self.p, range_="s3:c1 - s3:c1.c3", range_superset=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(43, 43)], ports)
+
+    def test_044_range_proper_subset1(self):
+        """Portcon query with context range proper subset match"""
+        q = PortconQuery(self.p, range_="s4:c1,c2", range_subset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(44, 44)], ports)
+
+    def test_044_range_proper_subset2(self):
+        """Portcon query with context range proper subset match (equal)"""
+        q = PortconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([], ports)
+
+    def test_044_range_proper_subset3(self):
+        """Portcon query with context range proper subset match (equal low only)"""
+        q = PortconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(44, 44)], ports)
+
+    def test_044_range_proper_subset4(self):
+        """Portcon query with context range proper subset match (equal high only)"""
+        q = PortconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(44, 44)], ports)
+
+    def test_045_range_proper_superset1(self):
+        """Portcon query with context range proper superset match"""
+        q = PortconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(45, 45)], ports)
+
+    def test_045_range_proper_superset2(self):
+        """Portcon query with context range proper superset match (equal)"""
+        q = PortconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([], ports)
+
+    def test_045_range_proper_superset3(self):
+        """Portcon query with context range proper superset match (equal low)"""
+        q = PortconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(45, 45)], ports)
+
+    def test_045_range_proper_superset4(self):
+        """Portcon query with context range proper superset match (equal high)"""
+        q = PortconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        ports = sorted(p.ports for p in q.results())
+        self.assertListEqual([(45, 45)], ports)
+
     def test_050_single_equal(self):
         """Portcon query with single port exact match"""
         q = PortconQuery(self.p, ports=(50, 50))

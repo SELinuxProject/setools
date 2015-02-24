@@ -113,3 +113,130 @@ class GenfsconQueryTest(unittest.TestCase):
 
         genfs = sorted(s.fs for s in q.results())
         self.assertListEqual(["test50b"], genfs)
+
+    def test_060_range_exact(self):
+        """Genfscon query with context range exact match"""
+        q = GenfsconQuery(self.p, range_="s0:c1 - s0:c0.c4")
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test60"], genfs)
+
+    def test_061_range_overlap1(self):
+        """Genfscon query with context range overlap match (equal)"""
+        q = GenfsconQuery(self.p, range_="s1:c1 - s1:c0.c4", range_overlap=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test61"], genfs)
+
+    def test_061_range_overlap2(self):
+        """Genfscon query with context range overlap match (subset)"""
+        q = GenfsconQuery(self.p, range_="s1:c1,c2 - s1:c0.c3", range_overlap=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test61"], genfs)
+
+    def test_061_range_overlap3(self):
+        """Genfscon query with context range overlap match (superset)"""
+        q = GenfsconQuery(self.p, range_="s1 - s1:c0.c4", range_overlap=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test61"], genfs)
+
+    def test_061_range_overlap4(self):
+        """Genfscon query with context range overlap match (overlap low level)"""
+        q = GenfsconQuery(self.p, range_="s1 - s1:c1,c2", range_overlap=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test61"], genfs)
+
+    def test_061_range_overlap5(self):
+        """Genfscon query with context range overlap match (overlap high level)"""
+        q = GenfsconQuery(self.p, range_="s1:c1,c2 - s1:c0.c4", range_overlap=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test61"], genfs)
+
+    def test_062_range_subset1(self):
+        """Genfscon query with context range subset match"""
+        q = GenfsconQuery(self.p, range_="s2:c1,c2 - s2:c0.c3", range_overlap=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test62"], genfs)
+
+    def test_062_range_subset2(self):
+        """Genfscon query with context range subset match (equal)"""
+        q = GenfsconQuery(self.p, range_="s2:c1 - s2:c1.c3", range_overlap=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test62"], genfs)
+
+    def test_063_range_superset1(self):
+        """Genfscon query with context range superset match"""
+        q = GenfsconQuery(self.p, range_="s3 - s3:c0.c4", range_superset=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test63"], genfs)
+
+    def test_063_range_superset2(self):
+        """Genfscon query with context range superset match (equal)"""
+        q = GenfsconQuery(self.p, range_="s3:c1 - s3:c1.c3", range_superset=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test63"], genfs)
+
+    def test_064_range_proper_subset1(self):
+        """Genfscon query with context range proper subset match"""
+        q = GenfsconQuery(self.p, range_="s4:c1,c2", range_subset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test64"], genfs)
+
+    def test_064_range_proper_subset2(self):
+        """Genfscon query with context range proper subset match (equal)"""
+        q = GenfsconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual([], genfs)
+
+    def test_064_range_proper_subset3(self):
+        """Genfscon query with context range proper subset match (equal low only)"""
+        q = GenfsconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test64"], genfs)
+
+    def test_064_range_proper_subset4(self):
+        """Genfscon query with context range proper subset match (equal high only)"""
+        q = GenfsconQuery(self.p,
+                          range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test64"], genfs)
+
+    def test_065_range_proper_superset1(self):
+        """Genfscon query with context range proper superset match"""
+        q = GenfsconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test65"], genfs)
+
+    def test_065_range_proper_superset2(self):
+        """Genfscon query with context range proper superset match (equal)"""
+        q = GenfsconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual([], genfs)
+
+    def test_065_range_proper_superset3(self):
+        """Genfscon query with context range proper superset match (equal low)"""
+        q = GenfsconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test65"], genfs)
+
+    def test_065_range_proper_superset4(self):
+        """Genfscon query with context range proper superset match (equal high)"""
+        q = GenfsconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        genfs = sorted(s.fs for s in q.results())
+        self.assertListEqual(["test65"], genfs)

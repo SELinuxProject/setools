@@ -87,6 +87,132 @@ class NodeconQueryTest(unittest.TestCase):
         nodecons = sorted(n.address for n in q.results())
         self.assertListEqual(["10.1.41.2", "10.1.41.3"], nodecons)
 
+    def test_050_range_exact(self):
+        """Nodecon query with context range exact match"""
+        q = NodeconQuery(self.p, range_="s0:c1 - s0:c0.c4")
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.50.1"], nodecons)
+
+    def test_051_range_overlap1(self):
+        """Nodecon query with context range overlap match (equal)"""
+        q = NodeconQuery(self.p, range_="s1:c1 - s1:c0.c4", range_overlap=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.51.1"], nodecons)
+
+    def test_051_range_overlap2(self):
+        """Nodecon query with context range overlap match (subset)"""
+        q = NodeconQuery(self.p, range_="s1:c1,c2 - s1:c0.c3", range_overlap=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.51.1"], nodecons)
+
+    def test_051_range_overlap3(self):
+        """Nodecon query with context range overlap match (superset)"""
+        q = NodeconQuery(self.p, range_="s1 - s1:c0.c4", range_overlap=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.51.1"], nodecons)
+
+    def test_051_range_overlap4(self):
+        """Nodecon query with context range overlap match (overlap low level)"""
+        q = NodeconQuery(self.p, range_="s1 - s1:c1,c2", range_overlap=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.51.1"], nodecons)
+
+    def test_051_range_overlap5(self):
+        """Nodecon query with context range overlap match (overlap high level)"""
+        q = NodeconQuery(self.p, range_="s1:c1,c2 - s1:c0.c4", range_overlap=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.51.1"], nodecons)
+
+    def test_052_range_subset1(self):
+        """Nodecon query with context range subset match"""
+        q = NodeconQuery(self.p, range_="s2:c1,c2 - s2:c0.c3", range_overlap=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.52.1"], nodecons)
+
+    def test_052_range_subset2(self):
+        """Nodecon query with context range subset match (equal)"""
+        q = NodeconQuery(self.p, range_="s2:c1 - s2:c1.c3", range_overlap=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.52.1"], nodecons)
+
+    def test_053_range_superset1(self):
+        """Nodecon query with context range superset match"""
+        q = NodeconQuery(self.p, range_="s3 - s3:c0.c4", range_superset=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.53.1"], nodecons)
+
+    def test_053_range_superset2(self):
+        """Nodecon query with context range superset match (equal)"""
+        q = NodeconQuery(self.p, range_="s3:c1 - s3:c1.c3", range_superset=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.53.1"], nodecons)
+
+    def test_054_range_proper_subset1(self):
+        """Nodecon query with context range proper subset match"""
+        q = NodeconQuery(self.p, range_="s4:c1,c2", range_subset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.54.1"], nodecons)
+
+    def test_054_range_proper_subset2(self):
+        """Nodecon query with context range proper subset match (equal)"""
+        q = NodeconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual([], nodecons)
+
+    def test_054_range_proper_subset3(self):
+        """Nodecon query with context range proper subset match (equal low only)"""
+        q = NodeconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.54.1"], nodecons)
+
+    def test_054_range_proper_subset4(self):
+        """Nodecon query with context range proper subset match (equal high only)"""
+        q = NodeconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.54.1"], nodecons)
+
+    def test_055_range_proper_superset1(self):
+        """Nodecon query with context range proper superset match"""
+        q = NodeconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.55.1"], nodecons)
+
+    def test_055_range_proper_superset2(self):
+        """Nodecon query with context range proper superset match (equal)"""
+        q = NodeconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual([], nodecons)
+
+    def test_055_range_proper_superset3(self):
+        """Nodecon query with context range proper superset match (equal low)"""
+        q = NodeconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.55.1"], nodecons)
+
+    def test_055_range_proper_superset4(self):
+        """Nodecon query with context range proper superset match (equal high)"""
+        q = NodeconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        nodecons = sorted(n.address for n in q.results())
+        self.assertListEqual(["10.1.55.1"], nodecons)
+
     def test_100_v4network_equal(self):
         """Nodecon query with IPv4 equal network"""
         if sys.version_info < (3, 3):

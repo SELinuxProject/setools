@@ -91,3 +91,132 @@ class InitialSIDQueryTest(unittest.TestCase):
 
         sids = sorted(str(s) for s in q.results())
         self.assertListEqual(["test31b", "test31c"], sids)
+
+    def test_040_range_exact(self):
+        """Initial SID query with context range exact match"""
+        q = InitialSIDQuery(self.p, range_="s0:c1 - s0:c0.c4")
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test40"], sids)
+
+    def test_041_range_overlap1(self):
+        """Initial SID query with context range overlap match (equal)"""
+        q = InitialSIDQuery(self.p, range_="s1:c1 - s1:c0.c4", range_overlap=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test41"], sids)
+
+    def test_041_range_overlap2(self):
+        """Initial SID query with context range overlap match (subset)"""
+        q = InitialSIDQuery(self.p, range_="s1:c1,c2 - s1:c0.c3", range_overlap=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test41"], sids)
+
+    def test_041_range_overlap3(self):
+        """Initial SID query with context range overlap match (superset)"""
+        q = InitialSIDQuery(self.p, range_="s1 - s1:c0.c4", range_overlap=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test41"], sids)
+
+    def test_041_range_overlap4(self):
+        """Initial SID query with context range overlap match (overlap low level)"""
+        q = InitialSIDQuery(self.p, range_="s1 - s1:c1,c2", range_overlap=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test41"], sids)
+
+    def test_041_range_overlap5(self):
+        """Initial SID query with context range overlap match (overlap high level)"""
+        q = InitialSIDQuery(self.p, range_="s1:c1,c2 - s1:c0.c4", range_overlap=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test41"], sids)
+
+    def test_042_range_subset1(self):
+        """Initial SID query with context range subset match"""
+        q = InitialSIDQuery(self.p, range_="s2:c1,c2 - s2:c0.c3", range_overlap=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test42"], sids)
+
+    def test_042_range_subset2(self):
+        """Initial SID query with context range subset match (equal)"""
+        q = InitialSIDQuery(self.p, range_="s2:c1 - s2:c1.c3", range_overlap=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test42"], sids)
+
+    def test_043_range_superset1(self):
+        """Initial SID query with context range superset match"""
+        q = InitialSIDQuery(self.p, range_="s3 - s3:c0.c4", range_superset=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test43"], sids)
+
+    def test_043_range_superset2(self):
+        """Initial SID query with context range superset match (equal)"""
+        q = InitialSIDQuery(self.p, range_="s3:c1 - s3:c1.c3", range_superset=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test43"], sids)
+
+    def test_044_range_proper_subset1(self):
+        """Initial SID query with context range proper subset match"""
+        q = InitialSIDQuery(self.p, range_="s4:c1,c2", range_subset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test44"], sids)
+
+    def test_044_range_proper_subset2(self):
+        """Initial SID query with context range proper subset match (equal)"""
+        q = InitialSIDQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual([], sids)
+
+    def test_044_range_proper_subset3(self):
+        """Initial SID query with context range proper subset match (equal low only)"""
+        q = InitialSIDQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test44"], sids)
+
+    def test_044_range_proper_subset4(self):
+        """Initial SID query with context range proper subset match (equal high only)"""
+        q = InitialSIDQuery(self.p,
+                            range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test44"], sids)
+
+    def test_045_range_proper_superset1(self):
+        """Initial SID query with context range proper superset match"""
+        q = InitialSIDQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test45"], sids)
+
+    def test_045_range_proper_superset2(self):
+        """Initial SID query with context range proper superset match (equal)"""
+        q = InitialSIDQuery(self.p,
+                            range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual([], sids)
+
+    def test_045_range_proper_superset3(self):
+        """Initial SID query with context range proper superset match (equal low)"""
+        q = InitialSIDQuery(self.p,
+                            range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test45"], sids)
+
+    def test_045_range_proper_superset4(self):
+        """Initial SID query with context range proper superset match (equal high)"""
+        q = InitialSIDQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+
+        sids = sorted(str(s) for s in q.results())
+        self.assertListEqual(["test45"], sids)
