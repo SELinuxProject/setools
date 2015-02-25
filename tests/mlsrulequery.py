@@ -177,3 +177,248 @@ class MLSRuleQueryTest(unittest.TestCase):
         self.assertEqual(r[1].tclass, "infoflow6")
         self.assertEqual(r[1].default, "s2")
         self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+
+    def test_040_range_exact(self):
+        """MLS rule query query with context range exact match"""
+        q = MLSRuleQuery(self.p, default="s40:c1 - s40:c0.c4")
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test40")
+        self.assertEqual(r[0].target, "test40")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s40:c1 - s40:c0.c4")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_041_range_overlap1(self):
+        """MLS rule query query with context range overlap match (equal)"""
+        q = MLSRuleQuery(self.p, default="s41:c1 - s41:c0.c4", default_overlap=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test41")
+        self.assertEqual(r[0].target, "test41")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_041_range_overlap2(self):
+        """MLS rule query query with context range overlap match (subset)"""
+        q = MLSRuleQuery(self.p, default="s41:c1,c2 - s41:c0.c3", default_overlap=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test41")
+        self.assertEqual(r[0].target, "test41")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_041_range_overlap3(self):
+        """MLS rule query query with context range overlap match (superset)"""
+        q = MLSRuleQuery(self.p, default="s41 - s41:c0.c4", default_overlap=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test41")
+        self.assertEqual(r[0].target, "test41")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_041_range_overlap4(self):
+        """MLS rule query query with context range overlap match (overlap low level)"""
+        q = MLSRuleQuery(self.p, default="s41 - s41:c1,c2", default_overlap=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test41")
+        self.assertEqual(r[0].target, "test41")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_041_range_overlap5(self):
+        """MLS rule query query with context range overlap match (overlap high level)"""
+        q = MLSRuleQuery(self.p, default="s41:c1,c2 - s41:c0.c4", default_overlap=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test41")
+        self.assertEqual(r[0].target, "test41")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_042_range_subset1(self):
+        """MLS rule query query with context range subset match"""
+        q = MLSRuleQuery(self.p, default="s42:c1,c2 - s42:c0.c3", default_overlap=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test42")
+        self.assertEqual(r[0].target, "test42")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s42:c1 - s42:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_042_range_subset2(self):
+        """MLS rule query query with context range subset match (equal)"""
+        q = MLSRuleQuery(self.p, default="s42:c1 - s42:c1.c3", default_overlap=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test42")
+        self.assertEqual(r[0].target, "test42")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s42:c1 - s42:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_043_range_superset1(self):
+        """MLS rule query query with context range superset match"""
+        q = MLSRuleQuery(self.p, default="s43 - s43:c0.c4", default_superset=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test43")
+        self.assertEqual(r[0].target, "test43")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s43:c1 - s43:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_043_range_superset2(self):
+        """MLS rule query query with context range superset match (equal)"""
+        q = MLSRuleQuery(self.p, default="s43:c1 - s43:c1.c3", default_superset=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test43")
+        self.assertEqual(r[0].target, "test43")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s43:c1 - s43:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_044_range_proper_subset1(self):
+        """MLS rule query query with context range proper subset match"""
+        q = MLSRuleQuery(self.p, default="s44:c1,c2", default_subset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test44")
+        self.assertEqual(r[0].target, "test44")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s44:c1 - s44:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_044_range_proper_subset2(self):
+        """MLS rule query query with context range proper subset match (equal)"""
+        q = MLSRuleQuery(self.p,
+                         default="s44:c1 - s44:c1.c3", default_subset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 0)
+
+    def test_044_range_proper_subset3(self):
+        """MLS rule query query with context range proper subset match (equal low only)"""
+        q = MLSRuleQuery(self.p,
+                         default="s44:c1 - s44:c1.c2", default_subset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test44")
+        self.assertEqual(r[0].target, "test44")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s44:c1 - s44:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_044_range_proper_subset4(self):
+        """MLS rule query query with context range proper subset match (equal high only)"""
+        q = MLSRuleQuery(self.p,
+                         default="s44:c1,c2 - s44:c1.c3", default_subset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test44")
+        self.assertEqual(r[0].target, "test44")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s44:c1 - s44:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_045_range_proper_superset1(self):
+        """MLS rule query query with context range proper superset match"""
+        q = MLSRuleQuery(self.p,
+                         default="s45 - s45:c0.c4", default_superset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test45")
+        self.assertEqual(r[0].target, "test45")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s45:c1 - s45:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_045_range_proper_superset2(self):
+        """MLS rule query query with context range proper superset match (equal)"""
+        q = MLSRuleQuery(self.p,
+                         default="s45:c1 - s45:c1.c3", default_superset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 0)
+
+    def test_045_range_proper_superset3(self):
+        """MLS rule query query with context range proper superset match (equal low)"""
+        q = MLSRuleQuery(self.p,
+                         default="s45:c1 - s45:c1.c4", default_superset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test45")
+        self.assertEqual(r[0].target, "test45")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s45:c1 - s45:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+
+    def test_045_range_proper_superset4(self):
+        """MLS rule query query with context range proper superset match (equal high)"""
+        q = MLSRuleQuery(self.p,
+                         default="s45 - s45:c1.c3", default_superset=True, default_proper=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+
+        self.assertEqual(r[0].ruletype, "range_transition")
+        self.assertEqual(r[0].source, "test45")
+        self.assertEqual(r[0].target, "test45")
+        self.assertEqual(r[0].tclass, "infoflow")
+        self.assertEqual(r[0].default, "s45:c1 - s45:c1.c3")
+        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")

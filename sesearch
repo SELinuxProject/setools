@@ -71,7 +71,7 @@ expr.add_argument("-c", "--class", dest="tclass", default="",
 expr.add_argument("-p", "--perms", metavar="PERMS", default="",
                   help="Comma separated list of permissions.")
 expr.add_argument("-D", "--default", default="",
-                  help="Default type of the TE/RBAC rule.")
+                  help="Default of the rule. (type/role/range transition rules)")
 expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL", default="",
                   help="Comma separated list of Booleans in the conditional expression.")
 
@@ -176,7 +176,8 @@ if args.mlsrtypes:
                                           source_regex=args.source_regex,
                                           target=args.target,
                                           target_regex=args.target_regex,
-                                          tclass_regex=args.tclass_regex)
+                                          tclass_regex=args.tclass_regex,
+                                          default=args.default)
 
     # these are broken out from the above statement to prevent making a list
     # with an empty string in it (split on empty string)

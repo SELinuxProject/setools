@@ -27,7 +27,9 @@ class MLSRuleQuery(rulequery.RuleQuery):
                  ruletype=[],
                  source="", source_regex=False,
                  target="", target_regex=False,
-                 tclass="", tclass_regex=False):
+                 tclass="", tclass_regex=False,
+                 default="", default_overlap=False, default_subset=False,
+                 default_superset=False, default_proper=False):
         """
         Parameters:
         policy           The policy to query.
@@ -49,6 +51,8 @@ class MLSRuleQuery(rulequery.RuleQuery):
         self.set_source(source, regex=source_regex)
         self.set_target(target, regex=target_regex)
         self.set_tclass(tclass, regex=tclass_regex)
+        self.set_default(default, overlap=default_overlap, subset=default_subset,
+                         superset=default_superset, proper=default_proper)
 
     def results(self):
         """Generator which yields all matching MLS rules."""
@@ -91,7 +95,55 @@ class MLSRuleQuery(rulequery.RuleQuery):
                     self.tclass_cmp):
                 continue
 
-            # TODO: something with the range
+            #
+            # Matching on range
+            #
+            if self.default and not self._match_range(
+                    (r.default.low, r.default.high),
+                    (self.default.low, self.default.high),
+                    self.default_subset,
+                    self.default_overlap,
+                    self.default_superset,
+                    self.default_proper):
+                continue
 
             # if we get here, we have matched all available criteria
             yield r
+
+    def set_default(self, default, **opts):
+        """
+        Set the criteria for matching the rule's default range.
+
+        Parameter:
+        default           Criteria to match the rule's default range.
+
+        Keyword Parameters:
+        default_subset    If true, the criteria will match if it is a subset
+                          of the rule's default range.
+        default_overlap   If true, the criteria will match if it overlaps
+                          any of the rule's default range.
+        default_superset  If true, the criteria will match if it is a superset
+                          of the rule's default range.
+        default_proper    If true, use proper superset/subset operations.
+                          No effect if not using set operations.
+
+        Exceptions:
+        NameError         Invalid keyword option.
+        """
+
+        if default:
+            self.default = self.policy.lookup_range(default)
+        else:
+            self.default = None
+
+        for k in list(opts.keys()):
+            if k == "subset":
+                self.default_subset = opts[k]
+            elif k == "overlap":
+                self.default_overlap = opts[k]
+            elif k == "superset":
+                self.default_superset = opts[k]
+            elif k == "proper":
+                self.default_proper = opts[k]
+            else:
+                raise NameError("Invalid name option: {0}".format(k))
