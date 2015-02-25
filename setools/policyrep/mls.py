@@ -216,7 +216,10 @@ class MLSSensitivity(symbol.PolicySymbol):
     """An MLS sensitivity"""
 
     def __eq__(self, other):
-        return (self._value == other._value)
+        try:
+            return (self._value == other._value)
+        except AttributeError:
+            return (str(self) == str(other))
 
     def __ge__(self, other):
         return (self._value >= other._value)
@@ -249,9 +252,13 @@ class BaseMLSLevel(symbol.PolicySymbol):
     """Abstract base class for MLS levels."""
 
     def __eq__(self, other):
-        selfcats = set(str(c) for c in self.categories())
-        othercats = set(str(c) for c in other.categories())
-        return (self.sensitivity == other.sensitivity and selfcats == othercats)
+        try:
+            othercats = set(str(c) for c in other.categories())
+        except AttributeError:
+            return (str(self) == str(other))
+        else:
+            selfcats = set(str(c) for c in self.categories())
+            return (self.sensitivity == other.sensitivity and selfcats == othercats)
 
     def __ge__(self, other):
         """Dom operator."""
@@ -349,6 +356,17 @@ class MLSLevel(BaseMLSLevel):
 class MLSRange(symbol.PolicySymbol):
 
     """An MLS range"""
+
+    def __eq__(self, other):
+        try:
+            return (self.low == other.low and self.high == other.high)
+        except AttributeError:
+            o = str(other)
+            if "-" in o and " - " not in o:
+                raise ValueError(
+                    "Range strings must have a spaces around the level separator (eg \"s0 - s1\")")
+
+            return (str(self) == o)
 
     def __str__(self):
         high = self.high
