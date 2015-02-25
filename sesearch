@@ -173,10 +173,8 @@ if args.mlsrtypes:
     q = setools.mlsrulequery.MLSRuleQuery(p,
                                           ruletype=args.mlsrtypes,
                                           source=args.source,
-                                          source_indirect=args.source_indirect,
                                           source_regex=args.source_regex,
                                           target=args.target,
-                                          target_indirect=args.target_indirect,
                                           target_regex=args.target_regex,
                                           tclass_regex=args.tclass_regex)
 
