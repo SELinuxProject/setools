@@ -384,6 +384,9 @@ class MLSRange(symbol.PolicySymbol):
 
             return (str(self) == o)
 
+    def __contains__(self, other):
+        return (self.low <= other <= self.high)
+
     def __str__(self):
         high = self.high
         low = self.low
