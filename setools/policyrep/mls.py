@@ -192,9 +192,6 @@ class MLSCategory(symbol.PolicySymbol):
 
     """An MLS category."""
 
-    def __hash__(self):
-        return hash(self._value)
-
     @property
     def _value(self):
         """
@@ -221,9 +218,6 @@ class MLSCategory(symbol.PolicySymbol):
 class MLSSensitivity(symbol.PolicySymbol):
 
     """An MLS sensitivity"""
-
-    def __hash__(self):
-        return hash(self._value)
 
     def __eq__(self, other):
         try:
