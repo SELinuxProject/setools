@@ -58,7 +58,7 @@ class User(symbol.PolicySymbol):
             # object_r is implicitly added to all roles by the compiler.
             # technically it is incorrect to skip it, but policy writers
             # and analysts don't expect to see it in results, and it
-            # will confuse, especially for set equality user queries.
+            # will confuse, especially for role set equality user queries.
             if item != "object_r":
                 r.add(item)
 

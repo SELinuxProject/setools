@@ -172,20 +172,20 @@ class ContextQuery(query.PolicyQuery):
         Set the criteria for matching the context's range.
 
         Parameter:
-        range_          Criteria to match the context's range.
+        range_      Criteria to match the context's range.
 
         Keyword Parameters:
-        range_subset    If true, the criteria will match if it is a subset
-                        of the context's range.
-        range_overlap   If true, the criteria will match if it overlaps
-                        any of the context's range.
-        range_superset  If true, the criteria will match if it is a superset
-                        of the context's range.
-        range_proper    If true, use proper superset/subset operations.
-                        No effect if not using set operations.
+        subset      If true, the criteria will match if it is a subset
+                    of the context's range.
+        overlap     If true, the criteria will match if it overlaps
+                    any of the context's range.
+        superset    If true, the criteria will match if it is a superset
+                    of the context's range.
+        proper      If true, use proper superset/subset operations.
+                    No effect if not using set operations.
 
         Exceptions:
-        NameError       Invalid keyword option.
+        NameError   Invalid keyword option.
         """
 
         if range_:

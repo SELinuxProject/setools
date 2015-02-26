@@ -115,20 +115,20 @@ class MLSRuleQuery(rulequery.RuleQuery):
         Set the criteria for matching the rule's default range.
 
         Parameter:
-        default           Criteria to match the rule's default range.
+        default     Criteria to match the rule's default range.
 
         Keyword Parameters:
-        default_subset    If true, the criteria will match if it is a subset
-                          of the rule's default range.
-        default_overlap   If true, the criteria will match if it overlaps
-                          any of the rule's default range.
-        default_superset  If true, the criteria will match if it is a superset
-                          of the rule's default range.
-        default_proper    If true, use proper superset/subset operations.
-                          No effect if not using set operations.
+        subset      If true, the criteria will match if it is a subset
+                    of the rule's default range.
+        overlap     If true, the criteria will match if it overlaps
+                    any of the rule's default range.
+        superset    If true, the criteria will match if it is a superset
+                    of the rule's default range.
+        proper      If true, use proper superset/subset operations.
+                    No effect if not using set operations.
 
         Exceptions:
-        NameError         Invalid keyword option.
+        NameError   Invalid keyword option.
         """
 
         if default:
