@@ -34,6 +34,10 @@ from . import symbol
 # is a 1:1 correspondence between the sensitivity declarations
 # and level declarations.
 
+# Hashing has to be handled below because the qpol references,
+# normally used for a hash key, are not the same for multiple
+# instances of the same object (except for level decl).
+
 
 class InvalidSensitivity(symbol.InvalidSymbol):
 
@@ -188,6 +192,9 @@ class MLSCategory(symbol.PolicySymbol):
 
     """An MLS category."""
 
+    def __hash__(self):
+        return hash(self._value)
+
     @property
     def _value(self):
         """
@@ -214,6 +221,9 @@ class MLSCategory(symbol.PolicySymbol):
 class MLSSensitivity(symbol.PolicySymbol):
 
     """An MLS sensitivity"""
+
+    def __hash__(self):
+        return hash(self._value)
 
     def __eq__(self, other):
         try:
@@ -253,34 +263,34 @@ class BaseMLSLevel(symbol.PolicySymbol):
 
     def __eq__(self, other):
         try:
-            othercats = set(str(c) for c in other.categories())
+            othercats = set(other.categories())
         except AttributeError:
             return (str(self) == str(other))
         else:
-            selfcats = set(str(c) for c in self.categories())
+            selfcats = set(self.categories())
             return (self.sensitivity == other.sensitivity and selfcats == othercats)
 
     def __ge__(self, other):
         """Dom operator."""
-        selfcats = set(str(c) for c in self.categories())
-        othercats = set(str(c) for c in other.categories())
+        selfcats = set(self.categories())
+        othercats = set(other.categories())
         return (self.sensitivity >= other.sensitivity and selfcats >= othercats)
 
     def __gt__(self, other):
-        selfcats = set(str(c) for c in self.categories())
-        othercats = set(str(c) for c in other.categories())
+        selfcats = set(self.categories())
+        othercats = set(other.categories())
         return ((self.sensitivity > other.sensitivity and selfcats >= othercats) or
                 (self.sensitivity >= other.sensitivity and selfcats > othercats))
 
     def __le__(self, other):
         """Domby operator."""
-        selfcats = set(str(c) for c in self.categories())
-        othercats = set(str(c) for c in other.categories())
+        selfcats = set(self.categories())
+        othercats = set(other.categories())
         return (self.sensitivity <= other.sensitivity and selfcats <= othercats)
 
     def __lt__(self, other):
-        selfcats = set(str(c) for c in self.categories())
-        othercats = set(str(c) for c in other.categories())
+        selfcats = set(self.categories())
+        othercats = set(other.categories())
         return ((self.sensitivity < other.sensitivity and selfcats <= othercats) or
                 (self.sensitivity <= other.sensitivity and selfcats < othercats))
 
@@ -347,6 +357,9 @@ class MLSLevel(BaseMLSLevel):
 
     """An MLS level used in contexts."""
 
+    def __hash__(self):
+        return hash(str(self))
+
     @property
     def sensitivity(self):
         """The sensitivity of the level."""
@@ -356,6 +369,9 @@ class MLSLevel(BaseMLSLevel):
 class MLSRange(symbol.PolicySymbol):
 
     """An MLS range"""
+
+    def __hash__(self):
+        return hash(str(self))
 
     def __eq__(self, other):
         try:
