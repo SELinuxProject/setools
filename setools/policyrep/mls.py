@@ -261,6 +261,27 @@ class BaseMLSLevel(symbol.PolicySymbol):
 
     """Abstract base class for MLS levels."""
 
+    def __str__(self):
+        lvl = str(self.sensitivity)
+
+        # sort by policy declaration order
+        cats = sorted(self.categories(), key=lambda k: k._value)
+
+        if cats:
+            # generate short category notation
+            shortlist = []
+            for k, g in itertools.groupby(cats, key=lambda k,
+                                          c=itertools.count(): k._value - next(c)):
+                group = list(g)
+                if len(group) > 1:
+                    shortlist.append("{0}.{1}".format(group[0], group[-1]))
+                else:
+                    shortlist.append(str(group[0]))
+
+            lvl += ":" + ','.join(shortlist)
+
+        return lvl
+
     def __eq__(self, other):
         try:
             othercats = set(other.categories())
@@ -297,27 +318,6 @@ class BaseMLSLevel(symbol.PolicySymbol):
     def __xor__(self, other):
         """Incomp operator."""
         return (not self >= other and not self <= other)
-
-    def __str__(self):
-        lvl = str(self.sensitivity)
-
-        # sort by policy declaration order
-        cats = sorted(self.categories(), key=lambda k: k._value)
-
-        if cats:
-            # generate short category notation
-            shortlist = []
-            for k, g in itertools.groupby(cats, key=lambda k,
-                                          c=itertools.count(): k._value - next(c)):
-                group = list(g)
-                if len(group) > 1:
-                    shortlist.append("{0}.{1}".format(group[0], group[-1]))
-                else:
-                    shortlist.append(str(group[0]))
-
-            lvl += ":" + ','.join(shortlist)
-
-        return lvl
 
     @property
     def sensitivity(self):
@@ -370,6 +370,14 @@ class MLSRange(symbol.PolicySymbol):
 
     """An MLS range"""
 
+    def __str__(self):
+        high = self.high
+        low = self.low
+        if high == low:
+            return str(low)
+
+        return "{0} - {1}".format(low, high)
+
     def __hash__(self):
         return hash(str(self))
 
@@ -386,14 +394,6 @@ class MLSRange(symbol.PolicySymbol):
 
     def __contains__(self, other):
         return (self.low <= other <= self.high)
-
-    def __str__(self):
-        high = self.high
-        low = self.low
-        if high == low:
-            return str(low)
-
-        return "{0} - {1}".format(low, high)
 
     @property
     def high(self):
