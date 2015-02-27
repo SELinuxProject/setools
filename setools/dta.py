@@ -362,13 +362,19 @@ class DomainTransitionAnalysis(object):
                 if r.tclass == "process":
                     if "transition" in perms:
                         for s, t in itertools.product(r.source.expand(), r.target.expand()):
-                            self.__add_edge(s, t)
-                            self.G[s][t]['transition'].append(r)
+                            # only add edges if they actually
+                            # transition to a new type
+                            if s != t:
+                                self.__add_edge(s, t)
+                                self.G[s][t]['transition'].append(r)
 
                     if "dyntransition" in perms:
                         for s, t in itertools.product(r.source.expand(), r.target.expand()):
-                            self.__add_edge(s, t)
-                            self.G[s][t]['dyntransition'].append(r)
+                            # only add edges if they actually
+                            # transition to a new type
+                            if s != t:
+                                self.__add_edge(s, t)
+                                self.G[s][t]['dyntransition'].append(r)
 
                     if "setexec" in perms:
                         for s in r.source.expand():
