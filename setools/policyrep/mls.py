@@ -311,7 +311,7 @@ class BaseMLSLevel(symbol.PolicySymbol):
 
     def __xor__(self, other):
         """Incomp operator."""
-        return (not self >= other and not self <= other)
+        return (not (self >= other or self <= other))
 
     @property
     def sensitivity(self):
