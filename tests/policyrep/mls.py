@@ -21,7 +21,7 @@ from setools import SELinuxPolicy
 from setools.policyrep.mls import level_factory, InvalidLevel, range_factory, InvalidRange
 
 
-class BoolQueryTest(unittest.TestCase):
+class LevelFactoryTest(unittest.TestCase):
 
     def setUp(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
@@ -61,6 +61,12 @@ class BoolQueryTest(unittest.TestCase):
         """Level lookup with category not associated with sensitivity."""
         # c4 is not associated with s0.
         self.assertRaises(InvalidLevel, level_factory, self.p.policy, "s0:c0,c4")
+
+
+class RangeFactoryTest(unittest.TestCase):
+
+    def setUp(self):
+        self.p = SELinuxPolicy("tests/policyrep/mls.conf")
 
     def test_400_range_lookup_single_level(self):
         """Range lookup with single-level range."""
