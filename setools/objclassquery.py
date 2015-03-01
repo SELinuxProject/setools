@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -64,18 +64,16 @@ class ObjClassQuery(compquery.ComponentQuery):
         for class_ in self.policy.classes():
             if self.name and not self._match_regex(
                     class_,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             if self.common:
                 try:
                     if not self._match_regex(
                             class_.common,
-                            self.common,
-                            self.common_regex,
-                            self.common_cmp):
+                            self.common_cmp,
+                            self.common_regex):
                         continue
                 except NoCommon:
                     continue
@@ -91,10 +89,9 @@ class ObjClassQuery(compquery.ComponentQuery):
 
                 if not self._match_regex_or_set(
                         perms,
-                        self.perms,
+                        self.perms_cmp,
                         self.perms_equal,
-                        self.perms_regex,
-                        self.perms_cmp):
+                        self.perms_regex):
                     continue
 
             yield class_
@@ -119,10 +116,12 @@ class ObjClassQuery(compquery.ComponentQuery):
             else:
                 raise NameError("Invalid common option: {0}".format(k))
 
-        if self.common_regex:
+        if not self.common:
+            self.common_cmp = None
+        elif self.common_regex:
             self.common_cmp = re.compile(self.common)
         else:
-            self.common_cmp = None
+            self.common_cmp = self.policy.lookup_common(self.common)
 
     def set_perms(self, perms, **opts):
         """
@@ -156,7 +155,9 @@ class ObjClassQuery(compquery.ComponentQuery):
             else:
                 raise NameError("Invalid permissions option: {0}".format(k))
 
-        if self.perms_regex:
+        if not self.perms:
+            self.perms_cmp = None
+        elif self.perms_regex:
             self.perms_cmp = re.compile(self.perms)
         else:
-            self.perms_cmp = None
+            self.perms_cmp = self.perms

@@ -267,9 +267,17 @@ class SELinuxPolicy(object):
         """Look up an attribute by name."""
         return typeattr.attribute_factory(self.policy, name)
 
+    def lookup_boolean(self, name):
+        """Look up a Boolean."""
+        return boolcond.boolean_factory(self.policy, name)
+
     def lookup_class(self, name):
         """Look up an object class."""
         return objclass.class_factory(self.policy, name)
+
+    def lookup_common(self, name):
+        """Look up a common permission set."""
+        return objclass.common_factory(self.policy, name)
 
     def lookup_level(self, level):
         """Look up a MLS level."""
@@ -286,6 +294,10 @@ class SELinuxPolicy(object):
     def lookup_type(self, name):
         """Look up a type by name."""
         return typeattr.type_factory(self.policy, name, deref=True)
+
+    def lookup_type_or_typeattr(self, name):
+        """Look up a type or type attributeby name."""
+        return typeattr.typeattr_factory(self.policy, name, deref=True)
 
     def lookup_user(self, name):
         """Look up a user by name."""

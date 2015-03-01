@@ -63,24 +63,21 @@ class TypeQuery(compquery.ComponentQuery):
         for t in self.policy.types():
             if self.name and not self._match_regex(
                     t,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             if self.alias and not self._match_in_set(
-                    set(str(a) for a in t.aliases()),
-                    self.alias,
-                    self.alias_regex,
-                    self.alias_cmp):
+                    t.aliases(),
+                    self.alias_cmp,
+                    self.alias_regex):
                 continue
 
             if self.attrs and not self._match_regex_or_set(
-                    set(str(a) for a in t.attributes()),
-                    self.attrs,
+                    set(t.attributes()),
+                    self.attrs_cmp,
                     self.attrs_equal,
-                    self.attrs_regex,
-                    self.attrs_cmp):
+                    self.attrs_regex):
                 continue
 
             if self.match_permissive and t.ispermissive != self.permissive:
@@ -110,10 +107,12 @@ class TypeQuery(compquery.ComponentQuery):
             else:
                 raise NameError("Invalid alias option: {0}".format(k))
 
-        if self.alias_regex:
+        if not self.alias:
+            self.alias_cmp = None
+        elif self.alias_regex:
             self.alias_cmp = re.compile(self.alias)
         else:
-            self.alias_cmp = None
+            self.alias_cmp = self.alias
 
     def set_attrs(self, attrs, **opts):
         """
@@ -144,10 +143,12 @@ class TypeQuery(compquery.ComponentQuery):
             else:
                 raise NameError("Invalid alias option: {0}".format(k))
 
-        if self.attrs_regex:
+        if not self.attrs:
+            self.attrs_cmp = None
+        elif self.attrs_regex:
             self.attrs_cmp = re.compile(self.attrs)
         else:
-            self.attrs_cmp = None
+            self.attrs_cmp = set(self.policy.lookup_attribute(a) for a in self.attrs)
 
     def set_permissive(self, match, **opts):
         """

@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -16,7 +16,11 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import re
+
 from .policyrep.rule import InvalidRuleUse
+from .policyrep.typeattr import InvalidType
+
 from . import rulequery
 
 
@@ -78,10 +82,9 @@ class RBACRuleQuery(rulequery.RuleQuery):
             #
             if self.source and not self._match_indirect_regex(
                     r.source,
-                    self.source,
+                    self.source_cmp,
                     self.source_indirect,
-                    self.source_regex,
-                    self.source_cmp):
+                    self.source_regex):
                 continue
 
             #
@@ -89,10 +92,9 @@ class RBACRuleQuery(rulequery.RuleQuery):
             #
             if self.target and not self._match_indirect_regex(
                     r.target,
-                    self.target,
+                    self.target_cmp,
                     self.target_indirect,
-                    self.target_regex,
-                    self.target_cmp):
+                    self.target_regex):
                 continue
 
             #
@@ -115,12 +117,111 @@ class RBACRuleQuery(rulequery.RuleQuery):
                 try:
                     if not self._match_regex(
                             r.default,
-                            self.default,
-                            self.default_regex,
-                            self.default_cmp):
+                            self.default_cmp,
+                            self.default_regex):
                         continue
                 except InvalidRuleUse:
                     continue
 
             # if we get here, we have matched all available criteria
             yield r
+
+    def set_source(self, source, **opts):
+        """
+        Set the criteria for the rule's source.
+
+        Parameter:
+        source      Name to match the rule's source.
+
+        Keyword Options:
+        indirect    If true, members of an attribute will be
+                    matched rather than the attribute itself.
+        regex       If true, regular expression matching will
+                    be used.  Obeys the indirect option.
+
+        Exceptions:
+        NameError	Invalid keyword option.
+        """
+
+        self.source = source
+
+        for k in list(opts.keys()):
+            if k == "indirect":
+                self.source_indirect = opts[k]
+            elif k == "regex":
+                self.source_regex = opts[k]
+            else:
+                raise NameError("Invalid source option: {0}".format(k))
+
+        if not self.source:
+            self.source_cmp = None
+        elif self.source_regex:
+            self.source_cmp = re.compile(self.source)
+        else:
+            self.source_cmp = self.policy.lookup_role(self.source)
+
+    def set_target(self, target, **opts):
+        """
+        Set the criteria for the rule's target.
+
+        Parameter:
+        target      Name to match the rule's target.
+
+        Keyword Options:
+        indirect    If true, members of an attribute will be
+                    matched rather than the attribute itself.
+        regex       If true, regular expression matching will
+                    be used.  Obeys the indirect option.
+
+        Exceptions:
+        NameError	Invalid keyword option.
+        """
+
+        self.target = target
+
+        for k in list(opts.keys()):
+            if k == "indirect":
+                self.target_indirect = opts[k]
+            elif k == "regex":
+                self.target_regex = opts[k]
+            else:
+                raise NameError("Invalid target option: {0}".format(k))
+
+        if not self.target:
+            self.target_cmp = None
+        elif self.target_regex:
+            self.target_cmp = re.compile(self.target)
+        else:
+            try:
+                self.target_cmp = self.policy.lookup_type_or_typeattr(self.target)
+            except InvalidType:
+                self.target_cmp = self.policy.lookup_role(self.target)
+
+    def set_default(self, default, **opts):
+        """
+        Set the criteria for the rule's default role.
+
+        Parameter:
+        default     Name to match the rule's default role.
+
+        Keyword Options:
+        regex       If true, regular expression matching will be used.
+
+        Exceptions:
+        NameError   Invalid keyword option.
+        """
+
+        self.default = default
+
+        for k in list(opts.keys()):
+            if k == "regex":
+                self.default_regex = opts[k]
+            else:
+                raise NameError("Invalid default option: {0}".format(k))
+
+        if not self.default:
+            self.default_cmp = None
+        elif self.default_regex:
+            self.default_cmp = re.compile(self.default)
+        else:
+            self.default_cmp = self.policy.lookup_role(self.default)

@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -27,9 +27,9 @@ class ContextQuery(query.PolicyQuery):
 
     @staticmethod
     def _match_context(context,
-                       user, user_regex, user_recomp,
-                       role, role_regex, role_recomp,
-                       type_, type_regex, type_recomp,
+                       user, user_regex,
+                       role, role_regex,
+                       type_, type_regex,
                        range_, range_subset, range_overlap, range_superset, range_proper):
         """
         Match the context with optional regular expression.
@@ -39,15 +39,12 @@ class ContextQuery(query.PolicyQuery):
         user            The user to match in the context.
         user_regex      If true, regular expression matching
                         will be used on the user.
-        user_recomp     The compiled user regular expression.
         role            The role to match in the context.
         role_regex      If true, regular expression matching
                         will be used on the role.
-        role_recomp     The compiled role regular expression.
         type_           The type to match in the context.
         type_regex      If true, regular expression matching
                         will be used on the type.
-        type_recomp     The compiled type regular expression.
         range_          The range to match in the context.
         range_subset    If true, the criteria will match if it
                         is a subset of the context's range.
@@ -63,22 +60,19 @@ class ContextQuery(query.PolicyQuery):
         if user and not query.PolicyQuery._match_regex(
                 context.user,
                 user,
-                user_regex,
-                user_recomp):
+                user_regex):
             return False
 
         if role and not query.PolicyQuery._match_regex(
                 context.role,
                 role,
-                role_regex,
-                role_recomp):
+                role_regex):
             return False
 
         if type_ and not query.PolicyQuery._match_regex(
                 context.type_,
                 type_,
-                type_regex,
-                type_recomp):
+                type_regex):
             return False
 
         if range_ and not query.PolicyQuery._match_range(
@@ -112,10 +106,12 @@ class ContextQuery(query.PolicyQuery):
             else:
                 raise NameError("Invalid name option: {0}".format(k))
 
-        if self.user_regex:
+        if not self.user:
+            self.user_cmp = None
+        elif self.user_regex:
             self.user_cmp = re.compile(self.user)
         else:
-            self.user_cmp = None
+            self.user_cmp = self.policy.lookup_user(self.user)
 
     def set_role(self, role, **opts):
         """
@@ -137,10 +133,12 @@ class ContextQuery(query.PolicyQuery):
             else:
                 raise NameError("Invalid name option: {0}".format(k))
 
-        if self.role_regex:
+        if not self.role:
+            self.role_cmp = None
+        elif self.role_regex:
             self.role_cmp = re.compile(self.role)
         else:
-            self.role_cmp = None
+            self.role_cmp = self.policy.lookup_role(self.role)
 
     def set_type(self, type_, **opts):
         """
@@ -162,10 +160,12 @@ class ContextQuery(query.PolicyQuery):
             else:
                 raise NameError("Invalid name option: {0}".format(k))
 
-        if self.type_regex:
+        if not self.type_:
+            self.type_cmp = None
+        elif self.type_regex:
             self.type_cmp = re.compile(self.type_)
         else:
-            self.type_cmp = None
+            self.type_cmp = self.policy.lookup_type(type_)
 
     def set_range(self, range_, **opts):
         """
@@ -188,10 +188,7 @@ class ContextQuery(query.PolicyQuery):
         NameError   Invalid keyword option.
         """
 
-        if range_:
-            self.range_ = self.policy.lookup_range(range_)
-        else:
-            self.range_ = None
+        self.range_ = range_
 
         for k in list(opts.keys()):
             if k == "subset":
@@ -204,3 +201,8 @@ class ContextQuery(query.PolicyQuery):
                 self.range_proper = opts[k]
             else:
                 raise NameError("Invalid name option: {0}".format(k))
+
+        if self.range_:
+            self.range_cmp = self.policy.lookup_range(self.range_)
+        else:
+            self.range_cmp = None

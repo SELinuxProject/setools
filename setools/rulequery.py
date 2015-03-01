@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -26,7 +26,7 @@ class RuleQuery(PolicyQuery):
     """Abstract base class for rule queries."""
 
     @staticmethod
-    def _match_indirect_regex(obj, criteria, indirect, regex, recomp):
+    def _match_indirect_regex(obj, criteria, indirect, regex):
         """
         Match the object with optional regular expression and indirection.
 
@@ -36,21 +36,18 @@ class RuleQuery(PolicyQuery):
         regex       If regular expression matching should be used.
         indirect    If object indirection should be	used, e.g.
                     expanding an attribute.
-        recomp      The compiled regular expression.
         """
 
         if indirect:
             return PolicyQuery._match_in_set(
-                (str(o) for o in obj.expand()),
+                (obj.expand()),
                 criteria,
-                regex,
-                recomp)
+                regex)
         else:
             return PolicyQuery._match_regex(
                 obj,
                 criteria,
-                regex,
-                recomp)
+                regex)
 
     @staticmethod
     def _match_object_class(obj, criteria, regex):
@@ -107,10 +104,12 @@ class RuleQuery(PolicyQuery):
             else:
                 raise NameError("Invalid source option: {0}".format(k))
 
-        if self.source_regex:
+        if not self.source:
+            self.source_cmp = None
+        elif self.source_regex:
             self.source_cmp = re.compile(self.source)
         else:
-            self.source_cmp = None
+            self.source_cmp = self.policy.lookup_type_or_typeattr(self.source)
 
     def set_target(self, target, **opts):
         """
@@ -139,10 +138,12 @@ class RuleQuery(PolicyQuery):
             else:
                 raise NameError("Invalid target option: {0}".format(k))
 
-        if self.target_regex:
+        if not self.target:
+            self.target_cmp = None
+        elif self.target_regex:
             self.target_cmp = re.compile(self.target)
         else:
-            self.target_cmp = None
+            self.target_cmp = self.policy.lookup_type_or_typeattr(self.target)
 
     def set_tclass(self, tclass, **opts):
         """
@@ -180,28 +181,4 @@ class RuleQuery(PolicyQuery):
             self.tclass_cmp = set(self.policy.lookup_class(c) for c in self.tclass)
 
     def set_default(self, default, **opts):
-        """
-        Set the criteria for the rule's default.
-
-        Parameter:
-        default     Name to match the rule's default.
-
-        Keyword Options:
-        regex       If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.default = default
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.default_regex = opts[k]
-            else:
-                raise NameError("Invalid default option: {0}".format(k))
-
-        if self.default_regex:
-            self.default_cmp = re.compile(self.default)
-        else:
-            self.default_cmp = None
+        raise NotImplementedError

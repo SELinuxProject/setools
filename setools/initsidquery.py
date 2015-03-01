@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -70,23 +70,19 @@ class InitialSIDQuery(compquery.ComponentQuery, contextquery.ContextQuery):
         for i in self.policy.initialsids():
             if self.name and not self._match_regex(
                     i,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             if not self._match_context(
                     i.context,
-                    self.user,
-                    self.user_regex,
                     self.user_cmp,
-                    self.role,
-                    self.role_regex,
+                    self.user_regex,
                     self.role_cmp,
-                    self.type_,
-                    self.type_regex,
+                    self.role_regex,
                     self.type_cmp,
-                    self.range_,
+                    self.type_regex,
+                    self.range_cmp,
                     self.range_subset,
                     self.range_overlap,
                     self.range_superset,

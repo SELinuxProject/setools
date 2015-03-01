@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -26,11 +26,22 @@ class InvalidCommon(symbol.InvalidSymbol):
     pass
 
 
-def common_factory(policy, symbol):
+class InvalidClass(symbol.InvalidSymbol):
+
+    """Exception for invalid object classes."""
+    pass
+
+
+def common_factory(policy, name):
     """Factory function for creating common permission set objects."""
 
-    if not isinstance(symbol, qpol.qpol_common_t):
-        raise NotImplementedError
+    if isinstance(name, qpol.qpol_common_t):
+        return Common(policy, name)
+
+    try:
+        symbol = qpol.qpol_common_t(policy, name)
+    except ValueError:
+        raise InvalidCommon("{0} is not a valid common".format(name))
 
     return Common(policy, symbol)
 

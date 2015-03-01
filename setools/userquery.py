@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -54,17 +54,15 @@ class UserQuery(compquery.ComponentQuery):
         for u in self.policy.users():
             if self.name and not self._match_regex(
                     u,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             if self.roles and not self._match_regex_or_set(
-                    set(str(r) for r in u.roles),
-                    self.roles,
+                    u.roles,
+                    self.roles_cmp,
                     self.roles_equal,
-                    self.roles_regex,
-                    self.roles_cmp):
+                    self.roles_regex):
                 continue
 
             # TODO: default level and range
@@ -100,7 +98,9 @@ class UserQuery(compquery.ComponentQuery):
             else:
                 raise NameError("Invalid roles option: {0}".format(k))
 
-        if self.roles_regex:
+        if not self.roles:
+            self.roles_cmp = None
+        elif self.roles_regex:
             self.roles_cmp = re.compile(self.roles)
         else:
-            self.roles_cmp = None
+            self.roles_cmp = set(self.policy.lookup_role(r) for r in self.roles)

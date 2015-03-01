@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -82,16 +82,14 @@ class GenfsconQuery(contextquery.ContextQuery):
         for g in self.policy.genfscons():
             if self.fs and not self._match_regex(
                     g.fs,
-                    self.fs,
-                    self.fs_regex,
-                    self.fs_cmp):
+                    self.fs_cmp,
+                    self.fs_regex):
                 continue
 
             if self.path and not self._match_regex(
                     g.path,
-                    self.path,
-                    self.path_regex,
-                    self.path_cmp):
+                    self.path_cmp,
+                    self.path_regex):
                 continue
 
             if self.filetype and not self.filetype == g.filetype:
@@ -99,16 +97,13 @@ class GenfsconQuery(contextquery.ContextQuery):
 
             if not self._match_context(
                     g.context,
-                    self.user,
-                    self.user_regex,
                     self.user_cmp,
-                    self.role,
-                    self.role_regex,
+                    self.user_regex,
                     self.role_cmp,
-                    self.type_,
-                    self.type_regex,
+                    self.role_regex,
                     self.type_cmp,
-                    self.range_,
+                    self.type_regex,
+                    self.range_cmp,
                     self.range_subset,
                     self.range_overlap,
                     self.range_superset,
@@ -137,10 +132,12 @@ class GenfsconQuery(contextquery.ContextQuery):
             else:
                 raise NameError("Invalid name option: {0}".format(k))
 
-        if self.fs_regex:
+        if not self.fs:
+            self.fs_cmp = None
+        elif self.fs_regex:
             self.fs_cmp = re.compile(self.fs)
         else:
-            self.fs_cmp = None
+            self.fs_cmp = self.fs
 
     def set_filetype(self, filetype):
         """
@@ -172,7 +169,9 @@ class GenfsconQuery(contextquery.ContextQuery):
             else:
                 raise NameError("Invalid name option: {0}".format(k))
 
-        if self.path_regex:
+        if not self.path:
+            self.path_cmp = None
+        elif self.path_regex:
             self.path_cmp = re.compile(self.path)
         else:
-            self.path_cmp = None
+            self.path_cmp = self.path

@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -81,23 +81,19 @@ class FSUseQuery(contextquery.ContextQuery):
 
             if self.fs and not self._match_regex(
                     fsu.fs,
-                    self.fs,
-                    self.fs_regex,
-                    self.fs_cmp):
+                    self.fs_cmp,
+                    self.fs_regex):
                 continue
 
             if not self._match_context(
                     fsu.context,
-                    self.user,
-                    self.user_regex,
                     self.user_cmp,
-                    self.role,
-                    self.role_regex,
+                    self.user_regex,
                     self.role_cmp,
-                    self.type_,
-                    self.type_regex,
+                    self.role_regex,
                     self.type_cmp,
-                    self.range_,
+                    self.type_regex,
+                    self.range_cmp,
                     self.range_subset,
                     self.range_overlap,
                     self.range_superset,
@@ -136,7 +132,9 @@ class FSUseQuery(contextquery.ContextQuery):
             else:
                 raise NameError("Invalid name option: {0}".format(k))
 
-        if self.fs_regex:
+        if not self.fs:
+            self.fs_cmp = None
+        elif self.fs_regex:
             self.fs_cmp = re.compile(self.fs)
         else:
-            self.fs_cmp = None
+            self.fs_cmp = self.fs

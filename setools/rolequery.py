@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -61,17 +61,15 @@ class RoleQuery(compquery.ComponentQuery):
 
             if self.name and not self._match_regex(
                     r,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             if self.types and not self._match_regex_or_set(
-                    set(str(t) for t in r.types()),
-                    self.types,
+                    set(r.types()),
+                    self.types_cmp,
                     self.types_equal,
-                    self.types_regex,
-                    self.types_cmp):
+                    self.types_regex):
                 continue
 
             yield r
@@ -105,7 +103,9 @@ class RoleQuery(compquery.ComponentQuery):
             else:
                 raise NameError("Invalid types option: {0}".format(k))
 
-        if self.types_regex:
+        if not self.types:
+            self.types_cmp = None
+        elif self.types_regex:
             self.types_cmp = re.compile(self.types)
         else:
-            self.types_cmp = None
+            self.types_cmp = set(self.policy.lookup_type(t) for t in self.types)

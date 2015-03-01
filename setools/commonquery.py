@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -52,17 +52,15 @@ class CommonQuery(compquery.ComponentQuery):
         for com in self.policy.commons():
             if self.name and not self._match_regex(
                     com,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             if self.perms and not self._match_regex_or_set(
                     com.perms,
-                    self.perms,
+                    self.perms_cmp,
                     self.perms_equal,
-                    self.perms_regex,
-                    self.perms_cmp):
+                    self.perms_regex):
                 continue
 
             yield com
@@ -98,4 +96,4 @@ class CommonQuery(compquery.ComponentQuery):
         if self.perms_regex:
             self.perms_cmp = re.compile(self.perms)
         else:
-            self.perms_cmp = None
+            self.perms_cmp = self.perms

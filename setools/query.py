@@ -24,7 +24,7 @@ class PolicyQuery(object):
     """Abstract base class for SELinux policy queries."""
 
     @staticmethod
-    def _match_regex(obj, criteria, regex, recomp):
+    def _match_regex(obj, criteria, regex):
         """
         Match the object with optional regular expression.
 
@@ -32,11 +32,10 @@ class PolicyQuery(object):
         obj         The object to match.
         criteria    The criteria to match.
         regex       If regular expression matching should be used.
-        recomp      The compiled regular expression.
         """
 
         if regex:
-            return bool(recomp.search(str(obj)))
+            return bool(criteria.search(str(obj)))
         else:
             return (obj == criteria)
 
@@ -58,7 +57,7 @@ class PolicyQuery(object):
             return bool(obj.intersection(criteria))
 
     @staticmethod
-    def _match_in_set(obj, criteria, regex, recomp):
+    def _match_in_set(obj, criteria, regex):
         """
         Match if the criteria is in the list, with optional
         regular expression matching.
@@ -67,16 +66,15 @@ class PolicyQuery(object):
         obj         The object to match.
         criteria    The criteria to match.
         regex       If regular expression matching should be used.
-        recomp      The compiled regular expression.
         """
 
         if regex:
-            return bool(list(filter(recomp.search, (str(m) for m in obj))))
+            return bool(list(filter(criteria.search, (str(m) for m in obj))))
         else:
             return (criteria in obj)
 
     @staticmethod
-    def _match_regex_or_set(obj, criteria, equal, regex, recomp):
+    def _match_regex_or_set(obj, criteria, equal, regex):
         """
         Match the object (a set) with either set comparisons
         (equality or intersection) or by regex matching of the
@@ -90,11 +88,10 @@ class PolicyQuery(object):
                     any set intersection will match. Ignored
                     if regular expression matching is used.
         regex       If regular expression matching should be used.
-        recomp      The compiled regular expression.
         """
 
         if regex:
-            return bool(list(filter(recomp.search, (str(m) for m in obj))))
+            return bool(list(filter(criteria.search, (str(m) for m in obj))))
         else:
             return PolicyQuery._match_set(obj, set(criteria), equal)
 

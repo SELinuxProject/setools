@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -48,9 +48,8 @@ class BoolQuery(compquery.ComponentQuery):
         for b in self.policy.bools():
             if self.name and not self._match_regex(
                     b,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             if self.match_default and b.state() != self.default:

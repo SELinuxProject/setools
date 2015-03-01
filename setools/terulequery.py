@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -89,10 +89,9 @@ class TERuleQuery(rulequery.RuleQuery):
             #
             if self.source and not self._match_indirect_regex(
                     r.source,
-                    self.source,
+                    self.source_cmp,
                     self.source_indirect,
-                    self.source_regex,
-                    self.source_cmp):
+                    self.source_regex):
                 continue
 
             #
@@ -100,10 +99,9 @@ class TERuleQuery(rulequery.RuleQuery):
             #
             if self.target and not self._match_indirect_regex(
                     r.target,
-                    self.target,
+                    self.target_cmp,
                     self.target_indirect,
-                    self.target_regex,
-                    self.target_cmp):
+                    self.target_regex):
                 continue
 
             #
@@ -135,9 +133,8 @@ class TERuleQuery(rulequery.RuleQuery):
                 try:
                     if not self._match_regex(
                             r.default,
-                            self.default,
-                            self.default_regex,
-                            self.default_cmp):
+                            self.default_cmp,
+                            self.default_regex):
                         continue
                 except InvalidRuleUse:
                     continue
@@ -148,11 +145,10 @@ class TERuleQuery(rulequery.RuleQuery):
             if self.boolean:
                 try:
                     if not self._match_regex_or_set(
-                            set(str(b) for b in r.conditional.booleans),
-                            self.boolean,
+                            r.conditional.booleans,
+                            self.boolean_cmp,
                             self.boolean_equal,
-                            self.boolean_regex,
-                            self.boolean_cmp):
+                            self.boolean_regex):
                         continue
                 except RuleNotConditional:
                     continue
@@ -185,10 +181,12 @@ class TERuleQuery(rulequery.RuleQuery):
             else:
                 raise NameError("Invalid permission set option: {0}".format(k))
 
-        if self.boolean_regex:
+        if not self.boolean:
+            self.boolean_cmp = None
+        elif self.boolean_regex:
             self.boolean_cmp = re.compile(self.boolean)
         else:
-            self.boolean_cmp = None
+            self.boolean_cmp = set(self.policy.lookup_boolean(b) for b in self.boolean)
 
     def set_perms(self, perms, **opts):
         """
@@ -217,3 +215,32 @@ class TERuleQuery(rulequery.RuleQuery):
                 self.perms_equal = opts[k]
             else:
                 raise NameError("Invalid permission set option: {0}".format(k))
+
+    def set_default(self, default, **opts):
+        """
+        Set the criteria for the rule's default type.
+
+        Parameter:
+        default     Name to match the rule's default type.
+
+        Keyword Options:
+        regex       If true, regular expression matching will be used.
+
+        Exceptions:
+        NameError   Invalid keyword option.
+        """
+
+        self.default = default
+
+        for k in list(opts.keys()):
+            if k == "regex":
+                self.default_regex = opts[k]
+            else:
+                raise NameError("Invalid default option: {0}".format(k))
+
+        if not self.default:
+            self.default_cmp = None
+        elif self.default_regex:
+            self.default_cmp = re.compile(self.default)
+        else:
+            self.default_cmp = self.policy.lookup_type(self.default)

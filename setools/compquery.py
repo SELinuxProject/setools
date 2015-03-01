@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -48,4 +48,4 @@ class ComponentQuery(query.PolicyQuery):
         if self.name_regex:
             self.name_cmp = re.compile(self.name)
         else:
-            self.name_cmp = None
+            self.name_cmp = self.name

@@ -1,4 +1,4 @@
-# Copyright 2014-2005, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -108,16 +108,13 @@ class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
 
             if not self._match_context(
                     p.context,
-                    self.user,
-                    self.user_regex,
                     self.user_cmp,
-                    self.role,
-                    self.role_regex,
+                    self.user_regex,
                     self.role_cmp,
-                    self.type_,
-                    self.type_regex,
+                    self.role_regex,
                     self.type_cmp,
-                    self.range_,
+                    self.type_regex,
+                    self.range_cmp,
                     self.range_subset,
                     self.range_overlap,
                     self.range_superset,

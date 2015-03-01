@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -70,9 +70,8 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             if self.source and not self._match_regex(
                     r.source,
-                    self.source,
-                    self.source_regex,
-                    self.source_cmp):
+                    self.source_cmp,
+                    self.source_regex):
                 continue
 
             #
@@ -80,9 +79,8 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             if self.target and not self._match_regex(
                     r.target,
-                    self.target,
-                    self.target_regex,
-                    self.target_cmp):
+                    self.target_cmp,
+                    self.target_regex):
                 continue
 
             #
@@ -99,7 +97,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             if self.default and not self._match_range(
                     (r.default.low, r.default.high),
-                    (self.default.low, self.default.high),
+                    (self.default_cmp.low, self.default_cmp.high),
                     self.default_subset,
                     self.default_overlap,
                     self.default_superset,
@@ -130,10 +128,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
         NameError   Invalid keyword option.
         """
 
-        if default:
-            self.default = self.policy.lookup_range(default)
-        else:
-            self.default = None
+        self.default = default
 
         for k in list(opts.keys()):
             if k == "subset":
@@ -146,3 +141,8 @@ class MLSRuleQuery(rulequery.RuleQuery):
                 self.default_proper = opts[k]
             else:
                 raise NameError("Invalid name option: {0}".format(k))
+
+        if not self.default:
+            self.default_cmp = None
+        else:
+            self.default_cmp = self.policy.lookup_range(self.default)

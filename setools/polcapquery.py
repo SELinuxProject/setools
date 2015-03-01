@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -43,9 +43,8 @@ class PolCapQuery(compquery.ComponentQuery):
         for cap in self.policy.polcaps():
             if self.name and not self._match_regex(
                     cap,
-                    self.name,
-                    self.name_regex,
-                    self.name_cmp):
+                    self.name_cmp,
+                    self.name_regex):
                 continue
 
             yield cap
