@@ -20,6 +20,12 @@ from . import symbol
 from . import qpol
 
 
+class InvalidCommon(symbol.InvalidSymbol):
+
+    """Exception for invalid common permission sets."""
+    pass
+
+
 def common_factory(policy, symbol):
     """Factory function for creating common permission set objects."""
 
@@ -38,7 +44,7 @@ def class_factory(policy, name):
     try:
         symbol = qpol.qpol_class_t(policy, name)
     except ValueError:
-        raise InvalidRole("{0} is not a valid object class".format(name))
+        raise InvalidClass("{0} is not a valid object class".format(name))
 
     return ObjClass(policy, symbol)
 
