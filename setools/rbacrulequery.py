@@ -102,9 +102,8 @@ class RBACRuleQuery(rulequery.RuleQuery):
                 try:
                     if not self._match_object_class(
                             r.tclass,
-                            self.tclass,
-                            self.tclass_regex,
-                            self.tclass_cmp):
+                            self.tclass_cmp,
+                            self.tclass_regex):
                         continue
                 except InvalidRuleUse:
                     continue

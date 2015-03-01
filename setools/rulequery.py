@@ -53,7 +53,7 @@ class RuleQuery(PolicyQuery):
                 recomp)
 
     @staticmethod
-    def _match_object_class(obj, criteria, regex, recomp):
+    def _match_object_class(obj, criteria, regex):
         """
         Match the object class with optional regular expression.
 
@@ -61,13 +61,12 @@ class RuleQuery(PolicyQuery):
         obj         The object to match.
         criteria    The criteria to match.
         regex       If regular expression matching should be used.
-        recomp      The compiled regular expression.
         """
 
         if isinstance(criteria, set):
-            return (str(obj) in criteria)
+            return (obj in criteria)
         elif regex:
-            return bool(recomp.search(str(obj)))
+            return bool(criteria.search(str(obj)))
         else:
             return (obj == criteria)
 
@@ -163,10 +162,7 @@ class RuleQuery(PolicyQuery):
         NameError   Invalid keyword option.
         """
 
-        if isinstance(tclass, str):
-            self.tclass = tclass
-        else:
-            self.tclass = set(tclass)
+        self.tclass = tclass
 
         for k in list(opts.keys()):
             if k == "regex":
@@ -174,10 +170,14 @@ class RuleQuery(PolicyQuery):
             else:
                 raise NameError("Invalid object class option: {0}".format(k))
 
-        if self.tclass_regex:
-            self.tclass_cmp = re.compile(self.tclass)
-        else:
+        if not self.tclass:
             self.tclass_cmp = None
+        elif self.tclass_regex:
+            self.tclass_cmp = re.compile(self.tclass)
+        elif isinstance(self.tclass, str):
+            self.tclass_cmp = self.policy.lookup_class(self.tclass)
+        else:
+            self.tclass_cmp = set(self.policy.lookup_class(c) for c in self.tclass)
 
     def set_default(self, default, **opts):
         """

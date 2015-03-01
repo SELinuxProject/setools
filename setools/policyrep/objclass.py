@@ -29,11 +29,16 @@ def common_factory(policy, symbol):
     return Common(policy, symbol)
 
 
-def class_factory(policy, symbol):
+def class_factory(policy, name):
     """Factory function for creating object class objects."""
 
-    if not isinstance(symbol, qpol.qpol_class_t):
-        raise NotImplementedError
+    if isinstance(name, qpol.qpol_class_t):
+        return ObjClass(policy, name)
+
+    try:
+        symbol = qpol.qpol_class_t(policy, name)
+    except ValueError:
+        raise InvalidRole("{0} is not a valid object class".format(name))
 
     return ObjClass(policy, symbol)
 
