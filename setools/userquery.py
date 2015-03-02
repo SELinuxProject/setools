@@ -27,26 +27,41 @@ class UserQuery(compquery.ComponentQuery):
 
     def __init__(self, policy,
                  name="", name_regex=False,
-                 roles=set(), roles_equal=False, roles_regex=False):
+                 roles=set(), roles_equal=False, roles_regex=False,
+                 level="", level_dom=False, level_domby=False, level_incomp=False,
+                 range_="", range_overlap=False, range_subset=False,
+                 range_superset=False, range_proper=False):
         """
         Parameter:
-        policy	     The policy to query.
-        name         The user name to match.
-        name_regex   If true, regular expression matching
-                     will be used on the user names.
-        roles        The attribute to match.
-        roles_equal  If true, only types with role sets
-                     that are equal to the criteria will
-                     match.  Otherwise, any intersection
-                     will match.
-        roles_regex  If true, regular expression matching
-                     will be used on the role names instead
-                     of set logic.
+        policy	        The policy to query.
+        name            The user name to match.
+        name_regex      If true, regular expression matching
+                        will be used on the user names.
+        roles           The attribute to match.
+        roles_equal     If true, only types with role sets
+                        that are equal to the criteria will
+                        match.  Otherwise, any intersection
+                        will match.
+        roles_regex     If true, regular expression matching
+                        will be used on the role names instead
+                        of set logic.
+        range_          The criteria to match the user's range.
+        range_subset    If true, the criteria will match if it is a subset
+                        of the user's range.
+        range_overlap   If true, the criteria will match if it overlaps
+                        any of the user's range.
+        range_superset  If true, the criteria will match if it is a superset
+                        of the user's range.
+        range_proper    If true, use proper superset/subset operations.
+                        No effect if not using set operations.
         """
 
         self.policy = policy
         self.set_name(name, regex=name_regex)
         self.set_roles(roles, regex=roles_regex, equal=roles_equal)
+        self.set_level(level, dom=level_dom, domby=level_domby, incomp=level_incomp)
+        self.set_range(range_, overlap=range_overlap, subset=range_subset,
+                       superset=range_superset, proper=range_proper)
 
     def results(self):
         """Generator which yields all matching users."""
@@ -65,9 +80,93 @@ class UserQuery(compquery.ComponentQuery):
                     self.roles_regex):
                 continue
 
-            # TODO: default level and range
+            if self.level and not self._match_level(
+                    u.mls_level,
+                    self.level,
+                    self.level_dom,
+                    self.level_domby,
+                    self.level_incomp):
+                continue
+
+            if self.range_ and not self._match_range(
+                    (u.mls_range.low, u.mls_range.high),
+                    (self.range_.low, self.range_.high),
+                    self.range_subset,
+                    self.range_overlap,
+                    self.range_superset,
+                    self.range_proper):
+                continue
 
             yield u
+
+    def set_level(self, level, **opts):
+        """
+        Set the criteria for matching the user's default level.
+
+        Parameter:
+        level       Criteria to match the user's default level.
+
+        Keyword Parameters:
+        dom         If true, the criteria will match if it dominates the user's default level.
+        domby       If true, the criteria will match if it is dominated by the user's default level.
+        incomp      If true, the criteria will match if it incomparable to the user's default level.
+
+        Exceptions:
+        NameError   Invalid keyword option.
+        """
+
+        if level:
+            self.level = self.policy.lookup_level(level)
+        else:
+            self.level = None
+
+        for k in list(opts.keys()):
+            if k == "dom":
+                self.level_dom = opts[k]
+            elif k == "domby":
+                self.level_domby = opts[k]
+            elif k == "incomp":
+                self.level_incomp = opts[k]
+            else:
+                raise NameError("Invalid name option: {0}".format(k))
+
+    def set_range(self, range_, **opts):
+        """
+        Set the criteria for matching the user's range.
+
+        Parameter:
+        range_      Criteria to match the user's range.
+
+        Keyword Parameters:
+        subset      If true, the criteria will match if it is a subset
+                    of the user's range.
+        overlap     If true, the criteria will match if it overlaps
+                    any of the user's range.
+        superset    If true, the criteria will match if it is a superset
+                    of the user's range.
+        proper      If true, use proper superset/subset operations.
+                    No effect if not using set operations.
+
+        Exceptions:
+        NameError   Invalid keyword option.
+        """
+
+        if range_:
+            self.range_ = self.policy.lookup_range(range_)
+        else:
+            self.range_ = None
+
+        for k in list(opts.keys()):
+            if k == "subset":
+                self.range_subset = opts[k]
+            elif k == "overlap":
+                self.range_overlap = opts[k]
+            elif k == "superset":
+                self.range_superset = opts[k]
+            elif k == "proper":
+                self.range_proper = opts[k]
+            else:
+                raise NameError("Invalid name option: {0}".format(k))
 
     def set_roles(self, roles, **opts):
         """

@@ -133,6 +133,27 @@ class PolicyQuery(object):
         else:
             return (crit_low == obj_low and obj_high == crit_high)
 
+    @staticmethod
+    def _match_level(obj, criteria, dom, domby, incomp):
+        """
+        Match the an MLS level.
+
+        obj         The level to match.
+        criteria    The criteria to match. (a level)
+        dom         If true, the criteria will match if it dominates obj.
+        domby       If true, the criteria will match if it is dominated by obj.
+        incomp      If true, the criteria will match if it is incomparable to obj.
+        """
+
+        if dom:
+            return (criteria >= obj)
+        elif domby:
+            return (criteria <= obj)
+        elif incomp:
+            return (criteria ^ obj)
+        else:
+            return (criteria == obj)
+
     def results(self):
         """
         Generator which returns the matches for the query.  This method
