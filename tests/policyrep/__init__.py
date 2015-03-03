@@ -16,3 +16,4 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 from . import mls
+from . import selinuxpolicy
