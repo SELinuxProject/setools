@@ -381,12 +381,6 @@ class SELinuxPolicy(object):
         for cap in self.policy.polcap_iter():
             yield polcap.polcap_factory(self.policy, cap)
 
-    def permissives(self):
-        """Generator which yields all permissive types."""
-
-        for type_ in self.policy.permissive_iter():
-            yield typeattr.type_factory(self.policy, type_)
-
     #
     # Policy rules generators
     #
