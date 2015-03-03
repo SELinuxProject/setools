@@ -65,7 +65,7 @@ class Common(symbol.PolicySymbol):
     """A common permission set."""
 
     def __contains__(self, other):
-        return (other in (self.qpol_symbol.perm_iter(self.policy)))
+        return (other in self.perms)
 
     @property
     def perms(self):
