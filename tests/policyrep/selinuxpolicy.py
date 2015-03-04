@@ -57,11 +57,11 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_104_category_count(self):
         """SELinuxPolicy: category count"""
-        self.assertEqual(self.p.category_count, 11)
+        self.assertEqual(self.p.category_count, 17)
 
     def test_105_class_count(self):
         """SELinuxPolicy: object class count"""
-        self.assertEqual(self.p.class_count, 5)
+        self.assertEqual(self.p.class_count, 7)
 
     def test_106_common_count(self):
         """SELinuxPolicy: common permisison set count"""
@@ -91,7 +91,7 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_113_initial_sid_count(self):
         """SELinuxPolicy: initial sid count"""
-        self.assertEqual(self.p.initialsids_count, 7)
+        self.assertEqual(self.p.initialsids_count, 11)
 
     def test_114_level_count(self):
         """SELinuxPolicy: MLS level count"""
@@ -119,7 +119,7 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_120_permission_count(self):
         """SELinuxPolicy: permission count"""
-        self.assertEqual(self.p.permission_count, 19)
+        self.assertEqual(self.p.permission_count, 29)
 
     def test_121_permissive_types_count(self):
         """SELinuxPolicy: permissive types count"""
