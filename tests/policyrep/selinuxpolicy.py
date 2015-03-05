@@ -15,6 +15,10 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+
+import os
+import subprocess
+import tempfile
 import unittest
 
 from setools import SELinuxPolicy
@@ -23,15 +27,39 @@ from setools.boolquery import BoolQuery
 
 class SELinuxPolicyTest(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(self):
+        # create a temp file for the binary policy
+        # and then have checkpolicy overwrite it.
+        fd, self.policy_path = tempfile.mkstemp()
+        os.close(fd)
+
+        try:
+            command = [os.environ['CHECKPOLICY']]
+        except KeyError:
+            command = ["/usr/bin/checkpolicy"]
+
+        command.extend(["-M", "-o", self.policy_path, "-U", "reject",
+                        "tests/policyrep/selinuxpolicy.conf"])
+
+        with open(os.devnull, "w") as null:
+            subprocess.check_call(command, stdout=null)
+
+    @classmethod
+    def tearDownClass(self):
+        os.unlink(self.policy_path)
+
     def setUp(self):
         self.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
+        self.p_binary = SELinuxPolicy(self.policy_path)
 
     def test_001_open_policy_error(self):
         """SELinuxPolicy: error on open."""
         self.assertRaises(OSError, SELinuxPolicy, "tests/policyrep/selinuxpolicy-bad.conf")
 
-    # def test_010_handle_unknown(self)
-    # TODO: need a binary policy
+    def test_010_handle_unknown(self):
+        """SELinuxPolicy: handle unknown setting."""
+        self.assertEqual(self.p_binary.handle_unknown, "reject")
 
     def test_011_mls(self):
         """SELinuxPolicy: MLS status."""
@@ -112,6 +140,7 @@ class SELinuxPolicyTest(unittest.TestCase):
     def test_118_neverallow_count(self):
         """SELinuxPolicy: neverallow rule count"""
         self.assertEqual(self.p.neverallow_count, 103)
+        self.assertEqual(self.p_binary.neverallow_count, 0)
 
     def test_119_nodecon_count(self):
         """SELinuxPolicy: nodecon count"""
