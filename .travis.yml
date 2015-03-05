@@ -55,6 +55,7 @@ before_install:
   - export CFLAGS="$CFLAGS -I$DESTDIR/usr/include"
   - export LDFLAGS="$LDFLAGS -L$DESTDIR/usr/lib"
   - sudo ln -sf "$DESTDIR/usr/lib/libsepol.a" /usr/lib/libsepol.a
+  - sudo ln -sf "$DESTDIR/usr/bin/checkpolicy" /usr/bin/checkpolicy
 
   # Ubuntu 12.04's flex generates a redundant decl
   - sed -i -e "/Wwrite-strings/s/,/, '-Wno-redundant-decls',/" setup.py
