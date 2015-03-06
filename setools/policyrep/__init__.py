@@ -341,7 +341,17 @@ class SELinuxPolicy(object):
                 # where a class has no default_* settings.
                 pass
 
-    def levels(self):
+    def mlscategories(self):
+        """Generator which yields all MLS categories."""
+
+        for cat in self.policy.cat_iter():
+            try:
+                yield mls.category_factory(self.policy, cat)
+            except TypeError:
+                # libqpol unfortunately iterates over aliases too
+                pass
+
+    def mlslevels(self):
         """Generator which yields all level declarations."""
 
         for level in self.policy.level_iter():

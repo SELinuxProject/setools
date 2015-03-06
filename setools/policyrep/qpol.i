@@ -424,6 +424,7 @@ typedef enum qpol_capability
     };
 
     %newobject cat_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_cat_from_void) %}
     qpol_iterator_t *cat_iter() {
         BEGIN_EXCEPTION
         qpol_iterator_t *iter;
@@ -1503,6 +1504,7 @@ typedef struct qpol_cat {} qpol_cat_t;
         return NULL;
     };
     %newobject alias_iter(qpol_policy_t*);
+    %pythoncode %{ @QpolGenerator(_qpol.to_str) %}
     qpol_iterator_t *alias_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;
         BEGIN_EXCEPTION

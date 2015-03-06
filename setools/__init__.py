@@ -29,6 +29,7 @@ from .policyrep import SELinuxPolicy
 
 # Component Queries
 from . import commonquery
+from . import mlscategoryquery
 from . import objclassquery
 from . import typequery
 from . import rolequery

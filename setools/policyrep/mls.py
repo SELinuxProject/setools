@@ -77,6 +77,9 @@ def category_factory(policy, symbol):
     if not isinstance(symbol, qpol.qpol_cat_t):
         raise NotImplementedError
 
+    if symbol.isalias(policy):
+        raise TypeError("{0} is an alias".format(symbol.name(policy)))
+
     return MLSCategory(policy, symbol)
 
 
@@ -212,7 +215,15 @@ class MLSCategory(symbol.PolicySymbol):
             yield alias
 
     def statement(self):
-        return "category {0};".format(self)
+        aliases = list(self.aliases())
+        stmt = "category {0}".format(self)
+        if aliases:
+            if len(aliases) > 1:
+                stmt += " alias {{ {0} }}".format(' '.join(aliases))
+            else:
+                stmt += " alias {0}".format(aliases[0])
+        stmt += ";"
+        return stmt
 
 
 class MLSSensitivity(symbol.PolicySymbol):
