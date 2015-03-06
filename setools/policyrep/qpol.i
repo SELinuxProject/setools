@@ -258,7 +258,11 @@ typedef enum qpol_capability
 %exception qpol_policy {
   $action
   if (!result) {
-    PyErr_SetFromErrno(PyExc_OSError);
+    if (errno == EINVAL) {
+        PyErr_SetString(PyExc_SyntaxError, "Invalid policy.");
+    } else {
+        PyErr_SetFromErrno(PyExc_OSError);
+    }
     return NULL;
   }
 }

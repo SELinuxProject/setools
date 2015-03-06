@@ -25,7 +25,7 @@ except:  # pragma: no cover
 
 # Python classes for policy representation
 from . import policyrep
-from .policyrep import SELinuxPolicy
+from .policyrep import SELinuxPolicy, InvalidPolicy
 
 # Component Queries
 from . import commonquery

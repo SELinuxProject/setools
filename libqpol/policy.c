@@ -200,7 +200,7 @@ static int read_source_policy(qpol_policy_t * qpolicy, const char *progname, int
 		ERR(qpolicy, "%s:  error(s) encountered while parsing configuration\n", progname);
 		queue_destroy(id_queue);
 		id_queue = NULL;
-//		errno = EIO;
+		errno = EINVAL;
 		return -1;
 	}
 	/* rewind the pointer */
@@ -211,13 +211,13 @@ static int read_source_policy(qpol_policy_t * qpolicy, const char *progname, int
 		ERR(qpolicy, "%s:  error(s) encountered while parsing configuration\n", progname);
 		queue_destroy(id_queue);
 		id_queue = NULL;
-//		errno = EIO;
+		errno = EINVAL;
 		return -1;
 	}
 	queue_destroy(id_queue);
 	id_queue = NULL;
 	if (policydb_errors) {
-//		errno = EIO;
+		errno = EINVAL;
 		return -1;
 	}
 	return 0;

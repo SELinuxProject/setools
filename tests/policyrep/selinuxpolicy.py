@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
-
+from __future__ import print_function
 import os
 import subprocess
 import tempfile
 import unittest
 
-from setools import SELinuxPolicy
+from setools import SELinuxPolicy, InvalidPolicy
 from setools.boolquery import BoolQuery
 
 
@@ -54,8 +54,13 @@ class SELinuxPolicyTest(unittest.TestCase):
         self.p_binary = SELinuxPolicy(self.policy_path)
 
     def test_001_open_policy_error(self):
-        """SELinuxPolicy: error on open."""
-        self.assertRaises(OSError, SELinuxPolicy, "tests/policyrep/selinuxpolicy-bad.conf")
+        """SELinuxPolicy: Invalid policy on open."""
+        self.assertRaises(InvalidPolicy, SELinuxPolicy, "tests/policyrep/selinuxpolicy-bad.conf")
+        print("The \"category can not be associated\" error above is expected.")
+
+    def test_002_open_policy_non_existant(self):
+        """SELinuxPolicy: Non existant policy on open."""
+        self.assertRaises(OSError, SELinuxPolicy, "tests/policyrep/DOES_NOT_EXIST")
 
     def test_010_handle_unknown(self):
         """SELinuxPolicy: handle unknown setting."""
