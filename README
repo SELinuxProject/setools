@@ -63,6 +63,7 @@ To run SETools unit tests, the following packages are required:
   flex
   libselinux
   libsepol 2.4+
+  checkpolicy 2.4+
   libbz2
   SWIG 2.0.12+ or 3.0+
   mock (on Python 2.7 only)
