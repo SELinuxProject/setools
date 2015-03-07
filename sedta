@@ -76,6 +76,7 @@ parser.add_argument("-s", "--source", help="Source type of the analysis.",
 parser.add_argument("-t", "--target", help="Target type of the analysis.", default="")
 parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")
+parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 alg = parser.add_argument_group("Analysis algorithm")
 alg.add_argument("-S", "--shortest_path", action="store_true",
@@ -99,48 +100,47 @@ if args.target and not (args.shortest_path or args.all_paths):
 try:
     p = setools.SELinuxPolicy(args.policy)
     g = setools.dta.DomainTransitionAnalysis(p, reverse=args.reverse, exclude=args.exclude)
-except Exception as err:
-    print(err)
-    sys.exit(1)
 
-if args.shortest_path or args.all_paths:
-    try:
+    if args.shortest_path or args.all_paths:
         if args.shortest_path:
             paths = g.all_shortest_paths(args.source, args.target)
         else:
             paths = g.all_paths(args.source, args.target, args.all_paths)
-    except Exception as err:
-        print(err)
-        sys.exit(1)
 
-    i = 0
-    for i, path in enumerate(paths, start=1):
-        print("Domain transition path {0}:".format(i))
+        i = 0
+        for i, path in enumerate(paths, start=1):
+            print("Domain transition path {0}:".format(i))
 
-        for step, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path,
-                                                                                         start=1):
-            print("Step {0}: {1} -> {2}\n".format(step, src, tgt))
+            for step, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in \
+                    enumerate(path, start=1):
+
+                print("Step {0}: {1} -> {2}\n".format(step, src, tgt))
+                print_transition(trans, entrypoints, setexec, dyntrans, setcur)
+
+        print(i, "domain transition path(s) found.")
+
+    else:  # single transition
+        transitions = g.transitions(args.source)
+
+        i = 0
+        for i, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(transitions,
+                                                                                      start=1):
+            print("Transition {0}: {1} -> {2}\n".format(i, src, tgt))
             print_transition(trans, entrypoints, setexec, dyntrans, setcur)
 
-    print(i, "domain transition path(s) found.")
+        print(i, "domain transition(s) found.")
 
-else:  # single transition
-    try:
-        transitions = g.transitions(args.source)
-    except Exception as err:
+    if args.stats:
+        print("Domain transition graph size:")
+        nnodes, nedges = g.get_stats()
+        print(" Nodes:", nnodes)
+        print(" Edges:", nedges)
+
+except Exception as err:
+    if args.debug:
+        import traceback
+        traceback.print_exc()
+    else:
         print(err)
-        sys.exit(1)
 
-    i = 0
-    for i, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(transitions,
-                                                                                  start=1):
-        print("Transition {0}: {1} -> {2}\n".format(i, src, tgt))
-        print_transition(trans, entrypoints, setexec, dyntrans, setcur)
-
-    print(i, "domain transition(s) found.")
-
-if args.stats:
-    print("Domain transition graph size:")
-    nnodes, nedges = g.get_stats()
-    print(" Nodes:", nnodes)
-    print(" Edges:", nedges)
+    sys.exit(1)

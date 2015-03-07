@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -28,6 +28,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")
+parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 settings = parser.add_argument_group("Analysis settings")
 settings.add_argument("-p", "--policy", required=True,
@@ -68,52 +69,58 @@ try:
     p = setools.SELinuxPolicy(args.policy)
     g = setools.infoflow.InfoFlowAnalysis(
         p, args.map, minweight=args.min_weight, exclude=args.exclude)
-except Exception as err:
-    print(err)
-    sys.exit(1)
 
-if args.shortest_path or args.all_paths:
-    try:
-        if args.shortest_path:
-            paths = g.all_shortest_paths(args.source, args.target)
-        else:
-            paths = g.all_paths(args.source, args.target, args.all_paths)
-    except Exception as err:
-        print(err)
-        sys.exit(1)
+    if args.shortest_path or args.all_paths:
+        try:
+            if args.shortest_path:
+                paths = g.all_shortest_paths(args.source, args.target)
+            else:
+                paths = g.all_paths(args.source, args.target, args.all_paths)
+        except Exception as err:
+            print(err)
+            sys.exit(1)
 
-    flownum = 0
-    for flownum, path in enumerate(paths, start=1):
-        print("Flow {0}:".format(flownum))
-        for stepnum, (src, tgt, rules) in enumerate(path, start=1):
-            print("  Step {0}: {1} -> {2}".format(stepnum, src, tgt))
+        flownum = 0
+        for flownum, path in enumerate(paths, start=1):
+            print("Flow {0}:".format(flownum))
+            for stepnum, (src, tgt, rules) in enumerate(path, start=1):
+                print("  Step {0}: {1} -> {2}".format(stepnum, src, tgt))
 
+                for rule in sorted(rules):
+                    print("   ", rule)
+
+                print()
+
+            if args.limit_flows and flownum >= args.limit_flows:
+                break
+
+            print()
+
+    else:  # single direct info flow
+        flownum = 0
+        for flownum, (src, tgt, rules) in enumerate(g.infoflows(args.source), start=1):
+            print("Flow {0}: {1} -> {2}".format(flownum, src, tgt))
             for rule in sorted(rules):
                 print("   ", rule)
 
             print()
 
-        if args.limit_flows and flownum >= args.limit_flows:
-            break
+            if args.limit_flows and flownum >= args.limit_flows:
+                break
 
-        print()
+    print(flownum, "information flow(s) found.\n")
 
-else:  # single direct info flow
-    flownum = 0
-    for flownum, (src, tgt, rules) in enumerate(g.infoflows(args.source), start=1):
-        print("Flow {0}: {1} -> {2}".format(flownum, src, tgt))
-        for rule in sorted(rules):
-            print("   ", rule)
+    if args.stats:
+        print("Information flow graph size:")
+        nnodes, nedges = g.get_stats()
+        print(" Nodes:", nnodes)
+        print(" Edges:", nedges)
 
-        print()
+except Exception as err:
+    if args.debug:
+        import traceback
+        traceback.print_exc()
+    else:
+        print(err)
 
-        if args.limit_flows and flownum >= args.limit_flows:
-            break
-
-print(flownum, "information flow(s) found.\n")
-
-if args.stats:
-    print("Information flow graph size:")
-    nnodes, nedges = g.get_stats()
-    print(" Nodes:", nnodes)
-    print(" Edges:", nedges)
+    sys.exit(1)

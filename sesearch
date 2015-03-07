@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -27,6 +27,7 @@ parser = argparse.ArgumentParser(
     epilog="TE/MLS rule searches cannot be mixed with RBAC rule searches.")
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("policy", help="Path to the SELinux policy to search.")
+parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 rtypes = parser.add_argument_group("TE Rule Types")
 rtypes.add_argument("-A", "--allow", action="append_const",
@@ -105,87 +106,93 @@ if (args.tertypes or args.mlsrtypes) and args.rbacrtypes:
 
 try:
     p = setools.SELinuxPolicy(args.policy)
-except Exception as err:
-    print(err)
-    sys.exit(-1)
 
-if args.tertypes:
-    q = setools.terulequery.TERuleQuery(p,
-                                        ruletype=args.tertypes,
-                                        source=args.source,
-                                        source_indirect=args.source_indirect,
-                                        source_regex=args.source_regex,
-                                        target=args.target,
-                                        target_indirect=args.target_indirect,
-                                        target_regex=args.target_regex,
-                                        tclass_regex=args.tclass_regex,
-                                        perms_equal=args.perms_equal,
-                                        default=args.default,
-                                        default_regex=args.default_regex,
-                                        boolean_regex=args.boolean_regex,
-                                        boolean_equal=args.boolean_equal)
-
-    # these are broken out from the above statement to prevent making a list
-    # with an empty string in it (split on empty string)
-    if args.tclass:
-        if args.tclass_regex:
-            q.set_tclass(args.tclass)
-        else:
-            q.set_tclass(args.tclass.split(","))
-
-    if args.perms:
-        q.set_perms(args.perms.split(","))
-
-    if args.boolean:
-        if args.boolean_regex:
-            q.set_boolean(args.boolean)
-        else:
-            q.set_boolean(args.boolean.split(","))
-
-    for r in sorted(q.results()):
-        print(r)
-
-if args.rbacrtypes:
-    q = setools.rbacrulequery.RBACRuleQuery(p,
-                                            ruletype=args.rbacrtypes,
+    if args.tertypes:
+        q = setools.terulequery.TERuleQuery(p,
+                                            ruletype=args.tertypes,
                                             source=args.source,
                                             source_indirect=args.source_indirect,
                                             source_regex=args.source_regex,
                                             target=args.target,
                                             target_indirect=args.target_indirect,
                                             target_regex=args.target_regex,
+                                            tclass_regex=args.tclass_regex,
+                                            perms_equal=args.perms_equal,
                                             default=args.default,
                                             default_regex=args.default_regex,
-                                            tclass_regex=args.tclass_regex)
+                                            boolean_regex=args.boolean_regex,
+                                            boolean_equal=args.boolean_equal)
 
-    # these are broken out from the above statement to prevent making a list
-    # with an empty string in it (split on empty string)
-    if args.tclass:
-        if args.tclass_regex:
-            q.set_tclass(args.tclass)
-        else:
-            q.set_tclass(args.tclass.split(","))
+        # these are broken out from the above statement to prevent making a list
+        # with an empty string in it (split on empty string)
+        if args.tclass:
+            if args.tclass_regex:
+                q.set_tclass(args.tclass)
+            else:
+                q.set_tclass(args.tclass.split(","))
 
-    for r in sorted(q.results()):
-        print(r)
+        if args.perms:
+            q.set_perms(args.perms.split(","))
 
-if args.mlsrtypes:
-    q = setools.mlsrulequery.MLSRuleQuery(p,
-                                          ruletype=args.mlsrtypes,
-                                          source=args.source,
-                                          source_regex=args.source_regex,
-                                          target=args.target,
-                                          target_regex=args.target_regex,
-                                          tclass_regex=args.tclass_regex,
-                                          default=args.default)
+        if args.boolean:
+            if args.boolean_regex:
+                q.set_boolean(args.boolean)
+            else:
+                q.set_boolean(args.boolean.split(","))
 
-    # these are broken out from the above statement to prevent making a list
-    # with an empty string in it (split on empty string)
-    if args.tclass:
-        if args.tclass_regex:
-            q.set_tclass(args.tclass)
-        else:
-            q.set_tclass(args.tclass.split(","))
+        for r in sorted(q.results()):
+            print(r)
 
-    for r in sorted(q.results()):
-        print(r)
+    if args.rbacrtypes:
+        q = setools.rbacrulequery.RBACRuleQuery(p,
+                                                ruletype=args.rbacrtypes,
+                                                source=args.source,
+                                                source_indirect=args.source_indirect,
+                                                source_regex=args.source_regex,
+                                                target=args.target,
+                                                target_indirect=args.target_indirect,
+                                                target_regex=args.target_regex,
+                                                default=args.default,
+                                                default_regex=args.default_regex,
+                                                tclass_regex=args.tclass_regex)
+
+        # these are broken out from the above statement to prevent making a list
+        # with an empty string in it (split on empty string)
+        if args.tclass:
+            if args.tclass_regex:
+                q.set_tclass(args.tclass)
+            else:
+                q.set_tclass(args.tclass.split(","))
+
+        for r in sorted(q.results()):
+            print(r)
+
+    if args.mlsrtypes:
+        q = setools.mlsrulequery.MLSRuleQuery(p,
+                                              ruletype=args.mlsrtypes,
+                                              source=args.source,
+                                              source_regex=args.source_regex,
+                                              target=args.target,
+                                              target_regex=args.target_regex,
+                                              tclass_regex=args.tclass_regex,
+                                              default=args.default)
+
+        # these are broken out from the above statement to prevent making a list
+        # with an empty string in it (split on empty string)
+        if args.tclass:
+            if args.tclass_regex:
+                q.set_tclass(args.tclass)
+            else:
+                q.set_tclass(args.tclass.split(","))
+
+        for r in sorted(q.results()):
+            print(r)
+
+except Exception as err:
+    if args.debug:
+        import traceback
+        traceback.print_exc()
+    else:
+        print(err)
+
+    sys.exit(-1)

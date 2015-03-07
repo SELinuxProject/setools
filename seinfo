@@ -30,6 +30,7 @@ parser.add_argument("-x", "--expand", action="store_true",
                     help="Print additional information about the specified components.")
 parser.add_argument("--flat",  help="Print without item count nor indentation.",
                     dest="flat", default=False, action="store_true")
+parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 queries = parser.add_argument_group("Component Queries")
 queries.add_argument("-c", "--class", help="Print object classes.", dest="classquery",
@@ -233,8 +234,11 @@ try:
             strfmt = "   {0}" if not args.flat else "{0}"
             print(strfmt.format(result))
 
-    sys.exit(0)
-
 except Exception as err:
-    print(err)
+    if args.debug:
+        import traceback
+        traceback.print_exc()
+    else:
+        print(err)
+
     sys.exit(-1)
