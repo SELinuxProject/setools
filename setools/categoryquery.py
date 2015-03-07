@@ -21,7 +21,7 @@ import re
 from . import compquery
 
 
-class MLSCategoryQuery(compquery.ComponentQuery):
+class CategoryQuery(compquery.ComponentQuery):
 
     """Query MLS Categories"""
 
@@ -45,7 +45,7 @@ class MLSCategoryQuery(compquery.ComponentQuery):
     def results(self):
         """Generator which yields all matching categories."""
 
-        for cat in self.policy.mlscategories():
+        for cat in self.policy.categories():
             if self.name and not self._match_regex(
                     cat,
                     self.name_cmp,

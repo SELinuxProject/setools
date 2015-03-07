@@ -18,48 +18,48 @@
 import unittest
 
 from setools import SELinuxPolicy
-from setools.mlscategoryquery import MLSCategoryQuery
+from setools.categoryquery import CategoryQuery
 
 
-class MLSCategoryQueryTest(unittest.TestCase):
+class CategoryQueryTest(unittest.TestCase):
 
     def setUp(self):
-        self.p = SELinuxPolicy("tests/mlscategoryquery.conf")
+        self.p = SELinuxPolicy("tests/categoryquery.conf")
 
     def test_000_unset(self):
         """MLS category query with no criteria."""
         # query with no parameters gets all categories.
-        allcats = sorted(str(c) for c in self.p.mlscategories())
+        allcats = sorted(str(c) for c in self.p.categories())
 
-        q = MLSCategoryQuery(self.p)
+        q = CategoryQuery(self.p)
         qcats = sorted(str(c) for c in q.results())
 
         self.assertListEqual(allcats, qcats)
 
     def test_001_name_exact(self):
         """MLS category query with exact name match."""
-        q = MLSCategoryQuery(self.p, name="test1")
+        q = CategoryQuery(self.p, name="test1")
 
         cats = sorted(str(c) for c in q.results())
         self.assertListEqual(["test1"], cats)
 
     def test_002_name_regex(self):
         """MLS category query with regex name match."""
-        q = MLSCategoryQuery(self.p, name="test2(a|b)", name_regex=True)
+        q = CategoryQuery(self.p, name="test2(a|b)", name_regex=True)
 
         cats = sorted(str(c) for c in q.results())
         self.assertListEqual(["test2a", "test2b"], cats)
 
     def test_010_alias_exact(self):
         """MLS category query with exact alias match."""
-        q = MLSCategoryQuery(self.p, alias="test10a")
+        q = CategoryQuery(self.p, alias="test10a")
 
         cats = sorted(str(t) for t in q.results())
         self.assertListEqual(["test10c1"], cats)
 
     def test_011_alias_regex(self):
         """MLS category query with regex alias match."""
-        q = MLSCategoryQuery(self.p, alias="test11(a|b)", alias_regex=True)
+        q = CategoryQuery(self.p, alias="test11(a|b)", alias_regex=True)
 
         cats = sorted(str(t) for t in q.results())
         self.assertListEqual(["test11c1", "test11c2"], cats)

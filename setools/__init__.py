@@ -28,8 +28,8 @@ from . import policyrep
 from .policyrep import SELinuxPolicy, InvalidPolicy
 
 # Component Queries
+from . import categoryquery
 from . import commonquery
-from . import mlscategoryquery
 from . import objclassquery
 from . import typequery
 from . import rolequery

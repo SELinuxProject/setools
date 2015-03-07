@@ -80,16 +80,16 @@ def category_factory(policy, symbol):
     if symbol.isalias(policy):
         raise TypeError("{0} is an alias".format(symbol.name(policy)))
 
-    return MLSCategory(policy, symbol)
+    return Category(policy, symbol)
 
 
 def sensitivity_factory(policy, symbol):
     """Factory function for creating MLS sensitivity objects."""
     if isinstance(symbol, qpol.qpol_level_t):
-        return MLSSensitivity(policy, symbol)
+        return Sensitivity(policy, symbol)
 
     try:
-        return MLSSensitivity(policy, qpol.qpol_level_t(policy, symbol))
+        return Sensitivity(policy, qpol.qpol_level_t(policy, symbol))
     except ValueError:
         raise InvalidSensitivity("{0} is not a valid sensitivity".format(symbol))
 
@@ -100,7 +100,7 @@ def level_factory(policy, symbol):
     in contexts of labeling statements)
     """
     if isinstance(symbol, qpol.qpol_mls_level_t):
-        return MLSLevel(policy, symbol)
+        return Level(policy, symbol)
 
     sens_split = symbol.split(":")
 
@@ -141,7 +141,7 @@ def level_factory(policy, symbol):
             "{0} is invalid (one or more categories are not associated with the sensitivity)".
             format(symbol))
 
-    return MLSLevel(policy, policy_level)
+    return Level(policy, policy_level)
 
 
 def level_decl_factory(policy, symbol):
@@ -151,10 +151,10 @@ def level_decl_factory(policy, symbol):
     """
 
     if isinstance(symbol, qpol.qpol_level_t):
-        return MLSLevelDecl(policy, symbol)
+        return LevelDecl(policy, symbol)
 
     try:
-        return MLSLevelDecl(policy, qpol.qpol_level_t(policy, symbol))
+        return LevelDecl(policy, qpol.qpol_level_t(policy, symbol))
     except ValueError:
         raise InvalidLevel("{0} is not a valid sensitivity".format(symbol))
 
@@ -162,7 +162,7 @@ def level_decl_factory(policy, symbol):
 def range_factory(policy, symbol):
     """Factory function for creating MLS range objects."""
     if isinstance(symbol, qpol.qpol_mls_range_t):
-        return MLSRange(policy, symbol)
+        return Range(policy, symbol)
 
     # build range:
     levels = symbol.split("-")
@@ -188,10 +188,10 @@ def range_factory(policy, symbol):
         raise InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
                            format(symbol, low, high))
 
-    return MLSRange(policy, policy_range)
+    return Range(policy, policy_range)
 
 
-class MLSCategory(symbol.PolicySymbol):
+class Category(symbol.PolicySymbol):
 
     """An MLS category."""
 
@@ -226,7 +226,7 @@ class MLSCategory(symbol.PolicySymbol):
         return stmt
 
 
-class MLSSensitivity(symbol.PolicySymbol):
+class Sensitivity(symbol.PolicySymbol):
 
     """An MLS sensitivity"""
 
@@ -339,7 +339,7 @@ class BaseMLSLevel(symbol.PolicySymbol):
             yield category_factory(self.policy, cat)
 
 
-class MLSLevelDecl(BaseMLSLevel):
+class LevelDecl(BaseMLSLevel):
 
     """
     The declaration statement for MLS levels, e.g:
@@ -358,7 +358,7 @@ class MLSLevelDecl(BaseMLSLevel):
         return "level {0};".format(self)
 
 
-class MLSLevel(BaseMLSLevel):
+class Level(BaseMLSLevel):
 
     """An MLS level used in contexts."""
 
@@ -371,7 +371,7 @@ class MLSLevel(BaseMLSLevel):
         return sensitivity_factory(self.policy, self.qpol_symbol.sens_name(self.policy))
 
 
-class MLSRange(symbol.PolicySymbol):
+class Range(symbol.PolicySymbol):
 
     """An MLS range"""
 

@@ -16,6 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 from . import boolquery
+from . import categoryquery
 from . import commonquery
 from . import dta
 from . import fsusequery

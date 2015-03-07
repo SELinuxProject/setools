@@ -82,6 +82,13 @@ try:
             q = setools.boolquery.BoolQuery(p)
         components.append(("Booleans", q))
 
+    if args.mlscatsquery or args.all:
+        if isinstance(args.mlscatsquery, str):
+            q = setools.categoryquery.CategoryQuery(p, name=args.mlscatsquery)
+        else:
+            q = setools.categoryquery.CategoryQuery(p)
+        components.append(("Categories", q))
+
     if args.classquery or args.all:
         if isinstance(args.classquery, str):
             q = setools.objclassquery.ObjClassQuery(p, name=args.classquery)
@@ -109,13 +116,6 @@ try:
         else:
             q = setools.initsidquery.InitialSIDQuery(p)
         components.append(("Initial SIDs", q))
-
-    if args.mlscatsquery or args.all:
-        if isinstance(args.mlscatsquery, str):
-            q = setools.mlscategoryquery.MLSCategoryQuery(p, name=args.mlscatsquery)
-        else:
-            q = setools.mlscategoryquery.MLSCategoryQuery(p)
-        components.append(("Categories", q))
 
     if args.netifconquery or args.all:
         if isinstance(args.netifconquery, str):
