@@ -123,7 +123,7 @@ class SELinuxPolicy(object):
     @property
     def category_count(self):
         """The number of categories."""
-        return self.policy.cat_count()
+        return sum(1 for _ in self.categories())
 
     @property
     def class_count(self):
@@ -168,7 +168,7 @@ class SELinuxPolicy(object):
     @property
     def level_count(self):
         """The number of levels."""
-        return self.policy.level_count()
+        return sum(1 for _ in self.levels())
 
     @property
     def mlsconstraint_count(self):
@@ -361,7 +361,12 @@ class SELinuxPolicy(object):
         """Generator which yields all level declarations."""
 
         for level in self.policy.level_iter():
-            yield mls.level_decl_factory(self.policy, level)
+
+            try:
+                yield mls.level_decl_factory(self.policy, level)
+            except TypeError:
+                # libqpol unfortunately iterates over levels and sens aliases
+                pass
 
     def types(self):
         """Generator which yields all types."""

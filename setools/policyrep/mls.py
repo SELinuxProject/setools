@@ -86,6 +86,9 @@ def category_factory(policy, symbol):
 def sensitivity_factory(policy, symbol):
     """Factory function for creating MLS sensitivity objects."""
     if isinstance(symbol, qpol.qpol_level_t):
+        if symbol.isalias(policy):
+            raise TypeError("{0} is an alias".format(symbol.name(policy)))
+
         return Sensitivity(policy, symbol)
 
     try:
@@ -151,6 +154,9 @@ def level_decl_factory(policy, symbol):
     """
 
     if isinstance(symbol, qpol.qpol_level_t):
+        if symbol.isalias(policy):
+            raise TypeError("{0} is an alias".format(symbol.name(policy)))
+
         return LevelDecl(policy, symbol)
 
     try:
@@ -191,20 +197,16 @@ def range_factory(policy, symbol):
     return Range(policy, policy_range)
 
 
-class Category(symbol.PolicySymbol):
+class BaseMLSComponent(symbol.PolicySymbol):
 
-    """An MLS category."""
+    """Abstract base class for sensitivities and categories."""
 
     @property
     def _value(self):
         """
-        The value of the category.
+        The value of the component.
 
-        This is a low-level policy detail exposed so that categories can
-        be sorted based on their policy declaration order instead of
-        by their name.  This has no other use.
-
-        Example usage: sorted(self.categories(), key=lambda k: k._value)
+        This is a low-level policy detail exposed for internal use only.
         """
         return self.qpol_symbol.value(self.policy)
 
@@ -213,6 +215,11 @@ class Category(symbol.PolicySymbol):
 
         for alias in self.qpol_symbol.alias_iter(self.policy):
             yield alias
+
+
+class Category(BaseMLSComponent):
+
+    """An MLS category."""
 
     def statement(self):
         aliases = list(self.aliases())
@@ -226,7 +233,7 @@ class Category(symbol.PolicySymbol):
         return stmt
 
 
-class Sensitivity(symbol.PolicySymbol):
+class Sensitivity(BaseMLSComponent):
 
     """An MLS sensitivity"""
 
@@ -248,18 +255,16 @@ class Sensitivity(symbol.PolicySymbol):
     def __lt__(self, other):
         return (self._value < other._value)
 
-    @property
-    def _value(self):
-        """
-        The value of the sensitivity.
-
-        This is a low-level policy detail exposed so that sensitivities can
-        be compared based on their dominance.  This has no other use.
-        """
-        return self.qpol_symbol.value(self.policy)
-
     def statement(self):
-        return "sensitivity {0};".format(self)
+        aliases = list(self.aliases())
+        stmt = "sensitivity {0}".format(self)
+        if aliases:
+            if len(aliases) > 1:
+                stmt += " alias {{ {0} }}".format(' '.join(aliases))
+            else:
+                stmt += " alias {0}".format(aliases[0])
+        stmt += ";"
+        return stmt
 
 
 class BaseMLSLevel(symbol.PolicySymbol):
