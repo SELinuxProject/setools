@@ -45,6 +45,13 @@ class UserQuery(compquery.ComponentQuery):
         roles_regex     If true, regular expression matching
                         will be used on the role names instead
                         of set logic.
+        level           The criteria to match the user's default level.
+        level_dom       If true, the criteria will match if it dominates
+                        the user's default level.
+        level_domby     If true, the criteria will match if it is dominated
+                        by the user's default level.
+        level_incomp    If true, the criteria will match if it is incomparable
+                        to the user's default level.
         range_          The criteria to match the user's range.
         range_subset    If true, the criteria will match if it is a subset
                         of the user's range.
