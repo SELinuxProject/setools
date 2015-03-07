@@ -21,6 +21,7 @@ from . import commonquery
 from . import dta
 from . import fsusequery
 from . import genfsconquery
+from . import infoflow
 from . import initsidquery
 from . import mlsrulequery
 from . import netifconquery
@@ -28,9 +29,8 @@ from . import nodeconquery
 from . import objclassquery
 from . import permmap
 from . import polcapquery
-from . import infoflow
-from . import terulequery
 from . import rbacrulequery
-from . import typequery
 from . import rolequery
+from . import terulequery
+from . import typequery
 from . import userquery

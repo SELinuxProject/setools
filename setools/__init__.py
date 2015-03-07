@@ -28,19 +28,19 @@ from . import policyrep
 from .policyrep import SELinuxPolicy, InvalidPolicy
 
 # Component Queries
+from . import boolquery
 from . import categoryquery
 from . import commonquery
 from . import objclassquery
-from . import typequery
-from . import rolequery
-from . import userquery
-from . import boolquery
 from . import polcapquery
+from . import rolequery
+from . import typequery
+from . import userquery
 
 # Rule Queries
-from . import terulequery
-from . import rbacrulequery
 from . import mlsrulequery
+from . import rbacrulequery
+from . import terulequery
 
 # In-policy Context Queries
 from . import fsusequery

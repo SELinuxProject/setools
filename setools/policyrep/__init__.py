@@ -33,26 +33,26 @@ from . import qpol
 # be valid for the policy it comes from.
 
 # Components
-from . import default
-from . import objclass
-from . import typeattr
 from . import boolcond
-from . import role
-from . import user
+from . import default
 from . import mls
+from . import objclass
 from . import polcap
+from . import role
+from . import typeattr
+from . import user
 
 # Rules
-from . import terule
-from . import rbacrule
 from . import mlsrule
+from . import rbacrule
+from . import terule
 
 # Constraints
 from . import constraint
 
 # In-policy Labeling
-from . import initsid
 from . import fscontext
+from . import initsid
 from . import netcontext
 
 
