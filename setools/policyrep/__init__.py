@@ -289,6 +289,10 @@ class SELinuxPolicy(object):
         """Look up a MLS level."""
         return mls.level_factory(self.policy, level)
 
+    def lookup_sensitivity(self, name):
+        """Look up a MLS sensitivity by name."""
+        return mls.sensitivity_factory(self.policy, name)
+
     def lookup_range(self, range_):
         """Look up a MLS range."""
         return mls.range_factory(self.policy, range_)
@@ -366,6 +370,17 @@ class SELinuxPolicy(object):
                 yield mls.level_decl_factory(self.policy, level)
             except TypeError:
                 # libqpol unfortunately iterates over levels and sens aliases
+                pass
+
+    def sensitivities(self):
+        """Generator which yields all sensitivities."""
+
+        # see mls.py for more info on why level_iter is used here.
+        for sens in self.policy.level_iter():
+            try:
+                yield mls.sensitivity_factory(self.policy, sens)
+            except TypeError:
+                # libqpol unfortunately iterates over sens and aliases
                 pass
 
     def types(self):

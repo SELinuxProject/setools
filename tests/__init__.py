@@ -31,6 +31,7 @@ from . import permmap
 from . import polcapquery
 from . import rbacrulequery
 from . import rolequery
+from . import sensitivityquery
 from . import terulequery
 from . import typequery
 from . import userquery

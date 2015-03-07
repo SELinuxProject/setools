@@ -34,6 +34,7 @@ from . import commonquery
 from . import objclassquery
 from . import polcapquery
 from . import rolequery
+from . import sensitivityquery
 from . import typequery
 from . import userquery
 

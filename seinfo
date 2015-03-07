@@ -165,6 +165,13 @@ try:
             q = setools.rolequery.RoleQuery(p)
         components.append(("Roles", q))
 
+    if args.mlssensquery or args.all:
+        if isinstance(args.mlssensquery, str):
+            q = setools.sensitivityquery.SensitivityQuery(p, name=args.mlssensquery)
+        else:
+            q = setools.sensitivityquery.SensitivityQuery(p)
+        components.append(("Sensitivities", q))
+
     if args.typequery or args.all:
         if isinstance(args.typequery, str):
             q = setools.typequery.TypeQuery(p, name=args.typequery)
