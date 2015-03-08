@@ -19,9 +19,10 @@
 import re
 
 from . import compquery
+from . import mixins
 
 
-class SensitivityQuery(compquery.ComponentQuery):
+class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
 
     """Query MLS Sensitivities"""
 
@@ -56,10 +57,7 @@ class SensitivityQuery(compquery.ComponentQuery):
             if self.name and not self._match_name(s):
                 continue
 
-            if self.alias and not self._match_in_set(
-                    s.aliases(),
-                    self.alias_cmp,
-                    self.alias_regex):
+            if self.alias and not self._match_alias(s.aliases()):
                 continue
 
             if self.sens and not self._match_level(
@@ -71,35 +69,6 @@ class SensitivityQuery(compquery.ComponentQuery):
                 continue
 
             yield s
-
-    def set_alias(self, alias, **opts):
-        """
-        Set the criteria for the sensitivity's aliases.
-
-        Parameter:
-        alias       Name to match the sensitivity's aliases.
-
-        Keyword Options:
-        regex       If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.alias = alias
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.alias_regex = opts[k]
-            else:
-                raise NameError("Invalid alias option: {0}".format(k))
-
-        if not self.alias:
-            self.alias_cmp = None
-        elif self.alias_regex:
-            self.alias_cmp = re.compile(self.alias)
-        else:
-            self.alias_cmp = self.alias
 
     def set_sensitivity(self, sens, **opts):
         """

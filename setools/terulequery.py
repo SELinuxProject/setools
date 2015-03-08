@@ -19,10 +19,11 @@
 import re
 
 from .policyrep.rule import InvalidRuleUse, RuleNotConditional
+from . import mixins
 from . import rulequery
 
 
-class TERuleQuery(rulequery.RuleQuery):
+class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
 
     """Query the Type Enforcement rules."""
 
@@ -107,10 +108,7 @@ class TERuleQuery(rulequery.RuleQuery):
             #
             # Matching on object class
             #
-            if self.tclass and not self._match_object_class(
-                    r.tclass,
-                    self.tclass_cmp,
-                    self.tclass_regex):
+            if self.tclass and not self._match_object_class(r.tclass):
                 continue
 
             #
@@ -118,10 +116,7 @@ class TERuleQuery(rulequery.RuleQuery):
             #
             if self.perms:
                 try:
-                    if not self._match_set(
-                            r.perms,
-                            self.perms,
-                            self.perms_equal):
+                    if not self._match_perms(r.perms):
                         continue
                 except InvalidRuleUse:
                     continue
@@ -187,34 +182,6 @@ class TERuleQuery(rulequery.RuleQuery):
             self.boolean_cmp = re.compile(self.boolean)
         else:
             self.boolean_cmp = set(self.policy.lookup_boolean(b) for b in self.boolean)
-
-    def set_perms(self, perms, **opts):
-        """
-        Set the permission set for the TE rule query.
-
-        Parameter:
-        perms       The permissions to match.
-
-        Options:
-        equal       If true, the permission set of the rule
-                    must equal the permissions criteria to
-                    match. If false, permission in the critera
-                    will cause a rule match.
-
-        Exceptions:
-        NameError   Invalid permission set keyword option.
-        """
-
-        if isinstance(perms, str):
-            self.perms = perms
-        else:
-            self.perms = set(perms)
-
-        for k in list(opts.keys()):
-            if k == "equal":
-                self.perms_equal = opts[k]
-            else:
-                raise NameError("Invalid permission set option: {0}".format(k))
 
     def set_default(self, default, **opts):
         """

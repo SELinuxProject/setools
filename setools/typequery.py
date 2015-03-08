@@ -19,9 +19,10 @@
 import re
 
 from . import compquery
+from . import mixins
 
 
-class TypeQuery(compquery.ComponentQuery):
+class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
 
     """Query SELinux policy types."""
 
@@ -64,10 +65,7 @@ class TypeQuery(compquery.ComponentQuery):
             if self.name and not self._match_name(t):
                 continue
 
-            if self.alias and not self._match_in_set(
-                    t.aliases(),
-                    self.alias_cmp,
-                    self.alias_regex):
+            if self.alias and not self._match_alias(t.aliases()):
                 continue
 
             if self.attrs and not self._match_regex_or_set(
@@ -81,35 +79,6 @@ class TypeQuery(compquery.ComponentQuery):
                 continue
 
             yield t
-
-    def set_alias(self, alias, **opts):
-        """
-        Set the criteria for the type's aliases.
-
-        Parameter:
-        alias       Name to match the component's aliases.
-
-        Keyword Options:
-        regex       If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.alias = alias
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.alias_regex = opts[k]
-            else:
-                raise NameError("Invalid alias option: {0}".format(k))
-
-        if not self.alias:
-            self.alias_cmp = None
-        elif self.alias_regex:
-            self.alias_cmp = re.compile(self.alias)
-        else:
-            self.alias_cmp = self.alias
 
     def set_attrs(self, attrs, **opts):
         """

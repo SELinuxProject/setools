@@ -86,10 +86,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             # Matching on object class
             #
-            if self.tclass and not self._match_object_class(
-                    r.tclass,
-                    self.tclass_cmp,
-                    self.tclass_regex):
+            if self.tclass and not self._match_object_class(r.tclass):
                 continue
 
             #

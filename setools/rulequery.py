@@ -18,10 +18,11 @@
 #
 import re
 
+from . import mixins
 from .query import PolicyQuery
 
 
-class RuleQuery(PolicyQuery):
+class RuleQuery(mixins.MatchObjClass, PolicyQuery):
 
     """Abstract base class for rule queries."""
 
@@ -48,24 +49,6 @@ class RuleQuery(PolicyQuery):
                 obj,
                 criteria,
                 regex)
-
-    @staticmethod
-    def _match_object_class(obj, criteria, regex):
-        """
-        Match the object class with optional regular expression.
-
-        Parameters:
-        obj         The object to match.
-        criteria    The criteria to match.
-        regex       If regular expression matching should be used.
-        """
-
-        if isinstance(criteria, set):
-            return (obj in criteria)
-        elif regex:
-            return bool(criteria.search(str(obj)))
-        else:
-            return (obj == criteria)
 
     def set_ruletype(self, ruletype):
         """
@@ -144,41 +127,6 @@ class RuleQuery(PolicyQuery):
             self.target_cmp = re.compile(self.target)
         else:
             self.target_cmp = self.policy.lookup_type_or_typeattr(self.target)
-
-    def set_tclass(self, tclass, **opts):
-        """
-        Set the object class(es) for the rule query.
-
-        Parameter:
-        tclass	    The name of the object classes to match.
-                    This must be a string if regular expression
-                    matching is used.
-
-        Keyword Options:
-        regex       If true, use a regular expression for
-                    matching the object class. If false, any
-                    set intersection will match.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.tclass = tclass
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.tclass_regex = opts[k]
-            else:
-                raise NameError("Invalid object class option: {0}".format(k))
-
-        if not self.tclass:
-            self.tclass_cmp = None
-        elif self.tclass_regex:
-            self.tclass_cmp = re.compile(self.tclass)
-        elif isinstance(self.tclass, str):
-            self.tclass_cmp = self.policy.lookup_class(self.tclass)
-        else:
-            self.tclass_cmp = set(self.policy.lookup_class(c) for c in self.tclass)
 
     def set_default(self, default, **opts):
         raise NotImplementedError
