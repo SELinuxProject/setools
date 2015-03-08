@@ -63,7 +63,7 @@ queries.add_argument("--nodecon", help="Print nodecon statements.", dest="nodeco
                      default=None, nargs='?', const=True, metavar="ADDR")
 queries.add_argument("--portcon", help="Print portcon statements.", dest="portconquery",
                      default=None, nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
-queries.add_argument("--permissive", help="Print permissive statements.", dest="permissivequery",
+queries.add_argument("--permissive", help="Print permissive types.", dest="permissivequery",
                      default=None, nargs='?', const=True, metavar="TYPE")
 queries.add_argument("--polcap", help="Print policy capabilities.", dest="polcapquery",
                      default=None, nargs='?', const=True, metavar="NAME")
@@ -138,6 +138,14 @@ try:
         else:
             q = setools.nodeconquery.NodeconQuery(p)
         components.append(("Nodecon", q))
+
+    if args.permissivequery or args.all:
+        if isinstance(args.permissivequery, str):
+            q = setools.typequery.TypeQuery(p, name=args.permissivequery,
+                                            permissive=True, match_permissive=True)
+        else:
+            q = setools.typequery.TypeQuery(p, permissive=True, match_permissive=True)
+        components.append(("Permissive Types", q))
 
     if args.polcapquery or args.all:
         if isinstance(args.polcapquery, str):
