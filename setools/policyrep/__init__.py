@@ -80,7 +80,6 @@ class SELinuxPolicy(object):
     #
     # Policy properties
     #
-
     @property
     def handle_unknown(self):
         """The handle unknown permissions setting (allow,deny,reject)"""
@@ -305,7 +304,7 @@ class SELinuxPolicy(object):
         return typeattr.type_factory(self.policy, name, deref=True)
 
     def lookup_type_or_typeattr(self, name):
-        """Look up a type or type attributeby name."""
+        """Look up a type or type attribute by name."""
         return typeattr.typeattr_factory(self.policy, name, deref=True)
 
     def lookup_user(self, name):
@@ -325,6 +324,12 @@ class SELinuxPolicy(object):
             except TypeError:
                 # libqpol unfortunately iterates over attributes and aliases
                 pass
+
+    def bools(self):
+        """Generator which yields all Booleans."""
+
+        for bool_ in self.policy.bool_iter():
+            yield boolcond.boolean_factory(self.policy, bool_)
 
     def categories(self):
         """Generator which yields all MLS categories."""
@@ -371,6 +376,18 @@ class SELinuxPolicy(object):
                 # libqpol unfortunately iterates over levels and sens aliases
                 pass
 
+    def polcaps(self):
+        """Generator which yields all policy capabilities."""
+
+        for cap in self.policy.polcap_iter():
+            yield polcap.polcap_factory(self.policy, cap)
+
+    def roles(self):
+        """Generator which yields all roles."""
+
+        for role_ in self.policy.role_iter():
+            yield role.role_factory(self.policy, role_)
+
     def sensitivities(self):
         """Generator which yields all sensitivities."""
 
@@ -392,40 +409,20 @@ class SELinuxPolicy(object):
                 # libqpol unfortunately iterates over attributes and aliases
                 pass
 
-    def roles(self):
-        """Generator which yields all roles."""
-
-        for role_ in self.policy.role_iter():
-            yield role.role_factory(self.policy, role_)
-
     def users(self):
         """Generator which yields all users."""
 
         for user_ in self.policy.user_iter():
             yield user.user_factory(self.policy, user_)
 
-    def bools(self):
-        """Generator which yields all Booleans."""
-
-        for bool_ in self.policy.bool_iter():
-            yield boolcond.boolean_factory(self.policy, bool_)
-
-    def polcaps(self):
-        """Generator which yields all policy capabilities."""
-
-        for cap in self.policy.polcap_iter():
-            yield polcap.polcap_factory(self.policy, cap)
-
     #
     # Policy rules generators
     #
-    def terules(self):
-        """Generator which yields all type enforcement rules."""
+    def mlsrules(self):
+        """Generator which yields all MLS rules."""
 
-        for rule in chain(self.policy.avrule_iter(),
-                          self.policy.terule_iter(),
-                          self.policy.filename_trans_iter()):
-            yield terule.te_rule_factory(self.policy, rule)
+        for rule in self.policy.range_trans_iter():
+            yield mlsrule.mls_rule_factory(self.policy, rule)
 
     def rbacrules(self):
         """Generator which yields all RBAC rules."""
@@ -434,11 +431,13 @@ class SELinuxPolicy(object):
                           self.policy.role_trans_iter()):
             yield rbacrule.rbac_rule_factory(self.policy, rule)
 
-    def mlsrules(self):
-        """Generator which yields all MLS rules."""
+    def terules(self):
+        """Generator which yields all type enforcement rules."""
 
-        for rule in self.policy.range_trans_iter():
-            yield mlsrule.mls_rule_factory(self.policy, rule)
+        for rule in chain(self.policy.avrule_iter(),
+                          self.policy.terule_iter(),
+                          self.policy.filename_trans_iter()):
+            yield terule.te_rule_factory(self.policy, rule)
 
     #
     # Constraints generators
@@ -459,12 +458,6 @@ class SELinuxPolicy(object):
     #
     # In-policy Labeling statement generators
     #
-    def initialsids(self):
-        """Generator which yields all initial SID statements."""
-
-        for sid in self.policy.isid_iter():
-            yield initsid.initialsid_factory(self.policy, sid)
-
     def fs_uses(self):
         """Generator which yields all fs_use_* statements."""
 
@@ -476,6 +469,12 @@ class SELinuxPolicy(object):
 
         for fscon in self.policy.genfscon_iter():
             yield fscontext.genfscon_factory(self.policy, fscon)
+
+    def initialsids(self):
+        """Generator which yields all initial SID statements."""
+
+        for sid in self.policy.isid_iter():
+            yield initsid.initialsid_factory(self.policy, sid)
 
     def netifcons(self):
         """Generator which yields all netifcon statements."""

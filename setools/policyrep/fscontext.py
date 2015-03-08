@@ -23,15 +23,6 @@ from . import symbol
 from . import context
 
 
-def genfscon_factory(policy, symbol):
-    """Factory function for creating genfscon objects."""
-
-    if not isinstance(symbol, qpol.qpol_genfscon_t):
-        raise TypeError("Genfscons cannot be looked-up.")
-
-    return Genfscon(policy, symbol)
-
-
 def fs_use_factory(policy, symbol):
     """Factory function for creating fs_use_* objects."""
 
@@ -39,6 +30,15 @@ def fs_use_factory(policy, symbol):
         raise TypeError("fs_use_* cannot be looked-up.")
 
     return FSUse(policy, symbol)
+
+
+def genfscon_factory(policy, symbol):
+    """Factory function for creating genfscon objects."""
+
+    if not isinstance(symbol, qpol.qpol_genfscon_t):
+        raise TypeError("Genfscons cannot be looked-up.")
+
+    return Genfscon(policy, symbol)
 
 
 class FSContext(symbol.PolicySymbol):

@@ -32,6 +32,14 @@ class InvalidClass(symbol.InvalidSymbol):
     pass
 
 
+class NoCommon(Exception):
+
+    """
+    Exception when a class does not inherit a common permission set.
+    """
+    pass
+
+
 def common_factory(policy, name):
     """Factory function for creating common permission set objects."""
 
@@ -74,14 +82,6 @@ class Common(symbol.PolicySymbol):
 
     def statement(self):
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
-
-
-class NoCommon(Exception):
-
-    """
-    Exception when a class does not inherit a common permission set.
-    """
-    pass
 
 
 class ObjClass(Common):
