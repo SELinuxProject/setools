@@ -41,10 +41,7 @@ class PolCapQuery(compquery.ComponentQuery):
         """Generator which yields all matching policy capabilities."""
 
         for cap in self.policy.polcaps():
-            if self.name and not self._match_regex(
-                    cap,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(cap):
                 continue
 
             yield cap

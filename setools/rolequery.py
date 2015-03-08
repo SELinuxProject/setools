@@ -59,10 +59,7 @@ class RoleQuery(compquery.ComponentQuery):
                 # will confuse, especially for set equality type queries.
                 continue
 
-            if self.name and not self._match_regex(
-                    r,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(r):
                 continue
 
             if self.types and not self._match_regex_or_set(

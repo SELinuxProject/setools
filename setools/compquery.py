@@ -25,6 +25,10 @@ class ComponentQuery(query.PolicyQuery):
 
     """Abstract base class for SETools component queries."""
 
+    def _match_name(self, obj):
+        """Match the object to the name criteria."""
+        return self._match_regex(obj, self.name_cmp, self.name_regex)
+
     def set_name(self, name, **opts):
         """
         Set the criteria for matching the component's name.

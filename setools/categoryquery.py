@@ -46,10 +46,7 @@ class CategoryQuery(compquery.ComponentQuery):
         """Generator which yields all matching categories."""
 
         for cat in self.policy.categories():
-            if self.name and not self._match_regex(
-                    cat,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(cat):
                 continue
 
             if self.alias and not self._match_in_set(

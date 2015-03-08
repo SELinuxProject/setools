@@ -53,10 +53,7 @@ class SensitivityQuery(compquery.ComponentQuery):
         """Generator which yields all matching sensitivities."""
 
         for s in self.policy.sensitivities():
-            if self.name and not self._match_regex(
-                    s,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(s):
                 continue
 
             if self.alias and not self._match_in_set(

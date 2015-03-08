@@ -50,10 +50,7 @@ class CommonQuery(compquery.ComponentQuery):
         """Generator which yields all matching commons."""
 
         for com in self.policy.commons():
-            if self.name and not self._match_regex(
-                    com,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(com):
                 continue
 
             if self.perms and not self._match_regex_or_set(

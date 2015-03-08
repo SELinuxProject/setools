@@ -61,10 +61,7 @@ class TypeQuery(compquery.ComponentQuery):
         """Generator which yields all matching types."""
 
         for t in self.policy.types():
-            if self.name and not self._match_regex(
-                    t,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(t):
                 continue
 
             if self.alias and not self._match_in_set(

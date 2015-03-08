@@ -46,10 +46,7 @@ class BoolQuery(compquery.ComponentQuery):
         """Generator which yields all Booleans matching the criteria."""
 
         for b in self.policy.bools():
-            if self.name and not self._match_regex(
-                    b,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(b):
                 continue
 
             if self.match_default and b.state() != self.default:

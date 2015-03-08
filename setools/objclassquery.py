@@ -62,10 +62,7 @@ class ObjClassQuery(compquery.ComponentQuery):
         """Generator which yields all matching object classes."""
 
         for class_ in self.policy.classes():
-            if self.name and not self._match_regex(
-                    class_,
-                    self.name_cmp,
-                    self.name_regex):
+            if self.name and not self._match_name(class_):
                 continue
 
             if self.common:
