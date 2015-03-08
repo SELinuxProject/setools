@@ -43,6 +43,9 @@ from . import mlsrulequery
 from . import rbacrulequery
 from . import terulequery
 
+# Constraint queries
+from . import constraintquery
+
 # In-policy Context Queries
 from . import fsusequery
 from . import genfsconquery

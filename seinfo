@@ -97,6 +97,13 @@ try:
             q = setools.objclassquery.ObjClassQuery(p)
         components.append(("Classes", q))
 
+    if args.constraintquery or args.all:
+        if isinstance(args.constraintquery, str):
+            q = setools.constraintquery.ConstraintQuery(p, tclass=args.constraintquery)
+        else:
+            q = setools.constraintquery.ConstraintQuery(p)
+        components.append(("Constraints", q))
+
     if args.fsusequery or args.all:
         if isinstance(args.fsusequery, str):
             q = setools.fsusequery.FSUseQuery(p, fs=args.fsusequery)

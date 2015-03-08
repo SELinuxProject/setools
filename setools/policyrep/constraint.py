@@ -35,51 +35,29 @@ def _is_mls(policy, symbol):
 
 
 def constraint_factory(policy, symbol):
-    """Factory function for creating regular constraint objects."""
+    """Factory function for creating constraint objects."""
 
     try:
         if _is_mls(policy, symbol):
-            raise TypeError("Symbol is not a constrain.")
+            return Constraint(policy, symbol, "mlsconstrain")
+        else:
+            return Constraint(policy, symbol, "constrain")
+
     except AttributeError:
         raise TypeError("Constraints cannot be looked-up.")
 
-    return Constraint(policy, symbol, "constrain")
-
-
-def mlsconstraint_factory(policy, symbol):
-    """Factory function for creating MLS constraint objects."""
-
-    try:
-        if not _is_mls(policy, symbol):
-            raise TypeError("Symbol is not a mlsconstrain.")
-    except AttributeError:
-        raise TypeError("mlsconstrain cannot be looked-up.")
-
-    return Constraint(policy, symbol, "mlsconstrain")
-
 
 def validatetrans_factory(policy, symbol):
-    """Factory function for creating regular validatetrans objects."""
+    """Factory function for creating validatetrans objects."""
 
     try:
         if _is_mls(policy, symbol):
-            raise TypeError("Symbol is not a validatetrans.")
+            return Validatetrans(policy, symbol, "mlsvalidatetrans")
+        else:
+            return Validatetrans(policy, symbol, "validatetrans")
+
     except AttributeError:
         raise TypeError("validatetrans cannot be looked-up.")
-
-    return Validatetrans(policy, symbol, "validatetrans")
-
-
-def mlsvalidatetrans_factory(policy, symbol):
-    """Factory function for creating MLS validatetrans objects."""
-
-    try:
-        if not _is_mls(policy, symbol):
-            raise TypeError("Symbol is not a mlsvalidatetrans.")
-    except AttributeError:
-        raise TypeError("mlsvalidatetrans cannot be looked-up.")
-
-    return Validatetrans(policy, symbol, "mlsvalidatetrans")
 
 
 class BaseConstraint(symbol.PolicySymbol):

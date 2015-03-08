@@ -143,7 +143,7 @@ class SELinuxPolicy(object):
     @property
     def constraint_count(self):
         """The number of standard constraints."""
-        return sum(1 for _ in self.constraints())
+        return sum(1 for c in self.constraints() if c.ruletype == "constrain")
 
     @property
     def dontaudit_count(self):
@@ -173,12 +173,12 @@ class SELinuxPolicy(object):
     @property
     def mlsconstraint_count(self):
         """The number of MLS constraints."""
-        return sum(1 for _ in self.mlsconstraints())
+        return sum(1 for c in self.constraints() if c.ruletype == "mlsconstrain")
 
     @property
     def mlsvalidatetrans_count(self):
         """The number of MLS validatetrans."""
-        return sum(1 for _ in self.mlsvalidatetrans())
+        return sum(1 for v in self.validatetrans() if v.ruletype == "mlsvalidatetrans")
 
     @property
     def netifcon_count(self):
@@ -263,12 +263,11 @@ class SELinuxPolicy(object):
     @property
     def validatetrans_count(self):
         """The number of validatetrans."""
-        return sum(1 for _ in self.validatetrans())
+        return sum(1 for v in self.validatetrans() if v.ruletype == "validatetrans")
 
     #
     # Policy components lookup functions
     #
-
     def lookup_attribute(self, name):
         """Look up an attribute by name."""
         return typeattr.attribute_factory(self.policy, name)
@@ -446,40 +445,16 @@ class SELinuxPolicy(object):
     #
 
     def constraints(self):
-        """Generator which yields all constraints."""
+        """Generator which yields all constraints (regular and MLS)."""
 
         for constraint_ in self.policy.constraint_iter():
-            try:
-                yield constraint.constraint_factory(self.policy, constraint_)
-            except TypeError:
-                pass
-
-    def mlsconstraints(self):
-        """Generator which yields all MLS constraints."""
-
-        for constraint_ in self.policy.constraint_iter():
-            try:
-                yield constraint.mlsconstraint_factory(self.policy, constraint_)
-            except TypeError:
-                pass
-
-    def mlsvalidatetrans(self):
-        """Generator which yields all mlsvalidatetrans."""
-
-        for validatetrans in self.policy.validatetrans_iter():
-            try:
-                yield constraint.mlsvalidatetrans_factory(self.policy, validatetrans)
-            except TypeError:
-                pass
+            yield constraint.constraint_factory(self.policy, constraint_)
 
     def validatetrans(self):
-        """Generator which yields all validatetrans."""
+        """Generator which yields all validatetrans (regular and MLS)."""
 
         for validatetrans in self.policy.validatetrans_iter():
-            try:
-                yield constraint.validatetrans_factory(self.policy, validatetrans)
-            except TypeError:
-                pass
+            yield constraint.validatetrans_factory(self.policy, validatetrans)
 
     #
     # In-policy Labeling statement generators
