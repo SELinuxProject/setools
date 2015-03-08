@@ -18,11 +18,10 @@
 #
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
-from . import compquery
 from . import contextquery
 
 
-class PortconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
+class PortconQuery(contextquery.ContextQuery):
 
     """Port context query."""
 
