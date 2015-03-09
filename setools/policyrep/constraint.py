@@ -17,8 +17,11 @@
 # <http://www.gnu.org/licenses/>.
 #
 from . import qpol
+from . import role
 from . import symbol
 from . import objclass
+from . import typeattr
+from . import user
 
 
 def _is_mls(policy, symbol):
@@ -183,6 +186,24 @@ class BaseConstraint(symbol.PolicySymbol):
 
         return self.__unwind_subexpression(stack)
 
+    def _get_symbols(self, syms, factory):
+        """
+        Internal generator for getting users/roles/types in a constraint
+        expression.  Symbols will be yielded multiple times if they appear
+        in the expression multiple times.
+
+        Parameters:
+        syms        List of qpol symbol types.
+        factory     The factory function related to these symbols.
+        """
+        for expr_node in self.qpol_symbol.expr_iter(self.policy):
+            sym_type = expr_node.sym_type(self.policy)
+            expr_type = expr_node.expr_type(self.policy)
+
+            if expr_type == qpol.QPOL_CEXPR_TYPE_NAMES and sym_type in syms:
+                for s in expr_node.names_iter(self.policy):
+                    yield factory(self.policy, s)
+
     def __unwind_subexpression(self, expr):
         ret = []
 
@@ -195,6 +216,19 @@ class BaseConstraint(symbol.PolicySymbol):
 
         return ' '.join(ret)
 
+    # There is no levels function as specific
+    # levels cannot be used in expressions, only
+    # the l1, h1, etc. symbols
+
+    @property
+    def roles(self):
+        """The roles used in the expression."""
+        role_syms = [qpol.QPOL_CEXPR_SYM_ROLE,
+                     qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_TARGET,
+                     qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_XTARGET]
+
+        return set(self._get_symbols(role_syms, role.role_factory))
+
     def statement(self):
         return str(self)
 
@@ -202,6 +236,24 @@ class BaseConstraint(symbol.PolicySymbol):
     def tclass(self):
         """Object class for this constraint."""
         return objclass.class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
+
+    @property
+    def types(self):
+        """The types and type attributes used in the expression."""
+        type_syms = [qpol.QPOL_CEXPR_SYM_TYPE,
+                     qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_TARGET,
+                     qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_XTARGET]
+
+        return set(self._get_symbols(type_syms, typeattr.typeattr_factory))
+
+    @property
+    def users(self):
+        """The users used in the expression."""
+        user_syms = [qpol.QPOL_CEXPR_SYM_USER,
+                     qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_TARGET,
+                     qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_XTARGET]
+
+        return set(self._get_symbols(user_syms, user.user_factory))
 
 
 class Constraint(BaseConstraint):
