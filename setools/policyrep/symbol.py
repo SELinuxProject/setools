@@ -49,16 +49,11 @@ class PolicySymbol(object):
 
     def __hash__(self):
         try:
-            return hash(self.qpol_symbol.value(self.policy))
+            return hash(self.qpol_symbol.name(self.policy))
         except:
             return NotImplemented
 
     def __eq__(self, other):
-        # this assumes the policy for both objects is the same.
-        # if this is not the case, the subclass will need to
-        # handle the comparison as there is insufficient
-        # information here.
-
         try:
             return (self.qpol_symbol.this == other.qpol_symbol.this)
         except AttributeError:
