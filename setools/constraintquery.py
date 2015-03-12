@@ -88,7 +88,7 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery)
         if indirect:
             obj = set()
             for item in expr:
-                obj |= set(item.expand())
+                obj.update(item.expand())
         else:
             obj = expr
 

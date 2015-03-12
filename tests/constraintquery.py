@@ -70,9 +70,51 @@ class ConstraintQueryTest(unittest.TestCase):
         constraint = sorted(c.tclass for c in q.results())
         self.assertListEqual(["test20a", "test20b"], constraint)
 
-    def test_020_perms_equal(self):
+    def test_021_perms_equal(self):
         """Constraint query with permission set equality match."""
         q = ConstraintQuery(self.p, perms=["test21ap", "test21bp"], perms_equal=True)
 
         constraint = sorted(c.tclass for c in q.results())
         self.assertListEqual(["test21c"], constraint)
+
+    def test_030_role_match_single(self):
+        """Constraint query with role match."""
+        q = ConstraintQuery(self.p, role="test30r")
+
+        constraint = sorted(c.tclass for c in q.results())
+        self.assertListEqual(["test30"], constraint)
+
+    def test_031_role_match_regex(self):
+        """Constraint query with regex role match."""
+        q = ConstraintQuery(self.p, role="test31r.", role_regex=True)
+
+        constraint = sorted(c.tclass for c in q.results())
+        self.assertListEqual(["test31a", "test31b"], constraint)
+
+    def test_040_type_match_single(self):
+        """Constraint query with type match."""
+        q = ConstraintQuery(self.p, type_="test40t")
+
+        constraint = sorted(c.tclass for c in q.results())
+        self.assertListEqual(["test40"], constraint)
+
+    def test_041_type_match_regex(self):
+        """Constraint query with regex type match."""
+        q = ConstraintQuery(self.p, type_="test41t.", type_regex=True)
+
+        constraint = sorted(c.tclass for c in q.results())
+        self.assertListEqual(["test41a", "test41b"], constraint)
+
+    def test_050_user_match_single(self):
+        """Constraint query with user match."""
+        q = ConstraintQuery(self.p, user="test50u")
+
+        constraint = sorted(c.tclass for c in q.results())
+        self.assertListEqual(["test50"], constraint)
+
+    def test_051_user_match_regex(self):
+        """Constraint query with regex user match."""
+        q = ConstraintQuery(self.p, user="test51u.", user_regex=True)
+
+        constraint = sorted(c.tclass for c in q.results())
+        self.assertListEqual(["test51a", "test51b"], constraint)
