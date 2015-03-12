@@ -190,7 +190,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
             self.target_cmp = re.compile(self.target)
         else:
             try:
-                self.target_cmp = self.policy.lookup_type_or_typeattr(self.target)
+                self.target_cmp = self.policy.lookup_type_or_attr(self.target)
             except InvalidType:
                 self.target_cmp = self.policy.lookup_role(self.target)
 

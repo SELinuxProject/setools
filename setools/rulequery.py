@@ -92,7 +92,7 @@ class RuleQuery(mixins.MatchObjClass, PolicyQuery):
         elif self.source_regex:
             self.source_cmp = re.compile(self.source)
         else:
-            self.source_cmp = self.policy.lookup_type_or_typeattr(self.source)
+            self.source_cmp = self.policy.lookup_type_or_attr(self.source)
 
     def set_target(self, target, **opts):
         """
@@ -126,7 +126,7 @@ class RuleQuery(mixins.MatchObjClass, PolicyQuery):
         elif self.target_regex:
             self.target_cmp = re.compile(self.target)
         else:
-            self.target_cmp = self.policy.lookup_type_or_typeattr(self.target)
+            self.target_cmp = self.policy.lookup_type_or_attr(self.target)
 
     def set_default(self, default, **opts):
         raise NotImplementedError

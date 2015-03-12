@@ -64,7 +64,7 @@ class Role(BaseRole):
         """Generator which yields the role's set of types."""
 
         for type_ in self.qpol_symbol.type_iter(self.policy):
-            yield typeattr.typeattr_factory(self.policy, type_)
+            yield typeattr.type_or_attr_factory(self.policy, type_)
 
     def statement(self):
         types = list(str(t) for t in self.types())

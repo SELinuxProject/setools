@@ -69,7 +69,7 @@ def type_factory(qpol_policy, name, deref=False):
     return Type(qpol_policy, qpol_symbol)
 
 
-def typeattr_factory(qpol_policy, name, deref=False):
+def type_or_attr_factory(qpol_policy, name, deref=False):
     """Factory function for creating type or attribute objects."""
 
     qpol_symbol = _symbol_lookup(qpol_policy, name)

@@ -244,7 +244,7 @@ class BaseConstraint(symbol.PolicySymbol):
                      qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_TARGET,
                      qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_XTARGET]
 
-        return set(self._get_symbols(type_syms, typeattr.typeattr_factory))
+        return set(self._get_symbols(type_syms, typeattr.type_or_attr_factory))
 
     @property
     def users(self):

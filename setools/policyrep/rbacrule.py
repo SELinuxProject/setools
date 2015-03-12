@@ -78,7 +78,7 @@ class RoleTransition(rule.PolicyRule):
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return typeattr.typeattr_factory(self.policy, self.qpol_symbol.target_type(self.policy))
+        return typeattr.type_or_attr_factory(self.policy, self.qpol_symbol.target_type(self.policy))
 
     @property
     def default(self):

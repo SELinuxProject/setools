@@ -42,12 +42,12 @@ class MLSRule(rule.PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        return typeattr.typeattr_factory(self.policy, self.qpol_symbol.source_type(self.policy))
+        return typeattr.type_or_attr_factory(self.policy, self.qpol_symbol.source_type(self.policy))
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return typeattr.typeattr_factory(self.policy, self.qpol_symbol.target_type(self.policy))
+        return typeattr.type_or_attr_factory(self.policy, self.qpol_symbol.target_type(self.policy))
 
     @property
     def default(self):

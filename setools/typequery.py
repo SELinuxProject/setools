@@ -114,7 +114,7 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
         elif self.attrs_regex:
             self.attrs_cmp = re.compile(self.attrs)
         else:
-            self.attrs_cmp = set(self.policy.lookup_attribute(a) for a in self.attrs)
+            self.attrs_cmp = set(self.policy.lookup_typeattr(a) for a in self.attrs)
 
     def set_permissive(self, match, **opts):
         """

@@ -267,10 +267,6 @@ class SELinuxPolicy(object):
     #
     # Policy components lookup functions
     #
-    def lookup_attribute(self, name):
-        """Look up an attribute by name."""
-        return typeattr.attribute_factory(self.policy, name)
-
     def lookup_boolean(self, name):
         """Look up a Boolean."""
         return boolcond.boolean_factory(self.policy, name)
@@ -303,9 +299,13 @@ class SELinuxPolicy(object):
         """Look up a type by name."""
         return typeattr.type_factory(self.policy, name, deref=True)
 
-    def lookup_type_or_typeattr(self, name):
+    def lookup_type_or_attr(self, name):
         """Look up a type or type attribute by name."""
-        return typeattr.typeattr_factory(self.policy, name, deref=True)
+        return typeattr.type_or_attr_factory(self.policy, name, deref=True)
+
+    def lookup_typeattr(self, name):
+        """Look up a type attribute by name."""
+        return typeattr.attribute_factory(self.policy, name)
 
     def lookup_user(self, name):
         """Look up a user by name."""
