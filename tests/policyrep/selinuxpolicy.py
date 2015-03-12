@@ -17,6 +17,7 @@
 #
 from __future__ import print_function
 import os
+import sys
 import subprocess
 import tempfile
 import unittest
@@ -56,7 +57,8 @@ class SELinuxPolicyTest(unittest.TestCase):
     def test_001_open_policy_error(self):
         """SELinuxPolicy: Invalid policy on open."""
         self.assertRaises(InvalidPolicy, SELinuxPolicy, "tests/policyrep/selinuxpolicy-bad.conf")
-        print("The \"category can not be associated\" error above is expected.")
+        sys.stderr.write(
+            "The \"category can not be associated\" error above is expected.")
 
     def test_002_open_policy_non_existant(self):
         """SELinuxPolicy: Non existant policy on open."""
