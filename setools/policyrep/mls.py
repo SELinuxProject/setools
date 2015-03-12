@@ -375,6 +375,9 @@ class Level(BaseMLSLevel):
         """The sensitivity of the level."""
         return sensitivity_factory(self.policy, self.qpol_symbol.sens_name(self.policy))
 
+    def statement(self):
+        return symbol.NoStatement
+
 
 class Range(symbol.PolicySymbol):
 
@@ -414,3 +417,6 @@ class Range(symbol.PolicySymbol):
     def low(self):
         """The low end/current level of this range."""
         return level_factory(self.policy, self.qpol_symbol.low_level(self.policy))
+
+    def statement(self):
+        raise symbol.NoStatement

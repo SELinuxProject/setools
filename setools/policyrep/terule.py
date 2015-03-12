@@ -105,11 +105,11 @@ class AVRule(BaseTERule):
     @property
     def default(self):
         """The rule's default type."""
-        raise rule.InvalidRuleUse("{0} rules do not have a default type.".format(self.ruletype))
+        raise rule.RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
 
     @property
     def filename(self):
-        raise rule.InvalidRuleUse("{0} rules do not have file names".format(self.ruletype))
+        raise rule.RuleUseError("{0} rules do not have file names".format(self.ruletype))
 
 
 class TERule(BaseTERule):
@@ -121,7 +121,7 @@ class TERule(BaseTERule):
 
         try:
             rule_string += " \"{0}\";".format(self.filename)
-        except (TERuleNoFilename, rule.InvalidRuleUse):
+        except (TERuleNoFilename, rule.RuleUseError):
             # invalid use for type_change/member
             rule_string += ";"
 
@@ -135,7 +135,7 @@ class TERule(BaseTERule):
     @property
     def perms(self):
         """The rule's permission set."""
-        raise rule.InvalidRuleUse(
+        raise rule.RuleUseError(
             "{0} rules do not have a permission set.".format(self.ruletype))
 
     @property
@@ -144,7 +144,7 @@ class TERule(BaseTERule):
         try:
             return typeattr.type_factory(self.policy, self.qpol_symbol.default_type(self.policy))
         except AttributeError:
-            raise rule.InvalidRuleUse("{0} rules do not have a default type.".format(self.ruletype))
+            raise rule.RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
 
     @property
     def filename(self):
@@ -155,4 +155,4 @@ class TERule(BaseTERule):
             if self.ruletype == "type_transition":
                 raise TERuleNoFilename
             else:
-                raise rule.InvalidRuleUse("{0} rules do not have file names".format(self.ruletype))
+                raise rule.RuleUseError("{0} rules do not have file names".format(self.ruletype))

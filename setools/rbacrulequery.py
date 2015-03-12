@@ -18,7 +18,7 @@
 #
 import re
 
-from .policyrep.rule import InvalidRuleUse
+from .policyrep.rule import RuleUseError
 from .policyrep.typeattr import InvalidType
 
 from . import rulequery
@@ -104,7 +104,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
                 try:
                     if not self._match_object_class(r.tclass):
                         continue
-                except InvalidRuleUse:
+                except RuleUseError:
                     continue
 
             #
@@ -117,7 +117,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
                             self.default_cmp,
                             self.default_regex):
                         continue
-                except InvalidRuleUse:
+                except RuleUseError:
                     continue
 
             # if we get here, we have matched all available criteria

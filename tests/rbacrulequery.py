@@ -19,7 +19,7 @@ import unittest
 
 from setools import SELinuxPolicy
 from setools.rbacrulequery import RBACRuleQuery
-from setools.policyrep.rule import InvalidRuleUse, RuleNotConditional
+from setools.policyrep.rule import RuleUseError, RuleNotConditional
 
 
 class RBACRuleQueryTest(unittest.TestCase):
@@ -48,8 +48,8 @@ class RBACRuleQueryTest(unittest.TestCase):
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "test1s")
         self.assertEqual(r[0].target, "test1t")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "tclass")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "default")
+        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
+        self.assertRaises(RuleUseError, getattr, r[0], "default")
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
         self.assertEqual(r[1].ruletype, "role_transition")
@@ -70,8 +70,8 @@ class RBACRuleQueryTest(unittest.TestCase):
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "test2s1")
         self.assertEqual(r[0].target, "test2t")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "tclass")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "default")
+        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
+        self.assertRaises(RuleUseError, getattr, r[0], "default")
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
     def test_010_target_direct(self):
@@ -85,8 +85,8 @@ class RBACRuleQueryTest(unittest.TestCase):
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "test10s")
         self.assertEqual(r[0].target, "test10t")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "tclass")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "default")
+        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
+        self.assertRaises(RuleUseError, getattr, r[0], "default")
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
     def test_011_target_direct_regex(self):
@@ -100,8 +100,8 @@ class RBACRuleQueryTest(unittest.TestCase):
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "test11s")
         self.assertEqual(r[0].target, "test11t1")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "tclass")
-        self.assertRaises(InvalidRuleUse, getattr, r[0], "default")
+        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
+        self.assertRaises(RuleUseError, getattr, r[0], "default")
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
     def test_020_class(self):

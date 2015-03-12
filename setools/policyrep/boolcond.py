@@ -164,3 +164,6 @@ class ConditionalExpr(symbol.PolicySymbol):
                 bools.add(boolean_factory(self.policy, expr_node.get_boolean(self.policy)))
 
         return bools
+
+    def statement(self):
+        raise symbol.NoStatement

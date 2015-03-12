@@ -18,7 +18,7 @@
 #
 import re
 
-from .policyrep.rule import InvalidRuleUse, RuleNotConditional
+from .policyrep.rule import RuleUseError, RuleNotConditional
 from . import mixins
 from . import rulequery
 
@@ -118,7 +118,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
                 try:
                     if not self._match_perms(r.perms):
                         continue
-                except InvalidRuleUse:
+                except RuleUseError:
                     continue
 
             #
@@ -131,7 +131,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
                             self.default_cmp,
                             self.default_regex):
                         continue
-                except InvalidRuleUse:
+                except RuleUseError:
                     continue
 
             #

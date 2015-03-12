@@ -21,7 +21,7 @@ from . import symbol
 from . import objclass
 
 
-class InvalidRuleUse(Exception):
+class RuleUseError(symbol.SymbolUseError):
 
     """
     Exception when getting incorrect parameters for a rule.  For

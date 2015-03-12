@@ -67,3 +67,6 @@ class Context(symbol.PolicySymbol):
             return mls.range_factory(self.policy, self.qpol_symbol.range(self.policy))
         else:
             raise mls.MLSDisabled("MLS is disabled, the context has no range.")
+
+    def statement(self):
+        raise symbol.NoStatement
