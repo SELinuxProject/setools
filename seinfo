@@ -67,6 +67,8 @@ queries.add_argument("--permissive", help="Print permissive types.", dest="permi
                      default=None, nargs='?', const=True, metavar="TYPE")
 queries.add_argument("--polcap", help="Print policy capabilities.", dest="polcapquery",
                      default=None, nargs='?', const=True, metavar="NAME")
+queries.add_argument("--validatetrans", help="Print validatetrans.", dest="validatetransquery",
+                     default=None, nargs='?', const=True, metavar="CLASS")
 queries.add_argument("--all", help="Print all of the above.",
                      dest="all", default=False, action="store_true")
 
@@ -201,6 +203,13 @@ try:
         else:
             q = setools.userquery.UserQuery(p)
         components.append(("Users", q))
+
+    if args.validatetransquery or args.all:
+        if isinstance(args.validatetransquery, str):
+            q = setools.validatetransquery.ValidatetransQuery(p, tclass=args.validatetransquery)
+        else:
+            q = setools.validatetransquery.ValidatetransQuery(p)
+        components.append(("Validatetrans", q))
 
     if (not components or args.all) and not args.flat:
         mls = "enabled" if p.mls else "disabled"
