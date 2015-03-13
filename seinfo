@@ -33,40 +33,40 @@ parser.add_argument("--flat",  help="Print without item count nor indentation.",
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 queries = parser.add_argument_group("Component Queries")
-queries.add_argument("-c", "--class", help="Print object classes.", dest="classquery",
-                     default=None, nargs='?', const=True, metavar="CLASS")
-queries.add_argument("-t", "--type", help="Print types.", dest="typequery",
-                     default=None, nargs='?', const=True, metavar="TYPE")
 queries.add_argument("-a", "--attribute",  help="Print type attributes.", dest="attrquery",
                      default=None, nargs='?', const=True, metavar="ATTR")
-queries.add_argument("-r", "--role", help="Print roles.", dest="rolequery",
-                     default=None, nargs='?', const=True, metavar="ROLE")
-queries.add_argument("-u", "--user", help="Print users.", dest="userquery",
-                     default=None, nargs='?', const=True, metavar="USER")
 queries.add_argument("-b", "--bool", help="Print Booleans.", dest="boolquery",
                      default=None, nargs='?', const=True, metavar="BOOL")
-queries.add_argument("--sensitivity", help="Print MLS sensitivities.", dest="mlssensquery",
-                     default=None, nargs='?', const=True, metavar="SENS")
+queries.add_argument("-c", "--class", help="Print object classes.", dest="classquery",
+                     default=None, nargs='?', const=True, metavar="CLASS")
+queries.add_argument("-r", "--role", help="Print roles.", dest="rolequery",
+                     default=None, nargs='?', const=True, metavar="ROLE")
+queries.add_argument("-t", "--type", help="Print types.", dest="typequery",
+                     default=None, nargs='?', const=True, metavar="TYPE")
+queries.add_argument("-u", "--user", help="Print users.", dest="userquery",
+                     default=None, nargs='?', const=True, metavar="USER")
 queries.add_argument("--category", help="Print MLS categories.", dest="mlscatsquery",
                      default=None, nargs='?', const=True, metavar="CAT")
 queries.add_argument("--constrain", help="Print constraints.", dest="constraintquery",
                      default=None, nargs='?', const=True, metavar="CLASS")
-queries.add_argument("--initialsid", help="Print initial SIDs (contexts).", dest="initialsidquery",
-                     default=None, nargs='?', const=True, metavar="NAME")
 queries.add_argument("--fs_use", help="Print fs_use statements.", dest="fsusequery",
                      default=None, nargs='?', const=True, metavar="FS_TYPE")
 queries.add_argument("--genfscon", help="Print genfscon statements.", dest="genfsconquery",
                      default=None, nargs='?', const=True, metavar="FS_TYPE")
+queries.add_argument("--initialsid", help="Print initial SIDs (contexts).", dest="initialsidquery",
+                     default=None, nargs='?', const=True, metavar="NAME")
 queries.add_argument("--netifcon", help="Print netifcon statements.", dest="netifconquery",
                      default=None, nargs='?', const=True, metavar="DEVICE")
 queries.add_argument("--nodecon", help="Print nodecon statements.", dest="nodeconquery",
                      default=None, nargs='?', const=True, metavar="ADDR")
-queries.add_argument("--portcon", help="Print portcon statements.", dest="portconquery",
-                     default=None, nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
 queries.add_argument("--permissive", help="Print permissive types.", dest="permissivequery",
                      default=None, nargs='?', const=True, metavar="TYPE")
 queries.add_argument("--polcap", help="Print policy capabilities.", dest="polcapquery",
                      default=None, nargs='?', const=True, metavar="NAME")
+queries.add_argument("--portcon", help="Print portcon statements.", dest="portconquery",
+                     default=None, nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
+queries.add_argument("--sensitivity", help="Print MLS sensitivities.", dest="mlssensquery",
+                     default=None, nargs='?', const=True, metavar="SENS")
 queries.add_argument("--validatetrans", help="Print validatetrans.", dest="validatetransquery",
                      default=None, nargs='?', const=True, metavar="CLASS")
 queries.add_argument("--all", help="Print all of the above.",
