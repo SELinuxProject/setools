@@ -45,7 +45,6 @@ from . import terulequery
 
 # Constraint queries
 from . import constraintquery
-from . import validatetransquery
 
 # In-policy Context Queries
 from . import fsusequery

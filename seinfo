@@ -101,9 +101,10 @@ try:
 
     if args.constraintquery or args.all:
         if isinstance(args.constraintquery, str):
-            q = setools.constraintquery.ConstraintQuery(p, tclass=args.constraintquery)
+            q = setools.constraintquery.ConstraintQuery(p, tclass=args.constraintquery,
+                                                        ruletype=["constrain", "mlsconstrain"])
         else:
-            q = setools.constraintquery.ConstraintQuery(p)
+            q = setools.constraintquery.ConstraintQuery(p, ruletype=["constrain", "mlsconstrain"])
         components.append(("Constraints", q))
 
     if args.fsusequery or args.all:
@@ -206,9 +207,12 @@ try:
 
     if args.validatetransquery or args.all:
         if isinstance(args.validatetransquery, str):
-            q = setools.validatetransquery.ValidatetransQuery(p, tclass=args.validatetransquery)
+            q = setools.constraintquery.ConstraintQuery(p, tclass=args.validatetransquery,
+                                                        ruletype=["validatetrans",
+                                                                  "mlsvalidatetrans"])
         else:
-            q = setools.validatetransquery.ValidatetransQuery(p)
+            q = setools.constraintquery.ConstraintQuery(p, ruletype=["validatetrans",
+                                                                     "mlsvalidatetrans"])
         components.append(("Validatetrans", q))
 
     if (not components or args.all) and not args.flat:

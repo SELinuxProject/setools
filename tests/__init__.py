@@ -17,6 +17,7 @@
 #
 from . import boolquery
 from . import categoryquery
+from . import constraintquery
 from . import commonquery
 from . import dta
 from . import fsusequery

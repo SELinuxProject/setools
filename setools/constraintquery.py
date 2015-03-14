@@ -20,6 +20,7 @@ import re
 
 from . import mixins
 from .query import PolicyQuery
+from .policyrep.constraint import ConstraintUseError
 
 
 class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery):
@@ -105,8 +106,12 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery)
             if self.tclass and not self._match_object_class(c.tclass):
                 continue
 
-            if self.perms and not self._match_perms(c.perms):
-                continue
+            if self.perms:
+                try:
+                    if not self._match_perms(c.perms):
+                        continue
+                except ConstraintUseError:
+                        continue
 
             if self.role and not self._match_expr(
                         c.roles,

@@ -177,7 +177,7 @@ class SELinuxPolicy(object):
     @property
     def mlsvalidatetrans_count(self):
         """The number of MLS validatetrans."""
-        return sum(1 for v in self.validatetrans() if v.ruletype == "mlsvalidatetrans")
+        return sum(1 for v in self.constraints() if v.ruletype == "mlsvalidatetrans")
 
     @property
     def netifcon_count(self):
@@ -262,7 +262,7 @@ class SELinuxPolicy(object):
     @property
     def validatetrans_count(self):
         """The number of validatetrans."""
-        return sum(1 for v in self.validatetrans() if v.ruletype == "validatetrans")
+        return sum(1 for v in self.constraints() if v.ruletype == "validatetrans")
 
     #
     # Policy components lookup functions
@@ -446,14 +446,10 @@ class SELinuxPolicy(object):
     def constraints(self):
         """Generator which yields all constraints (regular and MLS)."""
 
-        for constraint_ in self.policy.constraint_iter():
+        for constraint_ in chain(self.policy.constraint_iter(),
+                                 self.policy.validatetrans_iter()):
+
             yield constraint.constraint_factory(self.policy, constraint_)
-
-    def validatetrans(self):
-        """Generator which yields all validatetrans (regular and MLS)."""
-
-        for validatetrans in self.policy.validatetrans_iter():
-            yield constraint.validatetrans_factory(self.policy, validatetrans)
 
     #
     # In-policy Labeling statement generators

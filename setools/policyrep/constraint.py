@@ -24,6 +24,12 @@ from . import typeattr
 from . import user
 
 
+class ConstraintUseError(symbol.SymbolUseError):
+
+    """Exception when getting permissions from a validatetrans."""
+    pass
+
+
 def _is_mls(policy, symbol):
     # determine if this is a regular or MLS constraint/validatetrans.
     # this can only be determined by inspecting the expression.
@@ -42,25 +48,18 @@ def constraint_factory(policy, symbol):
 
     try:
         if _is_mls(policy, symbol):
-            return Constraint(policy, symbol, "mlsconstrain")
+            if isinstance(symbol, qpol.qpol_constraint_t):
+                return Constraint(policy, symbol, "mlsconstrain")
+            else:
+                return Validatetrans(policy, symbol, "mlsvalidatetrans")
         else:
-            return Constraint(policy, symbol, "constrain")
+            if isinstance(symbol, qpol.qpol_constraint_t):
+                return Constraint(policy, symbol, "constrain")
+            else:
+                return Validatetrans(policy, symbol, "validatetrans")
 
     except AttributeError:
         raise TypeError("Constraints cannot be looked-up.")
-
-
-def validatetrans_factory(policy, symbol):
-    """Factory function for creating validatetrans objects."""
-
-    try:
-        if _is_mls(policy, symbol):
-            return Validatetrans(policy, symbol, "mlsvalidatetrans")
-        else:
-            return Validatetrans(policy, symbol, "validatetrans")
-
-    except AttributeError:
-        raise TypeError("validatetrans cannot be looked-up.")
 
 
 class BaseConstraint(symbol.PolicySymbol):
@@ -229,6 +228,10 @@ class BaseConstraint(symbol.PolicySymbol):
 
         return set(self._get_symbols(role_syms, role.role_factory))
 
+    @property
+    def perms(self):
+        raise NotImplementedError
+
     def statement(self):
         return str(self)
 
@@ -286,3 +289,7 @@ class Validatetrans(BaseConstraint):
 
     def __str__(self):
         return "{0.ruletype} {0.tclass}\n\t{1}\n);".format(self, self._build_expression())
+
+    @property
+    def perms(self):
+        raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
