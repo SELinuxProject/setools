@@ -17,14 +17,64 @@
 #
 import unittest
 
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
+
 from setools import SELinuxPolicy
-from setools.policyrep.mls import level_factory, InvalidLevel, range_factory, InvalidRange
+from setools.policyrep import qpol
+from setools.policyrep.mls import sensitivity_factory, category_factory, level_factory, \
+                                  range_factory, level_decl_factory, \
+                                  MLSDisabled, InvalidLevel, InvalidRange
+
+
+class SensitivityFactoryTest(unittest.TestCase):
+
+    def setUp(self):
+        self.p = SELinuxPolicy("tests/policyrep/mls.conf")
+
+    def test_000_mls_disabled(self):
+        """Sensitivity factory on MLS-disabled policy."""
+        mock_p = Mock(qpol.qpol_policy_t)
+        mock_p.capability.return_value = False
+        self.assertRaises(MLSDisabled, sensitivity_factory, mock_p, None)
+
+
+class CategoryFactoryTest(unittest.TestCase):
+
+    def setUp(self):
+        self.p = SELinuxPolicy("tests/policyrep/mls.conf")
+
+    def test_000_mls_disabled(self):
+        """Category factory on MLS-disabled policy."""
+        mock_p = Mock(qpol.qpol_policy_t)
+        mock_p.capability.return_value = False
+        self.assertRaises(MLSDisabled, category_factory, mock_p, None)
+
+
+class LevelDeclFactoryTest(unittest.TestCase):
+
+    def setUp(self):
+        self.p = SELinuxPolicy("tests/policyrep/mls.conf")
+
+    def test_000_mls_disabled(self):
+        """Level declaration factory on MLS-disabled policy."""
+        mock_p = Mock(qpol.qpol_policy_t)
+        mock_p.capability.return_value = False
+        self.assertRaises(MLSDisabled, level_decl_factory, mock_p, None)
 
 
 class LevelFactoryTest(unittest.TestCase):
 
     def setUp(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
+
+    def test_000_mls_disabled(self):
+        """Level factory on MLS-disabled policy."""
+        mock_p = Mock(qpol.qpol_policy_t)
+        mock_p.capability.return_value = False
+        self.assertRaises(MLSDisabled, level_factory, mock_p, None)
 
     def test_300_level_lookup_no_cats(self):
         """Level lookup with no categories."""
@@ -67,6 +117,12 @@ class RangeFactoryTest(unittest.TestCase):
 
     def setUp(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
+
+    def test_000_mls_disabled(self):
+        """Range factory on MLS-disabled policy."""
+        mock_p = Mock(qpol.qpol_policy_t)
+        mock_p.capability.return_value = False
+        self.assertRaises(MLSDisabled, range_factory, mock_p, None)
 
     def test_400_range_lookup_single_level(self):
         """Range lookup with single-level range."""
