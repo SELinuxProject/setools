@@ -115,9 +115,12 @@ int qpol_context_get_range(const qpol_policy_t * policy, const qpol_context_t * 
 		return STATUS_ERR;
 	}
 
-	internal_context = (context_struct_t *) context;
-
-	*range = (qpol_mls_range_t *) & internal_context->range;
+	if (!qpol_policy_has_capability(policy, QPOL_CAP_MLS)) {
+		*range = NULL;
+	} else {
+		internal_context = (context_struct_t *) context;
+		*range = (qpol_mls_range_t *) & internal_context->range;
+	}
 
 	return STATUS_SUCCESS;
 }

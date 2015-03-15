@@ -61,12 +61,7 @@ class Context(symbol.PolicySymbol):
     @property
     def range_(self):
         """The MLS range of the context."""
-
-        # without this check, qpol will segfault on MLS-disabled policies
-        if self.policy.capability(qpol.QPOL_CAP_MLS):
-            return mls.range_factory(self.policy, self.qpol_symbol.range(self.policy))
-        else:
-            raise mls.MLSDisabled("MLS is disabled, the context has no range.")
+        return mls.range_factory(self.policy, self.qpol_symbol.range(self.policy))
 
     def statement(self):
         raise symbol.NoStatement

@@ -71,8 +71,16 @@ class MLSDisabled(Exception):
     pass
 
 
+def enabled(policy):
+    """Determine if MLS is enabled."""
+    return policy.capability(qpol.QPOL_CAP_MLS)
+
+
 def category_factory(policy, symbol):
     """Factory function for creating MLS category objects."""
+
+    if not enabled(policy):
+        raise MLSDisabled
 
     if not isinstance(symbol, qpol.qpol_cat_t):
         raise NotImplementedError
@@ -85,6 +93,10 @@ def category_factory(policy, symbol):
 
 def sensitivity_factory(policy, symbol):
     """Factory function for creating MLS sensitivity objects."""
+
+    if not enabled(policy):
+        raise MLSDisabled
+
     if isinstance(symbol, qpol.qpol_level_t):
         if symbol.isalias(policy):
             raise TypeError("{0} is an alias".format(symbol.name(policy)))
@@ -102,6 +114,10 @@ def level_factory(policy, symbol):
     Factory function for creating MLS level objects (e.g. levels used
     in contexts of labeling statements)
     """
+
+    if not enabled(policy):
+        raise MLSDisabled
+
     if isinstance(symbol, qpol.qpol_mls_level_t):
         return Level(policy, symbol)
 
@@ -153,6 +169,9 @@ def level_decl_factory(policy, symbol):
     (level statements) Lookups are only by sensitivity name.
     """
 
+    if not enabled(policy):
+        raise MLSDisabled
+
     if isinstance(symbol, qpol.qpol_level_t):
         if symbol.isalias(policy):
             raise TypeError("{0} is an alias".format(symbol.name(policy)))
@@ -167,6 +186,10 @@ def level_decl_factory(policy, symbol):
 
 def range_factory(policy, symbol):
     """Factory function for creating MLS range objects."""
+
+    if not enabled(policy):
+        raise MLSDisabled
+
     if isinstance(symbol, qpol.qpol_mls_range_t):
         return Range(policy, symbol)
 
