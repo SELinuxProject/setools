@@ -74,7 +74,7 @@ class MatchObjClass(object):
         Set the object class(es) for the rule query.
 
         Parameter:
-        tclass	    The name of the object classes to match.
+        tclass      The name of the object classes to match.
                     This must be a string if regular expression
                     matching is used.
 

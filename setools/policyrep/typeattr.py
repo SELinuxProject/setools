@@ -111,13 +111,11 @@ class Type(BaseType):
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
-
         for attr in self.qpol_symbol.attr_iter(self.policy):
             yield attribute_factory(self.policy, attr)
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-
         for alias in self.qpol_symbol.alias_iter(self.policy):
             yield alias
 
@@ -142,7 +140,6 @@ class TypeAttribute(BaseType):
 
     def expand(self):
         """Generator that expands this attribute into its member types."""
-
         for type_ in self.qpol_symbol.type_iter(self.policy):
             yield type_factory(self.policy, type_)
 

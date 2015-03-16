@@ -30,7 +30,7 @@ class RoleQuery(compquery.ComponentQuery):
                  types=set(), types_equal=False, types_regex=False):
         """
         Parameter:
-        policy	     The policy to query.
+        policy       The policy to query.
         name         The role name to match.
         name_regex   If true, regular expression matching
                      will be used on the role names.
@@ -76,12 +76,12 @@ class RoleQuery(compquery.ComponentQuery):
         Set the criteria for the role's types.
 
         Parameter:
-        types 		Name to match the role's types.
+        types       Name to match the role's types.
 
         Keyword Options:
         regex       If true, regular expression matching will be used
                     instead of set logic.
-        equal		If true, the type set of the role
+        equal       If true, the type set of the role
                     must equal the attributes criteria to
                     match. If false, any intersection in the
                     critera will cause a rule match.

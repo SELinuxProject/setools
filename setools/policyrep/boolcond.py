@@ -154,7 +154,6 @@ class ConditionalExpr(symbol.PolicySymbol):
     @property
     def booleans(self):
         """The set of Booleans in the expression."""
-
         bools = set()
 
         for expr_node in self.qpol_symbol.expr_node_iter(self.policy):

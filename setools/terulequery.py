@@ -38,8 +38,8 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
         """
         Parameter:
         policy            The policy to query.
-        ruletype	      The rule type(s) to match.
-        source		      The name of the source type/attribute to match.
+        ruletype          The rule type(s) to match.
+        source            The name of the source type/attribute to match.
         source_indirect   If true, members of an attribute will be
                           matched rather than the attribute itself.
         source_regex      If true, regular expression matching will

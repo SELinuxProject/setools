@@ -258,7 +258,7 @@ class DomainTransitionAnalysis(object):
         """
         Get the domain transition graph statistics.
 
-        Return:	tuple(nodes, edges)
+        Return:  tuple(nodes, edges)
 
         nodes    The number of nodes (types) in the graph.
         edges    The number of edges (domain transitions) in the graph.

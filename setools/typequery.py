@@ -33,7 +33,7 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
                  permissive=False, match_permissive=False):
         """
         Parameter:
-        policy	            The policy to query.
+        policy              The policy to query.
         name                The type name to match.
         name_regex          If true, regular expression matching
                             will be used on the type names.
@@ -85,12 +85,12 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
         Set the criteria for the type's attributes.
 
         Parameter:
-        alias 		Name to match the component's attributes.
+        alias       Name to match the component's attributes.
 
         Keyword Options:
         regex       If true, regular expression matching will be used
                     instead of set logic.
-        equal		If true, the attribute set of the type
+        equal       If true, the attribute set of the type
                     must equal the attributes criteria to
                     match. If false, any intersection in the
                     critera will cause a rule match.

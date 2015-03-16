@@ -33,7 +33,7 @@ class UserQuery(compquery.ComponentQuery):
                  range_superset=False, range_proper=False):
         """
         Parameter:
-        policy	        The policy to query.
+        policy          The policy to query.
         name            The user name to match.
         name_regex      If true, regular expression matching
                         will be used on the user names.
@@ -180,12 +180,12 @@ class UserQuery(compquery.ComponentQuery):
         Set the criteria for the users's roles.
 
         Parameter:
-        roles 		Name to match the component's attributes.
+        roles       Name to match the component's attributes.
 
         Keyword Options:
         regex       If true, regular expression matching will be used
                     instead of set logic.
-        equal		If true, the role set of the user
+        equal       If true, the role set of the user
                     must equal the attributes criteria to
                     match. If false, any intersection in the
                     critera will cause a rule match.

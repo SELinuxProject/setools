@@ -38,7 +38,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
         Parameters:
         policy          The policy to query.
         ruletype        The rule type(s) to match.
-        source	   	    The name of the source role/attribute to match.
+        source          The name of the source role/attribute to match.
         source_indirect If true, members of an attribute will be
                         matched rather than the attribute itself.
         source_regex    If true, regular expression matching will
@@ -137,7 +137,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
                     be used.  Obeys the indirect option.
 
         Exceptions:
-        NameError	Invalid keyword option.
+        NameError   Invalid keyword option.
         """
 
         self.source = source
@@ -171,7 +171,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
                     be used.  Obeys the indirect option.
 
         Exceptions:
-        NameError	Invalid keyword option.
+        NameError   Invalid keyword option.
         """
 
         self.target = target

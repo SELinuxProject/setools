@@ -53,14 +53,12 @@ class RoleAllow(rule.PolicyRule):
     @property
     def tclass(self):
         """The rule's object class."""
-        raise rule.RuleUseError(
-            "Role allow rules do not have an object class.")
+        raise rule.RuleUseError("Role allow rules do not have an object class.")
 
     @property
     def default(self):
         """The rule's default role."""
-        raise rule.RuleUseError(
-            "Role allow rules do not have a default role.")
+        raise rule.RuleUseError("Role allow rules do not have a default role.")
 
 
 class RoleTransition(rule.PolicyRule):

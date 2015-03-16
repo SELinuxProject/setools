@@ -55,7 +55,7 @@ class PolicySymbol(object):
         """
         Parameters:
         policy        The low-level policy object.
-        qpol_symbol	  The low-level policy symbol object.
+        qpol_symbol   The low-level policy symbol object.
         """
 
         assert qpol_symbol

@@ -35,7 +35,7 @@ class RuleQuery(mixins.MatchObjClass, PolicyQuery):
         obj         The object to match.
         criteria    The criteria to match.
         regex       If regular expression matching should be used.
-        indirect    If object indirection should be	used, e.g.
+        indirect    If object indirection should be used, e.g.
                     expanding an attribute.
         """
 
@@ -74,7 +74,7 @@ class RuleQuery(mixins.MatchObjClass, PolicyQuery):
                     be used.  Obeys the indirect option.
 
         Exceptions:
-        NameError	Invalid keyword option.
+        NameError   Invalid keyword option.
         """
 
         self.source = source
@@ -108,7 +108,7 @@ class RuleQuery(mixins.MatchObjClass, PolicyQuery):
                     be used.  Obeys the indirect option.
 
         Exceptions:
-        NameError	Invalid keyword option.
+        NameError   Invalid keyword option.
         """
 
         self.target = target

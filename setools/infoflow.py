@@ -33,7 +33,7 @@ class InfoFlowAnalysis(object):
         Parameters:
         policy      The policy to analyze.
         perm_map    The permission map or path to the permission map file.
-        minweight	The minimum permission weight to include in the analysis.
+        minweight   The minimum permission weight to include in the analysis.
                     (default is 1)
         exclude     The types excluded from the information flow analysis.
                     (default is none)
@@ -132,7 +132,7 @@ class InfoFlowAnalysis(object):
 
         steps Yield: tuple(source, target, rules)
 
-        source	 The source type for this step of the information flow.
+        source   The source type for this step of the information flow.
         target   The target type for this step of the information flow.
         rules    The list of rules creating this information flow step.
         """
@@ -160,7 +160,7 @@ class InfoFlowAnalysis(object):
         on the policy complexity.
 
         Parameters:
-        source	  The source type.
+        source    The source type.
         target    The target type.
         maxlen    Maximum length of paths.
 
@@ -245,7 +245,7 @@ class InfoFlowAnalysis(object):
         """
         Get the information flow graph statistics.
 
-        Return:	tuple(nodes, edges)
+        Return: tuple(nodes, edges)
 
         nodes    The number of nodes (types) in the graph.
         edges    The number of edges (information flows between types)

@@ -125,11 +125,11 @@ class ObjClassQuery(compquery.ComponentQuery):
         Set the criteria for the common's permissions.
 
         Parameter:
-        perms 		Name to match the common's permissions.
+        perms       Name to match the common's permissions.
 
         Keyword Options:
         regex       If true, regular expression matching will be used.
-        equal		If true, the permisison set of the common
+        equal       If true, the permisison set of the common
                     must equal the permissions criteria to
                     match. If false, any intersection in the
                     critera will cause a match.
