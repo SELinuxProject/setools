@@ -37,18 +37,13 @@ def _symbol_lookup(qpol_policy, name):
         raise InvalidType("{0} is not a valid type/attribute".format(name))
 
 
-def _dereference_alias(qpol_policy, qpol_symbol):
-    """Determine the actual type by from an alias."""
-    raise NotImplementedError
-
-
 def attribute_factory(qpol_policy, name):
     """Factory function for creating attribute objects."""
 
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
     if not qpol_symbol.isattr(qpol_policy):
-        raise TypeError("{0} is not an attribute".format(qpol_symbol.name(qpol_policy)))
+        raise TypeError("{0} is a type".format(qpol_symbol.name(qpol_policy)))
 
     return TypeAttribute(qpol_policy, qpol_symbol)
 
@@ -59,11 +54,8 @@ def type_factory(qpol_policy, name, deref=False):
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
     if qpol_symbol.isattr(qpol_policy):
-        raise TypeError("{0} is a not an attribute type".format(qpol_symbol.name(qpol_policy)))
-    elif qpol_symbol.isalias(qpol_policy):
-        if deref:
-            qpol_symbol = _dereference_alias(qpol_policy, qpol_symbol)
-        else:
+        raise TypeError("{0} is an attribute".format(qpol_symbol.name(qpol_policy)))
+    elif qpol_symbol.isalias(qpol_policy) and not deref:
             raise TypeError("{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
 
     return Type(qpol_policy, qpol_symbol)
@@ -74,11 +66,8 @@ def type_or_attr_factory(qpol_policy, name, deref=False):
 
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
-    if qpol_symbol.isalias(qpol_policy):
-        if deref:
-            qpol_symbol = _dereference_alias(qpol_policy, qpol_symbol)
-        else:
-            raise TypeError("{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
+    if qpol_symbol.isalias(qpol_policy) and not deref:
+        raise TypeError("{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
 
     if qpol_symbol.isattr(qpol_policy):
         return TypeAttribute(qpol_policy, qpol_symbol)
