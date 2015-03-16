@@ -25,7 +25,7 @@ from .policyrep.constraint import ConstraintUseError
 
 class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery):
 
-    """Query constraint rules (constraint/mlsconstraint)."""
+    """Query constraint rules, (mls)constrain/(mls)validatetrans."""
 
     def __init__(self, policy,
                  ruletype=[],
