@@ -105,11 +105,6 @@ class SELinuxPolicy(object):
         return self.policy.avrule_allow_count()
 
     @property
-    def attribute_count(self):
-        """The number of (type) attributes."""
-        return sum(1 for _ in self.attributes())
-
-    @property
     def auditallow_count(self):
         """The number of auditallow rules."""
         return self.policy.avrule_auditallow_count()
@@ -235,6 +230,11 @@ class SELinuxPolicy(object):
         return self.policy.role_trans_count()
 
     @property
+    def type_attribute_count(self):
+        """The number of (type) attributes."""
+        return sum(1 for _ in self.typeattributes())
+
+    @property
     def type_count(self):
         """The number of types."""
         return sum(1 for _ in self.types())
@@ -314,16 +314,6 @@ class SELinuxPolicy(object):
     #
     # Policy components generators
     #
-
-    def attributes(self):
-        """Generator which yields all (type) attributes."""
-
-        for type_ in self.policy.type_iter():
-            try:
-                yield typeattr.attribute_factory(self.policy, type_)
-            except TypeError:
-                # libqpol unfortunately iterates over attributes and aliases
-                pass
 
     def bools(self):
         """Generator which yields all Booleans."""
@@ -405,6 +395,16 @@ class SELinuxPolicy(object):
         for type_ in self.policy.type_iter():
             try:
                 yield typeattr.type_factory(self.policy, type_)
+            except TypeError:
+                # libqpol unfortunately iterates over attributes and aliases
+                pass
+
+    def typeattributes(self):
+        """Generator which yields all (type) attributes."""
+
+        for type_ in self.policy.type_iter():
+            try:
+                yield typeattr.attribute_factory(self.policy, type_)
             except TypeError:
                 # libqpol unfortunately iterates over attributes and aliases
                 pass

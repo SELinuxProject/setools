@@ -191,7 +191,7 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_130_type_attribute_count(self):
         """SELinuxPolicy: type attribute count"""
-        self.assertEqual(self.p.attribute_count, 157)
+        self.assertEqual(self.p.type_attribute_count, 157)
 
     def test_131_type_change_count(self):
         """SELinuxPolicy: type_change rule count"""

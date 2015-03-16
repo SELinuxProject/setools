@@ -225,7 +225,7 @@ try:
         print("  Sensitivities: {0:7}    Categories:    {1:7}".format(
             p.level_count, p.category_count))
         print("  Types:         {0:7}    Attributes:    {1:7}".format(
-            p.type_count, p.attribute_count))
+            p.type_count, p.type_attribute_count))
         print("  Users:         {0:7}    Roles:         {1:7}".format(
             p.user_count, p.role_count))
         print("  Booleans:      {0:7}    Cond. Expr.:   {1:7}".format(
