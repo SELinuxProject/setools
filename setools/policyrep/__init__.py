@@ -88,7 +88,7 @@ class SELinuxPolicy(object):
     @property
     def mls(self):
         """(T/F) The policy has MLS enabled."""
-        return bool(mls.enabled(self.policy))
+        return mls.enabled(self.policy)
 
     @property
     def version(self):
