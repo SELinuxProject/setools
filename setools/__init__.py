@@ -36,6 +36,7 @@ from . import polcapquery
 from . import rolequery
 from . import sensitivityquery
 from . import typequery
+from . import typeattrquery
 from . import userquery
 
 # Rule Queries

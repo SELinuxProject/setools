@@ -34,5 +34,6 @@ from . import rbacrulequery
 from . import rolequery
 from . import sensitivityquery
 from . import terulequery
+from . import typeattrquery
 from . import typequery
 from . import userquery

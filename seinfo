@@ -33,7 +33,7 @@ parser.add_argument("--flat",  help="Print without item count nor indentation.",
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 queries = parser.add_argument_group("Component Queries")
-queries.add_argument("-a", "--attribute",  help="Print type attributes.", dest="attrquery",
+queries.add_argument("-a", "--attribute",  help="Print type attributes.", dest="typeattrquery",
                      default=None, nargs='?', const=True, metavar="ATTR")
 queries.add_argument("-b", "--bool", help="Print Booleans.", dest="boolquery",
                      default=None, nargs='?', const=True, metavar="BOOL")
@@ -198,6 +198,13 @@ try:
             q = setools.typequery.TypeQuery(p)
         components.append(("Types", q))
 
+    if args.typeattrquery or args.all:
+        if isinstance(args.typeattrquery, str):
+            q = setools.typeattrquery.TypeAttributeQuery(p, name=args.typeattrquery)
+        else:
+            q = setools.typeattrquery.TypeAttributeQuery(p)
+        components.append(("Type Attributes", q))
+
     if args.userquery or args.all:
         if isinstance(args.userquery, str):
             q = setools.userquery.UserQuery(p, name=args.userquery)
@@ -225,7 +232,7 @@ try:
         print("  Sensitivities: {0:7}    Categories:    {1:7}".format(
             p.level_count, p.category_count))
         print("  Types:         {0:7}    Attributes:    {1:7}".format(
-            p.type_count, p.attribute_count))
+            p.type_count, p.type_attribute_count))
         print("  Users:         {0:7}    Roles:         {1:7}".format(
             p.user_count, p.role_count))
         print("  Booleans:      {0:7}    Cond. Expr.:   {1:7}".format(
