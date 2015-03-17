@@ -69,7 +69,7 @@ class PolicySymbol(object):
     def __hash__(self):
         try:
             return hash(self.qpol_symbol.name(self.policy))
-        except:
+        except:  # pragma: no cover
             return NotImplemented
 
     def __eq__(self, other):
