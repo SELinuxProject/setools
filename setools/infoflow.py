@@ -285,6 +285,8 @@ class InfoFlowAnalysis(object):
     def _build_graph(self):
         self.G.clear()
 
+        self.perm_map.map_policy(self.policy)
+
         for r in self.policy.terules():
             if r.ruletype != "allow":
                 continue
