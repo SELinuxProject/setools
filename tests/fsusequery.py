@@ -23,7 +23,8 @@ from setools.fsusequery import FSUseQuery
 
 class FSUseQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/fsusequery.conf")
 
     def test_000_unset(self):

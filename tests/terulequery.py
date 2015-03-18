@@ -24,7 +24,8 @@ from setools.policyrep.rule import RuleNotConditional
 
 class TERuleQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/terulequery.conf")
 
     def test_000_unset(self):

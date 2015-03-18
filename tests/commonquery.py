@@ -23,7 +23,8 @@ from setools.commonquery import CommonQuery
 
 class CommonQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/commonquery.conf")
 
     def test_000_unset(self):

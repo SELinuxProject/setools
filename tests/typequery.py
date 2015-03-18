@@ -23,7 +23,8 @@ from setools.typequery import TypeQuery
 
 class TypeQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/typequery.conf")
 
     def test_000_unset(self):

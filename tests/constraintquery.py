@@ -23,7 +23,8 @@ from setools.constraintquery import ConstraintQuery
 
 class ConstraintQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/constraintquery.conf")
 
     def test_000_unset(self):

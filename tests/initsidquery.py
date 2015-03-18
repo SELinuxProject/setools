@@ -23,7 +23,8 @@ from setools.initsidquery import InitialSIDQuery
 
 class InitialSIDQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/initsidquery.conf")
 
     def test_000_unset(self):

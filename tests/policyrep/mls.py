@@ -31,7 +31,8 @@ from setools.policyrep.mls import sensitivity_factory, category_factory, level_f
 
 class SensitivityFactoryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
 
     def test_000_mls_disabled(self):
@@ -43,7 +44,8 @@ class SensitivityFactoryTest(unittest.TestCase):
 
 class CategoryFactoryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
 
     def test_000_mls_disabled(self):
@@ -55,7 +57,8 @@ class CategoryFactoryTest(unittest.TestCase):
 
 class LevelDeclFactoryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
 
     def test_000_mls_disabled(self):
@@ -67,7 +70,8 @@ class LevelDeclFactoryTest(unittest.TestCase):
 
 class LevelFactoryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
 
     def test_000_mls_disabled(self):
@@ -115,7 +119,8 @@ class LevelFactoryTest(unittest.TestCase):
 
 class RangeFactoryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/policyrep/mls.conf")
 
     def test_000_mls_disabled(self):

@@ -23,7 +23,8 @@ from setools.userquery import UserQuery
 
 class UserQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/userquery.conf")
 
     def test_000_unset(self):

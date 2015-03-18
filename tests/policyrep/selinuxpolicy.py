@@ -44,15 +44,14 @@ class SELinuxPolicyTest(unittest.TestCase):
                         "tests/policyrep/selinuxpolicy.conf"])
 
         with open(os.devnull, "w") as null:
-            subprocess.check_call(command, stdout=null)
+            subprocess.check_call(command, stdout=null, shell=False, close_fds=True)
+
+        self.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
+        self.p_binary = SELinuxPolicy(self.policy_path)
 
     @classmethod
     def tearDownClass(self):
         os.unlink(self.policy_path)
-
-    def setUp(self):
-        self.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
-        self.p_binary = SELinuxPolicy(self.policy_path)
 
     def test_001_open_policy_error(self):
         """SELinuxPolicy: Invalid policy on open."""

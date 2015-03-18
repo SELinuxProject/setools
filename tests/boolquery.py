@@ -23,7 +23,8 @@ from setools.boolquery import BoolQuery
 
 class BoolQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/boolquery.conf")
 
     def test_000_unset(self):

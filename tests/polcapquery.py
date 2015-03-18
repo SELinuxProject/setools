@@ -23,7 +23,8 @@ from setools.polcapquery import PolCapQuery
 
 class PolCapQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/polcapquery.conf")
 
     def test_000_unset(self):

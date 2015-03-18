@@ -23,7 +23,8 @@ from setools.typeattrquery import TypeAttributeQuery
 
 class TypeAttributeQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/typeattrquery.conf")
 
     def test_000_unset(self):

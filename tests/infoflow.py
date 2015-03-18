@@ -33,7 +33,8 @@ from setools.policyrep.rule import RuleNotConditional
 
 class InfoFlowAnalysisTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/infoflow.conf")
         self.m = PermissionMap("tests/perm_map")
 

@@ -26,7 +26,8 @@ from setools.policyrep.rule import RuleNotConditional
 
 class InfoFlowAnalysisTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/dta.conf")
         self.a = DomainTransitionAnalysis(self.p)
         self.a._build_graph()

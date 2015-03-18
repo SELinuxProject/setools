@@ -23,7 +23,8 @@ from setools.categoryquery import CategoryQuery
 
 class CategoryQueryTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(self):
         self.p = SELinuxPolicy("tests/categoryquery.conf")
 
     def test_000_unset(self):
