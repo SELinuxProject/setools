@@ -230,6 +230,27 @@ class PermissionMap(object):
         except KeyError:
             raise UnmappedPermission("{0}:{1} is not mapped.".format(classname, permission))
 
+    def map_policy(self, policy):
+        """Create mappings for all classes and permissions in the specified policy."""
+        for c in policy.classes():
+            class_name = str(c)
+
+            if class_name not in self.permmap:
+                self.permmap[class_name] = dict()
+
+            perms = c.perms
+
+            try:
+                perms |= c.common.perms
+            except policyrep.objclass.NoCommon:
+                pass
+
+            for perm_name in perms:
+                if perm_name not in self.permmap[class_name]:
+                    self.permmap[class_name][perm_name] = {'direction': 'u',
+                                                           'weight': 1,
+                                                           'enabled': True}
+
     def rule_weight(self, rule):
         """
         Get the type enforcement rule's information flow read and write weights.
