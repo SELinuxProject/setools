@@ -66,17 +66,17 @@ mlsrtypes.add_argument("--range_trans", action="append_const",
                        help="Search range_transition rules.")
 
 expr = parser.add_argument_group("Expressions")
-expr.add_argument("-s", "--source", default="",
+expr.add_argument("-s", "--source",
                   help="Source type/role of the TE/RBAC rule.")
-expr.add_argument("-t", "--target", default="",
+expr.add_argument("-t", "--target",
                   help="Target type/role of the TE/RBAC rule.")
-expr.add_argument("-c", "--class", dest="tclass", default="",
+expr.add_argument("-c", "--class", dest="tclass",
                   help="Comma separated list of object classes")
-expr.add_argument("-p", "--perms", metavar="PERMS", default="",
+expr.add_argument("-p", "--perms", metavar="PERMS",
                   help="Comma separated list of permissions.")
-expr.add_argument("-D", "--default", default="",
+expr.add_argument("-D", "--default",
                   help="Default of the rule. (type/role/range transition rules)")
-expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL", default="",
+expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL",
                   help="Comma separated list of Booleans in the conditional expression.")
 
 opts = parser.add_argument_group("Search options")

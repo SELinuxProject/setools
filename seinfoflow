@@ -38,7 +38,7 @@ settings.add_argument("-p", "--policy", required=True,
                       help="Path to SELinux policy to analyze.")
 settings.add_argument("-m", "--map", required=True,
                       help="Path to permission map file.")
-settings.add_argument("-s", "--source", required=True, default="",
+settings.add_argument("-s", "--source", required=True,
                       help="Source type of the analysis.")
 settings.add_argument("-t", "--target", default="",
                       help="Target type of the analysis.")
