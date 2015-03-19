@@ -21,6 +21,7 @@ from __future__ import print_function
 import setools
 import argparse
 import sys
+import logging
 
 parser = argparse.ArgumentParser(
     description="SELinux policy information tool.")
@@ -30,6 +31,8 @@ parser.add_argument("-x", "--expand", action="store_true",
                     help="Print additional information about the specified components.")
 parser.add_argument("--flat",  help="Print without item count nor indentation.",
                     dest="flat", default=False, action="store_true")
+parser.add_argument("-v", "--verbose", action="store_true",
+                    help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 queries = parser.add_argument_group("Component Queries")
@@ -73,6 +76,11 @@ queries.add_argument("--all", help="Print all of the above.",
                      dest="all", default=False, action="store_true")
 
 args = parser.parse_args()
+
+if args.debug:
+    logging.basicConfig(level=logging.DEBUG)
+elif args.verbose:
+    logging.basicConfig(level=logging.INFO)
 
 try:
     p = setools.SELinuxPolicy(args.policy)

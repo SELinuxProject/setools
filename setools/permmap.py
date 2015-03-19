@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
+
 from . import policyrep
 
 
@@ -50,6 +52,8 @@ class PermissionMap(object):
         Parameter:
         permmapfile     The path to the permission map to load.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
+
         self.load(permmapfile)
 
     def load(self, permmapfile):
@@ -57,6 +61,7 @@ class PermissionMap(object):
         Parameter:
         permmapfile     The path to the permission map to load.
         """
+        self.log.info("Opening permission map \"{0}\"".format(permmapfile))
 
         # state machine
         # 1 = read number of classes
@@ -236,6 +241,7 @@ class PermissionMap(object):
             class_name = str(c)
 
             if class_name not in self.permmap:
+                self.log.info("Adding unmapped class {0}".format(class_name))
                 self.permmap[class_name] = dict()
 
             perms = c.perms
@@ -247,6 +253,8 @@ class PermissionMap(object):
 
             for perm_name in perms:
                 if perm_name not in self.permmap[class_name]:
+                    self.log.info("Adding unmapped permission {0} in {1}".format(perm_name,
+                                                                                 class_name))
                     self.permmap[class_name][perm_name] = {'direction': 'u',
                                                            'weight': 1,
                                                            'enabled': True}

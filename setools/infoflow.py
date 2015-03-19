@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 import itertools
+import logging
 
 import networkx as nx
 
@@ -38,6 +39,7 @@ class InfoFlowAnalysis(object):
         exclude     The types excluded from the information flow analysis.
                     (default is none)
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -285,6 +287,8 @@ class InfoFlowAnalysis(object):
     def _build_graph(self):
         self.G.clear()
 
+        self.log.info("Building graph...")
+
         self.perm_map.map_policy(self.policy)
 
         for r in self.policy.terules():
@@ -309,6 +313,10 @@ class InfoFlowAnalysis(object):
     def _build_subgraph(self):
         if self.rebuildgraph:
             self._build_graph()
+
+        self.log.info("Building subgraph.")
+        self.log.debug("Excluding {0}".format(self.exclude))
+        self.log.debug("Min weight {0}".format(self.minweight))
 
         # delete excluded types from subgraph
         nodes = [n for n in self.G.nodes() if n not in self.exclude]

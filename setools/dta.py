@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 import itertools
+import logging
 from collections import defaultdict
 
 import networkx as nx
@@ -31,6 +32,8 @@ class DomainTransitionAnalysis(object):
         Parameter:
         policy   The policy to analyze.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
+
         self.policy = policy
         self.set_exclude(exclude)
         self.set_reverse(reverse)
@@ -339,6 +342,8 @@ class DomainTransitionAnalysis(object):
     def _build_graph(self):
         self.G.clear()
 
+        self.log.info("Building graph...")
+
         # hash tables keyed on domain type
         setexec = defaultdict(list)
         setcurrent = defaultdict(list)
@@ -508,6 +513,10 @@ class DomainTransitionAnalysis(object):
     def _build_subgraph(self):
         if self.rebuildgraph:
             self._build_graph()
+
+        self.log.info("Building subgraph.")
+        self.log.debug("Excluding {0}".format(self.exclude))
+        self.log.debug("Reverse {0}".format(self.reverse))
 
         # delete excluded domains from subgraph
         nodes = [n for n in self.G.nodes() if n not in self.exclude]

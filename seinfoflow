@@ -21,6 +21,7 @@ from __future__ import print_function
 import setools
 import argparse
 import sys
+import logging
 
 parser = argparse.ArgumentParser(
     description="SELinux policy information flow analysis tool.",
@@ -28,6 +29,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")
+parser.add_argument("-v", "--verbose", action="store_true",
+                    help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 settings = parser.add_argument_group("Analysis settings")
@@ -64,6 +67,11 @@ if args.target and not (args.shortest_path or args.all_paths):
 
 if args.limit_flows < 0:
     parser.error("Limit on information flows cannot be negative.")
+
+if args.debug:
+    logging.basicConfig(level=logging.DEBUG)
+elif args.verbose:
+    logging.basicConfig(level=logging.INFO)
 
 try:
     p = setools.SELinuxPolicy(args.policy)

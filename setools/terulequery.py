@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 import re
 
 from .policyrep.rule import RuleUseError, RuleNotConditional
@@ -63,6 +64,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
         default_regex     If true, regular expression matching will be
                           used on the default type.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -76,6 +78,17 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
 
     def results(self):
         """Generator which yields all matching TE rules."""
+        self.log.info("Generating results.")
+        self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.debug("Source: {0.source}, indirect: {0.source_indirect}, "
+                       "regex: {0.source_regex}".format(self))
+        self.log.debug("Target: {0.target}, indirect: {0.target_indirect}, "
+                       "regex: {0.target_regex}".format(self))
+        self.log.debug("Class: {0.tclass}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Perms: {0.perms}, eq: {0.perms_equal}".format(self))
+        self.log.debug("Default: {0.default}, regex: {0.default_regex}".format(self))
+        self.log.debug("Boolean: {0.boolean}, eq: {0.boolean_equal}, "
+                       "regex: {0.boolean_regex}".format(self))
 
         for r in self.policy.terules():
             #

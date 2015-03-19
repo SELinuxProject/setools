@@ -20,6 +20,7 @@
 # The idea is that this is module provides convenient
 # abstractions and methods for accessing the policy
 # structures.
+import logging
 from itertools import chain
 
 from . import qpol
@@ -71,6 +72,9 @@ class SELinuxPolicy(object):
         Parameter:
         policyfile  Path to a policy to open.
         """
+
+        self.log = logging.getLogger(self.__class__.__name__)
+        self.log.info("Opening SELinux policy \"{0}\"".format(policyfile))
 
         try:
             self.policy = qpol.qpol_policy_t(policyfile, 0)

@@ -20,6 +20,7 @@
 from __future__ import print_function
 import sys
 import argparse
+import logging
 
 import setools
 
@@ -76,6 +77,8 @@ parser.add_argument("-s", "--source", help="Source type of the analysis.",
 parser.add_argument("-t", "--target", help="Target type of the analysis.", default="")
 parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")
+parser.add_argument("-v", "--verbose", action="store_true",
+                    help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 alg = parser.add_argument_group("Analysis algorithm")
@@ -96,6 +99,11 @@ if not args.target and (args.shortest_path or args.all_paths):
 
 if args.target and not (args.shortest_path or args.all_paths):
     parser.error("An algorithm must be specified to determine a path.")
+
+if args.debug:
+    logging.basicConfig(level=logging.DEBUG)
+elif args.verbose:
+    logging.basicConfig(level=logging.INFO)
 
 try:
     p = setools.SELinuxPolicy(args.policy)

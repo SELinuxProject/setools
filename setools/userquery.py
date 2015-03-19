@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 import re
 
 from . import compquery
@@ -62,6 +63,7 @@ class UserQuery(compquery.ComponentQuery):
         range_proper    If true, use proper superset/subset operations.
                         No effect if not using set operations.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
         self.set_name(name, regex=name_regex)
@@ -72,6 +74,13 @@ class UserQuery(compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching users."""
+        self.log.info("Generating results.")
+        self.log.debug("Name: {0.name}, regex: {0.name_regex}".format(self))
+        self.log.debug("Roles: {0.roles}, regex: {0.roles_regex}, eq: {0.roles_equal}".format(self))
+        self.log.debug("Level: {0.level}, dom: {0.level_dom}, domby: {0.level_domby}, "
+                       "incomp: {0.level_incomp}".format(self))
+        self.log.debug("Range: {0.range_}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
+                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
         for u in self.policy.users():
             if self.name and not self._match_regex(

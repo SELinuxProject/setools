@@ -21,12 +21,15 @@ from __future__ import print_function
 import setools
 import argparse
 import sys
+import logging
 
 parser = argparse.ArgumentParser(
     description="SELinux policy rule search tool.",
     epilog="TE/MLS rule searches cannot be mixed with RBAC rule searches.")
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("policy", help="Path to the SELinux policy to search.")
+parser.add_argument("-v", "--verbose", action="store_true",
+                    help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 rtypes = parser.add_argument_group("TE Rule Types")
@@ -103,6 +106,11 @@ if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
 
 if (args.tertypes or args.mlsrtypes) and args.rbacrtypes:
     parser.error("TE/MLS rule searches cannot be mixed with RBAC rule searches.")
+
+if args.debug:
+    logging.basicConfig(level=logging.DEBUG)
+elif args.verbose:
+    logging.basicConfig(level=logging.INFO)
 
 try:
     p = setools.SELinuxPolicy(args.policy)
