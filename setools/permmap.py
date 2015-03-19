@@ -241,7 +241,7 @@ class PermissionMap(object):
             class_name = str(c)
 
             if class_name not in self.permmap:
-                self.log.info("Adding unmapped class {0}".format(class_name))
+                self.log.info("Adding unmapped class {0} from {1}".format(class_name, policy))
                 self.permmap[class_name] = dict()
 
             perms = c.perms
@@ -253,8 +253,8 @@ class PermissionMap(object):
 
             for perm_name in perms:
                 if perm_name not in self.permmap[class_name]:
-                    self.log.info("Adding unmapped permission {0} in {1}".format(perm_name,
-                                                                                 class_name))
+                    self.log.info("Adding unmapped permission {0} in {1} from {2}".
+                                  format(perm_name, class_name, policy))
                     self.permmap[class_name][perm_name] = {'direction': 'u',
                                                            'weight': 1,
                                                            'enabled': True}

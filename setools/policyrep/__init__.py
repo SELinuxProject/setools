@@ -81,6 +81,14 @@ class SELinuxPolicy(object):
         except SyntaxError as err:
             raise InvalidPolicy("Error opening policy file \"{0}\": {1}".format(policyfile, err))
 
+        self.filename = policyfile
+
+    def __repr__(self):
+        return "<SELinuxPolicy(\"{0}\")>".format(self.filename)
+
+    def __str__(self):
+        return self.filename
+
     #
     # Policy properties
     #
