@@ -27,9 +27,9 @@ class ObjClassQuery(compquery.ComponentQuery):
     """Query object classes."""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 common="", common_regex=False,
-                 perms=set(), perms_equal=False, perms_regex=False,
+                 name=None, name_regex=False,
+                 common=None, common_regex=False,
+                 perms=None, perms_equal=False, perms_regex=False,
                  perms_indirect=True):
         """
         Parameters:
@@ -105,7 +105,7 @@ class ObjClassQuery(compquery.ComponentQuery):
         NameError  Invalid keyword option.
         """
 
-        self.common = str(common)
+        self.common = common
 
         for k in list(opts.keys()):
             if k == "regex":

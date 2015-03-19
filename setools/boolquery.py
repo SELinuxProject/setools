@@ -26,7 +26,7 @@ class BoolQuery(compquery.ComponentQuery):
     """Query SELinux policy Booleans."""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
+                 name=None, name_regex=False,
                  default=False, match_default=False):
         """
         Parameter:

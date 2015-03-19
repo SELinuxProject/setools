@@ -27,9 +27,9 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
     """Query MLS Sensitivities"""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 alias="", alias_regex=False,
-                 sens="", sens_dom=False, sens_domby=False):
+                 name=None, name_regex=False,
+                 alias=None, alias_regex=False,
+                 sens=None, sens_dom=False, sens_domby=False):
         """
         Parameters:
         name         The name of the category to match.

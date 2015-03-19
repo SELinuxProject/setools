@@ -29,13 +29,13 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
     """Query the Type Enforcement rules."""
 
     def __init__(self, policy,
-                 ruletype=[],
-                 source="", source_regex=False, source_indirect=True,
-                 target="", target_regex=False, target_indirect=True,
-                 tclass="", tclass_regex=False,
-                 perms=set(), perms_equal=False,
-                 default="", default_regex=False,
-                 boolean=set(), boolean_regex=False, boolean_equal=False):
+                 ruletype=None,
+                 source=None, source_regex=False, source_indirect=True,
+                 target=None, target_regex=False, target_indirect=True,
+                 tclass=None, tclass_regex=False,
+                 perms=None, perms_equal=False,
+                 default=None, default_regex=False,
+                 boolean=None, boolean_regex=False, boolean_equal=False):
         """
         Parameter:
         policy            The policy to query.

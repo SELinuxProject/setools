@@ -26,13 +26,13 @@ class PortconQuery(contextquery.ContextQuery):
     """Port context query."""
 
     def __init__(self, policy,
-                 protocol=0,
-                 ports=(0, 0), ports_subset=False, ports_overlap=False,
+                 protocol=None,
+                 ports=(None, None), ports_subset=False, ports_overlap=False,
                  ports_superset=False, ports_proper=False,
-                 user="", user_regex=False,
-                 role="", role_regex=False,
-                 type_="", type_regex=False,
-                 range_="", range_overlap=False, range_subset=False,
+                 user=None, user_regex=False,
+                 role=None, role_regex=False,
+                 type_=None, type_regex=False,
+                 range_=None, range_overlap=False, range_subset=False,
                  range_superset=False, range_proper=False):
         """
         Parameters:
@@ -92,10 +92,10 @@ class PortconQuery(contextquery.ContextQuery):
 
         for p in self.policy.portcons():
 
-            if any(self.ports):
+            if all(self.ports):
                 if not self._match_range(
                         p.ports,
-                        self.ports,
+                        self.ports_cmp,
                         self.subset,
                         self.overlap,
                         self.superset,
@@ -141,16 +141,7 @@ class PortconQuery(contextquery.ContextQuery):
                     No effect if not using set operations.
         """
 
-        pending_ports = (int(ports[0]), int(ports[1]))
-
-        if (pending_ports[0] < 0 or pending_ports[1] < 0):
-            raise ValueError("Port numbers must be positive: {0[0]}-{0[1]}".format(ports))
-
-        if (pending_ports[0] > pending_ports[1]):
-            raise ValueError(
-                "The low port must be smaller than the high port: {0[0]}-{0[1]}".format(ports))
-
-        self.ports = pending_ports
+        self.ports = ports
 
         for k in list(opts.keys()):
             if k == "subset":
@@ -163,6 +154,18 @@ class PortconQuery(contextquery.ContextQuery):
                 self.proper = opts[k]
             else:
                 raise NameError("Invalid name option: {0}".format(k))
+
+        if not all(self.ports):
+            self.ports_cmp = None
+        else:
+            if (self.ports[0] < 1 or self.ports[1] < 1):
+                raise ValueError("Port numbers must be positive: {0[0]}-{0[1]}".format(ports))
+
+            if (self.ports[0] > self.ports[1]):
+                raise ValueError(
+                    "The low port must be smaller than the high port: {0[0]}-{0[1]}".format(ports))
+
+            self.ports_cmp = self.ports
 
     def set_protocol(self, protocol):
         """

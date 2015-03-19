@@ -28,12 +28,12 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery)
     """Query constraint rules, (mls)constrain/(mls)validatetrans."""
 
     def __init__(self, policy,
-                 ruletype=[],
-                 tclass="", tclass_regex=False,
-                 perms=set(), perms_equal=False,
-                 role="", role_regex=False, role_indirect=True,
-                 type_="", type_regex=False, type_indirect=True,
-                 user="", user_regex=False):
+                 ruletype=None,
+                 tclass=None, tclass_regex=False,
+                 perms=None, perms_equal=False,
+                 role=None, role_regex=False, role_indirect=True,
+                 type_=None, type_regex=False, type_indirect=True,
+                 user=None, user_regex=False):
 
         """
         Parameter:

@@ -29,11 +29,11 @@ class RBACRuleQuery(rulequery.RuleQuery):
     """Query the RBAC rules."""
 
     def __init__(self, policy,
-                 ruletype=[],
-                 source="", source_regex=False, source_indirect=True,
-                 target="", target_regex=False, target_indirect=True,
-                 tclass="", tclass_regex=False,
-                 default="", default_regex=False):
+                 ruletype=None,
+                 source=None, source_regex=False, source_indirect=True,
+                 target=None, target_regex=False, target_indirect=True,
+                 tclass=None, tclass_regex=False,
+                 default=None, default_regex=False):
         """
         Parameters:
         policy          The policy to query.

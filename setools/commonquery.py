@@ -26,8 +26,8 @@ class CommonQuery(compquery.ComponentQuery):
     """Query common permission sets."""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 perms=set(), perms_equal=False, perms_regex=False):
+                 name=None, name_regex=False,
+                 perms=None, perms_equal=False, perms_regex=False):
         """
         Parameters:
         name         The name of the common to match.

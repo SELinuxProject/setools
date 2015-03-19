@@ -111,7 +111,7 @@ class MatchPermission(object):
 
     def _match_perms(self, obj):
         """Match the object to the permission criteria."""
-        return self._match_set(obj, self.perms, self.perms_equal)
+        return self._match_set(obj, self.perms_cmp, self.perms_equal)
 
     def set_perms(self, perms, **opts):
         """
@@ -130,13 +130,15 @@ class MatchPermission(object):
         NameError   Invalid permission set keyword option.
         """
 
-        if isinstance(perms, str):
-            self.perms = perms
-        else:
-            self.perms = set(perms)
+        self.perms = perms
 
         for k in list(opts.keys()):
             if k == "equal":
                 self.perms_equal = opts[k]
             else:
                 raise NameError("Invalid permission set option: {0}".format(k))
+
+        if not self.perms:
+            self.perms_cmp = None
+        else:
+            self.perms_cmp = set(self.perms)

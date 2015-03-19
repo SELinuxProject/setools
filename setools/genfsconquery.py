@@ -27,13 +27,13 @@ class GenfsconQuery(contextquery.ContextQuery):
     """Query genfscon statements."""
 
     def __init__(self, policy,
-                 fs="", fs_regex=False,
-                 path="", path_regex=False,
-                 filetype=0,
-                 user="", user_regex=False,
-                 role="", role_regex=False,
-                 type_="", type_regex=False,
-                 range_="", range_overlap=False, range_subset=False,
+                 fs=None, fs_regex=False,
+                 path=None, path_regex=False,
+                 filetype=None,
+                 user=None, user_regex=False,
+                 role=None, role_regex=False,
+                 type_=None, type_regex=False,
+                 range_=None, range_overlap=False, range_subset=False,
                  range_superset=False, range_proper=False):
         """
         Parameters:
@@ -124,7 +124,7 @@ class GenfsconQuery(contextquery.ContextQuery):
         NameError  Invalid keyword option.
         """
 
-        self.fs = str(fs)
+        self.fs = fs
 
         for k in list(opts.keys()):
             if k == "regex":
@@ -161,7 +161,7 @@ class GenfsconQuery(contextquery.ContextQuery):
         NameError  Invalid keyword option.
         """
 
-        self.path = str(path)
+        self.path = path
 
         for k in list(opts.keys()):
             if k == "regex":

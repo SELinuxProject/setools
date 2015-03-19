@@ -26,8 +26,8 @@ class TypeAttributeQuery(compquery.ComponentQuery):
     """Query SELinux policy type attributes."""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 types=set(), types_equal=False, types_regex=False):
+                 name=None, name_regex=False,
+                 types=None, types_equal=False, types_regex=False):
         """
         Parameter:
         policy              The policy to query.

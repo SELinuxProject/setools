@@ -98,7 +98,7 @@ class ContextQuery(query.PolicyQuery):
         NameError  Invalid keyword option.
         """
 
-        self.user = str(user)
+        self.user = user
 
         for k in list(opts.keys()):
             if k == "regex":
@@ -125,7 +125,7 @@ class ContextQuery(query.PolicyQuery):
         NameError  Invalid keyword option.
         """
 
-        self.role = str(role)
+        self.role = role
 
         for k in list(opts.keys()):
             if k == "regex":
@@ -152,7 +152,7 @@ class ContextQuery(query.PolicyQuery):
         NameError  Invalid keyword option.
         """
 
-        self.type_ = str(type_)
+        self.type_ = type_
 
         for k in list(opts.keys()):
             if k == "regex":

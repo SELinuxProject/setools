@@ -41,7 +41,7 @@ class ComponentQuery(query.PolicyQuery):
         NameError  Invalid keyword option.
         """
 
-        self.name = str(name)
+        self.name = name
 
         for k in list(opts.keys()):
             if k == "regex":

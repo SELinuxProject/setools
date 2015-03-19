@@ -27,9 +27,9 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
     """Query SELinux policy types."""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 alias="", alias_regex=False,
-                 attrs=set(), attrs_equal=False, attrs_regex=False,
+                 name=None, name_regex=False,
+                 alias=None, alias_regex=False,
+                 attrs=None, attrs_equal=False, attrs_regex=False,
                  permissive=False, match_permissive=False):
         """
         Parameter:

@@ -26,7 +26,7 @@ class PolCapQuery(compquery.ComponentQuery):
     """Query SELinux policy capabilities"""
 
     def __init__(self, policy,
-                 name="", name_regex=False):
+                 name=None, name_regex=False):
         """
         Parameters:
         name        The name of the policy capability to match.

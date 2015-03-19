@@ -27,8 +27,8 @@ class CategoryQuery(mixins.MatchAlias, compquery.ComponentQuery):
     """Query MLS Categories"""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 alias="", alias_regex=False):
+                 name=None, name_regex=False,
+                 alias=None, alias_regex=False):
         """
         Parameters:
         name         The name of the category to match.

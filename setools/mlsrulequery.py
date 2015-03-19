@@ -24,11 +24,11 @@ class MLSRuleQuery(rulequery.RuleQuery):
     """Query MLS rules."""
 
     def __init__(self, policy,
-                 ruletype=[],
-                 source="", source_regex=False,
-                 target="", target_regex=False,
-                 tclass="", tclass_regex=False,
-                 default="", default_overlap=False, default_subset=False,
+                 ruletype=None,
+                 source=None, source_regex=False,
+                 target=None, target_regex=False,
+                 tclass=None, tclass_regex=False,
+                 default=None, default_overlap=False, default_subset=False,
                  default_superset=False, default_proper=False):
         """
         Parameters:

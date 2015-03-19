@@ -33,12 +33,12 @@ class NodeconQuery(contextquery.ContextQuery):
     """Query nodecon statements."""
 
     def __init__(self, policy,
-                 net="", net_overlap=False,
-                 version=0,
-                 user="", user_regex=False,
-                 role="", role_regex=False,
-                 type_="", type_regex=False,
-                 range_="", range_overlap=False, range_subset=False,
+                 net=None, net_overlap=False,
+                 version=None,
+                 user=None, user_regex=False,
+                 role=None, role_regex=False,
+                 type_=None, type_regex=False,
+                 range_=None, range_overlap=False, range_subset=False,
                  range_superset=False, range_proper=False):
         """
         Parameters:

@@ -27,10 +27,10 @@ class UserQuery(compquery.ComponentQuery):
     """Query SELinux policy users."""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 roles=set(), roles_equal=False, roles_regex=False,
-                 level="", level_dom=False, level_domby=False, level_incomp=False,
-                 range_="", range_overlap=False, range_subset=False,
+                 name=None, name_regex=False,
+                 roles=None, roles_equal=False, roles_regex=False,
+                 level=None, level_dom=False, level_domby=False, level_incomp=False,
+                 range_=None, range_overlap=False, range_subset=False,
                  range_superset=False, range_proper=False):
         """
         Parameter:

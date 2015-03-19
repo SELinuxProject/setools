@@ -25,11 +25,11 @@ class InitialSIDQuery(compquery.ComponentQuery, contextquery.ContextQuery):
     """Initial SID (context) query."""
 
     def __init__(self, policy,
-                 name="", name_regex=False,
-                 user="", user_regex=False,
-                 role="", role_regex=False,
-                 type_="", type_regex=False,
-                 range_="", range_overlap=False, range_subset=False,
+                 name=None, name_regex=False,
+                 user=None, user_regex=False,
+                 role=None, role_regex=False,
+                 type_=None, type_regex=False,
+                 range_=None, range_overlap=False, range_subset=False,
                  range_superset=False, range_proper=False):
         """
         Parameters:
