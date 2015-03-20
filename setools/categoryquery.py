@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 import re
 
 from . import compquery
@@ -38,6 +39,7 @@ class CategoryQuery(mixins.MatchAlias, compquery.ComponentQuery):
         alias_regex  If true, regular expression matching
                      will be used on the alias names.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
         self.set_name(name, regex=name_regex)
@@ -45,6 +47,9 @@ class CategoryQuery(mixins.MatchAlias, compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching categories."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Alias: {0.alias_cmp}, regex: {0.alias_regex}".format(self))
 
         for cat in self.policy.categories():
             if self.name and not self._match_name(cat):

@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from . import contextquery
@@ -75,6 +76,7 @@ class PortconQuery(contextquery.ContextQuery):
         range_proper    If true, use proper superset/subset operations.
                         No effect if not using set operations.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -89,6 +91,15 @@ class PortconQuery(contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching portcons."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Ports: {0.ports_cmp}, overlap: {0.ports_overlap}, "
+                       "subset: {0.ports_subset}, superset: {0.ports_superset}, "
+                       "proper: {0.ports_proper}".format(self))
+        self.log.debug("User: {0.user_cmp!r}, regex: {0.user_regex}".format(self))
+        self.log.debug("Role: {0.role_cmp!r}, regex: {0.role_regex}".format(self))
+        self.log.debug("Type: {0.type_cmp!r}, regex: {0.type_regex}".format(self))
+        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
+                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
         for p in self.policy.portcons():
 

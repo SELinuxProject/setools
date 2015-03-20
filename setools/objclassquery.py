@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 import re
 
 from . import compquery
@@ -52,6 +53,7 @@ class ObjClassQuery(compquery.ComponentQuery):
                         permission set not will be evaluated.  Default
                         is true.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
         self.set_name(name, regex=name_regex)
@@ -60,6 +62,11 @@ class ObjClassQuery(compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching object classes."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Common: {0.common_cmp!r}, regex: {0.common_regex}".format(self))
+        self.log.debug("Perms: {0.perms_cmp}, regex: {0.perms_regex}, "
+                       "eq: {0.perms_equal}, indirect: {0.perms_indirect}".format(self))
 
         for class_ in self.policy.classes():
             if self.name and not self._match_name(class_):

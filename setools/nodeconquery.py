@@ -21,6 +21,7 @@ try:
 except ImportError:  # pragma: no cover
     pass
 
+import logging
 import re
 from socket import AF_INET, AF_INET6
 
@@ -66,6 +67,7 @@ class NodeconQuery(contextquery.ContextQuery):
         range_proper    If true, use proper superset/subset operations.
                         No effect if not using set operations.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -79,6 +81,14 @@ class NodeconQuery(contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching nodecons."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
+        self.log.debug("Ver: {0.version}".format(self))
+        self.log.debug("User: {0.user_cmp!r}, regex: {0.user_regex}".format(self))
+        self.log.debug("Role: {0.role_cmp!r}, regex: {0.role_regex}".format(self))
+        self.log.debug("Type: {0.type_cmp!r}, regex: {0.type_regex}".format(self))
+        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
+                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
         for n in self.policy.nodecons():
 

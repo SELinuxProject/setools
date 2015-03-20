@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 import re
 
 from . import compquery
@@ -44,6 +45,7 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
         sens_domby   If true, the criteria will match if it is dominated
                      by the sensitivity.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
         self.set_name(name, regex=name_regex)
@@ -52,6 +54,10 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching sensitivities."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Alias: {0.alias_cmp}, regex: {0.alias_regex}".format(self))
+        self.log.debug("Sens: {0.sens!r}, dom: {0.sens_dom}, domby: {0.sens_domby}".format(self))
 
         for s in self.policy.sensitivities():
             if self.name and not self._match_name(s):

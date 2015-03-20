@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 import re
 
 from . import mixins
@@ -64,6 +65,7 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery)
         user_regex        If true, regular expression matching will
                           be used on the user.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -97,6 +99,13 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery)
 
     def results(self):
         """Generator which yields all matching constraints rules."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.debug("Class: {0.tclass_cmp!r}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Perms: {0.perms_cmp}, eq: {0.perms_equal}".format(self))
+        self.log.debug("User: {0.user_cmp!r}, regex: {0.user_regex}".format(self))
+        self.log.debug("Role: {0.role_cmp!r}, regex: {0.role_regex}".format(self))
+        self.log.debug("Type: {0.type_cmp!r}, regex: {0.type_regex}".format(self))
 
         for c in self.policy.constraints():
             if self.ruletype:

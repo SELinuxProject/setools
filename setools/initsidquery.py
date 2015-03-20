@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
+
 from . import compquery
 from . import contextquery
 
@@ -54,6 +56,7 @@ class InitialSIDQuery(compquery.ComponentQuery, contextquery.ContextQuery):
         range_proper    If true, use proper superset/subset operations.
                         No effect if not using set operations.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -66,6 +69,13 @@ class InitialSIDQuery(compquery.ComponentQuery, contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching initial SIDs."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("User: {0.user_cmp!r}, regex: {0.user_regex}".format(self))
+        self.log.debug("Role: {0.role_cmp!r}, regex: {0.role_regex}".format(self))
+        self.log.debug("Type: {0.type_cmp!r}, regex: {0.type_regex}".format(self))
+        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
+                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
         for i in self.policy.initialsids():
             if self.name and not self._match_regex(

@@ -74,12 +74,13 @@ class UserQuery(compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching users."""
-        self.log.info("Generating results.")
-        self.log.debug("Name: {0.name}, regex: {0.name_regex}".format(self))
-        self.log.debug("Roles: {0.roles}, regex: {0.roles_regex}, eq: {0.roles_equal}".format(self))
-        self.log.debug("Level: {0.level}, dom: {0.level_dom}, domby: {0.level_domby}, "
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Roles: {0.roles_cmp!r}, regex: {0.roles_regex}, "
+                       "eq: {0.roles_equal}".format(self))
+        self.log.debug("Level: {0.level!r}, dom: {0.level_dom}, domby: {0.level_domby}, "
                        "incomp: {0.level_incomp}".format(self))
-        self.log.debug("Range: {0.range_}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
+        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                        "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
         for u in self.policy.users():

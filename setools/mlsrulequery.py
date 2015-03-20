@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
+
 from . import rulequery
 
 
@@ -44,6 +46,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
         tclass_regex     If true, use a regular expression for
                          matching the rule's object class.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -56,6 +59,14 @@ class MLSRuleQuery(rulequery.RuleQuery):
 
     def results(self):
         """Generator which yields all matching MLS rules."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.debug("Source: {0.source_cmp!r}, regex: {0.source_regex}".format(self))
+        self.log.debug("Target: {0.target_cmp!r}, regex: {0.target_regex}".format(self))
+        self.log.debug("Class: {0.tclass_cmp!r}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Default: {0.default_cmp!r}, overlap: {0.default_overlap}, "
+                       "subset: {0.default_subset}, superset: {0.default_superset}, "
+                       "proper: {0.default_proper}".format(self))
 
         for r in self.policy.mlsrules():
             #

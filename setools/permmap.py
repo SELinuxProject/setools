@@ -303,3 +303,57 @@ class PermissionMap(object):
                 write_weight = max(write_weight, mapping['weight'])
 
         return (read_weight, write_weight)
+
+    def set_direction(self, class_, permission, direction):
+        """
+        Set the information flow direction of a permission.
+
+        Parameter:
+        class_              The object class of the permission.
+        permission          The permission name.
+        direction           The information flow direction the permission (r/w/b/n).
+
+        Exceptions:
+        UnmappedClass       The specified object class is not mapped.
+        UnmappedPermission  The specified permission is not mapped for the object class.
+        """
+
+        if direction not in self.valid_infoflow_directions:
+            raise ValueError("Invalid information flow direction: {0}".format(direction))
+
+        classname = str(class_)
+
+        if classname not in self.permmap:
+            raise UnmappedClass("{0} is not mapped.".format(classname))
+
+        try:
+            self.permmap[classname][permission]['direction'] = direction
+        except KeyError:
+            raise UnmappedPermission("{0}:{1} is not mapped.".format(classname, permission))
+
+    def set_weight(self, class_, permission, weight):
+        """
+        Set the weight of a permission.
+
+        Parameter:
+        class_              The object class of the permission.
+        permission          The permission name.
+        weight              The weight of the permission (1-10).
+
+        Exceptions:
+        UnmappedClass       The specified object class is not mapped.
+        UnmappedPermission  The specified permission is not mapped for the object class.
+        """
+
+        if not self.min_weight <= weight <= self.max_weight:
+            raise ValueError("Permission weights must be 1-10: {0}".format(weight))
+
+        classname = str(class_)
+
+        if classname not in self.permmap:
+            raise UnmappedClass("{0} is not mapped.".format(classname))
+
+        try:
+            self.permmap[classname][permission]['weight'] = weight
+        except KeyError:
+            raise UnmappedPermission("{0}:{1} is not mapped.".format(classname, permission))

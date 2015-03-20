@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 import re
 
 from .policyrep.rule import RuleUseError
@@ -57,6 +58,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
         default_regex   If true, regular expression matching will
                         be used on the default role.
         """
+        self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
 
@@ -68,6 +70,14 @@ class RBACRuleQuery(rulequery.RuleQuery):
 
     def results(self):
         """Generator which yields all matching RBAC rules."""
+        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.debug("Source: {0.source_cmp!r}, indirect: {0.source_indirect}, "
+                       "regex: {0.source_regex}".format(self))
+        self.log.debug("Target: {0.target_cmp!r}, indirect: {0.target_indirect}, "
+                       "regex: {0.target_regex}".format(self))
+        self.log.debug("Class: {0.tclass_cmp!r}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Default: {0.default_cmp!r}, regex: {0.default_regex}".format(self))
 
         for r in self.policy.rbacrules():
             #
