@@ -96,10 +96,10 @@ class PortconQuery(contextquery.ContextQuery):
                 if not self._match_range(
                         p.ports,
                         self.ports_cmp,
-                        self.subset,
-                        self.overlap,
-                        self.superset,
-                        self.proper):
+                        self.ports_subset,
+                        self.ports_overlap,
+                        self.ports_superset,
+                        self.ports_proper):
                     continue
 
             if self.protocol and self.protocol != p.protocol:
@@ -145,13 +145,13 @@ class PortconQuery(contextquery.ContextQuery):
 
         for k in list(opts.keys()):
             if k == "subset":
-                self.subset = opts[k]
+                self.ports_subset = opts[k]
             elif k == "overlap":
-                self.overlap = opts[k]
+                self.ports_overlap = opts[k]
             elif k == "superset":
-                self.superset = opts[k]
+                self.ports_superset = opts[k]
             elif k == "proper":
-                self.proper = opts[k]
+                self.ports_proper = opts[k]
             else:
                 raise NameError("Invalid name option: {0}".format(k))
 
