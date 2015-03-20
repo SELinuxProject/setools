@@ -50,6 +50,8 @@ queries.add_argument("-u", "--user", help="Print users.", dest="userquery",
                      nargs='?', const=True, metavar="USER")
 queries.add_argument("--category", help="Print MLS categories.", dest="mlscatsquery",
                      nargs='?', const=True, metavar="CAT")
+queries.add_argument("--common", help="Print common permission set.", dest="commonquery",
+                     nargs='?', const=True, metavar="COMMON")
 queries.add_argument("--constrain", help="Print constraints.", dest="constraintquery",
                      nargs='?', const=True, metavar="CLASS")
 queries.add_argument("--fs_use", help="Print fs_use statements.", dest="fsusequery",
@@ -106,6 +108,13 @@ try:
         else:
             q = setools.objclassquery.ObjClassQuery(p)
         components.append(("Classes", q))
+
+    if args.commonquery or args.all:
+        if isinstance(args.commonquery, str):
+            q = setools.commonquery.CommonQuery(p, name=args.commonquery)
+        else:
+            q = setools.commonquery.CommonQuery(p)
+        components.append(("Commons", q))
 
     if args.constraintquery or args.all:
         if isinstance(args.constraintquery, str):
