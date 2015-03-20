@@ -111,6 +111,10 @@ class LevelFactoryTest(unittest.TestCase):
         """Level lookup with backwards category range."""
         self.assertRaises(InvalidLevel, level_factory, self.p.policy, "s0:c4.c0")
 
+    def test_306_level_lookup_cat_range_error(self):
+        """Level lookup with category range parse error."""
+        self.assertRaises(InvalidLevel, level_factory, self.p.policy, "s0:c0.c2.c4")
+
     def test_306_level_lookup_cat_not_assoc(self):
         """Level lookup with category not associated with sensitivity."""
         # c4 is not associated with s0.
