@@ -77,7 +77,7 @@ class SELinuxPolicy(object):
         self.log.info("Opening SELinux policy \"{0}\"".format(policyfile))
 
         try:
-            self.policy = qpol.qpol_policy_t(policyfile, 0)
+            self.policy = qpol.qpol_policy_factory(policyfile)
         except SyntaxError as err:
             raise InvalidPolicy("Error opening policy file \"{0}\": {1}".format(policyfile, err))
 

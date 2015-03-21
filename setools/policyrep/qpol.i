@@ -110,8 +110,36 @@ const char *libqpol_get_version(void);
         return NULL;
     }
 %}
+%{
+/* C Bridge to Python logging callback */
+__attribute__ ((format(printf, 4, 0)))
+static void qpol_log_callback(void *varg,
+                              const qpol_policy_t * p __attribute__ ((unused)),
+                              int level,
+                              const char *fmt,
+                              va_list va_args)
+{
+    /* Expand to a full string to avoid any C format string
+     * or variable args handling when passing to Python
+     */
+
+    PyObject *py_callback, *rc;
+    char *str = NULL;
+
+    vasprintf(&str, fmt, va_args);
+
+    py_callback = (PyObject *) varg;
+
+    /* this char* casting doesn't make sense, but this runs afoul of -Werror
+     * otherwise as the Python library doesn't do const char* */
+    rc = PyObject_CallFunction(py_callback, (char*)"(is)", level, str);
+    Py_XDECREF(rc);
+    free(str);
+}
+%}
 
 %pythoncode %{
+import logging
 from functools import wraps
 
 def QpolGenerator(cast):
@@ -140,6 +168,16 @@ def QpolGenerator(cast):
 
         return wrapper
     return decorate
+
+def qpol_logger(level, msg):
+    """Log qpol messages via Python logging."""
+    logging.getLogger("libqpol").debug(msg)
+
+def qpol_policy_factory(path):
+    """Factory function for qpol policy objects."""
+    # The main purpose here is to hook in the
+    # above logger callback.
+    return qpol_policy_t(path, 0, qpol_logger)
 %}
 
 /* qpol_module */
@@ -267,9 +305,15 @@ typedef enum qpol_capability
   }
 }
 %extend qpol_policy {
-    qpol_policy(const char *path, const int options) {
+    qpol_policy(const char *path, const int options, PyObject *py_callback) {
         qpol_policy_t *p;
-        qpol_policy_open_from_file(path, &p, qpol_swig_message_callback, qpol_swig_message_callback_arg, options);
+
+        if (!PyCallable_Check(py_callback)) {
+            PyErr_SetString(PyExc_TypeError, "Callback parameter must be callable");
+            return NULL;
+        }
+
+        qpol_policy_open_from_file(path, &p, qpol_log_callback, (void*)py_callback, options);
         return p;
     }
     ~qpol_policy() {

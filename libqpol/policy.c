@@ -154,7 +154,6 @@ __attribute__ ((format(printf, 4, 0)))
 static void qpol_handle_default_callback(void *varg __attribute__ ((unused)), const qpol_policy_t * p
 					 __attribute__ ((unused)), int level, const char *fmt, va_list va_args)
 {
-#ifdef DEBUG
 	switch (level) {
 	case QPOL_MSG_INFO:
 	{
@@ -176,7 +175,6 @@ static void qpol_handle_default_callback(void *varg __attribute__ ((unused)), co
 
 	vfprintf(stderr, fmt, va_args);
 	fprintf(stderr, "\n");
-#endif
 }
 
 static int read_source_policy(qpol_policy_t * qpolicy, const char *progname, int options)
