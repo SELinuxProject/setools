@@ -23,6 +23,13 @@ import argparse
 import sys
 import logging
 
+
+def expand_attr(attr):
+    """Render type and role attributes."""
+    items = "\n\t".join(sorted(str(i) for i in attr.expand()))
+    contents = items if items else "<empty set>"
+    return "{0}\n\t{1}".format(attr.statement(), contents)
+
 parser = argparse.ArgumentParser(
     description="SELinux policy information tool.")
 parser.add_argument("--version", action="version", version=setools.__version__)
@@ -93,28 +100,28 @@ try:
             q = setools.boolquery.BoolQuery(p, name=args.boolquery)
         else:
             q = setools.boolquery.BoolQuery(p)
-        components.append(("Booleans", q))
+        components.append(("Booleans", q, lambda x: x.statement()))
 
     if args.mlscatsquery or args.all:
         if isinstance(args.mlscatsquery, str):
             q = setools.categoryquery.CategoryQuery(p, name=args.mlscatsquery)
         else:
             q = setools.categoryquery.CategoryQuery(p)
-        components.append(("Categories", q))
+        components.append(("Categories", q, lambda x: x.statement()))
 
     if args.classquery or args.all:
         if isinstance(args.classquery, str):
             q = setools.objclassquery.ObjClassQuery(p, name=args.classquery)
         else:
             q = setools.objclassquery.ObjClassQuery(p)
-        components.append(("Classes", q))
+        components.append(("Classes", q, lambda x: x.statement()))
 
     if args.commonquery or args.all:
         if isinstance(args.commonquery, str):
             q = setools.commonquery.CommonQuery(p, name=args.commonquery)
         else:
             q = setools.commonquery.CommonQuery(p)
-        components.append(("Commons", q))
+        components.append(("Commons", q, lambda x: x.statement()))
 
     if args.constraintquery or args.all:
         if isinstance(args.constraintquery, str):
@@ -122,42 +129,42 @@ try:
                                                         ruletype=["constrain", "mlsconstrain"])
         else:
             q = setools.constraintquery.ConstraintQuery(p, ruletype=["constrain", "mlsconstrain"])
-        components.append(("Constraints", q))
+        components.append(("Constraints", q, lambda x: x.statement()))
 
     if args.fsusequery or args.all:
         if isinstance(args.fsusequery, str):
             q = setools.fsusequery.FSUseQuery(p, fs=args.fsusequery)
         else:
             q = setools.fsusequery.FSUseQuery(p)
-        components.append(("Fs_use", q))
+        components.append(("Fs_use", q, lambda x: x.statement()))
 
     if args.genfsconquery or args.all:
         if isinstance(args.genfsconquery, str):
             q = setools.genfsconquery.GenfsconQuery(p, fs=args.genfsconquery)
         else:
             q = setools.genfsconquery.GenfsconQuery(p)
-        components.append(("Genfscon", q))
+        components.append(("Genfscon", q, lambda x: x.statement()))
 
     if args.initialsidquery or args.all:
         if isinstance(args.initialsidquery, str):
             q = setools.initsidquery.InitialSIDQuery(p, name=args.initialsidquery)
         else:
             q = setools.initsidquery.InitialSIDQuery(p)
-        components.append(("Initial SIDs", q))
+        components.append(("Initial SIDs", q, lambda x: x.statement()))
 
     if args.netifconquery or args.all:
         if isinstance(args.netifconquery, str):
             q = setools.netifconquery.NetifconQuery(p, name=args.netifconquery)
         else:
             q = setools.netifconquery.NetifconQuery(p)
-        components.append(("Netifcon", q))
+        components.append(("Netifcon", q, lambda x: x.statement()))
 
     if args.nodeconquery or args.all:
         if isinstance(args.nodeconquery, str):
             q = setools.nodeconquery.NodeconQuery(p, net=args.nodeconquery)
         else:
             q = setools.nodeconquery.NodeconQuery(p)
-        components.append(("Nodecon", q))
+        components.append(("Nodecon", q, lambda x: x.statement()))
 
     if args.permissivequery or args.all:
         if isinstance(args.permissivequery, str):
@@ -165,14 +172,14 @@ try:
                                             permissive=True, match_permissive=True)
         else:
             q = setools.typequery.TypeQuery(p, permissive=True, match_permissive=True)
-        components.append(("Permissive Types", q))
+        components.append(("Permissive Types", q, lambda x: x.statement()))
 
     if args.polcapquery or args.all:
         if isinstance(args.polcapquery, str):
             q = setools.polcapquery.PolCapQuery(p, name=args.polcapquery)
         else:
             q = setools.polcapquery.PolCapQuery(p)
-        components.append(("Polcap", q))
+        components.append(("Polcap", q, lambda x: x.statement()))
 
     if args.portconquery or args.all:
         if isinstance(args.portconquery, str):
@@ -192,42 +199,42 @@ try:
 
         else:
             q = setools.portconquery.PortconQuery(p)
-        components.append(("Portcon", q))
+        components.append(("Portcon", q, lambda x: x.statement()))
 
     if args.rolequery or args.all:
         if isinstance(args.rolequery, str):
             q = setools.rolequery.RoleQuery(p, name=args.rolequery)
         else:
             q = setools.rolequery.RoleQuery(p)
-        components.append(("Roles", q))
+        components.append(("Roles", q, lambda x: x.statement()))
 
     if args.mlssensquery or args.all:
         if isinstance(args.mlssensquery, str):
             q = setools.sensitivityquery.SensitivityQuery(p, name=args.mlssensquery)
         else:
             q = setools.sensitivityquery.SensitivityQuery(p)
-        components.append(("Sensitivities", q))
+        components.append(("Sensitivities", q, lambda x: x.statement()))
 
     if args.typequery or args.all:
         if isinstance(args.typequery, str):
             q = setools.typequery.TypeQuery(p, name=args.typequery)
         else:
             q = setools.typequery.TypeQuery(p)
-        components.append(("Types", q))
+        components.append(("Types", q, lambda x: x.statement()))
 
     if args.typeattrquery or args.all:
         if isinstance(args.typeattrquery, str):
             q = setools.typeattrquery.TypeAttributeQuery(p, name=args.typeattrquery)
         else:
             q = setools.typeattrquery.TypeAttributeQuery(p)
-        components.append(("Type Attributes", q))
+        components.append(("Type Attributes", q, expand_attr))
 
     if args.userquery or args.all:
         if isinstance(args.userquery, str):
             q = setools.userquery.UserQuery(p, name=args.userquery)
         else:
             q = setools.userquery.UserQuery(p)
-        components.append(("Users", q))
+        components.append(("Users", q, lambda x: x.statement()))
 
     if args.validatetransquery or args.all:
         if isinstance(args.validatetransquery, str):
@@ -237,7 +244,7 @@ try:
         else:
             q = setools.constraintquery.ConstraintQuery(p, ruletype=["validatetrans",
                                                                      "mlsvalidatetrans"])
-        components.append(("Validatetrans", q))
+        components.append(("Validatetrans", q, lambda x: x.statement()))
 
     if (not components or args.all) and not args.flat:
         mls = "enabled" if p.mls else "disabled"
@@ -277,12 +284,12 @@ try:
         print("  Permissives:   {0:7}    Polcap:        {1:7}".format(
             p.permissives_count, p.polcap_count))
 
-    for desc, component in components:
+    for desc, component, expander in components:
         results = sorted(component.results())
         if not args.flat:
             print("\n{0}: {1}".format(desc, len(results)))
         for item in results:
-            result = item.statement() if args.expand else item
+            result = expander(item) if args.expand else item
             strfmt = "   {0}" if not args.flat else "{0}"
             print(strfmt.format(result))
 
