@@ -126,7 +126,8 @@ static void qpol_log_callback(void *varg,
     PyObject *py_callback, *rc;
     char *str = NULL;
 
-    vasprintf(&str, fmt, va_args);
+    if(vasprintf(&str, fmt, va_args) < 0)
+        return;
 
     py_callback = (PyObject *) varg;
 
