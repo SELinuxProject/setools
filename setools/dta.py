@@ -152,6 +152,8 @@ class DomainTransitionAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
+        self.log.info("Generating one shortest path from {0} to {1}...".format(s, t))
+
         if s in self.subG and t in self.subG:
             try:
                 path = nx.shortest_path(self.subG, s, t)
@@ -183,6 +185,8 @@ class DomainTransitionAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
+        self.log.info("Generating all paths from {0} to {1}, max len {2}...".format(s, t, maxlen))
+
         if s in self.subG and t in self.subG:
             try:
                 paths = nx.all_simple_paths(self.subG, s, t, maxlen)
@@ -213,6 +217,8 @@ class DomainTransitionAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
+        self.log.info("Generating all shortest paths from {0} to {1}...".format(s, t))
+
         if s in self.subG and t in self.subG:
             try:
                 paths = nx.all_shortest_paths(self.subG, s, t)
@@ -240,6 +246,9 @@ class DomainTransitionAnalysis(object):
 
         if self.rebuildsubgraph:
             self._build_subgraph()
+
+        self.log.info("Generating all transitions {1} {0}".
+                      format(s, "in to" if self.reverse else "out from"))
 
         for source, target in self.subG.out_edges_iter(s):
             if self.reverse:
@@ -342,7 +351,7 @@ class DomainTransitionAnalysis(object):
     def _build_graph(self):
         self.G.clear()
 
-        self.log.info("Building graph...")
+        self.log.info("Building graph from {0}...".format(self.policy))
 
         # hash tables keyed on domain type
         setexec = defaultdict(list)
@@ -480,6 +489,7 @@ class DomainTransitionAnalysis(object):
 
         self.rebuildgraph = False
         self.rebuildsubgraph = True
+        self.log.info("Completed building graph.")
 
     def __remove_excluded_entrypoints(self):
         invalid_edges = []
@@ -535,3 +545,4 @@ class DomainTransitionAnalysis(object):
             self.subG.reverse(copy=False)
 
         self.rebuildsubgraph = False
+        self.log.info("Completed building subgraph.")
