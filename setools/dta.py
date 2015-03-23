@@ -156,11 +156,9 @@ class DomainTransitionAnalysis(object):
 
         if s in self.subG and t in self.subG:
             try:
-                path = nx.shortest_path(self.subG, s, t)
+                yield self.__get_steps(nx.shortest_path(self.subG, s, t))
             except nx.exception.NetworkXNoPath:
                 pass
-            else:
-                yield self.__get_steps(path)
 
     def all_paths(self, source, target, maxlen=2):
         """
@@ -189,12 +187,10 @@ class DomainTransitionAnalysis(object):
 
         if s in self.subG and t in self.subG:
             try:
-                paths = nx.all_simple_paths(self.subG, s, t, maxlen)
+                for p in nx.all_simple_paths(self.subG, s, t, maxlen):
+                    yield self.__get_steps(p)
             except nx.exception.NetworkXNoPath:
                 pass
-            else:
-                for p in paths:
-                    yield self.__get_steps(p)
 
     def all_shortest_paths(self, source, target):
         """
@@ -221,12 +217,10 @@ class DomainTransitionAnalysis(object):
 
         if s in self.subG and t in self.subG:
             try:
-                paths = nx.all_shortest_paths(self.subG, s, t)
+                for p in nx.all_shortest_paths(self.subG, s, t):
+                    yield self.__get_steps(p)
             except nx.exception.NetworkXNoPath:
                 pass
-            else:
-                for p in paths:
-                    yield self.__get_steps(p)
 
     def transitions(self, type_):
         """
