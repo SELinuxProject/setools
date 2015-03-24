@@ -23,6 +23,12 @@ from . import typeattr
 from . import boolcond
 
 
+class InvalidTERuleType(rule.InvalidRuleType):
+
+    """Exception for invalid TE rule types."""
+    pass
+
+
 class TERuleNoFilename(Exception):
 
     """
@@ -41,6 +47,14 @@ def te_rule_factory(policy, symbol):
         return TERule(policy, symbol)
     else:
         raise TypeError("TE rules cannot be looked-up.")
+
+
+def validate_ruletype(types):
+    """Validate TE Rule types."""
+    for t in types:
+        if t not in ["allow", "auditallow", "dontaudit", "neverallow",
+                     "type_transition", "type_member", "type_change"]:
+            raise InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
 
 
 class BaseTERule(rule.PolicyRule):

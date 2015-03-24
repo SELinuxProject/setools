@@ -196,6 +196,18 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
         else:
             self.boolean_cmp = set(self.policy.lookup_boolean(b) for b in self.boolean)
 
+    def set_ruletype(self, ruletype):
+        """
+        Set the rule types for the rule query.
+
+        Parameter:
+        ruletype    The rule types to match.
+        """
+        if ruletype:
+            self.policy.validate_te_ruletype(ruletype)
+
+        self.ruletype = ruletype
+
     def set_default(self, default, **opts):
         """
         Set the criteria for the rule's default type.

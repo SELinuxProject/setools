@@ -152,6 +152,8 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery)
         Parameter:
         ruletype    The rule types to match.
         """
+        if ruletype:
+            self.policy.validate_constraint_ruletype(ruletype)
 
         self.ruletype = ruletype
 

@@ -115,6 +115,18 @@ class MLSRuleQuery(rulequery.RuleQuery):
             # if we get here, we have matched all available criteria
             yield r
 
+    def set_ruletype(self, ruletype):
+        """
+        Set the rule types for the rule query.
+
+        Parameter:
+        ruletype    The rule types to match.
+        """
+        if ruletype:
+            self.policy.validate_mls_ruletype(ruletype)
+
+        self.ruletype = ruletype
+
     def set_default(self, default, **opts):
         """
         Set the criteria for matching the rule's default range.

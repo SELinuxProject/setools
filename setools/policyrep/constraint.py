@@ -30,6 +30,12 @@ class ConstraintUseError(symbol.SymbolUseError):
     pass
 
 
+class InvalidConstraintType(symbol.InvalidSymbol):
+
+    """Exception for invalid constraint types."""
+    pass
+
+
 def _is_mls(policy, symbol):
     # determine if this is a regular or MLS constraint/validatetrans.
     # this can only be determined by inspecting the expression.
@@ -41,6 +47,13 @@ def _is_mls(policy, symbol):
             return True
 
     return False
+
+
+def validate_ruletype(types):
+    """Validate constraint rule types."""
+    for t in types:
+        if t not in ["constrain", "mlsconstrain", "validatetrans", "mlsvalidatetrans"]:
+            raise InvalidConstraintType("{0} is not a valid constraint type.".format(t))
 
 
 def constraint_factory(policy, symbol):

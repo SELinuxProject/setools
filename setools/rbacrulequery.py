@@ -133,6 +133,18 @@ class RBACRuleQuery(rulequery.RuleQuery):
             # if we get here, we have matched all available criteria
             yield r
 
+    def set_ruletype(self, ruletype):
+        """
+        Set the rule types for the rule query.
+
+        Parameter:
+        ruletype    The rule types to match.
+        """
+        if ruletype:
+            self.policy.validate_rbac_ruletype(ruletype)
+
+        self.ruletype = ruletype
+
     def set_source(self, source, **opts):
         """
         Set the criteria for the rule's source.

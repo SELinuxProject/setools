@@ -21,6 +21,12 @@ from . import symbol
 from . import objclass
 
 
+class InvalidRuleType(symbol.InvalidSymbol):
+
+    """Exception for invalid rule types."""
+    pass
+
+
 class RuleUseError(symbol.SymbolUseError):
 
     """

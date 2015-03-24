@@ -23,12 +23,25 @@ from . import mls
 from . import boolcond
 
 
+class InvalidMLSRuleType(rule.InvalidRuleType):
+
+    """Exception for invalid MLS rule types."""
+    pass
+
+
 def mls_rule_factory(policy, symbol):
     """Factory function for creating MLS rule objects."""
     if not isinstance(symbol, qpol.qpol_range_trans_t):
         raise TypeError("MLS rules cannot be looked-up.")
 
     return MLSRule(policy, symbol)
+
+
+def validate_ruletype(types):
+    """Validate MLS rule types."""
+    for t in types:
+        if t not in ["range_transition"]:
+            raise InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t))
 
 
 class MLSRule(rule.PolicyRule):

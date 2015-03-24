@@ -51,14 +51,7 @@ class RuleQuery(mixins.MatchObjClass, PolicyQuery):
                 regex)
 
     def set_ruletype(self, ruletype):
-        """
-        Set the rule types for the rule query.
-
-        Parameter:
-        ruletype    The rule types to match.
-        """
-
-        self.ruletype = ruletype
+        raise NotImplementedError
 
     def set_source(self, source, **opts):
         """

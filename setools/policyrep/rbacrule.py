@@ -22,6 +22,12 @@ from . import role
 from . import typeattr
 
 
+class InvalidRBACRuleType(rule.InvalidRuleType):
+
+    """Exception for invalid RBAC rule types."""
+    pass
+
+
 def rbac_rule_factory(policy, symbol):
     """Factory function for creating RBAC rule objects."""
 
@@ -31,6 +37,13 @@ def rbac_rule_factory(policy, symbol):
         return RoleTransition(policy, symbol)
     else:
         raise TypeError("RBAC rules cannot be looked up.")
+
+
+def validate_ruletype(types):
+    """Validate RBAC rule types."""
+    for t in types:
+        if t not in ["allow", "role_transition"]:
+            raise InvalidTERuleType("{0} is not a valid RBAC rule type.".format(t))
 
 
 class RoleAllow(rule.PolicyRule):

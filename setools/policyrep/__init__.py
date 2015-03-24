@@ -437,6 +437,21 @@ class SELinuxPolicy(object):
             yield terule.te_rule_factory(self.policy, rule)
 
     #
+    # Policy rule type validators
+    #
+    def validate_constraint_ruletype(self, types):
+        constraint.validate_ruletype(types)
+
+    def validate_mls_ruletype(self, types):
+        mlsrule.validate_ruletype(types)
+
+    def validate_rbac_ruletype(self, types):
+        rbacrule.validate_ruletype(types)
+
+    def validate_te_ruletype(self, types):
+        terule.validate_ruletype(types)
+
+    #
     # Constraints generators
     #
 
