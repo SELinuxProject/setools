@@ -100,9 +100,12 @@ if args.target and not (args.shortest_path or args.all_paths):
     parser.error("An algorithm must be specified to determine a path.")
 
 if args.debug:
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
 elif args.verbose:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+else:
+    logging.basicConfig(level=logging.WARNING, format='%(message)s')
 
 try:
     p = setools.SELinuxPolicy(args.policy)

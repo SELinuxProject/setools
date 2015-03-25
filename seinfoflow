@@ -69,9 +69,12 @@ if args.limit_flows < 0:
     parser.error("Limit on information flows cannot be negative.")
 
 if args.debug:
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
 elif args.verbose:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+else:
+    logging.basicConfig(level=logging.WARNING, format='%(message)s')
 
 try:
     p = setools.SELinuxPolicy(args.policy)

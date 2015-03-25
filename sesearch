@@ -105,9 +105,12 @@ if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
     parser.error("At least one rule type must be specified.")
 
 if args.debug:
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
 elif args.verbose:
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+else:
+    logging.basicConfig(level=logging.WARNING, format='%(message)s')
 
 try:
     p = setools.SELinuxPolicy(args.policy)
