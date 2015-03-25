@@ -2232,16 +2232,19 @@ typedef struct qpol_genfscon {} qpol_genfscon_t;
 /* qpol isid */
 typedef struct qpol_isid {} qpol_isid_t;
 %extend qpol_isid {
+    %exception qpol_isid {
+      $action
+      if (!result) {
+        PyErr_SetString(PyExc_ValueError, "Invalid initial sid name.");
+        return NULL;
+      }
+    }
     qpol_isid(qpol_policy_t *p, const char *name) {
         const qpol_isid_t *i;
-        BEGIN_EXCEPTION
-        if (qpol_policy_get_isid_by_name(p, name, &i)) {
-            SWIG_exception(SWIG_RuntimeError, "Isid does not exist");
-        }
-        END_EXCEPTION
-    fail:
+        qpol_policy_get_isid_by_name(p, name, &i);
         return (qpol_isid_t*)i;
     };
+
     ~qpol_isid() {
         /* no op */
         return;

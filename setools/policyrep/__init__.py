@@ -291,6 +291,10 @@ class SELinuxPolicy(object):
         """Look up a common permission set."""
         return objclass.common_factory(self.policy, name)
 
+    def lookup_initialsid(self, name):
+        """Look up an initial sid."""
+        return initsid.initialsid_factory(self.policy, name)
+
     def lookup_level(self, level):
         """Look up a MLS level."""
         return mls.level_factory(self.policy, level)
