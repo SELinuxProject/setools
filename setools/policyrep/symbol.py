@@ -19,7 +19,7 @@
 from . import qpol
 
 
-class InvalidSymbol(Exception):
+class InvalidSymbol(ValueError):
 
     """
     Exception for invalid symbols.  Typically this is attempting to
