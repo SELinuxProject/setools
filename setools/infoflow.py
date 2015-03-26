@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -20,6 +20,7 @@ import itertools
 import logging
 
 import networkx as nx
+from networkx.exception import NetworkXError, NetworkXNoPath
 
 from . import policyrep
 from . import permmap
@@ -139,11 +140,14 @@ class InfoFlowAnalysis(object):
 
         self.log.info("Generating one shortest path from {0} to {1}...".format(s, t))
 
-        if s in self.subG and t in self.subG:
-            try:
-                yield self.__get_steps(nx.shortest_path(self.subG, s, t))
-            except nx.exception.NetworkXNoPath:
-                pass
+        try:
+            yield self.__get_steps(nx.shortest_path(self.subG, s, t))
+        except (NetworkXNoPath, NetworkXError):
+            # NetworkXError: the type is valid but not in graph, e.g.
+            # excluded or disconnected due to min weight
+            # NetworkXNoPath: no paths or the target type is
+            # not in the graph
+            pass
 
     def all_paths(self, source, target, maxlen=2):
         """
@@ -165,6 +169,9 @@ class InfoFlowAnalysis(object):
         target    The target type for this step of the information flow.
         rules     The list of rules creating this information flow step.
         """
+        if maxlen < 1:
+            raise ValueError("Maximum path length must be positive.")
+
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
@@ -173,12 +180,15 @@ class InfoFlowAnalysis(object):
 
         self.log.info("Generating all paths from {0} to {1}, max len {2}...".format(s, t, maxlen))
 
-        if s in self.subG and t in self.subG:
-            try:
-                for p in nx.all_simple_paths(self.subG, s, t, maxlen):
-                    yield self.__get_steps(p)
-            except nx.exception.NetworkXNoPath:
-                pass
+        try:
+            for p in nx.all_simple_paths(self.subG, s, t, maxlen):
+                yield self.__get_steps(p)
+        except (NetworkXNoPath, NetworkXError):
+            # NetworkXError: the type is valid but not in graph, e.g.
+            # excluded or disconnected due to min weight
+            # NetworkXNoPath: no paths or the target type is
+            # not in the graph
+            pass
 
     def all_shortest_paths(self, source, target):
         """
@@ -205,12 +215,17 @@ class InfoFlowAnalysis(object):
 
         self.log.info("Generating all shortest paths from {0} to {1}...".format(s, t))
 
-        if s in self.subG and t in self.subG:
-            try:
-                for p in nx.all_shortest_paths(self.subG, s, t):
-                    yield self.__get_steps(p)
-            except nx.exception.NetworkXNoPath:
-                pass
+        try:
+            for p in nx.all_shortest_paths(self.subG, s, t):
+                yield self.__get_steps(p)
+        except (NetworkXNoPath, NetworkXError, KeyError):
+            # NetworkXError: the type is valid but not in graph, e.g.
+            # excluded or disconnected due to min weight
+            # NetworkXNoPath: no paths or the target type is
+            # not in the graph
+            # KeyError: work around NetworkX bug
+            # when the source node is not in the graph
+            pass
 
     def infoflows(self, type_):
         """
@@ -233,10 +248,15 @@ class InfoFlowAnalysis(object):
 
         self.log.info("Generating all infoflows out of {0}...".format(s))
 
-        for source, target, data in self.subG.out_edges_iter(s, data=True):
-            yield source, target, data["rules"]
+        try:
+            for source, target, data in self.subG.out_edges_iter(s, data=True):
+                yield source, target, data["rules"]
+        except NetworkXError:
+            # NetworkXError: the type is valid but not in graph, e.g.
+            # excluded or disconnected due to min weight
+            pass
 
-    def get_stats(self):
+    def get_stats(self):  # pragma: no cover
         """
         Get the information flow graph statistics.
 
