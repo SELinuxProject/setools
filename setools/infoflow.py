@@ -73,19 +73,12 @@ class InfoFlowAnalysis(object):
         Set the permission map used for the information flow analysis.
 
         Parameter:
-        perm_map    The permission map or path to the permission map file.
+        perm_map    The permission map.
 
         Exceptions:
         TypeError   The map is not a file path or permission map object.
         """
-        if not isinstance(perm_map, (str, permmap.PermissionMap)):
-            raise TypeError(
-                "Permission map must be an object or a path to a file.")
-
-        if isinstance(perm_map, str):
-            self.perm_map = permmap.PermissionMap(perm_map)
-        else:
-            self.perm_map = perm_map
+        self.perm_map = perm_map
 
         self.rebuildgraph = True
         self.rebuildsubgraph = True
