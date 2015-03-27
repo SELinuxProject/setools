@@ -30,7 +30,7 @@ class InfoFlowAnalysis(object):
 
     """Information flow analysis."""
 
-    def __init__(self, policy, perm_map, minweight=1, exclude=[]):
+    def __init__(self, policy, perm_map, minweight=1, exclude=None):
         """
         Parameters:
         policy      The policy to analyze.
@@ -92,7 +92,10 @@ class InfoFlowAnalysis(object):
         exclude         A list of types.
         """
 
-        self.exclude = [self.policy.lookup_type(t) for t in exclude]
+        if exclude:
+            self.exclude = [self.policy.lookup_type(t) for t in exclude]
+        else:
+            self.exclude = []
 
         self.rebuildsubgraph = True
 

@@ -27,7 +27,7 @@ class DomainTransitionAnalysis(object):
 
     """Domain transition analysis."""
 
-    def __init__(self, policy, reverse=False, exclude=[]):
+    def __init__(self, policy, reverse=False, exclude=None):
         """
         Parameter:
         policy   The policy to analyze.
@@ -128,7 +128,11 @@ class DomainTransitionAnalysis(object):
         exclude         A list of types.
         """
 
-        self.exclude = [self.policy.lookup_type(t) for t in exclude]
+        if exclude:
+            self.exclude = [self.policy.lookup_type(t) for t in exclude]
+        else:
+            self.exclude = []
+
         self.rebuildsubgraph = True
 
     def shortest_path(self, source, target):
