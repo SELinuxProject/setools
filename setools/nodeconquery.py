@@ -98,7 +98,7 @@ class NodeconQuery(contextquery.ContextQuery):
                 except NameError:  # pragma: no cover
                     # Should never actually hit this since the self.network
                     # setter raises the same exception.
-                    raise RuntimeError("IP address/network functions require Python 3.3+.")
+                    raise RuntimeError("Nodecon IP address/network functions require Python 3.3+.")
 
                 # Python 3.3's IPv6Network constructor does not support
                 # expanded netmasks, only CIDR numbers. Convert netmask
@@ -162,7 +162,7 @@ class NodeconQuery(contextquery.ContextQuery):
             try:
                 self.network = ipaddress.ip_network(net)
             except NameError:  # pragma: no cover
-                raise RuntimeError("IP address/network functions require Python 3.3+.")
+                raise RuntimeError("Nodecon IP address/network functions require Python 3.3+.")
         else:
             # ensure self.network is set
             self.network = None
