@@ -315,13 +315,13 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_915_all_paths_source_disconnected(self):
         """Information flow analysis: all paths with disconnected source type."""
         a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_paths("no_flow", "node2"))
+        paths = list(a.all_paths("disconnected1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_916_all_paths_target_disconnected(self):
         """Information flow analysis: all paths with disconnected target type."""
         a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_paths("node2", "no_flow"))
+        paths = list(a.all_paths("node2", "disconnected1"))
         self.assertEqual(0, len(paths))
 
     def test_920_shortest_path_invalid_source(self):
@@ -351,13 +351,13 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_924_shortest_path_source_disconnected(self):
         """Information flow analysis: shortest path with disconnected source type."""
         a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.shortest_path("no_flow", "node2"))
+        paths = list(a.shortest_path("disconnected1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_925_shortest_path_target_disconnected(self):
         """Information flow analysis: shortest path with disconnected target type."""
         a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.shortest_path("node2", "no_flow"))
+        paths = list(a.shortest_path("node2", "disconnected1"))
         self.assertEqual(0, len(paths))
 
     def test_930_all_shortest_paths_invalid_source(self):
@@ -387,13 +387,13 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_934_all_shortest_paths_source_disconnected(self):
         """Information flow analysis: all shortest paths with disconnected source type."""
         a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_shortest_paths("no_flow", "node2"))
+        paths = list(a.all_shortest_paths("disconnected1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_935_all_shortest_paths_target_disconnected(self):
         """Information flow analysis: all shortest paths with disconnected target type."""
         a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_shortest_paths("node2", "no_flow"))
+        paths = list(a.all_shortest_paths("node2", "disconnected1"))
         self.assertEqual(0, len(paths))
 
     def test_940_infoflows_invalid_source(self):
@@ -410,6 +410,6 @@ class InfoFlowAnalysisTest(unittest.TestCase):
 
     def test_942_infoflows_source_disconnected(self):
         """Information flow analysis: infoflows with disconnected source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.infoflows("no_flow"))
+        a = InfoFlowAnalysis(self.p, self.m, exclude=["disconnected2"])
+        paths = list(a.infoflows("disconnected1"))
         self.assertEqual(0, len(paths))
