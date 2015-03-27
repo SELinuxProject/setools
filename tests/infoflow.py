@@ -38,12 +38,12 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def setUpClass(self):
         self.p = SELinuxPolicy("tests/infoflow.conf")
         self.m = PermissionMap("tests/perm_map")
+        self.a = InfoFlowAnalysis(self.p, self.m)
 
     def test_001_full_graph(self):
         """Information flow analysis full graph."""
 
-        a = InfoFlowAnalysis(self.p, self.m)
-        a._build_graph()
+        self.a._build_graph()
 
         disconnected1 = self.p.lookup_type("disconnected1")
         disconnected2 = self.p.lookup_type("disconnected2")
@@ -57,12 +57,12 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         node8 = self.p.lookup_type("node8")
         node9 = self.p.lookup_type("node9")
 
-        nodes = set(a.G.nodes_iter())
+        nodes = set(self.a.G.nodes_iter())
         self.assertSetEqual(set([disconnected1, disconnected2, node1,
                                  node2, node3, node4, node5,
                                  node6, node7, node8, node9]), nodes)
 
-        edges = set(a.G.out_edges_iter())
+        edges = set(self.a.G.out_edges_iter())
         self.assertSetEqual(set([(disconnected1, disconnected2),
                                  (disconnected2, disconnected1),
                                  (node1, node2),
@@ -76,7 +76,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
                                  (node8, node9),
                                  (node9, node8)]), edges)
 
-        r = a.G.edge[disconnected1][disconnected2]["rules"]
+        r = self.a.G.edge[disconnected1][disconnected2]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -85,7 +85,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = a.G.edge[disconnected2][disconnected1]["rules"]
+        r = self.a.G.edge[disconnected2][disconnected1]["rules"]
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "disconnected1")
@@ -94,7 +94,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node1][node2]["rules"])
+        r = sorted(self.a.G.edge[node1][node2]["rules"])
         self.assertEqual(len(r), 2)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node1")
@@ -110,7 +110,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_r"]), r[1].perms)
         self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
 
-        r = sorted(a.G.edge[node1][node3]["rules"])
+        r = sorted(self.a.G.edge[node1][node3]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node3")
@@ -119,7 +119,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["low_r", "med_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node2][node4]["rules"])
+        r = sorted(self.a.G.edge[node2][node4]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node2")
@@ -128,7 +128,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node3][node5]["rules"])
+        r = sorted(self.a.G.edge[node3][node5]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -137,7 +137,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["low_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node4][node6]["rules"])
+        r = sorted(self.a.G.edge[node4][node6]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node4")
@@ -146,7 +146,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node5][node8]["rules"])
+        r = sorted(self.a.G.edge[node5][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -155,7 +155,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node6][node5]["rules"])
+        r = sorted(self.a.G.edge[node6][node5]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node5")
@@ -164,7 +164,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["med_r"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node6][node7]["rules"])
+        r = sorted(self.a.G.edge[node6][node7]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node6")
@@ -173,7 +173,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["hi_w"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node8][node9]["rules"])
+        r = sorted(self.a.G.edge[node8][node9]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")
@@ -182,7 +182,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.assertSetEqual(set(["super"]), r[0].perms)
         self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
 
-        r = sorted(a.G.edge[node9][node8]["rules"])
+        r = sorted(self.a.G.edge[node9][node8]["rules"])
         self.assertEqual(len(r), 1)
         self.assertEqual(r[0].ruletype, "allow")
         self.assertEqual(r[0].source, "node8")
@@ -194,8 +194,9 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_100_minimum_3(self):
         """Information flow analysis with minimum weight 3."""
 
-        a = InfoFlowAnalysis(self.p, self.m, minweight=3)
-        a._build_subgraph()
+        self.a.set_exclude(None)
+        self.a.set_min_weight(3)
+        self.a._build_subgraph()
 
         disconnected1 = self.p.lookup_type("disconnected1")
         disconnected2 = self.p.lookup_type("disconnected2")
@@ -209,14 +210,12 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         node8 = self.p.lookup_type("node8")
         node9 = self.p.lookup_type("node9")
 
-        # don't test nodes, as disconnected nodes
-        # are not removed by subgraph generation
-        # nodes = set(a.subG.nodes_iter())
-        # self.assertSetEqual(set([disconnected1, disconnected2, node1,
-        #                         node2, node3, node4, node5,
-        #                         node6, node7, node8, node9]), nodes)
+        # don't test nodes list, as disconnected nodes
+        # are not removed by subgraph generation. we
+        # assume NetworkX copies into the subgraph
+        # correctly.
 
-        edges = set(a.subG.out_edges_iter())
+        edges = set(self.a.subG.out_edges_iter())
         self.assertSetEqual(set([(disconnected1, disconnected2),
                                  (disconnected2, disconnected1),
                                  (node1, node2),
@@ -232,8 +231,9 @@ class InfoFlowAnalysisTest(unittest.TestCase):
     def test_200_minimum_8(self):
         """Information flow analysis with minimum weight 8."""
 
-        a = InfoFlowAnalysis(self.p, self.m, minweight=8)
-        a._build_subgraph()
+        self.a.set_exclude(None)
+        self.a.set_min_weight(8)
+        self.a._build_subgraph()
 
         disconnected1 = self.p.lookup_type("disconnected1")
         disconnected2 = self.p.lookup_type("disconnected2")
@@ -247,14 +247,12 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         node8 = self.p.lookup_type("node8")
         node9 = self.p.lookup_type("node9")
 
-        # don't test nodes, as disconnected nodes
-        # are not removed by subgraph generation
-        # nodes = set(a.subG.nodes_iter())
-        # self.assertSetEqual(set([disconnected1, disconnected2, node1,
-        #                         node2, node4, node5,
-        #                         node6, node7, node8, node9]), nodes)
+        # don't test nodes list, as disconnected nodes
+        # are not removed by subgraph generation. we
+        # assume NetworkX copies into the subgraph
+        # correctly.
 
-        edges = set(a.subG.out_edges_iter())
+        edges = set(self.a.subG.out_edges_iter())
         self.assertSetEqual(set([(disconnected1, disconnected2),
                                  (disconnected2, disconnected1),
                                  (node1, node2),
@@ -267,149 +265,168 @@ class InfoFlowAnalysisTest(unittest.TestCase):
 
     def test_900_set_exclude_invalid_type(self):
         """Information flow analysis: set invalid excluded type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        self.assertRaises(InvalidType, a.set_exclude, ["node1", "invalid_type"])
+        self.assertRaises(InvalidType, self.a.set_exclude, ["node1", "invalid_type"])
 
     def test_901_set_small_min_weight(self):
         """Information flow analysis: set too small weight."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        self.assertRaises(ValueError, a.set_min_weight, 0)
-        self.assertRaises(ValueError, a.set_min_weight, -3)
+        self.assertRaises(ValueError, self.a.set_min_weight, 0)
+        self.assertRaises(ValueError, self.a.set_min_weight, -3)
 
     def test_902_set_large_min_weight(self):
         """Information flow analysis: set too big weight."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        self.assertRaises(ValueError, a.set_min_weight, 11)
-        self.assertRaises(ValueError, a.set_min_weight, 50)
+        self.assertRaises(ValueError, self.a.set_min_weight, 11)
+        self.assertRaises(ValueError, self.a.set_min_weight, 50)
 
     def test_910_all_paths_invalid_source(self):
         """Information flow analysis: all paths with invalid source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(a.all_paths("invalid_type", "node1"))
+            paths = list(self.a.all_paths("invalid_type", "node1"))
 
     def test_911_all_paths_invalid_target(self):
         """Information flow analysis: all paths with invalid target type."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(a.all_paths("node1", "invalid_type"))
+            paths = list(self.a.all_paths("node1", "invalid_type"))
 
     def test_912_all_paths_invalid_maxlen(self):
         """Information flow analysis: all paths with invalid max path length."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(ValueError):
-            paths = list(a.all_paths("node1", "node2", maxlen=-2))
+            paths = list(self.a.all_paths("node1", "node2", maxlen=-2))
 
     def test_913_all_paths_source_excluded(self):
         """Information flow analysis: all paths with excluded source type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["node1"])
-        paths = list(a.all_paths("node1", "node2"))
+        self.a.set_exclude(["node1"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_paths("node1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_914_all_paths_target_excluded(self):
         """Information flow analysis: all paths with excluded target type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["node2"])
-        paths = list(a.all_paths("node1", "node2"))
+        self.a.set_exclude(["node2"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_paths("node1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_915_all_paths_source_disconnected(self):
         """Information flow analysis: all paths with disconnected source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_paths("disconnected1", "node2"))
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_paths("disconnected1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_916_all_paths_target_disconnected(self):
         """Information flow analysis: all paths with disconnected target type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_paths("node2", "disconnected1"))
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_paths("node2", "disconnected1"))
         self.assertEqual(0, len(paths))
 
     def test_920_shortest_path_invalid_source(self):
         """Information flow analysis: shortest path with invalid source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(a.shortest_path("invalid_type", "node1"))
+            paths = list(self.a.shortest_path("invalid_type", "node1"))
 
     def test_921_shortest_path_invalid_target(self):
         """Information flow analysis: shortest path with invalid target type."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(a.shortest_path("node1", "invalid_type"))
+            paths = list(self.a.shortest_path("node1", "invalid_type"))
 
     def test_922_shortest_path_source_excluded(self):
         """Information flow analysis: shortest path with excluded source type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["node1"])
-        paths = list(a.shortest_path("node1", "node2"))
+        self.a.set_exclude(["node1"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.shortest_path("node1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_923_shortest_path_target_excluded(self):
         """Information flow analysis: shortest path with excluded target type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["node2"])
-        paths = list(a.shortest_path("node1", "node2"))
+        self.a.set_exclude(["node2"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.shortest_path("node1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_924_shortest_path_source_disconnected(self):
         """Information flow analysis: shortest path with disconnected source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.shortest_path("disconnected1", "node2"))
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+        paths = list(self.a.shortest_path("disconnected1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_925_shortest_path_target_disconnected(self):
         """Information flow analysis: shortest path with disconnected target type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.shortest_path("node2", "disconnected1"))
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+        paths = list(self.a.shortest_path("node2", "disconnected1"))
         self.assertEqual(0, len(paths))
 
     def test_930_all_shortest_paths_invalid_source(self):
         """Information flow analysis: all shortest paths with invalid source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(a.all_shortest_paths("invalid_type", "node1"))
+            paths = list(self.a.all_shortest_paths("invalid_type", "node1"))
 
     def test_931_all_shortest_paths_invalid_target(self):
         """Information flow analysis: all shortest paths with invalid target type."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(a.all_shortest_paths("node1", "invalid_type"))
+            paths = list(self.a.all_shortest_paths("node1", "invalid_type"))
 
     def test_932_all_shortest_paths_source_excluded(self):
         """Information flow analysis: all shortest paths with excluded source type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["node1"])
-        paths = list(a.all_shortest_paths("node1", "node2"))
+        self.a.set_exclude(["node1"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_shortest_paths("node1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_933_all_shortest_paths_target_excluded(self):
         """Information flow analysis: all shortest paths with excluded target type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["node2"])
-        paths = list(a.all_shortest_paths("node1", "node2"))
+        self.a.set_exclude(["node2"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_shortest_paths("node1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_934_all_shortest_paths_source_disconnected(self):
         """Information flow analysis: all shortest paths with disconnected source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_shortest_paths("disconnected1", "node2"))
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_shortest_paths("disconnected1", "node2"))
         self.assertEqual(0, len(paths))
 
     def test_935_all_shortest_paths_target_disconnected(self):
         """Information flow analysis: all shortest paths with disconnected target type."""
-        a = InfoFlowAnalysis(self.p, self.m)
-        paths = list(a.all_shortest_paths("node2", "disconnected1"))
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+        paths = list(self.a.all_shortest_paths("node2", "disconnected1"))
         self.assertEqual(0, len(paths))
 
     def test_940_infoflows_invalid_source(self):
         """Information flow analysis: infoflows with invalid source type."""
-        a = InfoFlowAnalysis(self.p, self.m)
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(a.infoflows("invalid_type"))
+            paths = list(self.a.infoflows("invalid_type"))
 
     def test_941_infoflows_source_excluded(self):
         """Information flow analysis: infoflows with excluded source type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["node1"])
-        paths = list(a.infoflows("node1"))
+        self.a.set_exclude(["node1"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.infoflows("node1"))
         self.assertEqual(0, len(paths))
 
     def test_942_infoflows_source_disconnected(self):
         """Information flow analysis: infoflows with disconnected source type."""
-        a = InfoFlowAnalysis(self.p, self.m, exclude=["disconnected2"])
-        paths = list(a.infoflows("disconnected1"))
+        self.a.set_exclude(["disconnected2"])
+        self.a.set_min_weight(1)
+        paths = list(self.a.infoflows("disconnected1"))
         self.assertEqual(0, len(paths))

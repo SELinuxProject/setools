@@ -339,13 +339,16 @@ class InfoFlowAnalysis(object):
         nodes = [n for n in self.G.nodes() if n not in self.exclude]
         self.subG = self.G.subgraph(nodes)
 
-        # delete edges below minimum weight
-        delete_list = []
-        for s, t, data in self.subG.edges_iter(data=True):
-            if data['capacity'] < self.minweight:
-                delete_list.append((s, t))
+        # delete edges below minimum weight.
+        # no need if weight is 1, since that
+        # does not exclude any edges.
+        if self.minweight > 1:
+            delete_list = []
+            for s, t, data in self.subG.edges_iter(data=True):
+                if data['capacity'] < self.minweight:
+                    delete_list.append((s, t))
 
-        self.subG.remove_edges_from(delete_list)
+            self.subG.remove_edges_from(delete_list)
 
         self.rebuildsubgraph = False
         self.log.info("Completed building subgraph.")
