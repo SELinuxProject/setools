@@ -22,9 +22,10 @@ import networkx as nx
 from setools import SELinuxPolicy
 from setools.dta import DomainTransitionAnalysis
 from setools.policyrep.rule import RuleNotConditional
+from setools.policyrep.typeattr import InvalidType
 
 
-class InfoFlowAnalysisTest(unittest.TestCase):
+class DomainTransitionAnalysisTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
@@ -637,3 +638,163 @@ class InfoFlowAnalysisTest(unittest.TestCase):
                                  (start, trans1),
                                  (trans2, trans3),
                                  (trans3, trans5)]), edges)
+
+    def test_900_set_exclude_invalid_type(self):
+        """DTA: set invalid excluded type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        self.assertRaises(InvalidType, self.a.set_exclude, ["trans1", "invalid_type"])
+
+    def test_910_all_paths_invalid_source(self):
+        """DTA: all paths with invalid source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(InvalidType):
+            paths = list(self.a.all_paths("invalid_type", "trans1"))
+
+    def test_911_all_paths_invalid_target(self):
+        """DTA: all paths with invalid target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(InvalidType):
+            paths = list(self.a.all_paths("trans1", "invalid_type"))
+
+    def test_912_all_paths_invalid_maxlen(self):
+        """DTA: all paths with invalid max path length."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(ValueError):
+            paths = list(self.a.all_paths("trans1", "trans2", maxlen=-2))
+
+    def test_913_all_paths_source_excluded(self):
+        """DTA: all paths with excluded source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans1"])
+        paths = list(self.a.all_paths("trans1", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_914_all_paths_target_excluded(self):
+        """DTA: all paths with excluded target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans2"])
+        paths = list(self.a.all_paths("trans1", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_915_all_paths_source_disconnected(self):
+        """DTA: all paths with disconnected source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        paths = list(self.a.all_paths("trans5", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_916_all_paths_target_disconnected(self):
+        """DTA: all paths with disconnected target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans3"])
+        paths = list(self.a.all_paths("trans2", "trans5"))
+        self.assertEqual(0, len(paths))
+
+    def test_920_shortest_path_invalid_source(self):
+        """DTA: shortest path with invalid source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(InvalidType):
+            paths = list(self.a.shortest_path("invalid_type", "trans1"))
+
+    def test_921_shortest_path_invalid_target(self):
+        """DTA: shortest path with invalid target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(InvalidType):
+            paths = list(self.a.shortest_path("trans1", "invalid_type"))
+
+    def test_922_shortest_path_source_excluded(self):
+        """DTA: shortest path with excluded source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans1"])
+        paths = list(self.a.shortest_path("trans1", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_923_shortest_path_target_excluded(self):
+        """DTA: shortest path with excluded target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans2"])
+        paths = list(self.a.shortest_path("trans1", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_924_shortest_path_source_disconnected(self):
+        """DTA: shortest path with disconnected source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        paths = list(self.a.shortest_path("trans5", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_925_shortest_path_target_disconnected(self):
+        """DTA: shortest path with disconnected target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans3"])
+        paths = list(self.a.shortest_path("trans2", "trans5"))
+        self.assertEqual(0, len(paths))
+
+    def test_930_all_shortest_paths_invalid_source(self):
+        """DTA: all shortest paths with invalid source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(InvalidType):
+            paths = list(self.a.all_shortest_paths("invalid_type", "trans1"))
+
+    def test_931_all_shortest_paths_invalid_target(self):
+        """DTA: all shortest paths with invalid target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(InvalidType):
+            paths = list(self.a.all_shortest_paths("trans1", "invalid_type"))
+
+    def test_932_all_shortest_paths_source_excluded(self):
+        """DTA: all shortest paths with excluded source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans1"])
+        paths = list(self.a.all_shortest_paths("trans1", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_933_all_shortest_paths_target_excluded(self):
+        """DTA: all shortest paths with excluded target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans2"])
+        paths = list(self.a.all_shortest_paths("trans1", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_934_all_shortest_paths_source_disconnected(self):
+        """DTA: all shortest paths with disconnected source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        paths = list(self.a.all_shortest_paths("trans5", "trans2"))
+        self.assertEqual(0, len(paths))
+
+    def test_935_all_shortest_paths_target_disconnected(self):
+        """DTA: all shortest paths with disconnected target type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans3"])
+        paths = list(self.a.all_shortest_paths("trans2", "trans5"))
+        self.assertEqual(0, len(paths))
+
+    def test_940_transitions_invalid_source(self):
+        """DTA: transitions with invalid source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+        with self.assertRaises(InvalidType):
+            paths = list(self.a.transitions("invalid_type"))
+
+    def test_941_transitions_source_excluded(self):
+        """DTA: transitions with excluded source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans1"])
+        paths = list(self.a.transitions("trans1"))
+        self.assertEqual(0, len(paths))
+
+    def test_942_transitions_source_disconnected(self):
+        """DTA: transitions with disconnected source type."""
+        self.a.set_reverse(False)
+        self.a.set_exclude(["trans3"])
+        paths = list(self.a.transitions("trans5"))
+        self.assertEqual(0, len(paths))

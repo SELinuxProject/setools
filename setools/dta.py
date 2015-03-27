@@ -21,6 +21,7 @@ import logging
 from collections import defaultdict
 
 import networkx as nx
+from networkx.exception import NetworkXError, NetworkXNoPath
 
 
 class DomainTransitionAnalysis(object):
@@ -158,11 +159,13 @@ class DomainTransitionAnalysis(object):
 
         self.log.info("Generating one shortest path from {0} to {1}...".format(s, t))
 
-        if s in self.subG and t in self.subG:
-            try:
-                yield self.__get_steps(nx.shortest_path(self.subG, s, t))
-            except nx.exception.NetworkXNoPath:
-                pass
+        try:
+            yield self.__get_steps(nx.shortest_path(self.subG, s, t))
+        except (NetworkXNoPath, NetworkXError):
+            # NetworkXError: the type is valid but not in graph, e.g. excluded
+            # NetworkXNoPath: no paths or the target type is
+            # not in the graph
+            pass
 
     def all_paths(self, source, target, maxlen=2):
         """
@@ -181,6 +184,9 @@ class DomainTransitionAnalysis(object):
                  source, target, and rules for each
                  domain transition.
         """
+        if maxlen < 1:
+            raise ValueError("Maximum path length must be positive.")
+
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
@@ -189,12 +195,14 @@ class DomainTransitionAnalysis(object):
 
         self.log.info("Generating all paths from {0} to {1}, max len {2}...".format(s, t, maxlen))
 
-        if s in self.subG and t in self.subG:
-            try:
-                for p in nx.all_simple_paths(self.subG, s, t, maxlen):
-                    yield self.__get_steps(p)
-            except nx.exception.NetworkXNoPath:
-                pass
+        try:
+            for p in nx.all_simple_paths(self.subG, s, t, maxlen):
+                yield self.__get_steps(p)
+        except (NetworkXNoPath, NetworkXError):
+            # NetworkXError: the type is valid but not in graph, e.g. excluded
+            # NetworkXNoPath: no paths or the target type is
+            # not in the graph
+            pass
 
     def all_shortest_paths(self, source, target):
         """
@@ -219,12 +227,16 @@ class DomainTransitionAnalysis(object):
 
         self.log.info("Generating all shortest paths from {0} to {1}...".format(s, t))
 
-        if s in self.subG and t in self.subG:
-            try:
-                for p in nx.all_shortest_paths(self.subG, s, t):
-                    yield self.__get_steps(p)
-            except nx.exception.NetworkXNoPath:
-                pass
+        try:
+            for p in nx.all_shortest_paths(self.subG, s, t):
+                yield self.__get_steps(p)
+        except (NetworkXNoPath, NetworkXError, KeyError):
+            # NetworkXError: the type is valid but not in graph, e.g. excluded
+            # NetworkXNoPath: no paths or the target type is
+            # not in the graph
+            # KeyError: work around NetworkX bug
+            # when the source node is not in the graph
+            pass
 
     def transitions(self, type_):
         """
@@ -248,23 +260,27 @@ class DomainTransitionAnalysis(object):
         self.log.info("Generating all transitions {1} {0}".
                       format(s, "in to" if self.reverse else "out from"))
 
-        for source, target in self.subG.out_edges_iter(s):
-            if self.reverse:
-                real_source, real_target = target, source
-            else:
-                real_source, real_target = source, target
+        try:
+            for source, target in self.subG.out_edges_iter(s):
+                if self.reverse:
+                    real_source, real_target = target, source
+                else:
+                    real_source, real_target = source, target
 
-            # It seems that NetworkX does not reverse the dictionaries
-            # that store the attributes, so real_* is used everywhere
-            # below, rather than just the first line.
-            yield real_source, real_target, \
-                self.subG.edge[real_source][real_target]['transition'], \
-                self.__get_entrypoints(real_source, real_target), \
-                self.subG.edge[real_source][real_target]['setexec'], \
-                self.subG.edge[real_source][real_target]['dyntransition'], \
-                self.subG.edge[real_source][real_target]['setcurrent']
+                # It seems that NetworkX does not reverse the dictionaries
+                # that store the attributes, so real_* is used everywhere
+                # below, rather than just the first line.
+                yield real_source, real_target, \
+                    self.subG.edge[real_source][real_target]['transition'], \
+                    self.__get_entrypoints(real_source, real_target), \
+                    self.subG.edge[real_source][real_target]['setexec'], \
+                    self.subG.edge[real_source][real_target]['dyntransition'], \
+                    self.subG.edge[real_source][real_target]['setcurrent']
+        except NetworkXError:
+            # NetworkXError: the type is valid but not in graph, e.g. excluded
+            pass
 
-    def get_stats(self):
+    def get_stats(self):  # pragma: no cover
         """
         Get the domain transition graph statistics.
 
