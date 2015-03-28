@@ -99,25 +99,6 @@ class InfoFlowAnalysis(object):
 
         self.rebuildsubgraph = True
 
-    def __get_steps(self, path):
-        """
-        Generator which returns the source, target, and associated rules
-        for each information flow step.
-
-        Parameter:
-        path   A list of graph node names representing an information flow path.
-
-        Yield: tuple(source, target, rules)
-
-        source  The source type for this step of the information flow.
-        target  The target type for this step of the information flow.
-        rules   The list of rules creating this information flow step.
-        """
-        for s in range(1, len(path)):
-            source = path[s - 1]
-            target = path[s]
-            yield source, target, self.G.edge[source][target]['rules']
-
     def shortest_path(self, source, target):
         """
         Generator which yields one shortest path between the source
@@ -144,7 +125,7 @@ class InfoFlowAnalysis(object):
         self.log.info("Generating one shortest path from {0} to {1}...".format(s, t))
 
         try:
-            yield self.__get_steps(nx.shortest_path(self.subG, s, t))
+            yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
         except (NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -185,7 +166,7 @@ class InfoFlowAnalysis(object):
 
         try:
             for p in nx.all_simple_paths(self.subG, s, t, maxlen):
-                yield self.__get_steps(p)
+                yield self.__generate_steps(p)
         except (NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -220,7 +201,7 @@ class InfoFlowAnalysis(object):
 
         try:
             for p in nx.all_shortest_paths(self.subG, s, t):
-                yield self.__get_steps(p)
+                yield self.__generate_steps(p)
         except (NetworkXNoPath, NetworkXError, KeyError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -282,8 +263,31 @@ class InfoFlowAnalysis(object):
         return (self.G.number_of_nodes(), self.G.number_of_edges())
 
     #
+    # Internal functions follow
     #
-    # (Internal) Graph building functions
+
+    def __generate_steps(self, path):
+        """
+        Generator which returns the source, target, and associated rules
+        for each information flow step.
+
+        Parameter:
+        path   A list of graph node names representing an information flow path.
+
+        Yield: tuple(source, target, rules)
+
+        source  The source type for this step of the information flow.
+        target  The target type for this step of the information flow.
+        rules   The list of rules creating this information flow step.
+        """
+        for s in range(1, len(path)):
+            source = path[s - 1]
+            target = path[s]
+            yield source, target, self.G.edge[source][target]['rules']
+
+    #
+    #
+    # Graph building functions
     #
     #
     # 1. _build_graph determines the flow in each direction for each TE
