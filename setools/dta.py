@@ -42,64 +42,6 @@ class DomainTransitionAnalysis(object):
         self.rebuildsubgraph = True
         self.G = nx.DiGraph()
 
-    def __generate_entrypoints(self, data):
-        """
-        Generator which yields the entrypoint, execute, and
-        type_transition rules for each entrypoint.
-
-        Parameter:
-        data     The dictionary of entrypoints.
-
-        Yield: tuple(type, entry, exec, trans)
-
-        type     The entrypoint type.
-        entry    The list of entrypoint rules.
-        exec     The list of execute rules.
-        trans    The list of type_transition rules.
-        """
-        for e in data['entrypoint']:
-            yield e, data['entrypoint'][e], data['execute'][e], data['type_transition'][e]
-
-    def __generate_steps(self, path):
-        """
-        Generator which yields the source, target, and associated rules
-        for each domain transition.
-
-        Parameter:
-        path     A list of graph node names representing an information flow path.
-
-        Yield: tuple(source, target, transition, entrypoints,
-                     setexec, dyntransition, setcurrent)
-
-        source          The source type for this step of the domain transition.
-        target          The target type for this step of the domain transition.
-        transition      The list of transition rules.
-        entrypoints     Generator which yields entrypoint-related rules.
-        setexec         The list of setexec rules.
-        dyntranstion    The list of dynamic transition rules.
-        setcurrent      The list of setcurrent rules.
-        """
-
-        for s in range(1, len(path)):
-            source = path[s - 1]
-            target = path[s]
-
-            if self.reverse:
-                real_source, real_target = target, source
-            else:
-                real_source, real_target = source, target
-
-            # It seems that NetworkX does not reverse the dictionaries
-            # that store the attributes, so real_* is used here
-            data = self.subG.edge[real_source][real_target]
-
-            yield real_source, real_target, \
-                data['transition'], \
-                self.__generate_entrypoints(data), \
-                data['setexec'], \
-                data['dyntransition'], \
-                data['setcurrent']
-
     def set_reverse(self, reverse):
         """
         Set forward/reverse DTA direction.
@@ -283,6 +225,70 @@ class DomainTransitionAnalysis(object):
         """
         return (self.G.number_of_nodes(), self.G.number_of_edges())
 
+    #
+    # Internal functions follow
+    #
+    def __generate_entrypoints(self, data):
+        """
+        Generator which yields the entrypoint, execute, and
+        type_transition rules for each entrypoint.
+
+        Parameter:
+        data     The dictionary of entrypoints.
+
+        Yield: tuple(type, entry, exec, trans)
+
+        type     The entrypoint type.
+        entry    The list of entrypoint rules.
+        exec     The list of execute rules.
+        trans    The list of type_transition rules.
+        """
+        for e in data['entrypoint']:
+            yield e, data['entrypoint'][e], data['execute'][e], data['type_transition'][e]
+
+    def __generate_steps(self, path):
+        """
+        Generator which yields the source, target, and associated rules
+        for each domain transition.
+
+        Parameter:
+        path     A list of graph node names representing an information flow path.
+
+        Yield: tuple(source, target, transition, entrypoints,
+                     setexec, dyntransition, setcurrent)
+
+        source          The source type for this step of the domain transition.
+        target          The target type for this step of the domain transition.
+        transition      The list of transition rules.
+        entrypoints     Generator which yields entrypoint-related rules.
+        setexec         The list of setexec rules.
+        dyntranstion    The list of dynamic transition rules.
+        setcurrent      The list of setcurrent rules.
+        """
+
+        for s in range(1, len(path)):
+            source = path[s - 1]
+            target = path[s]
+
+            if self.reverse:
+                real_source, real_target = target, source
+            else:
+                real_source, real_target = source, target
+
+            # It seems that NetworkX does not reverse the dictionaries
+            # that store the attributes, so real_* is used here
+            data = self.subG.edge[real_source][real_target]
+
+            yield real_source, real_target, \
+                data['transition'], \
+                self.__generate_entrypoints(data), \
+                data['setexec'], \
+                data['dyntransition'], \
+                data['setcurrent']
+
+    #
+    # Graph building functions
+    #
     # Graph edge properties:
     # Each entry in the property dict corresponds to
     # a rule list.  For entrypoint/execute/type_transition
