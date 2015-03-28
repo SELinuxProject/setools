@@ -42,37 +42,27 @@ class DomainTransitionAnalysis(object):
         self.rebuildsubgraph = True
         self.G = nx.DiGraph()
 
-    def __get_entrypoints(self, source, target):
+    def __generate_entrypoints(self, data):
         """
-        Generator which returns the entrypoint, execute, and
+        Generator which yields the entrypoint, execute, and
         type_transition rules for each entrypoint.
 
         Parameter:
-        source   The source node for the transition.
-        target   The target node for the transition.
+        data     The dictionary of entrypoints.
 
         Yield: tuple(type, entry, exec, trans)
 
         type     The entrypoint type.
-        entry    The entrypoint rules.
-        exec     The execute rules.
-        trans    The type_transition rules.
+        entry    The list of entrypoint rules.
+        exec     The list of execute rules.
+        trans    The list of type_transition rules.
         """
-        for e in self.subG.edge[source][target]['entrypoint']:
-            if self.subG.edge[source][target]['type_transition'][e]:
-                yield e, \
-                    self.subG.edge[source][target]['entrypoint'][e], \
-                    self.subG.edge[source][target]['execute'][e], \
-                    self.subG.edge[source][target]['type_transition'][e]
-            else:
-                yield e, \
-                    self.subG.edge[source][target]['entrypoint'][e], \
-                    self.subG.edge[source][target]['execute'][e], \
-                    []
+        for e in data['entrypoint']:
+            yield e, data['entrypoint'][e], data['execute'][e], data['type_transition'][e]
 
-    def __get_steps(self, path):
+    def __generate_steps(self, path):
         """
-        Generator which returns the source, target, and associated rules
+        Generator which yields the source, target, and associated rules
         for each domain transition.
 
         Parameter:
@@ -83,8 +73,8 @@ class DomainTransitionAnalysis(object):
 
         source          The source type for this step of the domain transition.
         target          The target type for this step of the domain transition.
-        transition      The list of TE rules providing transition permissions.
-        entrypoints     Generator which provides entrypoint-related rules.
+        transition      The list of transition rules.
+        entrypoints     Generator which yields entrypoint-related rules.
         setexec         The list of setexec rules.
         dyntranstion    The list of dynamic transition rules.
         setcurrent      The list of setcurrent rules.
@@ -100,14 +90,15 @@ class DomainTransitionAnalysis(object):
                 real_source, real_target = source, target
 
             # It seems that NetworkX does not reverse the dictionaries
-            # that store the attributes, so real_* is used everywhere
-            # below, rather than just the first line.
+            # that store the attributes, so real_* is used here
+            data = self.subG.edge[real_source][real_target]
+
             yield real_source, real_target, \
-                self.subG.edge[real_source][real_target]['transition'], \
-                self.__get_entrypoints(real_source, real_target), \
-                self.subG.edge[real_source][real_target]['setexec'], \
-                self.subG.edge[real_source][real_target]['dyntransition'], \
-                self.subG.edge[real_source][real_target]['setcurrent']
+                data['transition'], \
+                self.__generate_entrypoints(data), \
+                data['setexec'], \
+                data['dyntransition'], \
+                data['setcurrent']
 
     def set_reverse(self, reverse):
         """
@@ -160,7 +151,7 @@ class DomainTransitionAnalysis(object):
         self.log.info("Generating one shortest path from {0} to {1}...".format(s, t))
 
         try:
-            yield self.__get_steps(nx.shortest_path(self.subG, s, t))
+            yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
         except (NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
@@ -197,7 +188,7 @@ class DomainTransitionAnalysis(object):
 
         try:
             for p in nx.all_simple_paths(self.subG, s, t, maxlen):
-                yield self.__get_steps(p)
+                yield self.__generate_steps(p)
         except (NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
@@ -229,7 +220,7 @@ class DomainTransitionAnalysis(object):
 
         try:
             for p in nx.all_shortest_paths(self.subG, s, t):
-                yield self.__get_steps(p)
+                yield self.__generate_steps(p)
         except (NetworkXNoPath, NetworkXError, KeyError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
@@ -268,14 +259,15 @@ class DomainTransitionAnalysis(object):
                     real_source, real_target = source, target
 
                 # It seems that NetworkX does not reverse the dictionaries
-                # that store the attributes, so real_* is used everywhere
-                # below, rather than just the first line.
+                # that store the attributes, so real_* is used here
+                data = self.subG.edge[real_source][real_target]
+
                 yield real_source, real_target, \
-                    self.subG.edge[real_source][real_target]['transition'], \
-                    self.__get_entrypoints(real_source, real_target), \
-                    self.subG.edge[real_source][real_target]['setexec'], \
-                    self.subG.edge[real_source][real_target]['dyntransition'], \
-                    self.subG.edge[real_source][real_target]['setcurrent']
+                    data['transition'], \
+                    self.__generate_entrypoints(data), \
+                    data['setexec'], \
+                    data['dyntransition'], \
+                    data['setcurrent']
         except NetworkXError:
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             pass
