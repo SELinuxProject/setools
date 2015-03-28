@@ -22,7 +22,7 @@ import networkx as nx
 from setools import SELinuxPolicy
 from setools.dta import DomainTransitionAnalysis
 from setools.policyrep.rule import RuleNotConditional
-from setools.policyrep.typeattr import InvalidType
+from setools.policyrep.typeattr import InvalidType, Type
 
 
 class DomainTransitionAnalysisTest(unittest.TestCase):
@@ -638,6 +638,326 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
                                  (start, trans1),
                                  (trans2, trans3),
                                  (trans3, trans5)]), edges)
+
+    def test_300_all_paths(self):
+        """DTA: all paths output"""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+
+        expected_path = ["start", "dyntrans100", "bothtrans200"]
+
+        paths = list(self.a.all_paths("start", "bothtrans200", 3))
+        self.assertEqual(1, len(paths))
+
+        for path in paths:
+            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
+                self.assertIsInstance(s, Type)
+                self.assertIsInstance(t, Type)
+                self.assertEqual(s, expected_path[stepnum])
+                self.assertEqual(t, expected_path[stepnum+1])
+
+                for r in trans:
+                    self.assertIn("transition", r.perms)
+
+                for name, entry, exe, type_trans in entrypoints:
+                    self.assertIsInstance(name, Type)
+
+                    for r in entry:
+                        self.assertIn("entrypoint", r.perms)
+
+                    for r in exe:
+                        self.assertIn("execute", r.perms)
+
+                    for r in type_trans:
+                        self.assertEqual("type_transition", r.ruletype)
+
+                for r in setexec:
+                    self.assertIn("setexec", r.perms)
+
+                for r in dyntrans:
+                    self.assertIn("dyntransition", r.perms)
+
+                for r in setcur:
+                    self.assertIn("setcurrent", r.perms)
+
+    def test_301_all_shortest_paths(self):
+        """DTA: all shortest paths output"""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+
+        expected_path = ["start", "dyntrans100", "bothtrans200"]
+
+        paths = list(self.a.all_shortest_paths("start", "bothtrans200"))
+        self.assertEqual(1, len(paths))
+
+        for path in paths:
+            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
+                self.assertIsInstance(s, Type)
+                self.assertIsInstance(t, Type)
+                self.assertEqual(s, expected_path[stepnum])
+                self.assertEqual(t, expected_path[stepnum+1])
+
+                for r in trans:
+                    self.assertIn("transition", r.perms)
+
+                for name, entry, exe, type_trans in entrypoints:
+                    self.assertIsInstance(name, Type)
+
+                    for r in entry:
+                        self.assertIn("entrypoint", r.perms)
+
+                    for r in exe:
+                        self.assertIn("execute", r.perms)
+
+                    for r in type_trans:
+                        self.assertEqual("type_transition", r.ruletype)
+
+                for r in setexec:
+                    self.assertIn("setexec", r.perms)
+
+                for r in dyntrans:
+                    self.assertIn("dyntransition", r.perms)
+
+                for r in setcur:
+                    self.assertIn("setcurrent", r.perms)
+
+    def test_302_shortest_path(self):
+        """DTA: shortest path output"""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+
+        expected_path = ["start", "dyntrans100", "bothtrans200"]
+
+        paths = list(self.a.shortest_path("start", "bothtrans200"))
+        self.assertEqual(1, len(paths))
+
+        for path in paths:
+            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
+                self.assertIsInstance(s, Type)
+                self.assertIsInstance(t, Type)
+                self.assertEqual(s, expected_path[stepnum])
+                self.assertEqual(t, expected_path[stepnum+1])
+
+                for r in trans:
+                    self.assertIn("transition", r.perms)
+
+                for name, entry, exe, type_trans in entrypoints:
+                    self.assertIsInstance(name, Type)
+
+                    for r in entry:
+                        self.assertIn("entrypoint", r.perms)
+
+                    for r in exe:
+                        self.assertIn("execute", r.perms)
+
+                    for r in type_trans:
+                        self.assertEqual("type_transition", r.ruletype)
+
+                for r in setexec:
+                    self.assertIn("setexec", r.perms)
+
+                for r in dyntrans:
+                    self.assertIn("dyntransition", r.perms)
+
+                for r in setcur:
+                    self.assertIn("setcurrent", r.perms)
+
+    def test_303_transitions(self):
+        """DTA: transitions output"""
+        self.a.set_reverse(False)
+        self.a.set_exclude(None)
+
+        transitions = list(self.a.transitions("start"))
+        self.assertEqual(2, len(transitions))
+
+        for s, t, trans, entrypoints, setexec, dyntrans, setcur in transitions:
+            self.assertIsInstance(s, Type)
+            self.assertIsInstance(t, Type)
+            self.assertEqual(s, "start")
+
+            for r in trans:
+                self.assertIn("transition", r.perms)
+
+            for name, entry, exe, type_trans in entrypoints:
+                self.assertIsInstance(name, Type)
+
+                for r in entry:
+                    self.assertIn("entrypoint", r.perms)
+
+                for r in exe:
+                    self.assertIn("execute", r.perms)
+
+                for r in type_trans:
+                    self.assertEqual("type_transition", r.ruletype)
+
+            for r in setexec:
+                self.assertIn("setexec", r.perms)
+
+            for r in dyntrans:
+                self.assertIn("dyntransition", r.perms)
+
+            for r in setcur:
+                self.assertIn("setcurrent", r.perms)
+
+    def test_310_all_paths_reversed(self):
+        """DTA: all paths output reverse DTA"""
+        self.a.set_reverse(True)
+        self.a.set_exclude(None)
+
+        expected_path = ["bothtrans200", "dyntrans100", "start"]
+
+        paths = list(self.a.all_paths("bothtrans200", "start", 3))
+        self.assertEqual(1, len(paths))
+
+        for path in paths:
+            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
+                self.assertIsInstance(s, Type)
+                self.assertIsInstance(t, Type)
+                self.assertEqual(s, expected_path[stepnum+1])
+                self.assertEqual(t, expected_path[stepnum])
+
+                for r in trans:
+                    self.assertIn("transition", r.perms)
+
+                for name, entry, exe, type_trans in entrypoints:
+                    self.assertIsInstance(name, Type)
+
+                    for r in entry:
+                        self.assertIn("entrypoint", r.perms)
+
+                    for r in exe:
+                        self.assertIn("execute", r.perms)
+
+                    for r in type_trans:
+                        self.assertEqual("type_transition", r.ruletype)
+
+                for r in setexec:
+                    self.assertIn("setexec", r.perms)
+
+                for r in dyntrans:
+                    self.assertIn("dyntransition", r.perms)
+
+                for r in setcur:
+                    self.assertIn("setcurrent", r.perms)
+
+    def test_311_all_shortest_paths_reversed(self):
+        """DTA: all shortest paths output reverse DTA"""
+        self.a.set_reverse(True)
+        self.a.set_exclude(None)
+
+        expected_path = ["bothtrans200", "dyntrans100", "start"]
+
+        paths = list(self.a.all_shortest_paths("bothtrans200", "start"))
+        self.assertEqual(1, len(paths))
+
+        for path in paths:
+            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
+                self.assertIsInstance(s, Type)
+                self.assertIsInstance(t, Type)
+                self.assertEqual(s, expected_path[stepnum+1])
+                self.assertEqual(t, expected_path[stepnum])
+
+                for r in trans:
+                    self.assertIn("transition", r.perms)
+
+                for name, entry, exe, type_trans in entrypoints:
+                    self.assertIsInstance(name, Type)
+
+                    for r in entry:
+                        self.assertIn("entrypoint", r.perms)
+
+                    for r in exe:
+                        self.assertIn("execute", r.perms)
+
+                    for r in type_trans:
+                        self.assertEqual("type_transition", r.ruletype)
+
+                for r in setexec:
+                    self.assertIn("setexec", r.perms)
+
+                for r in dyntrans:
+                    self.assertIn("dyntransition", r.perms)
+
+                for r in setcur:
+                    self.assertIn("setcurrent", r.perms)
+
+    def test_312_shortest_path_reversed(self):
+        """DTA: shortest path output reverse DTA"""
+        self.a.set_reverse(True)
+        self.a.set_exclude(None)
+
+        expected_path = ["bothtrans200", "dyntrans100", "start"]
+
+        paths = list(self.a.shortest_path("bothtrans200", "start"))
+        self.assertEqual(1, len(paths))
+
+        for path in paths:
+            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
+                self.assertIsInstance(s, Type)
+                self.assertIsInstance(t, Type)
+                self.assertEqual(s, expected_path[stepnum+1])
+                self.assertEqual(t, expected_path[stepnum])
+
+                for r in trans:
+                    self.assertIn("transition", r.perms)
+
+                for name, entry, exe, type_trans in entrypoints:
+                    self.assertIsInstance(name, Type)
+
+                    for r in entry:
+                        self.assertIn("entrypoint", r.perms)
+
+                    for r in exe:
+                        self.assertIn("execute", r.perms)
+
+                    for r in type_trans:
+                        self.assertEqual("type_transition", r.ruletype)
+
+                for r in setexec:
+                    self.assertIn("setexec", r.perms)
+
+                for r in dyntrans:
+                    self.assertIn("dyntransition", r.perms)
+
+                for r in setcur:
+                    self.assertIn("setcurrent", r.perms)
+
+    def test_313_transitions_reversed(self):
+        """DTA: transitions output reverse DTA"""
+        self.a.set_reverse(True)
+        self.a.set_exclude(None)
+
+        transitions = list(self.a.transitions("bothtrans200"))
+        self.assertEqual(1, len(transitions))
+
+        for s, t, trans, entrypoints, setexec, dyntrans, setcur in transitions:
+            self.assertIsInstance(s, Type)
+            self.assertIsInstance(t, Type)
+            self.assertEqual(t, "bothtrans200")
+
+            for r in trans:
+                self.assertIn("transition", r.perms)
+
+            for name, entry, exe, type_trans in entrypoints:
+                self.assertIsInstance(name, Type)
+
+                for r in entry:
+                    self.assertIn("entrypoint", r.perms)
+
+                for r in exe:
+                    self.assertIn("execute", r.perms)
+
+                for r in type_trans:
+                    self.assertEqual("type_transition", r.ruletype)
+
+            for r in setexec:
+                self.assertIn("setexec", r.perms)
+
+            for r in dyntrans:
+                self.assertIn("dyntransition", r.perms)
+
+            for r in setcur:
+                self.assertIn("setcurrent", r.perms)
 
     def test_900_set_exclude_invalid_type(self):
         """DTA: set invalid excluded type."""

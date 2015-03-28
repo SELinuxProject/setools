@@ -23,7 +23,7 @@ from setools import SELinuxPolicy
 from setools.infoflow import InfoFlowAnalysis
 from setools.permmap import PermissionMap
 from setools.policyrep.rule import RuleNotConditional
-from setools.policyrep.typeattr import InvalidType
+from setools.policyrep.typeattr import InvalidType, Type
 
 
 # Note: the testing for having correct rules on every edge is only
@@ -262,6 +262,111 @@ class InfoFlowAnalysisTest(unittest.TestCase):
                                  (node6, node7),
                                  (node8, node9),
                                  (node9, node8)]), edges)
+
+    def test_300_all_paths(self):
+        """Information flow analysis: all paths output"""
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+
+        paths = list(self.a.all_paths("node1", "node4", 3))
+        self.assertEqual(1, len(paths))
+
+        steps = list(paths[0])
+        self.assertEqual(2, len(steps))
+
+        s, t, rules = steps[0]
+        self.assertIsInstance(s, Type)
+        self.assertIsInstance(t, Type)
+        self.assertEqual(s, "node1")
+        self.assertEqual(t, "node2")
+        for r in rules:
+            self.assertEqual("allow", r.ruletype)
+
+        s, t, rules = steps[1]
+        self.assertIsInstance(s, Type)
+        self.assertIsInstance(t, Type)
+        self.assertEqual(s, "node2")
+        self.assertEqual(t, "node4")
+        for r in rules:
+            self.assertEqual("allow", r.ruletype)
+
+    def test_301_all_shortest_paths(self):
+        """Information flow analysis: all shortest paths output"""
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+
+        paths = list(self.a.all_shortest_paths("node1", "node4"))
+        self.assertEqual(1, len(paths))
+
+        steps = list(paths[0])
+        self.assertEqual(2, len(steps))
+
+        s, t, rules = steps[0]
+        self.assertIsInstance(s, Type)
+        self.assertIsInstance(t, Type)
+        self.assertEqual(s, "node1")
+        self.assertEqual(t, "node2")
+        for r in rules:
+            self.assertEqual("allow", r.ruletype)
+
+        s, t, rules = steps[1]
+        self.assertIsInstance(s, Type)
+        self.assertIsInstance(t, Type)
+        self.assertEqual(s, "node2")
+        self.assertEqual(t, "node4")
+        for r in rules:
+            self.assertEqual("allow", r.ruletype)
+
+    def test_302_shortest_path(self):
+        """Information flow analysis: shortest path output"""
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+
+        paths = list(self.a.shortest_path("node1", "node4"))
+        self.assertEqual(1, len(paths))
+
+        steps = list(paths[0])
+        self.assertEqual(2, len(steps))
+
+        s, t, rules = steps[0]
+        self.assertIsInstance(s, Type)
+        self.assertIsInstance(t, Type)
+        self.assertEqual(s, "node1")
+        self.assertEqual(t, "node2")
+        for r in rules:
+            self.assertEqual("allow", r.ruletype)
+
+        s, t, rules = steps[1]
+        self.assertIsInstance(s, Type)
+        self.assertIsInstance(t, Type)
+        self.assertEqual(s, "node2")
+        self.assertEqual(t, "node4")
+        for r in rules:
+            self.assertEqual("allow", r.ruletype)
+
+    def test_303_infoflows_out(self):
+        """Information flow analysis: flows out of a type"""
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+
+        for s, t, rules in self.a.infoflows("node6"):
+            self.assertIsInstance(s, Type)
+            self.assertIsInstance(t, Type)
+            self.assertEqual(s, "node6")
+            for r in rules:
+                self.assertEqual("allow", r.ruletype)
+
+    def test_304_infoflows_in(self):
+        """Information flow analysis: flows in to a type"""
+        self.a.set_exclude(None)
+        self.a.set_min_weight(1)
+
+        for s, t, rules in self.a.infoflows("node8", out=False):
+            self.assertIsInstance(s, Type)
+            self.assertIsInstance(t, Type)
+            self.assertEqual(t, "node8")
+            for r in rules:
+                self.assertEqual("allow", r.ruletype)
 
     def test_900_set_exclude_invalid_type(self):
         """Information flow analysis: set invalid excluded type."""
