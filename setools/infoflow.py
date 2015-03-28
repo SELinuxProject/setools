@@ -230,13 +230,18 @@ class InfoFlowAnalysis(object):
             # when the source node is not in the graph
             pass
 
-    def infoflows(self, type_):
+    def infoflows(self, type_, out=True):
         """
-        Generator which yields all information flows out of a
+        Generator which yields all information flows in/out of a
         specified source type.
 
         Parameters:
         source  The starting type.
+
+        Keyword Parameters:
+        out     If true, information flows out of the type will
+                be returned.  If false, information flows in to the
+                type will be returned.  Default is true.
 
         Yield: generator(steps)
 
@@ -251,8 +256,13 @@ class InfoFlowAnalysis(object):
 
         self.log.info("Generating all infoflows out of {0}...".format(s))
 
+        if out:
+            flows = self.subG.out_edges_iter(s, data=True)
+        else:
+            flows = self.subG.in_edges_iter(s, data=True)
+
         try:
-            for source, target, data in self.subG.out_edges_iter(s, data=True):
+            for source, target, data in flows:
                 yield source, target, data["rules"]
         except NetworkXError:
             # NetworkXError: the type is valid but not in graph, e.g.
