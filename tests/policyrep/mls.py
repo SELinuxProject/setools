@@ -162,7 +162,12 @@ class RangeFactoryTest(unittest.TestCase):
         """Range lookup with non-dominating high level."""
         self.assertRaises(InvalidRange, range_factory, self.p.policy, "s1-s0")
 
-    def test_406_range_lookup_invalid_range(self):
+    def test_406_range_lookup_invalid_range_low(self):
         """Range lookup with an invalid range (low)."""
         # c13 is not associated with s0.
         self.assertRaises(InvalidRange, range_factory, self.p.policy, "s0:c13-s2:c13")
+
+    def test_407_range_lookup_invalid_range_high(self):
+        """Range lookup with an invalid range (high)."""
+        # c13 is not associated with s0.
+        self.assertRaises(InvalidRange, range_factory, self.p.policy, "s0-s0:c13")
