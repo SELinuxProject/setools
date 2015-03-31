@@ -1,25 +1,7 @@
-SETools - Policy analysis tools for SELinux
-setools@tresys.com, https://github.com/TresysTechnology/setools3/wiki
+# SETools - Policy analysis tools for SELinux
+https://github.com/TresysTechnology/setools/wiki
 
-
-TABLE OF CONTENTS
------------------
-
-1. Overview
-2. Installation
-  2.1. building SETools
-  2.2. setup.py flags
-3. Features
-  3.1. graphical tools
-  3.2. command-line tools
-  3.3. analysis libraries
-4. Obtaining SETools
-5. Reporting bugs
-6. Copyright license
-
-
-1. Overview
------------
+## Overview
 
 This file describes SETools, developed by Tresys Technology.  SETools
 is a collection of graphical tools, command-line tools, and libraries
@@ -27,115 +9,104 @@ designed to facilitate SELinux policy analysis.  Please consult the
 KNOWN-BUGS file prior to reporting bugs.
 
 
-2. Installation
----------------
+## Installation
 
 SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
 SETools requires the following development packages for building:
-  Python 2.7 or 3.3+
-  setuptools
-  gcc
-  bison
-  flex
-  libselinux
-  libsepol 2.4+
-  libbz2
-  SWIG 2.0.12+ or 3.0+
+* Python 2.7 or 3.3+
+* setuptools
+* gcc
+* bison
+* flex
+* libselinux
+* libsepol 2.4+
+* libbz2
+* SWIG 2.0.12+ or 3.0+
 
 To build SETools' graphical tools, the following packages are required:
-  TBD
+TBD
 
 To run SETools, the following packages are required:
-  Python 2.7 or 3.3+
-  NetworkX 1.8+
-  setuptools
-  libselinux
-  libsepol 2.4+
-  libbz2
+* Python 2.7 or 3.3+
+* NetworkX 1.8+
+* setuptools
+* libselinux
+* libsepol 2.4+
+* libbz2
 
 To run SETools unit tests, the following packages are required:
-  Python 2.7 or 3.3+
-  setuptools
-  gcc
-  bison
-  flex
-  libselinux
-  libsepol 2.4+
-  checkpolicy 2.4+
-  libbz2
-  SWIG 2.0.12+ or 3.0+
-  mock (on Python 2.7 only)
-  tox (optional)
+* Python 2.7 or 3.3+
+* setuptools
+* gcc
+* bison
+* flex
+* libselinux
+* libsepol 2.4+
+* checkpolicy 2.4+
+* libbz2
+* SWIG 2.0.12+ or 3.0+
+* mock (on Python 2.7 only)
+* tox (optional)
 
-2.1. building SETools
----------------------
+### Building SETools
 
 Unpack the official distribution or check out the git repository,
 and perform the following:
 
+```
   $ cd setools
   $ python setup.py build
   $ python setup.py install
+```
 
 This will put the applications in /usr/bin, data files in /usr/share/setools,
 and libraries in /usr/lib/pythonX.Y/site-packages/setools.
 
 
-2.2. setup.py flags
--------------------
+### Installation Options
 
 Please see `python setup.py --help` or `python setup.py install --help`
 for up-to-date information on build and install options, respectively.
 
 
-2.3 unit tests
---------------
+### Unit Tests
 
 One goal for SETools is to provide confidence in the validity of the
 output for the tools.  The unit tests for SETools can be run with
 the following command
 
+```
   $ python setup.py test
+```
 
-
-3. Features
------------
+## Features
 
 SETools encompasses a number of tools, both graphical and command
 line, and libraries.  Many of the programs have help files accessible
 during runtime.
 
 
-3.1. graphical tools
---------------------
+### Graphical tools
 
 TBD
 
 
-3.2. command-line tools
------------------------
+### Command-line tools
 
 Some tools in the SETools suite may be run in a terminal
 environment.
 
-  sedta:
-      A tool to perform domain transition analyses on an SELinux policy.
-
-  seinfo:
-      A tool to quickly get a list of components from an SELinux policy.
-
-  seinfoflow:
-      A tool to perform information flow analyses on an SELinux policy.
-
-  sesearch:
-      A tool to search rules (allow, type_transition, etc.)
-      within an SELinux policy.
+Tool Name  | Description
+---------- | ------------------------------------------------------
+sedta      | A tool to perform domain transition analysis.
+seinfo     | A tool to get a list of policy components.
+seinfoflow | A tool to perform information flow analysis.
+sesearch   | A tool to search rules (allow, type_transition, etc.)
 
 
-3.3. analysis libraries
------------------------
+### Analysis Libraries
 
 The SETools support libraries are available for use in third-party
 applications.  Although they are not officially supported (and thus
@@ -143,8 +114,7 @@ subject to change between SETools releases), we will do our best to
 maintain API stability.
 
 
-4. Obtaining SETools
---------------------
+### Obtaining SETools
 
 Official releases of SETools may be freely downloaded from:
 
@@ -153,26 +123,26 @@ https://github.com/TresysTechnology/setools/releases
 SETools source code is maintained within a GitHub repository.
 From the command line do:
 
+```
   $ git clone https://github.com/TresysTechnology/setools.git
+```
 
 You may also browse the GitHub repository at
 https://github.com/TresysTechnology/setools.
 
-SETools included in most Linux distributions which enable
-SELinux usage, such as Fedora, Red Hat Enterprise Linux, Gentoo,
+SETools included in most Linux distributions which support
+SELinux, such as Fedora, Red Hat Enterprise Linux, Gentoo,
 and Debian.
 
 
-5. Reporting bugs
------------------
+### Reporting bugs
 
 Bugs can be reported in the SETools GitHub issues tracker:
 
 https://github.com/TresysTechnology/setools/issues
 
 
-6. Copyright license
---------------------
+### Copyright license
 
 The intent is to allow free use of this source code.  All programs'
 source files are copyright protected and freely distributed under the
