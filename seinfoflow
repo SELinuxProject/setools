@@ -82,14 +82,10 @@ try:
     g = setools.infoflow.InfoFlowAnalysis(p, m, minweight=args.min_weight, exclude=args.exclude)
 
     if args.shortest_path or args.all_paths:
-        try:
-            if args.shortest_path:
-                paths = g.all_shortest_paths(args.source, args.target)
-            else:
-                paths = g.all_paths(args.source, args.target, args.all_paths)
-        except Exception as err:
-            print(err)
-            sys.exit(1)
+        if args.shortest_path:
+            paths = g.all_shortest_paths(args.source, args.target)
+        else:
+            paths = g.all_paths(args.source, args.target, args.all_paths)
 
         flownum = 0
         for flownum, path in enumerate(paths, start=1):
