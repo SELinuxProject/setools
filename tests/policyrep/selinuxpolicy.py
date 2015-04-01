@@ -46,8 +46,17 @@ class SELinuxPolicyTest(unittest.TestCase):
         with open(os.devnull, "w") as null:
             subprocess.check_call(command, stdout=null, shell=False, close_fds=True)
 
-        self.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
-        self.p_binary = SELinuxPolicy(self.policy_path)
+        try:
+            self.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
+        except:
+            # This should never be hit, since this policy
+            # successfully compiled with checkpolicy above.
+            # If we do, clean up the binary policy since
+            # tearDownClass() does not run.
+            os.unlink(self.policy_path)
+            raise
+        else:
+            self.p_binary = SELinuxPolicy(self.policy_path)
 
     @classmethod
     def tearDownClass(self):
