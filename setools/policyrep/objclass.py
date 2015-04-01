@@ -16,28 +16,9 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import symbol
 from . import qpol
-
-
-class InvalidCommon(symbol.InvalidSymbol):
-
-    """Exception for invalid common permission sets."""
-    pass
-
-
-class InvalidClass(symbol.InvalidSymbol):
-
-    """Exception for invalid object classes."""
-    pass
-
-
-class NoCommon(Exception):
-
-    """
-    Exception when a class does not inherit a common permission set.
-    """
-    pass
 
 
 def common_factory(policy, name):
@@ -49,7 +30,7 @@ def common_factory(policy, name):
     try:
         symbol = qpol.qpol_common_t(policy, name)
     except ValueError:
-        raise InvalidCommon("{0} is not a valid common".format(name))
+        raise exception.InvalidCommon("{0} is not a valid common".format(name))
 
     return Common(policy, symbol)
 
@@ -63,7 +44,7 @@ def class_factory(policy, name):
     try:
         symbol = qpol.qpol_class_t(policy, name)
     except ValueError:
-        raise InvalidClass("{0} is not a valid object class".format(name))
+        raise exception.InvalidClass("{0} is not a valid object class".format(name))
 
     return ObjClass(policy, symbol)
 
@@ -100,7 +81,7 @@ class ObjClass(Common):
         try:
             return common_factory(self.policy, self.qpol_symbol.common(self.policy))
         except ValueError:
-            raise NoCommon("{0} does not inherit a common.".format(self))
+            raise exception.NoCommon("{0} does not inherit a common.".format(self))
 
     def statement(self):
         stmt = "class {0}\n".format(self)

@@ -22,8 +22,8 @@ import networkx as nx
 from setools import SELinuxPolicy
 from setools.infoflow import InfoFlowAnalysis
 from setools.permmap import PermissionMap
-from setools.policyrep.rule import RuleNotConditional
-from setools.policyrep.typeattr import InvalidType, Type
+from setools.policyrep.exception import InvalidType, RuleNotConditional
+from setools.policyrep.typeattr import Type
 
 
 # Note: the testing for having correct rules on every edge is only

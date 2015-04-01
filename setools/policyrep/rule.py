@@ -16,34 +16,10 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import symbol
 from . import objclass
-
-
-class InvalidRuleType(symbol.InvalidSymbol):
-
-    """Exception for invalid rule types."""
-    pass
-
-
-class RuleUseError(symbol.SymbolUseError):
-
-    """
-    Exception when getting incorrect parameters for a rule.  For
-    example, trying to get the permissions of a rule that has no
-    permissions.
-    """
-    pass
-
-
-class RuleNotConditional(Exception):
-
-    """
-    Exception when getting the conditional expression for rules
-    that are unconditional (not conditional).
-    """
-    pass
 
 
 class PolicyRule(symbol.PolicySymbol):
@@ -91,7 +67,7 @@ class PolicyRule(symbol.PolicySymbol):
     def conditional(self):
         """The conditional expression for this rule."""
         # Most rules cannot be conditional.
-        raise RuleNotConditional
+        raise exception.RuleNotConditional
 
     def statement(self):
         return str(self)

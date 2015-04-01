@@ -19,7 +19,7 @@ import unittest
 
 from setools import SELinuxPolicy
 from setools.mlsrulequery import MLSRuleQuery
-from setools.policyrep.rule import RuleNotConditional
+from setools.policyrep.exception import InvalidMLSRuleType, RuleNotConditional
 
 # Note: the test policy has been written assuming range_transition
 # statements could have attributes.  However, range_transition

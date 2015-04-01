@@ -16,16 +16,11 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import role
 from . import mls
 from . import symbol
-
-
-class InvalidUser(symbol.InvalidSymbol):
-
-    """Exception for invalid users."""
-    pass
 
 
 def user_factory(qpol_policy, name):
@@ -37,7 +32,7 @@ def user_factory(qpol_policy, name):
     try:
         symbol = qpol.qpol_user_t(qpol_policy, name)
     except ValueError:
-        raise InvalidUser("{0} is not a valid user".format(name))
+        raise exception.InvalidUser("{0} is not a valid user".format(name))
 
     return User(qpol_policy, symbol)
 

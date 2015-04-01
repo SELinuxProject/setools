@@ -16,16 +16,11 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import rule
 from . import role
 from . import typeattr
-
-
-class InvalidRBACRuleType(rule.InvalidRuleType):
-
-    """Exception for invalid RBAC rule types."""
-    pass
 
 
 def rbac_rule_factory(policy, symbol):
@@ -43,7 +38,7 @@ def validate_ruletype(types):
     """Validate RBAC rule types."""
     for t in types:
         if t not in ["allow", "role_transition"]:
-            raise InvalidTERuleType("{0} is not a valid RBAC rule type.".format(t))
+            raise exception.InvalidTERuleType("{0} is not a valid RBAC rule type.".format(t))
 
 
 class RoleAllow(rule.PolicyRule):
@@ -66,12 +61,12 @@ class RoleAllow(rule.PolicyRule):
     @property
     def tclass(self):
         """The rule's object class."""
-        raise rule.RuleUseError("Role allow rules do not have an object class.")
+        raise exception.RuleUseError("Role allow rules do not have an object class.")
 
     @property
     def default(self):
         """The rule's default role."""
-        raise rule.RuleUseError("Role allow rules do not have a default role.")
+        raise exception.RuleUseError("Role allow rules do not have a default role.")
 
 
 class RoleTransition(rule.PolicyRule):

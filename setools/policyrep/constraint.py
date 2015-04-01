@@ -16,24 +16,13 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import role
 from . import symbol
 from . import objclass
 from . import typeattr
 from . import user
-
-
-class ConstraintUseError(symbol.SymbolUseError):
-
-    """Exception when getting permissions from a validatetrans."""
-    pass
-
-
-class InvalidConstraintType(symbol.InvalidSymbol):
-
-    """Exception for invalid constraint types."""
-    pass
 
 
 def _is_mls(policy, symbol):
@@ -53,7 +42,7 @@ def validate_ruletype(types):
     """Validate constraint rule types."""
     for t in types:
         if t not in ["constrain", "mlsconstrain", "validatetrans", "mlsvalidatetrans"]:
-            raise InvalidConstraintType("{0} is not a valid constraint type.".format(t))
+            raise exception.InvalidConstraintType("{0} is not a valid constraint type.".format(t))
 
 
 def constraint_factory(policy, symbol):
@@ -305,4 +294,5 @@ class Validatetrans(BaseConstraint):
 
     @property
     def perms(self):
-        raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
+        raise exception.ConstraintUseError("{0} rules do not have permissions.".
+                                           format(self.ruletype))

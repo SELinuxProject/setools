@@ -23,7 +23,8 @@ except ImportError:
     from mock import MagicMock
 
 from setools import SELinuxPolicy
-from setools.permmap import PermissionMap, UnmappedClass, UnmappedPermission, RuleTypeError
+from setools.permmap import PermissionMap
+from setools.exception import RuleTypeError, UnmappedClass, UnmappedPermission
 
 
 class PermissionMapTest(unittest.TestCase):

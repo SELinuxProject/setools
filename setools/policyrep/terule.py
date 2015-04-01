@@ -16,26 +16,12 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import symbol
 from . import rule
 from . import typeattr
 from . import boolcond
-
-
-class InvalidTERuleType(rule.InvalidRuleType):
-
-    """Exception for invalid TE rule types."""
-    pass
-
-
-class TERuleNoFilename(Exception):
-
-    """
-    Exception when getting the file name of a
-    type_transition rule that has no file name.
-    """
-    pass
 
 
 def te_rule_factory(policy, symbol):
@@ -54,7 +40,7 @@ def validate_ruletype(types):
     for t in types:
         if t not in ["allow", "auditallow", "dontaudit", "neverallow",
                      "type_transition", "type_member", "type_change"]:
-            raise InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
+            raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
 
 
 class BaseTERule(rule.PolicyRule):
@@ -84,7 +70,7 @@ class BaseTERule(rule.PolicyRule):
             # AttributeError: name filetrans rules cannot be conditional
             #                 so no member function
             # ValueError:     The rule is not conditional
-            raise rule.RuleNotConditional
+            raise exception.RuleNotConditional
 
 
 class AVRule(BaseTERule):
@@ -106,7 +92,7 @@ class AVRule(BaseTERule):
 
         try:
             rule_string += " [ {0} ]".format(self.conditional)
-        except rule.RuleNotConditional:
+        except exception.RuleNotConditional:
             pass
 
         return rule_string
@@ -119,11 +105,11 @@ class AVRule(BaseTERule):
     @property
     def default(self):
         """The rule's default type."""
-        raise rule.RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
+        raise exception.RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
 
     @property
     def filename(self):
-        raise rule.RuleUseError("{0} rules do not have file names".format(self.ruletype))
+        raise exception.RuleUseError("{0} rules do not have file names".format(self.ruletype))
 
 
 class TERule(BaseTERule):
@@ -135,13 +121,13 @@ class TERule(BaseTERule):
 
         try:
             rule_string += " \"{0}\";".format(self.filename)
-        except (TERuleNoFilename, rule.RuleUseError):
+        except (exception.TERuleNoFilename, exception.RuleUseError):
             # invalid use for type_change/member
             rule_string += ";"
 
         try:
             rule_string += " [ {0} ]".format(self.conditional)
-        except rule.RuleNotConditional:
+        except exception.RuleNotConditional:
             pass
 
         return rule_string
@@ -149,7 +135,7 @@ class TERule(BaseTERule):
     @property
     def perms(self):
         """The rule's permission set."""
-        raise rule.RuleUseError(
+        raise exception.RuleUseError(
             "{0} rules do not have a permission set.".format(self.ruletype))
 
     @property
@@ -158,7 +144,8 @@ class TERule(BaseTERule):
         try:
             return typeattr.type_factory(self.policy, self.qpol_symbol.default_type(self.policy))
         except AttributeError:
-            raise rule.RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
+            raise exception.RuleUseError("{0} rules do not have a default type.".
+                                         format(self.ruletype))
 
     @property
     def filename(self):
@@ -167,6 +154,7 @@ class TERule(BaseTERule):
             return self.qpol_symbol.filename(self.policy)
         except AttributeError:
             if self.ruletype == "type_transition":
-                raise TERuleNoFilename
+                raise exception.TERuleNoFilename
             else:
-                raise rule.RuleUseError("{0} rules do not have file names".format(self.ruletype))
+                raise exception.RuleUseError("{0} rules do not have file names".
+                                             format(self.ruletype))

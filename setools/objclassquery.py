@@ -20,7 +20,7 @@ import logging
 import re
 
 from . import compquery
-from .policyrep.objclass import NoCommon
+from .policyrep.exception import NoCommon
 
 
 class ObjClassQuery(compquery.ComponentQuery):

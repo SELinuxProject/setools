@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import symbol
 from . import user
@@ -64,4 +65,4 @@ class Context(symbol.PolicySymbol):
         return mls.range_factory(self.policy, self.qpol_symbol.range(self.policy))
 
     def statement(self):
-        raise symbol.NoStatement
+        raise exception.NoStatement

@@ -16,15 +16,10 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import symbol
 from . import context
-
-
-class InvalidInitialSid(symbol.InvalidSymbol):
-
-    """Exception for invalid initial sids."""
-    pass
 
 
 def initialsid_factory(policy, symbol):
@@ -36,7 +31,7 @@ def initialsid_factory(policy, symbol):
     try:
         return InitialSID(policy, qpol.qpol_isid_t(policy, symbol))
     except ValueError:
-        raise InvalidInitialSid("{0} is not a valid initial sid".format(symbol))
+        raise exception.InvalidInitialSid("{0} is not a valid initial sid".format(symbol))
 
 
 class InitialSID(symbol.PolicySymbol):

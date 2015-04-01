@@ -16,15 +16,10 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import symbol
 from . import objclass
 from . import qpol
-
-
-class NoDefaults(symbol.InvalidSymbol):
-
-    """Exception for classes that have no default_* statements."""
-    pass
 
 
 def default_factory(policy, symbol):
@@ -41,7 +36,7 @@ def default_factory(policy, symbol):
     # qpol will essentially iterate over all classes
     # and emit None for classes that don't set a default
     if not symbol.object_class(policy):
-        raise NoDefaults
+        raise exception.NoDefaults
 
     if symbol.user_default(policy):
         yield UserDefault(policy, symbol)

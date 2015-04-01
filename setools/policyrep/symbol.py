@@ -19,34 +19,6 @@
 from . import qpol
 
 
-class InvalidSymbol(ValueError):
-
-    """
-    Exception for invalid symbols.  Typically this is attempting to
-    look up an object in the policy, but it does not exist.
-    """
-    pass
-
-
-class NoStatement(Exception):
-
-    """
-    Exception for objects that have no inherent statement, such
-    as conditional expressions and MLS ranges.
-    """
-    pass
-
-
-class SymbolUseError(Exception):
-
-    """
-    Exception for incorrectly using a symbol.  Typically this is
-    for classes with strong similarities, but with slight variances in
-    functionality, e.g. allow vs type_transition rules.
-    """
-    pass
-
-
 class PolicySymbol(object):
 
     """This is a base class for all policy objects."""

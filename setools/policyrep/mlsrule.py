@@ -16,17 +16,12 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import rule
 from . import typeattr
 from . import mls
 from . import boolcond
-
-
-class InvalidMLSRuleType(rule.InvalidRuleType):
-
-    """Exception for invalid MLS rule types."""
-    pass
 
 
 def mls_rule_factory(policy, symbol):
@@ -41,7 +36,7 @@ def validate_ruletype(types):
     """Validate MLS rule types."""
     for t in types:
         if t not in ["range_transition"]:
-            raise InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t))
+            raise exception.InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t))
 
 
 class MLSRule(rule.PolicyRule):

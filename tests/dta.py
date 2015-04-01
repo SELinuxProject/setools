@@ -21,8 +21,8 @@ import networkx as nx
 
 from setools import SELinuxPolicy
 from setools.dta import DomainTransitionAnalysis
-from setools.policyrep.rule import RuleNotConditional
-from setools.policyrep.typeattr import InvalidType, Type
+from setools.policyrep.exception import InvalidType, RuleNotConditional
+from setools.policyrep.typeattr import Type
 
 
 class DomainTransitionAnalysisTest(unittest.TestCase):

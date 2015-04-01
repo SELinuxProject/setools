@@ -16,14 +16,9 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import symbol
-
-
-class InvalidBoolean(symbol.InvalidSymbol):
-
-    """Exception for invalid Booleans."""
-    pass
 
 
 def boolean_factory(policy, symbol):
@@ -35,7 +30,7 @@ def boolean_factory(policy, symbol):
     try:
         return Boolean(policy, qpol.qpol_bool_t(policy, symbol))
     except ValueError:
-        raise InvalidBoolean("{0} is not a valid Boolean".format(symbol))
+        raise exception.InvalidBoolean("{0} is not a valid Boolean".format(symbol))
 
 
 def condexpr_factory(policy, symbol):
@@ -165,4 +160,4 @@ class ConditionalExpr(symbol.PolicySymbol):
         return bools
 
     def statement(self):
-        raise symbol.NoStatement
+        raise exception.NoStatement

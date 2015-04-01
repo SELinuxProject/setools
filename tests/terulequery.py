@@ -19,7 +19,7 @@ import unittest
 
 from setools import SELinuxPolicy
 from setools.terulequery import TERuleQuery
-from setools.policyrep.rule import RuleNotConditional
+from setools.policyrep.exception import RuleNotConditional
 
 
 class TERuleQueryTest(unittest.TestCase):

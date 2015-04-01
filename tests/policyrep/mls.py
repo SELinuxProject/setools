@@ -24,9 +24,9 @@ except ImportError:
 
 from setools import SELinuxPolicy
 from setools.policyrep import qpol
+from setools.policyrep.exception import MLSDisabled, InvalidLevel, InvalidRange
 from setools.policyrep.mls import sensitivity_factory, category_factory, level_factory, \
-                                  range_factory, level_decl_factory, \
-                                  MLSDisabled, InvalidLevel, InvalidRange
+                                  range_factory, level_decl_factory
 
 
 class SensitivityFactoryTest(unittest.TestCase):

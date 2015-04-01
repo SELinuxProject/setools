@@ -19,7 +19,7 @@
 import logging
 import re
 
-from .policyrep.rule import RuleUseError, RuleNotConditional
+from .policyrep.exception import RuleUseError, RuleNotConditional
 from . import mixins
 from . import rulequery
 

@@ -33,6 +33,9 @@ from . import qpol
 # This also makes sense since an object would only
 # be valid for the policy it comes from.
 
+# Exceptions
+from . import exception
+
 # Components
 from . import boolcond
 from . import default
@@ -57,12 +60,6 @@ from . import initsid
 from . import netcontext
 
 
-class InvalidPolicy(SyntaxError):
-
-    """Exception for invalid policy."""
-    pass
-
-
 class SELinuxPolicy(object):
 
     """The complete SELinux policy."""
@@ -79,7 +76,8 @@ class SELinuxPolicy(object):
         try:
             self.policy = qpol.qpol_policy_factory(policyfile)
         except SyntaxError as err:
-            raise InvalidPolicy("Error opening policy file \"{0}\": {1}".format(policyfile, err))
+            raise exception.InvalidPolicy("Error opening policy file \"{0}\": {1}".
+                                          format(policyfile, err))
 
         self.filename = policyfile
 

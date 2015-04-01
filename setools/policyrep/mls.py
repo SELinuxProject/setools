@@ -18,6 +18,7 @@
 #
 import itertools
 
+from . import exception
 from . import qpol
 from . import symbol
 
@@ -39,38 +40,6 @@ from . import symbol
 # instances of the same object (except for level decl).
 
 
-class InvalidSensitivity(symbol.InvalidSymbol):
-
-    """
-    Exception for an invalid sensitivity.
-    """
-    pass
-
-
-class InvalidLevel(symbol.InvalidSymbol):
-
-    """
-    Exception for an invalid level.
-    """
-    pass
-
-
-class InvalidRange(symbol.InvalidSymbol):
-
-    """
-    Exception for an invalid range.
-    """
-    pass
-
-
-class MLSDisabled(Exception):
-
-    """
-    Exception when MLS is disabled.
-    """
-    pass
-
-
 def enabled(policy):
     """Determine if MLS is enabled."""
     return policy.capability(qpol.QPOL_CAP_MLS)
@@ -80,7 +49,7 @@ def category_factory(policy, symbol):
     """Factory function for creating MLS category objects."""
 
     if not enabled(policy):
-        raise MLSDisabled
+        raise exception.MLSDisabled
 
     if not isinstance(symbol, qpol.qpol_cat_t):
         raise NotImplementedError
@@ -95,7 +64,7 @@ def sensitivity_factory(policy, symbol):
     """Factory function for creating MLS sensitivity objects."""
 
     if not enabled(policy):
-        raise MLSDisabled
+        raise exception.MLSDisabled
 
     if isinstance(symbol, qpol.qpol_level_t):
         if symbol.isalias(policy):
@@ -106,7 +75,7 @@ def sensitivity_factory(policy, symbol):
     try:
         return Sensitivity(policy, qpol.qpol_level_t(policy, symbol))
     except ValueError:
-        raise InvalidSensitivity("{0} is not a valid sensitivity".format(symbol))
+        raise exception.InvalidSensitivity("{0} is not a valid sensitivity".format(symbol))
 
 
 def level_factory(policy, symbol):
@@ -116,7 +85,7 @@ def level_factory(policy, symbol):
     """
 
     if not enabled(policy):
-        raise MLSDisabled
+        raise exception.MLSDisabled
 
     if isinstance(symbol, qpol.qpol_mls_level_t):
         return Level(policy, symbol)
@@ -127,7 +96,8 @@ def level_factory(policy, symbol):
     try:
         semantic_level = qpol.qpol_semantic_level_t(policy, sens)
     except ValueError:
-        raise InvalidLevel("{0} is invalid ({1} is not a valid sensitivity)".format(symbol, sens))
+        raise exception.InvalidLevel("{0} is invalid ({1} is not a valid sensitivity)".
+                                     format(symbol, sens))
 
     try:
         cats = sens_split[1]
@@ -141,22 +111,22 @@ def level_factory(policy, symbol):
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[1])
                 except ValueError:
-                    raise InvalidLevel("{0} is invalid ({1} is not a valid category range)".
-                                       format(symbol, group))
+                    raise exception.InvalidLevel(
+                        "{0} is invalid ({1} is not a valid category range)".format(symbol, group))
             elif len(catrange) == 1:
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[0])
                 except ValueError:
-                    raise InvalidLevel("{0} is invalid  ({1} is not a valid category)".
-                                       format(symbol, group))
+                    raise exception.InvalidLevel("{0} is invalid  ({1} is not a valid category)".
+                                                 format(symbol, group))
             else:
-                raise InvalidLevel("{0} is invalid (level parsing error)".format(symbol))
+                raise exception.InvalidLevel("{0} is invalid (level parsing error)".format(symbol))
 
     # convert to level object
     try:
         policy_level = qpol.qpol_mls_level_t(policy, semantic_level)
     except ValueError:
-        raise InvalidLevel(
+        raise exception.InvalidLevel(
             "{0} is invalid (one or more categories are not associated with the sensitivity)".
             format(symbol))
 
@@ -170,7 +140,7 @@ def level_decl_factory(policy, symbol):
     """
 
     if not enabled(policy):
-        raise MLSDisabled
+        raise exception.MLSDisabled
 
     if isinstance(symbol, qpol.qpol_level_t):
         if symbol.isalias(policy):
@@ -181,14 +151,14 @@ def level_decl_factory(policy, symbol):
     try:
         return LevelDecl(policy, qpol.qpol_level_t(policy, symbol))
     except ValueError:
-        raise InvalidLevel("{0} is not a valid sensitivity".format(symbol))
+        raise exception.InvalidLevel("{0} is not a valid sensitivity".format(symbol))
 
 
 def range_factory(policy, symbol):
     """Factory function for creating MLS range objects."""
 
     if not enabled(policy):
-        raise MLSDisabled
+        raise exception.MLSDisabled
 
     if isinstance(symbol, qpol.qpol_mls_range_t):
         return Range(policy, symbol)
@@ -200,13 +170,13 @@ def range_factory(policy, symbol):
     # e.g. s0:c1 - s0:c0.c255
     try:
         low = level_factory(policy, levels[0].strip())
-    except InvalidLevel as e:
-        raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
+    except exception.InvalidLevel as e:
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
 
     try:
         high = level_factory(policy, levels[1].strip())
-    except InvalidLevel as e:
-        raise InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
+    except exception.InvalidLevel as e:
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
     except IndexError:
         high = low
 
@@ -214,8 +184,8 @@ def range_factory(policy, symbol):
     try:
         policy_range = qpol.qpol_mls_range_t(policy, low.qpol_symbol, high.qpol_symbol)
     except ValueError:
-        raise InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
-                           format(symbol, low, high))
+        raise exception.InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
+                                     format(symbol, low, high))
 
     return Range(policy, policy_range)
 
@@ -399,7 +369,7 @@ class Level(BaseMLSLevel):
         return sensitivity_factory(self.policy, self.qpol_symbol.sens_name(self.policy))
 
     def statement(self):
-        return symbol.NoStatement
+        return exception.NoStatement
 
 
 class Range(symbol.PolicySymbol):
@@ -442,4 +412,4 @@ class Range(symbol.PolicySymbol):
         return level_factory(self.policy, self.qpol_symbol.low_level(self.policy))
 
     def statement(self):
-        raise symbol.NoStatement
+        raise exception.NoStatement

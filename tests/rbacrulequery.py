@@ -19,7 +19,7 @@ import unittest
 
 from setools import SELinuxPolicy
 from setools.rbacrulequery import RBACRuleQuery
-from setools.policyrep.rule import RuleUseError, RuleNotConditional
+from setools.policyrep.exception import RuleUseError, RuleNotConditional
 
 
 class RBACRuleQueryTest(unittest.TestCase):

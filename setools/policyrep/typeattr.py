@@ -16,14 +16,9 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import symbol
-
-
-class InvalidType(symbol.InvalidSymbol):
-
-    """Exception for invalid types and attributes."""
-    pass
 
 
 def _symbol_lookup(qpol_policy, name):
@@ -34,7 +29,7 @@ def _symbol_lookup(qpol_policy, name):
     try:
         return qpol.qpol_type_t(qpol_policy, name)
     except ValueError:
-        raise InvalidType("{0} is not a valid type/attribute".format(name))
+        raise exception.InvalidType("{0} is not a valid type/attribute".format(name))
 
 
 def attribute_factory(qpol_policy, name):

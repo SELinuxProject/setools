@@ -18,25 +18,8 @@
 #
 import logging
 
+from . import exception
 from . import policyrep
-
-
-class RuleTypeError(Exception):
-
-    """Exception for using rules with incorrect rule type."""
-    pass
-
-
-class UnmappedClass(Exception):
-
-    """Exception for classes that are unmapped"""
-    pass
-
-
-class UnmappedPermission(Exception):
-
-    """Exception for permissions that are unmapped"""
-    pass
 
 
 class PermissionMap(object):
@@ -169,7 +152,7 @@ class PermissionMap(object):
             for perm in self.permmap[classname]:
                 self.permmap[classname][perm]['enabled'] = False
         except KeyError:
-            raise UnmappedClass("{0} is not mapped.".format(classname))
+            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
 
     def exclude_permission(self, class_, permission):
         """
@@ -186,12 +169,13 @@ class PermissionMap(object):
         classname = str(class_)
 
         if classname not in self.permmap:
-            raise UnmappedClass("{0} is not mapped.".format(classname))
+            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
 
         try:
             self.permmap[classname][permission]['enabled'] = False
         except KeyError:
-            raise UnmappedPermission("{0}:{1} is not mapped.".format(classname, permission))
+            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
+                                               format(classname, permission))
 
     def include_class(self, class_):
         """
@@ -210,7 +194,7 @@ class PermissionMap(object):
             for perm in self.permmap[classname]:
                 self.permmap[classname][perm]['enabled'] = True
         except KeyError:
-            raise UnmappedClass("{0} is not mapped.".format(classname))
+            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
 
     def include_permission(self, class_, permission):
         """
@@ -228,12 +212,13 @@ class PermissionMap(object):
         classname = str(class_)
 
         if classname not in self.permmap:
-            raise UnmappedClass("{0} is not mapped.".format(classname))
+            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
 
         try:
             self.permmap[classname][permission]['enabled'] = True
         except KeyError:
-            raise UnmappedPermission("{0}:{1} is not mapped.".format(classname, permission))
+            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
+                                               format(classname, permission))
 
     def map_policy(self, policy):
         """Create mappings for all classes and permissions in the specified policy."""
@@ -248,7 +233,7 @@ class PermissionMap(object):
 
             try:
                 perms |= c.common.perms
-            except policyrep.objclass.NoCommon:
+            except policyrep.exception.NoCommon:
                 pass
 
             for perm_name in perms:
@@ -276,11 +261,11 @@ class PermissionMap(object):
         class_name = str(rule.tclass)
 
         if rule.ruletype != 'allow':
-            raise RuleTypeError("{0} rules cannot be used for calculating a weight".
-                                format(rule.ruletype))
+            raise exception.RuleTypeError("{0} rules cannot be used for calculating a weight".
+                                          format(rule.ruletype))
 
         if class_name not in self.permmap:
-            raise UnmappedClass("{0} is not mapped.".format(class_name))
+            raise exception.UnmappedClass("{0} is not mapped.".format(class_name))
 
         # iterate over the permissions and determine the
         # weight of the rule in each direction. The result
@@ -289,7 +274,8 @@ class PermissionMap(object):
             try:
                 mapping = self.permmap[class_name][perm_name]
             except KeyError:
-                raise UnmappedPermission("{0}:{1} is not mapped.".format(class_name, perm_name))
+                raise exception.UnmappedPermission("{0}:{1} is not mapped.".
+                                                   format(class_name, perm_name))
 
             if not mapping['enabled']:
                 continue

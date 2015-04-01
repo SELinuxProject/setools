@@ -19,8 +19,7 @@
 import logging
 import re
 
-from .policyrep.rule import RuleUseError
-from .policyrep.typeattr import InvalidType
+from .policyrep.exception import InvalidType, RuleUseError
 
 from . import rulequery
 

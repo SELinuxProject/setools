@@ -22,8 +22,8 @@ import subprocess
 import tempfile
 import unittest
 
-from setools import SELinuxPolicy, InvalidPolicy
-from setools.boolquery import BoolQuery
+from setools import SELinuxPolicy
+from setools.policyrep.exception import InvalidPolicy
 
 
 class SELinuxPolicyTest(unittest.TestCase):

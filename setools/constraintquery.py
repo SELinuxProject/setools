@@ -21,7 +21,7 @@ import re
 
 from . import mixins
 from .query import PolicyQuery
-from .policyrep.constraint import ConstraintUseError
+from .policyrep.exception import ConstraintUseError
 
 
 class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery):

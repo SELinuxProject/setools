@@ -16,15 +16,10 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from . import qpol
 from . import symbol
 from . import typeattr
-
-
-class InvalidRole(symbol.InvalidSymbol):
-
-    """Exception for invalid roles."""
-    pass
 
 
 def role_factory(qpol_policy, name):
@@ -36,7 +31,7 @@ def role_factory(qpol_policy, name):
     try:
         symbol = qpol.qpol_role_t(qpol_policy, name)
     except ValueError:
-        raise InvalidRole("{0} is not a valid role".format(name))
+        raise exception.InvalidRole("{0} is not a valid role".format(name))
 
     return Role(qpol_policy, symbol)
 

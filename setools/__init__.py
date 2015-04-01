@@ -25,7 +25,10 @@ except:  # pragma: no cover
 
 # Python classes for policy representation
 from . import policyrep
-from .policyrep import SELinuxPolicy, InvalidPolicy
+from .policyrep import SELinuxPolicy
+
+# Exceptions
+from . import exception
 
 # Component Queries
 from . import boolquery
