@@ -17,8 +17,6 @@
 #
 import unittest
 
-import networkx as nx
-
 from setools import SELinuxPolicy
 from setools.dta import DomainTransitionAnalysis
 from setools.policyrep.exception import InvalidType, RuleNotConditional

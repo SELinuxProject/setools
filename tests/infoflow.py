@@ -17,8 +17,6 @@
 #
 import unittest
 
-import networkx as nx
-
 from setools import SELinuxPolicy
 from setools.infoflow import InfoFlowAnalysis
 from setools.permmap import PermissionMap

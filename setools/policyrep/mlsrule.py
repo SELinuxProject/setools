@@ -21,7 +21,6 @@ from . import qpol
 from . import rule
 from . import typeattr
 from . import mls
-from . import boolcond
 
 
 def mls_rule_factory(policy, symbol):

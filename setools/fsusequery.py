@@ -19,7 +19,6 @@
 import logging
 import re
 
-from . import compquery
 from . import contextquery
 
 

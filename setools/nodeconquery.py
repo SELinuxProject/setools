@@ -22,10 +22,8 @@ except ImportError:  # pragma: no cover
     pass
 
 import logging
-import re
 from socket import AF_INET, AF_INET6
 
-from . import compquery
 from . import contextquery
 
 

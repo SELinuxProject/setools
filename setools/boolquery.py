@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
-import re
 
 from . import compquery
 

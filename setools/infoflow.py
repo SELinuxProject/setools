@@ -22,9 +22,6 @@ import logging
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
-from . import policyrep
-from . import permmap
-
 
 class InfoFlowAnalysis(object):
 

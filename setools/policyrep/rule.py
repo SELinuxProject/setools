@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 from . import exception
-from . import qpol
 from . import symbol
 from . import objclass
 

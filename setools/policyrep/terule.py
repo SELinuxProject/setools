@@ -18,7 +18,6 @@
 #
 from . import exception
 from . import qpol
-from . import symbol
 from . import rule
 from . import typeattr
 from . import boolcond
