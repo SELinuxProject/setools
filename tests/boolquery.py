@@ -24,8 +24,8 @@ from setools.boolquery import BoolQuery
 class BoolQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/boolquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/boolquery.conf")
 
     def test_000_unset(self):
         """Boolean query with no criteria."""

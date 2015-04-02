@@ -24,8 +24,8 @@ from setools.typequery import TypeQuery
 class TypeQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/typequery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/typequery.conf")
 
     def test_000_unset(self):
         """Type query with no criteria."""

@@ -24,8 +24,8 @@ from setools.sensitivityquery import SensitivityQuery
 class SensitivityQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/sensitivityquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/sensitivityquery.conf")
 
     def test_000_unset(self):
         """Sensitivity query with no criteria."""

@@ -29,11 +29,9 @@ def role_factory(qpol_policy, name):
         return Role(qpol_policy, name)
 
     try:
-        symbol = qpol.qpol_role_t(qpol_policy, name)
+        return Role(qpol_policy, qpol.qpol_role_t(qpol_policy, name))
     except ValueError:
         raise exception.InvalidRole("{0} is not a valid role".format(name))
-
-    return Role(qpol_policy, symbol)
 
 
 class BaseRole(symbol.PolicySymbol):

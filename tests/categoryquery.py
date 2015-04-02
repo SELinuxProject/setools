@@ -24,8 +24,8 @@ from setools.categoryquery import CategoryQuery
 class CategoryQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/categoryquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/categoryquery.conf")
 
     def test_000_unset(self):
         """MLS category query with no criteria."""

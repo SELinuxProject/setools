@@ -24,8 +24,8 @@ from setools.fsusequery import FSUseQuery
 class FSUseQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/fsusequery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/fsusequery.conf")
 
     def test_000_unset(self):
         """fs_use_* query with no criteria"""

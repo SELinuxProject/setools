@@ -25,8 +25,8 @@ from setools.policyrep.exception import RuleUseError, RuleNotConditional
 class RBACRuleQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/rbacrulequery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/rbacrulequery.conf")
 
     def test_000_unset(self):
         """RBAC rule query with no criteria."""

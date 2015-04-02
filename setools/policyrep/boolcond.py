@@ -21,25 +21,25 @@ from . import qpol
 from . import symbol
 
 
-def boolean_factory(policy, symbol):
+def boolean_factory(policy, name):
     """Factory function for creating Boolean statement objects."""
 
-    if isinstance(symbol, qpol.qpol_bool_t):
-        return Boolean(policy, symbol)
+    if isinstance(name, qpol.qpol_bool_t):
+        return Boolean(policy, name)
 
     try:
-        return Boolean(policy, qpol.qpol_bool_t(policy, symbol))
+        return Boolean(policy, qpol.qpol_bool_t(policy, name))
     except ValueError:
-        raise exception.InvalidBoolean("{0} is not a valid Boolean".format(symbol))
+        raise exception.InvalidBoolean("{0} is not a valid Boolean".format(name))
 
 
-def condexpr_factory(policy, symbol):
+def condexpr_factory(policy, name):
     """Factory function for creating conditional expression objects."""
 
-    if not isinstance(symbol, qpol.qpol_cond_t):
+    if not isinstance(name, qpol.qpol_cond_t):
         raise TypeError("Conditional expressions cannot be looked up.")
 
-    return ConditionalExpr(policy, symbol)
+    return ConditionalExpr(policy, name)
 
 
 class Boolean(symbol.PolicySymbol):

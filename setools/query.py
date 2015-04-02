@@ -36,7 +36,7 @@ class PolicyQuery(object):
         if regex:
             return bool(criteria.search(str(obj)))
         else:
-            return (obj == criteria)
+            return obj == criteria
 
     @staticmethod
     def _match_set(obj, criteria, equal):
@@ -51,7 +51,7 @@ class PolicyQuery(object):
         """
 
         if equal:
-            return (obj == criteria)
+            return obj == criteria
         else:
             return bool(obj.intersection(criteria))
 
@@ -68,9 +68,9 @@ class PolicyQuery(object):
         """
 
         if regex:
-            return bool(list(filter(criteria.search, (str(m) for m in obj))))
+            return [m for m in obj if criteria.search(str(m))]
         else:
-            return (criteria in obj)
+            return criteria in obj
 
     @staticmethod
     def _match_regex_or_set(obj, criteria, equal, regex):
@@ -90,7 +90,7 @@ class PolicyQuery(object):
         """
 
         if regex:
-            return bool(list(filter(criteria.search, (str(m) for m in obj))))
+            return [m for m in obj if criteria.search(str(m))]
         else:
             return PolicyQuery._match_set(obj, set(criteria), equal)
 
@@ -122,7 +122,7 @@ class PolicyQuery(object):
                 return ((obj_low < crit_low and crit_high <= obj_high) or (
                          obj_low <= crit_low and crit_high < obj_high))
             else:
-                return (obj_low <= crit_low and crit_high <= obj_high)
+                return obj_low <= crit_low and crit_high <= obj_high
         elif superset:
             if proper:
                 return ((crit_low < obj_low and obj_high <= crit_high) or (
@@ -130,7 +130,7 @@ class PolicyQuery(object):
             else:
                 return (crit_low <= obj_low and obj_high <= crit_high)
         else:
-            return (crit_low == obj_low and obj_high == crit_high)
+            return crit_low == obj_low and obj_high == crit_high
 
     @staticmethod
     def _match_level(obj, criteria, dom, domby, incomp):

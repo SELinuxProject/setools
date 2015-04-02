@@ -22,16 +22,16 @@ from . import symbol
 from . import context
 
 
-def initialsid_factory(policy, symbol):
+def initialsid_factory(policy, name):
     """Factory function for creating initial sid objects."""
 
-    if isinstance(symbol, qpol.qpol_isid_t):
-        return InitialSID(policy, symbol)
+    if isinstance(name, qpol.qpol_isid_t):
+        return InitialSID(policy, name)
 
     try:
-        return InitialSID(policy, qpol.qpol_isid_t(policy, symbol))
+        return InitialSID(policy, qpol.qpol_isid_t(policy, name))
     except ValueError:
-        raise exception.InvalidInitialSid("{0} is not a valid initial sid".format(symbol))
+        raise exception.InvalidInitialSid("{0} is not a valid initial sid".format(name))
 
 
 class InitialSID(symbol.PolicySymbol):

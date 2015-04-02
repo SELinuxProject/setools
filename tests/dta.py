@@ -26,10 +26,10 @@ from setools.policyrep.typeattr import Type
 class DomainTransitionAnalysisTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/dta.conf")
-        self.a = DomainTransitionAnalysis(self.p)
-        self.a._build_graph()
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/dta.conf")
+        cls.a = DomainTransitionAnalysis(cls.p)
+        cls.a._build_graph()
 
     def test_000_graph_structure(self):
         """DTA: verify graph structure."""
@@ -40,7 +40,6 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         trans1 = self.p.lookup_type("trans1")
         trans2 = self.p.lookup_type("trans2")
         trans3 = self.p.lookup_type("trans3")
-        trans4 = self.p.lookup_type("trans4")
         trans5 = self.p.lookup_type("trans5")
         dyntrans100 = self.p.lookup_type("dyntrans100")
         bothtrans200 = self.p.lookup_type("bothtrans200")
@@ -494,7 +493,6 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         trans1 = self.p.lookup_type("trans1")
         trans2 = self.p.lookup_type("trans2")
         trans3 = self.p.lookup_type("trans3")
-        trans4 = self.p.lookup_type("trans4")
         trans5 = self.p.lookup_type("trans5")
         dyntrans100 = self.p.lookup_type("dyntrans100")
         bothtrans200 = self.p.lookup_type("bothtrans200")
@@ -523,7 +521,6 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         trans1 = self.p.lookup_type("trans1")
         trans2 = self.p.lookup_type("trans2")
         trans3 = self.p.lookup_type("trans3")
-        trans4 = self.p.lookup_type("trans4")
         trans5 = self.p.lookup_type("trans5")
         dyntrans100 = self.p.lookup_type("dyntrans100")
         bothtrans200 = self.p.lookup_type("bothtrans200")
@@ -546,10 +543,8 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         self.a._build_subgraph()
 
         start = self.p.lookup_type("start")
-        trans1 = self.p.lookup_type("trans1")
         trans2 = self.p.lookup_type("trans2")
         trans3 = self.p.lookup_type("trans3")
-        trans4 = self.p.lookup_type("trans4")
         trans5 = self.p.lookup_type("trans5")
         dyntrans100 = self.p.lookup_type("dyntrans100")
         bothtrans200 = self.p.lookup_type("bothtrans200")
@@ -573,7 +568,6 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         trans1 = self.p.lookup_type("trans1")
         trans2 = self.p.lookup_type("trans2")
         trans3 = self.p.lookup_type("trans3")
-        trans4 = self.p.lookup_type("trans4")
         trans5 = self.p.lookup_type("trans5")
         dyntrans100 = self.p.lookup_type("dyntrans100")
         bothtrans200 = self.p.lookup_type("bothtrans200")
@@ -599,7 +593,6 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         trans1 = self.p.lookup_type("trans1")
         trans2 = self.p.lookup_type("trans2")
         trans3 = self.p.lookup_type("trans3")
-        trans4 = self.p.lookup_type("trans4")
         trans5 = self.p.lookup_type("trans5")
         dyntrans100 = self.p.lookup_type("dyntrans100")
         bothtrans200 = self.p.lookup_type("bothtrans200")
@@ -625,7 +618,6 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         trans1 = self.p.lookup_type("trans1")
         trans2 = self.p.lookup_type("trans2")
         trans3 = self.p.lookup_type("trans3")
-        trans4 = self.p.lookup_type("trans4")
         trans5 = self.p.lookup_type("trans5")
         dyntrans100 = self.p.lookup_type("dyntrans100")
         bothtrans200 = self.p.lookup_type("bothtrans200")
@@ -968,21 +960,21 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_paths("invalid_type", "trans1"))
+            list(self.a.all_paths("invalid_type", "trans1"))
 
     def test_911_all_paths_invalid_target(self):
         """DTA: all paths with invalid target type."""
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_paths("trans1", "invalid_type"))
+            list(self.a.all_paths("trans1", "invalid_type"))
 
     def test_912_all_paths_invalid_maxlen(self):
         """DTA: all paths with invalid max path length."""
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(ValueError):
-            paths = list(self.a.all_paths("trans1", "trans2", maxlen=-2))
+            list(self.a.all_paths("trans1", "trans2", maxlen=-2))
 
     def test_913_all_paths_source_excluded(self):
         """DTA: all paths with excluded source type."""
@@ -1017,14 +1009,14 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.shortest_path("invalid_type", "trans1"))
+            list(self.a.shortest_path("invalid_type", "trans1"))
 
     def test_921_shortest_path_invalid_target(self):
         """DTA: shortest path with invalid target type."""
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.shortest_path("trans1", "invalid_type"))
+            list(self.a.shortest_path("trans1", "invalid_type"))
 
     def test_922_shortest_path_source_excluded(self):
         """DTA: shortest path with excluded source type."""
@@ -1059,14 +1051,14 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_shortest_paths("invalid_type", "trans1"))
+            list(self.a.all_shortest_paths("invalid_type", "trans1"))
 
     def test_931_all_shortest_paths_invalid_target(self):
         """DTA: all shortest paths with invalid target type."""
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_shortest_paths("trans1", "invalid_type"))
+            list(self.a.all_shortest_paths("trans1", "invalid_type"))
 
     def test_932_all_shortest_paths_source_excluded(self):
         """DTA: all shortest paths with excluded source type."""
@@ -1101,7 +1093,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         self.a.set_reverse(False)
         self.a.set_exclude(None)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.transitions("invalid_type"))
+            list(self.a.transitions("invalid_type"))
 
     def test_941_transitions_source_excluded(self):
         """DTA: transitions with excluded source type."""

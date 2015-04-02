@@ -31,8 +31,8 @@ from setools.policyrep.exception import InvalidMLSRuleType, RuleNotConditional
 class MLSRuleQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/mlsrulequery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/mlsrulequery.conf")
 
     def test_000_unset(self):
         """MLS rule query with no criteria."""

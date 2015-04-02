@@ -24,8 +24,8 @@ from setools.objclassquery import ObjClassQuery
 class ObjClassQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/objclassquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/objclassquery.conf")
 
     def test_000_unset(self):
         """Class query with no criteria."""

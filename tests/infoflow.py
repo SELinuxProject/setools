@@ -33,10 +33,10 @@ from setools.policyrep.typeattr import Type
 class InfoFlowAnalysisTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/infoflow.conf")
-        self.m = PermissionMap("tests/perm_map")
-        self.a = InfoFlowAnalysis(self.p, self.m)
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/infoflow.conf")
+        cls.m = PermissionMap("tests/perm_map")
+        cls.a = InfoFlowAnalysis(cls.p, cls.m)
 
     def test_001_full_graph(self):
         """Information flow analysis full graph."""
@@ -237,7 +237,6 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         disconnected2 = self.p.lookup_type("disconnected2")
         node1 = self.p.lookup_type("node1")
         node2 = self.p.lookup_type("node2")
-        node3 = self.p.lookup_type("node3")
         node4 = self.p.lookup_type("node4")
         node5 = self.p.lookup_type("node5")
         node6 = self.p.lookup_type("node6")
@@ -385,21 +384,21 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_paths("invalid_type", "node1"))
+            list(self.a.all_paths("invalid_type", "node1"))
 
     def test_911_all_paths_invalid_target(self):
         """Information flow analysis: all paths with invalid target type."""
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_paths("node1", "invalid_type"))
+            list(self.a.all_paths("node1", "invalid_type"))
 
     def test_912_all_paths_invalid_maxlen(self):
         """Information flow analysis: all paths with invalid max path length."""
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(ValueError):
-            paths = list(self.a.all_paths("node1", "node2", maxlen=-2))
+            list(self.a.all_paths("node1", "node2", maxlen=-2))
 
     def test_913_all_paths_source_excluded(self):
         """Information flow analysis: all paths with excluded source type."""
@@ -434,14 +433,14 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.shortest_path("invalid_type", "node1"))
+            list(self.a.shortest_path("invalid_type", "node1"))
 
     def test_921_shortest_path_invalid_target(self):
         """Information flow analysis: shortest path with invalid target type."""
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.shortest_path("node1", "invalid_type"))
+            list(self.a.shortest_path("node1", "invalid_type"))
 
     def test_922_shortest_path_source_excluded(self):
         """Information flow analysis: shortest path with excluded source type."""
@@ -476,14 +475,14 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_shortest_paths("invalid_type", "node1"))
+            list(self.a.all_shortest_paths("invalid_type", "node1"))
 
     def test_931_all_shortest_paths_invalid_target(self):
         """Information flow analysis: all shortest paths with invalid target type."""
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.all_shortest_paths("node1", "invalid_type"))
+            list(self.a.all_shortest_paths("node1", "invalid_type"))
 
     def test_932_all_shortest_paths_source_excluded(self):
         """Information flow analysis: all shortest paths with excluded source type."""
@@ -518,7 +517,7 @@ class InfoFlowAnalysisTest(unittest.TestCase):
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
         with self.assertRaises(InvalidType):
-            paths = list(self.a.infoflows("invalid_type"))
+            list(self.a.infoflows("invalid_type"))
 
     def test_941_infoflows_source_excluded(self):
         """Information flow analysis: infoflows with excluded source type."""

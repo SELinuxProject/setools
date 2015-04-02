@@ -169,10 +169,10 @@ class PortconQuery(contextquery.ContextQuery):
         if not all(self.ports):
             self.ports_cmp = None
         else:
-            if (self.ports[0] < 1 or self.ports[1] < 1):
+            if self.ports[0] < 1 or self.ports[1] < 1:
                 raise ValueError("Port numbers must be positive: {0[0]}-{0[1]}".format(ports))
 
-            if (self.ports[0] > self.ports[1]):
+            if self.ports[0] > self.ports[1]:
                 raise ValueError(
                     "The low port must be smaller than the high port: {0[0]}-{0[1]}".format(ports))
 

@@ -24,8 +24,8 @@ from setools.commonquery import CommonQuery
 class CommonQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/commonquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/commonquery.conf")
 
     def test_000_unset(self):
         """Common query with no criteria."""

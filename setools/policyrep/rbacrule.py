@@ -23,13 +23,13 @@ from . import role
 from . import typeattr
 
 
-def rbac_rule_factory(policy, symbol):
+def rbac_rule_factory(policy, name):
     """Factory function for creating RBAC rule objects."""
 
-    if isinstance(symbol, qpol.qpol_role_allow_t):
-        return RoleAllow(policy, symbol)
-    elif isinstance(symbol, qpol.qpol_role_trans_t):
-        return RoleTransition(policy, symbol)
+    if isinstance(name, qpol.qpol_role_allow_t):
+        return RoleAllow(policy, name)
+    elif isinstance(name, qpol.qpol_role_trans_t):
+        return RoleTransition(policy, name)
     else:
         raise TypeError("RBAC rules cannot be looked up.")
 

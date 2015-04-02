@@ -23,31 +23,31 @@ from . import symbol
 from . import context
 
 
-def netifcon_factory(policy, symbol):
+def netifcon_factory(policy, name):
     """Factory function for creating netifcon objects."""
 
-    if not isinstance(symbol, qpol.qpol_netifcon_t):
+    if not isinstance(name, qpol.qpol_netifcon_t):
         raise NotImplementedError
 
-    return Netifcon(policy, symbol)
+    return Netifcon(policy, name)
 
 
-def nodecon_factory(policy, symbol):
+def nodecon_factory(policy, name):
     """Factory function for creating nodecon objects."""
 
-    if not isinstance(symbol, qpol.qpol_nodecon_t):
+    if not isinstance(name, qpol.qpol_nodecon_t):
         raise NotImplementedError
 
-    return Nodecon(policy, symbol)
+    return Nodecon(policy, name)
 
 
-def portcon_factory(policy, symbol):
+def portcon_factory(policy, name):
     """Factory function for creating portcon objects."""
 
-    if not isinstance(symbol, qpol.qpol_portcon_t):
+    if not isinstance(name, qpol.qpol_portcon_t):
         raise NotImplementedError
 
-    return Portcon(policy, symbol)
+    return Portcon(policy, name)
 
 
 class NetContext(symbol.PolicySymbol):

@@ -25,10 +25,10 @@ from . import typeattr
 from . import user
 
 
-def _is_mls(policy, symbol):
+def _is_mls(policy, sym):
     # determine if this is a regular or MLS constraint/validatetrans.
     # this can only be determined by inspecting the expression.
-    for expr_node in symbol.expr_iter(policy):
+    for expr_node in sym.expr_iter(policy):
         sym_type = expr_node.sym_type(policy)
         expr_type = expr_node.expr_type(policy)
 
@@ -45,20 +45,20 @@ def validate_ruletype(types):
             raise exception.InvalidConstraintType("{0} is not a valid constraint type.".format(t))
 
 
-def constraint_factory(policy, symbol):
+def constraint_factory(policy, sym):
     """Factory function for creating constraint objects."""
 
     try:
-        if _is_mls(policy, symbol):
-            if isinstance(symbol, qpol.qpol_constraint_t):
-                return Constraint(policy, symbol, "mlsconstrain")
+        if _is_mls(policy, sym):
+            if isinstance(sym, qpol.qpol_constraint_t):
+                return Constraint(policy, sym, "mlsconstrain")
             else:
-                return Validatetrans(policy, symbol, "mlsvalidatetrans")
+                return Validatetrans(policy, sym, "mlsvalidatetrans")
         else:
-            if isinstance(symbol, qpol.qpol_constraint_t):
-                return Constraint(policy, symbol, "constrain")
+            if isinstance(sym, qpol.qpol_constraint_t):
+                return Constraint(policy, sym, "constrain")
             else:
-                return Validatetrans(policy, symbol, "validatetrans")
+                return Validatetrans(policy, sym, "validatetrans")
 
     except AttributeError:
         raise TypeError("Constraints cannot be looked-up.")
@@ -127,7 +127,6 @@ class BaseConstraint(symbol.PolicySymbol):
         # highest precedence (op) so if there is a single binary
         # operator, no parentheses are output
 
-        expr_string = ""
         stack = []
         prev_op_precedence = self._logical_op_precedence
         for expr_node in self.qpol_symbol.expr_iter(self.policy):

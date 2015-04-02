@@ -63,11 +63,11 @@ class MatchObjClass(object):
         """Match the object class criteria"""
 
         if isinstance(self.tclass_cmp, set):
-            return (obj in self.tclass_cmp)
+            return obj in self.tclass_cmp
         elif self.tclass_regex:
             return bool(self.tclass_cmp.search(str(obj)))
         else:
-            return (obj == self.tclass_cmp)
+            return obj == self.tclass_cmp
 
     def set_tclass(self, tclass, **opts):
         """

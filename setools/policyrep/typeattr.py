@@ -51,7 +51,7 @@ def type_factory(qpol_policy, name, deref=False):
     if qpol_symbol.isattr(qpol_policy):
         raise TypeError("{0} is an attribute".format(qpol_symbol.name(qpol_policy)))
     elif qpol_symbol.isalias(qpol_policy) and not deref:
-            raise TypeError("{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
+        raise TypeError("{0} is an alias.".format(qpol_symbol.name(qpol_policy)))
 
     return Type(qpol_policy, qpol_symbol)
 

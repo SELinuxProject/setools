@@ -25,13 +25,13 @@ from . import typeattr
 from . import mls
 
 
-def context_factory(policy, symbol):
+def context_factory(policy, name):
     """Factory function for creating context objects."""
 
-    if not isinstance(symbol, qpol.qpol_context_t):
+    if not isinstance(name, qpol.qpol_context_t):
         raise TypeError("Contexts cannot be looked-up.")
 
-    return Context(policy, symbol)
+    return Context(policy, name)
 
 
 class Context(symbol.PolicySymbol):

@@ -29,10 +29,10 @@ from setools.policyrep.exception import InvalidPolicy
 class SELinuxPolicyTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
+    def setUpClass(cls):
         # create a temp file for the binary policy
         # and then have checkpolicy overwrite it.
-        fd, self.policy_path = tempfile.mkstemp()
+        fd, cls.policy_path = tempfile.mkstemp()
         os.close(fd)
 
         try:
@@ -40,27 +40,26 @@ class SELinuxPolicyTest(unittest.TestCase):
         except KeyError:
             command = ["/usr/bin/checkpolicy"]
 
-        command.extend(["-M", "-o", self.policy_path, "-U", "reject",
+        command.extend(["-M", "-o", cls.policy_path, "-U", "reject",
                         "tests/policyrep/selinuxpolicy.conf"])
 
         with open(os.devnull, "w") as null:
             subprocess.check_call(command, stdout=null, shell=False, close_fds=True)
 
         try:
-            self.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
+            cls.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
+            cls.p_binary = SELinuxPolicy(cls.policy_path)
         except:
             # This should never be hit, since this policy
             # successfully compiled with checkpolicy above.
             # If we do, clean up the binary policy since
             # tearDownClass() does not run.
-            os.unlink(self.policy_path)
+            os.unlink(cls.policy_path)
             raise
-        else:
-            self.p_binary = SELinuxPolicy(self.policy_path)
 
     @classmethod
-    def tearDownClass(self):
-        os.unlink(self.policy_path)
+    def tearDownClass(cls):
+        os.unlink(cls.policy_path)
 
     def test_001_open_policy_error(self):
         """SELinuxPolicy: Invalid policy on open."""

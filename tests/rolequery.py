@@ -24,8 +24,8 @@ from setools.rolequery import RoleQuery
 class RoleQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/rolequery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/rolequery.conf")
 
     def test_000_unset(self):
         """Role query with no criteria."""

@@ -23,22 +23,22 @@ from . import symbol
 from . import context
 
 
-def fs_use_factory(policy, symbol):
+def fs_use_factory(policy, name):
     """Factory function for creating fs_use_* objects."""
 
-    if not isinstance(symbol, qpol.qpol_fs_use_t):
+    if not isinstance(name, qpol.qpol_fs_use_t):
         raise TypeError("fs_use_* cannot be looked-up.")
 
-    return FSUse(policy, symbol)
+    return FSUse(policy, name)
 
 
-def genfscon_factory(policy, symbol):
+def genfscon_factory(policy, name):
     """Factory function for creating genfscon objects."""
 
-    if not isinstance(symbol, qpol.qpol_genfscon_t):
+    if not isinstance(name, qpol.qpol_genfscon_t):
         raise TypeError("Genfscons cannot be looked-up.")
 
-    return Genfscon(policy, symbol)
+    return Genfscon(policy, name)
 
 
 class FSContext(symbol.PolicySymbol):
@@ -90,7 +90,7 @@ class Genfscon(FSContext):
                     self.filetype == other.filetype and
                     self.context == other.context)
         except AttributeError:
-            return (str(self) == str(other))
+            return str(self) == str(other)
 
     @property
     def filetype(self):

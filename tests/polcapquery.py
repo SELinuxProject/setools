@@ -24,8 +24,8 @@ from setools.polcapquery import PolCapQuery
 class PolCapQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/polcapquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/polcapquery.conf")
 
     def test_000_unset(self):
         """Policy capability query with no criteria"""

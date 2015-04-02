@@ -24,8 +24,8 @@ from setools.netifconquery import NetifconQuery
 class NetifconQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/netifconquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/netifconquery.conf")
 
     def test_000_unset(self):
         """Netifcon query with no criteria"""

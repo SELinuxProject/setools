@@ -30,11 +30,9 @@ def user_factory(qpol_policy, name):
         return User(qpol_policy, name)
 
     try:
-        symbol = qpol.qpol_user_t(qpol_policy, name)
+        return User(qpol_policy, qpol.qpol_user_t(qpol_policy, name))
     except ValueError:
         raise exception.InvalidUser("{0} is not a valid user".format(name))
-
-    return User(qpol_policy, symbol)
 
 
 class User(symbol.PolicySymbol):
@@ -72,7 +70,7 @@ class User(symbol.PolicySymbol):
     def statement(self):
         roles = list(str(r) for r in self.roles)
         stmt = "user {0} roles ".format(self)
-        if (len(roles) > 1):
+        if len(roles) > 1:
             stmt += "{{ {0} }}".format(' '.join(roles))
         else:
             stmt += roles[0]

@@ -45,40 +45,40 @@ def enabled(policy):
     return policy.capability(qpol.QPOL_CAP_MLS)
 
 
-def category_factory(policy, symbol):
+def category_factory(policy, sym):
     """Factory function for creating MLS category objects."""
 
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if not isinstance(symbol, qpol.qpol_cat_t):
+    if not isinstance(sym, qpol.qpol_cat_t):
         raise NotImplementedError
 
-    if symbol.isalias(policy):
-        raise TypeError("{0} is an alias".format(symbol.name(policy)))
+    if sym.isalias(policy):
+        raise TypeError("{0} is an alias".format(sym.name(policy)))
 
-    return Category(policy, symbol)
+    return Category(policy, sym)
 
 
-def sensitivity_factory(policy, symbol):
+def sensitivity_factory(policy, sym):
     """Factory function for creating MLS sensitivity objects."""
 
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(symbol, qpol.qpol_level_t):
-        if symbol.isalias(policy):
-            raise TypeError("{0} is an alias".format(symbol.name(policy)))
+    if isinstance(sym, qpol.qpol_level_t):
+        if sym.isalias(policy):
+            raise TypeError("{0} is an alias".format(sym.name(policy)))
 
-        return Sensitivity(policy, symbol)
+        return Sensitivity(policy, sym)
 
     try:
-        return Sensitivity(policy, qpol.qpol_level_t(policy, symbol))
+        return Sensitivity(policy, qpol.qpol_level_t(policy, sym))
     except ValueError:
-        raise exception.InvalidSensitivity("{0} is not a valid sensitivity".format(symbol))
+        raise exception.InvalidSensitivity("{0} is not a valid sensitivity".format(sym))
 
 
-def level_factory(policy, symbol):
+def level_factory(policy, sym):
     """
     Factory function for creating MLS level objects (e.g. levels used
     in contexts of labeling statements)
@@ -87,17 +87,17 @@ def level_factory(policy, symbol):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(symbol, qpol.qpol_mls_level_t):
-        return Level(policy, symbol)
+    if isinstance(sym, qpol.qpol_mls_level_t):
+        return Level(policy, sym)
 
-    sens_split = symbol.split(":")
+    sens_split = sym.split(":")
 
     sens = sens_split[0]
     try:
         semantic_level = qpol.qpol_semantic_level_t(policy, sens)
     except ValueError:
         raise exception.InvalidLevel("{0} is invalid ({1} is not a valid sensitivity)".
-                                     format(symbol, sens))
+                                     format(sym, sens))
 
     try:
         cats = sens_split[1]
@@ -112,15 +112,15 @@ def level_factory(policy, symbol):
                     semantic_level.add_cats(policy, catrange[0], catrange[1])
                 except ValueError:
                     raise exception.InvalidLevel(
-                        "{0} is invalid ({1} is not a valid category range)".format(symbol, group))
+                        "{0} is invalid ({1} is not a valid category range)".format(sym, group))
             elif len(catrange) == 1:
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[0])
                 except ValueError:
                     raise exception.InvalidLevel("{0} is invalid  ({1} is not a valid category)".
-                                                 format(symbol, group))
+                                                 format(sym, group))
             else:
-                raise exception.InvalidLevel("{0} is invalid (level parsing error)".format(symbol))
+                raise exception.InvalidLevel("{0} is invalid (level parsing error)".format(sym))
 
     # convert to level object
     try:
@@ -128,12 +128,12 @@ def level_factory(policy, symbol):
     except ValueError:
         raise exception.InvalidLevel(
             "{0} is invalid (one or more categories are not associated with the sensitivity)".
-            format(symbol))
+            format(sym))
 
     return Level(policy, policy_level)
 
 
-def level_decl_factory(policy, symbol):
+def level_decl_factory(policy, sym):
     """
     Factory function for creating MLS level declaration objects.
     (level statements) Lookups are only by sensitivity name.
@@ -142,41 +142,41 @@ def level_decl_factory(policy, symbol):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(symbol, qpol.qpol_level_t):
-        if symbol.isalias(policy):
-            raise TypeError("{0} is an alias".format(symbol.name(policy)))
+    if isinstance(sym, qpol.qpol_level_t):
+        if sym.isalias(policy):
+            raise TypeError("{0} is an alias".format(sym.name(policy)))
 
-        return LevelDecl(policy, symbol)
+        return LevelDecl(policy, sym)
 
     try:
-        return LevelDecl(policy, qpol.qpol_level_t(policy, symbol))
+        return LevelDecl(policy, qpol.qpol_level_t(policy, sym))
     except ValueError:
-        raise exception.InvalidLevel("{0} is not a valid sensitivity".format(symbol))
+        raise exception.InvalidLevel("{0} is not a valid sensitivity".format(sym))
 
 
-def range_factory(policy, symbol):
+def range_factory(policy, sym):
     """Factory function for creating MLS range objects."""
 
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(symbol, qpol.qpol_mls_range_t):
-        return Range(policy, symbol)
+    if isinstance(sym, qpol.qpol_mls_range_t):
+        return Range(policy, sym)
 
     # build range:
-    levels = symbol.split("-")
+    levels = sym.split("-")
 
     # strip() levels to handle ranges with spaces in them,
     # e.g. s0:c1 - s0:c0.c255
     try:
         low = level_factory(policy, levels[0].strip())
     except exception.InvalidLevel as e:
-        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, e))
 
     try:
         high = level_factory(policy, levels[1].strip())
     except exception.InvalidLevel as e:
-        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(symbol, e))
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, e))
     except IndexError:
         high = low
 
@@ -185,7 +185,7 @@ def range_factory(policy, symbol):
         policy_range = qpol.qpol_mls_range_t(policy, low.qpol_symbol, high.qpol_symbol)
     except ValueError:
         raise exception.InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
-                                     format(symbol, low, high))
+                                     format(sym, low, high))
 
     return Range(policy, policy_range)
 
@@ -232,21 +232,21 @@ class Sensitivity(BaseMLSComponent):
 
     def __eq__(self, other):
         try:
-            return (self._value == other._value)
+            return self._value == other._value
         except AttributeError:
-            return (str(self) == str(other))
+            return str(self) == str(other)
 
     def __ge__(self, other):
-        return (self._value >= other._value)
+        return self._value >= other._value
 
     def __gt__(self, other):
-        return (self._value > other._value)
+        return self._value > other._value
 
     def __le__(self, other):
-        return (self._value <= other._value)
+        return self._value <= other._value
 
     def __lt__(self, other):
-        return (self._value < other._value)
+        return self._value < other._value
 
     def statement(self):
         aliases = list(self.aliases())
@@ -289,16 +289,16 @@ class BaseMLSLevel(symbol.PolicySymbol):
         try:
             othercats = set(other.categories())
         except AttributeError:
-            return (str(self) == str(other))
+            return str(self) == str(other)
         else:
             selfcats = set(self.categories())
-            return (self.sensitivity == other.sensitivity and selfcats == othercats)
+            return self.sensitivity == other.sensitivity and selfcats == othercats
 
     def __ge__(self, other):
         """Dom operator."""
         selfcats = set(self.categories())
         othercats = set(other.categories())
-        return (self.sensitivity >= other.sensitivity and selfcats >= othercats)
+        return self.sensitivity >= other.sensitivity and selfcats >= othercats
 
     def __gt__(self, other):
         selfcats = set(self.categories())
@@ -310,7 +310,7 @@ class BaseMLSLevel(symbol.PolicySymbol):
         """Domby operator."""
         selfcats = set(self.categories())
         othercats = set(other.categories())
-        return (self.sensitivity <= other.sensitivity and selfcats <= othercats)
+        return self.sensitivity <= other.sensitivity and selfcats <= othercats
 
     def __lt__(self, other):
         selfcats = set(self.categories())
@@ -320,7 +320,7 @@ class BaseMLSLevel(symbol.PolicySymbol):
 
     def __xor__(self, other):
         """Incomp operator."""
-        return (not (self >= other or self <= other))
+        return not (self >= other or self <= other)
 
     @property
     def sensitivity(self):
@@ -389,17 +389,17 @@ class Range(symbol.PolicySymbol):
 
     def __eq__(self, other):
         try:
-            return (self.low == other.low and self.high == other.high)
+            return self.low == other.low and self.high == other.high
         except AttributeError:
             o = str(other)
             if "-" in o and " - " not in o:
                 raise ValueError(
                     "Range strings must have a spaces around the level separator (eg \"s0 - s1\")")
 
-            return (str(self) == o)
+            return str(self) == o
 
     def __contains__(self, other):
-        return (self.low <= other <= self.high)
+        return self.low <= other <= self.high
 
     @property
     def high(self):

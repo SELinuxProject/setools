@@ -48,6 +48,7 @@ class InfoFlowAnalysis(object):
         self.rebuildsubgraph = True
 
         self.G = nx.DiGraph()
+        self.subG = None
 
     def set_min_weight(self, w):
         """

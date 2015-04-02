@@ -26,8 +26,8 @@ from setools.nodeconquery import NodeconQuery
 class NodeconQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/nodeconquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/nodeconquery.conf")
 
     def test_000_unset(self):
         """Nodecon query with no criteria"""

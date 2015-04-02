@@ -41,6 +41,7 @@ class DomainTransitionAnalysis(object):
         self.rebuildgraph = True
         self.rebuildsubgraph = True
         self.G = nx.DiGraph()
+        self.subG = None
 
     def set_reverse(self, reverse):
         """

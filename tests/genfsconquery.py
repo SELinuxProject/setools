@@ -25,8 +25,8 @@ from setools.genfsconquery import GenfsconQuery
 class GenfsconQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/genfsconquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/genfsconquery.conf")
 
     def test_000_unset(self):
         """Genfscon query with no criteria"""

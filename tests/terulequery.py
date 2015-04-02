@@ -25,8 +25,8 @@ from setools.policyrep.exception import RuleNotConditional
 class TERuleQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/terulequery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/terulequery.conf")
 
     def test_000_unset(self):
         """TE rule query with no criteria."""

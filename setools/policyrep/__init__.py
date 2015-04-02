@@ -441,16 +441,20 @@ class SELinuxPolicy(object):
     #
     # Policy rule type validators
     #
-    def validate_constraint_ruletype(self, types):
+    @staticmethod
+    def validate_constraint_ruletype(types):
         constraint.validate_ruletype(types)
 
-    def validate_mls_ruletype(self, types):
+    @staticmethod
+    def validate_mls_ruletype(types):
         mlsrule.validate_ruletype(types)
 
-    def validate_rbac_ruletype(self, types):
+    @staticmethod
+    def validate_rbac_ruletype(types):
         rbacrule.validate_ruletype(types)
 
-    def validate_te_ruletype(self, types):
+    @staticmethod
+    def validate_te_ruletype(types):
         terule.validate_ruletype(types)
 
     #

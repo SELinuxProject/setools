@@ -24,8 +24,8 @@ from setools.userquery import UserQuery
 class UserQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/userquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/userquery.conf")
 
     def test_000_unset(self):
         """User query with no criteria."""

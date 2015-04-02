@@ -22,7 +22,7 @@ from . import objclass
 from . import qpol
 
 
-def default_factory(policy, symbol):
+def default_factory(policy, sym):
     """Factory generator for creating default_* statement objects."""
 
     # The low level policy groups default_* settings by object class.
@@ -30,25 +30,25 @@ def default_factory(policy, symbol):
     # this factory function is a generator which yields up to
     # four Default objects.
 
-    if not isinstance(symbol, qpol.qpol_default_object_t):
+    if not isinstance(sym, qpol.qpol_default_object_t):
         raise NotImplementedError
 
     # qpol will essentially iterate over all classes
     # and emit None for classes that don't set a default
-    if not symbol.object_class(policy):
+    if not sym.object_class(policy):
         raise exception.NoDefaults
 
-    if symbol.user_default(policy):
-        yield UserDefault(policy, symbol)
+    if sym.user_default(policy):
+        yield UserDefault(policy, sym)
 
-    if symbol.role_default(policy):
-        yield RoleDefault(policy, symbol)
+    if sym.role_default(policy):
+        yield RoleDefault(policy, sym)
 
-    if symbol.type_default(policy):
-        yield TypeDefault(policy, symbol)
+    if sym.type_default(policy):
+        yield TypeDefault(policy, sym)
 
-    if symbol.range_default(policy):
-        yield RangeDefault(policy, symbol)
+    if sym.range_default(policy):
+        yield RangeDefault(policy, sym)
 
 
 class Default(symbol.PolicySymbol):

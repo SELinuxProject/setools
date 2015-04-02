@@ -24,8 +24,8 @@ from setools.initsidquery import InitialSIDQuery
 class InitialSIDQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/initsidquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/initsidquery.conf")
 
     def test_000_unset(self):
         """Initial SID query with no criteria"""

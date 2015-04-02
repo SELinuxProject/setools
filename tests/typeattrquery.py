@@ -24,8 +24,8 @@ from setools.typeattrquery import TypeAttributeQuery
 class TypeAttributeQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/typeattrquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/typeattrquery.conf")
 
     def test_000_unset(self):
         """Type attribute query with no criteria."""

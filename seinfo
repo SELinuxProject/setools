@@ -190,7 +190,7 @@ try:
 
             try:
                 ports = [int(i) for i in args.portconquery.split("-")]
-            except:
+            except ValueError:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
             if len(ports) == 2:

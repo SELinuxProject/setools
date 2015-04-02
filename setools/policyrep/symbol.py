@@ -40,21 +40,21 @@ class PolicySymbol(object):
     def __hash__(self):
         try:
             return hash(self.qpol_symbol.name(self.policy))
-        except:  # pragma: no cover
+        except AttributeError:  # pragma: no cover
             return NotImplemented
 
     def __eq__(self, other):
         try:
-            return (self.qpol_symbol.this == other.qpol_symbol.this)
+            return self.qpol_symbol.this == other.qpol_symbol.this
         except AttributeError:
-            return (str(self) == str(other))
+            return str(self) == str(other)
 
     def __ne__(self, other):
         return not self == other
 
     def __lt__(self, other):
         """Comparison used by Python sorting functions."""
-        return (str(self) < str(other))
+        return str(self) < str(other)
 
     def __repr__(self):
         return "<{0.__class__.__name__}(<qpol_policy_t id={1}>,\"{0}\")>".format(

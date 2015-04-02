@@ -24,8 +24,8 @@ from setools.constraintquery import ConstraintQuery
 class ConstraintQueryTest(unittest.TestCase):
 
     @classmethod
-    def setUpClass(self):
-        self.p = SELinuxPolicy("tests/constraintquery.conf")
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/constraintquery.conf")
 
     def test_000_unset(self):
         """Constraint query with no criteria."""
