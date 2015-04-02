@@ -79,7 +79,7 @@ class User(symbol.PolicySymbol):
 
         try:
             stmt += " level {0.mls_level} range {0.mls_range};".format(self)
-        except mls.MLSDisabled:
+        except exception.MLSDisabled:
             stmt += ";"
 
         return stmt

@@ -41,7 +41,7 @@ class Context(symbol.PolicySymbol):
     def __str__(self):
         try:
             return "{0.user}:{0.role}:{0.type_}:{0.range_}".format(self)
-        except mls.MLSDisabled:
+        except exception.MLSDisabled:
             return "{0.user}:{0.role}:{0.type_}".format(self)
 
     @property

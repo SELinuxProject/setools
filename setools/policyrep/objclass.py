@@ -88,7 +88,7 @@ class ObjClass(Common):
 
         try:
             stmt += "inherits {0}\n".format(self.common)
-        except NoCommon:
+        except exception.NoCommon:
             pass
 
         # a class that inherits may not have additional permissions

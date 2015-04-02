@@ -359,7 +359,7 @@ class SELinuxPolicy(object):
             try:
                 for d in default.default_factory(self.policy, default_):
                     yield d
-            except default.NoDefaults:
+            except exception.NoDefaults:
                 # qpol iterates over all classes. Handle case
                 # where a class has no default_* settings.
                 pass

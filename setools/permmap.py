@@ -310,12 +310,13 @@ class PermissionMap(object):
         classname = str(class_)
 
         if classname not in self.permmap:
-            raise UnmappedClass("{0} is not mapped.".format(classname))
+            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
 
         try:
             self.permmap[classname][permission]['direction'] = direction
         except KeyError:
-            raise UnmappedPermission("{0}:{1} is not mapped.".format(classname, permission))
+            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
+                                               format(classname, permission))
 
     def set_weight(self, class_, permission, weight):
         """
@@ -337,9 +338,10 @@ class PermissionMap(object):
         classname = str(class_)
 
         if classname not in self.permmap:
-            raise UnmappedClass("{0} is not mapped.".format(classname))
+            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
 
         try:
             self.permmap[classname][permission]['weight'] = weight
         except KeyError:
-            raise UnmappedPermission("{0}:{1} is not mapped.".format(classname, permission))
+            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
+                                               format(classname, permission))
