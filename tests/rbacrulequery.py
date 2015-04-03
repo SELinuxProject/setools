@@ -1,3 +1,4 @@
+"""RBAC rule query unit tests."""
 # Copyright 2014, Tresys Technology, LLC
 #
 # This file is part of SETools.
@@ -15,18 +16,32 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+# pylint: disable=invalid-name,too-many-public-methods
 import unittest
 
 from setools import SELinuxPolicy
 from setools.rbacrulequery import RBACRuleQuery
 from setools.policyrep.exception import RuleUseError, RuleNotConditional
 
+from . import mixins
 
-class RBACRuleQueryTest(unittest.TestCase):
+
+class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
+
+    """RBAC rule query unit tests."""
 
     @classmethod
     def setUpClass(cls):
         cls.p = SELinuxPolicy("tests/rbacrulequery.conf")
+
+    def validate_allow(self, rule, source, target):
+        """Validate a role allow rule."""
+        self.assertEqual("allow", rule.ruletype)
+        self.assertEqual(source, rule.source)
+        self.assertEqual(target, rule.target)
+        self.assertRaises(RuleUseError, getattr, rule, "tclass")
+        self.assertRaises(RuleUseError, getattr, rule, "default")
+        self.assertRaises(RuleNotConditional, getattr, rule, "conditional")
 
     def test_000_unset(self):
         """RBAC rule query with no criteria."""
@@ -46,19 +61,8 @@ class RBACRuleQueryTest(unittest.TestCase):
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
 
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test1s")
-        self.assertEqual(r[0].target, "test1t")
-        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
-        self.assertRaises(RuleUseError, getattr, r[0], "default")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        self.assertEqual(r[1].ruletype, "role_transition")
-        self.assertEqual(r[1].source, "test1s")
-        self.assertEqual(r[1].target, "system")
-        self.assertEqual(r[1].tclass, "infoflow")
-        self.assertEqual(r[1].default, "test1t")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_allow(r[0], "test1s", "test1t")
+        self.validate_rule(r[1], "role_transition", "test1s", "system", "infoflow", "test1t")
 
     def test_002_source_direct_regex(self):
         """RBAC rule query with regex, direct, source match."""
@@ -67,13 +71,7 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test2s1")
-        self.assertEqual(r[0].target, "test2t")
-        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
-        self.assertRaises(RuleUseError, getattr, r[0], "default")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_allow(r[0], "test2s1", "test2t")
 
     def test_010_target_direct(self):
         """RBAC rule query with exact, direct, target match."""
@@ -82,13 +80,7 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test10s")
-        self.assertEqual(r[0].target, "test10t")
-        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
-        self.assertRaises(RuleUseError, getattr, r[0], "default")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_allow(r[0], "test10s", "test10t")
 
     def test_011_target_direct_regex(self):
         """RBAC rule query with regex, direct, target match."""
@@ -97,13 +89,7 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test11s")
-        self.assertEqual(r[0].target, "test11t1")
-        self.assertRaises(RuleUseError, getattr, r[0], "tclass")
-        self.assertRaises(RuleUseError, getattr, r[0], "default")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_allow(r[0], "test11s", "test11t1")
 
     def test_020_class(self):
         """RBAC rule query with exact object class match."""
@@ -111,13 +97,7 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "role_transition")
-        self.assertEqual(r[0].source, "test20")
-        self.assertEqual(r[0].target, "system")
-        self.assertEqual(r[0].tclass, "infoflow2")
-        self.assertEqual(r[0].default, "test20d2")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "role_transition", "test20", "system", "infoflow2", "test20d2")
 
     def test_021_class_list(self):
         """RBAC rule query with object class list match."""
@@ -126,20 +106,8 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        self.assertEqual(r[0].ruletype, "role_transition")
-        self.assertEqual(r[0].source, "test21")
-        self.assertEqual(r[0].target, "system")
-        self.assertEqual(r[0].tclass, "infoflow3")
-        self.assertEqual(r[0].default, "test21d3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        self.assertEqual(r[1].ruletype, "role_transition")
-        self.assertEqual(r[1].source, "test21")
-        self.assertEqual(r[1].target, "system")
-        self.assertEqual(r[1].tclass, "infoflow4")
-        self.assertEqual(r[1].default, "test21d2")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "role_transition", "test21", "system", "infoflow3", "test21d3")
+        self.validate_rule(r[1], "role_transition", "test21", "system", "infoflow4", "test21d2")
 
     def test_022_class_regex(self):
         """RBAC rule query with object class regex match."""
@@ -147,20 +115,8 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        self.assertEqual(r[0].ruletype, "role_transition")
-        self.assertEqual(r[0].source, "test22")
-        self.assertEqual(r[0].target, "system")
-        self.assertEqual(r[0].tclass, "infoflow5")
-        self.assertEqual(r[0].default, "test22d2")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        self.assertEqual(r[1].ruletype, "role_transition")
-        self.assertEqual(r[1].source, "test22")
-        self.assertEqual(r[1].target, "system")
-        self.assertEqual(r[1].tclass, "infoflow6")
-        self.assertEqual(r[0].default, "test22d2")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "role_transition", "test22", "system", "infoflow5", "test22d2")
+        self.validate_rule(r[1], "role_transition", "test22", "system", "infoflow6", "test22d3")
 
     def test_030_default(self):
         """RBAC rule query with exact default match."""
@@ -169,13 +125,7 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "role_transition")
-        self.assertEqual(r[0].source, "test30s")
-        self.assertEqual(r[0].target, "system")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "test30d")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "role_transition", "test30s", "system", "infoflow", "test30d")
 
     def test_031_default_regex(self):
         """RBAC rule query with regex default match."""
@@ -184,25 +134,14 @@ class RBACRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        self.assertEqual(r[0].ruletype, "role_transition")
-        self.assertEqual(r[0].source, "test31s")
-        self.assertEqual(r[0].target, "system")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertEqual(r[0].default, "test31d3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        self.assertEqual(r[1].ruletype, "role_transition")
-        self.assertEqual(r[1].source, "test31s")
-        self.assertEqual(r[1].target, "system")
-        self.assertEqual(r[1].tclass, "process")
-        self.assertEqual(r[1].default, "test31d2")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "role_transition", "test31s", "system", "infoflow7", "test31d3")
+        self.validate_rule(r[1], "role_transition", "test31s", "system", "process", "test31d2")
 
     def test_040_ruletype(self):
         """RBAC rule query with rule type."""
         q = RBACRuleQuery(self.p, ruletype=["allow"])
 
+        num = 0
         for num, r in enumerate(sorted(q.results()), start=1):
             self.assertEqual(r.ruletype, "allow")
 

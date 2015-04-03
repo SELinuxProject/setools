@@ -19,11 +19,13 @@ import unittest
 
 from setools import SELinuxPolicy
 from setools.dta import DomainTransitionAnalysis
-from setools.policyrep.exception import InvalidType, RuleNotConditional
+from setools.policyrep.exception import InvalidType
 from setools.policyrep.typeattr import Type
 
+from . import mixins
 
-class DomainTransitionAnalysisTest(unittest.TestCase):
+
+class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -62,22 +64,12 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, t)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["transition", "dyntransition"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, t, "process", set(["transition", "dyntransition"]))
 
         # setexec perms
         r = self.a.G.edge[s][t]["setexec"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, s)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["setexec", "setcurrent"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, s, "process", set(["setexec", "setcurrent"]))
 
         # exec perms
         k = sorted(self.a.G.edge[s][t]["execute"].keys())
@@ -85,12 +77,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["execute"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["execute"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
@@ -98,12 +85,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, t)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["entrypoint"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
@@ -111,32 +93,17 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["type_transition"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "type_transition")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertEqual(r[0].default, t)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "type_transition", s, e, "process", t)
 
         # dynamic transition
         r = self.a.G.edge[s][t]["dyntransition"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, t)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["transition", "dyntransition"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, t, "process", set(["transition", "dyntransition"]))
 
         # setcurrent
         r = self.a.G.edge[s][t]["setcurrent"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, s)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["setexec", "setcurrent"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, s, "process", set(["setexec", "setcurrent"]))
 
     def test_010_dyntrans(self):
         """DTA: setcon() transition."""
@@ -167,22 +134,12 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         # dynamic transition
         r = self.a.G.edge[s][t]["dyntransition"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, t)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["dyntransition"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, t, "process", set(["dyntransition"]))
 
         # setcurrent
         r = self.a.G.edge[s][t]["setcurrent"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, s)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["setcurrent"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, s, "process", set(["setcurrent"]))
 
     def test_020_trans(self):
         """DTA: type_transition transition."""
@@ -194,12 +151,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, t)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["transition"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, t, "process", set(["transition"]))
 
         # setexec perms
         r = self.a.G.edge[s][t]["setexec"]
@@ -211,12 +163,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["execute"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["execute"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
@@ -224,12 +171,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, t)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["entrypoint"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
@@ -237,12 +179,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["type_transition"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "type_transition")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertEqual(r[0].default, t)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "type_transition", s, e, "process", t)
 
         # dynamic transition
         r = self.a.G.edge[s][t]["dyntransition"]
@@ -262,22 +199,12 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, t)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["transition"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, t, "process", set(["transition"]))
 
         # setexec perms
         r = self.a.G.edge[s][t]["setexec"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, s)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["setexec"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, s, "process", set(["setexec"]))
 
         # exec perms
         k = sorted(self.a.G.edge[s][t]["execute"].keys())
@@ -285,12 +212,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["execute"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["execute"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
@@ -298,12 +220,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, t)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["entrypoint"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
@@ -327,22 +244,12 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, t)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["transition"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, t, "process", set(["transition"]))
 
         # setexec perms
         r = self.a.G.edge[s][t]["setexec"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, s)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["setexec"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, s, "process", set(["setexec"]))
 
         # exec perms
         k = sorted(self.a.G.edge[s][t]["execute"].keys())
@@ -350,21 +257,11 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["execute"][e[0]]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e[0])
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["execute"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, e[0], "file", set(["execute"]))
 
         r = self.a.G.edge[s][t]["execute"][e[1]]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e[1])
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["execute"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, e[1], "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
@@ -372,21 +269,11 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["entrypoint"][e[0]]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, t)
-        self.assertEqual(r[0].target, e[0])
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["entrypoint"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", t, e[0], "file", set(["entrypoint"]))
 
         r = self.a.G.edge[s][t]["entrypoint"][e[1]]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, t)
-        self.assertEqual(r[0].target, e[1])
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["entrypoint"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", t, e[1], "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
@@ -394,12 +281,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["type_transition"][e[0]]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "type_transition")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e[0])
-        self.assertEqual(r[0].tclass, "process")
-        self.assertEqual(r[0].default, t)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "type_transition", s, e[0], "process", t)
 
         # dynamic transition
         r = self.a.G.edge[s][t]["dyntransition"]
@@ -419,12 +301,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
         # regular transition
         r = self.a.G.edge[s][t]["transition"]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, t)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertSetEqual(set(["transition"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, t, "process", set(["transition"]))
 
         # setexec perms
         r = self.a.G.edge[s][t]["setexec"]
@@ -436,12 +313,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["execute"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["execute"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(self.a.G.edge[s][t]["entrypoint"].keys())
@@ -449,12 +321,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["entrypoint"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, t)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "file")
-        self.assertSetEqual(set(["entrypoint"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(self.a.G.edge[s][t]["type_transition"].keys())
@@ -462,12 +329,7 @@ class DomainTransitionAnalysisTest(unittest.TestCase):
 
         r = self.a.G.edge[s][t]["type_transition"][e]
         self.assertEqual(len(r), 1)
-        self.assertEqual(r[0].ruletype, "type_transition")
-        self.assertEqual(r[0].source, s)
-        self.assertEqual(r[0].target, e)
-        self.assertEqual(r[0].tclass, "process")
-        self.assertEqual(r[0].default, t)
-        self.assertEqual(r[0].conditional, "trans5")
+        self.validate_rule(r[0], "type_transition", s, e, "process", t, cond="trans5")
 
         # dynamic transition
         r = self.a.G.edge[s][t]["dyntransition"]

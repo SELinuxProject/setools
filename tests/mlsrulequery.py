@@ -19,7 +19,9 @@ import unittest
 
 from setools import SELinuxPolicy
 from setools.mlsrulequery import MLSRuleQuery
-from setools.policyrep.exception import InvalidMLSRuleType, RuleNotConditional
+from setools.policyrep.exception import InvalidMLSRuleType, InvalidType
+
+from . import mixins
 
 # Note: the test policy has been written assuming range_transition
 # statements could have attributes.  However, range_transition
@@ -28,7 +30,7 @@ from setools.policyrep.exception import InvalidMLSRuleType, RuleNotConditional
 # expected type names)
 
 
-class MLSRuleQueryTest(unittest.TestCase):
+class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -51,13 +53,7 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test1s")
-        self.assertEqual(r[0].target, "test1t")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s0")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test1s", "test1t", "infoflow", "s0")
 
     def test_003_source_direct_regex(self):
         """MLS rule query with regex, direct, source match."""
@@ -66,20 +62,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test3s")
-        self.assertEqual(r[0].target, "test3t")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s1")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        self.assertEqual(r[1].ruletype, "range_transition")
-        self.assertEqual(r[1].source, "test3s")
-        self.assertEqual(r[1].target, "test3t")
-        self.assertEqual(r[1].tclass, "infoflow2")
-        self.assertEqual(r[1].default, "s2")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "range_transition", "test3s", "test3t", "infoflow", "s1")
+        self.validate_rule(r[1], "range_transition", "test3s", "test3t", "infoflow2", "s2")
 
     def test_010_target_direct(self):
         """MLS rule query with exact, direct, target match."""
@@ -88,20 +72,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test10s")
-        self.assertEqual(r[0].target, "test10t")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s0")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        self.assertEqual(r[1].ruletype, "range_transition")
-        self.assertEqual(r[1].source, "test10s")
-        self.assertEqual(r[1].target, "test10t")
-        self.assertEqual(r[1].tclass, "infoflow2")
-        self.assertEqual(r[1].default, "s1")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "range_transition", "test10s", "test10t", "infoflow", "s0")
+        self.validate_rule(r[1], "range_transition", "test10s", "test10t", "infoflow2", "s1")
 
     def test_012_target_direct_regex(self):
         """MLS rule query with regex, direct, target match."""
@@ -110,13 +82,7 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test12s")
-        self.assertEqual(r[0].target, "test12aFAIL")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s2")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test12s", "test12aFAIL", "infoflow", "s2")
 
     def test_020_class(self):
         """MLS rule query with exact object class match."""
@@ -124,13 +90,7 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test20")
-        self.assertEqual(r[0].target, "test20")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertEqual(r[0].default, "s1")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test20", "test20", "infoflow7", "s1")
 
     def test_021_class_list(self):
         """MLS rule query with object class list match."""
@@ -139,22 +99,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test21")
-        self.assertEqual(r[0].target, "test21")
-        self.assertEqual(r[0].tclass, "infoflow3")
-        self.assertEqual(r[0].default, "s2")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "range_transition")
-        self.assertEqual(r[1].source, "test21")
-        self.assertEqual(r[1].target, "test21")
-        self.assertEqual(r[1].tclass, "infoflow4")
-        self.assertEqual(r[1].default, "s1")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "range_transition", "test21", "test21", "infoflow3", "s2")
+        self.validate_rule(r[1], "range_transition", "test21", "test21", "infoflow4", "s1")
 
     def test_022_class_regex(self):
         """MLS rule query with object class regex match."""
@@ -162,22 +108,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test22")
-        self.assertEqual(r[0].target, "test22")
-        self.assertEqual(r[0].tclass, "infoflow5")
-        self.assertEqual(r[0].default, "s1")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "range_transition")
-        self.assertEqual(r[1].source, "test22")
-        self.assertEqual(r[1].target, "test22")
-        self.assertEqual(r[1].tclass, "infoflow6")
-        self.assertEqual(r[1].default, "s2")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "range_transition", "test22", "test22", "infoflow5", "s1")
+        self.validate_rule(r[1], "range_transition", "test22", "test22", "infoflow6", "s2")
 
     def test_040_range_exact(self):
         """MLS rule query query with context range exact match"""
@@ -185,13 +117,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test40")
-        self.assertEqual(r[0].target, "test40")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s40:c1 - s40:c0.c4")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test40", "test40", "infoflow",
+                                 "s40:c1 - s40:c0.c4")
 
     def test_041_range_overlap1(self):
         """MLS rule query query with context range overlap match (equal)"""
@@ -199,13 +126,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test41")
-        self.assertEqual(r[0].target, "test41")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test41", "test41", "infoflow",
+                           "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap2(self):
         """MLS rule query query with context range overlap match (subset)"""
@@ -213,13 +135,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test41")
-        self.assertEqual(r[0].target, "test41")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test41", "test41", "infoflow",
+                           "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap3(self):
         """MLS rule query query with context range overlap match (superset)"""
@@ -227,13 +144,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test41")
-        self.assertEqual(r[0].target, "test41")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test41", "test41", "infoflow",
+                           "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap4(self):
         """MLS rule query query with context range overlap match (overlap low level)"""
@@ -241,13 +153,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test41")
-        self.assertEqual(r[0].target, "test41")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test41", "test41", "infoflow",
+                           "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap5(self):
         """MLS rule query query with context range overlap match (overlap high level)"""
@@ -255,13 +162,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test41")
-        self.assertEqual(r[0].target, "test41")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s41:c1 - s41:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test41", "test41", "infoflow",
+                           "s41:c1 - s41:c1.c3")
 
     def test_042_range_subset1(self):
         """MLS rule query query with context range subset match"""
@@ -269,13 +171,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test42")
-        self.assertEqual(r[0].target, "test42")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s42:c1 - s42:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test42", "test42", "infoflow",
+                           "s42:c1 - s42:c1.c3")
 
     def test_042_range_subset2(self):
         """MLS rule query query with context range subset match (equal)"""
@@ -283,13 +180,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test42")
-        self.assertEqual(r[0].target, "test42")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s42:c1 - s42:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test42", "test42", "infoflow",
+                           "s42:c1 - s42:c1.c3")
 
     def test_043_range_superset1(self):
         """MLS rule query query with context range superset match"""
@@ -297,13 +189,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test43")
-        self.assertEqual(r[0].target, "test43")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s43:c1 - s43:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test43", "test43", "infoflow",
+                           "s43:c1 - s43:c1.c3")
 
     def test_043_range_superset2(self):
         """MLS rule query query with context range superset match (equal)"""
@@ -311,13 +198,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test43")
-        self.assertEqual(r[0].target, "test43")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s43:c1 - s43:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test43", "test43", "infoflow",
+                           "s43:c1 - s43:c1.c3")
 
     def test_044_range_proper_subset1(self):
         """MLS rule query query with context range proper subset match"""
@@ -325,13 +207,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test44")
-        self.assertEqual(r[0].target, "test44")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s44:c1 - s44:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test44", "test44", "infoflow",
+                           "s44:c1 - s44:c1.c3")
 
     def test_044_range_proper_subset2(self):
         """MLS rule query query with context range proper subset match (equal)"""
@@ -348,13 +225,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test44")
-        self.assertEqual(r[0].target, "test44")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s44:c1 - s44:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test44", "test44", "infoflow",
+                           "s44:c1 - s44:c1.c3")
 
     def test_044_range_proper_subset4(self):
         """MLS rule query query with context range proper subset match (equal high only)"""
@@ -363,13 +235,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test44")
-        self.assertEqual(r[0].target, "test44")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s44:c1 - s44:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test44", "test44", "infoflow",
+                           "s44:c1 - s44:c1.c3")
 
     def test_045_range_proper_superset1(self):
         """MLS rule query query with context range proper superset match"""
@@ -378,13 +245,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test45")
-        self.assertEqual(r[0].target, "test45")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s45:c1 - s45:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test45", "test45", "infoflow",
+                           "s45:c1 - s45:c1.c3")
 
     def test_045_range_proper_superset2(self):
         """MLS rule query query with context range proper superset match (equal)"""
@@ -401,13 +263,8 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test45")
-        self.assertEqual(r[0].target, "test45")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s45:c1 - s45:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "range_transition", "test45", "test45", "infoflow",
+                           "s45:c1 - s45:c1.c3")
 
     def test_045_range_proper_superset4(self):
         """MLS rule query query with context range proper superset match (equal high)"""
@@ -416,10 +273,6 @@ class MLSRuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "range_transition", "test45", "test45", "infoflow",
+                           "s45:c1 - s45:c1.c3")
 
-        self.assertEqual(r[0].ruletype, "range_transition")
-        self.assertEqual(r[0].source, "test45")
-        self.assertEqual(r[0].target, "test45")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertEqual(r[0].default, "s45:c1 - s45:c1.c3")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")

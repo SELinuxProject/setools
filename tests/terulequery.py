@@ -1,3 +1,4 @@
+"""Type enforcement rule query unit tests."""
 # Copyright 2014, Tresys Technology, LLC
 #
 # This file is part of SETools.
@@ -15,14 +16,18 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+# pylint: disable=invalid-name,too-many-public-methods
 import unittest
 
 from setools import SELinuxPolicy
 from setools.terulequery import TERuleQuery
-from setools.policyrep.exception import RuleNotConditional
+
+from . import mixins
 
 
-class TERuleQueryTest(unittest.TestCase):
+class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
+
+    """Type enforcement rule query unit tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -45,13 +50,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test1a")
-        self.assertEqual(r[0].target, "test1t")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["hi_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", "test1a", "test1t", "infoflow", set(["hi_w"]))
 
     def test_002_source_indirect(self):
         """TE rule query with exact, indirect, source match."""
@@ -60,13 +59,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test2a")
-        self.assertEqual(r[0].target, "test2t")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["hi_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", "test2a", "test2t", "infoflow", set(["hi_w"]))
 
     def test_003_source_direct_regex(self):
         """TE rule query with regex, direct, source match."""
@@ -75,13 +68,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test3aS")
-        self.assertEqual(r[0].target, "test3t")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["low_r"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", "test3aS", "test3t", "infoflow", set(["low_r"]))
 
     def test_004_source_indirect_regex(self):
         """TE rule query with regex, indirect, source match."""
@@ -90,22 +77,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test4a1")
-        self.assertEqual(r[0].target, "test4a1")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["hi_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test4a2")
-        self.assertEqual(r[1].target, "test4a2")
-        self.assertEqual(r[1].tclass, "infoflow")
-        self.assertSetEqual(set(["low_r"]), r[1].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "allow", "test4a1", "test4a1", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[1], "allow", "test4a2", "test4a2", "infoflow", set(["low_r"]))
 
     def test_005_target_direct(self):
         """TE rule query with exact, direct, target match."""
@@ -114,13 +87,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test5s")
-        self.assertEqual(r[0].target, "test5a")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["hi_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", "test5s", "test5a", "infoflow", set(["hi_w"]))
 
     def test_006_target_indirect(self):
         """TE rule query with exact, indirect, target match."""
@@ -129,22 +96,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test6s")
-        self.assertEqual(r[0].target, "test6a")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["hi_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test6s")
-        self.assertEqual(r[1].target, "test6t")
-        self.assertEqual(r[1].tclass, "infoflow")
-        self.assertSetEqual(set(["low_r"]), r[1].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "allow", "test6s", "test6a", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[1], "allow", "test6s", "test6t", "infoflow", set(["low_r"]))
 
     def test_007_target_direct_regex(self):
         """TE rule query with regex, direct, target match."""
@@ -153,13 +106,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test7s")
-        self.assertEqual(r[0].target, "test7aPASS")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["low_r"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", "test7s", "test7aPASS", "infoflow", set(["low_r"]))
 
     def test_008_target_indirect_regex(self):
         """TE rule query with regex, indirect, target match."""
@@ -168,22 +115,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test8a1")
-        self.assertEqual(r[0].target, "test8a1")
-        self.assertEqual(r[0].tclass, "infoflow")
-        self.assertSetEqual(set(["hi_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test8a2")
-        self.assertEqual(r[1].target, "test8a2")
-        self.assertEqual(r[1].tclass, "infoflow")
-        self.assertSetEqual(set(["low_r"]), r[1].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "allow", "test8a1", "test8a1", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[1], "allow", "test8a2", "test8a2", "infoflow", set(["low_r"]))
 
     def test_009_class(self):
         """TE rule query with exact object class match."""
@@ -191,13 +124,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test9")
-        self.assertEqual(r[0].target, "test9")
-        self.assertEqual(r[0].tclass, "infoflow2")
-        self.assertSetEqual(set(["super_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", "test9", "test9", "infoflow2", set(["super_w"]))
 
     def test_010_class_list(self):
         """TE rule query with object class list match."""
@@ -206,22 +133,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test10")
-        self.assertEqual(r[0].target, "test10")
-        self.assertEqual(r[0].tclass, "infoflow3")
-        self.assertSetEqual(set(["null"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test10")
-        self.assertEqual(r[1].target, "test10")
-        self.assertEqual(r[1].tclass, "infoflow4")
-        self.assertSetEqual(set(["hi_w"]), r[1].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "allow", "test10", "test10", "infoflow3", set(["null"]))
+        self.validate_rule(r[1], "allow", "test10", "test10", "infoflow4", set(["hi_w"]))
 
     def test_011_class_regex(self):
         """TE rule query with object class regex match."""
@@ -229,22 +142,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test11")
-        self.assertEqual(r[0].target, "test11")
-        self.assertEqual(r[0].tclass, "infoflow5")
-        self.assertSetEqual(set(["low_w"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test11")
-        self.assertEqual(r[1].target, "test11")
-        self.assertEqual(r[1].tclass, "infoflow6")
-        self.assertSetEqual(set(["med_r"]), r[1].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "allow", "test11", "test11", "infoflow5", set(["low_w"]))
+        self.validate_rule(r[1], "allow", "test11", "test11", "infoflow6", set(["med_r"]))
 
     def test_012_perms_any(self):
         """TE rule query with permission set intersection."""
@@ -252,22 +151,9 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test12a")
-        self.assertEqual(r[0].target, "test12a")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_r"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test12b")
-        self.assertEqual(r[1].target, "test12b")
-        self.assertEqual(r[1].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_r", "super_none"]), r[1].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "allow", "test12a", "test12a", "infoflow7", set(["super_r"]))
+        self.validate_rule(r[1], "allow", "test12b", "test12b", "infoflow7",
+                           set(["super_r", "super_none"]))
 
     def test_013_perms_equal(self):
         """TE rule query with permission set equality."""
@@ -276,14 +162,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test13c")
-        self.assertEqual(r[0].target, "test13c")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertSetEqual(
-            set(["super_w", "super_none", "super_both"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "allow", "test13c", "test13c", "infoflow7",
+                           set(["super_w", "super_none", "super_both"]))
 
     def test_014_ruletype(self):
         """TE rule query with rule type match."""
@@ -291,22 +171,10 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "auditallow")
-        self.assertEqual(r[0].source, "test14")
-        self.assertEqual(r[0].target, "test14")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_both"]), r[0].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "dontaudit")
-        self.assertEqual(r[1].source, "test14")
-        self.assertEqual(r[1].target, "test14")
-        self.assertEqual(r[1].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_unmapped"]), r[1].perms)
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "auditallow", "test14", "test14", "infoflow7",
+                           set(["super_both"]))
+        self.validate_rule(r[1], "dontaudit", "test14", "test14", "infoflow7",
+                           set(["super_unmapped"]))
 
     def test_100_default(self):
         """TE rule query with default type exact match."""
@@ -314,13 +182,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "type_transition")
-        self.assertEqual(r[0].source, "test100")
-        self.assertEqual(r[0].target, "test100")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertEqual(r[0].default, "test100d")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
+        self.validate_rule(r[0], "type_transition", "test100", "test100", "infoflow7", "test100d")
 
     def test_101_default_regex(self):
         """TE rule query with default type regex match."""
@@ -328,22 +190,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        # verify first rule
-        self.assertEqual(r[0].ruletype, "type_transition")
-        self.assertEqual(r[0].source, "test101")
-        self.assertEqual(r[0].target, "test101d")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertEqual(r[0].default, "test101e")
-        self.assertRaises(RuleNotConditional, getattr, r[0], "conditional")
-
-        # verify second rule
-        self.assertEqual(r[1].ruletype, "type_transition")
-        self.assertEqual(r[1].source, "test101")
-        self.assertEqual(r[1].target, "test101e")
-        self.assertEqual(r[1].tclass, "infoflow7")
-        self.assertEqual(r[1].default, "test101d")
-        self.assertRaises(RuleNotConditional, getattr, r[1], "conditional")
+        self.validate_rule(r[0], "type_transition", "test101", "test101d", "infoflow7", "test101e")
+        self.validate_rule(r[1], "type_transition", "test101", "test101e", "infoflow7", "test101d")
 
     def test_200_boolean_intersection(self):
         """TE rule query with intersection Boolean set match."""
@@ -351,18 +199,10 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test200t1")
-        self.assertEqual(r[0].target, "test200t1")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_w"]), r[0].perms)
-
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test200t2")
-        self.assertEqual(r[1].target, "test200t2")
-        self.assertEqual(r[1].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_w"]), r[1].perms)
+        self.validate_rule(r[0], "allow", "test200t1", "test200t1", "infoflow7",
+                           set(["super_w"]), cond="test200")
+        self.validate_rule(r[1], "allow", "test200t2", "test200t2", "infoflow7",
+                           set(["super_w"]), cond="test200a && test200")
 
     def test_201_boolean_equal(self):
         """TE rule query with equal Boolean set match."""
@@ -370,12 +210,8 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test201t1")
-        self.assertEqual(r[0].target, "test201t1")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_unmapped"]), r[0].perms)
+        self.validate_rule(r[0], "allow", "test201t1", "test201t1", "infoflow7",
+                           set(["super_unmapped"]), cond="test201b && test201a")
 
     def test_202_boolean_regex(self):
         """TE rule query with regex Boolean match."""
@@ -383,15 +219,7 @@ class TERuleQueryTest(unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-
-        self.assertEqual(r[0].ruletype, "allow")
-        self.assertEqual(r[0].source, "test202t1")
-        self.assertEqual(r[0].target, "test202t1")
-        self.assertEqual(r[0].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_none"]), r[0].perms)
-
-        self.assertEqual(r[1].ruletype, "allow")
-        self.assertEqual(r[1].source, "test202t2")
-        self.assertEqual(r[1].target, "test202t2")
-        self.assertEqual(r[1].tclass, "infoflow7")
-        self.assertSetEqual(set(["super_unmapped"]), r[1].perms)
+        self.validate_rule(r[0], "allow", "test202t1", "test202t1", "infoflow7",
+                           set(["super_none"]), cond="test202a")
+        self.validate_rule(r[1], "allow", "test202t2", "test202t2", "infoflow7",
+                           set(["super_unmapped"]), cond="test202b || test202c")
