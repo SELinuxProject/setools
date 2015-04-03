@@ -275,4 +275,3 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], "range_transition", "test45", "test45", "infoflow",
                            "s45:c1 - s45:c1.c3")
-
