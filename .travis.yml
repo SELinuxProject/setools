@@ -5,10 +5,12 @@
 language: python
 
 env:
-  - TOX_ENV=py27-coverage
-  - TOX_ENV=py33-coverage
-  - TOX_ENV=py34-coverage
+  - TOX_ENV=py27
+  - TOX_ENV=py33
+  - TOX_ENV=py34
   - TOX_ENV=pep8
+  - TOX_ENV=coverage
+  - TOX_ENV=lint
 
 before_install:
   - lsb_release -a
@@ -36,7 +38,7 @@ before_install:
   - sed 's/ln -sf --relative /ln -sf /' -i selinux-src/libsepol/src/Makefile
   - sed 's/ln -sf --relative /ln -sf /' -i selinux-src/libselinux/src/Makefile
 
-  # Drop sepolicy to break setools dependence (sepolicy isn't used anyway)
+  # Drop sepolicy to break setools3 dependence (sepolicy isn't used here anyway)
   - sed -i -e 's/sepolicy//' selinux-src/policycoreutils/Makefile
 
   # Compile and install SELinux toolchain
