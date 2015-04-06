@@ -57,18 +57,18 @@ class TypeAttributeQuery(compquery.ComponentQuery):
         self.log.debug("Types: {0.types_cmp!r}, regex: {0.types_regex}, "
                        "eq: {0.types_equal}".format(self))
 
-        for a in self.policy.typeattributes():
-            if self.name and not self._match_name(a):
+        for attr in self.policy.typeattributes():
+            if self.name and not self._match_name(attr):
                 continue
 
             if self.types and not self._match_regex_or_set(
-                    set(a.expand()),
+                    set(attr.expand()),
                     self.types_cmp,
                     self.types_equal,
                     self.types_regex):
                 continue
 
-            yield a
+            yield attr
 
     def set_types(self, types, **opts):
         """

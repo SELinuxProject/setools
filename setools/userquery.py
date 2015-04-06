@@ -83,22 +83,22 @@ class UserQuery(compquery.ComponentQuery):
         self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                        "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
-        for u in self.policy.users():
+        for user in self.policy.users():
             if self.name and not self._match_regex(
-                    u,
+                    user,
                     self.name_cmp,
                     self.name_regex):
                 continue
 
             if self.roles and not self._match_regex_or_set(
-                    u.roles,
+                    user.roles,
                     self.roles_cmp,
                     self.roles_equal,
                     self.roles_regex):
                 continue
 
             if self.level and not self._match_level(
-                    u.mls_level,
+                    user.mls_level,
                     self.level,
                     self.level_dom,
                     self.level_domby,
@@ -106,7 +106,7 @@ class UserQuery(compquery.ComponentQuery):
                 continue
 
             if self.range_ and not self._match_range(
-                    (u.mls_range.low, u.mls_range.high),
+                    (user.mls_range.low, user.mls_range.high),
                     (self.range_.low, self.range_.high),
                     self.range_subset,
                     self.range_overlap,
@@ -114,7 +114,7 @@ class UserQuery(compquery.ComponentQuery):
                     self.range_proper):
                 continue
 
-            yield u
+            yield user
 
     def set_level(self, level, **opts):
         """

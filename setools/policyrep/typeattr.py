@@ -123,8 +123,8 @@ class Type(BaseType):
                 stmt += " alias {{ {0} }}".format(' '.join(aliases))
             else:
                 stmt += " alias {0}".format(aliases[0])
-        for a in attrs:
-            stmt += ", {0}".format(a)
+        for attr in attrs:
+            stmt += ", {0}".format(attr)
         stmt += ";"
         return stmt
 

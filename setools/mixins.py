@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+# pylint: disable=attribute-defined-outside-init,no-member
 import re
 
 
@@ -58,6 +59,8 @@ class MatchAlias(object):
 
 
 class MatchObjClass(object):
+
+    """Mixin for matching an object's class."""
 
     def _match_object_class(self, obj):
         """Match the object class criteria"""

@@ -50,21 +50,21 @@ class InfoFlowAnalysis(object):
         self.G = nx.DiGraph()
         self.subG = None
 
-    def set_min_weight(self, w):
+    def set_min_weight(self, weight):
         """
         Set the minimum permission weight for the information flow analysis.
 
         Parameter:
-        w           Minimum permission weight (1-10)
+        weight      Minimum permission weight (1-10)
 
         Exceptions:
         ValueError  The minimum weight is not 1-10.
         """
-        if not 1 <= w <= 10:
+        if not 1 <= weight <= 10:
             raise ValueError(
                 "Min information flow weight must be an integer 1-10.")
 
-        self.minweight = w
+        self.minweight = weight
         self.rebuildsubgraph = True
 
     def set_perm_map(self, perm_map):
@@ -163,8 +163,8 @@ class InfoFlowAnalysis(object):
         self.log.info("Generating all paths from {0} to {1}, max len {2}...".format(s, t, maxlen))
 
         try:
-            for p in nx.all_simple_paths(self.subG, s, t, maxlen):
-                yield self.__generate_steps(p)
+            for path in nx.all_simple_paths(self.subG, s, t, maxlen):
+                yield self.__generate_steps(path)
         except (NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -198,8 +198,8 @@ class InfoFlowAnalysis(object):
         self.log.info("Generating all shortest paths from {0} to {1}...".format(s, t))
 
         try:
-            for p in nx.all_shortest_paths(self.subG, s, t):
-                yield self.__generate_steps(p)
+            for path in nx.all_shortest_paths(self.subG, s, t):
+                yield self.__generate_steps(path)
         except (NetworkXNoPath, NetworkXError, KeyError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -319,21 +319,21 @@ class InfoFlowAnalysis(object):
 
         self.log.info("Building graph from {0}...".format(self.policy))
 
-        for r in self.policy.terules():
-            if r.ruletype != "allow":
+        for rule in self.policy.terules():
+            if rule.ruletype != "allow":
                 continue
 
-            (rweight, wweight) = self.perm_map.rule_weight(r)
+            (rweight, wweight) = self.perm_map.rule_weight(rule)
 
-            for s, t in itertools.product(r.source.expand(), r.target.expand()):
+            for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                 # only add flows if they actually flow
                 # in or out of the source type type
                 if s != t:
                     if wweight:
-                        self.__add_edge(s, t, r, wweight)
+                        self.__add_edge(s, t, rule, wweight)
 
                     if rweight:
-                        self.__add_edge(t, s, r, rweight)
+                        self.__add_edge(t, s, rule, rweight)
 
         self.rebuildgraph = False
         self.rebuildsubgraph = True

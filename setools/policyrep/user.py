@@ -43,7 +43,7 @@ class User(symbol.PolicySymbol):
     def roles(self):
         """The user's set of roles."""
 
-        r = set()
+        roleset = set()
 
         for role_ in self.qpol_symbol.role_iter(self.policy):
             item = role.role_factory(self.policy, role_)
@@ -53,9 +53,9 @@ class User(symbol.PolicySymbol):
             # and analysts don't expect to see it in results, and it
             # will confuse, especially for role set equality user queries.
             if item != "object_r":
-                r.add(item)
+                roleset.add(item)
 
-        return r
+        return roleset
 
     @property
     def mls_level(self):

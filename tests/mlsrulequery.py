@@ -19,7 +19,6 @@ import unittest
 
 from setools import SELinuxPolicy
 from setools.mlsrulequery import MLSRuleQuery
-from setools.policyrep.exception import InvalidMLSRuleType, InvalidType
 
 from . import mixins
 

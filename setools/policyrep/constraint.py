@@ -26,7 +26,7 @@ from . import user
 
 
 def _is_mls(policy, sym):
-    # determine if this is a regular or MLS constraint/validatetrans.
+    """Determine if this is a regular or MLS constraint/validatetrans."""
     # this can only be determined by inspecting the expression.
     for expr_node in sym.expr_iter(policy):
         sym_type = expr_node.sym_type(policy)

@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+# pylint: disable=too-many-public-methods
+#
 # Create a Python representation of the policy.
 # The idea is that this is module provides convenient
 # abstractions and methods for accessing the policy
@@ -357,8 +359,8 @@ class SELinuxPolicy(object):
         """Generator which yields all default_* statements."""
         for default_ in self.policy.default_iter():
             try:
-                for d in default.default_factory(self.policy, default_):
-                    yield d
+                for default_obj in default.default_factory(self.policy, default_):
+                    yield default_obj
             except exception.NoDefaults:
                 # qpol iterates over all classes. Handle case
                 # where a class has no default_* settings.
@@ -443,18 +445,22 @@ class SELinuxPolicy(object):
     #
     @staticmethod
     def validate_constraint_ruletype(types):
+        """Validate constraint types."""
         constraint.validate_ruletype(types)
 
     @staticmethod
     def validate_mls_ruletype(types):
+        """Validate MLS rule types."""
         mlsrule.validate_ruletype(types)
 
     @staticmethod
     def validate_rbac_ruletype(types):
+        """Validate RBAC rule types."""
         rbacrule.validate_ruletype(types)
 
     @staticmethod
     def validate_te_ruletype(types):
+        """Validate type enforcement rule types."""
         terule.validate_ruletype(types)
 
     #

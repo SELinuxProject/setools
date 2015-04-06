@@ -89,24 +89,24 @@ class GenfsconQuery(contextquery.ContextQuery):
         self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                        "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
-        for g in self.policy.genfscons():
+        for genfs in self.policy.genfscons():
             if self.fs and not self._match_regex(
-                    g.fs,
+                    genfs.fs,
                     self.fs_cmp,
                     self.fs_regex):
                 continue
 
             if self.path and not self._match_regex(
-                    g.path,
+                    genfs.path,
                     self.path_cmp,
                     self.path_regex):
                 continue
 
-            if self.filetype and not self.filetype == g.filetype:
+            if self.filetype and not self.filetype == genfs.filetype:
                 continue
 
             if not self._match_context(
-                    g.context,
+                    genfs.context,
                     self.user_cmp,
                     self.user_regex,
                     self.role_cmp,
@@ -120,7 +120,7 @@ class GenfsconQuery(contextquery.ContextQuery):
                     self.range_proper):
                 continue
 
-            yield g
+            yield genfs
 
     def set_fs(self, fs, **opts):
         """

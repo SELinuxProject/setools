@@ -68,19 +68,19 @@ class MLSRuleQuery(rulequery.RuleQuery):
                        "subset: {0.default_subset}, superset: {0.default_superset}, "
                        "proper: {0.default_proper}".format(self))
 
-        for r in self.policy.mlsrules():
+        for rule in self.policy.mlsrules():
             #
             # Matching on rule type
             #
             if self.ruletype:
-                if r.ruletype not in self.ruletype:
+                if rule.ruletype not in self.ruletype:
                     continue
 
             #
             # Matching on source type
             #
             if self.source and not self._match_regex(
-                    r.source,
+                    rule.source,
                     self.source_cmp,
                     self.source_regex):
                 continue
@@ -89,7 +89,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
             # Matching on target type
             #
             if self.target and not self._match_regex(
-                    r.target,
+                    rule.target,
                     self.target_cmp,
                     self.target_regex):
                 continue
@@ -97,14 +97,14 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             # Matching on object class
             #
-            if self.tclass and not self._match_object_class(r.tclass):
+            if self.tclass and not self._match_object_class(rule.tclass):
                 continue
 
             #
             # Matching on range
             #
             if self.default and not self._match_range(
-                    (r.default.low, r.default.high),
+                    (rule.default.low, rule.default.high),
                     (self.default_cmp.low, self.default_cmp.high),
                     self.default_subset,
                     self.default_overlap,
@@ -113,7 +113,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
                 continue
 
             # if we get here, we have matched all available criteria
-            yield r
+            yield rule
 
     def set_ruletype(self, ruletype):
         """

@@ -88,11 +88,11 @@ class NodeconQuery(contextquery.ContextQuery):
         self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                        "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
-        for n in self.policy.nodecons():
+        for nodecon in self.policy.nodecons():
 
             if self.network:
                 try:
-                    netmask = ipaddress.ip_address(n.netmask)
+                    netmask = ipaddress.ip_address(nodecon.netmask)
                 except NameError:  # pragma: no cover
                     # Should never actually hit this since the self.network
                     # setter raises the same exception.
@@ -110,7 +110,7 @@ class NodeconQuery(contextquery.ContextQuery):
                     int_netmask &= int_netmask - 1
                     CIDR += 1
 
-                net = ipaddress.ip_network('{0}/{1}'.format(n.address, CIDR))
+                net = ipaddress.ip_network('{0}/{1}'.format(nodecon.address, CIDR))
 
                 if self.network_overlap:
                     if not self.network.overlaps(net):
@@ -119,11 +119,11 @@ class NodeconQuery(contextquery.ContextQuery):
                     if not net == self.network:
                         continue
 
-            if self.version and self.version != n.ip_version:
+            if self.version and self.version != nodecon.ip_version:
                 continue
 
             if not self._match_context(
-                    n.context,
+                    nodecon.context,
                     self.user_cmp,
                     self.user_regex,
                     self.role_cmp,
@@ -137,7 +137,7 @@ class NodeconQuery(contextquery.ContextQuery):
                     self.range_proper):
                 continue
 
-            yield n
+            yield nodecon
 
     def set_network(self, net, **opts):
         """

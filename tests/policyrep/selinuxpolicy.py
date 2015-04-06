@@ -173,9 +173,11 @@ class SELinuxPolicyTest(unittest.TestCase):
         self.assertEqual(self.p.polcap_count, 2)
 
     def test_123_portcon_count(self):
+        """SELinuxPolicy: portcon count"""
         self.assertEqual(self.p.portcon_count, 163)
 
     def test_124_range_transition_count(self):
+        """SELinuxPolicy: range_transition count"""
         self.assertEqual(self.p.range_transition_count, 71)
 
     def test_125_role_count(self):

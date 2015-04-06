@@ -50,14 +50,14 @@ class PermissionMap(object):
         # 1 = read number of classes
         # 2 = read class name and number of perms
         # 3 = read perms
-        with open(permmapfile, "r") as fd:
+        with open(permmapfile, "r") as mapfile:
             class_count = 0
             num_classes = 0
             state = 1
 
             self.permmap = dict()
 
-            for line_num, line in enumerate(fd, start=1):
+            for line_num, line in enumerate(mapfile, start=1):
                 entry = line.split()
 
                 if class_count > num_classes:
@@ -222,17 +222,17 @@ class PermissionMap(object):
 
     def map_policy(self, policy):
         """Create mappings for all classes and permissions in the specified policy."""
-        for c in policy.classes():
-            class_name = str(c)
+        for class_ in policy.classes():
+            class_name = str(class_)
 
             if class_name not in self.permmap:
                 self.log.info("Adding unmapped class {0} from {1}".format(class_name, policy))
                 self.permmap[class_name] = dict()
 
-            perms = c.perms
+            perms = class_.perms
 
             try:
-                perms |= c.common.perms
+                perms |= class_.common.perms
             except policyrep.exception.NoCommon:
                 pass
 

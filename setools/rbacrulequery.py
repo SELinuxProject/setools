@@ -78,19 +78,19 @@ class RBACRuleQuery(rulequery.RuleQuery):
         self.log.debug("Class: {0.tclass_cmp!r}, regex: {0.tclass_regex}".format(self))
         self.log.debug("Default: {0.default_cmp!r}, regex: {0.default_regex}".format(self))
 
-        for r in self.policy.rbacrules():
+        for rule in self.policy.rbacrules():
             #
             # Matching on rule type
             #
             if self.ruletype:
-                if r.ruletype not in self.ruletype:
+                if rule.ruletype not in self.ruletype:
                     continue
 
             #
             # Matching on source role
             #
             if self.source and not self._match_indirect_regex(
-                    r.source,
+                    rule.source,
                     self.source_cmp,
                     self.source_indirect,
                     self.source_regex):
@@ -100,7 +100,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
             # Matching on target type (role_transition)/role(allow)
             #
             if self.target and not self._match_indirect_regex(
-                    r.target,
+                    rule.target,
                     self.target_cmp,
                     self.target_indirect,
                     self.target_regex):
@@ -111,7 +111,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
             #
             if self.tclass:
                 try:
-                    if not self._match_object_class(r.tclass):
+                    if not self._match_object_class(rule.tclass):
                         continue
                 except RuleUseError:
                     continue
@@ -122,7 +122,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
             if self.default:
                 try:
                     if not self._match_regex(
-                            r.default,
+                            rule.default,
                             self.default_cmp,
                             self.default_regex):
                         continue
@@ -130,7 +130,7 @@ class RBACRuleQuery(rulequery.RuleQuery):
                     continue
 
             # if we get here, we have matched all available criteria
-            yield r
+            yield rule
 
     def set_ruletype(self, ruletype):
         """

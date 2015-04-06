@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+# pylint: disable=protected-access
 import itertools
 
 from . import exception
@@ -170,13 +171,13 @@ def range_factory(policy, sym):
     # e.g. s0:c1 - s0:c0.c255
     try:
         low = level_factory(policy, levels[0].strip())
-    except exception.InvalidLevel as e:
-        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, e))
+    except exception.InvalidLevel as ex:
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, ex))
 
     try:
         high = level_factory(policy, levels[1].strip())
-    except exception.InvalidLevel as e:
-        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, e))
+    except exception.InvalidLevel as ex:
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, ex))
     except IndexError:
         high = low
 
@@ -273,9 +274,9 @@ class BaseMLSLevel(symbol.PolicySymbol):
         if cats:
             # generate short category notation
             shortlist = []
-            for k, g in itertools.groupby(cats, key=lambda k,
+            for _, i in itertools.groupby(cats, key=lambda k,
                                           c=itertools.count(): k._value - next(c)):
-                group = list(g)
+                group = list(i)
                 if len(group) > 1:
                     shortlist.append("{0}.{1}".format(group[0], group[-1]))
                 else:
@@ -391,12 +392,12 @@ class Range(symbol.PolicySymbol):
         try:
             return self.low == other.low and self.high == other.high
         except AttributeError:
-            o = str(other)
-            if "-" in o and " - " not in o:
+            other_str = str(other)
+            if "-" in other_str and " - " not in other_str:
                 raise ValueError(
                     "Range strings must have a spaces around the level separator (eg \"s0 - s1\")")
 
-            return str(self) == o
+            return str(self) == other_str
 
     def __contains__(self, other):
         return self.low <= other <= self.high

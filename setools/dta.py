@@ -130,8 +130,8 @@ class DomainTransitionAnalysis(object):
         self.log.info("Generating all paths from {0} to {1}, max len {2}...".format(s, t, maxlen))
 
         try:
-            for p in nx.all_simple_paths(self.subG, s, t, maxlen):
-                yield self.__generate_steps(p)
+            for path in nx.all_simple_paths(self.subG, s, t, maxlen):
+                yield self.__generate_steps(path)
         except (NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
@@ -162,8 +162,8 @@ class DomainTransitionAnalysis(object):
         self.log.info("Generating all shortest paths from {0} to {1}...".format(s, t))
 
         try:
-            for p in nx.all_shortest_paths(self.subG, s, t):
-                yield self.__generate_steps(p)
+            for path in nx.all_shortest_paths(self.subG, s, t):
+                yield self.__generate_steps(path)
         except (NetworkXNoPath, NetworkXError, KeyError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
@@ -229,7 +229,8 @@ class DomainTransitionAnalysis(object):
     #
     # Internal functions follow
     #
-    def __generate_entrypoints(self, data):
+    @staticmethod
+    def __generate_entrypoints(data):
         """
         Generator which yields the entrypoint, execute, and
         type_transition rules for each entrypoint.
@@ -379,56 +380,56 @@ class DomainTransitionAnalysis(object):
         # hash table keyed on (domain, entrypoint, target domain)
         type_trans = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
-        for r in self.policy.terules():
-            if r.ruletype == "allow":
-                if r.tclass not in ["process", "file"]:
+        for rule in self.policy.terules():
+            if rule.ruletype == "allow":
+                if rule.tclass not in ["process", "file"]:
                     continue
 
-                perms = r.perms
+                perms = rule.perms
 
-                if r.tclass == "process":
+                if rule.tclass == "process":
                     if "transition" in perms:
-                        for s, t in itertools.product(r.source.expand(), r.target.expand()):
+                        for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             # only add edges if they actually
                             # transition to a new type
                             if s != t:
                                 self.__add_edge(s, t)
-                                self.G[s][t]['transition'].append(r)
+                                self.G[s][t]['transition'].append(rule)
 
                     if "dyntransition" in perms:
-                        for s, t in itertools.product(r.source.expand(), r.target.expand()):
+                        for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             # only add edges if they actually
                             # transition to a new type
                             if s != t:
                                 self.__add_edge(s, t)
-                                self.G[s][t]['dyntransition'].append(r)
+                                self.G[s][t]['dyntransition'].append(rule)
 
                     if "setexec" in perms:
-                        for s in r.source.expand():
-                            setexec[s].append(r)
+                        for s in rule.source.expand():
+                            setexec[s].append(rule)
 
                     if "setcurrent" in perms:
-                        for s in r.source.expand():
-                            setcurrent[s].append(r)
+                        for s in rule.source.expand():
+                            setcurrent[s].append(rule)
 
                 else:
                     if "execute" in perms:
                         for s, t in itertools.product(
-                                r.source.expand(),
-                                r.target.expand()):
-                            execute[s][t].append(r)
+                                rule.source.expand(),
+                                rule.target.expand()):
+                            execute[s][t].append(rule)
 
                     if "entrypoint" in perms:
-                        for s, t in itertools.product(r.source.expand(), r.target.expand()):
-                            entrypoint[s][t].append(r)
+                        for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
+                            entrypoint[s][t].append(rule)
 
-            elif r.ruletype == "type_transition":
-                if r.tclass != "process":
+            elif rule.ruletype == "type_transition":
+                if rule.tclass != "process":
                     continue
 
-                d = r.default
-                for s, t in itertools.product(r.source.expand(), r.target.expand()):
-                    type_trans[s][t][d].append(r)
+                d = rule.default
+                for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
+                    type_trans[s][t][d].append(rule)
 
         invalid_edge = []
         clear_transition = []

@@ -194,8 +194,10 @@ try:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
             if len(ports) == 2:
+                # pylint: disable=no-member
                 q.set_ports((ports[0], ports[1]))
             elif len(ports) == 1:
+                # pylint: disable=no-member
                 q.set_ports((ports[0], ports[0]))
             else:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")

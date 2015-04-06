@@ -90,19 +90,19 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
         self.log.debug("Boolean: {0.boolean_cmp!r}, eq: {0.boolean_equal}, "
                        "regex: {0.boolean_regex}".format(self))
 
-        for r in self.policy.terules():
+        for rule in self.policy.terules():
             #
             # Matching on rule type
             #
             if self.ruletype:
-                if r.ruletype not in self.ruletype:
+                if rule.ruletype not in self.ruletype:
                     continue
 
             #
             # Matching on source type
             #
             if self.source and not self._match_indirect_regex(
-                    r.source,
+                    rule.source,
                     self.source_cmp,
                     self.source_indirect,
                     self.source_regex):
@@ -112,7 +112,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             # Matching on target type
             #
             if self.target and not self._match_indirect_regex(
-                    r.target,
+                    rule.target,
                     self.target_cmp,
                     self.target_indirect,
                     self.target_regex):
@@ -121,7 +121,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             #
             # Matching on object class
             #
-            if self.tclass and not self._match_object_class(r.tclass):
+            if self.tclass and not self._match_object_class(rule.tclass):
                 continue
 
             #
@@ -129,7 +129,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             #
             if self.perms:
                 try:
-                    if not self._match_perms(r.perms):
+                    if not self._match_perms(rule.perms):
                         continue
                 except RuleUseError:
                     continue
@@ -140,7 +140,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             if self.default:
                 try:
                     if not self._match_regex(
-                            r.default,
+                            rule.default,
                             self.default_cmp,
                             self.default_regex):
                         continue
@@ -153,7 +153,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             if self.boolean:
                 try:
                     if not self._match_regex_or_set(
-                            r.conditional.booleans,
+                            rule.conditional.booleans,
                             self.boolean_cmp,
                             self.boolean_equal,
                             self.boolean_regex):
@@ -162,7 +162,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
                     continue
 
             # if we get here, we have matched all available criteria
-            yield r
+            yield rule
 
     def set_boolean(self, boolean, **opts):
         """

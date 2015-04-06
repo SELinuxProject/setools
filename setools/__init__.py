@@ -19,6 +19,7 @@
 #
 try:
     import pkg_resources
+    # pylint: disable=no-member
     __version__ = pkg_resources.get_distribution("setools").version
 except ImportError:  # pragma: no cover
     __version__ = "unknown"

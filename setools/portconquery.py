@@ -101,11 +101,11 @@ class PortconQuery(contextquery.ContextQuery):
         self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                        "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
-        for p in self.policy.portcons():
+        for portcon in self.policy.portcons():
 
             if all(self.ports):
                 if not self._match_range(
-                        p.ports,
+                        portcon.ports,
                         self.ports_cmp,
                         self.ports_subset,
                         self.ports_overlap,
@@ -113,11 +113,11 @@ class PortconQuery(contextquery.ContextQuery):
                         self.ports_proper):
                     continue
 
-            if self.protocol and self.protocol != p.protocol:
+            if self.protocol and self.protocol != portcon.protocol:
                 continue
 
             if not self._match_context(
-                    p.context,
+                    portcon.context,
                     self.user_cmp,
                     self.user_regex,
                     self.role_cmp,
@@ -131,7 +131,7 @@ class PortconQuery(contextquery.ContextQuery):
                     self.range_proper):
                 continue
 
-            yield p
+            yield portcon
 
     def set_ports(self, ports, **opts):
         """

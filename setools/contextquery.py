@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+# pylint: disable=attribute-defined-outside-init,no-member
 import re
 
 from . import query

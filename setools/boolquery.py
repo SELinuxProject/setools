@@ -49,14 +49,14 @@ class BoolQuery(compquery.ComponentQuery):
         self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
         self.log.debug("Default: {0.match_default}, state: {0.default}".format(self))
 
-        for b in self.policy.bools():
-            if self.name and not self._match_name(b):
+        for boolean in self.policy.bools():
+            if self.name and not self._match_name(boolean):
                 continue
 
-            if self.match_default and b.state() != self.default:
+            if self.match_default and boolean.state() != self.default:
                 continue
 
-            yield b
+            yield boolean
 
     def set_default(self, match, **opts):
         """
