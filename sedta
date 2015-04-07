@@ -89,6 +89,8 @@ alg.add_argument("-A", "--all_paths", type=int, metavar="MAX_STEPS",
 opts = parser.add_argument_group("Analysis options")
 opts.add_argument("-r", "--reverse", action="store_true", default=False,
                   help="Perform a reverse DTA.")
+opts.add_argument("-l", "--limit_trans", default=0, type=int,
+                  help="Limit to the specified number of transitions.  Default is unlimited.")
 opts.add_argument("exclude", help="List of excluded types in the analysis.", nargs="*")
 
 args = parser.parse_args()
@@ -127,6 +129,9 @@ try:
                 print("Step {0}: {1} -> {2}\n".format(step, src, tgt))
                 print_transition(trans, entrypoints, setexec, dyntrans, setcur)
 
+            if args.limit_trans and i >= args.limit_trans:
+                break
+
         print(i, "domain transition path(s) found.")
 
     else:  # single transition
@@ -137,6 +142,9 @@ try:
                                                                                       start=1):
             print("Transition {0}: {1} -> {2}\n".format(i, src, tgt))
             print_transition(trans, entrypoints, setexec, dyntrans, setcur)
+
+            if args.limit_trans and i >= args.limit_trans:
+                break
 
         print(i, "domain transition(s) found.")
 
