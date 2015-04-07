@@ -73,19 +73,18 @@ TBD
 Some tools in the SETools suite may be run in a terminal
 environment.
 
-Tool Name  | Description
----------- | ------------------------------------------------------
-sedta      | A tool to perform domain transition analysis.
-seinfo     | A tool to get a list of policy components.
-seinfoflow | A tool to perform information flow analysis.
-sesearch   | A tool to search rules (allow, type_transition, etc.)
+Tool Name  | Use
+---------- | -------------------------------------------
+sedta      | Perform domain transition analyses
+seinfo     | List policy components.
+seinfoflow | Perform information flow analyses.
+sesearch   | Search rules (allow, type_transition, etc.)
 
 ### Analysis Libraries
 
 The SETools libraries are available for use in third-party
-applications.  Although this is are not officially supported (and thus
-subject to change between SETools releases), we will do our best to
-maintain API stability.
+applications.  Although this is not officially supported, we will
+do our best to maintain API stability.
 
 ### Obtaining SETools
 
