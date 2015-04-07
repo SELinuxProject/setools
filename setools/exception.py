@@ -38,6 +38,12 @@ class PermissionMapException(SEToolsException):
     pass
 
 
+class PermissionMapParseError(PermissionMapException):
+
+    """Exception for parse errors while reading permission map files."""
+    pass
+
+
 class RuleTypeError(PermissionMapException):
 
     """Exception for using rules with incorrect rule type."""

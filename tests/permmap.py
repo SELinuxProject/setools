@@ -18,13 +18,14 @@
 import unittest
 
 try:
-    from unittest.mock import MagicMock
+    from unittest.mock import Mock
 except ImportError:
-    from mock import MagicMock
+    from mock import Mock
 
 from setools import SELinuxPolicy
 from setools.permmap import PermissionMap
-from setools.exception import RuleTypeError, UnmappedClass, UnmappedPermission
+from setools.exception import PermissionMapParseError, RuleTypeError, \
+                              UnmappedClass, UnmappedPermission
 
 
 class PermissionMapTest(unittest.TestCase):
@@ -90,8 +91,129 @@ class PermissionMapTest(unittest.TestCase):
         self.assertEqual(1, len(permmap.permmap['process']))
         self.validate_permmap_entry(permmap.permmap, 'process', 'transition', 'w', 10, True)
 
-    # 100 get/set weight
-    # 110 get/set direction
+    def test_002_load_invalid(self):
+        """PermMap load completely wrong file type"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("setup.py")
+
+    def test_002_load_negative_class_count(self):
+        """PermMap load negative class count"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/negative-classcount")
+
+    def test_003_load_non_number_class_count(self):
+        """PermMap load non-number class count"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/non-number-classcount")
+
+    def test_004_load_extra_class(self):
+        """PermMap load extra class"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/extra-class")
+
+    def test_005_load_bad_class_keyword(self):
+        """PermMap load bad class keyword"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/bad-class-keyword")
+
+    # test 6: bad class name(?)
+
+    def test_007_load_negative_perm_count(self):
+        """PermMap load negative permission count"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/negative-permcount")
+
+    def test_008_load_bad_perm_count(self):
+        """PermMap load bad permission count"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/bad-permcount")
+
+    # test 9: bad perm name(?)
+
+    def test_010_load_extra_perms(self):
+        """PermMap load negative permission count"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/extra-perms")
+
+    def test_011_load_invalid_flow_direction(self):
+        """PermMap load invalid flow direction"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/invalid-flowdir")
+
+    def test_012_load_bad_perm_weight(self):
+        """PermMap load too high/low permission weight"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/bad-perm-weight-high")
+
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/bad-perm-weight-low")
+
+    def test_013_load_invalid_weight(self):
+        """PermMap load invalid permission weight"""
+        with self.assertRaises(PermissionMapParseError):
+            PermissionMap("tests/invalid_perm_maps/invalid-perm-weight")
+
+    def test_100_set_weight(self):
+        """PermMap set weight"""
+        permmap = PermissionMap("tests/perm_map")
+        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'w', 1, True)
+        permmap.set_weight("infoflow2", "low_w", 10)
+        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'w', 10, True)
+
+    def test_101_set_weight_low(self):
+        """PermMap set weight low"""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(ValueError):
+            permmap.set_weight("infoflow2", "low_w", 0)
+
+        with self.assertRaises(ValueError):
+            permmap.set_weight("infoflow2", "low_w", -10)
+
+    def test_102_set_weight_low(self):
+        """PermMap set weight high"""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(ValueError):
+            permmap.set_weight("infoflow2", "low_w", 11)
+
+        with self.assertRaises(ValueError):
+            permmap.set_weight("infoflow2", "low_w", 50)
+
+    def test_103_set_weight_unmapped_class(self):
+        """PermMap set weight unmapped class"""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedClass):
+            permmap.set_weight("UNMAPPED", "write", 10)
+
+    def test_104_set_weight_unmapped_permission(self):
+        """PermMap set weight unmapped class"""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedPermission):
+            permmap.set_weight("infoflow2", "UNMAPPED", 10)
+
+    def test_110_set_direction(self):
+        """PermMap set direction"""
+        permmap = PermissionMap("tests/perm_map")
+        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'w', 1, True)
+        permmap.set_direction("infoflow2", "low_w", "r")
+        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'r', 1, True)
+
+    def test_111_set_direction_invalid(self):
+        """PermMap set invalid direction"""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(ValueError):
+            permmap.set_direction("infoflow2", "low_w", "X")
+
+    def test_112_set_direction_unmapped_class(self):
+        """PermMap set direction unmapped class"""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedClass):
+            permmap.set_direction("UNMAPPED", "write", "w")
+
+    def test_113_set_direction_unmapped_permission(self):
+        """PermMap set direction unmapped class"""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedPermission):
+            permmap.set_direction("infoflow2", "UNMAPPED", "w")
 
     def test_120_exclude_perm(self):
         """PermMap exclude permission."""
@@ -99,7 +221,19 @@ class PermissionMapTest(unittest.TestCase):
         permmap.exclude_permission("infoflow", "med_w")
         self.validate_permmap_entry(permmap.permmap, 'infoflow', 'med_w', 'w', 5, False)
 
-    def test_121_reinclude_perm(self):
+    def test_121_exclude_perm_unmapped_class(self):
+        """PermMap exclude permission unmapped class."""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedClass):
+            permmap.exclude_permission("UNMAPPED", "med_w")
+
+    def test_122_exclude_perm_unmapped_perm(self):
+        """PermMap exclude permission unmapped permission."""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedPermission):
+            permmap.exclude_permission("infoflow", "UNMAPPED")
+
+    def test_123_include_perm(self):
         """PermMap include permission."""
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_permission("infoflow", "med_w")
@@ -108,14 +242,32 @@ class PermissionMapTest(unittest.TestCase):
         permmap.include_permission("infoflow", "med_w")
         self.validate_permmap_entry(permmap.permmap, 'infoflow', 'med_w', 'w', 5, True)
 
-    def test_122_exclude_class(self):
+    def test_124_include_perm_unmapped_class(self):
+        """PermMap include permission unmapped class."""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedClass):
+            permmap.include_permission("UNMAPPED", "med_w")
+
+    def test_125_include_perm_unmapped_perm(self):
+        """PermMap include permission unmapped permission."""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedPermission):
+            permmap.include_permission("infoflow", "UNMAPPED")
+
+    def test_130_exclude_class(self):
         """PermMap exclude class."""
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_class("file")
         self.validate_permmap_entry(permmap.permmap, 'file', 'execute', 'r', 10, False)
         self.validate_permmap_entry(permmap.permmap, 'file', 'entrypoint', 'r', 10, False)
 
-    def test_123_include_class(self):
+    def test_131_exclude_class_unmapped_class(self):
+        """PermMap exclude class unmapped class."""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedClass):
+            permmap.exclude_class("UNMAPPED")
+
+    def test_132_include_class(self):
         """PermMap exclude class."""
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_class("file")
@@ -126,9 +278,15 @@ class PermissionMapTest(unittest.TestCase):
         self.validate_permmap_entry(permmap.permmap, 'file', 'execute', 'r', 10, True)
         self.validate_permmap_entry(permmap.permmap, 'file', 'entrypoint', 'r', 10, True)
 
-    def test_130_weight_read_only(self):
+    def test_133_include_class_unmapped_class(self):
+        """PermMap include class unmapped class."""
+        permmap = PermissionMap("tests/perm_map")
+        with self.assertRaises(UnmappedClass):
+            permmap.include_class("UNMAPPED")
+
+    def test_140_weight_read_only(self):
         """PermMap get weight of read-only rule."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "infoflow"
         rule.perms = set(["med_r", "hi_r"])
@@ -138,9 +296,9 @@ class PermissionMapTest(unittest.TestCase):
         self.assertEqual(r, 10)
         self.assertEqual(w, 0)
 
-    def test_131_weight_write_only(self):
+    def test_141_weight_write_only(self):
         """PermMap get weight of write-only rule."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "infoflow"
         rule.perms = set(["low_w", "med_w"])
@@ -150,9 +308,9 @@ class PermissionMapTest(unittest.TestCase):
         self.assertEqual(r, 0)
         self.assertEqual(w, 5)
 
-    def test_132_weight_both(self):
+    def test_142_weight_both(self):
         """PermMap get weight of both rule."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "infoflow"
         rule.perms = set(["low_r", "hi_w"])
@@ -162,9 +320,9 @@ class PermissionMapTest(unittest.TestCase):
         self.assertEqual(r, 1)
         self.assertEqual(w, 10)
 
-    def test_133_weight_none(self):
+    def test_143_weight_none(self):
         """PermMap get weight of none rule."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "infoflow3"
         rule.perms = set(["null"])
@@ -174,9 +332,9 @@ class PermissionMapTest(unittest.TestCase):
         self.assertEqual(r, 0)
         self.assertEqual(w, 0)
 
-    def test_134_weight_unmapped_class(self):
+    def test_144_weight_unmapped_class(self):
         """PermMap get weight of rule with unmapped class."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "unmapped"
         rule.perms = set(["null"])
@@ -184,9 +342,9 @@ class PermissionMapTest(unittest.TestCase):
         permmap = PermissionMap("tests/perm_map")
         self.assertRaises(UnmappedClass, permmap.rule_weight, rule)
 
-    def test_135_weight_unmapped_permission(self):
+    def test_145_weight_unmapped_permission(self):
         """PermMap get weight of rule with unmapped permission."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "infoflow"
         rule.perms = set(["low_r", "unmapped"])
@@ -194,18 +352,18 @@ class PermissionMapTest(unittest.TestCase):
         permmap = PermissionMap("tests/perm_map")
         self.assertRaises(UnmappedPermission, permmap.rule_weight, rule)
 
-    def test_136_weight_wrong_rule_type(self):
+    def test_146_weight_wrong_rule_type(self):
         """PermMap get weight of rule with wrong rule type."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "type_transition"
         rule.tclass = "infoflow"
 
         permmap = PermissionMap("tests/perm_map")
         self.assertRaises(RuleTypeError, permmap.rule_weight, rule)
 
-    def test_133_weight_excluded_permission(self):
+    def test_147_weight_excluded_permission(self):
         """PermMap get weight of a rule with excluded permission."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "infoflow"
         rule.perms = set(["med_r", "hi_r"])
@@ -216,9 +374,9 @@ class PermissionMapTest(unittest.TestCase):
         self.assertEqual(r, 5)
         self.assertEqual(w, 0)
 
-    def test_133_weight_excluded_class(self):
+    def test_148_weight_excluded_class(self):
         """PermMap get weight of a rule with excluded class."""
-        rule = MagicMock()
+        rule = Mock()
         rule.ruletype = "allow"
         rule.tclass = "infoflow"
         rule.perms = set(["low_r", "med_r", "hi_r", "low_w", "med_w", "hi_w"])

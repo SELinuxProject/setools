@@ -60,9 +60,6 @@ class PermissionMap(object):
             for line_num, line in enumerate(mapfile, start=1):
                 entry = line.split()
 
-                if class_count > num_classes:
-                    break
-
                 if len(entry) == 0 or entry[0][0] == '#':
                     continue
 
@@ -70,20 +67,20 @@ class PermissionMap(object):
                     try:
                         num_classes = int(entry[0])
                     except ValueError:
-                        raise SyntaxError(
+                        raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid number of classes: {2}".
                             format(permmapfile, line_num, entry[0]))
 
                     if num_classes < 1:
-                        SyntaxError(
-                            "{0}:{1}:Number of classes must be 1-32: {2}".
-                            format(permmapfile, line_num, entry[2]))
+                        raise exception.PermissionMapParseError(
+                            "{0}:{1}:Number of classes must be positive: {2}".
+                            format(permmapfile, line_num, entry[0]))
 
                     state = 2
 
                 elif state == 2:
                     if len(entry) != 3 or entry[0] != "class":
-                        raise SyntaxError(
+                        raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid class declaration: {2}".
                             format(permmapfile, line_num, entry))
 
@@ -92,40 +89,46 @@ class PermissionMap(object):
                     try:
                         num_perms = int(entry[2])
                     except ValueError:
-                        raise SyntaxError(
+                        raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid number of permissions: {2}".
                             format(permmapfile, line_num, entry[2]))
 
                     if num_perms < 1:
-                        SyntaxError(
-                            "{0}:{1}:Number of permissions must be 1-32: {2}".
+                        raise exception.PermissionMapParseError(
+                            "{0}:{1}:Number of permissions must be positive: {2}".
                             format(permmapfile, line_num, entry[2]))
 
-                    self.permmap[class_name] = dict()
                     class_count += 1
+                    if class_count > num_classes:
+                        raise exception.PermissionMapParseError(
+                            "{0}:{1}:Extra class found: {2}".
+                            format(permmapfile, line_num, class_name))
+
+                    self.permmap[class_name] = dict()
                     perm_count = 0
                     state = 3
 
                 elif state == 3:
-                    perm_name = entry[0]
+                    perm_name = str(entry[0])
 
                     flow_direction = str(entry[1])
                     if flow_direction not in self.valid_infoflow_directions:
-                        raise SyntaxError(
+                        raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid information flow direction: {2}".
                             format(permmapfile, line_num, entry[1]))
 
                     try:
                         weight = int(entry[2])
                     except ValueError:
-                        SyntaxError(
+                        raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid permission weight: {2}".
                             format(permmapfile, line_num, entry[2]))
 
                     if not self.min_weight <= weight <= self.max_weight:
-                        SyntaxError(
-                            "{0}:{1}:Permission weight must be 1-10: {2}".
-                            format(permmapfile, line_num, entry[2]))
+                        raise exception.PermissionMapParseError(
+                            "{0}:{1}:Permission weight must be {3}-{4}: {2}".
+                            format(permmapfile, line_num, entry[2],
+                                   self.min_weight, self.max_weight))
 
                     self.permmap[class_name][perm_name] = {'direction': flow_direction,
                                                            'weight': weight,
