@@ -52,13 +52,16 @@ def category_factory(policy, sym):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if not isinstance(sym, qpol.qpol_cat_t):
-        raise NotImplementedError
+    if isinstance(sym, qpol.qpol_cat_t):
+        if sym.isalias(policy):
+            raise TypeError("{0} is an alias".format(sym.name(policy)))
 
-    if sym.isalias(policy):
-        raise TypeError("{0} is an alias".format(sym.name(policy)))
+        return Category(policy, sym)
 
-    return Category(policy, sym)
+    try:
+        return Category(policy, qpol.qpol_cat_t(policy, sym))
+    except ValueError:
+        raise exception.InvalidCategory("{0} is not a valid category".format(sym))
 
 
 def sensitivity_factory(policy, sym):
@@ -152,7 +155,7 @@ def level_decl_factory(policy, sym):
     try:
         return LevelDecl(policy, qpol.qpol_level_t(policy, sym))
     except ValueError:
-        raise exception.InvalidLevel("{0} is not a valid sensitivity".format(sym))
+        raise exception.InvalidLevelDecl("{0} is not a valid sensitivity".format(sym))
 
 
 def range_factory(policy, sym):
@@ -286,6 +289,76 @@ class BaseMLSLevel(symbol.PolicySymbol):
 
         return lvl
 
+    @property
+    def sensitivity(self):
+        raise NotImplementedError
+
+    def categories(self):
+        """
+        Generator that yields all individual categories for this level.
+        All categories are yielded, not a compact notation such as
+        c0.c255
+        """
+
+        for cat in self.qpol_symbol.cat_iter(self.policy):
+            yield category_factory(self.policy, cat)
+
+
+class LevelDecl(BaseMLSLevel):
+
+    """
+    The declaration statement for MLS levels, e.g:
+
+    level s7:c0.c1023;
+    """
+    # below comparisons are only based on sensitivity
+    # dominance since, in this context, the allowable
+    # category set is being defined for the level.
+    # object type is asserted here because this cannot
+    # be compared to a Level instance.
+
+    def __eq__(self, other):
+        assert not isinstance(other, Level), "Levels cannot be compared to level declarations"
+
+        try:
+            return self.sensitivity == other.sensitivity
+        except AttributeError:
+            return str(self) == str(other)
+
+    def __ge__(self, other):
+        assert not isinstance(other, Level), "Levels cannot be compared to level declarations"
+        return self.sensitivity >= other.sensitivity
+
+    def __gt__(self, other):
+        assert not isinstance(other, Level), "Levels cannot be compared to level declarations"
+        return self.sensitivity > other.sensitivity
+
+    def __le__(self, other):
+        assert not isinstance(other, Level), "Levels cannot be compared to level declarations"
+        return self.sensitivity <= other.sensitivity
+
+    def __lt__(self, other):
+        assert not isinstance(other, Level), "Levels cannot be compared to level declarations"
+        return self.sensitivity < other.sensitivity
+
+    @property
+    def sensitivity(self):
+        """The sensitivity of the level."""
+        # since the qpol symbol for levels is also used for
+        # MLSSensitivity objects, use self's qpol symbol
+        return sensitivity_factory(self.policy, self.qpol_symbol)
+
+    def statement(self):
+        return "level {0};".format(self)
+
+
+class Level(BaseMLSLevel):
+
+    """An MLS level used in contexts."""
+
+    def __hash__(self):
+        return hash(str(self))
+
     def __eq__(self, other):
         try:
             othercats = set(other.categories())
@@ -325,52 +398,11 @@ class BaseMLSLevel(symbol.PolicySymbol):
 
     @property
     def sensitivity(self):
-        raise NotImplementedError
-
-    def categories(self):
-        """
-        Generator that yields all individual categories for this level.
-        All categories are yielded, not a compact notation such as
-        c0.c255
-        """
-
-        for cat in self.qpol_symbol.cat_iter(self.policy):
-            yield category_factory(self.policy, cat)
-
-
-class LevelDecl(BaseMLSLevel):
-
-    """
-    The declaration statement for MLS levels, e.g:
-
-    level s7:c0.c1023;
-    """
-
-    @property
-    def sensitivity(self):
-        """The sensitivity of the level."""
-        # since the qpol symbol for levels is also used for
-        # MLSSensitivity objects, use self's qpol symbol
-        return sensitivity_factory(self.policy, self.qpol_symbol)
-
-    def statement(self):
-        return "level {0};".format(self)
-
-
-class Level(BaseMLSLevel):
-
-    """An MLS level used in contexts."""
-
-    def __hash__(self):
-        return hash(str(self))
-
-    @property
-    def sensitivity(self):
         """The sensitivity of the level."""
         return sensitivity_factory(self.policy, self.qpol_symbol.sens_name(self.policy))
 
     def statement(self):
-        return exception.NoStatement
+        raise exception.NoStatement
 
 
 class Range(symbol.PolicySymbol):
@@ -392,12 +424,12 @@ class Range(symbol.PolicySymbol):
         try:
             return self.low == other.low and self.high == other.high
         except AttributeError:
-            other_str = str(other)
-            if "-" in other_str and " - " not in other_str:
-                raise ValueError(
-                    "Range strings must have a spaces around the level separator (eg \"s0 - s1\")")
-
-            return str(self) == other_str
+            # remove all spaces in the string representations
+            # to handle cases where the other object does not
+            # have spaces around the '-'
+            other_str = str(other).replace(" ", "")
+            self_str = str(self).replace(" ", "")
+            return self_str == other_str
 
     def __contains__(self, other):
         return self.low <= other <= self.high

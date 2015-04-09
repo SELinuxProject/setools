@@ -50,7 +50,8 @@ int qpol_policy_get_level_by_name(const qpol_policy_t * policy, const char *name
 	internal_datum = hashtab_search(db->p_levels.table, (hashtab_key_t)name);
 	if (internal_datum == NULL) {
 		ERR(policy, "could not find datum for level %s", name);
-		errno = ENOENT;
+		errno = EINVAL;
+		*datum = NULL;
 		return STATUS_ERR;
 	}
 	*datum = (qpol_level_t *) internal_datum;
@@ -339,7 +340,7 @@ int qpol_policy_get_cat_by_name(const qpol_policy_t * policy, const char *name, 
 	if (internal_datum == NULL) {
 		*datum = NULL;
 		ERR(policy, "could not find datum for cat %s", name);
-		errno = ENOENT;
+		errno = EINVAL;
 		return STATUS_ERR;
 	}
 	*datum = (qpol_cat_t *) internal_datum;

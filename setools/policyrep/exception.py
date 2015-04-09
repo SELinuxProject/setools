@@ -66,6 +66,12 @@ class InvalidBoolean(InvalidSymbol):
     pass
 
 
+class InvalidCategory(InvalidSymbol):
+
+    """Exception for invalid MLS categories."""
+    pass
+
+
 class InvalidClass(InvalidSymbol):
 
     """Exception for invalid object classes."""
@@ -88,6 +94,14 @@ class InvalidLevel(InvalidSymbol):
 
     """
     Exception for an invalid level.
+    """
+    pass
+
+
+class InvalidLevelDecl(InvalidSymbol):
+
+    """
+    Exception for an invalid level declaration.
     """
     pass
 

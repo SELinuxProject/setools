@@ -1424,17 +1424,24 @@ typedef struct qpol_role {} qpol_role_t;
 /* qpol level */
 typedef struct qpol_level {} qpol_level_t;
 %extend qpol_level {
+    %exception qpol_level {
+      $action
+      if (!result) {
+        if (errno == EINVAL) {
+            PyErr_SetString(PyExc_ValueError, "Invalid level.");
+        } else {
+            PyErr_SetFromErrno(PyExc_OSError);
+        }
+
+        return NULL;
+      }
+    }
     qpol_level(qpol_policy_t *p, const char *name) {
         const qpol_level_t *l;
-        BEGIN_EXCEPTION
-        if (qpol_policy_get_level_by_name(p, name, &l)) {
-            SWIG_exception(SWIG_RuntimeError, "Level does not exist");
-        }
-        END_EXCEPTION
+        qpol_policy_get_level_by_name(p, name, &l);
         return (qpol_level_t*)l;
-    fail:
-        return NULL;
     };
+
     ~qpol_level() {
         /* no op */
         return;
@@ -1506,17 +1513,26 @@ typedef struct qpol_level {} qpol_level_t;
 /* qpol cat */
 typedef struct qpol_cat {} qpol_cat_t;
 %extend qpol_cat {
+    %exception qpol_cat {
+      $action
+      if (!result) {
+        if (errno == EINVAL) {
+            PyErr_SetString(PyExc_ValueError, "Invalid category.");
+        } else {
+            PyErr_SetFromErrno(PyExc_OSError);
+        }
+
+        return NULL;
+      }
+    }
     qpol_cat(qpol_policy_t *p, const char *name) {
         const qpol_cat_t *c;
-        BEGIN_EXCEPTION
-        if (qpol_policy_get_cat_by_name(p, name, &c)) {
-            SWIG_exception(SWIG_RuntimeError, "Category does not exist");
-        }
-        END_EXCEPTION
+        qpol_policy_get_cat_by_name(p, name, &c);
         return (qpol_cat_t*)c;
     fail:
         return NULL;
     };
+
     ~qpol_cat() {
         /* no op */
         return;
