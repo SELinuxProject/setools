@@ -1529,8 +1529,6 @@ typedef struct qpol_cat {} qpol_cat_t;
         const qpol_cat_t *c;
         qpol_policy_get_cat_by_name(p, name, &c);
         return (qpol_cat_t*)c;
-    fail:
-        return NULL;
     };
 
     ~qpol_cat() {
