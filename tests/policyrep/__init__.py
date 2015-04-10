@@ -17,3 +17,4 @@
 #
 from . import mls
 from . import selinuxpolicy
+from . import user
