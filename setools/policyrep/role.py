@@ -62,14 +62,12 @@ class Role(BaseRole):
     def statement(self):
         types = list(str(t) for t in self.types())
         stmt = "role {0}".format(self)
-        if (len(types) > 1):
-            stmt += " types {{ {0} }};".format(' '.join(types))
-        else:
-            try:
-                stmt += " types {0};".format(types[0])
-            except IndexError:
-                stmt += ";"
-
+        if types:
+            if (len(types) > 1):
+                stmt += " types {{ {0} }}".format(' '.join(types))
+            else:
+                stmt += " types {0}".format(types[0])
+        stmt += ";"
         return stmt
 
 
