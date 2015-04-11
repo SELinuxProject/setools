@@ -56,7 +56,7 @@ class UserTest(unittest.TestCase):
         self.assertEqual("user10", user.qpol_symbol.name(self.p.policy))
 
     def test_002_lookup_invalid(self):
-        """Sensitivity factory policy invalid lookup."""
+        """User factory policy invalid lookup."""
         with self.assertRaises(InvalidUser):
             user_factory(self.p.policy, "INVALID")
 
