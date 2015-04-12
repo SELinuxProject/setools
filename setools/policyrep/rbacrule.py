@@ -38,7 +38,7 @@ def validate_ruletype(types):
     """Validate RBAC rule types."""
     for t in types:
         if t not in ["allow", "role_transition"]:
-            raise exception.InvalidTERuleType("{0} is not a valid RBAC rule type.".format(t))
+            raise exception.InvalidRBACRuleType("{0} is not a valid RBAC rule type.".format(t))
 
 
 class RoleAllow(rule.PolicyRule):
