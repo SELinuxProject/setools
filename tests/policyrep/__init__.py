@@ -18,5 +18,6 @@
 from . import mls
 from . import role
 from . import selinuxpolicy
+from . import terule
 from . import typeattr
 from . import user

@@ -140,11 +140,7 @@ class TERule(BaseTERule):
     @property
     def default(self):
         """The rule's default type."""
-        try:
-            return typeattr.type_factory(self.policy, self.qpol_symbol.default_type(self.policy))
-        except AttributeError:
-            raise exception.RuleUseError("{0} rules do not have a default type.".
-                                         format(self.ruletype))
+        return typeattr.type_factory(self.policy, self.qpol_symbol.default_type(self.policy))
 
     @property
     def filename(self):
