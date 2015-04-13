@@ -22,10 +22,8 @@ try:
 except ImportError:
     from mock import Mock, patch
 
-from setools import SELinuxPolicy
 from setools.policyrep.qpol import qpol_policy_t, qpol_role_allow_t, qpol_role_trans_t
-from setools.policyrep.rbacrule import rbac_rule_factory, validate_ruletype, RoleAllow, \
-                                       RoleTransition
+from setools.policyrep.rbacrule import rbac_rule_factory, validate_ruletype
 from setools.policyrep.exception import InvalidRBACRuleType, RuleNotConditional, RuleUseError
 
 

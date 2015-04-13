@@ -25,7 +25,7 @@ except ImportError:
 from setools import SELinuxPolicy
 from setools.policyrep.qpol import qpol_policy_t, qpol_avrule_t, qpol_terule_t, \
                                    qpol_filename_trans_t
-from setools.policyrep.terule import te_rule_factory, validate_ruletype, AVRule, TERule
+from setools.policyrep.terule import te_rule_factory, validate_ruletype
 from setools.policyrep.exception import InvalidTERuleType, RuleNotConditional, RuleUseError, \
                                         TERuleNoFilename
 
