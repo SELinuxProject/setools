@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.userquery import UserQuery
+from setools import SELinuxPolicy, UserQuery
 
 
 class UserQueryTest(unittest.TestCase):

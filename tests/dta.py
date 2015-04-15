@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.dta import DomainTransitionAnalysis
+from setools import SELinuxPolicy, DomainTransitionAnalysis
 from setools.policyrep.exception import InvalidType
 from setools.policyrep.typeattr import Type
 

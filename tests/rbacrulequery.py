@@ -19,8 +19,7 @@
 # pylint: disable=invalid-name,too-many-public-methods
 import unittest
 
-from setools import SELinuxPolicy
-from setools.rbacrulequery import RBACRuleQuery
+from setools import SELinuxPolicy, RBACRuleQuery
 from setools.policyrep.exception import RuleUseError, RuleNotConditional
 
 from . import mixins

@@ -18,8 +18,7 @@
 import unittest
 from socket import IPPROTO_UDP
 
-from setools import SELinuxPolicy
-from setools.portconquery import PortconQuery
+from setools import SELinuxPolicy, PortconQuery
 
 
 class PortconQueryTest(unittest.TestCase):

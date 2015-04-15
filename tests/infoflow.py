@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.infoflow import InfoFlowAnalysis
+from setools import SELinuxPolicy, InfoFlowAnalysis
 from setools.permmap import PermissionMap
 from setools.policyrep.exception import InvalidType
 from setools.policyrep.typeattr import Type

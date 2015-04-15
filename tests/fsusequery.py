@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.fsusequery import FSUseQuery
+from setools import SELinuxPolicy, FSUseQuery
 
 
 class FSUseQueryTest(unittest.TestCase):

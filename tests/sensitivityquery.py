@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.sensitivityquery import SensitivityQuery
+from setools import SELinuxPolicy, SensitivityQuery
 
 
 class SensitivityQueryTest(unittest.TestCase):

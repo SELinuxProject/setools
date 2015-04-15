@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.polcapquery import PolCapQuery
+from setools import SELinuxPolicy, PolCapQuery
 
 
 class PolCapQueryTest(unittest.TestCase):

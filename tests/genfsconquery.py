@@ -18,8 +18,7 @@
 import unittest
 import stat
 
-from setools import SELinuxPolicy
-from setools.genfsconquery import GenfsconQuery
+from setools import SELinuxPolicy, GenfsconQuery
 
 
 class GenfsconQueryTest(unittest.TestCase):

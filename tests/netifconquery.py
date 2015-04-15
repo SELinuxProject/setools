@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.netifconquery import NetifconQuery
+from setools import SELinuxPolicy, NetifconQuery
 
 
 class NetifconQueryTest(unittest.TestCase):

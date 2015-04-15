@@ -32,36 +32,36 @@ from .policyrep import SELinuxPolicy
 from . import exception
 
 # Component Queries
-from . import boolquery
-from . import categoryquery
-from . import commonquery
-from . import objclassquery
-from . import polcapquery
-from . import rolequery
-from . import sensitivityquery
-from . import typequery
-from . import typeattrquery
-from . import userquery
+from .boolquery import BoolQuery
+from .categoryquery import CategoryQuery
+from .commonquery import CommonQuery
+from .objclassquery import ObjClassQuery
+from .polcapquery import PolCapQuery
+from .rolequery import RoleQuery
+from .sensitivityquery import SensitivityQuery
+from .typequery import TypeQuery
+from .typeattrquery import TypeAttributeQuery
+from .userquery import UserQuery
 
 # Rule Queries
-from . import mlsrulequery
-from . import rbacrulequery
-from . import terulequery
+from .mlsrulequery import MLSRuleQuery
+from .rbacrulequery import RBACRuleQuery
+from .terulequery import TERuleQuery
 
 # Constraint queries
-from . import constraintquery
+from .constraintquery import ConstraintQuery
 
 # In-policy Context Queries
-from . import fsusequery
-from . import genfsconquery
-from . import initsidquery
-from . import netifconquery
-from . import nodeconquery
-from . import portconquery
+from .fsusequery import FSUseQuery
+from .genfsconquery import GenfsconQuery
+from .initsidquery import InitialSIDQuery
+from .netifconquery import NetifconQuery
+from .nodeconquery import NodeconQuery
+from .portconquery import PortconQuery
 
 # Information Flow Analysis
-from . import infoflow
-from . import permmap
+from .infoflow import InfoFlowAnalysis
+from .permmap import PermissionMap
 
 # Domain Transition Analysis
-from . import dta
+from .dta import DomainTransitionAnalysis

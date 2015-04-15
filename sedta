@@ -111,7 +111,7 @@ else:
 
 try:
     p = setools.SELinuxPolicy(args.policy)
-    g = setools.dta.DomainTransitionAnalysis(p, reverse=args.reverse, exclude=args.exclude)
+    g = setools.DomainTransitionAnalysis(p, reverse=args.reverse, exclude=args.exclude)
 
     if args.shortest_path or args.all_paths:
         if args.shortest_path:

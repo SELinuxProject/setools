@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.rolequery import RoleQuery
+from setools import SELinuxPolicy, RoleQuery
 
 
 class RoleQueryTest(unittest.TestCase):

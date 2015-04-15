@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.typeattrquery import TypeAttributeQuery
+from setools import SELinuxPolicy, TypeAttributeQuery
 
 
 class TypeAttributeQueryTest(unittest.TestCase):

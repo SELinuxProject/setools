@@ -19,8 +19,7 @@ import sys
 import unittest
 from socket import AF_INET6
 
-from setools import SELinuxPolicy
-from setools.nodeconquery import NodeconQuery
+from setools import SELinuxPolicy, NodeconQuery
 
 
 class NodeconQueryTest(unittest.TestCase):

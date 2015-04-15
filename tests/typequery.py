@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.typequery import TypeQuery
+from setools import SELinuxPolicy, TypeQuery
 
 
 class TypeQueryTest(unittest.TestCase):

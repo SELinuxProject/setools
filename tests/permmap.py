@@ -22,8 +22,7 @@ try:
 except ImportError:
     from mock import Mock
 
-from setools import SELinuxPolicy
-from setools.permmap import PermissionMap
+from setools import SELinuxPolicy, PermissionMap
 from setools.exception import PermissionMapParseError, RuleTypeError, \
                               UnmappedClass, UnmappedPermission
 

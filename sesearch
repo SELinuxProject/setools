@@ -116,20 +116,20 @@ try:
     p = setools.SELinuxPolicy(args.policy)
 
     if args.tertypes:
-        q = setools.terulequery.TERuleQuery(p,
-                                            ruletype=args.tertypes,
-                                            source=args.source,
-                                            source_indirect=args.source_indirect,
-                                            source_regex=args.source_regex,
-                                            target=args.target,
-                                            target_indirect=args.target_indirect,
-                                            target_regex=args.target_regex,
-                                            tclass_regex=args.tclass_regex,
-                                            perms_equal=args.perms_equal,
-                                            default=args.default,
-                                            default_regex=args.default_regex,
-                                            boolean_regex=args.boolean_regex,
-                                            boolean_equal=args.boolean_equal)
+        q = setools.TERuleQuery(p,
+                                ruletype=args.tertypes,
+                                source=args.source,
+                                source_indirect=args.source_indirect,
+                                source_regex=args.source_regex,
+                                target=args.target,
+                                target_indirect=args.target_indirect,
+                                target_regex=args.target_regex,
+                                tclass_regex=args.tclass_regex,
+                                perms_equal=args.perms_equal,
+                                default=args.default,
+                                default_regex=args.default_regex,
+                                boolean_regex=args.boolean_regex,
+                                boolean_equal=args.boolean_equal)
 
         # these are broken out from the above statement to prevent making a list
         # with an empty string in it (split on empty string)
@@ -152,17 +152,17 @@ try:
             print(r)
 
     if args.rbacrtypes:
-        q = setools.rbacrulequery.RBACRuleQuery(p,
-                                                ruletype=args.rbacrtypes,
-                                                source=args.source,
-                                                source_indirect=args.source_indirect,
-                                                source_regex=args.source_regex,
-                                                target=args.target,
-                                                target_indirect=args.target_indirect,
-                                                target_regex=args.target_regex,
-                                                default=args.default,
-                                                default_regex=args.default_regex,
-                                                tclass_regex=args.tclass_regex)
+        q = setools.RBACRuleQuery(p,
+                                  ruletype=args.rbacrtypes,
+                                  source=args.source,
+                                  source_indirect=args.source_indirect,
+                                  source_regex=args.source_regex,
+                                  target=args.target,
+                                  target_indirect=args.target_indirect,
+                                  target_regex=args.target_regex,
+                                  default=args.default,
+                                  default_regex=args.default_regex,
+                                  tclass_regex=args.tclass_regex)
 
         # these are broken out from the above statement to prevent making a list
         # with an empty string in it (split on empty string)
@@ -176,14 +176,14 @@ try:
             print(r)
 
     if args.mlsrtypes:
-        q = setools.mlsrulequery.MLSRuleQuery(p,
-                                              ruletype=args.mlsrtypes,
-                                              source=args.source,
-                                              source_regex=args.source_regex,
-                                              target=args.target,
-                                              target_regex=args.target_regex,
-                                              tclass_regex=args.tclass_regex,
-                                              default=args.default)
+        q = setools.MLSRuleQuery(p,
+                                 ruletype=args.mlsrtypes,
+                                 source=args.source,
+                                 source_regex=args.source_regex,
+                                 target=args.target,
+                                 target_regex=args.target_regex,
+                                 tclass_regex=args.tclass_regex,
+                                 default=args.default)
 
         # these are broken out from the above statement to prevent making a list
         # with an empty string in it (split on empty string)

@@ -19,8 +19,7 @@
 # pylint: disable=invalid-name,too-many-public-methods
 import unittest
 
-from setools import SELinuxPolicy
-from setools.terulequery import TERuleQuery
+from setools import SELinuxPolicy, TERuleQuery
 
 from . import mixins
 

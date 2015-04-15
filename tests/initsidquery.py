@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.initsidquery import InitialSIDQuery
+from setools import SELinuxPolicy, InitialSIDQuery
 
 
 class InitialSIDQueryTest(unittest.TestCase):

@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.constraintquery import ConstraintQuery
+from setools import SELinuxPolicy, ConstraintQuery
 
 
 class ConstraintQueryTest(unittest.TestCase):

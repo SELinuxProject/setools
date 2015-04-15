@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.mlsrulequery import MLSRuleQuery
+from setools import SELinuxPolicy, MLSRuleQuery
 
 from . import mixins
 

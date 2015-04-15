@@ -17,8 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy
-from setools.categoryquery import CategoryQuery
+from setools import SELinuxPolicy, CategoryQuery
 
 
 class CategoryQueryTest(unittest.TestCase):
