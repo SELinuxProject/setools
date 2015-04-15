@@ -32,8 +32,8 @@ class NodeconQuery(contextquery.ContextQuery):
     """Query nodecon statements."""
 
     def __init__(self, policy,
-                 net=None, net_overlap=False,
-                 version=None,
+                 network=None, network_overlap=False,
+                 ip_version=None,
                  user=None, user_regex=False,
                  role=None, role_regex=False,
                  type_=None, type_regex=False,
@@ -43,8 +43,8 @@ class NodeconQuery(contextquery.ContextQuery):
         Parameters:
         policy          The policy to query.
 
-        net             The network address.
-        overlap         If true, the net will match if it overlaps with
+        network         The network address.
+        network_overlap If true, the net will match if it overlaps with
                         the nodecon's network instead of equality.
         user            The criteria to match the context's user.
         user_regex      If true, regular expression matching
@@ -69,8 +69,8 @@ class NodeconQuery(contextquery.ContextQuery):
 
         self.policy = policy
 
-        self.set_network(net, overlap=net_overlap)
-        self.set_ip_version(version)
+        self.set_network(network, overlap=network_overlap)
+        self.set_ip_version(ip_version)
         self.set_user(user, regex=user_regex)
         self.set_role(role, regex=role_regex)
         self.set_type(type_, regex=type_regex)
