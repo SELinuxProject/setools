@@ -25,7 +25,10 @@ from . import context
 def initialsid_factory(policy, name):
     """Factory function for creating initial sid objects."""
 
-    if isinstance(name, qpol.qpol_isid_t):
+    if isinstance(name, InitialSID):
+        assert name.policy == policy
+        return name
+    elif isinstance(name, qpol.qpol_isid_t):
         return InitialSID(policy, name)
 
     try:

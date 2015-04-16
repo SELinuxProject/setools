@@ -24,7 +24,10 @@ from . import symbol
 def boolean_factory(policy, name):
     """Factory function for creating Boolean statement objects."""
 
-    if isinstance(name, qpol.qpol_bool_t):
+    if isinstance(name, Boolean):
+        assert name.policy == policy
+        return name
+    elif isinstance(name, qpol.qpol_bool_t):
         return Boolean(policy, name)
 
     try:

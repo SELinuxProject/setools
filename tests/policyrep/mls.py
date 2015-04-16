@@ -62,6 +62,12 @@ class SensitivityTest(unittest.TestCase):
         with self.assertRaises(InvalidSensitivity):
             sensitivity_factory(self.p.policy, "INVALID")
 
+    def test_003_lookup_object(self):
+        """Sensitivity factory policy lookup of Sensitivity object."""
+        sens1 = sensitivity_factory(self.p.policy, "s1")
+        sens2 = sensitivity_factory(self.p.policy, sens1)
+        self.assertIs(sens2, sens1)
+
     def test_010_string(self):
         """Sensitivity basic string rendering."""
         sens = self.mock_sens_factory("s0")
@@ -202,13 +208,19 @@ class CategoryTest(unittest.TestCase):
 
     def test_001_lookup(self):
         """Category factory policy lookup."""
-        sens = category_factory(self.p.policy, "c1")
-        self.assertEqual("c1", sens.qpol_symbol.name(self.p.policy))
+        cat = category_factory(self.p.policy, "c1")
+        self.assertEqual("c1", cat.qpol_symbol.name(self.p.policy))
 
     def test_002_lookup_invalid(self):
         """Category factory policy invalid lookup."""
         with self.assertRaises(InvalidCategory):
             category_factory(self.p.policy, "INVALID")
+
+    def test_003_lookup_object(self):
+        """Category factory policy lookup of Category object."""
+        cat1 = category_factory(self.p.policy, "c1")
+        cat2 = category_factory(self.p.policy, cat1)
+        self.assertIs(cat2, cat1)
 
     def test_010_statement(self):
         """Category basic string rendering."""
@@ -267,6 +279,12 @@ class LevelDeclTest(unittest.TestCase):
         """Level declaration factory policy invalid lookup."""
         with self.assertRaises(InvalidLevelDecl):
             level_decl_factory(self.p.policy, "INVALID")
+
+    def test_003_lookup_object(self):
+        """Level declaration factory policy lookup of LevelDecl object."""
+        level1 = level_decl_factory(self.p.policy, "s1")
+        level2 = level_decl_factory(self.p.policy, level1)
+        self.assertIs(level2, level1)
 
     def test_010_string(self):
         """Level declaration basic string rendering."""
@@ -469,6 +487,12 @@ class LevelTest(unittest.TestCase):
         """Level lookup with category not associated with sensitivity."""
         # c4 is not associated with s0.
         self.assertRaises(InvalidLevel, level_factory, self.p.policy, "s0:c0,c4")
+
+    def test_00a_lookup_object(self):
+        """Level factory policy lookup of Level object."""
+        level1 = level_factory(self.p.policy, "s0")
+        level2 = level_factory(self.p.policy, level1)
+        self.assertIs(level2, level1)
 
     def test_010_equal(self):
         """Level equal."""
@@ -677,6 +701,12 @@ class RangeTest(unittest.TestCase):
         """Range lookup with an invalid range (high)."""
         # c13 is not associated with s0.
         self.assertRaises(InvalidRange, range_factory, self.p.policy, "s0-s0:c13")
+
+    def test_009_lookup_object(self):
+        """Range factory policy lookup of Range object."""
+        range1 = range_factory(self.p.policy, "s0")
+        range2 = range_factory(self.p.policy, range1)
+        self.assertIs(range2, range1)
 
     def test_020_equal(self):
         """Range equality."""

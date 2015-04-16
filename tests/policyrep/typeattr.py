@@ -92,6 +92,18 @@ class TypeTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             type_ = type_or_attr_factory(self.p.policy, "sysalias")
 
+    def test_00a_lookup_object(self):
+        """Type factory policy lookup of Type object."""
+        type1 = type_factory(self.p.policy, "system")
+        type2 = type_factory(self.p.policy, type1)
+        self.assertIs(type2, type1)
+
+    def test_00b_lookup2_object(self):
+        """Type factory policy lookup of Type object (type_or_attr_factory)."""
+        type1 = type_or_attr_factory(self.p.policy, "system")
+        type2 = type_or_attr_factory(self.p.policy, type1)
+        self.assertIs(type2, type1)
+
     def test_010_string(self):
         """Type basic string rendering."""
         type_ = self.mock_type_factory("name10")
@@ -199,13 +211,25 @@ class TypeAttributeTest(unittest.TestCase):
 
     def test_006_lookup2(self):
         """TypeAttribute factory policy lookup (type_or_attr_factory)."""
-        attr = type_or_attr_factory(self.p.policy, "system")
-        self.assertEqual("system", attr.qpol_symbol.name(self.p.policy))
+        attr = type_or_attr_factory(self.p.policy, "attr1")
+        self.assertEqual("attr1", attr.qpol_symbol.name(self.p.policy))
 
     def test_007_lookup2_invalid(self):
         """TypeAttribute factory policy invalid lookup (type_or_attr_factory)."""
         with self.assertRaises(InvalidType):
             type_or_attr_factory(self.p.policy, "INVALID")
+
+    def test_008_lookup_object(self):
+        """TypeAttribute factory policy lookup of TypeAttribute object."""
+        attr1 = attribute_factory(self.p.policy, "attr1")
+        attr2 = attribute_factory(self.p.policy, attr1)
+        self.assertIs(attr2, attr1)
+
+    def test_009_lookup2_object(self):
+        """TypeAttribute factory policy lookup of TypeAttribute object (type_or_attr_factory)."""
+        attr1 = type_or_attr_factory(self.p.policy, "attr2")
+        attr2 = type_or_attr_factory(self.p.policy, attr1)
+        self.assertIs(attr2, attr1)
 
     def test_010_string(self):
         """TypeAttribute basic string rendering."""

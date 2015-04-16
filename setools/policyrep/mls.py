@@ -52,7 +52,10 @@ def category_factory(policy, sym):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(sym, qpol.qpol_cat_t):
+    if isinstance(sym, Category):
+        assert sym.policy == policy
+        return sym
+    elif isinstance(sym, qpol.qpol_cat_t):
         if sym.isalias(policy):
             raise TypeError("{0} is an alias".format(sym.name(policy)))
 
@@ -70,7 +73,10 @@ def sensitivity_factory(policy, sym):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(sym, qpol.qpol_level_t):
+    if isinstance(sym, Sensitivity):
+        assert sym.policy == policy
+        return sym
+    elif isinstance(sym, qpol.qpol_level_t):
         if sym.isalias(policy):
             raise TypeError("{0} is an alias".format(sym.name(policy)))
 
@@ -91,7 +97,10 @@ def level_factory(policy, sym):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(sym, qpol.qpol_mls_level_t):
+    if isinstance(sym, Level):
+        assert sym.policy == policy
+        return sym
+    elif isinstance(sym, qpol.qpol_mls_level_t):
         return Level(policy, sym)
 
     sens_split = sym.split(":")
@@ -146,7 +155,10 @@ def level_decl_factory(policy, sym):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(sym, qpol.qpol_level_t):
+    if isinstance(sym, LevelDecl):
+        assert sym.policy == policy
+        return sym
+    elif isinstance(sym, qpol.qpol_level_t):
         if sym.isalias(policy):
             raise TypeError("{0} is an alias".format(sym.name(policy)))
 
@@ -164,7 +176,10 @@ def range_factory(policy, sym):
     if not enabled(policy):
         raise exception.MLSDisabled
 
-    if isinstance(sym, qpol.qpol_mls_range_t):
+    if isinstance(sym, Range):
+        assert sym.policy == policy
+        return sym
+    elif isinstance(sym, qpol.qpol_mls_range_t):
         return Range(policy, sym)
 
     # build range:

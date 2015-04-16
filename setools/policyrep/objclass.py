@@ -24,7 +24,10 @@ from . import qpol
 def common_factory(policy, name):
     """Factory function for creating common permission set objects."""
 
-    if isinstance(name, qpol.qpol_common_t):
+    if isinstance(name, Common):
+        assert name.policy == policy
+        return name
+    elif isinstance(name, qpol.qpol_common_t):
         return Common(policy, name)
 
     try:
@@ -36,7 +39,10 @@ def common_factory(policy, name):
 def class_factory(policy, name):
     """Factory function for creating object class objects."""
 
-    if isinstance(name, qpol.qpol_class_t):
+    if isinstance(name, ObjClass):
+        assert name.policy == policy
+        return name
+    elif isinstance(name, qpol.qpol_class_t):
         return ObjClass(policy, name)
 
     try:

@@ -23,10 +23,13 @@ from . import symbol
 def polcap_factory(policy, name):
     """Factory function for creating policy capability objects."""
 
-    if not isinstance(name, qpol.qpol_polcap_t):
-        raise NotImplementedError
+    if isinstance(name, PolicyCapability):
+        assert name.policy == policy
+        return name
+    elif isinstance(name, qpol.qpol_polcap_t):
+        return PolicyCapability(policy, name)
 
-    return PolicyCapability(policy, name)
+    raise NotImplementedError
 
 
 class PolicyCapability(symbol.PolicySymbol):

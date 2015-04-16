@@ -26,7 +26,10 @@ from . import symbol
 def user_factory(qpol_policy, name):
     """Factory function for creating User objects."""
 
-    if isinstance(name, qpol.qpol_user_t):
+    if isinstance(name, User):
+        assert name.policy == qpol_policy
+        return name
+    elif isinstance(name, qpol.qpol_user_t):
         return User(qpol_policy, name)
 
     try:

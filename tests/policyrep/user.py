@@ -60,6 +60,12 @@ class UserTest(unittest.TestCase):
         with self.assertRaises(InvalidUser):
             user_factory(self.p.policy, "INVALID")
 
+    def test_003_lookup_object(self):
+        """User factory policy lookup of User object."""
+        user1 = user_factory(self.p.policy, "user10")
+        user2 = user_factory(self.p.policy, user1)
+        self.assertIs(user2, user1)
+
     def test_010_string(self):
         """User basic string rendering."""
         user = self.mock_user_factory("username", ['role1'])

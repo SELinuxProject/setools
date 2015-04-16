@@ -52,6 +52,12 @@ class RoleTest(unittest.TestCase):
         with self.assertRaises(InvalidRole):
             role_factory(self.p.policy, "INVALID")
 
+    def test_003_lookup_object(self):
+        """Role factory policy lookup of Role object."""
+        role1 = role_factory(self.p.policy, "role20_r")
+        role2 = role_factory(self.p.policy, role1)
+        self.assertIs(role2, role1)
+
     def test_010_string(self):
         """Role basic string rendering."""
         role = self.mock_role_factory("rolename10", ['type1'])

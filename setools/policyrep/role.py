@@ -25,7 +25,10 @@ from . import typeattr
 def role_factory(qpol_policy, name):
     """Factory function for creating Role objects."""
 
-    if isinstance(name, qpol.qpol_role_t):
+    if isinstance(name, Role):
+        assert name.policy == qpol_policy
+        return name
+    elif isinstance(name, qpol.qpol_role_t):
         return Role(qpol_policy, name)
 
     try:

@@ -35,6 +35,10 @@ def _symbol_lookup(qpol_policy, name):
 def attribute_factory(qpol_policy, name):
     """Factory function for creating attribute objects."""
 
+    if isinstance(name, TypeAttribute):
+        assert name.policy == qpol_policy
+        return name
+
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
     if not qpol_symbol.isattr(qpol_policy):
@@ -45,6 +49,10 @@ def attribute_factory(qpol_policy, name):
 
 def type_factory(qpol_policy, name, deref=False):
     """Factory function for creating type objects."""
+
+    if isinstance(name, Type):
+        assert name.policy == qpol_policy
+        return name
 
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
@@ -58,6 +66,10 @@ def type_factory(qpol_policy, name, deref=False):
 
 def type_or_attr_factory(qpol_policy, name, deref=False):
     """Factory function for creating type or attribute objects."""
+
+    if isinstance(name, (Type, TypeAttribute)):
+        assert name.policy == qpol_policy
+        return name
 
     qpol_symbol = _symbol_lookup(qpol_policy, name)
 
