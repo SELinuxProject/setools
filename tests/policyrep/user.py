@@ -44,7 +44,7 @@ class UserTest(unittest.TestCase):
 
         mock_user = Mock(qpol.qpol_user_t)
         mock_user.name.return_value = name
-        mock_user.role_iter.return_value = iter(roles_with_objr)
+        mock_user.role_iter = lambda x: iter(roles_with_objr)
         mock_user.dfltlevel.return_value = level
         mock_user.range.return_value = range_
 

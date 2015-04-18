@@ -42,7 +42,7 @@ class SensitivityTest(unittest.TestCase):
         mock_sens.name.return_value = sens
         mock_sens.isalias.return_value = False
         mock_sens.value.return_value = int(sens[1:])
-        mock_sens.alias_iter.return_value = iter(aliases)
+        mock_sens.alias_iter = lambda x: iter(aliases)
 
         return sensitivity_factory(self.p.policy, mock_sens)
 
@@ -196,7 +196,7 @@ class CategoryTest(unittest.TestCase):
         mock_cat.name.return_value = cat
         mock_cat.isalias.return_value = False
         mock_cat.value.return_value = int(cat[1:])
-        mock_cat.alias_iter.return_value = iter(aliases)
+        mock_cat.alias_iter = lambda x: iter(aliases)
 
         return category_factory(self.p.policy, mock_cat)
 
@@ -260,7 +260,7 @@ class LevelDeclTest(unittest.TestCase):
         mock_decl.name.return_value = sens
         mock_decl.isalias.return_value = False
         mock_decl.value.return_value = int(sens[1:])
-        mock_decl.cat_iter.return_value = iter(cats)
+        mock_decl.cat_iter = lambda x: iter(cats)
 
         return level_decl_factory(self.p.policy, mock_decl)
 
@@ -437,7 +437,7 @@ class LevelTest(unittest.TestCase):
         """Factory function Level objects, using a mock qpol object."""
         mock_level = Mock(qpol.qpol_mls_level_t)
         mock_level.sens_name.return_value = sens
-        mock_level.cat_iter.return_value = iter(cats)
+        mock_level.cat_iter = lambda x: iter(cats)
 
         return level_factory(self.p.policy, mock_level)
 
@@ -643,6 +643,38 @@ class LevelTest(unittest.TestCase):
         level1 = self.mock_level_factory("s1", ["c0", "c1", "c2"])
         level2 = self.mock_level_factory("s1", ["c7", "c8", "c9"])
         self.assertFalse(level1 < level2)
+
+    def test_018_incomp(self):
+        """Level incomparable (xor)."""
+        # equal
+        level1 = self.mock_level_factory("s1", ["c0", "c1", "c2", "c3"])
+        level2 = self.mock_level_factory("s1", ["c0", "c1", "c2", "c3"])
+        self.assertFalse(level1 ^ level2)
+
+        # sens dominate
+        level1 = self.mock_level_factory("s2", ["c0", "c1", "c2", "c3"])
+        level2 = self.mock_level_factory("s1", ["c0", "c1", "c2", "c3"])
+        self.assertFalse(level1 ^ level2)
+
+        # cat set dominate
+        level1 = self.mock_level_factory("s1", ["c0", "c1", "c2", "c3", "c4"])
+        level2 = self.mock_level_factory("s1", ["c0", "c1", "c2", "c3"])
+        self.assertFalse(level1 ^ level2)
+
+        # sens domby
+        level1 = self.mock_level_factory("s0", ["c0", "c1", "c2", "c3"])
+        level2 = self.mock_level_factory("s1", ["c0", "c1", "c2", "c3"])
+        self.assertFalse(level1 ^ level2)
+
+        # cat set domby
+        level1 = self.mock_level_factory("s1", ["c0", "c1", "c2"])
+        level2 = self.mock_level_factory("s1", ["c0", "c1", "c2", "c3"])
+        self.assertFalse(level1 ^ level2)
+
+        # incomp
+        level1 = self.mock_level_factory("s1", ["c0", "c1", "c2"])
+        level2 = self.mock_level_factory("s1", ["c7", "c8", "c9"])
+        self.assertTrue(level1 ^ level2)
 
     def test_020_level_statement(self):
         """Level has no statement."""

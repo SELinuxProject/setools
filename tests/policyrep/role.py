@@ -38,7 +38,7 @@ class RoleTest(unittest.TestCase):
         """Factory function for Role objects, using a mock qpol object."""
         mock_role = Mock(qpol.qpol_role_t)
         mock_role.name.return_value = name
-        mock_role.type_iter.return_value = iter(types)
+        mock_role.type_iter = lambda x: iter(types)
 
         return role_factory(self.p.policy, mock_role)
 

@@ -39,8 +39,8 @@ class TypeTest(unittest.TestCase):
         mock_type = Mock(qpol.qpol_type_t)
         mock_type.name.return_value = name
         mock_type.type_iter.side_effect = AssertionError("Type iterator used")
-        mock_type.attr_iter.return_value = iter(attrs)
-        mock_type.alias_iter.return_value = iter(alias)
+        mock_type.attr_iter = lambda x: iter(attrs)
+        mock_type.alias_iter = lambda x: iter(alias)
         mock_type.ispermissive.return_value = perm
         mock_type.isattr.return_value = False
         mock_type.isalias.return_value = False
@@ -190,7 +190,7 @@ class TypeAttributeTest(unittest.TestCase):
         """Factory function for TypeAttribute objects, using a mock qpol object."""
         mock_type = Mock(qpol.qpol_type_t)
         mock_type.name.return_value = name
-        mock_type.type_iter.return_value = iter(types)
+        mock_type.type_iter = lambda x: iter(types)
         mock_type.attr_iter.side_effect = AssertionError("Attr iter used")
         mock_type.alias_iter.side_effect = AssertionError("Alias iter used")
         mock_type.ispermissive.side_effect = AssertionError("Permissive used")

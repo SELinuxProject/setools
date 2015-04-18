@@ -41,7 +41,7 @@ class AVRuleTest(unittest.TestCase):
         mock_rule.source_type.return_value = source
         mock_rule.target_type.return_value = target
         mock_rule.object_class.return_value = tclass
-        mock_rule.perm_iter.return_value = iter(perms)
+        mock_rule.perm_iter = lambda x: iter(perms)
 
         if cond:
             mock_rule.cond.return_value = cond
