@@ -389,8 +389,8 @@ class EdgeAttrIntMax(object):
         if value is None:
             obj.G[obj.source][obj.target][self.name] = 0
         else:
-            current_weight = obj.G[obj.source][obj.target]['capacity']
-            obj.G[obj.source][obj.target]['capacity'] = max(current_weight, value)
+            current_value = obj.G[obj.source][obj.target][self.name]
+            obj.G[obj.source][obj.target][self.name] = max(current_value, value)
 
 
 class Edge(object):
