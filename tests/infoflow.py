@@ -20,7 +20,6 @@ import unittest
 from setools import SELinuxPolicy, InfoFlowAnalysis
 from setools.permmap import PermissionMap
 from setools.policyrep.exception import InvalidType
-from setools.policyrep.typeattr import Type
 
 from . import mixins
 
@@ -208,20 +207,14 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         steps = list(paths[0])
         self.assertEqual(2, len(steps))
 
-        s, t, rules = steps[0]
-        self.assertIsInstance(s, Type)
-        self.assertIsInstance(t, Type)
-        self.assertEqual(s, "node1")
-        self.assertEqual(t, "node2")
-        for r in rules:
+        self.assertEqual(steps[0].source, "node1")
+        self.assertEqual(steps[0].target, "node2")
+        for r in steps[0].rules:
             self.assertEqual("allow", r.ruletype)
 
-        s, t, rules = steps[1]
-        self.assertIsInstance(s, Type)
-        self.assertIsInstance(t, Type)
-        self.assertEqual(s, "node2")
-        self.assertEqual(t, "node4")
-        for r in rules:
+        self.assertEqual(steps[1].source, "node2")
+        self.assertEqual(steps[1].target, "node4")
+        for r in steps[1].rules:
             self.assertEqual("allow", r.ruletype)
 
     def test_301_all_shortest_paths(self):
@@ -235,20 +228,14 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         steps = list(paths[0])
         self.assertEqual(2, len(steps))
 
-        s, t, rules = steps[0]
-        self.assertIsInstance(s, Type)
-        self.assertIsInstance(t, Type)
-        self.assertEqual(s, "node1")
-        self.assertEqual(t, "node2")
-        for r in rules:
+        self.assertEqual(steps[0].source, "node1")
+        self.assertEqual(steps[0].target, "node2")
+        for r in steps[0].rules:
             self.assertEqual("allow", r.ruletype)
 
-        s, t, rules = steps[1]
-        self.assertIsInstance(s, Type)
-        self.assertIsInstance(t, Type)
-        self.assertEqual(s, "node2")
-        self.assertEqual(t, "node4")
-        for r in rules:
+        self.assertEqual(steps[1].source, "node2")
+        self.assertEqual(steps[1].target, "node4")
+        for r in steps[1].rules:
             self.assertEqual("allow", r.ruletype)
 
     def test_302_shortest_path(self):
@@ -262,20 +249,14 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         steps = list(paths[0])
         self.assertEqual(2, len(steps))
 
-        s, t, rules = steps[0]
-        self.assertIsInstance(s, Type)
-        self.assertIsInstance(t, Type)
-        self.assertEqual(s, "node1")
-        self.assertEqual(t, "node2")
-        for r in rules:
+        self.assertEqual(steps[0].source, "node1")
+        self.assertEqual(steps[0].target, "node2")
+        for r in steps[0].rules:
             self.assertEqual("allow", r.ruletype)
 
-        s, t, rules = steps[1]
-        self.assertIsInstance(s, Type)
-        self.assertIsInstance(t, Type)
-        self.assertEqual(s, "node2")
-        self.assertEqual(t, "node4")
-        for r in rules:
+        self.assertEqual(steps[1].source, "node2")
+        self.assertEqual(steps[1].target, "node4")
+        for r in steps[1].rules:
             self.assertEqual("allow", r.ruletype)
 
     def test_303_infoflows_out(self):
@@ -283,11 +264,9 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
 
-        for s, t, rules in self.a.infoflows("node6"):
-            self.assertIsInstance(s, Type)
-            self.assertIsInstance(t, Type)
-            self.assertEqual(s, "node6")
-            for r in rules:
+        for flow in self.a.infoflows("node6"):
+            self.assertEqual(flow.source, "node6")
+            for r in flow.rules:
                 self.assertEqual("allow", r.ruletype)
 
     def test_304_infoflows_in(self):
@@ -295,11 +274,9 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.set_exclude(None)
         self.a.set_min_weight(1)
 
-        for s, t, rules in self.a.infoflows("node8", out=False):
-            self.assertIsInstance(s, Type)
-            self.assertIsInstance(t, Type)
-            self.assertEqual(t, "node8")
-            for r in rules:
+        for flow in self.a.infoflows("node8", out=False):
+            self.assertEqual(flow.target, "node8")
+            for r in flow.rules:
                 self.assertEqual("allow", r.ruletype)
 
     def test_900_set_exclude_invalid_type(self):

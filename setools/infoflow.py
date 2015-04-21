@@ -23,6 +23,9 @@ import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
 
+__all__ = ['InfoFlowAnalysis']
+
+
 class InfoFlowAnalysis(object):
 
     """Information flow analysis."""
@@ -106,13 +109,9 @@ class InfoFlowAnalysis(object):
         source   The source type.
         target   The target type.
 
-        Yield: generator(steps)
+        Yield: generator(paths)
 
-        steps Yield: tuple(source, target, rules)
-
-        source   The source type for this step of the information flow.
-        target   The target type for this step of the information flow.
-        rules    The list of rules creating this information flow step.
+        steps    Generator which yields steps in the path.
         """
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
@@ -143,13 +142,9 @@ class InfoFlowAnalysis(object):
         target    The target type.
         maxlen    Maximum length of paths.
 
-        Yield: generator(steps)
+        Yield: generator(paths)
 
-        steps Yield: tuple(source, target, rules)
-
-        source    The source type for this step of the information flow.
-        target    The target type for this step of the information flow.
-        rules     The list of rules creating this information flow step.
+        steps    Generator which yields steps in the path.
         """
         if maxlen < 1:
             raise ValueError("Maximum path length must be positive.")
@@ -181,13 +176,9 @@ class InfoFlowAnalysis(object):
         source   The source type.
         target   The target type.
 
-        Yield: generator(steps)
+        Yield: generator(paths)
 
-        steps Yield: tuple(source, target, rules)
-
-        source   The source type for this step of the information flow.
-        target   The target type for this step of the information flow.
-        rules    The list of rules creating this information flow step.
+        steps    Generator which yields steps in the path.
         """
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
@@ -223,10 +214,6 @@ class InfoFlowAnalysis(object):
                 type will be returned.  Default is true.
 
         Yield: generator(steps)
-
-        steps   A generator that returns the tuple of
-                source, target, and rules for each
-                information flow.
         """
         s = self.policy.lookup_type(type_)
 
@@ -236,13 +223,13 @@ class InfoFlowAnalysis(object):
         self.log.info("Generating all infoflows out of {0}...".format(s))
 
         if out:
-            flows = self.subG.out_edges_iter(s, data=True)
+            flows = self.subG.out_edges_iter(s)
         else:
-            flows = self.subG.in_edges_iter(s, data=True)
+            flows = self.subG.in_edges_iter(s)
 
         try:
-            for source, target, data in flows:
-                yield source, target, data["rules"]
+            for source, target in flows:
+                yield Edge(self.subG, source, target)
         except NetworkXError:
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -266,22 +253,15 @@ class InfoFlowAnalysis(object):
 
     def __generate_steps(self, path):
         """
-        Generator which returns the source, target, and associated rules
-        for each information flow step.
+        Generator which yields each information flow step in a path.
 
         Parameter:
         path   A list of graph node names representing an information flow path.
 
-        Yield: tuple(source, target, rules)
-
-        source  The source type for this step of the information flow.
-        target  The target type for this step of the information flow.
-        rules   The list of rules creating this information flow step.
+        Yield: step (A graph edge)
         """
         for s in range(1, len(path)):
-            source = path[s - 1]
-            target = path[s]
-            yield source, target, self.G.edge[source][target]['rules']
+            yield Edge(self.subG, path[s - 1], path[s])
 
     #
     #
@@ -300,17 +280,6 @@ class InfoFlowAnalysis(object):
     #    types (nodes) and edges (information flows) which are below the
     #    minimum weight. This subgraph is rebuilt only if the main graph
     #    is rebuilt or the minimum weight or excluded types change.
-    def __add_edge(self, source, target, rule, weight):
-        # use capacity to store the info flow weight so
-        # we can use network flow algorithms naturally.
-        # The weight for each edge is 1 since each info
-        # flow step is no more costly than another
-        if self.G.has_edge(source, target):
-            self.G.edge[source][target]['rules'].append(rule)
-            edgecap = self.G.edge[source][target]['capacity']
-            self.G.edge[source][target]['capacity'] = max(edgecap, weight)
-        else:
-            self.G.add_edge(source, target, capacity=weight, weight=1, rules=[rule])
 
     def _build_graph(self):
         self.G.clear()
@@ -330,10 +299,14 @@ class InfoFlowAnalysis(object):
                 # in or out of the source type type
                 if s != t:
                     if wweight:
-                        self.__add_edge(s, t, rule, wweight)
+                        edge = Edge(self.G, s, t, create=True)
+                        edge.rules.append(rule)
+                        edge.weight = wweight
 
                     if rweight:
-                        self.__add_edge(t, s, rule, rweight)
+                        edge = Edge(self.G, t, s, create=True)
+                        edge.rules.append(rule)
+                        edge.weight = rweight
 
         self.rebuildgraph = False
         self.rebuildsubgraph = True
@@ -356,11 +329,111 @@ class InfoFlowAnalysis(object):
         # does not exclude any edges.
         if self.minweight > 1:
             delete_list = []
-            for s, t, data in self.subG.edges_iter(data=True):
-                if data['capacity'] < self.minweight:
-                    delete_list.append((s, t))
+            for s, t in self.subG.edges_iter():
+                edge = Edge(self.subG, s, t)
+                if edge.weight < self.minweight:
+                    delete_list.append(edge)
 
             self.subG.remove_edges_from(delete_list)
 
         self.rebuildsubgraph = False
         self.log.info("Completed building subgraph.")
+
+
+class EdgeAttrList(object):
+
+    """
+    A descriptor for edge attributes that are lists.
+
+    Parameter:
+    name    The edge property name
+    """
+
+    def __init__(self, propname):
+        self.name = propname
+
+    def __get__(self, obj, type=None):
+        return obj.G[obj.source][obj.target][self.name]
+
+    def __set__(self, obj, value):
+        # None is a special value to initialize
+        if value is None:
+            obj.G[obj.source][obj.target][self.name] = []
+        else:
+            raise ValueError("{0} lists should not be assigned directly".format(self.name))
+
+    def __delete__(self, obj):
+        # in Python3 a .clear() function was added for lists
+        # keep this implementation for Python 2 compat
+        del obj.G[obj.source][obj.target][self.name][:]
+
+
+class EdgeAttrIntMax(object):
+
+    """
+    A descriptor for edge attributes that are non-negative integers that always
+    keep the max assigned value until re-initialized.
+
+    Parameter:
+    name    The edge property name
+    """
+
+    def __init__(self, propname):
+        self.name = propname
+
+    def __get__(self, obj, type=None):
+        return obj.G[obj.source][obj.target][self.name]
+
+    def __set__(self, obj, value):
+        # None is a special value to initialize
+        if value is None:
+            obj.G[obj.source][obj.target][self.name] = 0
+        else:
+            current_weight = obj.G[obj.source][obj.target]['capacity']
+            obj.G[obj.source][obj.target]['capacity'] = max(current_weight, value)
+
+
+class Edge(object):
+
+    """
+    A graph edge.  Also used for returning information flow steps.
+
+    Parameters:
+    source      The source type of the edge.
+    target      The target type of the edge.
+
+    Keyword Parameters:
+    create      (T/F) create the edge if it does not exist.
+                The default is False.
+    """
+
+    rules = EdgeAttrList('rules')
+
+    # use capacity to store the info flow weight so
+    # we can use network flow algorithms naturally.
+    # The weight for each edge is 1 since each info
+    # flow step is no more costly than another
+    # (see below add_edge() call)
+    weight = EdgeAttrIntMax('capacity')
+
+    def __init__(self, graph, source, target, create=False):
+        self.G = graph
+        self.source = source
+        self.target = target
+
+        # a bit of a hack to make edges work
+        # in NetworkX functions that work on
+        # 2-tuples of (source, target)
+        # (see __getitem__ below)
+        self.st_tuple = (source, target)
+
+        if not self.G.has_edge(source, target):
+            if create:
+                self.G.add_edge(source, target, weight=1)
+                self.rules = None
+                self.weight = None
+            else:
+                raise ValueError("Edge does not exist in graph")
+
+    def __getitem__(self, key):
+        return self.st_tuple[key]

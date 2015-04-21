@@ -90,10 +90,10 @@ try:
         flownum = 0
         for flownum, path in enumerate(paths, start=1):
             print("Flow {0}:".format(flownum))
-            for stepnum, (src, tgt, rules) in enumerate(path, start=1):
-                print("  Step {0}: {1} -> {2}".format(stepnum, src, tgt))
+            for stepnum, step in enumerate(path, start=1):
+                print("  Step {0}: {1} -> {2}".format(stepnum, step.source, step.target))
 
-                for rule in sorted(rules):
+                for rule in sorted(step.rules):
                     print("   ", rule)
 
                 print()
@@ -105,9 +105,9 @@ try:
 
     else:  # single direct info flow
         flownum = 0
-        for flownum, (src, tgt, rules) in enumerate(g.infoflows(args.source), start=1):
-            print("Flow {0}: {1} -> {2}".format(flownum, src, tgt))
-            for rule in sorted(rules):
+        for flownum, step in enumerate(g.infoflows(args.source), start=1):
+            print("Flow {0}: {1} -> {2}".format(flownum, step.source, step.target))
+            for rule in sorted(step.rules):
                 print("   ", rule)
 
             print()
