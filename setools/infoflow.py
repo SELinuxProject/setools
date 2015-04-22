@@ -109,9 +109,13 @@ class InfoFlowAnalysis(object):
         source   The source type.
         target   The target type.
 
-        Yield: generator(paths)
+        Yield: generator(steps)
 
-        steps    Generator which yields steps in the path.
+        steps Yield: tuple(source, target, rules)
+
+        source   The source type for this step of the information flow.
+        target   The target type for this step of the information flow.
+        rules    The list of rules creating this information flow step.
         """
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
@@ -142,9 +146,13 @@ class InfoFlowAnalysis(object):
         target    The target type.
         maxlen    Maximum length of paths.
 
-        Yield: generator(paths)
+        Yield: generator(steps)
 
-        steps    Generator which yields steps in the path.
+        steps Yield: tuple(source, target, rules)
+
+        source    The source type for this step of the information flow.
+        target    The target type for this step of the information flow.
+        rules     The list of rules creating this information flow step.
         """
         if maxlen < 1:
             raise ValueError("Maximum path length must be positive.")
@@ -176,9 +184,13 @@ class InfoFlowAnalysis(object):
         source   The source type.
         target   The target type.
 
-        Yield: generator(paths)
+        Yield: generator(steps)
 
-        steps    Generator which yields steps in the path.
+        steps Yield: tuple(source, target, rules)
+
+        source   The source type for this step of the information flow.
+        target   The target type for this step of the information flow.
+        rules    The list of rules creating this information flow step.
         """
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
@@ -214,6 +226,10 @@ class InfoFlowAnalysis(object):
                 type will be returned.  Default is true.
 
         Yield: generator(steps)
+
+        steps   A generator that returns the tuple of
+                source, target, and rules for each
+                information flow.
         """
         s = self.policy.lookup_type(type_)
 
@@ -229,7 +245,8 @@ class InfoFlowAnalysis(object):
 
         try:
             for source, target in flows:
-                yield Edge(self.subG, source, target)
+                edge = Edge(self.subG, source, target)
+                yield source, target, edge.rules
         except NetworkXError:
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -253,15 +270,21 @@ class InfoFlowAnalysis(object):
 
     def __generate_steps(self, path):
         """
-        Generator which yields each information flow step in a path.
+        Generator which returns the source, target, and associated rules
+        for each information flow step.
 
         Parameter:
         path   A list of graph node names representing an information flow path.
 
-        Yield: step (A graph edge)
+        Yield: tuple(source, target, rules)
+
+        source  The source type for this step of the information flow.
+        target  The target type for this step of the information flow.
+        rules   The list of rules creating this information flow step.
         """
         for s in range(1, len(path)):
-            yield Edge(self.subG, path[s - 1], path[s])
+            edge = Edge(self.subG, path[s - 1], path[s])
+            yield edge.source, edge.target, edge.rules
 
     #
     #
@@ -273,10 +296,7 @@ class InfoFlowAnalysis(object):
     #    included in this main graph: memory is traded off for efficiency
     #    as the main graph should only need to be rebuilt if permission
     #    weights change.
-    # 2. __add_edge does the actual graph insertions.  Nodes are implictly
-    #    created by the edge additions, i.e. types that have no info flow
-    #    do not appear in the graph.
-    # 3. _build_subgraph derives a subgraph which removes all excluded
+    # 2. _build_subgraph derives a subgraph which removes all excluded
     #    types (nodes) and edges (information flows) which are below the
     #    minimum weight. This subgraph is rebuilt only if the main graph
     #    is rebuilt or the minimum weight or excluded types change.
