@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2015, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -28,8 +28,8 @@ def polcap_factory(policy, name):
         return name
     elif isinstance(name, qpol.qpol_polcap_t):
         return PolicyCapability(policy, name)
-
-    raise NotImplementedError
+    else:
+        raise TypeError("Policy capabilities cannot be looked up.")
 
 
 class PolicyCapability(symbol.PolicySymbol):

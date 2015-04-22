@@ -17,6 +17,7 @@
 #
 from . import mls
 from . import mlsrule
+from . import polcap
 from . import rbacrule
 from . import role
 from . import selinuxpolicy
