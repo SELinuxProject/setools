@@ -16,6 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import print_function
+import copy
 import os
 import sys
 import subprocess
@@ -70,6 +71,12 @@ class SELinuxPolicyTest(unittest.TestCase):
     def test_002_open_policy_non_existant(self):
         """SELinuxPolicy: Non existant policy on open."""
         self.assertRaises(OSError, SELinuxPolicy, "tests/policyrep/DOES_NOT_EXIST")
+
+    def test_003_deepcopy(self):
+        """SELinuxPolicy: Deep copy"""
+        p = copy.deepcopy(self.p)
+        self.assertIs(self.p.policy, p.policy)
+        self.assertIs(self.p.filename, p.filename)
 
     def test_010_handle_unknown(self):
         """SELinuxPolicy: handle unknown setting."""

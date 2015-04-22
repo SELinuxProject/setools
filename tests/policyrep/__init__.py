@@ -20,6 +20,7 @@ from . import mlsrule
 from . import rbacrule
 from . import role
 from . import selinuxpolicy
+from . import symbol
 from . import terule
 from . import typeattr
 from . import user

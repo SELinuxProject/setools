@@ -38,10 +38,7 @@ class PolicySymbol(object):
         return self.qpol_symbol.name(self.policy)
 
     def __hash__(self):
-        try:
-            return hash(self.qpol_symbol.name(self.policy))
-        except AttributeError:  # pragma: no cover
-            return NotImplemented
+        return hash(self.qpol_symbol.name(self.policy))
 
     def __eq__(self, other):
         try:
@@ -59,6 +56,15 @@ class PolicySymbol(object):
     def __repr__(self):
         return "<{0.__class__.__name__}(<qpol_policy_t id={1}>,\"{0}\")>".format(
             self, id(self.policy))
+
+    def __deepcopy__(self, memo):
+        # shallow copy as all of the members are immutable
+        cls = self.__class__
+        newobj = cls.__new__(cls)
+        newobj.policy = self.policy
+        newobj.qpol_symbol = self.qpol_symbol
+        memo[id(self)] = newobj
+        return newobj
 
     def statement(self):
         """

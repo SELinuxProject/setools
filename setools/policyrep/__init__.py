@@ -89,6 +89,14 @@ class SELinuxPolicy(object):
     def __str__(self):
         return self.filename
 
+    def __deepcopy__(self, memo):
+        # shallow copy as all of the members are immutable
+        newobj = SELinuxPolicy.__new__(SELinuxPolicy)
+        newobj.policy = self.policy
+        newobj.filename = self.filename
+        memo[id(self)] = newobj
+        return newobj
+
     #
     # Policy properties
     #

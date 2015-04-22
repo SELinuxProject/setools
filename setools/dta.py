@@ -23,6 +23,10 @@ from collections import defaultdict
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
+from .infoflow import EdgeAttrList
+
+__all__ = ['DomainTransitionAnalysis']
+
 
 class DomainTransitionAnalysis(object):
 
@@ -196,21 +200,20 @@ class DomainTransitionAnalysis(object):
 
         try:
             for source, target in self.subG.out_edges_iter(s):
+                edge = Edge(self.subG, source, target)
+
                 if self.reverse:
                     real_source, real_target = target, source
                 else:
                     real_source, real_target = source, target
 
-                # It seems that NetworkX does not reverse the dictionaries
-                # that store the attributes, so real_* is used here
-                data = self.subG.edge[real_source][real_target]
-
                 yield real_source, real_target, \
-                    data['transition'], \
-                    self.__generate_entrypoints(data), \
-                    data['setexec'], \
-                    data['dyntransition'], \
-                    data['setcurrent']
+                    edge.transition, \
+                    self.__generate_entrypoints(edge), \
+                    edge.setexec, \
+                    edge.dyntransition, \
+                    edge.setcurrent
+
         except NetworkXError:
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             pass
@@ -230,7 +233,7 @@ class DomainTransitionAnalysis(object):
     # Internal functions follow
     #
     @staticmethod
-    def __generate_entrypoints(data):
+    def __generate_entrypoints(edge):
         """
         Generator which yields the entrypoint, execute, and
         type_transition rules for each entrypoint.
@@ -245,8 +248,8 @@ class DomainTransitionAnalysis(object):
         exec     The list of execute rules.
         trans    The list of type_transition rules.
         """
-        for e in data['entrypoint']:
-            yield e, data['entrypoint'][e], data['execute'][e], data['type_transition'][e]
+        for e in edge.entrypoint:
+            yield e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e]
 
     def __generate_steps(self, path):
         """
@@ -271,46 +274,26 @@ class DomainTransitionAnalysis(object):
         for s in range(1, len(path)):
             source = path[s - 1]
             target = path[s]
+            edge = Edge(self.subG, source, target)
 
+            # Yield the actual source and target.
+            # The above perspective is reversed
+            # if the graph has been reversed.
             if self.reverse:
                 real_source, real_target = target, source
             else:
                 real_source, real_target = source, target
 
-            # It seems that NetworkX does not reverse the dictionaries
-            # that store the attributes, so real_* is used here
-            data = self.subG.edge[real_source][real_target]
-
             yield real_source, real_target, \
-                data['transition'], \
-                self.__generate_entrypoints(data), \
-                data['setexec'], \
-                data['dyntransition'], \
-                data['setcurrent']
+                edge.transition, \
+                self.__generate_entrypoints(edge), \
+                edge.setexec, \
+                edge.dyntransition, \
+                edge.setcurrent
 
     #
     # Graph building functions
     #
-    # Graph edge properties:
-    # Each entry in the property dict corresponds to
-    # a rule list.  For entrypoint/execute/type_transition
-    # it is a dictionary keyed on the entrypoint type.
-    def __add_edge(self, source, target):
-        self.G.add_edge(source, target)
-        if 'transition' not in self.G[source][target]:
-            self.G[source][target]['transition'] = []
-        if 'entrypoint' not in self.G[source][target]:
-            self.G[source][target]['entrypoint'] = defaultdict(list)
-        if 'execute' not in self.G[source][target]:
-            self.G[source][target]['execute'] = defaultdict(list)
-        if 'type_transition' not in self.G[source][target]:
-            self.G[source][target]['type_transition'] = defaultdict(list)
-        if 'setexec' not in self.G[source][target]:
-            self.G[source][target]['setexec'] = []
-        if 'dyntransition' not in self.G[source][target]:
-            self.G[source][target]['dyntransition'] = []
-        if 'setcurrent' not in self.G[source][target]:
-            self.G[source][target]['setcurrent'] = []
 
     # Domain transition requirements:
     #
@@ -393,16 +376,16 @@ class DomainTransitionAnalysis(object):
                             # only add edges if they actually
                             # transition to a new type
                             if s != t:
-                                self.__add_edge(s, t)
-                                self.G[s][t]['transition'].append(rule)
+                                edge = Edge(self.G, s, t, create=True)
+                                edge.transition.append(rule)
 
                     if "dyntransition" in perms:
                         for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             # only add edges if they actually
                             # transition to a new type
                             if s != t:
-                                self.__add_edge(s, t)
-                                self.G[s][t]['dyntransition'].append(rule)
+                                e = Edge(self.G, s, t, create=True)
+                                e.dyntransition.append(rule)
 
                     if "setexec" in perms:
                         for s in rule.source.expand():
@@ -436,10 +419,11 @@ class DomainTransitionAnalysis(object):
         clear_dyntransition = []
 
         for s, t in self.G.edges_iter():
+            edge = Edge(self.G, s, t)
             invalid_trans = False
             invalid_dyntrans = False
 
-            if self.G[s][t]['transition']:
+            if edge.transition:
                 # get matching domain exec w/entrypoint type
                 entry = set(entrypoint[t].keys())
                 exe = set(execute[s].keys())
@@ -453,24 +437,24 @@ class DomainTransitionAnalysis(object):
                     # efficiency in this loop
                     for m in match:
                         if s in setexec or type_trans[s][m]:
-                            # add subkey for each entrypoint
-                            self.G[s][t]['entrypoint'][m] += entrypoint[t][m]
-                            self.G[s][t]['execute'][m] += execute[s][m]
+                            # add key for each entrypoint
+                            edge.entrypoint[m] += entrypoint[t][m]
+                            edge.execute[m] += execute[s][m]
 
                         if type_trans[s][m][t]:
-                            self.G[s][t]['type_transition'][m] += type_trans[s][m][t]
+                            edge.type_transition[m] += type_trans[s][m][t]
 
                     if s in setexec:
-                        self.G[s][t]['setexec'] += setexec[s]
+                        edge.setexec.extend(setexec[s])
 
-                    if not self.G[s][t]['setexec'] and not self.G[s][t]['type_transition']:
+                    if not edge.setexec and not edge.type_transition:
                         invalid_trans = True
             else:
                 invalid_trans = True
 
-            if self.G[s][t]['dyntransition']:
+            if edge.dyntransition:
                 if s in setcurrent:
-                    self.G[s][t]['setcurrent'] += setcurrent[s]
+                    edge.setcurrent.extend(setcurrent[s])
                 else:
                     invalid_dyntrans = True
             else:
@@ -479,27 +463,27 @@ class DomainTransitionAnalysis(object):
             # cannot change the edges while iterating over them,
             # so keep appropriate lists
             if invalid_trans and invalid_dyntrans:
-                invalid_edge.append((s, t))
+                invalid_edge.append(edge)
             elif invalid_trans:
-                clear_transition.append((s, t))
+                clear_transition.append(edge)
             elif invalid_dyntrans:
-                clear_dyntransition.append((s, t))
+                clear_dyntransition.append(edge)
 
         # Remove invalid transitions
         self.G.remove_edges_from(invalid_edge)
-        for s, t in clear_transition:
+        for edge in clear_transition:
             # if only the regular transition is invalid,
             # clear the relevant lists
-            del self.G[s][t]['transition'][:]
-            self.G[s][t]['execute'].clear()
-            self.G[s][t]['entrypoint'].clear()
-            self.G[s][t]['type_transition'].clear()
-            del self.G[s][t]['setexec'][:]
-        for s, t in clear_dyntransition:
+            del edge.transition
+            del edge.execute
+            del edge.entrypoint
+            del edge.type_transition
+            del edge.setexec
+        for edge in clear_dyntransition:
             # if only the dynamic transition is invalid,
             # clear the relevant lists
-            del self.G[s][t]['dyntransition'][:]
-            del self.G[s][t]['setcurrent'][:]
+            del edge.dyntransition
+            del edge.setcurrent
 
         self.rebuildgraph = False
         self.rebuildsubgraph = True
@@ -508,7 +492,8 @@ class DomainTransitionAnalysis(object):
     def __remove_excluded_entrypoints(self):
         invalid_edges = []
         for source, target in self.subG.edges_iter():
-            entrypoints = set(self.subG.edge[source][target]['entrypoint'])
+            edge = Edge(self.subG, source, target)
+            entrypoints = set(edge.entrypoint)
             entrypoints.intersection_update(self.exclude)
 
             if not entrypoints:
@@ -519,18 +504,17 @@ class DomainTransitionAnalysis(object):
 
             for e in entrypoints:
                 # clear the entrypoint data
-                del self.subG.edge[source][target]['entrypoint'][e]
-                del self.subG.edge[source][target]['execute'][e]
+                del edge.entrypoint[e]
+                del edge.execute[e]
 
                 try:
-                    del self.subG.edge[source][target]['type_transition'][e]
+                    del edge.type_transition[e]
                 except KeyError:  # setexec
                     pass
 
-            # cannot change the edges while iterating over them
-            if len(self.subG.edge[source][target]['entrypoint']) == 0 and \
-                    len(self.subG.edge[source][target]['dyntransition']) == 0:
-                invalid_edges.append((source, target))
+            # cannot delete the edges while iterating over them
+            if not edge.entrypoint and not edge.dyntransition:
+                invalid_edges.append(edge)
 
         self.subG.remove_edges_from(invalid_edges)
 
@@ -542,21 +526,94 @@ class DomainTransitionAnalysis(object):
         self.log.debug("Excluding {0}".format(self.exclude))
         self.log.debug("Reverse {0}".format(self.reverse))
 
-        # delete excluded domains from subgraph
-        nodes = [n for n in self.G.nodes() if n not in self.exclude]
-        # subgraph created this way to get copies of the edge
-        # attributes. otherwise the edge attributes point to the
-        # original graph, and the entrypoint removal below would also
-        # affect the main graph.
-        self.subG = nx.DiGraph(self.G.subgraph(nodes))
-
-        # delete excluded entrypoints from subgraph
-        if self.exclude:
-            self.__remove_excluded_entrypoints()
-
         # reverse graph for reverse DTA
         if self.reverse:
-            self.subG.reverse(copy=False)
+            self.subG = self.G.reverse(copy=True)
+        else:
+            self.subG = self.G.copy()
+
+        if self.exclude:
+            # delete excluded domains from subgraph
+            self.subG.remove_nodes_from(self.exclude)
+
+            # delete excluded entrypoints from subgraph
+            self.__remove_excluded_entrypoints()
 
         self.rebuildsubgraph = False
         self.log.info("Completed building subgraph.")
+
+
+class EdgeAttrDict(object):
+
+    """
+    A descriptor for edge attributes that are dictionaries.
+
+    Parameter:
+    name    The edge property name
+    """
+
+    def __init__(self, propname):
+        self.name = propname
+
+    def __get__(self, obj, type=None):
+        return obj.G[obj.source][obj.target][self.name]
+
+    def __set__(self, obj, value):
+        # None is a special value to initialize the attribute
+        if value is None:
+            obj.G[obj.source][obj.target][self.name] = defaultdict(list)
+        else:
+            raise ValueError("{0} dictionaries should not be assigned directly".format(self.name))
+
+    def __delete__(self, obj):
+        obj.G[obj.source][obj.target][self.name].clear()
+
+
+class Edge(object):
+
+    """
+    A graph edge.  Also used for returning domain transition steps.
+
+    Parameters:
+    source      The source type of the edge.
+    target      The target tyep of the edge.
+
+    Keyword Parameters:
+    create      (T/F) create the edge if it does not exist.
+                The default is False.
+    """
+
+    transition = EdgeAttrList('transition')
+    setexec = EdgeAttrList('setexec')
+    dyntransition = EdgeAttrList('dyntransition')
+    setcurrent = EdgeAttrList('setcurrent')
+    entrypoint = EdgeAttrDict('entrypoint')
+    execute = EdgeAttrDict('execute')
+    type_transition = EdgeAttrDict('type_transition')
+
+    def __init__(self, graph, source, target, create=False):
+        self.G = graph
+        self.source = source
+        self.target = target
+
+        # a bit of a hack to make Edges work
+        # in NetworkX functions that work on
+        # 2-tuples of (source, target)
+        # (see __getitem__ below)
+        self.st_tuple = (source, target)
+
+        if not self.G.has_edge(source, target):
+            if not create:
+                raise ValueError("Edge does not exist in graph")
+            else:
+                self.G.add_edge(source, target)
+                self.transition = None
+                self.entrypoint = None
+                self.execute = None
+                self.type_transition = None
+                self.setexec = None
+                self.dyntransition = None
+                self.setcurrent = None
+
+    def __getitem__(self, key):
+        return self.st_tuple[key]
