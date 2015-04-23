@@ -30,6 +30,7 @@ from . import nodeconquery
 from . import objclassquery
 from . import permmap
 from . import polcapquery
+from . import policyrep
 from . import rbacrulequery
 from . import rolequery
 from . import sensitivityquery

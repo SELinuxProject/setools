@@ -23,7 +23,6 @@ except ImportError:
     from mock import Mock
 
 from setools.policyrep import qpol
-from setools.policyrep.exception import InvalidPolicyCapability
 from setools.policyrep.polcap import polcap_factory
 
 
