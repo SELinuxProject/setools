@@ -56,7 +56,7 @@ class Common(symbol.PolicySymbol):
     """A common permission set."""
 
     def __contains__(self, other):
-        return (other in self.perms)
+        return other in self.perms
 
     @property
     def perms(self):
@@ -70,6 +70,15 @@ class Common(symbol.PolicySymbol):
 class ObjClass(Common):
 
     """An object class."""
+
+    def __contains__(self, other):
+        try:
+            if other in self.common.perms:
+                return True
+        except exception.NoCommon:
+            pass
+
+        return other in self.perms
 
     @property
     def common(self):

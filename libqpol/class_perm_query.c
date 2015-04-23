@@ -376,7 +376,7 @@ int qpol_policy_get_class_by_name(const qpol_policy_t * policy, const char *name
 	if (internal_datum == NULL) {
 		*obj_class = NULL;
 		ERR(policy, "could not find class %s", name);
-		errno = ENOENT;
+		errno = EINVAL;
 		return STATUS_ERR;
 	}
 
@@ -541,7 +541,7 @@ int qpol_policy_get_common_by_name(const qpol_policy_t * policy, const char *nam
 	if (internal_datum == NULL) {
 		*common = NULL;
 		ERR(policy, "could not find common %s", name);
-		errno = ENOENT;
+		errno = EINVAL;
 		return STATUS_ERR;
 	}
 	*common = (qpol_common_t *) internal_datum;

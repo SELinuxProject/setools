@@ -1942,16 +1942,24 @@ typedef struct qpol_context {} qpol_context_t;
 /* qpol class */
 typedef struct qpol_class {} qpol_class_t;
 %extend qpol_class {
+    %exception qpol_class {
+      $action
+      if (!result) {
+        if (errno == EINVAL) {
+            PyErr_SetString(PyExc_ValueError, "Invalid class.");
+        } else {
+            PyErr_SetFromErrno(PyExc_OSError);
+        }
+
+        return NULL;
+      }
+    }
     qpol_class(qpol_policy_t *p, const char *name) {
         const qpol_class_t *c;
-        BEGIN_EXCEPTION
-        if (qpol_policy_get_class_by_name(p, name, &c)) {
-            SWIG_exception(SWIG_RuntimeError, "Class does not exist");
-        }
-        END_EXCEPTION
-    fail:
+        qpol_policy_get_class_by_name(p, name, &c);
         return (qpol_class_t*)c;
     };
+
     ~qpol_class() {
         /* no op */
         return;
@@ -2041,16 +2049,24 @@ typedef struct qpol_class {} qpol_class_t;
 /* qpol common */
 typedef struct qpol_common {} qpol_common_t;
 %extend qpol_common {
+    %exception qpol_common {
+      $action
+      if (!result) {
+        if (errno == EINVAL) {
+            PyErr_SetString(PyExc_ValueError, "Invalid common.");
+        } else {
+            PyErr_SetFromErrno(PyExc_OSError);
+        }
+
+        return NULL;
+      }
+    }
     qpol_common(qpol_policy_t *p, const char *name) {
         const qpol_common_t *c;
-        BEGIN_EXCEPTION
-        if (qpol_policy_get_common_by_name(p, name, &c)) {
-            SWIG_exception(SWIG_RuntimeError, "Common does not exist");
-        }
-        END_EXCEPTION
-    fail:
+        qpol_policy_get_common_by_name(p, name, &c);
         return (qpol_common_t*)c;
     };
+
     ~qpol_common() {
         /* no op */
         return;
