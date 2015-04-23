@@ -145,6 +145,13 @@ class TypeAttribute(BaseType):
 
     """An attribute."""
 
+    def __contains__(self, other):
+        for type_ in self.expand():
+            if other == type_:
+                return True
+
+        return False
+
     def expand(self):
         """Generator that expands this attribute into its member types."""
         for type_ in self.qpol_symbol.type_iter(self.policy):

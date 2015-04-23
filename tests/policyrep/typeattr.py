@@ -262,3 +262,9 @@ class TypeAttributeTest(unittest.TestCase):
         """TypeAttribute basic statement"""
         attr = self.mock_attr_factory("name60")
         self.assertEqual("attribute name60;", attr.statement())
+
+    def test_070_contains(self):
+        """TypeAttribute: contains"""
+        attr = self.mock_attr_factory("name70", types=['type31a', 'type31b', 'type31c'])
+        self.assertIn("type31b", attr)
+        self.assertNotIn("type30", attr)
