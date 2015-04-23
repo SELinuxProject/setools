@@ -50,6 +50,11 @@ class PolCapTest(unittest.TestCase):
         cap2 = polcap_factory(self.p, cap1)
         self.assertIs(cap2, cap1)
 
+    def test_003_factory_lookup(self):
+        """PolCap: factory lookup."""
+        with self.assertRaises(TypeError):
+            polcap_factory(self.p, "open_perms")
+
     def test_010_string(self):
         """PolCap: basic string rendering."""
         q = self.mock_cap("test10")
