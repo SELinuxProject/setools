@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+from . import initsid
 from . import mls
 from . import mlsrule
 from . import objclass

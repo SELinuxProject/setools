@@ -47,4 +47,4 @@ class InitialSID(symbol.PolicySymbol):
         return context.context_factory(self.policy, self.qpol_symbol.context(self.policy))
 
     def statement(self):
-        return "sid {0} {1}".format(self, self.context)
+        return "sid {0} {0.context}".format(self)

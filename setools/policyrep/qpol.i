@@ -2265,7 +2265,12 @@ typedef struct qpol_isid {} qpol_isid_t;
     %exception qpol_isid {
       $action
       if (!result) {
-        PyErr_SetString(PyExc_ValueError, "Invalid initial sid name.");
+        if (errno == EINVAL) {
+            PyErr_SetString(PyExc_ValueError, "Invalid initial sid name.");
+        } else {
+            PyErr_SetFromErrno(PyExc_OSError);
+        }
+
         return NULL;
       }
     }

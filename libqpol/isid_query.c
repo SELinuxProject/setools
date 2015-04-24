@@ -58,7 +58,7 @@ int qpol_policy_get_isid_by_name(const qpol_policy_t * policy, const char *name,
 
 	if (*ocon == NULL) {
 		ERR(policy, "could not find initial SID statement for %s", name);
-		errno = ENOENT;
+		errno = EINVAL;
 		return STATUS_ERR;
 	}
 
