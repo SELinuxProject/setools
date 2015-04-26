@@ -18,7 +18,7 @@
 #
 import itertools
 import logging
-from collections import defaultdict
+from collections import defaultdict, namedtuple
 
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
@@ -26,6 +26,21 @@ from networkx.exception import NetworkXError, NetworkXNoPath
 from .infoflow import EdgeAttrList
 
 __all__ = ['DomainTransitionAnalysis']
+
+# Return values for the analysis
+# are in the following tuple formats:
+step_output = namedtuple("step", ["source",
+                                  "target",
+                                  "transition",
+                                  "entrypoints",
+                                  "setexec",
+                                  "dyntransition",
+                                  "setcurrent"])
+
+entrypoint_output = namedtuple("entrypoints", ["name",
+                                               "entrypoint",
+                                               "execute",
+                                               "type_transition"])
 
 
 class DomainTransitionAnalysis(object):
@@ -207,12 +222,12 @@ class DomainTransitionAnalysis(object):
                 else:
                     real_source, real_target = source, target
 
-                yield real_source, real_target, \
-                    edge.transition, \
-                    self.__generate_entrypoints(edge), \
-                    edge.setexec, \
-                    edge.dyntransition, \
-                    edge.setcurrent
+                yield step_output(real_source, real_target,
+                                  edge.transition,
+                                  self.__generate_entrypoints(edge),
+                                  edge.setexec,
+                                  edge.dyntransition,
+                                  edge.setcurrent)
 
         except NetworkXError:
             # NetworkXError: the type is valid but not in graph, e.g. excluded
@@ -249,7 +264,7 @@ class DomainTransitionAnalysis(object):
         trans    The list of type_transition rules.
         """
         for e in edge.entrypoint:
-            yield e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e]
+            yield entrypoint_output(e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e])
 
     def __generate_steps(self, path):
         """
@@ -284,12 +299,12 @@ class DomainTransitionAnalysis(object):
             else:
                 real_source, real_target = source, target
 
-            yield real_source, real_target, \
-                edge.transition, \
-                self.__generate_entrypoints(edge), \
-                edge.setexec, \
-                edge.dyntransition, \
-                edge.setcurrent
+            yield step_output(real_source, real_target,
+                              edge.transition,
+                              self.__generate_entrypoints(edge),
+                              edge.setexec,
+                              edge.dyntransition,
+                              edge.setcurrent)
 
     #
     # Graph building functions

@@ -25,42 +25,42 @@ import logging
 import setools
 
 
-def print_transition(trans, entrypoints, setexec, dyntrans, setcur):
-    if trans:
+def print_transition(trans):
+    if trans.transition:
         print("Domain transition rule(s):")
-        for t in trans:
+        for t in trans.transition:
             print(t)
 
-        if setexec:
+        if trans.setexec:
             print("\nSet execution context rule(s):")
-            for s in setexec:
+            for s in trans.setexec:
                 print(s)
 
-        for name, entry, exe, type_trans in entrypoints:
-            print("\nEntrypoint {0}:".format(name))
+        for entrypoint in trans.entrypoints:
+            print("\nEntrypoint {0}:".format(entrypoint.name))
 
             print("\tDomain entrypoint rule(s):")
-            for e in entry:
+            for e in entrypoint.entrypoint:
                 print("\t{0}".format(e))
 
             print("\n\tFile execute rule(s):")
-            for e in exe:
+            for e in entrypoint.execute:
                 print("\t{0}".format(e))
 
-            if type_trans:
+            if entrypoint.type_transition:
                 print("\n\tType transition rule(s):")
-                for t in type_trans:
+                for t in entrypoint.type_transition:
                     print("\t{0}".format(t))
 
             print()
 
-    if dyntrans:
+    if trans.dyntransition:
         print("Dynamic transition rule(s):")
-        for d in dyntrans:
+        for d in trans.dyntransition:
             print(d)
 
         print("\nSet current process context rule(s):")
-        for s in setcur:
+        for s in trans.setcurrent:
             print(s)
 
         print()
@@ -123,11 +123,10 @@ try:
         for i, path in enumerate(paths, start=1):
             print("Domain transition path {0}:".format(i))
 
-            for step, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in \
-                    enumerate(path, start=1):
+            for stepnum, step in enumerate(path, start=1):
 
-                print("Step {0}: {1} -> {2}\n".format(step, src, tgt))
-                print_transition(trans, entrypoints, setexec, dyntrans, setcur)
+                print("Step {0}: {1} -> {2}\n".format(stepnum, step.source, step.target))
+                print_transition(step)
 
             if args.limit_trans and i >= args.limit_trans:
                 break
@@ -138,10 +137,9 @@ try:
         transitions = g.transitions(args.source)
 
         i = 0
-        for i, (src, tgt, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(transitions,
-                                                                                      start=1):
-            print("Transition {0}: {1} -> {2}\n".format(i, src, tgt))
-            print_transition(trans, entrypoints, setexec, dyntrans, setcur)
+        for i, step in enumerate(transitions, start=1):
+            print("Transition {0}: {1} -> {2}\n".format(i, step.source, step.target))
+            print_transition(step)
 
             if args.limit_trans and i >= args.limit_trans:
                 break

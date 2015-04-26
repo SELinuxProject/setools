@@ -501,34 +501,34 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(paths))
 
         for path in paths:
-            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
-                self.assertIsInstance(s, Type)
-                self.assertIsInstance(t, Type)
-                self.assertEqual(s, expected_path[stepnum])
-                self.assertEqual(t, expected_path[stepnum+1])
+            for stepnum, step in enumerate(path):
+                self.assertIsInstance(step.source, Type)
+                self.assertIsInstance(step.target, Type)
+                self.assertEqual(expected_path[stepnum], step.source)
+                self.assertEqual(expected_path[stepnum+1], step.target)
 
-                for r in trans:
+                for r in step.transition:
                     self.assertIn("transition", r.perms)
 
-                for name, entry, exe, type_trans in entrypoints:
-                    self.assertIsInstance(name, Type)
+                for e in step.entrypoints:
+                    self.assertIsInstance(e.name, Type)
 
-                    for r in entry:
+                    for r in e.entrypoint:
                         self.assertIn("entrypoint", r.perms)
 
-                    for r in exe:
+                    for r in e.execute:
                         self.assertIn("execute", r.perms)
 
-                    for r in type_trans:
+                    for r in e.type_transition:
                         self.assertEqual("type_transition", r.ruletype)
 
-                for r in setexec:
+                for r in step.setexec:
                     self.assertIn("setexec", r.perms)
 
-                for r in dyntrans:
+                for r in step.dyntransition:
                     self.assertIn("dyntransition", r.perms)
 
-                for r in setcur:
+                for r in step.setcurrent:
                     self.assertIn("setcurrent", r.perms)
 
     def test_301_all_shortest_paths(self):
@@ -542,34 +542,34 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(paths))
 
         for path in paths:
-            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
-                self.assertIsInstance(s, Type)
-                self.assertIsInstance(t, Type)
-                self.assertEqual(s, expected_path[stepnum])
-                self.assertEqual(t, expected_path[stepnum+1])
+            for stepnum, step in enumerate(path):
+                self.assertIsInstance(step.source, Type)
+                self.assertIsInstance(step.target, Type)
+                self.assertEqual(expected_path[stepnum], step.source)
+                self.assertEqual(expected_path[stepnum+1], step.target)
 
-                for r in trans:
+                for r in step.transition:
                     self.assertIn("transition", r.perms)
 
-                for name, entry, exe, type_trans in entrypoints:
-                    self.assertIsInstance(name, Type)
+                for e in step.entrypoints:
+                    self.assertIsInstance(e.name, Type)
 
-                    for r in entry:
+                    for r in e.entrypoint:
                         self.assertIn("entrypoint", r.perms)
 
-                    for r in exe:
+                    for r in e.execute:
                         self.assertIn("execute", r.perms)
 
-                    for r in type_trans:
+                    for r in e.type_transition:
                         self.assertEqual("type_transition", r.ruletype)
 
-                for r in setexec:
+                for r in step.setexec:
                     self.assertIn("setexec", r.perms)
 
-                for r in dyntrans:
+                for r in step.dyntransition:
                     self.assertIn("dyntransition", r.perms)
 
-                for r in setcur:
+                for r in step.setcurrent:
                     self.assertIn("setcurrent", r.perms)
 
     def test_302_shortest_path(self):
@@ -583,34 +583,34 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(paths))
 
         for path in paths:
-            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
-                self.assertIsInstance(s, Type)
-                self.assertIsInstance(t, Type)
-                self.assertEqual(s, expected_path[stepnum])
-                self.assertEqual(t, expected_path[stepnum+1])
+            for stepnum, step in enumerate(path):
+                self.assertIsInstance(step.source, Type)
+                self.assertIsInstance(step.target, Type)
+                self.assertEqual(expected_path[stepnum], step.source)
+                self.assertEqual(expected_path[stepnum+1], step.target)
 
-                for r in trans:
+                for r in step.transition:
                     self.assertIn("transition", r.perms)
 
-                for name, entry, exe, type_trans in entrypoints:
-                    self.assertIsInstance(name, Type)
+                for e in step.entrypoints:
+                    self.assertIsInstance(e.name, Type)
 
-                    for r in entry:
+                    for r in e.entrypoint:
                         self.assertIn("entrypoint", r.perms)
 
-                    for r in exe:
+                    for r in e.execute:
                         self.assertIn("execute", r.perms)
 
-                    for r in type_trans:
+                    for r in e.type_transition:
                         self.assertEqual("type_transition", r.ruletype)
 
-                for r in setexec:
+                for r in step.setexec:
                     self.assertIn("setexec", r.perms)
 
-                for r in dyntrans:
+                for r in step.dyntransition:
                     self.assertIn("dyntransition", r.perms)
 
-                for r in setcur:
+                for r in step.setcurrent:
                     self.assertIn("setcurrent", r.perms)
 
     def test_303_transitions(self):
@@ -621,33 +621,33 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         transitions = list(self.a.transitions("start"))
         self.assertEqual(2, len(transitions))
 
-        for s, t, trans, entrypoints, setexec, dyntrans, setcur in transitions:
-            self.assertIsInstance(s, Type)
-            self.assertIsInstance(t, Type)
-            self.assertEqual(s, "start")
+        for step in transitions:
+            self.assertIsInstance(step.source, Type)
+            self.assertIsInstance(step.target, Type)
+            self.assertEqual("start", step.source)
 
-            for r in trans:
+            for r in step.transition:
                 self.assertIn("transition", r.perms)
 
-            for name, entry, exe, type_trans in entrypoints:
-                self.assertIsInstance(name, Type)
+            for e in step.entrypoints:
+                self.assertIsInstance(e.name, Type)
 
-                for r in entry:
+                for r in e.entrypoint:
                     self.assertIn("entrypoint", r.perms)
 
-                for r in exe:
+                for r in e.execute:
                     self.assertIn("execute", r.perms)
 
-                for r in type_trans:
+                for r in e.type_transition:
                     self.assertEqual("type_transition", r.ruletype)
 
-            for r in setexec:
+            for r in step.setexec:
                 self.assertIn("setexec", r.perms)
 
-            for r in dyntrans:
+            for r in step.dyntransition:
                 self.assertIn("dyntransition", r.perms)
 
-            for r in setcur:
+            for r in step.setcurrent:
                 self.assertIn("setcurrent", r.perms)
 
     def test_310_all_paths_reversed(self):
@@ -661,34 +661,34 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(paths))
 
         for path in paths:
-            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
-                self.assertIsInstance(s, Type)
-                self.assertIsInstance(t, Type)
-                self.assertEqual(s, expected_path[stepnum+1])
-                self.assertEqual(t, expected_path[stepnum])
+            for stepnum, step in enumerate(path):
+                self.assertIsInstance(step.source, Type)
+                self.assertIsInstance(step.target, Type)
+                self.assertEqual(step.source, expected_path[stepnum+1])
+                self.assertEqual(step.target, expected_path[stepnum])
 
-                for r in trans:
+                for r in step.transition:
                     self.assertIn("transition", r.perms)
 
-                for name, entry, exe, type_trans in entrypoints:
-                    self.assertIsInstance(name, Type)
+                for e in step.entrypoints:
+                    self.assertIsInstance(e.name, Type)
 
-                    for r in entry:
+                    for r in e.entrypoint:
                         self.assertIn("entrypoint", r.perms)
 
-                    for r in exe:
+                    for r in e.execute:
                         self.assertIn("execute", r.perms)
 
-                    for r in type_trans:
+                    for r in e.type_transition:
                         self.assertEqual("type_transition", r.ruletype)
 
-                for r in setexec:
+                for r in step.setexec:
                     self.assertIn("setexec", r.perms)
 
-                for r in dyntrans:
+                for r in step.dyntransition:
                     self.assertIn("dyntransition", r.perms)
 
-                for r in setcur:
+                for r in step.setcurrent:
                     self.assertIn("setcurrent", r.perms)
 
     def test_311_all_shortest_paths_reversed(self):
@@ -702,34 +702,34 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(paths))
 
         for path in paths:
-            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
-                self.assertIsInstance(s, Type)
-                self.assertIsInstance(t, Type)
-                self.assertEqual(s, expected_path[stepnum+1])
-                self.assertEqual(t, expected_path[stepnum])
+            for stepnum, step in enumerate(path):
+                self.assertIsInstance(step.source, Type)
+                self.assertIsInstance(step.target, Type)
+                self.assertEqual(step.source, expected_path[stepnum+1])
+                self.assertEqual(step.target, expected_path[stepnum])
 
-                for r in trans:
+                for r in step.transition:
                     self.assertIn("transition", r.perms)
 
-                for name, entry, exe, type_trans in entrypoints:
-                    self.assertIsInstance(name, Type)
+                for e in step.entrypoints:
+                    self.assertIsInstance(e.name, Type)
 
-                    for r in entry:
+                    for r in e.entrypoint:
                         self.assertIn("entrypoint", r.perms)
 
-                    for r in exe:
+                    for r in e.execute:
                         self.assertIn("execute", r.perms)
 
-                    for r in type_trans:
+                    for r in e.type_transition:
                         self.assertEqual("type_transition", r.ruletype)
 
-                for r in setexec:
+                for r in step.setexec:
                     self.assertIn("setexec", r.perms)
 
-                for r in dyntrans:
+                for r in step.dyntransition:
                     self.assertIn("dyntransition", r.perms)
 
-                for r in setcur:
+                for r in step.setcurrent:
                     self.assertIn("setcurrent", r.perms)
 
     def test_312_shortest_path_reversed(self):
@@ -743,34 +743,34 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(paths))
 
         for path in paths:
-            for stepnum, (s, t, trans, entrypoints, setexec, dyntrans, setcur) in enumerate(path):
-                self.assertIsInstance(s, Type)
-                self.assertIsInstance(t, Type)
-                self.assertEqual(s, expected_path[stepnum+1])
-                self.assertEqual(t, expected_path[stepnum])
+            for stepnum, step in enumerate(path):
+                self.assertIsInstance(step.source, Type)
+                self.assertIsInstance(step.target, Type)
+                self.assertEqual(expected_path[stepnum+1], step.source)
+                self.assertEqual(expected_path[stepnum], step.target)
 
-                for r in trans:
+                for r in step.transition:
                     self.assertIn("transition", r.perms)
 
-                for name, entry, exe, type_trans in entrypoints:
-                    self.assertIsInstance(name, Type)
+                for e in step.entrypoints:
+                    self.assertIsInstance(e.name, Type)
 
-                    for r in entry:
+                    for r in e.entrypoint:
                         self.assertIn("entrypoint", r.perms)
 
-                    for r in exe:
+                    for r in e.execute:
                         self.assertIn("execute", r.perms)
 
-                    for r in type_trans:
+                    for r in e.type_transition:
                         self.assertEqual("type_transition", r.ruletype)
 
-                for r in setexec:
+                for r in step.setexec:
                     self.assertIn("setexec", r.perms)
 
-                for r in dyntrans:
+                for r in step.dyntransition:
                     self.assertIn("dyntransition", r.perms)
 
-                for r in setcur:
+                for r in step.setcurrent:
                     self.assertIn("setcurrent", r.perms)
 
     def test_313_transitions_reversed(self):
@@ -781,33 +781,33 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         transitions = list(self.a.transitions("bothtrans200"))
         self.assertEqual(1, len(transitions))
 
-        for s, t, trans, entrypoints, setexec, dyntrans, setcur in transitions:
-            self.assertIsInstance(s, Type)
-            self.assertIsInstance(t, Type)
-            self.assertEqual(t, "bothtrans200")
+        for step in transitions:
+            self.assertIsInstance(step.source, Type)
+            self.assertIsInstance(step.target, Type)
+            self.assertEqual("bothtrans200", step.target)
 
-            for r in trans:
+            for r in step.transition:
                 self.assertIn("transition", r.perms)
 
-            for name, entry, exe, type_trans in entrypoints:
-                self.assertIsInstance(name, Type)
+            for e in step.entrypoints:
+                self.assertIsInstance(e.name, Type)
 
-                for r in entry:
+                for r in e.entrypoint:
                     self.assertIn("entrypoint", r.perms)
 
-                for r in exe:
+                for r in e.execute:
                     self.assertIn("execute", r.perms)
 
-                for r in type_trans:
+                for r in e.type_transition:
                     self.assertEqual("type_transition", r.ruletype)
 
-            for r in setexec:
+            for r in step.setexec:
                 self.assertIn("setexec", r.perms)
 
-            for r in dyntrans:
+            for r in step.dyntransition:
                 self.assertIn("dyntransition", r.perms)
 
-            for r in setcur:
+            for r in step.setcurrent:
                 self.assertIn("setcurrent", r.perms)
 
     def test_900_set_exclude_invalid_type(self):
