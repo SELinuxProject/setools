@@ -18,12 +18,18 @@
 #
 import itertools
 import logging
+from collections import namedtuple
 
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
-
 __all__ = ['InfoFlowAnalysis']
+
+# Return values for the analysis
+# are in the following tuple format:
+step_output = namedtuple("step", ["source",
+                                  "target",
+                                  "rules"])
 
 
 class InfoFlowAnalysis(object):
@@ -246,7 +252,7 @@ class InfoFlowAnalysis(object):
         try:
             for source, target in flows:
                 edge = Edge(self.subG, source, target)
-                yield source, target, edge.rules
+                yield step_output(source, target, edge.rules)
         except NetworkXError:
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
@@ -284,7 +290,7 @@ class InfoFlowAnalysis(object):
         """
         for s in range(1, len(path)):
             edge = Edge(self.subG, path[s - 1], path[s])
-            yield edge.source, edge.target, edge.rules
+            yield step_output(edge.source, edge.target, edge.rules)
 
     #
     #
