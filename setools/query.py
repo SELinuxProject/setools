@@ -99,38 +99,33 @@ class PolicyQuery(object):
         """
         Match ranges of objects.
 
-        obj         A 2-tuple of the range to match.
-        criteria    A 2-tuple of the criteria to match.
+        obj         An object with attributes named "low" and "high", representing the range.
+        criteria    An object with attributes named "low" and "high", representing the criteria.
         subset      If true, the criteria will match if it is a subset obj's range.
         overlap     If true, the criteria will match if it overlaps any of the obj's range.
         superset    If true, the criteria will match if it is a superset of the obj's range.
         proper      If true, use proper superset/subset operations.
                     No effect if not using set operations.
         """
-        # use nicer names to make the below conditions easier to read.
-        obj_low = obj[0]
-        obj_high = obj[1]
-        crit_low = criteria[0]
-        crit_high = criteria[1]
 
         if overlap:
-            return ((obj_low <= crit_low <= obj_high) or (
-                     obj_low <= crit_high <= obj_high) or (
-                     crit_low <= obj_low and obj_high <= crit_high))
+            return ((obj.low <= criteria.low <= obj.high) or (
+                     obj.low <= criteria.high <= obj.high) or (
+                     criteria.low <= obj.low and obj.high <= criteria.high))
         elif subset:
             if proper:
-                return ((obj_low < crit_low and crit_high <= obj_high) or (
-                         obj_low <= crit_low and crit_high < obj_high))
+                return ((obj.low < criteria.low and criteria.high <= obj.high) or (
+                         obj.low <= criteria.low and criteria.high < obj.high))
             else:
-                return obj_low <= crit_low and crit_high <= obj_high
+                return obj.low <= criteria.low and criteria.high <= obj.high
         elif superset:
             if proper:
-                return ((crit_low < obj_low and obj_high <= crit_high) or (
-                         crit_low <= obj_low and obj_high < crit_high))
+                return ((criteria.low < obj.low and obj.high <= criteria.high) or (
+                         criteria.low <= obj.low and obj.high < criteria.high))
             else:
-                return (crit_low <= obj_low and obj_high <= crit_high)
+                return (criteria.low <= obj.low and obj.high <= criteria.high)
         else:
-            return crit_low == obj_low and obj_high == crit_high
+            return criteria.low == obj.low and obj.high == criteria.high
 
     @staticmethod
     def _match_level(obj, criteria, dom, domby, incomp):

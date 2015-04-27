@@ -17,10 +17,13 @@
 # <http://www.gnu.org/licenses/>.
 #
 import socket
+from collections import namedtuple
 
 from . import qpol
 from . import symbol
 from . import context
+
+port_range = namedtuple("port_range", ["low", "high"])
 
 
 def netifcon_factory(policy, name):
@@ -161,4 +164,4 @@ class Portcon(NetContext):
         """
         low = self.qpol_symbol.low_port(self.policy)
         high = self.qpol_symbol.high_port(self.policy)
-        return (low, high)
+        return port_range(low, high)

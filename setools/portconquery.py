@@ -20,6 +20,7 @@ import logging
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from . import contextquery
+from .policyrep.netcontext import port_range
 
 
 class PortconQuery(contextquery.ContextQuery):
@@ -28,7 +29,7 @@ class PortconQuery(contextquery.ContextQuery):
 
     def __init__(self, policy,
                  protocol=None,
-                 ports=(None, None), ports_subset=False, ports_overlap=False,
+                 ports=port_range(None, None), ports_subset=False, ports_overlap=False,
                  ports_superset=False, ports_proper=False,
                  user=None, user_regex=False,
                  role=None, role_regex=False,
@@ -176,7 +177,7 @@ class PortconQuery(contextquery.ContextQuery):
                 raise ValueError(
                     "The low port must be smaller than the high port: {0[0]}-{0[1]}".format(ports))
 
-            self.ports_cmp = self.ports
+            self.ports_cmp = port_range(*ports)
 
     def set_protocol(self, protocol):
         """

@@ -104,8 +104,8 @@ class MLSRuleQuery(rulequery.RuleQuery):
             # Matching on range
             #
             if self.default and not self._match_range(
-                    (rule.default.low, rule.default.high),
-                    (self.default_cmp.low, self.default_cmp.high),
+                    rule.default,
+                    self.default_cmp,
                     self.default_subset,
                     self.default_overlap,
                     self.default_superset,

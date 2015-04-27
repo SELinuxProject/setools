@@ -106,8 +106,8 @@ class UserQuery(compquery.ComponentQuery):
                 continue
 
             if self.range_ and not self._match_range(
-                    (user.mls_range.low, user.mls_range.high),
-                    (self.range_.low, self.range_.high),
+                    user.mls_range,
+                    self.range_,
                     self.range_subset,
                     self.range_overlap,
                     self.range_superset,

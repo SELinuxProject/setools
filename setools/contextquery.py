@@ -77,8 +77,8 @@ class ContextQuery(query.PolicyQuery):
             return False
 
         if range_ and not query.PolicyQuery._match_range(
-                (context.range_.low, context.range_.high),
-                (range_.low, range_.high),
+                context.range_,
+                range_,
                 range_subset,
                 range_overlap,
                 range_superset,
