@@ -49,13 +49,14 @@ class Boolean(symbol.PolicySymbol):
 
     """A Boolean."""
 
+    @property
     def state(self):
         """The default state of the Boolean."""
         return bool(self.qpol_symbol.state(self.policy))
 
     def statement(self):
         """The policy statement."""
-        return "bool {0} {1};".format(self, str(self.state()).lower())
+        return "bool {0} {1};".format(self, str(self.state).lower())
 
 
 class ConditionalExpr(symbol.PolicySymbol):

@@ -53,7 +53,7 @@ class BoolQuery(compquery.ComponentQuery):
             if self.name and not self._match_name(boolean):
                 continue
 
-            if self.match_default and boolean.state() != self.default:
+            if self.match_default and boolean.state != self.default:
                 continue
 
             yield boolean
