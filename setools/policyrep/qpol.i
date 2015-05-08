@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <arpa/inet.h>
 #include <sepol/policydb.h>
+#include <sepol/policydb/policydb.h>
 #include "include/qpol/avrule_query.h"
 #include "include/qpol/bool_query.h"
 #include "include/qpol/class_perm_query.h"
@@ -153,6 +154,9 @@ def qpol_policy_factory(path):
 #define QPOL_POLICY_OPTION_NO_NEVERALLOWS 0x00000001
 #define QPOL_POLICY_OPTION_NO_RULES       0x00000002
 #define QPOL_POLICY_OPTION_MATCH_SYSTEM   0x00000004
+/* add maximum and minimum policy versions supported by the statically linked libsepol */
+%constant int QPOL_POLICY_MAX_VERSION = POLICYDB_VERSION_MAX;
+%constant int QPOL_POLICY_MIN_VERSION = POLICYDB_VERSION_MIN;
 typedef struct qpol_policy {} qpol_policy_t;
 typedef void (*qpol_callback_fn_t) (void *varg, struct qpol_policy * policy, int level, const char *fmt, va_list va_args);
 

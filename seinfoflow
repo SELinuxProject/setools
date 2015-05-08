@@ -34,7 +34,7 @@ parser.add_argument("-v", "--verbose", action="store_true",
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 settings = parser.add_argument_group("Analysis settings")
-settings.add_argument("-p", "--policy", required=True,
+settings.add_argument("-p", "--policy",
                       help="Path to SELinux policy to analyze.")
 settings.add_argument("-m", "--map", required=True,
                       help="Path to permission map file.")

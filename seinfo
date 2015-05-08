@@ -33,7 +33,7 @@ def expand_attr(attr):
 parser = argparse.ArgumentParser(
     description="SELinux policy information tool.")
 parser.add_argument("--version", action="version", version=setools.__version__)
-parser.add_argument("policy", help="Path to the SELinux policy to query.")
+parser.add_argument("policy", help="Path to the SELinux policy to query.", nargs="?")
 parser.add_argument("-x", "--expand", action="store_true",
                     help="Print additional information about the specified components.")
 parser.add_argument("--flat",  help="Print without item count nor indentation.",
@@ -251,7 +251,7 @@ try:
     if (not components or args.all) and not args.flat:
         mls = "enabled" if p.mls else "disabled"
 
-        print("Statistics for policy file: {0}".format(args.policy))
+        print("Statistics for policy file: {0}".format(p))
         print("Policy Version: {0} (MLS {1})".format(p.version, mls))
         print("  Classes:       {0:7}    Permissions:   {1:7}".format(
             p.class_count, p.permission_count))

@@ -71,7 +71,7 @@ parser = argparse.ArgumentParser(
     description="SELinux policy domain transition analysis tool.",
     epilog="If no analysis is selected, all forward transitions out of the source will be printed.")
 parser.add_argument("--version", action="version", version=setools.__version__)
-parser.add_argument("-p", "--policy", help="Path to SELinux policy to analyze.", required=True)
+parser.add_argument("-p", "--policy", help="Path to SELinux policy to analyze.")
 parser.add_argument("-s", "--source", help="Source type of the analysis.", required=True)
 parser.add_argument("-t", "--target", help="Target type of the analysis.")
 parser.add_argument("--stats", action="store_true",

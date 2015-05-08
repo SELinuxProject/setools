@@ -27,7 +27,7 @@ parser = argparse.ArgumentParser(
     description="SELinux policy rule search tool.",
     epilog="TE/MLS rule searches cannot be mixed with RBAC rule searches.")
 parser.add_argument("--version", action="version", version=setools.__version__)
-parser.add_argument("policy", help="Path to the SELinux policy to search.")
+parser.add_argument("policy", help="Path to the SELinux policy to search.", nargs="?")
 parser.add_argument("-v", "--verbose", action="store_true",
                     help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")

@@ -24,6 +24,9 @@
 # structures.
 import logging
 from itertools import chain
+from errno import ENOENT
+
+import selinux
 
 from . import qpol
 
@@ -66,22 +69,20 @@ class SELinuxPolicy(object):
 
     """The complete SELinux policy."""
 
-    def __init__(self, policyfile):
+    def __init__(self, policyfile=None):
         """
         Parameter:
         policyfile  Path to a policy to open.
         """
 
         self.log = logging.getLogger(self.__class__.__name__)
-        self.log.info("Opening SELinux policy \"{0}\"".format(policyfile))
+        self.policy = None
+        self.filename = None
 
-        try:
-            self.policy = qpol.qpol_policy_factory(policyfile)
-        except SyntaxError as err:
-            raise exception.InvalidPolicy("Error opening policy file \"{0}\": {1}".
-                                          format(policyfile, err))
-
-        self.filename = policyfile
+        if policyfile:
+            self._load_policy(policyfile)
+        else:
+            self._load_running_policy()
 
     def __repr__(self):
         return "<SELinuxPolicy(\"{0}\")>".format(self.filename)
@@ -96,6 +97,51 @@ class SELinuxPolicy(object):
         newobj.filename = self.filename
         memo[id(self)] = newobj
         return newobj
+
+    #
+    # Policy loading functions
+    #
+
+    def _load_policy(self, filename):
+        """Load the specified policy."""
+        self.log.info("Opening SELinux policy \"{0}\"".format(filename))
+
+        try:
+            self.policy = qpol.qpol_policy_factory(filename)
+        except SyntaxError as err:
+            raise exception.InvalidPolicy("Error opening policy file \"{0}\": {1}".
+                                          format(filename, err))
+
+        self.log.info("Successfully opened SELinux policy \"{0}\"".format(filename))
+        self.filename = filename
+
+    @staticmethod
+    def _potential_policies():
+        """Generate a list of potential policies to use."""
+        # Start with binary policies in the standard location
+        base_policy_path = selinux.selinux_binary_policy_path()
+        for version in range(qpol.QPOL_POLICY_MAX_VERSION, qpol.QPOL_POLICY_MIN_VERSION-1, -1):
+            yield "{0}.{1}".format(base_policy_path, version)
+
+        # Last chance, try selinuxfs. This is not first, to avoid
+        # holding kernel memory for a long time
+        if selinux.selinuxfs_exists():
+            yield selinux.selinux_current_policy_path()
+
+    def _load_running_policy(self):
+        """Try to load the current running policy."""
+        self.log.info("Attempting to locate current running policy.")
+
+        for filename in self._potential_policies():
+            try:
+                self._load_policy(filename)
+            except OSError as err:
+                if err.errno != ENOENT:
+                    raise
+            else:
+                break
+        else:
+            raise RuntimeError("Unable to locate an SELinux policy to load.")
 
     #
     # Policy properties
