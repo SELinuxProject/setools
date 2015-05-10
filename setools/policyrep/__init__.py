@@ -26,7 +26,10 @@ import logging
 from itertools import chain
 from errno import ENOENT
 
-import selinux
+try:
+    import selinux
+except ImportError:
+    pass
 
 from . import qpol
 
@@ -82,7 +85,10 @@ class SELinuxPolicy(object):
         if policyfile:
             self._load_policy(policyfile)
         else:
-            self._load_running_policy()
+            try:
+                self._load_running_policy()
+            except NameError:
+                raise RuntimeError("Loading the running policy requires libselinux Python bindings")
 
     def __repr__(self):
         return "<SELinuxPolicy(\"{0}\")>".format(self.filename)

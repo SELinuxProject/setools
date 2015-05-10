@@ -17,7 +17,7 @@ To run SETools, the following packages are required:
 * Python 2.7 or 3.3+
 * NetworkX 1.8+
 * setuptools
-* libselinux (including Python bindings)
+* libselinux (Python bindings optional but recommended)
 * libbz2
 
 To build SETools, the following development packages are required, in

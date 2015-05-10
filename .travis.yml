@@ -4,25 +4,17 @@
 
 language: python
 
-# These environments have to be spelled
-# out so that libselinux bindings get
-# the right Python version.
-matrix:
-  include:
-    - python: "2.7"
-      env: TOX_ENV=py27
-    - python: "3.3"
-      env: TOX_ENV=py33
-    - python: "3.4"
-      env: TOX_ENV=py34
-    - python: "3.3"
-      env: TOX_ENV=coverage
-    - env: TOX_ENV=pep8
-    - env: TOX_ENV=lint
+env:
+  - TOX_ENV=py27
+  - TOX_ENV=py33
+  - TOX_ENV=py34
+  - TOX_ENV=pep8
+  - TOX_ENV=coverage
+  - TOX_ENV=lint
 
+matrix:
   allow_failures:
-    - python: "3.3"
-      env: TOX_ENV=coverage
+    - env: TOX_ENV=coverage
 
 before_install:
   - lsb_release -a
@@ -57,9 +49,6 @@ before_install:
   # On Ubuntu 12.04, default CFLAGS make the build fail in libsepol/cil with:
   #    error: declaration of 'index' shadows a global declarationo
   - sudo make CFLAGS="-O2 -pipe -fPIC -Wall" -C selinux-src install
-
-  # Install libselinux Python bindings.
-  - sudo make CFLAGS="-O2 -pipe -fPIC -Wall" -C selinux-src/libselinux install-pywrap
 
   # Ubuntu 12.04's flex generates a redundant decl in libqpol
   - sed -i -e "/Wwrite-strings/s/,/, '-Wno-redundant-decls',/" setup.py
