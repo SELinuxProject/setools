@@ -347,7 +347,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # Don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        self.a.set_reverse(False)
+        self.a.reverse = False
         self.a._build_subgraph()
 
         start = self.p.lookup_type("start")
@@ -375,7 +375,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # Don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        self.a.set_reverse(True)
+        self.a.reverse = True
         self.a._build_subgraph()
 
         start = self.p.lookup_type("start")
@@ -399,8 +399,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # Don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans1"])
+        self.a.reverse = False
+        self.a.exclude = ["trans1"]
         self.a._build_subgraph()
 
         start = self.p.lookup_type("start")
@@ -421,8 +421,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # Don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans3_exec1"])
+        self.a.reverse = False
+        self.a.exclude = ["trans3_exec1"]
         self.a._build_subgraph()
 
         start = self.p.lookup_type("start")
@@ -446,8 +446,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # Don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        self.a.set_reverse(False)
-        self.a.set_exclude(["bothtrans200_exec"])
+        self.a.reverse = False
+        self.a.exclude = ["bothtrans200_exec"]
         self.a._build_subgraph()
 
         start = self.p.lookup_type("start")
@@ -471,8 +471,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # Don't check node list since the disconnected nodes are not
         # removed after removing invalid domain transitions
 
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans2_exec"])
+        self.a.reverse = False
+        self.a.exclude = ["trans2_exec"]
         self.a._build_subgraph()
 
         start = self.p.lookup_type("start")
@@ -492,8 +492,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_300_all_paths(self):
         """DTA: all paths output"""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
 
         expected_path = ["start", "dyntrans100", "bothtrans200"]
 
@@ -533,8 +533,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_301_all_shortest_paths(self):
         """DTA: all shortest paths output"""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
 
         expected_path = ["start", "dyntrans100", "bothtrans200"]
 
@@ -574,8 +574,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_302_shortest_path(self):
         """DTA: shortest path output"""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
 
         expected_path = ["start", "dyntrans100", "bothtrans200"]
 
@@ -615,8 +615,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_303_transitions(self):
         """DTA: transitions output"""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
 
         transitions = list(self.a.transitions("start"))
         self.assertEqual(2, len(transitions))
@@ -652,8 +652,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_310_all_paths_reversed(self):
         """DTA: all paths output reverse DTA"""
-        self.a.set_reverse(True)
-        self.a.set_exclude(None)
+        self.a.reverse = True
+        self.a.exclude = None
 
         expected_path = ["bothtrans200", "dyntrans100", "start"]
 
@@ -693,8 +693,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_311_all_shortest_paths_reversed(self):
         """DTA: all shortest paths output reverse DTA"""
-        self.a.set_reverse(True)
-        self.a.set_exclude(None)
+        self.a.reverse = True
+        self.a.exclude = None
 
         expected_path = ["bothtrans200", "dyntrans100", "start"]
 
@@ -734,8 +734,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_312_shortest_path_reversed(self):
         """DTA: shortest path output reverse DTA"""
-        self.a.set_reverse(True)
-        self.a.set_exclude(None)
+        self.a.reverse = True
+        self.a.exclude = None
 
         expected_path = ["bothtrans200", "dyntrans100", "start"]
 
@@ -775,8 +775,8 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_313_transitions_reversed(self):
         """DTA: transitions output reverse DTA"""
-        self.a.set_reverse(True)
-        self.a.set_exclude(None)
+        self.a.reverse = True
+        self.a.exclude = None
 
         transitions = list(self.a.transitions("bothtrans200"))
         self.assertEqual(1, len(transitions))
@@ -812,160 +812,161 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     def test_900_set_exclude_invalid_type(self):
         """DTA: set invalid excluded type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
-        self.assertRaises(InvalidType, self.a.set_exclude, ["trans1", "invalid_type"])
+        self.a.reverse = False
+        self.a.exclude = None
+        with self.assertRaises(InvalidType):
+            self.a.exclude = ["trans1", "invalid_type"]
 
     def test_910_all_paths_invalid_source(self):
         """DTA: all paths with invalid source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(InvalidType):
             list(self.a.all_paths("invalid_type", "trans1"))
 
     def test_911_all_paths_invalid_target(self):
         """DTA: all paths with invalid target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(InvalidType):
             list(self.a.all_paths("trans1", "invalid_type"))
 
     def test_912_all_paths_invalid_maxlen(self):
         """DTA: all paths with invalid max path length."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(ValueError):
             list(self.a.all_paths("trans1", "trans2", maxlen=-2))
 
     def test_913_all_paths_source_excluded(self):
         """DTA: all paths with excluded source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans1"])
+        self.a.reverse = False
+        self.a.exclude = ["trans1"]
         paths = list(self.a.all_paths("trans1", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_914_all_paths_target_excluded(self):
         """DTA: all paths with excluded target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans2"])
+        self.a.reverse = False
+        self.a.exclude = ["trans2"]
         paths = list(self.a.all_paths("trans1", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_915_all_paths_source_disconnected(self):
         """DTA: all paths with disconnected source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         paths = list(self.a.all_paths("trans5", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_916_all_paths_target_disconnected(self):
         """DTA: all paths with disconnected target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans3"])
+        self.a.reverse = False
+        self.a.exclude = ["trans3"]
         paths = list(self.a.all_paths("trans2", "trans5"))
         self.assertEqual(0, len(paths))
 
     def test_920_shortest_path_invalid_source(self):
         """DTA: shortest path with invalid source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(InvalidType):
             list(self.a.shortest_path("invalid_type", "trans1"))
 
     def test_921_shortest_path_invalid_target(self):
         """DTA: shortest path with invalid target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(InvalidType):
             list(self.a.shortest_path("trans1", "invalid_type"))
 
     def test_922_shortest_path_source_excluded(self):
         """DTA: shortest path with excluded source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans1"])
+        self.a.reverse = False
+        self.a.exclude = ["trans1"]
         paths = list(self.a.shortest_path("trans1", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_923_shortest_path_target_excluded(self):
         """DTA: shortest path with excluded target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans2"])
+        self.a.reverse = False
+        self.a.exclude = ["trans2"]
         paths = list(self.a.shortest_path("trans1", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_924_shortest_path_source_disconnected(self):
         """DTA: shortest path with disconnected source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         paths = list(self.a.shortest_path("trans5", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_925_shortest_path_target_disconnected(self):
         """DTA: shortest path with disconnected target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans3"])
+        self.a.reverse = False
+        self.a.exclude = ["trans3"]
         paths = list(self.a.shortest_path("trans2", "trans5"))
         self.assertEqual(0, len(paths))
 
     def test_930_all_shortest_paths_invalid_source(self):
         """DTA: all shortest paths with invalid source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(InvalidType):
             list(self.a.all_shortest_paths("invalid_type", "trans1"))
 
     def test_931_all_shortest_paths_invalid_target(self):
         """DTA: all shortest paths with invalid target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(InvalidType):
             list(self.a.all_shortest_paths("trans1", "invalid_type"))
 
     def test_932_all_shortest_paths_source_excluded(self):
         """DTA: all shortest paths with excluded source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans1"])
+        self.a.reverse = False
+        self.a.exclude = ["trans1"]
         paths = list(self.a.all_shortest_paths("trans1", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_933_all_shortest_paths_target_excluded(self):
         """DTA: all shortest paths with excluded target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans2"])
+        self.a.reverse = False
+        self.a.exclude = ["trans2"]
         paths = list(self.a.all_shortest_paths("trans1", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_934_all_shortest_paths_source_disconnected(self):
         """DTA: all shortest paths with disconnected source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         paths = list(self.a.all_shortest_paths("trans5", "trans2"))
         self.assertEqual(0, len(paths))
 
     def test_935_all_shortest_paths_target_disconnected(self):
         """DTA: all shortest paths with disconnected target type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans3"])
+        self.a.reverse = False
+        self.a.exclude = ["trans3"]
         paths = list(self.a.all_shortest_paths("trans2", "trans5"))
         self.assertEqual(0, len(paths))
 
     def test_940_transitions_invalid_source(self):
         """DTA: transitions with invalid source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(None)
+        self.a.reverse = False
+        self.a.exclude = None
         with self.assertRaises(InvalidType):
             list(self.a.transitions("invalid_type"))
 
     def test_941_transitions_source_excluded(self):
         """DTA: transitions with excluded source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans1"])
+        self.a.reverse = False
+        self.a.exclude = ["trans1"]
         paths = list(self.a.transitions("trans1"))
         self.assertEqual(0, len(paths))
 
     def test_942_transitions_source_disconnected(self):
         """DTA: transitions with disconnected source type."""
-        self.a.set_reverse(False)
-        self.a.set_exclude(["trans3"])
+        self.a.reverse = False
+        self.a.exclude = ["trans3"]
         paths = list(self.a.transitions("trans5"))
         self.assertEqual(0, len(paths))

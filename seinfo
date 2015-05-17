@@ -101,88 +101,84 @@ try:
     if args.boolquery or args.all:
         q = setools.BoolQuery(p)
         if isinstance(args.boolquery, str):
-            q.set_name(args.boolquery)
+            q.name = args.boolquery
 
         components.append(("Booleans", q, lambda x: x.statement()))
 
     if args.mlscatsquery or args.all:
         q = setools.CategoryQuery(p)
         if isinstance(args.mlscatsquery, str):
-            q.set_name(args.mlscatsquery)
+            q.name = args.mlscatsquery
 
         components.append(("Categories", q, lambda x: x.statement()))
 
     if args.classquery or args.all:
         q = setools.ObjClassQuery(p)
         if isinstance(args.classquery, str):
-            q.set_name(args.classquery)
+            q.name = args.classquery
 
         components.append(("Classes", q, lambda x: x.statement()))
 
     if args.commonquery or args.all:
         q = setools.CommonQuery(p)
         if isinstance(args.commonquery, str):
-            q.set_name(args.commonquery)
+            q.name = args.commonquery
 
         components.append(("Commons", q, lambda x: x.statement()))
 
     if args.constraintquery or args.all:
         q = setools.ConstraintQuery(p, ruletype=["constrain", "mlsconstrain"])
         if isinstance(args.constraintquery, str):
-            # pylint: disable=no-member
-            q.set_tclass(args.constraintquery)
+            q.tclass = [args.constraintquery]
 
         components.append(("Constraints", q, lambda x: x.statement()))
 
     if args.fsusequery or args.all:
         q = setools.FSUseQuery(p)
         if isinstance(args.fsusequery, str):
-            # pylint: disable=no-member
-            q.set_fs(args.fsusequery)
+            q.fs = args.fsusequery
 
         components.append(("Fs_use", q, lambda x: x.statement()))
 
     if args.genfsconquery or args.all:
         q = setools.GenfsconQuery(p)
         if isinstance(args.genfsconquery, str):
-            # pylint: disable=no-member
-            q.set_fs(args.genfsconquery)
+            q.fs = args.genfsconquery
 
         components.append(("Genfscon", q, lambda x: x.statement()))
 
     if args.initialsidquery or args.all:
         q = setools.InitialSIDQuery(p)
         if isinstance(args.initialsidquery, str):
-            q.set_name(args.initialsidquery)
+            q.name = args.initialsidquery
 
         components.append(("Initial SIDs", q, lambda x: x.statement()))
 
     if args.netifconquery or args.all:
         q = setools.NetifconQuery(p)
         if isinstance(args.netifconquery, str):
-            q.set_name(args.netifconquery)
+            q.name = args.netifconquery
 
         components.append(("Netifcon", q, lambda x: x.statement()))
 
     if args.nodeconquery or args.all:
         q = setools.NodeconQuery(p)
         if isinstance(args.nodeconquery, str):
-            # pylint: disable=no-member
-            q.set_network(args.nodeconquery)
+            q.network = args.nodeconquery
 
         components.append(("Nodecon", q, lambda x: x.statement()))
 
     if args.permissivequery or args.all:
         q = setools.TypeQuery(p, permissive=True, match_permissive=True)
         if isinstance(args.permissivequery, str):
-            q.set_name(args.permissivequery)
+            q.name = args.permissivequery
 
         components.append(("Permissive Types", q, lambda x: x.statement()))
 
     if args.polcapquery or args.all:
         q = setools.PolCapQuery(p)
         if isinstance(args.polcapquery, str):
-            q.set_name(args.polcapquery)
+            q.name = args.polcapquery
 
         components.append(("Polcap", q, lambda x: x.statement()))
 
@@ -195,11 +191,9 @@ try:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
             if len(ports) == 2:
-                # pylint: disable=no-member
-                q.set_ports((ports[0], ports[1]))
+                q.ports = ports
             elif len(ports) == 1:
-                # pylint: disable=no-member
-                q.set_ports((ports[0], ports[0]))
+                q.ports = (ports[0], ports[0])
             else:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
@@ -208,43 +202,42 @@ try:
     if args.rolequery or args.all:
         q = setools.RoleQuery(p)
         if isinstance(args.rolequery, str):
-            q.set_name(args.rolequery)
+            q.name = args.rolequery
 
         components.append(("Roles", q, lambda x: x.statement()))
 
     if args.mlssensquery or args.all:
         q = setools.SensitivityQuery(p)
         if isinstance(args.mlssensquery, str):
-            q.set_name(args.mlssensquery)
+            q.name = args.mlssensquery
 
         components.append(("Sensitivities", q, lambda x: x.statement()))
 
     if args.typequery or args.all:
         q = setools.TypeQuery(p)
         if isinstance(args.typequery, str):
-            q.set_name(args.typequery)
+            q.name = args.typequery
 
         components.append(("Types", q, lambda x: x.statement()))
 
     if args.typeattrquery or args.all:
         q = setools.TypeAttributeQuery(p)
         if isinstance(args.typeattrquery, str):
-            q.set_name(args.typeattrquery)
+            q.name = args.typeattrquery
 
         components.append(("Type Attributes", q, expand_attr))
 
     if args.userquery or args.all:
         q = setools.UserQuery(p)
         if isinstance(args.userquery, str):
-            q.set_name(args.userquery)
+            q.name = args.userquery
 
         components.append(("Users", q, lambda x: x.statement()))
 
     if args.validatetransquery or args.all:
         q = setools.ConstraintQuery(p, ruletype=["validatetrans", "mlsvalidatetrans"])
         if isinstance(args.validatetransquery, str):
-            # pylint: disable=no-member
-            q.set_tclass(args.validatetransquery)
+            q.tclass = [args.validatetransquery]
 
         components.append(("Validatetrans", q, lambda x: x.statement()))
 

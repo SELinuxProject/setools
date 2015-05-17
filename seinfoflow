@@ -79,7 +79,7 @@ else:
 try:
     p = setools.SELinuxPolicy(args.policy)
     m = setools.PermissionMap(args.map)
-    g = setools.InfoFlowAnalysis(p, m, minweight=args.min_weight, exclude=args.exclude)
+    g = setools.InfoFlowAnalysis(p, m, min_weight=args.min_weight, exclude=args.exclude)
 
     if args.shortest_path or args.all_paths:
         if args.shortest_path:

@@ -16,11 +16,29 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 
 
 class PolicyQuery(object):
 
-    """Abstract base class for SELinux policy queries."""
+    """Base class for SELinux policy queries."""
+
+    def __init__(self, policy, **kwargs):
+        self.log = logging.getLogger(self.__class__.__name__)
+
+        self.policy = policy
+
+        # keys are sorted in reverse order so regex settings
+        # are set before the criteria, e.g. name_regex
+        # is set before name.  This ensures correct behavior
+        # since the criteria descriptors are sensitve to
+        # regex settings.
+        for name in sorted(kwargs.keys(), reverse=True):
+            attr = getattr(self, name, None)  # None is not callable
+            if callable(attr):
+                raise ValueError("Keyword parameter {0} conflicts with a callable.".format(name))
+
+            setattr(self, name, kwargs[name])
 
     @staticmethod
     def _match_regex(obj, criteria, regex):
@@ -71,6 +89,24 @@ class PolicyQuery(object):
             return [m for m in obj if criteria.search(str(m))]
         else:
             return criteria in obj
+
+    @staticmethod
+    def _match_indirect_regex(obj, criteria, indirect, regex):
+        """
+        Match the object with optional regular expression and indirection.
+
+        Parameters:
+        obj         The object to match.
+        criteria    The criteria to match.
+        regex       If regular expression matching should be used.
+        indirect    If object indirection should be used, e.g.
+                    expanding an attribute.
+        """
+
+        if indirect:
+            return PolicyQuery._match_in_set((obj.expand()), criteria, regex)
+        else:
+            return PolicyQuery._match_regex(obj, criteria, regex)
 
     @staticmethod
     def _match_regex_or_set(obj, criteria, equal, regex):

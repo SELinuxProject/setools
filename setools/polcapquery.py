@@ -23,28 +23,25 @@ from . import compquery
 
 class PolCapQuery(compquery.ComponentQuery):
 
-    """Query SELinux policy capabilities"""
+    """
+    Query SELinux policy capabilities
 
-    def __init__(self, policy,
-                 name=None, name_regex=False):
-        """
-        Parameters:
-        name        The name of the policy capability to match.
-        name_regex  If true, regular expression matching will
-                    be used for matching the name.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Parameter:
+    policy      The policy to query.
 
-        self.policy = policy
-        self.set_name(name, regex=name_regex)
+    Keyword Parameters/Class attributes:
+    name        The name of the policy capability to match.
+    name_regex  If true, regular expression matching will
+                be used for matching the name.
+    """
 
     def results(self):
         """Generator which yields all matching policy capabilities."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
 
         for cap in self.policy.polcaps():
-            if self.name and not self._match_name(cap):
+            if not self._match_name(cap):
                 continue
 
             yield cap

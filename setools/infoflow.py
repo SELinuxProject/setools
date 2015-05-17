@@ -23,6 +23,8 @@ from collections import namedtuple
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
+from .descriptors import EdgeAttrIntMax, EdgeAttrList
+
 __all__ = ['InfoFlowAnalysis']
 
 # Return values for the analysis
@@ -36,7 +38,7 @@ class InfoFlowAnalysis(object):
 
     """Information flow analysis."""
 
-    def __init__(self, policy, perm_map, minweight=1, exclude=None):
+    def __init__(self, policy, perm_map, min_weight=1, exclude=None):
         """
         Parameters:
         policy      The policy to analyze.
@@ -50,59 +52,48 @@ class InfoFlowAnalysis(object):
 
         self.policy = policy
 
-        self.set_min_weight(minweight)
-        self.set_perm_map(perm_map)
-        self.set_exclude(exclude)
+        self.min_weight = min_weight
+        self.perm_map = perm_map
+        self.exclude = exclude
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
         self.G = nx.DiGraph()
         self.subG = None
 
-    def set_min_weight(self, weight):
-        """
-        Set the minimum permission weight for the information flow analysis.
+    @property
+    def min_weight(self):
+        return self._min_weight
 
-        Parameter:
-        weight      Minimum permission weight (1-10)
-
-        Exceptions:
-        ValueError  The minimum weight is not 1-10.
-        """
+    @min_weight.setter
+    def min_weight(self, weight):
         if not 1 <= weight <= 10:
             raise ValueError(
                 "Min information flow weight must be an integer 1-10.")
 
-        self.minweight = weight
+        self._min_weight = weight
         self.rebuildsubgraph = True
 
-    def set_perm_map(self, perm_map):
-        """
-        Set the permission map used for the information flow analysis.
+    @property
+    def perm_map(self):
+        return self._perm_map
 
-        Parameter:
-        perm_map    The permission map.
-
-        Exceptions:
-        TypeError   The map is not a file path or permission map object.
-        """
-        self.perm_map = perm_map
-
+    @perm_map.setter
+    def perm_map(self, perm_map):
+        self._perm_map = perm_map
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
-    def set_exclude(self, exclude):
-        """
-        Set the types to exclude from the information flow analysis.
+    @property
+    def exclude(self):
+        return self._exclude
 
-        Parameter:
-        exclude         A list of types.
-        """
-
-        if exclude:
-            self.exclude = [self.policy.lookup_type(t) for t in exclude]
+    @exclude.setter
+    def exclude(self, types):
+        if types:
+            self._exclude = [self.policy.lookup_type(t) for t in types]
         else:
-            self.exclude = []
+            self._exclude = []
 
         self.rebuildsubgraph = True
 
@@ -344,7 +335,7 @@ class InfoFlowAnalysis(object):
 
         self.log.info("Building subgraph...")
         self.log.debug("Excluding {0!r}".format(self.exclude))
-        self.log.debug("Min weight {0}".format(self.minweight))
+        self.log.debug("Min weight {0}".format(self.min_weight))
 
         # delete excluded types from subgraph
         nodes = [n for n in self.G.nodes() if n not in self.exclude]
@@ -353,70 +344,17 @@ class InfoFlowAnalysis(object):
         # delete edges below minimum weight.
         # no need if weight is 1, since that
         # does not exclude any edges.
-        if self.minweight > 1:
+        if self.min_weight > 1:
             delete_list = []
             for s, t in self.subG.edges_iter():
                 edge = Edge(self.subG, s, t)
-                if edge.weight < self.minweight:
+                if edge.weight < self.min_weight:
                     delete_list.append(edge)
 
             self.subG.remove_edges_from(delete_list)
 
         self.rebuildsubgraph = False
         self.log.info("Completed building subgraph.")
-
-
-class EdgeAttrList(object):
-
-    """
-    A descriptor for edge attributes that are lists.
-
-    Parameter:
-    name    The edge property name
-    """
-
-    def __init__(self, propname):
-        self.name = propname
-
-    def __get__(self, obj, type=None):
-        return obj.G[obj.source][obj.target][self.name]
-
-    def __set__(self, obj, value):
-        # None is a special value to initialize
-        if value is None:
-            obj.G[obj.source][obj.target][self.name] = []
-        else:
-            raise ValueError("{0} lists should not be assigned directly".format(self.name))
-
-    def __delete__(self, obj):
-        # in Python3 a .clear() function was added for lists
-        # keep this implementation for Python 2 compat
-        del obj.G[obj.source][obj.target][self.name][:]
-
-
-class EdgeAttrIntMax(object):
-
-    """
-    A descriptor for edge attributes that are non-negative integers that always
-    keep the max assigned value until re-initialized.
-
-    Parameter:
-    name    The edge property name
-    """
-
-    def __init__(self, propname):
-        self.name = propname
-
-    def __get__(self, obj, type=None):
-        return obj.G[obj.source][obj.target][self.name]
-
-    def __set__(self, obj, value):
-        # None is a special value to initialize
-        if value is None:
-            obj.G[obj.source][obj.target][self.name] = 0
-        else:
-            current_value = obj.G[obj.source][obj.target][self.name]
-            obj.G[obj.source][obj.target][self.name] = max(current_value, value)
 
 
 class Edge(object):

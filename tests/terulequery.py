@@ -117,6 +117,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.validate_rule(r[0], "allow", "test8a1", "test8a1", "infoflow", set(["hi_w"]))
         self.validate_rule(r[1], "allow", "test8a2", "test8a2", "infoflow", set(["low_r"]))
 
+    @unittest.skip("Setting tclass to a string is no longer supported.")
     def test_009_class(self):
         """TE rule query with exact object class match."""
         q = TERuleQuery(self.p, tclass="infoflow2", tclass_regex=False)

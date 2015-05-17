@@ -24,37 +24,32 @@ from . import mixins
 
 class CategoryQuery(mixins.MatchAlias, compquery.ComponentQuery):
 
-    """Query MLS Categories"""
+    """
+    Query MLS Categories
 
-    def __init__(self, policy,
-                 name=None, name_regex=False,
-                 alias=None, alias_regex=False):
-        """
-        Parameters:
-        name         The name of the category to match.
-        name_regex   If true, regular expression matching will
-                     be used for matching the name.
-        alias        The alias name to match.
-        alias_regex  If true, regular expression matching
-                     will be used on the alias names.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Parameter:
+    policy       The policy to query.
 
-        self.policy = policy
-        self.set_name(name, regex=name_regex)
-        self.set_alias(alias, regex=alias_regex)
+    Keyword Parameters/Class attributes:
+    name         The name of the category to match.
+    name_regex   If true, regular expression matching will
+                 be used for matching the name.
+    alias        The alias name to match.
+    alias_regex  If true, regular expression matching
+                 will be used on the alias names.
+    """
 
     def results(self):
         """Generator which yields all matching categories."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
-        self.log.debug("Alias: {0.alias_cmp}, regex: {0.alias_regex}".format(self))
+        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Alias: {0.alias}, regex: {0.alias_regex}".format(self))
 
         for cat in self.policy.categories():
-            if self.name and not self._match_name(cat):
+            if not self._match_name(cat):
                 continue
 
-            if self.alias and not self._match_alias(cat.aliases()):
+            if not self._match_alias(cat):
                 continue
 
             yield cat

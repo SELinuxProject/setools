@@ -18,6 +18,7 @@
 import unittest
 
 from setools import SELinuxPolicy, MLSRuleQuery
+from setools.policyrep.exception import InvalidMLSRuleType
 
 from . import mixins
 
@@ -82,6 +83,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], "range_transition", "test12s", "test12aFAIL", "infoflow", "s2")
 
+    @unittest.skip("Setting tclass to a string is no longer supported.")
     def test_020_class(self):
         """MLS rule query with exact object class match."""
         q = MLSRuleQuery(self.p, tclass="infoflow7", tclass_regex=False)
@@ -273,3 +275,8 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], "range_transition", "test45", "test45", "infoflow",
                            "s45:c1 - s45:c1.c3")
+
+    def test_900_invalid_ruletype(self):
+        """MLS rule query with invalid rule type."""
+        with self.assertRaises(InvalidMLSRuleType):
+            q = MLSRuleQuery(self.p, ruletype="type_transition")

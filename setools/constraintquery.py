@@ -19,62 +19,58 @@
 import logging
 import re
 
-from . import mixins
-from .query import PolicyQuery
+from . import mixins, query
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
 from .policyrep.exception import ConstraintUseError
 
 
-class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery):
+class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuery):
 
-    """Query constraint rules, (mls)constrain/(mls)validatetrans."""
+    """
+    Query constraint rules, (mls)constrain/(mls)validatetrans.
 
-    def __init__(self, policy,
-                 ruletype=None,
-                 tclass=None, tclass_regex=False,
-                 perms=None, perms_equal=False,
-                 role=None, role_regex=False, role_indirect=True,
-                 type_=None, type_regex=False, type_indirect=True,
-                 user=None, user_regex=False):
+    Parameter:
+    policy            The policy to query.
 
-        """
-        Parameter:
-        policy            The policy to query.
-        ruletype          The rule type(s) to match.
-        tclass            The object class(es) to match.
-        tclass_regex      If true, use a regular expression for
-                          matching the rule's object class.
-        perms             The permission(s) to match.
-        perms_equal       If true, the permission set of the rule
-                          must exactly match the permissions
-                          criteria.  If false, any set intersection
-                          will match.
-        role              The name of the role to match in the
-                          constraint expression.
-        role_indirect     If true, members of an attribute will be
-                          matched rather than the attribute itself.
-        role_regex        If true, regular expression matching will
-                          be used on the role.
-        type_             The name of the type/attribute to match in the
-                          constraint expression.
-        type_indirect     If true, members of an attribute will be
-                          matched rather than the attribute itself.
-        type_regex        If true, regular expression matching will
-                          be used on the type/attribute.
-        user              The name of the user to match in the
-                          constraint expression.
-        user_regex        If true, regular expression matching will
-                          be used on the user.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Keyword Parameters/Class attributes:
+    ruletype          The list of rule type(s) to match.
+    tclass            The object class(es) to match.
+    tclass_regex      If true, use a regular expression for
+                      matching the rule's object class.
+    perms             The permission(s) to match.
+    perms_equal       If true, the permission set of the rule
+                      must exactly match the permissions
+                      criteria.  If false, any set intersection
+                      will match.
+    perms_regex       If true, regular expression matching will be used
+                      on the permission names instead of set logic.
+    role              The name of the role to match in the
+                      constraint expression.
+    role_indirect     If true, members of an attribute will be
+                      matched rather than the attribute itself.
+    role_regex        If true, regular expression matching will
+                      be used on the role.
+    type_             The name of the type/attribute to match in the
+                      constraint expression.
+    type_indirect     If true, members of an attribute will be
+                      matched rather than the attribute itself.
+    type_regex        If true, regular expression matching will
+                      be used on the type/attribute.
+    user              The name of the user to match in the
+                      constraint expression.
+    user_regex        If true, regular expression matching will
+                      be used on the user.
+    """
 
-        self.policy = policy
-
-        self.set_ruletype(ruletype)
-        self.set_tclass(tclass, regex=tclass_regex)
-        self.set_perms(perms, equal=perms_equal)
-        self.set_role(role, regex=role_regex, indirect=role_indirect)
-        self.set_type(type_, regex=type_regex, indirect=type_indirect)
-        self.set_user(user, regex=user_regex)
+    ruletype = RuletypeDescriptor("validate_constraint_ruletype")
+    user = CriteriaDescriptor("user_regex", "lookup_user")
+    user_regex = False
+    role = CriteriaDescriptor("role_regex", "lookup_role")
+    role_regex = False
+    role_indirect = True
+    type_ = CriteriaDescriptor("type_regex", "lookup_type_or_attr")
+    type_regex = False
+    type_indirect = True
 
     def _match_expr(self, expr, criteria, indirect, regex):
         """
@@ -101,143 +97,46 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, PolicyQuery)
         """Generator which yields all matching constraints rules."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Class: {0.tclass_cmp!r}, regex: {0.tclass_regex}".format(self))
-        self.log.debug("Perms: {0.perms_cmp}, eq: {0.perms_equal}".format(self))
-        self.log.debug("User: {0.user_cmp!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role_cmp!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_cmp!r}, regex: {0.type_regex}".format(self))
+        self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
+                       format(self))
+        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
+        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
+        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
 
         for c in self.policy.constraints():
             if self.ruletype:
                 if c.ruletype not in self.ruletype:
                     continue
 
-            if self.tclass and not self._match_object_class(c.tclass):
+            if not self._match_object_class(c):
                 continue
 
-            if self.perms:
-                try:
-                    if not self._match_perms(c.perms):
-                        continue
-                except ConstraintUseError:
-                        continue
+            try:
+                if not self._match_perms(c):
+                    continue
+            except ConstraintUseError:
+                    continue
 
             if self.role and not self._match_expr(
                         c.roles,
-                        self.role_cmp,
+                        self.role,
                         self.role_indirect,
                         self.role_regex):
                     continue
 
             if self.type_ and not self._match_expr(
                         c.types,
-                        self.type_cmp,
+                        self.type_,
                         self.type_indirect,
                         self.type_regex):
                     continue
 
             if self.user and not self._match_expr(
                         c.users,
-                        self.user_cmp,
+                        self.user,
                         False,
                         self.user_regex):
                     continue
 
             yield c
-
-    def set_ruletype(self, ruletype):
-        """
-        Set the rule types for the rule query.
-
-        Parameter:
-        ruletype    The rule types to match.
-        """
-        if ruletype:
-            self.policy.validate_constraint_ruletype(ruletype)
-
-        self.ruletype = ruletype
-
-    def set_role(self, role, **opts):
-        """
-        Set the criteria for matching the constraint's role.
-
-        Parameter:
-        role       Name to match the constraint's role.
-        regex      If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError  Invalid keyword option.
-        """
-
-        self.role = role
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.role_regex = opts[k]
-            elif k == "indirect":
-                self.role_indirect = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))
-
-        if not self.role:
-            self.role_cmp = None
-        elif self.role_regex:
-            self.role_cmp = re.compile(self.role)
-        else:
-            self.role_cmp = self.policy.lookup_role(self.role)
-
-    def set_type(self, type_, **opts):
-        """
-        Set the criteria for matching the constraint's type.
-
-        Parameter:
-        type_      Name to match the constraint's type.
-        regex      If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError  Invalid keyword option.
-        """
-
-        self.type_ = type_
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.type_regex = opts[k]
-            elif k == "indirect":
-                self.type_indirect = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))
-
-        if not self.type_:
-            self.type_cmp = None
-        elif self.type_regex:
-            self.type_cmp = re.compile(self.type_)
-        else:
-            self.type_cmp = self.policy.lookup_type(type_)
-
-    def set_user(self, user, **opts):
-        """
-        Set the criteria for matching the constraint's user.
-
-        Parameter:
-        user       Name to match the constraint's user.
-        regex      If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError  Invalid keyword option.
-        """
-
-        self.user = user
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.user_regex = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))
-
-        if not self.user:
-            self.user_cmp = None
-        elif self.user_regex:
-            self.user_cmp = re.compile(self.user)
-        else:
-            self.user_cmp = self.policy.lookup_user(self.user)

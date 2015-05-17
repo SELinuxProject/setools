@@ -52,7 +52,7 @@ class BoolQueryTest(unittest.TestCase):
 
     def test_010_default(self):
         """Boolean query with default state match."""
-        q = BoolQuery(self.p, match_default=True, default=False)
+        q = BoolQuery(self.p, default=False)
 
         bools = sorted(str(b) for b in q.results())
         self.assertListEqual(["test10a", "test10b"], bools)

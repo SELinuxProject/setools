@@ -135,18 +135,18 @@ try:
         # with an empty string in it (split on empty string)
         if args.tclass:
             if args.tclass_regex:
-                q.set_tclass(args.tclass)
+                q.tclass = args.tclass
             else:
-                q.set_tclass(args.tclass.split(","))
+                q.tclass = args.tclass.split(",")
 
         if args.perms:
-            q.set_perms(args.perms.split(","))
+            q.perms = args.perms.split(",")
 
         if args.boolean:
             if args.boolean_regex:
-                q.set_boolean(args.boolean)
+                q.boolean = args.boolean
             else:
-                q.set_boolean(args.boolean.split(","))
+                q.boolean = args.boolean.split(",")
 
         for r in sorted(q.results()):
             print(r)
@@ -168,9 +168,9 @@ try:
         # with an empty string in it (split on empty string)
         if args.tclass:
             if args.tclass_regex:
-                q.set_tclass(args.tclass)
+                q.tclass = args.tclass
             else:
-                q.set_tclass(args.tclass.split(","))
+                q.tclass = args.tclass.split(",")
 
         for r in sorted(q.results()):
             print(r)
@@ -189,9 +189,9 @@ try:
         # with an empty string in it (split on empty string)
         if args.tclass:
             if args.tclass_regex:
-                q.set_tclass(args.tclass)
+                q.tclass = args.tclass
             else:
-                q.set_tclass(args.tclass.split(","))
+                q.tclass = args.tclass.split(",")
 
         for r in sorted(q.results()):
             print(r)

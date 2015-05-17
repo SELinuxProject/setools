@@ -19,84 +19,42 @@
 import logging
 import re
 
-from . import compquery
+from . import compquery, mixins
 
 
-class CommonQuery(compquery.ComponentQuery):
+class CommonQuery(mixins.MatchPermission, compquery.ComponentQuery):
 
-    """Query common permission sets."""
+    """
+    Query common permission sets.
 
-    def __init__(self, policy,
-                 name=None, name_regex=False,
-                 perms=None, perms_equal=False, perms_regex=False):
-        """
-        Parameters:
-        name         The name of the common to match.
-        name_regex   If true, regular expression matching will
-                     be used for matching the name.
-        perms        The permissions to match.
-        perms_equal  If true, only commons with permission sets
-                     that are equal to the criteria will
-                     match.  Otherwise, any intersection
-                     will match.
-        perms_regex  If true, regular expression matching will be used
-                     on the permission names instead of set logic.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Parameter:
+    policy       The policy to query.
 
-        self.policy = policy
-        self.set_name(name, regex=name_regex)
-        self.set_perms(perms, regex=perms_regex, equal=perms_equal)
+    Keyword Parameters/Class attributes:
+    name         The name of the common to match.
+    name_regex   If true, regular expression matching will
+                 be used for matching the name.
+    perms        The permissions to match.
+    perms_equal  If true, only commons with permission sets
+                 that are equal to the criteria will
+                 match.  Otherwise, any intersection
+                 will match.
+    perms_regex  If true, regular expression matching will be used
+                 on the permission names instead of set logic.
+    """
 
     def results(self):
         """Generator which yields all matching commons."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
-        self.log.debug("Perms: {0.perms_cmp!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
+        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
                        format(self))
 
         for com in self.policy.commons():
-            if self.name and not self._match_name(com):
+            if not self._match_name(com):
                 continue
 
-            if self.perms and not self._match_regex_or_set(
-                    com.perms,
-                    self.perms_cmp,
-                    self.perms_equal,
-                    self.perms_regex):
+            if not self._match_perms(com):
                 continue
 
             yield com
-
-    def set_perms(self, perms, **opts):
-        """
-        Set the criteria for the common's permissions.
-
-        Parameter:
-        perms       Name to match the common's permissions.
-
-        Keyword Options:
-        regex       If true, regular expression matching will be used.
-        equal       If true, the permisison set of the common
-                    must equal the permissions criteria to
-                    match. If false, any intersection in the
-                    critera will cause a match.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.perms = perms
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.perms_regex = opts[k]
-            elif k == "equal":
-                self.perms_equal = opts[k]
-            else:
-                raise NameError("Invalid permissions option: {0}".format(k))
-
-        if self.perms_regex:
-            self.perms_cmp = re.compile(self.perms)
-        else:
-            self.perms_cmp = self.perms

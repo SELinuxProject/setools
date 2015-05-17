@@ -42,6 +42,7 @@ class ConstraintQueryTest(unittest.TestCase):
         constraint = sorted(c.tclass for c in q.results())
         self.assertListEqual(["test1"], constraint)
 
+    @unittest.skip("Setting tclass to a string is no longer supported.")
     def test_010_class_exact(self):
         """Constraint query with exact object class match."""
         q = ConstraintQuery(self.p, tclass="test10")

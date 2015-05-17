@@ -89,7 +89,7 @@ class TypeQueryTest(unittest.TestCase):
 
     def test_030_permissive(self):
         """Type query with permissive match"""
-        q = TypeQuery(self.p, match_permissive=True, permissive=True)
+        q = TypeQuery(self.p, permissive=True)
 
         types = sorted(str(t) for t in q.results())
         self.assertListEqual(["test30"], types)

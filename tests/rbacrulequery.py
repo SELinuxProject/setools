@@ -90,6 +90,15 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(len(r), 1)
         self.validate_allow(r[0], "test11s", "test11t1")
 
+    def test_012_target_type(self):
+        """RBAC rule query with a type as target."""
+        q = RBACRuleQuery(self.p, target="test12t")
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "role_transition", "test12s", "test12t", "infoflow", "test12d")
+
+    @unittest.skip("Setting tclass to a string is no longer supported.")
     def test_020_class(self):
         """RBAC rule query with exact object class match."""
         q = RBACRuleQuery(self.p, tclass="infoflow2", tclass_regex=False)
@@ -146,4 +155,4 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         # this will have to be updated as number of
         # role allows change in the test policy
-        self.assertEqual(num, 8)
+        self.assertEqual(num, 9)

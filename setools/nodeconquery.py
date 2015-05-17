@@ -29,62 +29,82 @@ from . import contextquery
 
 class NodeconQuery(contextquery.ContextQuery):
 
-    """Query nodecon statements."""
+    """
+    Query nodecon statements.
 
-    def __init__(self, policy,
-                 network=None, network_overlap=False,
-                 ip_version=None,
-                 user=None, user_regex=False,
-                 role=None, role_regex=False,
-                 type_=None, type_regex=False,
-                 range_=None, range_overlap=False, range_subset=False,
-                 range_superset=False, range_proper=False):
-        """
-        Parameters:
-        policy          The policy to query.
+    Parameter:
+    policy          The policy to query.
 
-        network         The network address.
-        network_overlap If true, the net will match if it overlaps with
-                        the nodecon's network instead of equality.
-        user            The criteria to match the context's user.
-        user_regex      If true, regular expression matching
-                        will be used on the user.
-        role            The criteria to match the context's role.
-        role_regex      If true, regular expression matching
-                        will be used on the role.
-        type_           The criteria to match the context's type.
-        type_regex      If true, regular expression matching
-                        will be used on the type.
-        range_          The criteria to match the context's range.
-        range_subset    If true, the criteria will match if it is a subset
-                        of the context's range.
-        range_overlap   If true, the criteria will match if it overlaps
-                        any of the context's range.
-        range_superset  If true, the criteria will match if it is a superset
-                        of the context's range.
-        range_proper    If true, use proper superset/subset operations.
-                        No effect if not using set operations.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Keyword Parameters/Class attributes:
+    network         The IPv4/IPv6 address or IPv4/IPv6 network address
+                    with netmask, e.g. 192.168.1.0/255.255.255.0 or
+                    "192.168.1.0/24".
+    network_overlap If true, the net will match if it overlaps with
+                    the nodecon's network instead of equality.
+    ip_version      The IP version of the nodecon to match. (socket.AF_INET
+                    for IPv4 or socket.AF_INET6 for IPv6)
+    user            The criteria to match the context's user.
+    user_regex      If true, regular expression matching
+                    will be used on the user.
+    role            The criteria to match the context's role.
+    role_regex      If true, regular expression matching
+                    will be used on the role.
+    type_           The criteria to match the context's type.
+    type_regex      If true, regular expression matching
+                    will be used on the type.
+    range_          The criteria to match the context's range.
+    range_subset    If true, the criteria will match if it is a subset
+                    of the context's range.
+    range_overlap   If true, the criteria will match if it overlaps
+                    any of the context's range.
+    range_superset  If true, the criteria will match if it is a superset
+                    of the context's range.
+    range_proper    If true, use proper superset/subset operations.
+                    No effect if not using set operations.
+    """
 
-        self.policy = policy
+    _network = None
+    network_overlap = False
+    _ip_version = None
 
-        self.set_network(network, overlap=network_overlap)
-        self.set_ip_version(ip_version)
-        self.set_user(user, regex=user_regex)
-        self.set_role(role, regex=role_regex)
-        self.set_type(type_, regex=type_regex)
-        self.set_range(range_, overlap=range_overlap, subset=range_subset,
-                       superset=range_superset, proper=range_proper)
+    @property
+    def ip_version(self):
+        return self._ip_version
+
+    @ip_version.setter
+    def ip_version(self, value):
+        if value:
+            if not (value == AF_INET or value == AF_INET6):
+                raise ValueError(
+                    "The address family must be {0} for IPv4 or {1} for IPv6.".
+                    format(AF_INET, AF_INET6))
+
+            self._ip_version = value
+        else:
+            self._ip_version = None
+
+    @property
+    def network(self):
+        return self._network
+
+    @network.setter
+    def network(self, value):
+        if value:
+            try:
+                self._network = ipaddress.ip_network(value)
+            except NameError:  # pragma: no cover
+                raise RuntimeError("Nodecon IP address/network functions require Python 3.3+.")
+        else:
+            self._network = None
 
     def results(self):
         """Generator which yields all matching nodecons."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
-        self.log.debug("Ver: {0.version}".format(self))
-        self.log.debug("User: {0.user_cmp!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role_cmp!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_cmp!r}, regex: {0.type_regex}".format(self))
+        self.log.debug("IP Version: {0.ip_version}".format(self))
+        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
+        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
+        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
         self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                        "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
@@ -119,77 +139,10 @@ class NodeconQuery(contextquery.ContextQuery):
                     if not net == self.network:
                         continue
 
-            if self.version and self.version != nodecon.ip_version:
+            if self.ip_version and self.ip_version != nodecon.ip_version:
                 continue
 
-            if not self._match_context(
-                    nodecon.context,
-                    self.user_cmp,
-                    self.user_regex,
-                    self.role_cmp,
-                    self.role_regex,
-                    self.type_cmp,
-                    self.type_regex,
-                    self.range_cmp,
-                    self.range_subset,
-                    self.range_overlap,
-                    self.range_superset,
-                    self.range_proper):
+            if not self._match_context(nodecon.context):
                 continue
 
             yield nodecon
-
-    def set_network(self, net, **opts):
-        """
-        Set the criteria for matching the network.
-
-        Parameter:
-        net         String IPv4/IPv6 address or IPv4/IPv6 network address
-                    with netmask, e.g. 192.168.1.0/255.255.255.0 or
-                    "192.168.1.0/24".
-
-        Keyword parameters:
-        overlap     If true, the criteria will match if it overlaps with the
-                    nodecon's network instead of equality.
-
-        Exceptions:
-        NameError   Invalid keyword parameter.
-        """
-
-        if net:
-            try:
-                self.network = ipaddress.ip_network(net)
-            except NameError:  # pragma: no cover
-                raise RuntimeError("Nodecon IP address/network functions require Python 3.3+.")
-        else:
-            # ensure self.network is set
-            self.network = None
-
-        for k in list(opts.keys()):
-            if k == "overlap":
-                self.network_overlap = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))
-
-    def set_ip_version(self, version):
-        """
-        Set the criteria for matching the IP version.
-
-        Parameter:
-        version     The address family to match.  (socket.AF_INET for
-                    IPv4 or socket.AF_INET6 for IPv6)
-
-        Exceptions:
-        ValueError  Invalid address family number.
-        """
-
-        if version:
-            if not (version == AF_INET or version == AF_INET6):
-                raise ValueError(
-                    "The address family must be {0} for IPv4 or {1} for IPv6.".
-                    format(AF_INET, AF_INET6))
-
-            self.version = version
-
-        else:
-            self.version = None

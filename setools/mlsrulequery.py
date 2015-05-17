@@ -18,53 +18,52 @@
 #
 import logging
 
-from . import rulequery
+from . import mixins, query
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
 
 
-class MLSRuleQuery(rulequery.RuleQuery):
+class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
 
-    """Query MLS rules."""
+    """
+    Query MLS rules.
 
-    def __init__(self, policy,
-                 ruletype=None,
-                 source=None, source_regex=False,
-                 target=None, target_regex=False,
-                 tclass=None, tclass_regex=False,
-                 default=None, default_overlap=False, default_subset=False,
-                 default_superset=False, default_proper=False):
-        """
-        Parameters:
-        policy           The policy to query.
-        ruletype         The rule type(s) to match.
-        source           The name of the source type/attribute to match.
-        source_regex     If true, regular expression matching will
-                         be used on the source type/attribute.
-        target           The name of the target type/attribute to match.
-        target_regex     If true, regular expression matching will
-                         be used on the target type/attribute.
-        tclass           The object class(es) to match.
-        tclass_regex     If true, use a regular expression for
-                         matching the rule's object class.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Parameter:
+    policy            The policy to query.
 
-        self.policy = policy
+    Keyword Parameters/Class attributes:
+    ruletype         The list of rule type(s) to match.
+    source           The name of the source type/attribute to match.
+    source_regex     If true, regular expression matching will
+                     be used on the source type/attribute.
+    target           The name of the target type/attribute to match.
+    target_regex     If true, regular expression matching will
+                     be used on the target type/attribute.
+    tclass           The object class(es) to match.
+    tclass_regex     If true, use a regular expression for
+                     matching the rule's object class.
+    """
 
-        self.set_ruletype(ruletype)
-        self.set_source(source, regex=source_regex)
-        self.set_target(target, regex=target_regex)
-        self.set_tclass(tclass, regex=tclass_regex)
-        self.set_default(default, overlap=default_overlap, subset=default_subset,
-                         superset=default_superset, proper=default_proper)
+    ruletype = RuletypeDescriptor("validate_mls_ruletype")
+    source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
+    source_regex = False
+    target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
+    target_regex = False
+    tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
+    tclass_regex = False
+    default = CriteriaDescriptor(lookup_function="lookup_range")
+    default_overlap = False
+    default_subset = False
+    default_superset = False
+    default_proper = False
 
     def results(self):
         """Generator which yields all matching MLS rules."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Source: {0.source_cmp!r}, regex: {0.source_regex}".format(self))
-        self.log.debug("Target: {0.target_cmp!r}, regex: {0.target_regex}".format(self))
-        self.log.debug("Class: {0.tclass_cmp!r}, regex: {0.tclass_regex}".format(self))
-        self.log.debug("Default: {0.default_cmp!r}, overlap: {0.default_overlap}, "
+        self.log.debug("Source: {0.source!r}, regex: {0.source_regex}".format(self))
+        self.log.debug("Target: {0.target!r}, regex: {0.target_regex}".format(self))
+        self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Default: {0.default!r}, overlap: {0.default_overlap}, "
                        "subset: {0.default_subset}, superset: {0.default_superset}, "
                        "proper: {0.default_proper}".format(self))
 
@@ -81,7 +80,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             if self.source and not self._match_regex(
                     rule.source,
-                    self.source_cmp,
+                    self.source,
                     self.source_regex):
                 continue
 
@@ -90,14 +89,14 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             if self.target and not self._match_regex(
                     rule.target,
-                    self.target_cmp,
+                    self.target,
                     self.target_regex):
                 continue
 
             #
             # Matching on object class
             #
-            if self.tclass and not self._match_object_class(rule.tclass):
+            if not self._match_object_class(rule):
                 continue
 
             #
@@ -105,7 +104,7 @@ class MLSRuleQuery(rulequery.RuleQuery):
             #
             if self.default and not self._match_range(
                     rule.default,
-                    self.default_cmp,
+                    self.default,
                     self.default_subset,
                     self.default_overlap,
                     self.default_superset,
@@ -114,55 +113,3 @@ class MLSRuleQuery(rulequery.RuleQuery):
 
             # if we get here, we have matched all available criteria
             yield rule
-
-    def set_ruletype(self, ruletype):
-        """
-        Set the rule types for the rule query.
-
-        Parameter:
-        ruletype    The rule types to match.
-        """
-        if ruletype:
-            self.policy.validate_mls_ruletype(ruletype)
-
-        self.ruletype = ruletype
-
-    def set_default(self, default, **opts):
-        """
-        Set the criteria for matching the rule's default range.
-
-        Parameter:
-        default     Criteria to match the rule's default range.
-
-        Keyword Parameters:
-        subset      If true, the criteria will match if it is a subset
-                    of the rule's default range.
-        overlap     If true, the criteria will match if it overlaps
-                    any of the rule's default range.
-        superset    If true, the criteria will match if it is a superset
-                    of the rule's default range.
-        proper      If true, use proper superset/subset operations.
-                    No effect if not using set operations.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.default = default
-
-        for k in list(opts.keys()):
-            if k == "subset":
-                self.default_subset = opts[k]
-            elif k == "overlap":
-                self.default_overlap = opts[k]
-            elif k == "superset":
-                self.default_superset = opts[k]
-            elif k == "proper":
-                self.default_proper = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))
-
-        if not self.default:
-            self.default_cmp = None
-        else:
-            self.default_cmp = self.policy.lookup_range(self.default)

@@ -19,75 +19,89 @@
 import logging
 import re
 
+from . import mixins, query
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
 from .policyrep.exception import RuleUseError, RuleNotConditional
-from . import mixins
-from . import rulequery
 
 
-class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
+class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuery):
 
-    """Query the Type Enforcement rules."""
+    """
+    Query the Type Enforcement rules.
 
-    def __init__(self, policy,
-                 ruletype=None,
-                 source=None, source_regex=False, source_indirect=True,
-                 target=None, target_regex=False, target_indirect=True,
-                 tclass=None, tclass_regex=False,
-                 perms=None, perms_equal=False,
-                 default=None, default_regex=False,
-                 boolean=None, boolean_regex=False, boolean_equal=False):
-        """
-        Parameter:
-        policy            The policy to query.
-        ruletype          The rule type(s) to match.
-        source            The name of the source type/attribute to match.
-        source_indirect   If true, members of an attribute will be
-                          matched rather than the attribute itself.
-        source_regex      If true, regular expression matching will
-                          be used on the source type/attribute.
-                          Obeys the source_indirect option.
-        target            The name of the target type/attribute to match.
-        target_indirect   If true, members of an attribute will be
-                          matched rather than the attribute itself.
-        target_regex      If true, regular expression matching will
-                          be used on the target type/attribute.
-                          Obeys target_indirect option.
-        tclass            The object class(es) to match.
-        tclass_regex      If true, use a regular expression for
-                          matching the rule's object class.
-        perms             The permission(s) to match.
-        perms_equal       If true, the permission set of the rule
-                          must exactly match the permissions
-                          criteria.  If false, any set intersection
-                          will match.
-        default           The name of the default type to match.
-        default_regex     If true, regular expression matching will be
-                          used on the default type.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Parameter:
+    policy            The policy to query.
 
-        self.policy = policy
+    Keyword Parameters/Class attributes:
+    ruletype          The list of rule type(s) to match.
+    source            The name of the source type/attribute to match.
+    source_indirect   If true, members of an attribute will be
+                      matched rather than the attribute itself.
+                      Default is true.
+    source_regex      If true, regular expression matching will
+                      be used on the source type/attribute.
+                      Obeys the source_indirect option.
+                      Default is false.
+    target            The name of the target type/attribute to match.
+    target_indirect   If true, members of an attribute will be
+                      matched rather than the attribute itself.
+                      Default is true.
+    target_regex      If true, regular expression matching will
+                      be used on the target type/attribute.
+                      Obeys target_indirect option.
+                      Default is false.
+    tclass            The object class(es) to match.
+    tclass_regex      If true, use a regular expression for
+                      matching the rule's object class.
+                      Default is false.
+    perms             The set of permission(s) to match.
+    perms_equal       If true, the permission set of the rule
+                      must exactly match the permissions
+                      criteria.  If false, any set intersection
+                      will match.
+                      Default is false.
+    perms_regex       If true, regular expression matching will be used
+                      on the permission names instead of set logic.
+    default           The name of the default type to match.
+    default_regex     If true, regular expression matching will be
+                      used on the default type.
+                      Default is false.
+    boolean           The set of boolean(s) to match.
+    boolean_regex     If true, regular expression matching will be
+                      used on the booleans.
+                      Default is false.
+    boolean_equal     If true, the booleans in the conditional
+                      expression of the rule must exactly match the
+                      criteria.  If false, any set intersection
+                      will match.  Default is false.
+    """
 
-        self.set_ruletype(ruletype)
-        self.set_source(source, indirect=source_indirect, regex=source_regex)
-        self.set_target(target, indirect=target_indirect, regex=target_regex)
-        self.set_tclass(tclass, regex=tclass_regex)
-        self.set_perms(perms, equal=perms_equal)
-        self.set_default(default, regex=default_regex)
-        self.set_boolean(boolean, regex=boolean_regex, equal=boolean_equal)
+    ruletype = RuletypeDescriptor("validate_te_ruletype")
+    source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
+    source_regex = False
+    source_indirect = True
+    target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
+    target_regex = False
+    target_indirect = True
+    default = CriteriaDescriptor("default_regex", "lookup_type")
+    default_regex = False
+    boolean = CriteriaSetDescriptor("boolean_regex", "lookup_boolean")
+    boolean_regex = False
+    boolean_equal = False
 
     def results(self):
         """Generator which yields all matching TE rules."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Source: {0.source_cmp!r}, indirect: {0.source_indirect}, "
+        self.log.debug("Source: {0.source!r}, indirect: {0.source_indirect}, "
                        "regex: {0.source_regex}".format(self))
-        self.log.debug("Target: {0.target_cmp!r}, indirect: {0.target_indirect}, "
+        self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
                        "regex: {0.target_regex}".format(self))
-        self.log.debug("Class: {0.tclass_cmp!r}, regex: {0.tclass_regex}".format(self))
-        self.log.debug("Perms: {0.perms_cmp}, eq: {0.perms_equal}".format(self))
-        self.log.debug("Default: {0.default_cmp!r}, regex: {0.default_regex}".format(self))
-        self.log.debug("Boolean: {0.boolean_cmp!r}, eq: {0.boolean_equal}, "
+        self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
+                       format(self))
+        self.log.debug("Default: {0.default!r}, regex: {0.default_regex}".format(self))
+        self.log.debug("Boolean: {0.boolean!r}, eq: {0.boolean_equal}, "
                        "regex: {0.boolean_regex}".format(self))
 
         for rule in self.policy.terules():
@@ -103,7 +117,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             #
             if self.source and not self._match_indirect_regex(
                     rule.source,
-                    self.source_cmp,
+                    self.source,
                     self.source_indirect,
                     self.source_regex):
                 continue
@@ -113,7 +127,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             #
             if self.target and not self._match_indirect_regex(
                     rule.target,
-                    self.target_cmp,
+                    self.target,
                     self.target_indirect,
                     self.target_regex):
                 continue
@@ -121,18 +135,17 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
             #
             # Matching on object class
             #
-            if self.tclass and not self._match_object_class(rule.tclass):
+            if not self._match_object_class(rule):
                 continue
 
             #
             # Matching on permission set
             #
-            if self.perms:
-                try:
-                    if not self._match_perms(rule.perms):
-                        continue
-                except RuleUseError:
+            try:
+                if not self._match_perms(rule):
                     continue
+            except RuleUseError:
+                continue
 
             #
             # Matching on default type
@@ -141,7 +154,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
                 try:
                     if not self._match_regex(
                             rule.default,
-                            self.default_cmp,
+                            self.default,
                             self.default_regex):
                         continue
                 except RuleUseError:
@@ -154,7 +167,7 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
                 try:
                     if not self._match_regex_or_set(
                             rule.conditional.booleans,
-                            self.boolean_cmp,
+                            self.boolean,
                             self.boolean_equal,
                             self.boolean_regex):
                         continue
@@ -163,76 +176,3 @@ class TERuleQuery(mixins.MatchPermission, rulequery.RuleQuery):
 
             # if we get here, we have matched all available criteria
             yield rule
-
-    def set_boolean(self, boolean, **opts):
-        """
-        Set the Boolean for the TE rule query.
-
-        Parameter:
-        boolean     The Boolean names to match in the TE rule
-                    conditional expression.
-
-        Options:
-        regex       If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError   Invalid permission set keyword option.
-        """
-
-        self.boolean = boolean
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.boolean_regex = opts[k]
-            elif k == "equal":
-                self.boolean_equal = opts[k]
-            else:
-                raise NameError("Invalid permission set option: {0}".format(k))
-
-        if not self.boolean:
-            self.boolean_cmp = None
-        elif self.boolean_regex:
-            self.boolean_cmp = re.compile(self.boolean)
-        else:
-            self.boolean_cmp = set(self.policy.lookup_boolean(b) for b in self.boolean)
-
-    def set_ruletype(self, ruletype):
-        """
-        Set the rule types for the rule query.
-
-        Parameter:
-        ruletype    The rule types to match.
-        """
-        if ruletype:
-            self.policy.validate_te_ruletype(ruletype)
-
-        self.ruletype = ruletype
-
-    def set_default(self, default, **opts):
-        """
-        Set the criteria for the rule's default type.
-
-        Parameter:
-        default     Name to match the rule's default type.
-
-        Keyword Options:
-        regex       If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.default = default
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.default_regex = opts[k]
-            else:
-                raise NameError("Invalid default option: {0}".format(k))
-
-        if not self.default:
-            self.default_cmp = None
-        elif self.default_regex:
-            self.default_cmp = re.compile(self.default)
-        else:
-            self.default_cmp = self.policy.lookup_type(self.default)

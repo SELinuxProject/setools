@@ -20,49 +20,47 @@ import logging
 
 from . import compquery
 from . import mixins
+from .descriptors import CriteriaDescriptor
 
 
 class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
 
-    """Query MLS Sensitivities"""
+    """
+    Query MLS Sensitivities
 
-    def __init__(self, policy,
-                 name=None, name_regex=False,
-                 alias=None, alias_regex=False,
-                 sens=None, sens_dom=False, sens_domby=False):
-        """
-        Parameters:
-        name         The name of the category to match.
-        name_regex   If true, regular expression matching will
-                     be used for matching the name.
-        alias        The alias name to match.
-        alias_regex  If true, regular expression matching
-                     will be used on the alias names.
-        sens         The criteria to match the sensitivity by dominance.
-        sens_dom     If true, the criteria will match if it dominates
-                     the sensitivity.
-        sens_domby   If true, the criteria will match if it is dominated
-                     by the sensitivity.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Parameter:
+    policy       The policy to query.
 
-        self.policy = policy
-        self.set_name(name, regex=name_regex)
-        self.set_alias(alias, regex=alias_regex)
-        self.set_sensitivity(sens, dom=sens_dom, domby=sens_domby)
+    Keyword Parameters/Class attributes:
+    name         The name of the category to match.
+    name_regex   If true, regular expression matching will
+                 be used for matching the name.
+    alias        The alias name to match.
+    alias_regex  If true, regular expression matching
+                 will be used on the alias names.
+    sens         The criteria to match the sensitivity by dominance.
+    sens_dom     If true, the criteria will match if it dominates
+                 the sensitivity.
+    sens_domby   If true, the criteria will match if it is dominated
+                 by the sensitivity.
+    """
+
+    sens = CriteriaDescriptor(lookup_function="lookup_sensitivity")
+    sens_dom = False
+    sens_domby = False
 
     def results(self):
         """Generator which yields all matching sensitivities."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
-        self.log.debug("Alias: {0.alias_cmp}, regex: {0.alias_regex}".format(self))
+        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Alias: {0.alias}, regex: {0.alias_regex}".format(self))
         self.log.debug("Sens: {0.sens!r}, dom: {0.sens_dom}, domby: {0.sens_domby}".format(self))
 
         for s in self.policy.sensitivities():
-            if self.name and not self._match_name(s):
+            if not self._match_name(s):
                 continue
 
-            if self.alias and not self._match_alias(s.aliases()):
+            if not self._match_alias(s):
                 continue
 
             if self.sens and not self._match_level(
@@ -74,33 +72,3 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
                 continue
 
             yield s
-
-    def set_sensitivity(self, sens, **opts):
-        """
-        Set the criteria for matching the sensitivity by dominance.
-
-        Parameter:
-        sens        Criteria to match the sensitivity.
-
-        Keyword Parameters:
-        dom         If true, the criteria will match if it
-                    dominates the sensitivity.
-        domby       If true, the criteria will match if it
-                    is dominated by the sensitivity.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        if sens:
-            self.sens = self.policy.lookup_sensitivity(sens)
-        else:
-            self.sens = None
-
-        for k in list(opts.keys()):
-            if k == "dom":
-                self.sens_dom = opts[k]
-            elif k == "domby":
-                self.sens_domby = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))

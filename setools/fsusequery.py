@@ -20,67 +20,54 @@ import logging
 import re
 
 from . import contextquery
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 
 
 class FSUseQuery(contextquery.ContextQuery):
 
-    """Query fs_use_* statements."""
+    """
+    Query fs_use_* statements.
 
-    def __init__(self, policy,
-                 ruletype=None,
-                 fs=None, fs_regex=False,
-                 user=None, user_regex=False,
-                 role=None, role_regex=False,
-                 type_=None, type_regex=False,
-                 range_=None, range_overlap=False, range_subset=False,
-                 range_superset=False, range_proper=False):
-        """
-        Parameters:
-        policy          The policy to query.
+    Parameter:
+    policy          The policy to query.
 
-        ruletype        The rule type(s) to match.
-        fs              The criteria to match the file system type.
-        fs_regex        If true, regular expression matching
-                        will be used on the file system type.
-        user            The criteria to match the context's user.
-        user_regex      If true, regular expression matching
-                        will be used on the user.
-        role            The criteria to match the context's role.
-        role_regex      If true, regular expression matching
-                        will be used on the role.
-        type_           The criteria to match the context's type.
-        type_regex      If true, regular expression matching
-                        will be used on the type.
-        range_          The criteria to match the context's range.
-        range_subset    If true, the criteria will match if it is a subset
-                        of the context's range.
-        range_overlap   If true, the criteria will match if it overlaps
-                        any of the context's range.
-        range_superset  If true, the criteria will match if it is a superset
-                        of the context's range.
-        range_proper    If true, use proper superset/subset operations.
-                        No effect if not using set operations.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Keyword Parameters/Class attributes:
+    ruletype        The rule type(s) to match.
+    fs              The criteria to match the file system type.
+    fs_regex        If true, regular expression matching
+                    will be used on the file system type.
+    user            The criteria to match the context's user.
+    user_regex      If true, regular expression matching
+                    will be used on the user.
+    role            The criteria to match the context's role.
+    role_regex      If true, regular expression matching
+                    will be used on the role.
+    type_           The criteria to match the context's type.
+    type_regex      If true, regular expression matching
+                    will be used on the type.
+    range_          The criteria to match the context's range.
+    range_subset    If true, the criteria will match if it is a subset
+                    of the context's range.
+    range_overlap   If true, the criteria will match if it overlaps
+                    any of the context's range.
+    range_superset  If true, the criteria will match if it is a superset
+                    of the context's range.
+    range_proper    If true, use proper superset/subset operations.
+                    No effect if not using set operations.
+    """
 
-        self.policy = policy
-
-        self.set_ruletype(ruletype)
-        self.set_fs(fs, regex=fs_regex)
-        self.set_user(user, regex=user_regex)
-        self.set_role(role, regex=role_regex)
-        self.set_type(type_, regex=type_regex)
-        self.set_range(range_, overlap=range_overlap, subset=range_subset,
-                       superset=range_superset, proper=range_proper)
+    ruletype = None
+    fs = CriteriaDescriptor("fs_regex")
+    fs_regex = False
 
     def results(self):
         """Generator which yields all matching fs_use_* statements."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("FS: {0.fs_cmp!r}, regex: {0.fs_regex}".format(self))
-        self.log.debug("User: {0.user_cmp!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role_cmp!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_cmp!r}, regex: {0.type_regex}".format(self))
+        self.log.debug("FS: {0.fs!r}, regex: {0.fs_regex}".format(self))
+        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
+        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
+        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
         self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                        "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
@@ -90,60 +77,11 @@ class FSUseQuery(contextquery.ContextQuery):
 
             if self.fs and not self._match_regex(
                     fsu.fs,
-                    self.fs_cmp,
+                    self.fs,
                     self.fs_regex):
                 continue
 
-            if not self._match_context(
-                    fsu.context,
-                    self.user_cmp,
-                    self.user_regex,
-                    self.role_cmp,
-                    self.role_regex,
-                    self.type_cmp,
-                    self.type_regex,
-                    self.range_cmp,
-                    self.range_subset,
-                    self.range_overlap,
-                    self.range_superset,
-                    self.range_proper):
+            if not self._match_context(fsu.context):
                 continue
 
             yield fsu
-
-    def set_ruletype(self, ruletype):
-        """
-        Set the rule types for the rule query.
-
-        Parameter:
-        ruletype    The rule types to match.
-        """
-
-        self.ruletype = ruletype
-
-    def set_fs(self, fs, **opts):
-        """
-        Set the criteria for matching the file system type.
-
-        Parameter:
-        fs         Name to match the file system.
-        regex      If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError  Invalid keyword option.
-        """
-
-        self.fs = fs
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.fs_regex = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))
-
-        if not self.fs:
-            self.fs_cmp = None
-        elif self.fs_regex:
-            self.fs_cmp = re.compile(self.fs)
-        else:
-            self.fs_cmp = self.fs

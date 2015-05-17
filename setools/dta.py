@@ -23,7 +23,7 @@ from collections import defaultdict, namedtuple
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
-from .infoflow import EdgeAttrList
+from .descriptors import EdgeAttrDict, EdgeAttrList
 
 __all__ = ['DomainTransitionAnalysis']
 
@@ -55,37 +55,32 @@ class DomainTransitionAnalysis(object):
         self.log = logging.getLogger(self.__class__.__name__)
 
         self.policy = policy
-        self.set_exclude(exclude)
-        self.set_reverse(reverse)
+        self.exclude = exclude
+        self.reverse = reverse
         self.rebuildgraph = True
         self.rebuildsubgraph = True
         self.G = nx.DiGraph()
         self.subG = None
 
-    def set_reverse(self, reverse):
-        """
-        Set forward/reverse DTA direction.
+    @property
+    def reverse(self):
+        return self._reverse
 
-        Parameter:
-        reverse     If true, a reverse DTA is performed, otherwise a
-                    forward DTA is performed.
-        """
-
-        self.reverse = bool(reverse)
+    @reverse.setter
+    def reverse(self, direction):
+        self._reverse = bool(direction)
         self.rebuildsubgraph = True
 
-    def set_exclude(self, exclude):
-        """
-        Set the domains to exclude from the domain transition analysis.
+    @property
+    def exclude(self):
+        return self._exclude
 
-        Parameter:
-        exclude         A list of types.
-        """
-
-        if exclude:
-            self.exclude = [self.policy.lookup_type(t) for t in exclude]
+    @exclude.setter
+    def exclude(self, types):
+        if types:
+            self._exclude = [self.policy.lookup_type(t) for t in types]
         else:
-            self.exclude = []
+            self._exclude = None
 
         self.rebuildsubgraph = True
 
@@ -556,32 +551,6 @@ class DomainTransitionAnalysis(object):
 
         self.rebuildsubgraph = False
         self.log.info("Completed building subgraph.")
-
-
-class EdgeAttrDict(object):
-
-    """
-    A descriptor for edge attributes that are dictionaries.
-
-    Parameter:
-    name    The edge property name
-    """
-
-    def __init__(self, propname):
-        self.name = propname
-
-    def __get__(self, obj, type=None):
-        return obj.G[obj.source][obj.target][self.name]
-
-    def __set__(self, obj, value):
-        # None is a special value to initialize the attribute
-        if value is None:
-            obj.G[obj.source][obj.target][self.name] = defaultdict(list)
-        else:
-            raise ValueError("{0} dictionaries should not be assigned directly".format(self.name))
-
-    def __delete__(self, obj):
-        obj.G[obj.source][obj.target][self.name].clear()
 
 
 class Edge(object):

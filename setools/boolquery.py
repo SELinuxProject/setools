@@ -19,61 +19,48 @@
 import logging
 
 from . import compquery
+from .descriptors import CriteriaDescriptor
 
 
 class BoolQuery(compquery.ComponentQuery):
 
-    """Query SELinux policy Booleans."""
+    """Query SELinux policy Booleans.
 
-    def __init__(self, policy,
-                 name=None, name_regex=False,
-                 default=False, match_default=False):
-        """
-        Parameter:
-        policy          The policy to query.
-        name            The Boolean name to match.
-        name_regex      If true, regular expression matching
-                        will be used on the Boolean name.
-        default         The default state to match.
-        match_default   If true, the default state will be matched.
-        """
-        self.log = logging.getLogger(self.__class__.__name__)
+    Parameter:
+    policy          The policy to query.
 
-        self.policy = policy
-        self.set_name(name, regex=name_regex)
-        self.set_default(match_default, default=default)
+    Keyword Parameters/Class attributes:
+    name            The Boolean name to match.
+    name_regex      If true, regular expression matching
+                    will be used on the Boolean name.
+    default         The default state to match.  If this
+                    is None, the default state not be matched.
+    """
+
+    _default = None
+
+    @property
+    def default(self):
+        return self._default
+
+    @default.setter
+    def default(self, value):
+        if value is None:
+            self._default = None
+        else:
+            self._default = bool(value)
 
     def results(self):
         """Generator which yields all Booleans matching the criteria."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name_cmp!r}, regex: {0.name_regex}".format(self))
-        self.log.debug("Default: {0.match_default}, state: {0.default}".format(self))
+        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self.log.debug("Default: {0.default}".format(self))
 
         for boolean in self.policy.bools():
-            if self.name and not self._match_name(boolean):
+            if not self._match_name(boolean):
                 continue
 
-            if self.match_default and boolean.state != self.default:
+            if self.default is not None and boolean.state != self.default:
                 continue
 
             yield boolean
-
-    def set_default(self, match, **opts):
-        """
-        Set if the default Boolean state should be matched.
-
-        Parameter:
-        match       If true, the default state will be matched.
-        default     The default state to match.
-
-        Exceptions:
-        NameError   Invalid keyword option.
-        """
-
-        self.match_default = bool(match)
-
-        for k in list(opts.keys()):
-            if k == "default":
-                self.default = bool(opts[k])
-            else:
-                raise NameError("Invalid default option: {0}".format(k))

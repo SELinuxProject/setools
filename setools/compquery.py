@@ -20,37 +20,20 @@
 import re
 
 from . import query
+from .descriptors import CriteriaDescriptor
 
 
 class ComponentQuery(query.PolicyQuery):
 
-    """Abstract base class for SETools component queries."""
+    """Base class for SETools component queries."""
+
+    name = CriteriaDescriptor("name_regex")
+    name_regex = False
 
     def _match_name(self, obj):
         """Match the object to the name criteria."""
-        return self._match_regex(obj, self.name_cmp, self.name_regex)
+        if not self.name:
+            # if there is no criteria, everything matches.
+            return True
 
-    def set_name(self, name, **opts):
-        """
-        Set the criteria for matching the component's name.
-
-        Parameter:
-        name       Name to match the component's name.
-        regex      If true, regular expression matching will be used.
-
-        Exceptions:
-        NameError  Invalid keyword option.
-        """
-
-        self.name = name
-
-        for k in list(opts.keys()):
-            if k == "regex":
-                self.name_regex = opts[k]
-            else:
-                raise NameError("Invalid name option: {0}".format(k))
-
-        if self.name_regex:
-            self.name_cmp = re.compile(self.name)
-        else:
-            self.name_cmp = self.name
+        return self._match_regex(obj, self.name, self.name_regex)
