@@ -43,7 +43,7 @@ def genfscon_factory(policy, name):
 
 class FSContext(symbol.PolicySymbol):
 
-    """Abstract base class for in-policy labeling rules."""
+    """Base class for in-policy labeling rules."""
 
     def __str__(self):
         raise NotImplementedError

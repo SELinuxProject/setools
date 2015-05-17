@@ -53,7 +53,7 @@ def default_factory(policy, sym):
 
 class Default(symbol.PolicySymbol):
 
-    """Abstract base class for default_* statements."""
+    """Base class for default_* statements."""
 
     def __str__(self):
         raise NotImplementedError

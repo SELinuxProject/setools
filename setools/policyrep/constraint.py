@@ -66,7 +66,7 @@ def constraint_factory(policy, sym):
 
 class BaseConstraint(symbol.PolicySymbol):
 
-    """Abstract base class for constraint rules."""
+    """Base class for constraint rules."""
 
     _expr_type_to_text = {
         qpol.QPOL_CEXPR_TYPE_NOT: "not",

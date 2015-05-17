@@ -211,7 +211,7 @@ def range_factory(policy, sym):
 
 class BaseMLSComponent(symbol.PolicySymbol):
 
-    """Abstract base class for sensitivities and categories."""
+    """Base class for sensitivities and categories."""
 
     @property
     def _value(self):
@@ -281,7 +281,7 @@ class Sensitivity(BaseMLSComponent):
 
 class BaseMLSLevel(symbol.PolicySymbol):
 
-    """Abstract base class for MLS levels."""
+    """Base class for MLS levels."""
 
     def __str__(self):
         lvl = str(self.sensitivity)

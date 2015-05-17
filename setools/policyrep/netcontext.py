@@ -55,7 +55,7 @@ def portcon_factory(policy, name):
 
 class NetContext(symbol.PolicySymbol):
 
-    """Abstract base class for in-policy network labeling rules."""
+    """Base class for in-policy network labeling rules."""
 
     def __str__(self):
         raise NotImplementedError

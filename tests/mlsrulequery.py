@@ -112,7 +112,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.validate_rule(r[1], "range_transition", "test22", "test22", "infoflow6", "s2")
 
     def test_040_range_exact(self):
-        """MLS rule query query with context range exact match"""
+        """MLS rule query with context range exact match"""
         q = MLSRuleQuery(self.p, default="s40:c1 - s40:c0.c4")
 
         r = sorted(q.results())
@@ -121,7 +121,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                                  "s40:c1 - s40:c0.c4")
 
     def test_041_range_overlap1(self):
-        """MLS rule query query with context range overlap match (equal)"""
+        """MLS rule query with context range overlap match (equal)"""
         q = MLSRuleQuery(self.p, default="s41:c1 - s41:c0.c4", default_overlap=True)
 
         r = sorted(q.results())
@@ -130,7 +130,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap2(self):
-        """MLS rule query query with context range overlap match (subset)"""
+        """MLS rule query with context range overlap match (subset)"""
         q = MLSRuleQuery(self.p, default="s41:c1,c2 - s41:c0.c3", default_overlap=True)
 
         r = sorted(q.results())
@@ -139,7 +139,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap3(self):
-        """MLS rule query query with context range overlap match (superset)"""
+        """MLS rule query with context range overlap match (superset)"""
         q = MLSRuleQuery(self.p, default="s41 - s41:c0.c4", default_overlap=True)
 
         r = sorted(q.results())
@@ -148,7 +148,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap4(self):
-        """MLS rule query query with context range overlap match (overlap low level)"""
+        """MLS rule query with context range overlap match (overlap low level)"""
         q = MLSRuleQuery(self.p, default="s41 - s41:c1,c2", default_overlap=True)
 
         r = sorted(q.results())
@@ -157,7 +157,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s41:c1 - s41:c1.c3")
 
     def test_041_range_overlap5(self):
-        """MLS rule query query with context range overlap match (overlap high level)"""
+        """MLS rule query with context range overlap match (overlap high level)"""
         q = MLSRuleQuery(self.p, default="s41:c1,c2 - s41:c0.c4", default_overlap=True)
 
         r = sorted(q.results())
@@ -166,7 +166,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s41:c1 - s41:c1.c3")
 
     def test_042_range_subset1(self):
-        """MLS rule query query with context range subset match"""
+        """MLS rule query with context range subset match"""
         q = MLSRuleQuery(self.p, default="s42:c1,c2 - s42:c0.c3", default_overlap=True)
 
         r = sorted(q.results())
@@ -175,7 +175,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s42:c1 - s42:c1.c3")
 
     def test_042_range_subset2(self):
-        """MLS rule query query with context range subset match (equal)"""
+        """MLS rule query with context range subset match (equal)"""
         q = MLSRuleQuery(self.p, default="s42:c1 - s42:c1.c3", default_overlap=True)
 
         r = sorted(q.results())
@@ -184,7 +184,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s42:c1 - s42:c1.c3")
 
     def test_043_range_superset1(self):
-        """MLS rule query query with context range superset match"""
+        """MLS rule query with context range superset match"""
         q = MLSRuleQuery(self.p, default="s43 - s43:c0.c4", default_superset=True)
 
         r = sorted(q.results())
@@ -193,7 +193,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s43:c1 - s43:c1.c3")
 
     def test_043_range_superset2(self):
-        """MLS rule query query with context range superset match (equal)"""
+        """MLS rule query with context range superset match (equal)"""
         q = MLSRuleQuery(self.p, default="s43:c1 - s43:c1.c3", default_superset=True)
 
         r = sorted(q.results())
@@ -202,7 +202,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s43:c1 - s43:c1.c3")
 
     def test_044_range_proper_subset1(self):
-        """MLS rule query query with context range proper subset match"""
+        """MLS rule query with context range proper subset match"""
         q = MLSRuleQuery(self.p, default="s44:c1,c2", default_subset=True, default_proper=True)
 
         r = sorted(q.results())
@@ -211,7 +211,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s44:c1 - s44:c1.c3")
 
     def test_044_range_proper_subset2(self):
-        """MLS rule query query with context range proper subset match (equal)"""
+        """MLS rule query with context range proper subset match (equal)"""
         q = MLSRuleQuery(self.p,
                          default="s44:c1 - s44:c1.c3", default_subset=True, default_proper=True)
 
@@ -219,7 +219,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(len(r), 0)
 
     def test_044_range_proper_subset3(self):
-        """MLS rule query query with context range proper subset match (equal low only)"""
+        """MLS rule query with context range proper subset match (equal low only)"""
         q = MLSRuleQuery(self.p,
                          default="s44:c1 - s44:c1.c2", default_subset=True, default_proper=True)
 
@@ -229,7 +229,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s44:c1 - s44:c1.c3")
 
     def test_044_range_proper_subset4(self):
-        """MLS rule query query with context range proper subset match (equal high only)"""
+        """MLS rule query with context range proper subset match (equal high only)"""
         q = MLSRuleQuery(self.p,
                          default="s44:c1,c2 - s44:c1.c3", default_subset=True, default_proper=True)
 
@@ -239,7 +239,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s44:c1 - s44:c1.c3")
 
     def test_045_range_proper_superset1(self):
-        """MLS rule query query with context range proper superset match"""
+        """MLS rule query with context range proper superset match"""
         q = MLSRuleQuery(self.p,
                          default="s45 - s45:c0.c4", default_superset=True, default_proper=True)
 
@@ -249,7 +249,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s45:c1 - s45:c1.c3")
 
     def test_045_range_proper_superset2(self):
-        """MLS rule query query with context range proper superset match (equal)"""
+        """MLS rule query with context range proper superset match (equal)"""
         q = MLSRuleQuery(self.p,
                          default="s45:c1 - s45:c1.c3", default_superset=True, default_proper=True)
 
@@ -257,7 +257,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(len(r), 0)
 
     def test_045_range_proper_superset3(self):
-        """MLS rule query query with context range proper superset match (equal low)"""
+        """MLS rule query with context range proper superset match (equal low)"""
         q = MLSRuleQuery(self.p,
                          default="s45:c1 - s45:c1.c4", default_superset=True, default_proper=True)
 
@@ -267,7 +267,7 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "s45:c1 - s45:c1.c3")
 
     def test_045_range_proper_superset4(self):
-        """MLS rule query query with context range proper superset match (equal high)"""
+        """MLS rule query with context range proper superset match (equal high)"""
         q = MLSRuleQuery(self.p,
                          default="s45 - s45:c1.c3", default_superset=True, default_proper=True)
 
