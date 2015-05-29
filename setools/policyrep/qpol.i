@@ -1318,9 +1318,11 @@ typedef struct qpol_cat {} qpol_cat_t;
 /* qpol mls range */
 typedef struct qpol_mls_range {} qpol_mls_range_t;
 %extend qpol_mls_range {
-    # TODO: determine how to conditionally destroy this range.
-    # It should only be destroyed if it was looked up (user-entered)
-    # Otherwise qpol will destroy the others when the policy closes.
+    /*
+     * TODO: determine how to conditionally destroy this range.
+     * It should only be destroyed if it was looked up (user-entered)
+     * Otherwise qpol will destroy the others when the policy closes.
+     */
     %exception qpol_mls_range {
       $action
       if (!result) {
