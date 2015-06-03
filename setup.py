@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import glob
 from setuptools import setup
 import distutils.log as log
 from distutils.core import Extension
@@ -126,14 +127,15 @@ setup(name='setools',
       cmdclass={'build_yacc': YaccCommand,
                 'build_lex': LexCommand,
                 'build_ext': BuildExtCommand},
-      packages=['setools', 'setools.policyrep'],
-      scripts=['seinfo', 'seinfoflow', 'sesearch', 'sedta'],
-      data_files=[(join(sys.prefix, 'share/setools'), ['data/perm_map'])],
+      packages=['setools', 'setools.policyrep', 'setoolsgui', 'setoolsgui.apol'],
+      scripts=['apol', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
+      data_files=[(join(sys.prefix, 'share/setools'), glob.glob("data/*"))],
       ext_modules=ext_py_mods,
       test_suite='tests',
       license='GPLv2+, LGPLv2.1+',
       classifiers=[
           'Environment :: Console',
+          'Environment :: X11 Applications :: Qt',
           'Intended Audience :: Information Technology',
           'Topic :: Security',
           'Topic :: Utilities',

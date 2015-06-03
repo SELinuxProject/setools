@@ -16,6 +16,7 @@ As such it contains a setup.py script that will install the tools.
 To run SETools, the following packages are required:
 * Python 2.7 or 3.3+
 * NetworkX 1.8+
+* PyQt5
 * setuptools
 * libselinux (Python bindings optional but recommended)
 * libbz2
