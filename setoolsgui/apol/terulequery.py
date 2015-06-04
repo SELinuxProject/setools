@@ -73,6 +73,12 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
 
+        # check expanders to make sure the display
+        # is consistent with the initial .ui state
+        self.toggle_criteria_frame()
+        self.toggle_results_frame()
+        self.toggle_notes_frame()
+
         # connect signals
         self.buttonBox.clicked.connect(self.run)
         self.source.textEdited.connect(self.clear_source_error)
@@ -85,6 +91,13 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.clear_class.clicked.connect(self.clear_tclass_selection)
         self.perms.selectionModel().selectionChanged.connect(self.set_perms)
         self.clear_perms.clicked.connect(self.clear_perms_selection)
+        self.criteria_expander.clicked.connect(self.toggle_criteria_frame)
+        self.results_expander.clicked.connect(self.toggle_results_frame)
+        self.notes_expander.clicked.connect(self.toggle_notes_frame)
+
+    #
+    # Source criteria
+    #
 
     def clear_source_error(self):
         self.source.setToolTip("Match the source type/attribute of the rule.")
@@ -99,6 +112,10 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
             self.source.setToolTip("Error: " + str(ex))
             self.source.setPalette(self.error_palette)
 
+    #
+    # Target criteria
+    #
+
     def clear_target_error(self):
         self.target.setToolTip("Match the target type/attribute of the rule.")
         self.target.setPalette(self.orig_palette)
@@ -112,6 +129,10 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
             self.target.setToolTip("Error: " + str(ex))
             self.target.setPalette(self.error_palette)
 
+    #
+    # Class criteria
+    #
+
     def clear_tclass_selection(self):
         self.tclass.selectionModel().clearSelection()
 
@@ -123,6 +144,10 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.query.tclass = selected_classes
         self.perms_model.set_classes(selected_classes)
 
+    #
+    # Permissions criteria
+    #
+
     def clear_perms_selection(self):
         self.perms.selectionModel().clearSelection()
 
@@ -132,6 +157,10 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
             selected_perms.append(self.perms_model.data(index, Qt.UserRole))
 
         self.query.perms = selected_perms
+
+    #
+    # Results runner
+    #
 
     def run(self, button):
         # right now there is only one button.
@@ -175,3 +204,25 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
             self.raw_results.appendPlainText(str(line))
 
         self.raw_results.moveCursor(QTextCursor.Start)
+
+    #
+    # Section expander handlers
+    #
+
+    def toggle_criteria_frame(self):
+        if self.criteria_expander.isChecked():
+            self.criteria_frame.show()
+        else:
+            self.criteria_frame.hide()
+
+    def toggle_results_frame(self):
+        if self.results_expander.isChecked():
+            self.results_frame.show()
+        else:
+            self.results_frame.hide()
+
+    def toggle_notes_frame(self):
+        if self.notes_expander.isChecked():
+            self.notes.show()
+        else:
+            self.notes.hide()
