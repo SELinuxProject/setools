@@ -72,6 +72,13 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
+        headerview = self.table_results.horizontalHeader()
+        headerview.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        headerview.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        headerview.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        headerview.setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        headerview.setSectionResizeMode(4, QHeaderView.Stretch)
+        headerview.setSectionResizeMode(5, QHeaderView.ResizeToContents)
 
         # check expanders to make sure the display
         # is consistent with the initial .ui state
@@ -188,15 +195,6 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         # update results table
         results = list(self.query.results())
         self.table_results_model.set_rules(results)
-
-        # Column sizing
-        headerview = self.table_results.horizontalHeader()
-        headerview.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(4, QHeaderView.Stretch)
-        headerview.setSectionResizeMode(5, QHeaderView.ResizeToContents)
 
         # update raw results
         self.raw_results.clear()
