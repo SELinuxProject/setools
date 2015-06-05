@@ -52,11 +52,12 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.target.setCompleter(self.type_completion)
 
         # setup indications of errors on source/target
-        self.source.setToolTip("Match the source type/attribute of the rule.")
-        self.target.setToolTip("Match the target type/attribute of the rule.")
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.clear_source_error()
+        self.clear_target_error()
+        self.clear_default_error()
 
         # populate class list
         self.class_model = SEToolsListModel(self)
