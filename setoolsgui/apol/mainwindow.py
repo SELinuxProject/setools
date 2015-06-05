@@ -98,7 +98,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         # create a vertical layout in the tab, place the analysis ui inside.
         tabLayout = QVBoxLayout()
-        tabLayout.setContentsMargins(3, 3, 3, 3)
+        tabLayout.setContentsMargins(0, 0, 0, 0)
         tabLayout.addWidget(newanalysis)
         newtab.setLayout(tabLayout)
 

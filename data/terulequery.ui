@@ -23,6 +23,18 @@
    <property name="sizeConstraint">
     <enum>QLayout::SetNoConstraint</enum>
    </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QScrollArea" name="scrollArea">
      <property name="sizeAdjustPolicy">
@@ -36,7 +48,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>740</width>
+        <width>758</width>
         <height>981</height>
        </rect>
       </property>
@@ -66,7 +78,7 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>720</width>
+            <width>738</width>
             <height>210</height>
            </rect>
           </property>
@@ -94,8 +106,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>720</width>
-            <height>210</height>
+            <width>98</width>
+            <height>88</height>
            </rect>
           </property>
           <attribute name="label">
