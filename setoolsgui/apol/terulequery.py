@@ -87,8 +87,10 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         headerview.setSectionResizeMode(4, QHeaderView.Stretch)
         headerview.setSectionResizeMode(5, QHeaderView.ResizeToContents)
 
-        # check expanders to make sure the display
-        # is consistent with the initial .ui state
+        # Ensure settings are consistent with the initial .ui state
+        self.set_source_regex(self.source_regex.isChecked())
+        self.set_target_regex(self.target_regex.isChecked())
+        self.set_default_regex(self.default_regex.isChecked())
         self.toggle_criteria_frame()
         self.toggle_results_frame()
         self.toggle_notes_frame()
@@ -97,16 +99,17 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.buttonBox.clicked.connect(self.run)
         self.source.textEdited.connect(self.clear_source_error)
         self.source.editingFinished.connect(self.set_source)
+        self.source_regex.toggled.connect(self.set_source_regex)
         self.target.textEdited.connect(self.clear_target_error)
         self.target.editingFinished.connect(self.set_target)
-        self.source_regex.toggled.connect(self.set_source)
-        self.target_regex.toggled.connect(self.set_target)
+        self.target_regex.toggled.connect(self.set_target_regex)
         self.tclass.selectionModel().selectionChanged.connect(self.set_tclass)
         self.clear_class.clicked.connect(self.clear_tclass_selection)
         self.perms.selectionModel().selectionChanged.connect(self.set_perms)
         self.clear_perms.clicked.connect(self.clear_perms_selection)
         self.default_type.textEdited.connect(self.clear_default_error)
         self.default_type.editingFinished.connect(self.set_default_type)
+        self.default_regex.toggled.connect(self.set_default_regex)
         self.bool_criteria.selectionModel().selectionChanged.connect(self.set_bools)
         self.clear_bools.clicked.connect(self.clear_bool_selection)
         self.criteria_expander.clicked.connect(self.toggle_criteria_frame)
@@ -122,13 +125,17 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.source.setPalette(self.orig_palette)
 
     def set_source(self):
-        self.query.source_regex = self.source_regex.isChecked()
-
         try:
             self.query.source = self.source.text()
         except Exception as ex:
             self.source.setToolTip("Error: " + str(ex))
             self.source.setPalette(self.error_palette)
+
+    def set_source_regex(self, state):
+        self.log.debug("Setting source_regex {0}".format(state))
+        self.query.source_regex = state
+        self.clear_source_error()
+        self.set_source()
 
     #
     # Target criteria
@@ -139,13 +146,17 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.target.setPalette(self.orig_palette)
 
     def set_target(self):
-        self.query.target_regex = self.target_regex.isChecked()
-
         try:
             self.query.target = self.target.text()
         except Exception as ex:
             self.target.setToolTip("Error: " + str(ex))
             self.target.setPalette(self.error_palette)
+
+    def set_target_regex(self, state):
+        self.log.debug("Setting target_regex {0}".format(state))
+        self.query.target_regex = state
+        self.clear_target_error()
+        self.set_target()
 
     #
     # Class criteria
@@ -193,6 +204,12 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
             self.default_type.setToolTip("Error: " + str(ex))
             self.default_type.setPalette(self.error_palette)
 
+    def set_default_regex(self, state):
+        self.log.debug("Setting default_regex {0}".format(state))
+        self.query.default_regex = state
+        self.clear_default_error()
+        self.set_default_type()
+
     #
     # Boolean criteria
     #
@@ -233,6 +250,8 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.query.ruletype = rule_types
         self.query.source_indirect = self.source_indirect.isChecked()
         self.query.target_indirect = self.target_indirect.isChecked()
+        self.query.perms_equal = self.perms_equal.isChecked()
+        self.query.boolean_equal = self.bools_equal.isChecked()
 
         # update results table
         results = list(self.query.results())
