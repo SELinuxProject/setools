@@ -178,9 +178,9 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
             item = self.analysisTypes.selectedItems()[0]
             title = item.text(0)
             self.parent.create_new_analysis(title, item._tab_class)
-        except IndexError:
-            pass  # nothing is selected
-        except TypeError:
-            pass  # one of the group items was selected.
+        except (IndexError, TypeError):
+            # IndexError: nothing is selected
+            # TypeError: one of the group items was selected.
+            pass
         else:
             self.accept()
