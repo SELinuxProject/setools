@@ -50,8 +50,9 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.type_completion.setModel(completer_model)
         self.source.setCompleter(self.type_completion)
         self.target.setCompleter(self.type_completion)
+        self.default_type.setCompleter(self.type_completion)
 
-        # setup indications of errors on source/target
+        # setup indications of errors on source/target/default
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -67,6 +68,11 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         # populate perm list
         self.perms_model = PermListModel(self, self.policy)
         self.perms.setModel(self.perms_model)
+
+        # populate bool list
+        self.bool_model = SEToolsListModel(self)
+        self.bool_model.item_list = sorted(self.policy.bools())
+        self.bool_criteria.setModel(self.bool_model)
 
         # set up results
         self.table_results_model = TERuleListModel(self)
@@ -99,6 +105,10 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.clear_class.clicked.connect(self.clear_tclass_selection)
         self.perms.selectionModel().selectionChanged.connect(self.set_perms)
         self.clear_perms.clicked.connect(self.clear_perms_selection)
+        self.default_type.textEdited.connect(self.clear_default_error)
+        self.default_type.editingFinished.connect(self.set_default_type)
+        self.bool_criteria.selectionModel().selectionChanged.connect(self.set_bools)
+        self.clear_bools.clicked.connect(self.clear_bool_selection)
         self.criteria_expander.clicked.connect(self.toggle_criteria_frame)
         self.results_expander.clicked.connect(self.toggle_results_frame)
         self.notes_expander.clicked.connect(self.toggle_notes_frame)
@@ -165,6 +175,37 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
             selected_perms.append(self.perms_model.data(index, Qt.UserRole))
 
         self.query.perms = selected_perms
+
+    #
+    # Default criteria
+    #
+
+    def clear_default_error(self):
+        self.default_type.setToolTip("Match the default type the rule.")
+        self.default_type.setPalette(self.orig_palette)
+
+    def set_default_type(self):
+        self.query.default_regex = self.default_regex.isChecked()
+
+        try:
+            self.query.default = self.default_type.text()
+        except Exception as ex:
+            self.default_type.setToolTip("Error: " + str(ex))
+            self.default_type.setPalette(self.error_palette)
+
+    #
+    # Boolean criteria
+    #
+
+    def clear_bool_selection(self):
+        self.bool_criteria.selectionModel().clearSelection()
+
+    def set_bools(self):
+        selected_bools = []
+        for index in self.bool_criteria.selectionModel().selectedIndexes():
+            selected_bools.append(self.bool_model.data(index, Qt.UserRole))
+
+        self.query.boolean = selected_bools
 
     #
     # Results runner

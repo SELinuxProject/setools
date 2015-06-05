@@ -37,7 +37,7 @@
         <x>0</x>
         <y>0</y>
         <width>740</width>
-        <height>864</height>
+        <height>981</height>
        </rect>
       </property>
       <property name="minimumSize">
@@ -251,6 +251,134 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="label_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Results</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="criteria_expander">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::TabFocus</enum>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton:flat {   border: none; }</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset>
+           <normaloff>icons/expand_inactive.png</normaloff>
+           <normalon>icons/expand_active.png</normalon>icons/expand_inactive.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>16</width>
+           <height>16</height>
+          </size>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="label_4">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Notes</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QTextEdit" name="notes">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>125</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Optionally enter notes here about the query.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>11</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Type Enforcement Rule Query</string>
+         </property>
+        </widget>
+       </item>
        <item row="2" column="0" colspan="2">
         <widget class="QFrame" name="criteria_frame">
          <property name="maximumSize">
@@ -266,6 +394,86 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_3">
+          <item row="1" column="1">
+           <widget class="QGroupBox" name="target_criteria">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="title">
+             <string>Target Type/Attribute</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_5">
+             <item row="1" column="2">
+              <widget class="QRadioButton" name="target_regex">
+               <property name="text">
+                <string>Regular Expression</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QRadioButton" name="target_exact">
+               <property name="text">
+                <string>Exact Match</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="target">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="target_indirect">
+               <property name="toolTip">
+                <string>If the rule target is an attribute, indirect will match the criteria against the contents of the attribute, rather than the attribute itself.</string>
+               </property>
+               <property name="text">
+                <string>Indirect</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>113</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </item>
           <item row="0" column="0" colspan="2">
            <widget class="QGroupBox" name="ruletype_criteria">
             <property name="sizePolicy">
@@ -365,6 +573,67 @@
                 <bool>false</bool>
                </property>
               </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QGroupBox" name="default_criteria">
+            <property name="title">
+             <string>Default Type</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_4">
+             <item row="1" column="1">
+              <widget class="QRadioButton" name="default_regex">
+               <property name="text">
+                <string>Regular Expression</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QRadioButton" name="default_exact">
+               <property name="text">
+                <string>Exact Match</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLineEdit" name="default_type">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>150</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </widget>
@@ -591,48 +860,19 @@
             </layout>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QGroupBox" name="target_criteria">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>100</height>
-             </size>
-            </property>
+          <item row="4" column="1">
+           <widget class="QGroupBox" name="booleans_criteria">
             <property name="title">
-             <string>Target Type/Attribute</string>
+             <string>Booleans in Conditional Expression</string>
             </property>
-            <layout class="QGridLayout" name="gridLayout_5">
-             <item row="1" column="2">
-              <widget class="QRadioButton" name="target_regex">
-               <property name="text">
-                <string>Regular Expression</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="2">
-              <widget class="QRadioButton" name="target_exact">
-               <property name="text">
-                <string>Exact Match</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="target">
+            <layout class="QGridLayout" name="gridLayout_8">
+             <item row="0" column="0" rowspan="2">
+              <widget class="QListView" name="bool_criteria">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>150</width>
-                 <height>0</height>
-                </size>
                </property>
                <property name="maximumSize">
                 <size>
@@ -640,29 +880,52 @@
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="toolTip">
+                <string>Booleans used in the rule's conditional expression.</string>
+               </property>
+               <property name="selectionMode">
+                <enum>QAbstractItemView::MultiSelection</enum>
+               </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="target_indirect">
+             <item row="0" column="3">
+              <widget class="QRadioButton" name="bools_any">
                <property name="toolTip">
-                <string>If the rule target is an attribute, indirect will match the criteria against the contents of the attribute, rather than the attribute itself.</string>
+                <string>A matching rule will have at least one of the selected Booleans in its conditional expression..</string>
                </property>
                <property name="text">
-                <string>Indirect</string>
+                <string>Match Any</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
               </widget>
              </item>
-             <item row="0" column="3">
-              <spacer name="horizontalSpacer_3">
+             <item row="1" column="3">
+              <widget class="QRadioButton" name="bools_equal">
+               <property name="toolTip">
+                <string>A matching rule will have all of the selected Booleans in its conditional expression..</string>
+               </property>
+               <property name="text">
+                <string>Match All</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="clear_bools">
+               <property name="text">
+                <string>Clear</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <spacer name="horizontalSpacer_7">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>113</width>
+                 <width>40</width>
                  <height>20</height>
                 </size>
                </property>
@@ -671,7 +934,7 @@
             </layout>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="5" column="1">
            <widget class="QDialogButtonBox" name="buttonBox">
             <property name="standardButtons">
              <set>QDialogButtonBox::Apply</set>
@@ -684,135 +947,9 @@
          <zorder>target_criteria</zorder>
          <zorder>class_criteria</zorder>
          <zorder>perms_criteria</zorder>
+         <zorder>default_criteria</zorder>
+         <zorder>booleans_criteria</zorder>
          <zorder>buttonBox</zorder>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="label_3">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Results</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QPushButton" name="criteria_expander">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
-         <property name="focusPolicy">
-          <enum>Qt::TabFocus</enum>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton:flat {   border: none; }</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="icon">
-          <iconset>
-           <normaloff>icons/expand_inactive.png</normaloff>
-           <normalon>icons/expand_active.png</normalon>icons/expand_inactive.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>16</width>
-           <height>16</height>
-          </size>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QLabel" name="label_4">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Notes</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0" colspan="2">
-        <widget class="QTextEdit" name="notes">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>125</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Optionally enter notes here about the query.</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>Type Enforcement Rule Query</string>
-         </property>
         </widget>
        </item>
       </layout>
@@ -849,6 +986,13 @@
   <tabstop>invert_perms</tabstop>
   <tabstop>perms_any</tabstop>
   <tabstop>perms_equal</tabstop>
+  <tabstop>default_type</tabstop>
+  <tabstop>default_exact</tabstop>
+  <tabstop>default_regex</tabstop>
+  <tabstop>bool_criteria</tabstop>
+  <tabstop>clear_bools</tabstop>
+  <tabstop>bools_any</tabstop>
+  <tabstop>bools_equal</tabstop>
   <tabstop>results_expander</tabstop>
   <tabstop>table_results</tabstop>
   <tabstop>raw_results</tabstop>
