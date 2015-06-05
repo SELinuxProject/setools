@@ -104,14 +104,11 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
         self.target.editingFinished.connect(self.set_target)
         self.target_regex.toggled.connect(self.set_target_regex)
         self.tclass.selectionModel().selectionChanged.connect(self.set_tclass)
-        self.clear_class.clicked.connect(self.clear_tclass_selection)
         self.perms.selectionModel().selectionChanged.connect(self.set_perms)
-        self.clear_perms.clicked.connect(self.clear_perms_selection)
         self.default_type.textEdited.connect(self.clear_default_error)
         self.default_type.editingFinished.connect(self.set_default_type)
         self.default_regex.toggled.connect(self.set_default_regex)
         self.bool_criteria.selectionModel().selectionChanged.connect(self.set_bools)
-        self.clear_bools.clicked.connect(self.clear_bool_selection)
         self.criteria_expander.clicked.connect(self.toggle_criteria_frame)
         self.results_expander.clicked.connect(self.toggle_results_frame)
         self.notes_expander.clicked.connect(self.toggle_notes_frame)
@@ -162,9 +159,6 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
     # Class criteria
     #
 
-    def clear_tclass_selection(self):
-        self.tclass.selectionModel().clearSelection()
-
     def set_tclass(self):
         selected_classes = []
         for index in self.tclass.selectionModel().selectedIndexes():
@@ -176,9 +170,6 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
     #
     # Permissions criteria
     #
-
-    def clear_perms_selection(self):
-        self.perms.selectionModel().clearSelection()
 
     def set_perms(self):
         selected_perms = []
@@ -213,9 +204,6 @@ class TERuleQueryTab(SEToolsWidget, QWidget):
     #
     # Boolean criteria
     #
-
-    def clear_bool_selection(self):
-        self.bool_criteria.selectionModel().clearSelection()
 
     def set_bools(self):
         selected_bools = []

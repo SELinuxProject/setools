@@ -1000,5 +1000,54 @@
   <tabstop>notes</tabstop>
  </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>clear_bools</sender>
+   <signal>clicked()</signal>
+   <receiver>bool_criteria</receiver>
+   <slot>clearSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>576</x>
+     <y>430</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>454</x>
+     <y>447</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clear_class</sender>
+   <signal>clicked()</signal>
+   <receiver>tclass</receiver>
+   <slot>clearSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>299</x>
+     <y>312</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>147</x>
+     <y>330</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clear_perms</sender>
+   <signal>clicked()</signal>
+   <receiver>perms</receiver>
+   <slot>clearSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>565</x>
+     <y>312</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>448</x>
+     <y>330</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
