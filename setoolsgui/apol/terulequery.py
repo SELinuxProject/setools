@@ -21,7 +21,7 @@ import logging
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel
 from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QWidget
+from PyQt5.QtWidgets import QCompleter, QHeaderView, QScrollArea
 from setools import TERuleQuery
 
 from ..widget import SEToolsWidget
@@ -29,7 +29,7 @@ from .rulemodels import TERuleListModel
 from .models import PermListModel, SEToolsListModel
 
 
-class TERuleQueryTab(SEToolsWidget, QWidget):
+class TERuleQueryTab(SEToolsWidget, QScrollArea):
     def __init__(self, tab, policy):
         super(TERuleQueryTab, self).__init__(tab)
         self.log = logging.getLogger(self.__class__.__name__)
