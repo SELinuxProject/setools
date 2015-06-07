@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import sys
 
 from PyQt5.uic import loadUi
 
@@ -24,7 +25,7 @@ class SEToolsWidget(object):
     def load_ui(self, filename):
         # If we are in the git repo, look at the local
         # UI file, otherwise look at the installed file.
-        for path in ["data/", "/usr/share/setools/"]:
+        for path in ["data/", sys.prefix + "/share/setools/"]:
             try:
                 loadUi(path + filename, self)
                 break
