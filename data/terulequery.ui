@@ -79,8 +79,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>738</width>
-         <height>210</height>
+         <width>98</width>
+         <height>88</height>
         </rect>
        </property>
        <attribute name="label">
@@ -391,23 +391,6 @@
           <string>Target Type/Attribute</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="1" column="2">
-           <widget class="QRadioButton" name="target_regex">
-            <property name="text">
-             <string>Regular Expression</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QRadioButton" name="target_exact">
-            <property name="text">
-             <string>Exact Match</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="target">
             <property name="sizePolicy">
@@ -430,7 +413,17 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="1" column="2">
+           <widget class="QCheckBox" name="target_regex">
+            <property name="toolTip">
+             <string>Use regular expressions to match the target type/attribute.</string>
+            </property>
+            <property name="text">
+             <string>Regex</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
            <widget class="QCheckBox" name="target_indirect">
             <property name="toolTip">
              <string>If the rule target is an attribute, indirect will match the criteria against the contents of the attribute, rather than the attribute itself.</string>
@@ -568,22 +561,18 @@
           <string>Default Type</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_4">
-          <item row="1" column="1">
-           <widget class="QRadioButton" name="default_regex">
-            <property name="text">
-             <string>Regular Expression</string>
+          <item row="0" column="2">
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QRadioButton" name="default_exact">
-            <property name="text">
-             <string>Exact Match</string>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
             </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
+           </spacer>
           </item>
           <item row="0" column="0">
            <widget class="QLineEdit" name="default_type">
@@ -607,18 +596,15 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <spacer name="horizontalSpacer_6">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="default_regex">
+            <property name="toolTip">
+             <string>Use regular expressions to match the default type.</string>
             </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
+            <property name="text">
+             <string>Regex</string>
             </property>
-           </spacer>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -629,16 +615,6 @@
           <string>Permission Set</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_6">
-          <item row="1" column="3">
-           <widget class="QRadioButton" name="perms_equal">
-            <property name="toolTip">
-             <string>A matching rule will have all of the selected permissions.</string>
-            </property>
-            <property name="text">
-             <string>Match All</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="2">
            <widget class="QPushButton" name="invert_perms">
             <property name="text">
@@ -689,15 +665,12 @@
            </spacer>
           </item>
           <item row="0" column="3">
-           <widget class="QRadioButton" name="perms_any">
+           <widget class="QCheckBox" name="perms_equal">
             <property name="toolTip">
-             <string>A matching rule will have at least one of the selected permissions.</string>
+             <string>A matching rule will have all of the selected permissions.</string>
             </property>
             <property name="text">
-             <string>Match Any</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
+             <string>Match All</string>
             </property>
            </widget>
           </item>
@@ -716,19 +689,6 @@
           <string>Source Type/Attribute</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="source_indirect">
-            <property name="toolTip">
-             <string>If the rule source is an attribute, indirect will match the criteria against the contents of the attribute, rather than the attribute itself.</string>
-            </property>
-            <property name="text">
-             <string>Indirect</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="3">
            <spacer name="horizontalSpacer_2">
             <property name="orientation">
@@ -765,16 +725,22 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QRadioButton" name="source_regex">
+           <widget class="QCheckBox" name="source_regex">
+            <property name="toolTip">
+             <string>Use regular expressions to match the source type/attribute.</string>
+            </property>
             <property name="text">
-             <string>Regular Expression</string>
+             <string>Regex</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QRadioButton" name="source_exact">
+           <widget class="QCheckBox" name="source_indirect">
+            <property name="toolTip">
+             <string>If the rule source is an attribute, indirect will match the criteria against the contents of the attribute, rather than the attribute itself.</string>
+            </property>
             <property name="text">
-             <string>Exact Match</string>
+             <string>Indirect</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -810,12 +776,6 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
             </property>
             <property name="maximumSize">
              <size>
@@ -876,29 +836,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
-           <widget class="QRadioButton" name="bools_any">
-            <property name="toolTip">
-             <string>A matching rule will have at least one of the selected Booleans in its conditional expression..</string>
-            </property>
-            <property name="text">
-             <string>Match Any</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QRadioButton" name="bools_equal">
-            <property name="toolTip">
-             <string>A matching rule will have all of the selected Booleans in its conditional expression..</string>
-            </property>
-            <property name="text">
-             <string>Match All</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="clear_bools">
             <property name="text">
@@ -918,6 +855,16 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item row="0" column="3">
+           <widget class="QCheckBox" name="bools_equal">
+            <property name="toolTip">
+             <string>A matching rule will have all of the selected Booleans in its conditional expression..</string>
+            </property>
+            <property name="text">
+             <string>Match All</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -955,12 +902,8 @@
   <tabstop>clear_ruletypes</tabstop>
   <tabstop>all_ruletypes</tabstop>
   <tabstop>source</tabstop>
-  <tabstop>source_indirect</tabstop>
-  <tabstop>source_exact</tabstop>
   <tabstop>source_regex</tabstop>
   <tabstop>target</tabstop>
-  <tabstop>target_indirect</tabstop>
-  <tabstop>target_exact</tabstop>
   <tabstop>target_regex</tabstop>
   <tabstop>tclass</tabstop>
   <tabstop>clear_class</tabstop>
@@ -968,15 +911,9 @@
   <tabstop>perms</tabstop>
   <tabstop>clear_perms</tabstop>
   <tabstop>invert_perms</tabstop>
-  <tabstop>perms_any</tabstop>
-  <tabstop>perms_equal</tabstop>
   <tabstop>default_type</tabstop>
-  <tabstop>default_exact</tabstop>
-  <tabstop>default_regex</tabstop>
   <tabstop>bool_criteria</tabstop>
   <tabstop>clear_bools</tabstop>
-  <tabstop>bools_any</tabstop>
-  <tabstop>bools_equal</tabstop>
   <tabstop>results_expander</tabstop>
   <tabstop>table_results</tabstop>
   <tabstop>raw_results</tabstop>
