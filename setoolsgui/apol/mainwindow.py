@@ -50,6 +50,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
     def setupUi(self):
         self.load_ui("apol.ui")
 
+        self.update_window_title()
+
         self.error_msg = QMessageBox(self)
         self.error_msg.setStandardButtons(QMessageBox.Ok)
 
@@ -60,16 +62,24 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         self.show()
 
+    def update_window_title(self):
+        if self._policy:
+            self.setWindowTitle("{0} - apol".format(self._policy))
+        else:
+            self.setWindowTitle("apol")
+
     def select_policy(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, "Open policy file", ".")[0]
+        filename = QFileDialog.getOpenFileName(self, "Open policy file", ".")[0]
         if filename:
             try:
                 self._policy = SELinuxPolicy(filename)
             except Exception as ex:
                 self.error_msg.critical(self, "Policy loading error", str(ex))
+            else:
+                self.update_window_title()
 
-            if self._policy and self._permmap:
-                self._permmap.map_policy(self._policy)
+                if self._permmap:
+                    self._permmap.map_policy(self._policy)
 
     def select_permmap(self):
         filename = QFileDialog.getOpenFileName(self, "Open permission map file", ".")[0]
@@ -78,17 +88,25 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                 self._permmap = PermissionMap(filename)
             except Exception as ex:
                 self.error_msg.critical(self, "Permission map loading error", str(ex))
+            else:
 
-            if self._policy and self._permmap:
-                self._permmap.map_policy(self._policy)
+                if self._policy:
+                    self._permmap.map_policy(self._policy)
 
     def choose_analysis(self):
         if not self._policy:
-            self.error_msg.critical(self, "No open policy", "Please load a policy first.")
-            return
+            self.error_msg.critical(self, "No open policy",
+                                    "Cannot start a new analysis. Please open a policy first.")
 
-        chooser = ChooseAnalysis(self)
-        chooser.show()
+            self.select_policy()
+
+        if self._policy:
+            # this check of self._policy is here in case someone
+            # tries to start an analysis with no policy open, but then
+            # cancels out of the policy file chooser or there is an
+            # error opening the policy file.
+            chooser = ChooseAnalysis(self)
+            chooser.show()
 
     def create_new_analysis(self, tabtitle, tabclass):
         newtab = QWidget()

@@ -99,8 +99,15 @@
    <addaction name="new_analysis"/>
   </widget>
   <action name="open_policy">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/Folder.png</normaloff>icons/Folder.png</iconset>
+   </property>
    <property name="text">
     <string>&amp;Open Policy</string>
+   </property>
+   <property name="toolTip">
+    <string>Open an SELinux Policy</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -120,6 +127,10 @@
    </property>
   </action>
   <action name="new_analysis">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/Add.png</normaloff>icons/Add.png</iconset>
+   </property>
    <property name="text">
     <string>New Analysis</string>
    </property>
@@ -134,15 +145,24 @@
    <property name="text">
     <string>Cut</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
   </action>
   <action name="actionCopy">
    <property name="text">
     <string>Copy</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
   </action>
   <action name="actionPaste">
    <property name="text">
     <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
   <action name="open_permmap">
