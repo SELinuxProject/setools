@@ -41,15 +41,22 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
     def setupUi(self):
         self.load_ui("terulequery.ui")
 
-        # set up source/target/default autocompletion
-        completion_list = [str(t) for t in self.policy.types()]
-        completion_list.extend(str(a) for a in self.policy.typeattributes())
-        completer_model = QStringListModel(self)
-        completer_model.setStringList(sorted(completion_list))
+        # set up source/target autocompletion
+        typeattr_completion_list = [str(t) for t in self.policy.types()]
+        typeattr_completion_list.extend(str(a) for a in self.policy.typeattributes())
+        typeattr_completer_model = QStringListModel(self)
+        typeattr_completer_model.setStringList(sorted(typeattr_completion_list))
+        self.typeattr_completion = QCompleter()
+        self.typeattr_completion.setModel(typeattr_completer_model)
+        self.source.setCompleter(self.typeattr_completion)
+        self.target.setCompleter(self.typeattr_completion)
+
+        # set up default autocompletion
+        type_completion_list = [str(t) for t in self.policy.types()]
+        type_completer_model = QStringListModel(self)
+        type_completer_model.setStringList(sorted(type_completion_list))
         self.type_completion = QCompleter()
-        self.type_completion.setModel(completer_model)
-        self.source.setCompleter(self.type_completion)
-        self.target.setCompleter(self.type_completion)
+        self.type_completion.setModel(type_completer_model)
         self.default_type.setCompleter(self.type_completion)
 
         # setup indications of errors on source/target/default
