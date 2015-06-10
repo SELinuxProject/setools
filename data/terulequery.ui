@@ -683,7 +683,7 @@
              <string>The list of permissions common to selected object classes.</string>
             </property>
             <property name="selectionMode">
-             <enum>QAbstractItemView::MultiSelection</enum>
+             <enum>QAbstractItemView::ExtendedSelection</enum>
             </property>
            </widget>
           </item>
@@ -827,7 +827,7 @@
              <string>Match the object class of the rule.</string>
             </property>
             <property name="selectionMode">
-             <enum>QAbstractItemView::MultiSelection</enum>
+             <enum>QAbstractItemView::ExtendedSelection</enum>
             </property>
            </widget>
           </item>
@@ -858,7 +858,7 @@
              <string>Booleans used in the rule's conditional expression.</string>
             </property>
             <property name="selectionMode">
-             <enum>QAbstractItemView::MultiSelection</enum>
+             <enum>QAbstractItemView::ExtendedSelection</enum>
             </property>
            </widget>
           </item>
