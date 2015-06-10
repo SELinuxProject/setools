@@ -104,6 +104,8 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
 
         # connect signals
         self.buttonBox.clicked.connect(self.run)
+        self.clear_ruletypes.clicked.connect(self.clear_all_ruletypes)
+        self.all_ruletypes.clicked.connect(self.set_all_ruletypes)
         self.source.textEdited.connect(self.clear_source_error)
         self.source.editingFinished.connect(self.set_source)
         self.source_regex.toggled.connect(self.set_source_regex)
@@ -116,6 +118,25 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.default_type.editingFinished.connect(self.set_default_type)
         self.default_regex.toggled.connect(self.set_default_regex)
         self.bool_criteria.selectionModel().selectionChanged.connect(self.set_bools)
+
+    #
+    # Ruletype criteria
+    #
+
+    def _set_ruletypes(self, value):
+        self.allow.setChecked(value)
+        self.auditallow.setChecked(value)
+        self.neverallow.setChecked(value)
+        self.dontaudit.setChecked(value)
+        self.type_transition.setChecked(value)
+        self.type_member.setChecked(value)
+        self.type_change.setChecked(value)
+
+    def set_all_ruletypes(self):
+        self._set_ruletypes(True)
+
+    def clear_all_ruletypes(self):
+        self._set_ruletypes(False)
 
     #
     # Source criteria
