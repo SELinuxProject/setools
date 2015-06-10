@@ -98,9 +98,9 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.set_source_regex(self.source_regex.isChecked())
         self.set_target_regex(self.target_regex.isChecked())
         self.set_default_regex(self.default_regex.isChecked())
-        self.toggle_criteria_frame()
-        self.toggle_results_frame()
-        self.toggle_notes_frame()
+        self.criteria_frame.setHidden(not self.criteria_expander.isChecked())
+        self.results_frame.setHidden(not self.results_expander.isChecked())
+        self.notes.setHidden(not self.notes_expander.isChecked())
 
         # connect signals
         self.buttonBox.clicked.connect(self.run)
@@ -116,9 +116,6 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.default_type.editingFinished.connect(self.set_default_type)
         self.default_regex.toggled.connect(self.set_default_regex)
         self.bool_criteria.selectionModel().selectionChanged.connect(self.set_bools)
-        self.criteria_expander.clicked.connect(self.toggle_criteria_frame)
-        self.results_expander.clicked.connect(self.toggle_results_frame)
-        self.notes_expander.clicked.connect(self.toggle_notes_frame)
 
     #
     # Source criteria
@@ -258,25 +255,3 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
             self.raw_results.appendPlainText(str(line))
 
         self.raw_results.moveCursor(QTextCursor.Start)
-
-    #
-    # Section expander handlers
-    #
-
-    def toggle_criteria_frame(self):
-        if self.criteria_expander.isChecked():
-            self.criteria_frame.show()
-        else:
-            self.criteria_frame.hide()
-
-    def toggle_results_frame(self):
-        if self.results_expander.isChecked():
-            self.results_frame.show()
-        else:
-            self.results_frame.hide()
-
-    def toggle_notes_frame(self):
-        if self.notes_expander.isChecked():
-            self.notes.show()
-        else:
-            self.notes.hide()

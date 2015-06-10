@@ -1009,5 +1009,53 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>criteria_expander</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>criteria_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>17</x>
+     <y>41</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>289</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>results_expander</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>results_frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>17</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>685</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>notes_expander</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>notes</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>17</x>
+     <y>833</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>379</x>
+     <y>910</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
