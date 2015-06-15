@@ -32,7 +32,7 @@ def role_factory(qpol_policy, name):
         return Role(qpol_policy, name)
 
     try:
-        return Role(qpol_policy, qpol.qpol_role_t(qpol_policy, name))
+        return Role(qpol_policy, qpol.qpol_role_t(qpol_policy, str(name)))
     except ValueError:
         raise exception.InvalidRole("{0} is not a valid role".format(name))
 

@@ -113,7 +113,7 @@ class SELinuxPolicy(object):
         self.log.info("Opening SELinux policy \"{0}\"".format(filename))
 
         try:
-            self.policy = qpol.qpol_policy_factory(filename)
+            self.policy = qpol.qpol_policy_factory(str(filename))
         except SyntaxError as err:
             raise exception.InvalidPolicy("Error opening policy file \"{0}\": {1}".
                                           format(filename, err))

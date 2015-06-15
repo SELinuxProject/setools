@@ -31,7 +31,7 @@ def boolean_factory(policy, name):
         return Boolean(policy, name)
 
     try:
-        return Boolean(policy, qpol.qpol_bool_t(policy, name))
+        return Boolean(policy, qpol.qpol_bool_t(policy, str(name)))
     except ValueError:
         raise exception.InvalidBoolean("{0} is not a valid Boolean".format(name))
 

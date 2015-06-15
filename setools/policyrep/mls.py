@@ -62,7 +62,7 @@ def category_factory(policy, sym):
         return Category(policy, sym)
 
     try:
-        return Category(policy, qpol.qpol_cat_t(policy, sym))
+        return Category(policy, qpol.qpol_cat_t(policy, str(sym)))
     except ValueError:
         raise exception.InvalidCategory("{0} is not a valid category".format(sym))
 
@@ -83,7 +83,7 @@ def sensitivity_factory(policy, sym):
         return Sensitivity(policy, sym)
 
     try:
-        return Sensitivity(policy, qpol.qpol_level_t(policy, sym))
+        return Sensitivity(policy, qpol.qpol_level_t(policy, str(sym)))
     except ValueError:
         raise exception.InvalidSensitivity("{0} is not a valid sensitivity".format(sym))
 
@@ -103,7 +103,7 @@ def level_factory(policy, sym):
     elif isinstance(sym, qpol.qpol_mls_level_t):
         return Level(policy, sym)
 
-    sens_split = sym.split(":")
+    sens_split = str(sym).split(":")
 
     sens = sens_split[0]
     try:
@@ -165,7 +165,7 @@ def level_decl_factory(policy, sym):
         return LevelDecl(policy, sym)
 
     try:
-        return LevelDecl(policy, qpol.qpol_level_t(policy, sym))
+        return LevelDecl(policy, qpol.qpol_level_t(policy, str(sym)))
     except ValueError:
         raise exception.InvalidLevelDecl("{0} is not a valid sensitivity".format(sym))
 
@@ -183,7 +183,7 @@ def range_factory(policy, sym):
         return Range(policy, sym)
 
     # build range:
-    levels = sym.split("-")
+    levels = str(sym).split("-")
 
     # strip() levels to handle ranges with spaces in them,
     # e.g. s0:c1 - s0:c0.c255

@@ -31,7 +31,7 @@ def common_factory(policy, name):
         return Common(policy, name)
 
     try:
-        return Common(policy, qpol.qpol_common_t(policy, name))
+        return Common(policy, qpol.qpol_common_t(policy, str(name)))
     except ValueError:
         raise exception.InvalidCommon("{0} is not a valid common".format(name))
 
@@ -46,7 +46,7 @@ def class_factory(policy, name):
         return ObjClass(policy, name)
 
     try:
-        return ObjClass(policy, qpol.qpol_class_t(policy, name))
+        return ObjClass(policy, qpol.qpol_class_t(policy, str(name)))
     except ValueError:
         raise exception.InvalidClass("{0} is not a valid object class".format(name))
 

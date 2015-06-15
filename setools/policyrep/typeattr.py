@@ -27,7 +27,7 @@ def _symbol_lookup(qpol_policy, name):
         return name
 
     try:
-        return qpol.qpol_type_t(qpol_policy, name)
+        return qpol.qpol_type_t(qpol_policy, str(name))
     except ValueError:
         raise exception.InvalidType("{0} is not a valid type/attribute".format(name))
 
