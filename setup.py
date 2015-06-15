@@ -5,9 +5,11 @@ from setuptools import setup
 import distutils.log as log
 from distutils.core import Extension
 from distutils.cmd import Command
+from distutils.unixccompiler import UnixCCompiler
 from setuptools.command.build_ext import build_ext
 import subprocess
 import sys
+import os
 from os.path import join
 
 
@@ -53,6 +55,17 @@ class BuildExtCommand(build_ext):
         self.run_command('build_yacc')
         self.run_command('build_lex')
         build_ext.run(self)
+
+
+try:
+    static_sepol = [os.environ['SEPOL']]
+except KeyError:
+    # try to find libsepol.a. The find_library_file function
+    # chooses dynamic libraries over static ones, so
+    # this assumes that the static lib is in the same directory
+    # as the dynamic lib.
+    dynamic_sepol = UnixCCompiler().find_library_file(['/usr/lib64', '/usr/lib'], 'sepol')
+    static_sepol = dynamic_sepol.replace(".so", ".a")
 
 ext_py_mods = [Extension('setools.policyrep._qpol',
                          ['setools/policyrep/qpol.i',
@@ -114,8 +127,8 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                                              '-Wno-cast-qual', # libsepol/libselinux uses const-to-nonconst casts
                                              '-Wno-shadow', # SWIG generates shadow variables
                                              '-fno-exceptions'],
-                         extra_link_args=['-Wl,--version-script=libqpol/libqpol.map',
-                                          '/usr/lib/libsepol.a'],
+                         extra_objects=[static_sepol],
+                         extra_link_args=['-Wl,--version-script=libqpol/libqpol.map'],
                          swig_opts=['-Ilibqpol/include'])]
 
 setup(name='setools',
