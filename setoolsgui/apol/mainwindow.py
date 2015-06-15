@@ -41,7 +41,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         try:
             # try to load default permission map
             self._permmap = PermissionMap()
-        except OSError as ex:
+        except (IOError, OSError) as ex:
             self.log.info("Failed to load default permission map: {0}".format(ex))
             self._permmap = None
 

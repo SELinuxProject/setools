@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 import sys
+from errno import ENOENT
 
 from PyQt5.uic import loadUi
 
@@ -29,7 +30,8 @@ class SEToolsWidget(object):
             try:
                 loadUi(path + filename, self)
                 break
-            except OSError:
-                pass
+            except (IOError, OSError) as err:
+                if err.errno != ENOENT:
+                    raise
         else:
             raise RuntimeError("Unable to load Qt UI file \"{0}\"".format(filename))

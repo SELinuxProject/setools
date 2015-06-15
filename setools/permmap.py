@@ -16,7 +16,9 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import sys
 import logging
+from errno import ENOENT
 
 from . import exception
 from . import policyrep
@@ -30,14 +32,25 @@ class PermissionMap(object):
     min_weight = 1
     max_weight = 10
 
-    def __init__(self, permmapfile="/usr/share/setools/perm_map"):
+    def __init__(self, permmapfile=None):
         """
         Parameter:
         permmapfile     The path to the permission map to load.
         """
         self.log = logging.getLogger(self.__class__.__name__)
 
-        self.load(permmapfile)
+        if permmapfile:
+            self.load(permmapfile)
+        else:
+            for path in ["data/", sys.prefix + "/share/setools/"]:
+                try:
+                    self.load(path + "perm_map")
+                    break
+                except (IOError, OSError) as err:
+                    if err.errno != ENOENT:
+                        raise
+            else:
+                raise RuntimeError("Unable to load default permission map.")
 
     def load(self, permmapfile):
         """
