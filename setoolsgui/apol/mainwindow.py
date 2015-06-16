@@ -19,8 +19,9 @@
 
 import logging
 
-from PyQt5.QtWidgets import QDialog, QFileDialog, QMainWindow, QMessageBox, QTreeWidgetItem, \
-                            QVBoxLayout, QWidget
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QAction, QDialog, QFileDialog, QLineEdit, QMainWindow, QMenu, \
+                            QMessageBox, QTreeWidgetItem, QVBoxLayout, QWidget
 from setools import PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
@@ -50,15 +51,35 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
     def setupUi(self):
         self.load_ui("apol.ui")
 
+        self.tab_counter = 0
+
         self.update_window_title()
 
+        # set up error message dialog
         self.error_msg = QMessageBox(self)
         self.error_msg.setStandardButtons(QMessageBox.Ok)
 
+        # set up tab name editor
+        self.tab_editor = QLineEdit(self.AnalysisTabs)
+        self.tab_editor.setWindowFlags(Qt.Popup)
+
+        # configure tab bar context menu
+        tabBar = self.AnalysisTabs.tabBar()
+        self.rename_tab_action = QAction("&Rename active tab", tabBar)
+        self.close_tab_action = QAction("&Close active tab", tabBar)
+        tabBar.addAction(self.rename_tab_action)
+        tabBar.addAction(self.close_tab_action)
+        tabBar.setContextMenuPolicy(Qt.ActionsContextMenu)
+
+        # connect signals
         self.open_policy.triggered.connect(self.select_policy)
         self.open_permmap.triggered.connect(self.select_permmap)
         self.new_analysis.triggered.connect(self.choose_analysis)
-        self.AnalysisTabs.tabCloseRequested.connect(self.AnalysisTabs.removeTab)
+        self.AnalysisTabs.tabCloseRequested.connect(self.close_tab)
+        self.AnalysisTabs.tabBarDoubleClicked.connect(self.tab_name_editor)
+        self.tab_editor.editingFinished.connect(self.rename_tab)
+        self.rename_tab_action.triggered.connect(self.rename_active_tab)
+        self.close_tab_action.triggered.connect(self.close_active_tab)
 
         self.show()
 
@@ -109,8 +130,11 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             chooser.show()
 
     def create_new_analysis(self, tabtitle, tabclass):
+        self.tab_counter += 1
+        counted_name = "{0}: {1}".format(self.tab_counter, tabtitle)
+
         newtab = QWidget()
-        newtab.setObjectName(tabtitle)
+        newtab.setObjectName(counted_name)
 
         newanalysis = tabclass(newtab, self._policy)
 
@@ -120,7 +144,40 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         tabLayout.addWidget(newanalysis)
         newtab.setLayout(tabLayout)
 
-        self.AnalysisTabs.addTab(newtab, tabtitle)
+        index = self.AnalysisTabs.addTab(newtab, counted_name)
+        self.AnalysisTabs.setTabToolTip(index, tabtitle)
+
+    def tab_name_editor(self, index):
+        if index >= 0:
+            tab_area = self.AnalysisTabs.tabBar().tabRect(index)
+            self.tab_editor.move(self.AnalysisTabs.mapToGlobal(tab_area.topLeft()))
+            self.tab_editor.setText(self.AnalysisTabs.tabText(index))
+            self.tab_editor.selectAll()
+            self.tab_editor.show()
+            self.tab_editor.setFocus()
+
+    def close_active_tab(self):
+        index = self.AnalysisTabs.currentIndex()
+        if index >= 0:
+            self.close_tab(index)
+
+    def rename_active_tab(self):
+        index = self.AnalysisTabs.currentIndex()
+        if index >= 0:
+            self.tab_name_editor(index)
+
+    def close_tab(self, index):
+        widget = self.AnalysisTabs.widget(index)
+        widget.close()
+        widget.deleteLater()
+        self.AnalysisTabs.removeTab(index)
+
+    def rename_tab(self):
+        # this should never be negative since the editor is modal
+        index = self.AnalysisTabs.currentIndex()
+
+        self.tab_editor.hide()
+        self.AnalysisTabs.setTabText(index, self.tab_editor.text())
 
 
 class ChooseAnalysis(SEToolsWidget, QDialog):
