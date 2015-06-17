@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-from PyQt5 import QtCore
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from setools.policyrep.exception import RuleNotConditional, RuleUseError
 
@@ -42,7 +41,7 @@ class RuleResultModel(QAbstractTableModel):
     def data(self, index, role):
         if role == Qt.DisplayRole:
             if not self.resultlist:
-                return QtCore.QVariant()
+                return None
 
             row = index.row()
             col = index.column()
@@ -82,7 +81,7 @@ class RuleResultModel(QAbstractTableModel):
                     return None
             else:
                 raise ValueError("Invalid column number")
-        elif role == QtCore.Qt.UserRole:
+        elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()
 
@@ -96,11 +95,11 @@ class TERuleListModel(RuleResultModel):
 
     """Type Enforcement rule model.  Represents rules as a column."""
 
-    def columnCount(self, parent=QtCore.QModelIndex()):
+    def columnCount(self, parent=QModelIndex()):
         return 6
 
     def headerData(self, section, orientation, role):
-        if role == QtCore.Qt.DisplayRole and orientation == QtCore.Qt.Horizontal:
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             if section == 0:
                 return "Rule Type"
             elif section == 1:
