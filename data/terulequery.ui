@@ -941,8 +941,10 @@
   <tabstop>clear_ruletypes</tabstop>
   <tabstop>all_ruletypes</tabstop>
   <tabstop>source</tabstop>
+  <tabstop>source_indirect</tabstop>
   <tabstop>source_regex</tabstop>
   <tabstop>target</tabstop>
+  <tabstop>target_indirect</tabstop>
   <tabstop>target_regex</tabstop>
   <tabstop>tclass</tabstop>
   <tabstop>clear_class</tabstop>
@@ -950,9 +952,12 @@
   <tabstop>perms</tabstop>
   <tabstop>clear_perms</tabstop>
   <tabstop>invert_perms</tabstop>
+  <tabstop>perms_equal</tabstop>
   <tabstop>default_type</tabstop>
+  <tabstop>default_regex</tabstop>
   <tabstop>bool_criteria</tabstop>
   <tabstop>clear_bools</tabstop>
+  <tabstop>bools_equal</tabstop>
   <tabstop>results_expander</tabstop>
   <tabstop>table_results</tabstop>
   <tabstop>raw_results</tabstop>
