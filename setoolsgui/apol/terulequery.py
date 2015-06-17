@@ -86,13 +86,6 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
-        headerview = self.table_results.horizontalHeader()
-        headerview.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        headerview.setSectionResizeMode(4, QHeaderView.Stretch)
-        headerview.setSectionResizeMode(5, QHeaderView.ResizeToContents)
 
         # Ensure settings are consistent with the initial .ui state
         self.set_source_regex(self.source_regex.isChecked())
@@ -269,6 +262,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         # update results table
         results = list(self.query.results())
         self.table_results_model.set_rules(results)
+        self.table_results.resizeColumnsToContents()
 
         # update raw results
         self.raw_results.clear()
