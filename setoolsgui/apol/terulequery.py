@@ -30,12 +30,11 @@ from .models import PermListModel, SEToolsListModel
 
 
 class TERuleQueryTab(SEToolsWidget, QScrollArea):
-    def __init__(self, tab, policy):
-        super(TERuleQueryTab, self).__init__(tab)
+    def __init__(self, parent, policy):
+        super(TERuleQueryTab, self).__init__(parent)
         self.log = logging.getLogger(self.__class__.__name__)
         self.policy = policy
         self.query = TERuleQuery(policy)
-        self.tab = tab
         self.setupUi()
 
     def setupUi(self):
