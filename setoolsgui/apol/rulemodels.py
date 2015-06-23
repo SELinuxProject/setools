@@ -85,11 +85,6 @@ class RuleResultModel(QAbstractTableModel):
             # get the whole rule for user role
             return self.resultlist[row].statement()
 
-    def set_rules(self, result_list):
-        self.beginResetModel()
-        self.resultlist = result_list
-        self.endResetModel()
-
 
 class TERuleListModel(RuleResultModel):
 

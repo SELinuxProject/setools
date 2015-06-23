@@ -19,9 +19,9 @@
 
 import logging
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel
+from PyQt5.QtCore import pyqtSignal, Qt, QObject, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QScrollArea
+from PyQt5.QtWidgets import QCompleter, QHeaderView, QProgressDialog, QScrollArea
 from setools import TERuleQuery
 
 from ..widget import SEToolsWidget
@@ -30,12 +30,27 @@ from .models import PermListModel, SEToolsListModel, invert_list_selection
 
 
 class TERuleQueryTab(SEToolsWidget, QScrollArea):
+
+    """
+    A Type Enforcement rule query.
+
+    Qt signals:
+    update_results      Signal child worker thread to run the query.
+    """
+
+    update_results = pyqtSignal()
+
     def __init__(self, parent, policy):
         super(TERuleQueryTab, self).__init__(parent)
         self.log = logging.getLogger(self.__class__.__name__)
         self.policy = policy
         self.query = TERuleQuery(policy)
         self.setupUi()
+
+    def __del__(self):
+        self.thread.quit()
+        self.thread.wait(5000)
+        self.log.debug("Thread successfully finished: %s", self.thread.isFinished())
 
     def setupUi(self):
         self.load_ui("terulequery.ui")
@@ -85,6 +100,23 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
+
+        # set up processing thread
+        self.thread = QThread()
+        self.worker = ResultsUpdater(self.query, self.table_results_model)
+        self.worker.raw_line.connect(self.raw_results.appendPlainText)
+        self.worker.finished.connect(self.update_complete)
+        self.worker.moveToThread(self.thread)
+        self.update_results.connect(self.worker.update)
+        self.thread.start()
+
+        # create a "busy, please wait" dialog
+        self.busy = QProgressDialog(self)
+        self.busy.setModal(True)
+        self.busy.setLabelText("Processing query...")
+        self.busy.setRange(0, 0)
+        self.busy.setMinimumDuration(0)
+        self.busy.canceled.connect(self.thread.requestInterruption)
 
         # Ensure settings are consistent with the initial .ui state
         self.set_source_regex(self.source_regex.isChecked())
@@ -266,14 +298,57 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.query.perms_equal = self.perms_equal.isChecked()
         self.query.boolean_equal = self.bools_equal.isChecked()
 
-        # update results table
-        results = list(self.query.results())
-        self.table_results_model.set_rules(results)
-        self.table_results.resizeColumnsToContents()
-
-        # update raw results
+        # start processing
+        self.busy.show()
         self.raw_results.clear()
-        for line in results:
-            self.raw_results.appendPlainText(str(line))
+        self.update_results.emit()
 
+    def update_complete(self):
+        # update sizes/location of result displays
+        self.table_results.resizeColumnsToContents()
+        self.table_results.resizeRowsToContents()
         self.raw_results.moveCursor(QTextCursor.Start)
+
+        self.busy.reset()
+
+
+class ResultsUpdater(QObject):
+
+    """
+    Thread for processing queries and updating result widgets.
+
+    Parameters:
+    query       The query object
+    model       The model for the results
+
+    Qt signals:
+    finished    The update has completed.
+    raw_line    (str) A string to be appended to the raw results.
+    """
+
+    finished = pyqtSignal()
+    raw_line = pyqtSignal(str)
+
+    def __init__(self, query, model):
+        super(ResultsUpdater, self).__init__()
+        self.query = query
+        self.table_results_model = model
+
+    def update(self):
+        """Run the query and update results."""
+        self.table_results_model.beginResetModel()
+
+        results = []
+
+        for item in self.query.results():
+            results.append(item)
+
+            self.raw_line.emit(str(item))
+
+            if QThread.currentThread().isInterruptionRequested():
+                break
+
+        self.table_results_model.resultlist = results
+        self.table_results_model.endResetModel()
+
+        self.finished.emit()
