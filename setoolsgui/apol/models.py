@@ -17,9 +17,18 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-from PyQt5 import QtCore
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, QStringListModel, Qt
+from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QModelIndex, QStringListModel, Qt
 from setools.policyrep.exception import NoCommon
+
+
+def invert_list_selection(selection_model):
+    """Invert the selection of a list-based model."""
+
+    model = selection_model.model()
+    rowcount = model.rowCount()
+    for row in range(rowcount):
+        index = model.createIndex(row, 0)
+        selection_model.select(index, QItemSelectionModel.Toggle)
 
 
 class SEToolsListModel(QAbstractListModel):

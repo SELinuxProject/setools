@@ -26,7 +26,7 @@ from setools import TERuleQuery
 
 from ..widget import SEToolsWidget
 from .rulemodels import TERuleListModel
-from .models import PermListModel, SEToolsListModel
+from .models import PermListModel, SEToolsListModel, invert_list_selection
 
 
 class TERuleQueryTab(SEToolsWidget, QScrollArea):
@@ -105,7 +105,9 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.target.editingFinished.connect(self.set_target)
         self.target_regex.toggled.connect(self.set_target_regex)
         self.tclass.selectionModel().selectionChanged.connect(self.set_tclass)
+        self.invert_class.clicked.connect(self.invert_tclass_selection)
         self.perms.selectionModel().selectionChanged.connect(self.set_perms)
+        self.invert_perms.clicked.connect(self.invert_perms_selection)
         self.default_type.textEdited.connect(self.clear_default_error)
         self.default_type.editingFinished.connect(self.set_default_type)
         self.default_regex.toggled.connect(self.set_default_regex)
@@ -184,6 +186,9 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.query.tclass = selected_classes
         self.perms_model.set_classes(selected_classes)
 
+    def invert_tclass_selection(self):
+        invert_list_selection(self.tclass.selectionModel())
+
     #
     # Permissions criteria
     #
@@ -194,6 +199,9 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
             selected_perms.append(self.perms_model.data(index, Qt.UserRole))
 
         self.query.perms = selected_perms
+
+    def invert_perms_selection(self):
+        invert_list_selection(self.perms.selectionModel())
 
     #
     # Default criteria
