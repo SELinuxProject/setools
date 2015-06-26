@@ -21,7 +21,7 @@ import logging
 
 from PyQt5.QtCore import pyqtSignal, Qt, QObject, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QProgressDialog, QScrollArea
+from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import TERuleQuery
 
 from ..widget import SEToolsWidget
@@ -276,27 +276,46 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
     def run(self, button):
         # right now there is only one button.
         rule_types = []
+        max_results = 0
 
         if self.allow.isChecked():
             rule_types.append("allow")
+            max_results += self.policy.allow_count
         if self.auditallow.isChecked():
             rule_types.append("auditallow")
+            max_results += self.policy.auditallow_count
         if self.neverallow.isChecked():
             rule_types.append("neverallow")
+            max_results += self.policy.neverallow_count
         if self.dontaudit.isChecked():
             rule_types.append("dontaudit")
+            max_results += self.policy.dontaudit_count
         if self.type_transition.isChecked():
             rule_types.append("type_transition")
+            max_results += self.policy.type_transition_count
         if self.type_member.isChecked():
             rule_types.append("type_member")
+            max_results += self.policy.type_member_count
         if self.type_change.isChecked():
             rule_types.append("type_change")
+            max_results += self.policy.type_change_count
 
         self.query.ruletype = rule_types
         self.query.source_indirect = self.source_indirect.isChecked()
         self.query.target_indirect = self.target_indirect.isChecked()
         self.query.perms_equal = self.perms_equal.isChecked()
         self.query.boolean_equal = self.bools_equal.isChecked()
+
+        # if query is broad, show warning.
+        if not self.query.source and not self.query.target and not self.query.tclass and \
+                not self.query.perms and not self.query.default and not self.query.boolean:
+            reply = QMessageBox.question(
+                self, "Continue?",
+                "This is a broad query, estimated to return {0} results.  Continue?".
+                format(max_results), QMessageBox.Yes | QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                return
 
         # start processing
         self.busy.show()
