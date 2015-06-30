@@ -104,6 +104,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         self.all_paths.toggled.connect(self.all_paths_toggled)
         self.flows_in.toggled.connect(self.flows_in_toggled)
         self.flows_out.toggled.connect(self.flows_out_toggled)
+        self.min_perm_weight.valueChanged.connect(self.set_min_weight)
 
     #
     # Analysis mode
@@ -152,6 +153,12 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         except Exception as ex:
             self.target.setToolTip("Error: " + str(ex))
             self.target.setPalette(self.error_palette)
+
+    #
+    # Options
+    #
+    def set_min_weight(self, value):
+        self.query.min_weight = value
 
     #
     # Results runner
