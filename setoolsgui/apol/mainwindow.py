@@ -25,6 +25,8 @@ from PyQt5.QtWidgets import QAction, QDialog, QFileDialog, QLineEdit, QMainWindo
 from setools import PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
+# Analysis tabs:
+from .infoflow import InfoFlowAnalysisTab
 from .terulequery import TERuleQueryTab
 
 
@@ -136,7 +138,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         newtab = QWidget()
         newtab.setObjectName(counted_name)
 
-        newanalysis = tabclass(newtab, self._policy)
+        newanalysis = tabclass(newtab, self._policy, self._permmap)
 
         # create a vertical layout in the tab, place the analysis ui inside.
         tabLayout = QVBoxLayout()
@@ -222,8 +224,10 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 #                         "Analysis": _analysis_map,
 #                         "Labeling Statements": _labeling_map}
 
+    _analysis_map = {"Information Flow Analysis": InfoFlowAnalysisTab}
     _rule_map = {"TE Rules": TERuleQueryTab}
-    _analysis_choices = {"Rules": _rule_map}
+    _analysis_choices = {"Rules": _rule_map,
+                         "Analyses": _analysis_map}
 
     def __init__(self, parent):
         super(ChooseAnalysis, self).__init__(parent)

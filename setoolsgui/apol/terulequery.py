@@ -40,7 +40,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
 
     update_results = pyqtSignal()
 
-    def __init__(self, parent, policy):
+    def __init__(self, parent, policy, perm_map):
         super(TERuleQueryTab, self).__init__(parent)
         self.log = logging.getLogger(self.__class__.__name__)
         self.policy = policy
