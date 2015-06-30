@@ -358,14 +358,19 @@ class ResultsUpdater(QObject):
         self.table_results_model.beginResetModel()
 
         results = []
+        counter = 0
 
         for item in self.query.results():
+            counter += 1
             results.append(item)
 
             self.raw_line.emit(str(item))
 
             if QThread.currentThread().isInterruptionRequested():
                 break
+            elif not counter % 10:
+                # yield execution every 10 rules
+                QThread.yieldCurrentThread()
 
         self.table_results_model.resultlist = results
         self.table_results_model.endResetModel()
