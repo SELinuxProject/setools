@@ -360,8 +360,7 @@ class ResultsUpdater(QObject):
         results = []
         counter = 0
 
-        for item in self.query.results():
-            counter += 1
+        for counter, item in enumerate(self.query.results(), start=1):
             results.append(item)
 
             self.raw_line.emit(str(item))
