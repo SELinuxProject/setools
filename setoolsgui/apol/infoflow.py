@@ -208,9 +208,9 @@ class ResultsUpdater(QObject):
         elif mode == "all_shortest_paths":
             self.transitive(self.query.all_shortest_paths(source, target), limit)
         elif mode == "flows_out":
-            self.direct(self.query.infoflows(source), limit)
+            self.direct(self.query.infoflows(source, out=True), limit)
         else:  # flows_in
-            pass
+            self.direct(self.query.infoflows(target, out=False), limit)
 
         self.finished.emit()
 

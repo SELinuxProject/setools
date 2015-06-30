@@ -59,7 +59,7 @@
        <enum>QFrame::StyledPanel</enum>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="tabSpacing">
        <number>0</number>
@@ -682,9 +682,6 @@
           </item>
           <item row="3" column="0" colspan="2">
            <widget class="QRadioButton" name="flows_in">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
             <property name="toolTip">
              <string>All information flows into the target type will be shown.</string>
             </property>
