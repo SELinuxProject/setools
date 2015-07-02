@@ -115,13 +115,11 @@ try:
             if args.limit_flows and flownum >= args.limit_flows:
                 break
 
-    print(flownum, "information flow(s) found.\n")
+    print(flownum, "information flow(s) found.")
 
     if args.stats:
-        print("Information flow graph size:")
-        nnodes, nedges = g.get_stats()
-        print(" Nodes:", nnodes)
-        print(" Edges:", nedges)
+        print("\nGraph statistics:")
+        print(g.get_stats())
 
 except Exception as err:
     if args.debug:

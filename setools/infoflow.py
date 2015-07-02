@@ -253,13 +253,12 @@ class InfoFlowAnalysis(object):
         """
         Get the information flow graph statistics.
 
-        Return: tuple(nodes, edges)
-
-        nodes    The number of nodes (types) in the graph.
-        edges    The number of edges (information flows between types)
-                 in the graph.
+        Return: str
         """
-        return (self.G.number_of_nodes(), self.G.number_of_edges())
+        if self.rebuildgraph:
+            self._build_graph()
+
+        return nx.info(self.G)
 
     #
     # Internal functions follow
@@ -300,6 +299,7 @@ class InfoFlowAnalysis(object):
 
     def _build_graph(self):
         self.G.clear()
+        self.G.name = "Information flow graph for {0}.".format(self.policy)
 
         self.perm_map.map_policy(self.policy)
 

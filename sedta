@@ -147,10 +147,8 @@ try:
         print(i, "domain transition(s) found.")
 
     if args.stats:
-        print("Domain transition graph size:")
-        nnodes, nedges = g.get_stats()
-        print(" Nodes:", nnodes)
-        print(" Edges:", nedges)
+        print("\nGraph statistics:")
+        print(g.get_stats())
 
 except Exception as err:
     if args.debug:

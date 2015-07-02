@@ -232,12 +232,12 @@ class DomainTransitionAnalysis(object):
         """
         Get the domain transition graph statistics.
 
-        Return:  tuple(nodes, edges)
-
-        nodes    The number of nodes (types) in the graph.
-        edges    The number of edges (domain transitions) in the graph.
+        Return: str
         """
-        return (self.G.number_of_nodes(), self.G.number_of_edges())
+        if self.rebuildgraph:
+            self._build_graph()
+
+        return nx.info(self.G)
 
     #
     # Internal functions follow
@@ -357,6 +357,7 @@ class DomainTransitionAnalysis(object):
     #
     def _build_graph(self):
         self.G.clear()
+        self.G.name = "Domain transition graph for {0}.".format(self.policy)
 
         self.log.info("Building graph from {0}...".format(self.policy))
 
