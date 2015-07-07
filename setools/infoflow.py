@@ -233,7 +233,7 @@ class InfoFlowAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all infoflows out of {0}...".format(s))
+        self.log.info("Generating all infoflows {0} {1}".format("out of" if out else "into", s))
 
         if out:
             flows = self.subG.out_edges_iter(s)
