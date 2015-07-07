@@ -113,7 +113,6 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         # create a "busy, please wait" dialog
         self.busy = QProgressDialog(self)
         self.busy.setModal(True)
-        self.busy.setLabelText("Processing query...")
         self.busy.setRange(0, 0)
         self.busy.setMinimumDuration(0)
         self.busy.canceled.connect(self.thread.requestInterruption)
@@ -318,15 +317,32 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
                 return
 
         # start processing
+        self.busy.setLabelText("Processing query...")
         self.busy.show()
         self.raw_results.clear()
         self.update_results.emit()
 
     def update_complete(self):
         # update sizes/location of result displays
-        self.table_results.resizeColumnsToContents()
-        self.table_results.resizeRowsToContents()
-        self.raw_results.moveCursor(QTextCursor.Start)
+        if not self.busy.wasCanceled():
+            self.busy.setLabelText("Resizing the result table's columns; GUI may be unresponsive")
+            self.busy.repaint()
+            self.table_results.resizeColumnsToContents()
+            # If the permissions column width is too long, pull back
+            # to a reasonable size
+            header = self.table_results.horizontalHeader()
+            if header.sectionSize(4) > 400:
+                header.resizeSection(4, 400)
+
+        if not self.busy.wasCanceled():
+            self.busy.setLabelText("Resizing the result table's rows; GUI may be unresponsive")
+            self.busy.repaint()
+            self.table_results.resizeRowsToContents()
+
+        if not self.busy.wasCanceled():
+            self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
+            self.busy.repaint()
+            self.raw_results.moveCursor(QTextCursor.Start)
 
         self.busy.reset()
 
