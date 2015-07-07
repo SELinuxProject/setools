@@ -29,14 +29,7 @@ from ..widget import SEToolsWidget
 
 class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
 
-    """
-    An information flow analysis tab.
-
-    Qt signals:
-    update_results      Signal child worker thread to run the analysis.
-    """
-
-    update_results = pyqtSignal(str, str, str, int, int)
+    """An information flow analysis tab."""
 
     def __init__(self, parent, policy, perm_map):
         super(InfoFlowAnalysisTab, self).__init__(parent)
@@ -48,7 +41,6 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
     def __del__(self):
         self.thread.quit()
         self.thread.wait(5000)
-        self.log.debug("Thread successfully finished: %s", self.thread.isFinished())
 
     def setupUi(self):
         self.log.debug("Initializing UI.")
@@ -73,11 +65,11 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         # set up processing thread
         self.thread = QThread()
         self.worker = ResultsUpdater(self.query)
-        self.worker.raw_line.connect(self.raw_results.appendPlainText)
-        self.worker.finished.connect(self.update_complete)
         self.worker.moveToThread(self.thread)
-        self.update_results.connect(self.worker.update)
-        self.thread.start()
+        self.worker.raw_line.connect(self.raw_results.appendPlainText)
+        self.worker.finished.connect(self.thread.quit)
+        self.thread.started.connect(self.worker.update)
+        self.thread.finished.connect(self.update_complete)
 
         # create a "busy, please wait" dialog
         self.busy = QProgressDialog(self)
@@ -132,6 +124,8 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
             text = self.source.text()
             if text:
                 self.query.source = self.policy.lookup_type(text)
+            else:
+                self.query.source = None
         except Exception as ex:
             self.source.setToolTip("Error: " + str(ex))
             self.source.setPalette(self.error_palette)
@@ -150,6 +144,8 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
             text = self.target.text()
             if text:
                 self.query.target = self.policy.lookup_type(text)
+            else:
+                self.query.target = None
         except Exception as ex:
             self.target.setToolTip("Error: " + str(ex))
             self.target.setPalette(self.error_palette)
@@ -170,14 +166,14 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
             if mode.isChecked():
                 break
 
+        self.query.mode = mode.objectName()
+        self.query.max_path_len = self.max_path_length.value()
+        self.query.limit = self.limit_paths.value()
+
         # start processing
         self.busy.show()
         self.raw_results.clear()
-        self.update_results.emit(mode.objectName(),
-                                 self.source.text(),
-                                 self.target.text(),
-                                 self.max_path_length.value(),
-                                 self.limit_paths.value())
+        self.thread.start()
 
     def update_complete(self):
         # update location of result display
@@ -207,21 +203,23 @@ class ResultsUpdater(QObject):
         super(ResultsUpdater, self).__init__()
         self.query = query
 
-    def update(self, mode, source, target, max_path_len, limit):
+    def update(self):
         """Run the query and update results."""
 
-        if mode == "all_paths":
-            self.transitive(self.query.all_paths(source, target, max_path_len), limit)
-        elif mode == "all_shortest_paths":
-            self.transitive(self.query.all_shortest_paths(source, target), limit)
-        elif mode == "flows_out":
-            self.direct(self.query.infoflows(source, out=True), limit)
+        assert self.query.limit, "Code doesn't currently handle unlimited (limit=0) paths."
+        if self.query.mode == "all_paths":
+            self.transitive(self.query.all_paths(self.query.source, self.query.target,
+                                                 self.query.max_path_len))
+        elif self.query.mode == "all_shortest_paths":
+            self.transitive(self.query.all_shortest_paths(self.query.source, self.query.target))
+        elif self.query.mode == "flows_out":
+            self.direct(self.query.infoflows(self.query.source, out=True))
         else:  # flows_in
-            self.direct(self.query.infoflows(target, out=False), limit)
+            self.direct(self.query.infoflows(self.query.target, out=False))
 
         self.finished.emit()
 
-    def transitive(self, paths, limit):
+    def transitive(self, paths):
         pathnum = 0
         for pathnum, path in enumerate(paths, start=1):
             self.raw_line.emit("Flow {0}:".format(pathnum))
@@ -235,7 +233,7 @@ class ResultsUpdater(QObject):
 
                 self.raw_line.emit("")
 
-            if QThread.currentThread().isInterruptionRequested() or (limit and pathnum >= limit):
+            if QThread.currentThread().isInterruptionRequested() or (pathnum >= self.query.limit):
                 break
             else:
                 QThread.yieldCurrentThread()
@@ -244,7 +242,7 @@ class ResultsUpdater(QObject):
 
         self.raw_line.emit("{0} information flow path(s) found.\n".format(pathnum))
 
-    def direct(self, flows, limit):
+    def direct(self, flows):
         flownum = 0
         for flownum, flow in enumerate(flows, start=1):
             self.raw_line.emit("Flow {0}: {1} -> {2}".format(flownum, flow.source, flow.target))
@@ -253,7 +251,7 @@ class ResultsUpdater(QObject):
 
             self.raw_line.emit("")
 
-            if QThread.currentThread().isInterruptionRequested() or (limit and flownum >= limit):
+            if QThread.currentThread().isInterruptionRequested() or (flownum >= self.query.limit):
                 break
             else:
                 QThread.yieldCurrentThread()

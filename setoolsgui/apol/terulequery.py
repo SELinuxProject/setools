@@ -31,14 +31,7 @@ from .models import PermListModel, SEToolsListModel, invert_list_selection
 
 class TERuleQueryTab(SEToolsWidget, QScrollArea):
 
-    """
-    A Type Enforcement rule query.
-
-    Qt signals:
-    update_results      Signal child worker thread to run the query.
-    """
-
-    update_results = pyqtSignal()
+    """A Type Enforcement rule query."""
 
     def __init__(self, parent, policy, perm_map):
         super(TERuleQueryTab, self).__init__(parent)
@@ -50,7 +43,6 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
     def __del__(self):
         self.thread.quit()
         self.thread.wait(5000)
-        self.log.debug("Thread successfully finished: %s", self.thread.isFinished())
 
     def setupUi(self):
         self.load_ui("terulequery.ui")
@@ -104,11 +96,11 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         # set up processing thread
         self.thread = QThread()
         self.worker = ResultsUpdater(self.query, self.table_results_model)
+        self.worker.moveToThread(self.thread)
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
         self.worker.finished.connect(self.update_complete)
-        self.worker.moveToThread(self.thread)
-        self.update_results.connect(self.worker.update)
-        self.thread.start()
+        self.worker.finished.connect(self.thread.quit)
+        self.thread.started.connect(self.worker.update)
 
         # create a "busy, please wait" dialog
         self.busy = QProgressDialog(self)
@@ -320,7 +312,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.busy.setLabelText("Processing query...")
         self.busy.show()
         self.raw_results.clear()
-        self.update_results.emit()
+        self.thread.start()
 
     def update_complete(self):
         # update sizes/location of result displays
