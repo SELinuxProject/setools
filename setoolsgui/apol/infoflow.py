@@ -24,6 +24,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import InfoFlowAnalysis
 
+from .excludetypes import ExcludeTypes
 from ..widget import SEToolsWidget
 
 
@@ -97,6 +98,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         self.flows_in.toggled.connect(self.flows_in_toggled)
         self.flows_out.toggled.connect(self.flows_out_toggled)
         self.min_perm_weight.valueChanged.connect(self.set_min_weight)
+        self.exclude_types.clicked.connect(self.choose_excluded_types)
 
     #
     # Analysis mode
@@ -155,6 +157,10 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
     #
     def set_min_weight(self, value):
         self.query.min_weight = value
+
+    def choose_excluded_types(self):
+        chooser = ExcludeTypes(self, self.policy)
+        chooser.show()
 
     #
     # Results runner
