@@ -62,6 +62,10 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                       Default is false.
     perms_regex       If true, regular expression matching will be used
                       on the permission names instead of set logic.
+                      Default is false.
+    perms_subset      If true, the rule matches if the permissions criteria
+                      is a subset of the rule's permission set.
+                      Default is false.
     default           The name of the default type to match.
     default_regex     If true, regular expression matching will be
                       used on the default type.

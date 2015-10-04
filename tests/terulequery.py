@@ -176,6 +176,27 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.validate_rule(r[1], "dontaudit", "test14", "test14", "infoflow7",
                            set(["super_unmapped"]))
 
+    def test_052_perms_subset1(self):
+        """TE rule query with permission subset."""
+        q = TERuleQuery(self.p, perms=["super_none", "super_both"], perms_subset=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "allow", "test13c", "test13c", "infoflow7",
+                           set(["super_w", "super_none", "super_both"]))
+        self.validate_rule(r[1], "allow", "test13d", "test13d", "infoflow7",
+                           set(["super_w", "super_none", "super_both", "super_unmapped"]))
+
+    def test_052_perms_subset2(self):
+        """TE rule query with permission subset (equality)."""
+        q = TERuleQuery(self.p, perms=["super_w", "super_none", "super_both", "super_unmapped"],
+                        perms_subset=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "allow", "test13d", "test13d", "infoflow7",
+                           set(["super_w", "super_none", "super_both", "super_unmapped"]))
+
     def test_100_default(self):
         """TE rule query with default type exact match."""
         q = TERuleQuery(self.p, default="test100d", default_regex=False)

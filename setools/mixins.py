@@ -75,6 +75,7 @@ class MatchPermission(object):
     perms = CriteriaSetDescriptor("perms_regex")
     perms_equal = False
     perms_regex = False
+    perms_subset = False
 
     def _match_perms(self, obj):
         """
@@ -88,4 +89,8 @@ class MatchPermission(object):
             # if there is no criteria, everything matches.
             return True
 
-        return self._match_regex_or_set(obj.perms, self.perms, self.perms_equal, self.perms_regex)
+        if self.perms_subset:
+            return obj.perms >= self.perms
+        else:
+            return self._match_regex_or_set(obj.perms, self.perms, self.perms_equal,
+                                            self.perms_regex)
