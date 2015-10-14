@@ -124,15 +124,14 @@ class SELinuxPolicy(object):
     @staticmethod
     def _potential_policies():
         """Generate a list of potential policies to use."""
-        # Start with binary policies in the standard location
+        # try libselinux for current policy
+        if selinux.selinuxfs_exists():
+            yield selinux.selinux_current_policy_path()
+
+        # otherwise look through the supported policy versions
         base_policy_path = selinux.selinux_binary_policy_path()
         for version in range(qpol.QPOL_POLICY_MAX_VERSION, qpol.QPOL_POLICY_MIN_VERSION-1, -1):
             yield "{0}.{1}".format(base_policy_path, version)
-
-        # Last chance, try selinuxfs. This is not first, to avoid
-        # holding kernel memory for a long time
-        if selinux.selinuxfs_exists():
-            yield selinux.selinux_current_policy_path()
 
     def _load_running_policy(self):
         """Try to load the current running policy."""
