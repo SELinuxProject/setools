@@ -24,7 +24,7 @@ from setools.policyrep.exception import RuleNotConditional, RuleUseError
 class RuleResultModel(QAbstractTableModel):
     def __init__(self, parent):
         super(RuleResultModel, self).__init__(parent)
-        self.resultlist = None
+        self.resultlist = []
 
     def rowCount(self, parent=QModelIndex()):
         if self.resultlist:

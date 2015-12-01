@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+# pylint: disable=unsubscriptable-object
+
 import itertools
 import logging
 from collections import defaultdict, namedtuple
