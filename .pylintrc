@@ -1,11 +1,11 @@
 [MASTER]
 
+# Specify a configuration file.
+#rcfile=
+
 # Python code to execute, usually for sys.path manipulation such as
 # pygtk.require().
 #init-hook=
-
-# Profiled execution.
-profile=no
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
@@ -60,7 +60,7 @@ confidence=
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 # format: enforced by pep8 tool
-disable=I,logging-format-interpolation,format,similarities
+disable=I,logging-format-interpolation,format,similarities,import-error
 
 [REPORTS]
 
@@ -84,19 +84,12 @@ reports=no
 # (RP0004).
 evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
 
-# Add a comment according to your evaluation note. This is used by the global
-# evaluation report (RP0004).
-comment=no
-
 # Template used to display messages. This is a python new-style format string
 # used to format the message information. See doc for all details
 #msg-template=
 
 
 [BASIC]
-
-# Required attributes for module, separated by a comma
-required-attributes=
 
 # List of builtins function names that should not be used, separated by a comma
 bad-functions=map,filter
@@ -105,7 +98,7 @@ bad-functions=map,filter
 good-names=i,j,k,s,t,ex,fs,Run,_
 
 # Bad variable names which should always be refused, separated by a comma
-bad-names=foo,bar,baz
+bad-names=foo,bar,baz,toto,tutu,tata
 
 # Colon-delimited sets of names that determine each other's naming style when
 # the name regexes allow several styles.
@@ -120,35 +113,11 @@ const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__))$
 # Naming hint for constant names
 const-name-hint=(([A-Z_][A-Z0-9_]*)|(__.*__))$
 
-# Regular expression matching correct argument names
-argument-rgx=[a-z_][a-z0-9_]{2,30}$
+# Regular expression matching correct method names
+method-rgx=[a-z_][a-z0-9_]{2,30}$
 
-# Naming hint for argument names
-argument-name-hint=[a-z_][a-z0-9_]{2,30}$
-
-# Regular expression matching correct variable names
-variable-rgx=[a-z_][a-z0-9_]{2,30}$
-
-# Naming hint for variable names
-variable-name-hint=[a-z_][a-z0-9_]{2,30}$
-
-# Regular expression matching correct class names
-class-rgx=[A-Z_][a-zA-Z0-9]+$
-
-# Naming hint for class names
-class-name-hint=[A-Z_][a-zA-Z0-9]+$
-
-# Regular expression matching correct module names
-module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
-
-# Naming hint for module names
-module-name-hint=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
-
-# Regular expression matching correct attribute names
-attr-rgx=[a-z_][a-z0-9_]{2,30}$
-
-# Naming hint for attribute names
-attr-name-hint=[a-z_][a-z0-9_]{2,30}$
+# Naming hint for method names
+method-name-hint=[a-z_][a-z0-9_]{2,30}$
 
 # Regular expression matching correct function names
 function-rgx=[a-z_][a-z0-9_]{2,30}$
@@ -162,25 +131,55 @@ class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
 # Naming hint for class attribute names
 class-attribute-name-hint=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
 
+# Regular expression matching correct attribute names
+attr-rgx=[a-z_][a-z0-9_]{2,30}$
+
+# Naming hint for attribute names
+attr-name-hint=[a-z_][a-z0-9_]{2,30}$
+
+# Regular expression matching correct class names
+class-rgx=[A-Z_][a-zA-Z0-9]+$
+
+# Naming hint for class names
+class-name-hint=[A-Z_][a-zA-Z0-9]+$
+
+# Regular expression matching correct module names
+module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+
+# Naming hint for module names
+module-name-hint=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+
 # Regular expression matching correct inline iteration names
 inlinevar-rgx=[A-Za-z_][A-Za-z0-9_]*$
 
 # Naming hint for inline iteration names
 inlinevar-name-hint=[A-Za-z_][A-Za-z0-9_]*$
 
-# Regular expression matching correct method names
-method-rgx=[a-z_][a-z0-9_]{2,30}$
+# Regular expression matching correct argument names
+argument-rgx=[a-z_][a-z0-9_]{2,30}$
 
-# Naming hint for method names
-method-name-hint=[a-z_][a-z0-9_]{2,30}$
+# Naming hint for argument names
+argument-name-hint=[a-z_][a-z0-9_]{2,30}$
+
+# Regular expression matching correct variable names
+variable-rgx=[a-z_][a-z0-9_]{2,30}$
+
+# Naming hint for variable names
+variable-name-hint=[a-z_][a-z0-9_]{2,30}$
 
 # Regular expression which should only match function or class names that do
 # not require a docstring.
-no-docstring-rgx=__.*__
+no-docstring-rgx=^_
 
 # Minimum line length for functions/classes that require docstrings, shorter
 # ones are exempt.
 docstring-min-length=-1
+
+
+[ELIF]
+
+# Maximum number of nested blocks for function / method body
+max-nested-blocks=5
 
 
 [LOGGING]
@@ -225,17 +224,20 @@ ignore-long-lines=^\s*(# )?<?https?://\S+>?$
 # else.
 single-line-if-stmt=no
 
-# List of optional constructs for which whitespace checking is disabled
+# List of optional constructs for which whitespace checking is disabled. `dict-
+# separator` is used to allow tabulation in dicts, etc.: {1  : 1,\n222: 2}.
+# `trailing-comma` allows a space between comma and closing bracket: (a, ).
+# `empty-line` allows space-only lines.
 no-space-check=trailing-comma,dict-separator
 
 # Maximum number of lines in a module
 max-module-lines=1000
 
-# String used as indentation unit. This is usually " " (4 spaces) or "\t" (1
+# String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1
 # tab).
 indent-string='    '
 
-# Number of spaces of indent required inside a hanging or continued line.
+# Number of spaces of indent required inside a hanging  or continued line.
 indent-after-paren=4
 
 # Expected format of line ending, e.g. empty (any line ending), LF or CRLF.
@@ -250,21 +252,19 @@ ignore-mixin-members=yes
 
 # List of module names for which member attributes should not be checked
 # (useful for modules/projects where namespaces are manipulated during runtime
-# and thus existing member attributes cannot be deduced by static analysis
+# and thus existing member attributes cannot be deduced by static analysis. It
+# supports qualified module names, as well as Unix pattern matching.
 ignored-modules=
 
 # List of classes names for which member attributes should not be checked
-# (useful for classes with attributes dynamically set).
-ignored-classes=SQLObject
-
-# When zope mode is activated, add a predefined set of Zope acquired attributes
-# to generated-members.
-zope=no
+# (useful for classes with attributes dynamically set). This supports can work
+# with qualified names.
+ignored-classes=
 
 # List of members which are set dynamically and missed by pylint inference
-# system, and so shouldn't trigger E0201 when accessed. Python regular
+# system, and so shouldn't trigger E1101 when accessed. Python regular
 # expressions are accepted.
-generated-members=REQUEST,acl_users,aq_parent
+generated-members=
 
 
 [SIMILARITIES]
@@ -303,7 +303,7 @@ callbacks=cb_,_cb
 [IMPORTS]
 
 # Deprecated modules which should not be used, separated by a comma
-deprecated-modules=stringprep,optparse
+deprecated-modules=optparse
 
 # Create a graph of every (i.e. internal and external) dependencies in the
 # given file (report RP0402 must not be disabled)
@@ -351,12 +351,11 @@ min-public-methods=2
 # Maximum number of public methods for a class (see R0904).
 max-public-methods=20
 
+# Maximum number of boolean expressions in a if statement
+max-bool-expr=5
+
 
 [CLASSES]
-
-# List of interface methods to ignore, separated by a comma. This is used for
-# instance to not check methods defines in Zope's Interface base class.
-ignore-iface-methods=isImplementedBy,deferred,extends,names,namesAndDescriptions,queryDescriptionFor,getBases,getDescriptionFor,getDoc,getName,getTaggedValue,getTaggedValueTags,isEqualOrExtendedBy,setTaggedValue,isImplementedByInstancesOf,adaptWith,is_implemented_by
 
 # List of method names used to declare (i.e. assign) instance attributes.
 defining-attr-methods=__init__,__new__,setUp
