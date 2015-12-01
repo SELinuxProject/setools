@@ -18,9 +18,17 @@
 #
 import stat
 
+from . import exception
 from . import qpol
 from . import symbol
 from . import context
+
+
+def validate_ruletype(types):
+    """Validate fs_use_* rule types."""
+    for t in types:
+        if t not in ["fs_use_xattr", "fs_use_trans", "fs_use_task"]:
+            raise exception.InvalidConstraintType("{0} is not a valid fs_use_* type.".format(t))
 
 
 def fs_use_factory(policy, name):

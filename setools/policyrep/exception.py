@@ -157,6 +157,12 @@ class InvalidConstraintType(InvalidSymbol):
     pass
 
 
+class InvalidFSUseType(InvalidSymbol):
+
+    """Exception for invalid fs_use_* types."""
+    pass
+
+
 class InvalidMLSRuleType(InvalidRuleType):
 
     """Exception for invalid MLS rule types."""

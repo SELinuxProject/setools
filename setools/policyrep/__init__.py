@@ -508,6 +508,11 @@ class SELinuxPolicy(object):
         constraint.validate_ruletype(types)
 
     @staticmethod
+    def validate_fs_use_ruletype(types):
+        """Validate fs_use_* rule types."""
+        fscontext.validate_ruletype(types)
+
+    @staticmethod
     def validate_mls_ruletype(types):
         """Validate MLS rule types."""
         mlsrule.validate_ruletype(types)
