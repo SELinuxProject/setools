@@ -60,7 +60,7 @@ confidence=
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 # format: enforced by pep8 tool
-disable=I,logging-format-interpolation,format,similarities,import-error
+disable=I,logging-format-interpolation,format,similarities
 
 [REPORTS]
 
