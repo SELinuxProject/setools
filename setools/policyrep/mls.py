@@ -244,6 +244,10 @@ class Category(BaseMLSComponent):
         stmt += ";"
         return stmt
 
+    def __lt__(self, other):
+        """Comparison based on their index instead of their names."""
+        return self._value < other._value
+
 
 class Sensitivity(BaseMLSComponent):
 
