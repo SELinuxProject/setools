@@ -26,6 +26,7 @@ from setools import PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
 # Analysis tabs:
+from .dta import DomainTransitionAnalysisTab
 from .infoflow import InfoFlowAnalysisTab
 from .terulequery import TERuleQueryTab
 
@@ -224,7 +225,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 #                         "Analysis": _analysis_map,
 #                         "Labeling Statements": _labeling_map}
 
-    _analysis_map = {"Information Flow Analysis": InfoFlowAnalysisTab}
+    _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
+                     "Information Flow Analysis": InfoFlowAnalysisTab}
     _rule_map = {"TE Rules": TERuleQueryTab}
     _analysis_choices = {"Rules": _rule_map,
                          "Analyses": _analysis_map}
