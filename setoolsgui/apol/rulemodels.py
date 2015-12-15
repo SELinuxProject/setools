@@ -21,16 +21,33 @@ from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from setools.policyrep.exception import RuleNotConditional, RuleUseError
 
 
-class MLSRuleListModel(QAbstractTableModel):
+class RuleListModel(QAbstractTableModel):
 
-    """MLS rule model.  Represents rules as a column."""
+    """Base class for rule list models."""
 
     def __init__(self, parent):
-        super(MLSRuleListModel, self).__init__(parent)
+        super(RuleListModel, self).__init__(parent)
         self.resultlist = []
+
+    def headerData(self, section, orientation, role):
+        raise NotImplementedError
 
     def columnCount(self, parent=QModelIndex()):
         return 5
+
+    def rowCount(self, parent=QModelIndex()):
+        if self.resultlist:
+            return len(self.resultlist)
+        else:
+            return 0
+
+    def data(self, index, role):
+        raise NotImplementedError
+
+
+class MLSRuleListModel(RuleListModel):
+
+    """MLS rule model.  Represents rules as a column."""
 
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
@@ -45,13 +62,7 @@ class MLSRuleListModel(QAbstractTableModel):
             elif section == 4:
                 return "Default Range"
             else:
-                raise ValueError("Invalid column number")
-
-    def rowCount(self, parent=QModelIndex()):
-        if self.resultlist:
-            return len(self.resultlist)
-        else:
-            return 0
+                raise ValueError("Invalid column number: {0}".format(section))
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -72,22 +83,15 @@ class MLSRuleListModel(QAbstractTableModel):
             elif col == 4:
                 return str(self.resultlist[row].default)
             else:
-                raise ValueError("Invalid column number")
+                raise ValueError("Invalid column number: {0}".format(col))
         elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()
 
 
-class RBACRuleListModel(QAbstractTableModel):
+class RBACRuleListModel(RuleListModel):
 
     """RBAC rule model.  Represents rules as a column."""
-
-    def __init__(self, parent):
-        super(RBACRuleListModel, self).__init__(parent)
-        self.resultlist = []
-
-    def columnCount(self, parent=QModelIndex()):
-        return 5
 
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
@@ -102,13 +106,7 @@ class RBACRuleListModel(QAbstractTableModel):
             elif section == 4:
                 return "Default Role"
             else:
-                raise ValueError("Invalid column number")
-
-    def rowCount(self, parent=QModelIndex()):
-        if self.resultlist:
-            return len(self.resultlist)
-        else:
-            return 0
+                raise ValueError("Invalid column number: {0}".format(section))
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -137,22 +135,15 @@ class RBACRuleListModel(QAbstractTableModel):
                 except RuleUseError:
                     return None
             else:
-                raise ValueError("Invalid column number")
+                raise ValueError("Invalid column number: {0}".format(col))
         elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()
 
 
-class TERuleListModel(QAbstractTableModel):
+class TERuleListModel(RuleListModel):
 
     """Type Enforcement rule model.  Represents rules as a column."""
-
-    def __init__(self, parent):
-        super(TERuleListModel, self).__init__(parent)
-        self.resultlist = []
-
-    def columnCount(self, parent=QModelIndex()):
-        return 6
 
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
@@ -169,13 +160,10 @@ class TERuleListModel(QAbstractTableModel):
             elif section == 5:
                 return "Conditional Expression"
             else:
-                raise ValueError("Invalid column number")
+                raise ValueError("Invalid column number: {0}".format(section))
 
-    def rowCount(self, parent=QModelIndex()):
-        if self.resultlist:
-            return len(self.resultlist)
-        else:
-            return 0
+    def columnCount(self, parent=QModelIndex()):
+        return 6
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -204,7 +192,7 @@ class TERuleListModel(QAbstractTableModel):
                 except RuleNotConditional:
                     return None
             else:
-                raise ValueError("Invalid column number")
+                raise ValueError("Invalid column number: {0}".format(col))
         elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()
