@@ -259,6 +259,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                 groupitem.addChild(item)
 
         self.analysisTypes.expandAll()
+        self.analysisTypes.sortByColumn(0, Qt.AscendingOrder)
 
     def ok_clicked(self):
         try:
