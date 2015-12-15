@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TeRuleQueryTab</class>
- <widget class="QScrollArea" name="TeRuleQueryTab">
+ <class>RBACRuleQueryTab</class>
+ <widget class="QScrollArea" name="RBACRuleQueryTab">
   <property name="geometry">
    <rect>
     <x>0</x>
