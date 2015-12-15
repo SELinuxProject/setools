@@ -21,22 +21,37 @@ from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from setools.policyrep.exception import RuleNotConditional, RuleUseError
 
 
-class RuleResultModel(QAbstractTableModel):
+class RBACRuleListModel(QAbstractTableModel):
+
+    """RBAC rule model.  Represents rules as a column."""
+
     def __init__(self, parent):
-        super(RuleResultModel, self).__init__(parent)
+        super(RBACRuleListModel, self).__init__(parent)
         self.resultlist = []
+
+    def columnCount(self, parent=QModelIndex()):
+        return 5
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            if section == 0:
+                return "Rule Type"
+            elif section == 1:
+                return "Source"
+            elif section == 2:
+                return "Target"
+            elif section == 3:
+                return "Object Class"
+            elif section == 4:
+                return "Default Role"
+            else:
+                raise ValueError("Invalid column number")
 
     def rowCount(self, parent=QModelIndex()):
         if self.resultlist:
             return len(self.resultlist)
         else:
             return 0
-
-    def columnCount(self, parent=QModelIndex()):
-        return 5
-
-    def headerData(self, section, orientation, role):
-        raise NotImplementedError
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -59,25 +74,10 @@ class RuleResultModel(QAbstractTableModel):
                     # role allow
                     return None
             elif col == 4:
-                # most common: permissions
-                try:
-                    return ", ".join(sorted(self.resultlist[row].perms))
-                except RuleUseError:
-                    pass
-
                 # next most common: default
-                # TODO: figure out filename trans
                 try:
                     return str(self.resultlist[row].default)
                 except RuleUseError:
-                    pass
-
-                # least common: nothing (role allow)
-                return None
-            elif col == 5:
-                try:
-                    return str(self.resultlist[row].conditional)
-                except RuleNotConditional:
                     return None
             else:
                 raise ValueError("Invalid column number")
@@ -86,9 +86,13 @@ class RuleResultModel(QAbstractTableModel):
             return self.resultlist[row].statement()
 
 
-class TERuleListModel(RuleResultModel):
+class TERuleListModel(QAbstractTableModel):
 
     """Type Enforcement rule model.  Represents rules as a column."""
+
+    def __init__(self, parent):
+        super(TERuleListModel, self).__init__(parent)
+        self.resultlist = []
 
     def columnCount(self, parent=QModelIndex()):
         return 6
@@ -109,3 +113,41 @@ class TERuleListModel(RuleResultModel):
                 return "Conditional Expression"
             else:
                 raise ValueError("Invalid column number")
+
+    def rowCount(self, parent=QModelIndex()):
+        if self.resultlist:
+            return len(self.resultlist)
+        else:
+            return 0
+
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            if not self.resultlist:
+                return None
+
+            row = index.row()
+            col = index.column()
+
+            if col == 0:
+                return self.resultlist[row].ruletype
+            elif col == 1:
+                return str(self.resultlist[row].source)
+            elif col == 2:
+                return str(self.resultlist[row].target)
+            elif col == 3:
+                return str(self.resultlist[row].tclass)
+            elif col == 4:
+                try:
+                    return ", ".join(sorted(self.resultlist[row].perms))
+                except RuleUseError:
+                    return str(self.resultlist[row].default)
+            elif col == 5:
+                try:
+                    return str(self.resultlist[row].conditional)
+                except RuleNotConditional:
+                    return None
+            else:
+                raise ValueError("Invalid column number")
+        elif role == Qt.UserRole:
+            # get the whole rule for user role
+            return self.resultlist[row].statement()
