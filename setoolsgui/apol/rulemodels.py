@@ -21,6 +21,63 @@ from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from setools.policyrep.exception import RuleNotConditional, RuleUseError
 
 
+class MLSRuleListModel(QAbstractTableModel):
+
+    """MLS rule model.  Represents rules as a column."""
+
+    def __init__(self, parent):
+        super(MLSRuleListModel, self).__init__(parent)
+        self.resultlist = []
+
+    def columnCount(self, parent=QModelIndex()):
+        return 5
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            if section == 0:
+                return "Rule Type"
+            elif section == 1:
+                return "Source"
+            elif section == 2:
+                return "Target"
+            elif section == 3:
+                return "Object Class"
+            elif section == 4:
+                return "Default Range"
+            else:
+                raise ValueError("Invalid column number")
+
+    def rowCount(self, parent=QModelIndex()):
+        if self.resultlist:
+            return len(self.resultlist)
+        else:
+            return 0
+
+    def data(self, index, role):
+        if role == Qt.DisplayRole:
+            if not self.resultlist:
+                return None
+
+            row = index.row()
+            col = index.column()
+
+            if col == 0:
+                return self.resultlist[row].ruletype
+            elif col == 1:
+                return str(self.resultlist[row].source)
+            elif col == 2:
+                return str(self.resultlist[row].target)
+            elif col == 3:
+                return str(self.resultlist[row].tclass)
+            elif col == 4:
+                return str(self.resultlist[row].default)
+            else:
+                raise ValueError("Invalid column number")
+        elif role == Qt.UserRole:
+            # get the whole rule for user role
+            return self.resultlist[row].statement()
+
+
 class RBACRuleListModel(QAbstractTableModel):
 
     """RBAC rule model.  Represents rules as a column."""

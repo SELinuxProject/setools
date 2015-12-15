@@ -28,6 +28,7 @@ from ..widget import SEToolsWidget
 # Analysis tabs:
 from .dta import DomainTransitionAnalysisTab
 from .infoflow import InfoFlowAnalysisTab
+from .mlsrulequery import MLSRuleQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .terulequery import TERuleQueryTab
 
@@ -228,7 +229,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 
     _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
                      "Information Flow Analysis": InfoFlowAnalysisTab}
-    _rule_map = {"RBAC Rules": RBACRuleQueryTab,
+    _rule_map = {"MLS Rules": MLSRuleQueryTab,
+                 "RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
     _analysis_choices = {"Rules": _rule_map,
                          "Analyses": _analysis_map}
