@@ -49,6 +49,7 @@ from .userquery import UserQuery
 from .mlsrulequery import MLSRuleQuery
 from .rbacrulequery import RBACRuleQuery
 from .terulequery import TERuleQuery
+from .xpermrulequery import XpermRuleQuery
 
 # Constraint queries
 from .constraintquery import ConstraintQuery
@@ -64,6 +65,11 @@ from .initsidquery import InitialSIDQuery
 from .netifconquery import NetifconQuery
 from .nodeconquery import NodeconQuery
 from .portconquery import PortconQuery
+from .ioportconquery import IoportconQuery
+from .iomemconquery import IomemconQuery
+from .pirqconquery import PirqconQuery
+from .pcideviceconquery import PcideviceconQuery
+from .devicetreeconquery import DevicetreeconQuery
 
 # Information Flow Analysis
 from .infoflow import InfoFlowAnalysis

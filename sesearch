@@ -42,6 +42,9 @@ rtypes.add_argument("--auditallow", action="append_const",
 rtypes.add_argument("--dontaudit", action="append_const",
                     const="dontaudit", dest="tertypes",
                     help="Search dontaudit rules.")
+rtypes.add_argument("--neverallow", action="append_const",
+                    const="neverallow", dest="tertypes",
+                    help="Search neverallow rules.")
 rtypes.add_argument("-T", "--type_trans", action="append_const",
                     const="type_transition", dest="tertypes",
                     help="Search type_transition rules.")
@@ -51,7 +54,19 @@ rtypes.add_argument("--type_change", action="append_const",
 rtypes.add_argument("--type_member", action="append_const",
                     const="type_member", dest="tertypes",
                     help="Search type_member rules.")
-
+xperms = parser.add_argument_group("XPERM Rule Types")
+xperms.add_argument( "--allowxperm", action="append_const",
+                    const="allowxperm", dest="xpermrule",
+                    help="Search allowxperm rules.")
+xperms.add_argument("--auditallowxperm", action="append_const",
+                    const="auditallowxperm", dest="xpermrule",
+                    help="Search auditallowxperm rules.")
+xperms.add_argument("--dontauditxperm", action="append_const",
+                    const="dontauditxperm", dest="xpermrule",
+                    help="Search dontauditxperm rules.")
+xperms.add_argument("--neverallowxperm", action="append_const",
+                    const="neverallowxperm", dest="xpermrule",
+                    help="Search neverallowxperm rules.")
 rbacrtypes = parser.add_argument_group("RBAC Rule Types")
 rbacrtypes.add_argument("--role_allow", action="append_const",
                         const="allow", dest="rbacrtypes",
@@ -101,7 +116,7 @@ opts.add_argument("-rb", action="store_true", dest="boolean_regex",
 
 args = parser.parse_args()
 
-if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
+if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes and not args.xpermrule:
     parser.error("At least one rule type must be specified.")
 
 if args.debug:
@@ -147,6 +162,28 @@ try:
                 q.boolean = args.boolean
             else:
                 q.boolean = args.boolean.split(",")
+
+        for r in sorted(q.results()):
+            print(r)
+
+    if args.xpermrule:
+        q = setools.XpermRuleQuery(p,
+                                ruletype=args.xpermrule,
+                                source=args.source,
+                                source_indirect=args.source_indirect,
+                                source_regex=args.source_regex,
+                                target=args.target,
+                                target_indirect=args.target_indirect,
+                                target_regex=args.target_regex,
+                                tclass_regex=args.tclass_regex)
+
+        # these are broken out from the above statement to prevent making a list
+        # with an empty string in it (split on empty string)
+        if args.tclass:
+            if args.tclass_regex:
+                q.tclass = args.tclass
+            else:
+                q.tclass = args.tclass.split(",")
 
         for r in sorted(q.results()):
             print(r)

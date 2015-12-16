@@ -56,6 +56,7 @@ from . import user
 from . import mlsrule
 from . import rbacrule
 from . import terule
+from . import xpermrule
 
 # Constraints
 from . import constraint
@@ -167,6 +168,11 @@ class SELinuxPolicy(object):
     def version(self):
         """The policy database version (e.g. v29)"""
         return self.policy.version()
+
+    @property
+    def target_platform(self):
+        """The policy platform (selinux or xen)"""
+        return self.policy.target_platform()
 
     #
     # Policy statistics
@@ -347,6 +353,51 @@ class SELinuxPolicy(object):
         """The number of validatetrans."""
         return sum(1 for v in self.constraints() if v.ruletype == "validatetrans")
 
+    @property
+    def iomemcon_count(self):
+        """The number of iomemcon statements."""
+        return self.policy.iomemcon_count()
+
+    @property
+    def ioportcon_count(self):
+        """The number of ioportcon statements."""
+        return self.policy.ioportcon_count()
+
+    @property
+    def pcidevicecon_count(self):
+        """The number of pcidevicecon statements."""
+        return self.policy.pcidevicecon_count()
+
+    @property
+    def pirqcon_count(self):
+        """The number of pirqcon statements."""
+        return self.policy.pirqcon_count()
+
+    @property
+    def devicetreecon_count(self):
+        """The number of devicetreecon statements."""
+        return self.policy.devicetreecon_count()
+
+    @property
+    def xprule_allow_count(self):
+        """The number of allowxperm rules."""
+        return self.policy.xprule_allow_count()
+
+    @property
+    def xprule_auditallow_count(self):
+        """The number of auditallowxperm rules."""
+        return self.policy.xprule_auditallow_count()
+
+    @property
+    def xprule_dontaudit_count(self):
+        """The number of dontauditxperm rules."""
+        return self.policy.xprule_dontaudit_count()
+
+    @property
+    def xprule_neverallow_count(self):
+        """The number of neverallowxperm rules."""
+        return self.policy.xprule_neverallow_count()
+
     #
     # Policy components lookup functions
     #
@@ -516,6 +567,11 @@ class SELinuxPolicy(object):
                           self.policy.filename_trans_iter()):
             yield terule.te_rule_factory(self.policy, rule)
 
+    def xpermrules(self):
+        """Generator which yields all XPERM rules."""
+        for rule in self.policy.xprule_iter():
+            yield xpermrule.xperm_rule_factory(self.policy, rule)
+
     #
     # Policy rule type validators
     #
@@ -564,6 +620,11 @@ class SELinuxPolicy(object):
         """Validate type enforcement rule types."""
         return terule.validate_ruletype(types)
 
+    @staticmethod
+    def validate_xperm_ruletype(types):
+        """Validate XPERM rule types."""
+        xpermrule.validate_ruletype(types)
+
     #
     # Constraints generators
     #
@@ -607,3 +668,30 @@ class SELinuxPolicy(object):
         """Generator which yields all portcon statements."""
         for port in self.policy.portcon_iter():
             yield netcontext.portcon_factory(self.policy, port)
+
+    ### Start XEN statements
+    def iomemcons(self):
+        """Generator which yields all iomemcon statements."""
+        for mem_addr in self.policy.iomemcon_iter():
+            yield xencontext.iomemcon_factory(self.policy, mem_addr)
+
+    def ioportcons(self):
+        """Generator which yields all ioportcon statements."""
+        for port in self.policy.ioportcon_iter():
+            yield xencontext.ioportcon_factory(self.policy, port)
+
+    def pcidevicecons(self):
+        """Generator which yields all pcidevicecon statements."""
+        for device in self.policy.pcidevicecon_iter():
+            yield xencontext.pcidevicecon_factory(self.policy, device)
+
+    def pirqcons(self):
+        """Generator which yields all pirqcon statements."""
+        for irq in self.policy.pirqcon_iter():
+            yield xencontext.pirqcon_factory(self.policy, irq)
+
+    def devicetreecons(self):
+        """Generator which yields all devicetreecon statements."""
+        for path in self.policy.devicetreecon_iter():
+            yield xencontext.devicetreecon_factory(self.policy, path)
+    ### End XEN statements

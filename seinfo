@@ -85,6 +85,18 @@ queries.add_argument("--typebounds", help="Print typebounds statements.", dest="
                      nargs='?', const=True, metavar="BOUND_TYPE")
 queries.add_argument("--validatetrans", help="Print validatetrans.", dest="validatetransquery",
                      nargs='?', const=True, metavar="CLASS")
+#### Xen statements
+queries.add_argument("--ioportcon", help="Print all ioportcon statements.", dest="ioportconquery",
+                     default=False, action="store_true")
+queries.add_argument("--iomemcon", help="Print all iomemcon statements.", dest="iomemconquery",
+                     default=False, action="store_true")
+queries.add_argument("--pcidevicecon", help="Print all pcidevicecon statements.",
+                     dest="pcideviceconquery", default=False, action="store_true")
+queries.add_argument("--pirqcon", help="Print all pirqcon statements.", dest="pirqconquery",
+                     default=False, action="store_true")
+queries.add_argument("--devicetreecon", help="Print all devicetreecon statements.", dest="devicetreeconquery",
+                     default=False, action="store_true")
+####
 queries.add_argument("--all", help="Print all of the above.",
                      dest="all", default=False, action="store_true")
 
@@ -259,46 +271,81 @@ try:
 
         components.append(("Validatetrans", q, lambda x: x.statement()))
 
+    if p.target_platform == "xen":
+        if args.ioportconquery or args.all:
+            q = setools.IoportconQuery(p)
+            components.append(("Ioportcon", q, lambda x: x.statement()))
+
+        if args.iomemconquery or args.all:
+            q = setools.IomemconQuery(p)
+            components.append(("Iomemcon", q, lambda x: x.statement()))
+
+        if args.pcideviceconquery or args.all:
+            q = setools.PcideviceconQuery(p)
+            components.append(("Pcidevicecon", q, lambda x: x.statement()))
+
+        if args.pirqconquery or args.all:
+            q = setools.PirqconQuery(p)
+            components.append(("Pirqcon", q, lambda x: x.statement()))
+
+        if args.devicetreeconquery or args.all:
+            q = setools.DevicetreeconQuery(p)
+            components.append(("Devicetreecon", q, lambda x: x.statement()))
+
     if (not components or args.all) and not args.flat:
         mls = "enabled" if p.mls else "disabled"
 
         print("Statistics for policy file: {0}".format(p))
-        print("Policy Version: {0} (MLS {1}, {2} unknown permissions)".format(
-            p.version, mls, p.handle_unknown))
-        print("  Classes:       {0:7}    Permissions:   {1:7}".format(
+        print("Policy Version:             {0} (MLS {1})".format(p.version, mls))
+        print("Target Policy:              {0}".format(p.target_platform))
+        print("Handle unknown classes:     {0}".format(p.handle_unknown))
+        print("  Classes:         {0:7}    Permissions:     {1:7}".format(
             p.class_count, p.permission_count))
-        print("  Sensitivities: {0:7}    Categories:    {1:7}".format(
+        print("  Sensitivities:   {0:7}    Categories:      {1:7}".format(
             p.level_count, p.category_count))
-        print("  Types:         {0:7}    Attributes:    {1:7}".format(
+        print("  Types:           {0:7}    Attributes:      {1:7}".format(
             p.type_count, p.type_attribute_count))
-        print("  Users:         {0:7}    Roles:         {1:7}".format(
+        print("  Users:           {0:7}    Roles:           {1:7}".format(
             p.user_count, p.role_count))
-        print("  Booleans:      {0:7}    Cond. Expr.:   {1:7}".format(
+        print("  Booleans:        {0:7}    Cond. Expr.:     {1:7}".format(
             p.boolean_count, p.conditional_count))
-        print("  Allow:         {0:7}    Neverallow:    {1:7}".format(
+        print("  Allow:           {0:7}    Neverallow:      {1:7}".format(
             p.allow_count, p.neverallow_count))
-        print("  Auditallow:    {0:7}    Dontaudit:     {1:7}".format(
+        print("  Auditallow:      {0:7}    Dontaudit:       {1:7}".format(
             p.auditallow_count, p.dontaudit_count))
-        print("  Type_trans:    {0:7}    Type_change:   {1:7}".format(
+        print("  Type_trans:      {0:7}    Type_change:     {1:7}".format(
             p.type_transition_count, p.type_change_count))
-        print("  Type_member:   {0:7}    Range_trans:   {1:7}".format(
+        print("  Type_member:     {0:7}    Range_trans:     {1:7}".format(
             p.type_member_count, p.range_transition_count))
-        print("  Role allow:    {0:7}    Role_trans:    {1:7}".format(
+        print("  Role allow:      {0:7}    Role_trans:      {1:7}".format(
             p.role_allow_count, p.role_transition_count))
-        print("  Constraints:   {0:7}    Validatetrans: {1:7}".format(
+        print("  Constraints:     {0:7}    Validatetrans:   {1:7}".format(
             p.constraint_count, p.validatetrans_count))
-        print("  MLS Constrain: {0:7}    MLS Val. Tran: {1:7}".format(
+        print("  MLS Constrain:   {0:7}    MLS Val. Tran:   {1:7}".format(
             p.mlsconstraint_count, p.mlsvalidatetrans_count))
-        print("  Initial SIDs:  {0:7}    Fs_use:        {1:7}".format(
-            p.initialsids_count, p.fs_use_count))
-        print("  Genfscon:      {0:7}    Portcon:       {1:7}".format(
-            p.genfscon_count, p.portcon_count))
-        print("  Netifcon:      {0:7}    Nodecon:       {1:7}".format(
-            p.netifcon_count, p.nodecon_count))
-        print("  Permissives:   {0:7}    Polcap:        {1:7}".format(
+        print("  Permissives:     {0:7}    Polcap:          {1:7}".format(
             p.permissives_count, p.polcap_count))
         print("  Defaults:      {0:7}    Typebounds:    {1:7}".format(
             p.default_count, p.typebounds_count))
+
+        if p.target_platform == "selinux":
+            print("  Allowxperm:      {0:7}    Neverallowxperm: {1:7}".format(
+                p.xprule_allow_count, p.xprule_neverallow_count))
+            print("  Auditallowxperm: {0:7}    Dontauditxperm:  {1:7}".format(
+                p.xprule_auditallow_count, p.xprule_dontaudit_count))
+            print("  Initial SIDs:    {0:7}    Fs_use:          {1:7}".format(
+                p.initialsids_count, p.fs_use_count))
+            print("  Genfscon:        {0:7}    Portcon:         {1:7}".format(
+                p.genfscon_count, p.portcon_count))
+            print("  Netifcon:        {0:7}    Nodecon:         {1:7}".format(
+                p.netifcon_count, p.nodecon_count))
+        elif p.target_platform == "xen":
+            print("  Initial SIDs:    {0:7}    Devicetreecon    {1:7}".format(
+                p.initialsids_count, p.devicetreecon_count))
+            print("  Iomemcon:        {0:7}    Ioportcon:       {1:7}".format(
+                p.iomemcon_count, p.ioportcon_count))
+            print("  Pcidevicecon:    {0:7}    Pirqcon:         {1:7}".format(
+                p.pcidevicecon_count, p.pirqcon_count))
 
     for desc, component, expander in components:
         results = sorted(component.results())

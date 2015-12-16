@@ -47,3 +47,21 @@ class ValidateRule(unittest.TestCase):
 
         if cond_block is not None:
             self.assertEqual(cond_block, rule.conditional_block)
+
+
+class ValidateXpermRule(unittest.TestCase):
+
+    """Mixin for validating policy xperm rules."""
+
+    def validate_xperm_rule(self, rule, ruletype, source, target, tclass):
+        """Validate a rule."""
+        self.assertEqual(ruletype, rule.ruletype)
+        self.assertEqual(source, rule.source)
+        self.assertEqual(target, rule.target)
+        self.assertEqual(tclass, rule.tclass)
+
+#        try:
+#            # This is the common case.
+#            self.assertSetEqual(last_item, rule.perms)
+#        except (AttributeError, RuleUseError):
+#            self.assertEqual(last_item, rule.default)
