@@ -58,7 +58,7 @@ class BuildExtCommand(build_ext):
 
 
 try:
-    static_sepol = [os.environ['SEPOL']]
+    static_sepol = os.environ['SEPOL']
 except KeyError:
     # try to find libsepol.a. The find_library_file function
     # chooses dynamic libraries over static ones, so
