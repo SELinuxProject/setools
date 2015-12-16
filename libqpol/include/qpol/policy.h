@@ -63,6 +63,8 @@ extern "C"
 #include <qpol/terule_query.h>
 #include <qpol/type_query.h>
 #include <qpol/user_query.h>
+#include <qpol/xen_query.h>
+#include <qpol/xperm_query.h>
 
 	typedef void (__attribute__ ((format(printf, 4, 0))) *qpol_callback_fn_t)
 		(void *varg, const struct qpol_policy * policy, int level,
@@ -131,7 +133,9 @@ extern "C"
 		/** The policy supports filename type_transition rules. */
 		QPOL_CAP_FILENAME_TRANS,
 		/** The policy supports role transition rules. */
-		QPOL_CAP_ROLETRANS
+		QPOL_CAP_ROLETRANS,
+		/** The policy supports ioctl extended permissions. */
+		QPOL_CAP_XPERM_IOCTL
 	} qpol_capability_e;
 
 /**
@@ -277,6 +281,16 @@ extern "C"
  *  errno will be set and *handle_unknown will be 0.
  */
 	extern int qpol_policy_get_policy_handle_unknown(const qpol_policy_t * policy, unsigned int *handle_unknown);
+
+/**
+ *  Get target platform (SELinux or XEN) of the policy.
+ *  @param policy The policy for which to get the target.
+ *  @param target_platform Pointer to the target.
+ *  @return Returns 0 on success and < 0 on failure; if the call fails,
+ *  errno will be set and *target_platform will be 0.
+ */
+	extern int qpol_policy_get_target_platform(const qpol_policy_t *policy,
+						    int *target_platform);
 
 #ifdef	__cplusplus
 }

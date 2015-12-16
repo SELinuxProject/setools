@@ -73,6 +73,7 @@ extern unsigned long policydb_lineno;
 extern char source_file[];
 extern policydb_t *policydbp;
 extern int mlspol;
+extern int xenpol;
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define cpu_to_le16(x) (x)
@@ -189,6 +190,7 @@ static int read_source_policy(qpol_policy_t * qpolicy, const char *progname, int
 
 	policydbp = &qpolicy->p->p;
 	mlspol = policydbp->mls;
+	xenpol = policydbp->target_platform;
 
 	INFO(qpolicy, "%s", "Parsing policy. (Step 1 of 5)");
 	init_scanner();
@@ -416,8 +418,14 @@ static int infer_policy_version(qpol_policy_t * policy)
 	}
 	qpol_iterator_destroy(&iter);
 
-/* Check each version change from 29 to 24 */
-/* If this is available then just set version 29 */
+/* Check each version change from 30 to 24 */
+/* If these are available set version 30 */
+#if defined(HAVE_SEPOL_XPERM_IOCTL) || defined(HAVE_SEPOL_XEN_DEVICETREE)
+	db->policyvers = 30;
+	return STATUS_SUCCESS;
+#endif
+
+/* If this is available then set version 29 */
 #ifdef HAVE_SEPOL_CONSTRAINT_NAMES
 	db->policyvers = 29;
 	return STATUS_SUCCESS;
@@ -1530,6 +1538,27 @@ int qpol_policy_get_policy_handle_unknown(const qpol_policy_t * policy, unsigned
 	return STATUS_SUCCESS;
 }
 
+int qpol_policy_get_target_platform(const qpol_policy_t *policy,
+					    int *target_platform)
+{
+	policydb_t *db;
+
+	if (target_platform != NULL)
+		*target_platform = 0;
+
+	if (policy == NULL || target_platform == NULL) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	db = &policy->p->p;
+
+	*target_platform = db->target_platform;
+
+	return STATUS_SUCCESS;
+}
+
 int qpol_policy_get_type(const qpol_policy_t * policy, int *type)
 {
 	if (!policy || !type) {
@@ -1644,6 +1673,14 @@ int qpol_policy_has_capability(const qpol_policy_t * policy, qpol_capability_e c
 		if (version >= 28 && policy->type != QPOL_POLICY_MODULE_BINARY)
 			return 1;
 		if (version >= 16 && policy->type == QPOL_POLICY_MODULE_BINARY)
+			return 1;
+		break;
+	}
+	case QPOL_CAP_XPERM_IOCTL:
+	{
+		if (version >= 30 && policy->type != QPOL_POLICY_MODULE_BINARY)
+			return 1;
+		if (version >= 17 && policy->type == QPOL_POLICY_MODULE_BINARY)
 			return 1;
 		break;
 	}

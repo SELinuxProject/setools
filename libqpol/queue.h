@@ -1,12 +1,9 @@
-/**
- * @file
- *
- * This file is a copy of queue.h from NSA's CVS repository.
- *
- * Author : Stephen Smalley, <sds@epoch.ncsc.mil>
+/*
+ * This file is a copy of queue.h from checkpolicy 2.4. There are
+ * NO updates required to support SETools.
  */
 
-/* No changes for SETools libqpol services - Just the header */
+/* Author : Stephen Smalley, <sds@epoch.ncsc.mil> */
 
 /* FLASK */
 

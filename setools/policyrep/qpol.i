@@ -53,6 +53,8 @@
 #include "include/qpol/type_query.h"
 #include "include/qpol/user_query.h"
 #include "include/qpol/util.h"
+#include "include/qpol/xen_query.h"
+#include "include/qpol/xprule_query.h"
 
 /* Provide hooks so that language-specific modules can define the
  * callback function, used by the handler in
@@ -177,7 +179,8 @@ typedef enum qpol_capability
     QPOL_CAP_DEFAULT_TYPE,
     QPOL_CAP_PERMISSIVE,
     QPOL_CAP_FILENAME_TRANS,
-    QPOL_CAP_ROLETRANS
+    QPOL_CAP_ROLETRANS,
+    QPOL_CAP_XPERM_IOCTL
 } qpol_capability_e;
 %exception qpol_policy {
   $action
@@ -220,6 +223,17 @@ typedef enum qpol_capability
             case SEPOL_DENY_UNKNOWN: return "deny";
             case SEPOL_REJECT_UNKNOWN: return "reject";
             case SEPOL_ALLOW_UNKNOWN: return "allow";
+            default: return "unknown";
+        }
+    };
+
+    /* This is whether SELinux or XEN policy */
+    const char *target_platform () {
+        int t;
+        (void)qpol_policy_get_target_platform(self, &t);
+        switch (t) {
+            case SEPOL_TARGET_SELINUX: return "selinux";
+            case SEPOL_TARGET_XEN: return "xen";
             default: return "unknown";
         }
     };
@@ -766,6 +780,75 @@ typedef enum qpol_capability
         return 0;
     };
 
+    %newobject xprule_iter(int);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_xprule_from_void) %}
+    qpol_iterator_t *xprule_iter() {
+        qpol_iterator_t *iter;
+        uint32_t rule_types = QPOL_RULE_ALLOWXPERM | QPOL_RULE_AUDITALLOWXPERM | QPOL_RULE_DONTAUDITXPERM;
+
+        if (qpol_policy_has_capability(self, QPOL_CAP_NEVERALLOW))
+            rule_types |= QPOL_RULE_NEVERALLOWXPERM;
+
+        if (qpol_policy_get_xprule_iter(self, rule_types, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        return iter;
+    fail:
+        return NULL;
+    };
+
+    size_t xprule_allow_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_xprule_iter(self, QPOL_RULE_ALLOWXPERM, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    size_t xprule_auditallow_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_xprule_iter(self, QPOL_RULE_AUDITALLOWXPERM, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    size_t xprule_neverallow_count() {
+        if (qpol_policy_has_capability(self, QPOL_CAP_NEVERALLOW)) {
+            qpol_iterator_t *iter;
+            size_t count = 0;
+            if (qpol_policy_get_xprule_iter(self, QPOL_RULE_NEVERALLOWXPERM, &iter)) {
+                SWIG_exception(SWIG_MemoryError, "Out of Memory");
+            }
+            qpol_iterator_get_size(iter, &count);
+            return count;
+        } else {
+            return 0;
+        }
+    fail:
+        return 0;
+    };
+
+    size_t xprule_dontaudit_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_xprule_iter(self, QPOL_RULE_DONTAUDITXPERM, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
     %newobject terule_iter(int);
     %pythoncode %{ @QpolGenerator(_qpol.qpol_terule_from_void) %}
     qpol_iterator_t *terule_iter() {
@@ -933,6 +1016,122 @@ typedef enum qpol_capability
         return iter;
     fail:
         return NULL;
+    };
+
+    %newobject iomemcon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_iomemcon_from_void) %}
+    qpol_iterator_t *iomemcon_iter() {
+        qpol_iterator_t *iter;
+        if (qpol_policy_get_iomemcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+    }
+        return iter;
+    fail:
+        return NULL;
+    };
+    size_t iomemcon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_iomemcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    %newobject ioportcon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_ioportcon_from_void) %}
+    qpol_iterator_t *ioportcon_iter() {
+        qpol_iterator_t *iter;
+        if (qpol_policy_get_ioportcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        return iter;
+    fail:
+        return NULL;
+    };
+
+    size_t ioportcon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_ioportcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    %newobject pcidevicecon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_pcidevicecon_from_void) %}
+    qpol_iterator_t *pcidevicecon_iter() {
+        qpol_iterator_t *iter;
+        if (qpol_policy_get_pcidevicecon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+    }
+        return iter;
+    fail:
+        return NULL;
+    };
+    size_t pcidevicecon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_pcidevicecon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    %newobject pirqcon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_pirqcon_from_void) %}
+    qpol_iterator_t *pirqcon_iter() {
+        qpol_iterator_t *iter;
+        if (qpol_policy_get_pirqcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+    }
+        return iter;
+    fail:
+        return NULL;
+    };
+    size_t pirqcon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_pirqcon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
+    };
+
+    %newobject devicetreecon_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_devicetreecon_from_void) %}
+    qpol_iterator_t *devicetreecon_iter() {
+        qpol_iterator_t *iter;
+        if (qpol_policy_get_devicetreecon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+    }
+        return iter;
+    fail:
+        return NULL;
+    };
+    size_t devicetreecon_count() {
+        qpol_iterator_t *iter;
+        size_t count = 0;
+        if (qpol_policy_get_devicetreecon_iter(self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of Memory");
+        }
+        qpol_iterator_get_size(iter, &count);
+        return count;
+    fail:
+        return 0;
     };
 };
 
@@ -2566,6 +2765,85 @@ typedef struct qpol_avrule {} qpol_avrule_t;
     };
 %}
 
+/* qpol xperm rules */
+#define QPOL_RULE_ALLOWXPERM	 	0x0100
+#define QPOL_RULE_AUDITALLOWXPERM	0x0200
+#define QPOL_RULE_DONTAUDITXPERM	0x0400
+#define QPOL_RULE_NEVERALLOWXPERM	0x0800
+
+typedef struct qpol_xprule {} qpol_xprule_t;
+%extend qpol_xprule {
+    qpol_xprule() {
+        SWIG_exception(SWIG_RuntimeError, "Cannot directly create qpol_xprule_t objects");
+    fail:
+        return NULL;
+    };
+    ~qpol_xprule() {
+        /* no op */
+        return;
+    };
+    const char * rule_type(qpol_policy_t *p) {
+        uint32_t rt;
+        if (qpol_xprule_get_rule_type(p, self, &rt)) {
+            SWIG_exception(SWIG_ValueError, "Could not get rule type for xperm rule");
+        }
+        switch (rt) {
+            case QPOL_RULE_ALLOWXPERM: return "allowxperm"; break;
+            case QPOL_RULE_NEVERALLOWXPERM: return "neverallowxperm"; break;
+            case QPOL_RULE_AUDITALLOWXPERM: return "auditallowxperm"; break;
+            case QPOL_RULE_DONTAUDITXPERM: return "dontauditxperm"; break;
+        }
+    fail:
+        return NULL;
+    };
+    const qpol_type_t *source_type(qpol_policy_t *p) {
+        const qpol_type_t *t;
+        if (qpol_xprule_get_source_type(p, self, &t)) {
+            SWIG_exception(SWIG_ValueError, "Could not get source for xperm rule");
+        }
+    fail:
+        return t;
+    };
+    const qpol_type_t *target_type(qpol_policy_t *p) {
+        const qpol_type_t *t;
+        if (qpol_xprule_get_target_type(p, self, &t)) {
+            SWIG_exception(SWIG_ValueError, "Could not get target for xperm rule");
+        }
+    fail:
+        return t;
+    };
+    const qpol_class_t *object_class(qpol_policy_t *p) {
+        const qpol_class_t *cls;
+        if (qpol_xprule_get_object_class(p, self, &cls)) {
+            SWIG_exception(SWIG_ValueError, "Could not get class for xperm rule");
+        }
+    fail:
+        return cls;
+    };
+    /* This function gets the cmd (e.g. ioctl) and xperms via sepol_extended_perms_to_string() */
+    char *xprule_xperm_string(qpol_policy_t *p) {
+        char *xprule_xperm_string = NULL;
+        if (qpol_xprule_get_xperm_string(p, self, &xprule_xperm_string)) {
+            SWIG_exception(SWIG_ValueError, "Could not get extended permissions for xperm rule");
+        }
+    fail:
+        return xprule_xperm_string;
+    };
+    const char *xprule_command(qpol_policy_t *p) {
+        const char *xprule_command = NULL;
+        if (qpol_xprule_get_command(p, self, &xprule_command)) {
+            SWIG_exception(SWIG_ValueError, "Could not get command for xperm rule");
+        }
+    fail:
+        return xprule_command;
+    };
+};
+%inline %{
+    qpol_xprule_t *qpol_xprule_from_void(void *x) {
+        return (qpol_xprule_t*)x;
+    };
+%}
+
 /* qpol te rule */
 #define QPOL_RULE_TYPE_TRANS   16
 #define QPOL_RULE_TYPE_CHANGE  64
@@ -3061,3 +3339,197 @@ typedef struct qpol_default_object {} qpol_default_object_t;
         return (qpol_default_object_t*)x;
     };
 %}
+
+/* qpol iomemcon */
+typedef struct qpol_iomemcon {} qpol_iomemcon_t;
+%extend qpol_iomemcon {
+    qpol_iomemcon(qpol_policy_t *p, uint64_t low, uint64_t high) {
+        const qpol_iomemcon_t *qp;
+        if (qpol_policy_get_iomemcon_by_addr(p, low, high, &qp)) {
+            SWIG_exception(SWIG_RuntimeError, "iomemcon statement does not exist");
+        }
+    fail:
+        return (qpol_iomemcon_t*)qp;
+    };
+    ~qpol_iomemcon() {
+        /* no op */
+        return;
+    };
+    uint64_t low_addr(qpol_policy_t *p) {
+        uint64_t addr = 0;
+        if(qpol_iomemcon_get_low_addr(p, self, &addr)) {
+            SWIG_exception(SWIG_RuntimeError, "Could not get low addr for iomemcon statement");
+        }
+    fail:
+        return addr;
+    };
+    uint64_t high_addr(qpol_policy_t *p) {
+        uint64_t addr = 0;
+        if(qpol_iomemcon_get_high_addr(p, self, &addr)) {
+            SWIG_exception(SWIG_RuntimeError, "Could not get high addr for iomemcon statement");
+        }
+    fail:
+        return addr;
+    };
+    const qpol_context_t *context(qpol_policy_t *p) {
+        const qpol_context_t *ctx;
+        if (qpol_iomemcon_get_context(p, self, &ctx)) {
+            SWIG_exception(SWIG_ValueError, "Could not get context for iomemcon statement");
+        }
+    fail:
+        return ctx;
+    };
+}
+%inline %{
+    qpol_iomemcon_t *qpol_iomemcon_from_void(void *x) {
+        return (qpol_iomemcon_t*)x;
+    };
+%}
+
+/* qpol ioportcon */
+typedef struct qpol_ioportcon {} qpol_ioportcon_t;
+%extend qpol_ioportcon {
+    qpol_ioportcon(qpol_policy_t *p, uint32_t low, uint32_t high) {
+        const qpol_ioportcon_t *qp;
+        if (qpol_policy_get_ioportcon_by_port(p, low, high, &qp)) {
+            SWIG_exception(SWIG_RuntimeError, "ioportcon statement does not exist");
+        }
+    fail:
+        return (qpol_ioportcon_t*)qp;
+    };
+    ~qpol_ioportcon() {
+        /* no op */
+        return;
+    };
+    uint32_t low_port(qpol_policy_t *p) {
+        uint32_t port = 0;
+        if(qpol_ioportcon_get_low_port(p, self, &port)) {
+            SWIG_exception(SWIG_RuntimeError, "Could not get low port for ioportcon statement");
+        }
+    fail:
+        return port;
+    };
+    uint32_t high_port(qpol_policy_t *p) {
+        uint32_t port = 0;
+        if(qpol_ioportcon_get_high_port(p, self, &port)) {
+            SWIG_exception(SWIG_RuntimeError, "Could not get high port for ioportcon statement");
+        }
+    fail:
+        return port;
+    };
+    const qpol_context_t *context(qpol_policy_t *p) {
+        const qpol_context_t *ctx;
+        if (qpol_ioportcon_get_context(p, self, &ctx)) {
+            SWIG_exception(SWIG_ValueError, "Could not get context for ioportcon statement");
+        }
+    fail:
+        return ctx;
+    };
+}
+%inline %{
+    qpol_ioportcon_t *qpol_ioportcon_from_void(void *x) {
+        return (qpol_ioportcon_t*)x;
+    };
+%}
+
+/* qpol pcidevicecon */
+typedef struct qpol_pcidevicecon {} qpol_pcidevicecon_t;
+%extend qpol_pcidevicecon {
+	qpol_pcidevicecon() {
+		SWIG_exception(SWIG_RuntimeError, "pcidevicecon statement does not exist");
+	fail:
+		return NULL;
+	};
+	~qpol_pcidevicecon() {
+		return;
+	};
+    uint32_t device(qpol_policy_t *p) {
+        uint32_t device = 0;
+        if(qpol_pcidevicecon_get_device(p, self, &device)) {
+            SWIG_exception(SWIG_RuntimeError, "Could not get device for pcidevicecon statement");
+        }
+    fail:
+        return device;
+    };
+    const qpol_context_t *context(qpol_policy_t *p) {
+        const qpol_context_t *ctx;
+        if (qpol_pcidevicecon_get_context(p, self, &ctx)) {
+            SWIG_exception(SWIG_ValueError, "Could not get context for pcidevicecon statement");
+        }
+    fail:
+        return ctx;
+    };
+}
+%inline %{
+    qpol_pcidevicecon_t *qpol_pcidevicecon_from_void(void *x) {
+        return (qpol_pcidevicecon_t*)x;
+    };
+%}
+
+/* qpol pirqcon */
+typedef struct qpol_pirqcon {} qpol_pirqcon_t;
+%extend qpol_pirqcon {
+    qpol_pirqcon() {
+        SWIG_exception(SWIG_RuntimeError, "pirqcon statement does not exist");
+    fail:
+        return NULL;
+    };
+    ~qpol_pirqcon() {
+	return;
+    };
+    uint32_t irq(qpol_policy_t *p) {
+        uint16_t irq = 0;
+        if(qpol_pirqcon_get_irq(p, self, &irq)) {
+            SWIG_exception(SWIG_RuntimeError, "Could not get irq for pirqcon statement");
+        }
+    fail:
+        return irq;
+    };
+    const qpol_context_t *context(qpol_policy_t *p) {
+        const qpol_context_t *ctx;
+        if (qpol_pirqcon_get_context(p, self, &ctx)) {
+            SWIG_exception(SWIG_ValueError, "Could not get context for pirqcon statement");
+        }
+    fail:
+        return ctx;
+    };
+}
+%inline %{
+    qpol_pirqcon_t *qpol_pirqcon_from_void(void *x) {
+        return (qpol_pirqcon_t*)x;
+    };
+%}
+
+/* qpol devicetreecon */
+typedef struct qpol_devicetreecon {} qpol_devicetreecon_t;
+%extend qpol_devicetreecon {
+    qpol_devicetreecon() {
+
+        SWIG_exception(SWIG_RuntimeError, "devicetreecon statement does not exist");
+
+    fail:
+        return NULL;
+    };
+    char *path(qpol_policy_t *p) {
+        char *path = NULL;
+        if(qpol_devicetreecon_get_path(p, self, &path)) {
+            SWIG_exception(SWIG_RuntimeError, "Could not get path for devicetreecon statement");
+        }
+    fail:
+        return path;
+    };
+    const qpol_context_t *context(qpol_policy_t *p) {
+        const qpol_context_t *ctx;
+        if (qpol_devicetreecon_get_context(p, self, &ctx)) {
+            SWIG_exception(SWIG_ValueError, "Could not get context for devicetreecon statement");
+        }
+    fail:
+        return ctx;
+    };
+}
+%inline %{
+    qpol_devicetreecon_t *qpol_devicetreecon_from_void(void *x) {
+        return (qpol_devicetreecon_t*)x;
+    };
+%}
+

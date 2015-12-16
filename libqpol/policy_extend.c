@@ -231,7 +231,7 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
 		}
 
 		/* Already exists */
-		else 
+		else
 			tmp_name = db->p_type_val_to_name[i];
 
 		tmp_type = calloc(1, sizeof(type_datum_t));
@@ -311,6 +311,7 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
  *  errno will be set. On failure, the policy state may be inconsistent
  *  especially in the case where the hashtab functions return the error.
  */
+
 static int qpol_policy_fill_attr_holes(qpol_policy_t * policy)
 {
 	policydb_t *db = NULL;
@@ -1007,6 +1008,7 @@ int policy_extend(qpol_policy_t * policy)
 		error = errno;
 		goto err;
 	}
+
 	if (db->attr_type_map) {
 		retv = qpol_policy_build_attrs_from_map(policy);
 		if (retv) {

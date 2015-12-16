@@ -61,6 +61,14 @@
 /* if users and roles are mapped during policy expansion */
 #define HAVE_SEPOL_USER_ROLE_MAPPING 1
 
+/* if source policy Xen devicetreecon and iomemcon 64bit are present */
+#define HAVE_SEPOL_XEN_DEVICETREE 1
+/* OR */
+/* #undef HAVE_SEPOL_XEN_DEVICETREE */
+
+/* if source policy ioctl white listing */
+#define HAVE_SEPOL_XPERM_IOCTL 1
+
 /* Define to 1 if stdbool.h conforms to C99. */
 #define HAVE_STDBOOL_H 1
 

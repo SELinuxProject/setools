@@ -1,7 +1,6 @@
-/**
- * @file policy_define.h
- * This file is based upon checkpolicy/policy_define.h from NSA's SVN
- * repository.
+/*
+ * This file is a copy of policy_define.h from checkpolicy 2.4 updated to
+ * support SETools.
  */
 
 /* Functions used to define policy grammar components. */
@@ -18,8 +17,10 @@
 
 #define TRUE 1
 #define FALSE 0
-/* Used by SETools to determine if source MLS or not */
+
+/* Used by SETools to determine if source has MLS and/or XEN support */
 int define_mls(void);
+int define_xen(void);
 
 avrule_t *define_cond_compute_type(int which);
 avrule_t *define_cond_pol_list(avrule_t *avlist, avrule_t *stmt);
@@ -54,9 +55,15 @@ int define_permissive(void);
 int define_polcap(void);
 int define_port_context(unsigned int low, unsigned int high);
 int define_pirq_context(unsigned int pirq);
+/* Support SETools */
+#ifdef HAVE_SEPOL_XEN_DEVICETREE
+int define_iomem_context(uint64_t low, uint64_t high);
+#else
 int define_iomem_context(unsigned long low, unsigned long high);
+#endif
 int define_ioport_context(unsigned long low, unsigned long high);
 int define_pcidevice_context(unsigned long device);
+int define_devicetree_context(void);
 int define_range_trans(int class_specified);
 int define_role_allow(void);
 int define_role_trans(int class_specified);
@@ -66,6 +73,7 @@ int define_roleattribute(void);
 int define_filename_trans(void);
 int define_sens(void);
 int define_te_avtab(int which);
+int define_te_avtab_extended_perms(int which);
 int define_typealias(void);
 int define_typeattribute(void);
 int define_typebounds(void);

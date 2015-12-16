@@ -1,10 +1,6 @@
-/**
- * @file policy_define.c
- *
- * This file is based upon checkpolicy/policy_define.c from NSA's SVN
- * repository.  It has been modified to support older policy formats.
- * The older format just seems to be PSID support (see
- * int define_fs_use(int behavior).
+/*
+ * This file is a copy of policy_define.c from checkpolicy 2.4 updated to
+ * support SETools.
  */
 
 /*
@@ -49,6 +45,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <inttypes.h>
 
 #include <sepol/policydb/expand.h>
 #include <sepol/policydb/policydb.h>
@@ -56,11 +54,9 @@
 #include <sepol/policydb/conditional.h>
 #include <sepol/policydb/flask.h>
 #include <sepol/policydb/hierarchy.h>
-/* Required for SETools libqpol */
 #include <sepol/policydb/polcaps.h>
-#include <sepol/errcodes.h>
-
 #include "queue.h"
+
 /* Required for SETools libqpol - Removed #include "checkpolicy.h"*/
 #include <qpol/policy.h>
 
@@ -72,10 +68,13 @@ queue_t id_queue = 0;
 unsigned int pass;
 char *curfile = 0;
 int mlspol = 0;
+/* Required for SETools libqpol */
+int xenpol = 0;
 
 extern unsigned long policydb_lineno;
 extern unsigned long source_lineno;
 extern unsigned int policydb_errors;
+extern char source_file[PATH_MAX];
 
 extern int yywarn(const char *msg);
 extern int yyerror(const char *msg);
@@ -83,7 +82,7 @@ extern int yyerror(const char *msg);
 #define ERRORMSG_LEN 255
 static char errormsg[ERRORMSG_LEN + 1] = {0};
 
-static int id_has_dot(const char *id);
+static int id_has_dot(char *id);
 static int parse_security_context(context_struct_t *c);
 
 /* initialize all of the state variables for the scanner/parser */
@@ -110,6 +109,14 @@ int define_mls(void)
 {
 	mlspol = 1;
 	policydbp->mls = 1;
+
+	return 0;
+}
+/* Required for SETools libqpol */
+int define_xen(void)
+{
+	xenpol = 1;
+	policydbp->target_platform = 1;
 
 	return 0;
 }
@@ -156,7 +163,7 @@ int insert_id(const char *id, int push)
 
 /* If the identifier has a dot within it and that its first character
    is not a dot then return 1, else return 0. */
-static int id_has_dot(const char *id)
+static int id_has_dot(char *id)
 {
 	if (strchr(id, '.') >= id + 1) {
 		return 1;
@@ -207,7 +214,7 @@ int define_class(void)
 			break;
 		}
 	default:{
-			abort();	/* should never get here */
+			abort();	/* SETools - should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -781,7 +788,7 @@ int define_sens(void)
 			break;
 		}
 	default:{
-			abort();	/* should never get here */
+			abort();	/* SETools - should never get here */
 		}
 	}
 
@@ -820,7 +827,7 @@ int define_sens(void)
 				break;
 			}
 		default:{
-				abort();	/* should never get here */
+				abort();  /* SETools - should never get here */
 			}
 		}
 	}
@@ -950,7 +957,7 @@ int define_category(void)
 			break;
 		}
 	default:{
-			abort();	/* should never get here */
+			abort();	/* SETools - should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -992,7 +999,7 @@ int define_category(void)
 				break;
 			}
 		default:{
-				abort();	/* should never get here */
+				abort();  /* SETools - should never get here */
 			}
 		}
 	}
@@ -1209,7 +1216,7 @@ static int add_aliases_to_type(type_datum_t * type)
 				break;
 			}
 		default:{
-				abort();	/* should never get here */
+				abort();  /* SETools - should never get here */
 			}
 		}
 	}
@@ -1288,7 +1295,8 @@ int define_typeattribute(void)
 			free(id);
 			return -1;
 		}
-		attr = hashtab_search(policydbp->p_types.table, id);
+		attr = hashtab_search(policydbp->p_types.table,
+					    (hashtab_key_t)id); /* SETools */
 		if (!attr) {
 			/* treat it as a fatal error */
 			yyerror2("attribute %s is not declared", id);
@@ -1316,7 +1324,8 @@ int define_typeattribute(void)
 	return 0;
 }
 
-static int define_typebounds_helper(const char *bounds_id, const char *type_id)
+							   /* SETools */
+static int define_typebounds_helper(char *bounds_id, hashtab_key_t type_id)
 {
 	type_datum_t *bounds, *type;
 
@@ -1325,7 +1334,8 @@ static int define_typebounds_helper(const char *bounds_id, const char *type_id)
 		return -1;
 	}
 
-	bounds = hashtab_search(policydbp->p_types.table, (hashtab_key_t)bounds_id);
+	bounds = hashtab_search(policydbp->p_types.table,
+				    (hashtab_key_t)bounds_id); /* SETools */
 	if (!bounds || bounds->flavor == TYPE_ATTRIB) {
 		yyerror2("hoge unknown type %s", bounds_id);
 		return -1;
@@ -1336,7 +1346,8 @@ static int define_typebounds_helper(const char *bounds_id, const char *type_id)
 		return -1;
 	}
 
-	type = hashtab_search(policydbp->p_types.table, (hashtab_key_t)type_id);
+	type = hashtab_search(policydbp->p_types.table,
+				    (hashtab_key_t)type_id); /* SETools */
 	if (!type || type->flavor == TYPE_ATTRIB) {
 		yyerror2("type %s is not declared", type_id);
 		return -1;
@@ -1438,7 +1449,8 @@ int define_type(int alias)
 			free(id);
 			return -1;
 		}
-		attr = hashtab_search(policydbp->p_types.table, (hashtab_key_t)id);
+		attr = hashtab_search(policydbp->p_types.table,
+					    (hashtab_key_t)id); /* SETools */
 		if (!attr) {
 			/* treat it as a fatal error */
 			yyerror2("attribute %s is not declared", id);
@@ -1511,7 +1523,8 @@ static int set_types(type_set_t * set, char *id, int *add, char starallowed)
 		free(id);
 		return -1;
 	}
-	t = hashtab_search(policydbp->p_types.table, (hashtab_key_t)id);
+	t = hashtab_search(policydbp->p_types.table,
+				    (hashtab_key_t)id); /* SETools */
 	if (!t) {
 		yyerror2("unknown type %s", id);
 		free(id);
@@ -1542,8 +1555,7 @@ int define_compute_type_helper(int which, avrule_t ** rule)
 	ebitmap_node_t *node;
 	avrule_t *avrule;
 	class_perm_node_t *perm;
-	unsigned int i;
-	int add = 1;
+	int i, add = 1;
 
 	avrule = malloc(sizeof(avrule_t));
 	if (!avrule) {
@@ -1553,6 +1565,12 @@ int define_compute_type_helper(int which, avrule_t ** rule)
 	avrule_init(avrule);
 	avrule->specified = which;
 	avrule->line = policydb_lineno;
+	avrule->source_line = source_lineno;
+	avrule->source_filename = strdup(source_file);
+	if (!avrule->source_filename) {
+		yyerror("out of memory");
+		return -1;
+	}
 
 	while ((id = queue_remove(id_queue))) {
 		if (set_types(&avrule->stypes, id, &add, 0))
@@ -1632,7 +1650,7 @@ int define_compute_type(int which)
 
 	append_avrule(avrule);
 	return 0;
-	}
+}
 
 avrule_t *define_cond_compute_type(int which)
 {
@@ -1708,7 +1726,7 @@ int define_bool_tunable(int is_tunable)
 			break;
 		}
 	default:{
-			abort();	/* should never get here */
+			abort();	/* SETools - should never get here */
 		}
 	}
 	datum->s.value = value;
@@ -1744,6 +1762,681 @@ avrule_t *define_cond_pol_list(avrule_t * avlist, avrule_t * sl)
 	return sl;
 }
 
+/* START XPERM */
+typedef struct av_ioctl_range {
+	uint16_t low;
+	uint16_t high;
+} av_ioctl_range_t;
+
+struct av_ioctl_range_list {
+	uint8_t omit;
+	av_ioctl_range_t range;
+	struct av_ioctl_range_list *next;
+};
+
+int avrule_sort_ioctls(struct av_ioctl_range_list **rangehead)
+{
+	struct av_ioctl_range_list *r, *r2, *sorted, *sortedhead = NULL;
+
+	/* order list by range.low */
+	for (r = *rangehead; r != NULL; r = r->next) {
+		sorted = malloc(sizeof(struct av_ioctl_range_list));
+		if (sorted == NULL)
+			goto error;
+		memcpy(sorted, r, sizeof(struct av_ioctl_range_list));
+		sorted->next = NULL;
+		if (sortedhead == NULL) {
+			sortedhead = sorted;
+			continue;
+		}
+		for (r2 = sortedhead; r2 != NULL; r2 = r2->next) {
+			if (sorted->range.low < r2->range.low) {
+				/* range is the new head */
+				sorted->next = r2;
+				sortedhead = sorted;
+				break;
+			} else if ((r2->next != NULL) &&
+					(r->range.low < r2->next->range.low)) {
+				/* insert range between elements */
+				sorted->next = r2->next;
+				r2->next = sorted;
+				break;
+			} else if (r2->next == NULL) {
+				/* range is the new tail*/
+				r2->next = sorted;
+				break;
+			}
+		}
+	}
+
+	r = *rangehead;
+	while (r != NULL) {
+		r2 = r;
+		r = r->next;
+		free(r2);
+	}
+	*rangehead = sortedhead;
+	return 0;
+error:
+	yyerror("out of memory");
+	return -1;
+}
+
+int avrule_merge_ioctls(struct av_ioctl_range_list **rangehead)
+{
+	struct av_ioctl_range_list *r, *tmp;
+
+	r = *rangehead;
+	while (r != NULL && r->next != NULL) {
+		/* merge */
+		if ((r->range.high + 1) >= r->next->range.low) {
+			/* keep the higher of the two */
+			if (r->range.high < r->next->range.high)
+				r->range.high = r->next->range.high;
+			tmp = r->next;
+			r->next = r->next->next;
+			free(tmp);
+			continue;
+		}
+		r = r->next;
+	}
+	return 0;
+}
+
+int avrule_read_ioctls(struct av_ioctl_range_list **rangehead)
+{
+	char *id;
+	struct av_ioctl_range_list *rnew, *r = NULL;
+	*rangehead = NULL;
+	uint8_t omit = 0;
+
+	/* read in all the ioctl commands */
+	while ((id = queue_remove(id_queue))) {
+		if (strcmp(id, "~") == 0) {
+			/* these are values to be omitted */
+			free(id);
+			omit = 1;
+		} else if (strcmp(id, "-") == 0) {
+			/* high value of range */
+			free(id);
+			id = queue_remove(id_queue);
+			r->range.high = (uint16_t) strtoul(id, NULL, 0);
+			if (r->range.high < r->range.low) {
+				yyerror("Ioctl ranges must be in ascending order.");
+				return -1;
+			}
+			free(id);
+		} else {
+			/* read in new low value */
+			rnew = malloc(sizeof(struct av_ioctl_range_list));
+			if (rnew == NULL)
+				goto error;
+			rnew->next = NULL;
+			if (*rangehead == NULL) {
+				*rangehead = rnew;
+				r = *rangehead;
+			} else {
+				r->next = rnew;
+				r = r->next;
+			}
+			rnew->range.low = (uint16_t) strtoul(id, NULL, 0);
+			rnew->range.high = rnew->range.low;
+			free(id);
+		}
+	}
+	r = *rangehead;
+	r->omit = omit;
+	return 0;
+error:
+	yyerror("out of memory");
+	return -1;
+}
+
+/* flip to included ranges */
+int avrule_omit_ioctls(struct av_ioctl_range_list **rangehead)
+{
+	struct av_ioctl_range_list *rnew, *r, *newhead, *r2;
+
+	rnew = calloc(1, sizeof(struct av_ioctl_range_list));
+	if (!rnew)
+		goto error;
+
+	newhead = rnew;
+
+	r = *rangehead;
+	r2 = newhead;
+
+	if (r->range.low == 0) {
+		r2->range.low = r->range.high + 1;
+		r = r->next;
+	} else {
+		r2->range.low = 0;
+	}
+
+	while (r) {
+		r2->range.high = r->range.low - 1;
+		rnew = calloc(1, sizeof(struct av_ioctl_range_list));
+		if (!rnew)
+			goto error;
+		r2->next = rnew;
+		r2 = r2->next;
+
+		r2->range.low = r->range.high + 1;
+		if (!r->next)
+			r2->range.high = 0xffff;
+		r = r->next;
+	}
+
+	r = *rangehead;
+	while (r != NULL) {
+		r2 = r;
+		r = r->next;
+		free(r2);
+	}
+	*rangehead = newhead;
+	return 0;
+
+error:
+	yyerror("out of memory");
+	return -1;
+}
+
+int avrule_ioctl_ranges(struct av_ioctl_range_list **rangelist)
+{
+	struct av_ioctl_range_list *rangehead;
+	uint8_t omit;
+
+	/* read in ranges to include and omit */
+	if (avrule_read_ioctls(&rangehead))
+		return -1;
+	omit = rangehead->omit;
+	if (rangehead == NULL) {
+		yyerror("error processing ioctl commands");
+		return -1;
+	}
+	/* sort and merge the input ioctls */
+	if (avrule_sort_ioctls(&rangehead))
+		return -1;
+	if (avrule_merge_ioctls(&rangehead))
+		return -1;
+	/* flip ranges if these are ommited*/
+	if (omit) {
+		if (avrule_omit_ioctls(&rangehead))
+			return -1;
+	}
+
+	*rangelist = rangehead;
+	return 0;
+}
+
+int define_te_avtab_xperms_helper(int which, avrule_t **rule)
+{
+	char *id;
+	class_perm_node_t *perms, *tail = NULL, *cur_perms = NULL;
+	class_datum_t *cladatum;
+	perm_datum_t *perdatum = NULL;
+	ebitmap_t tclasses;
+	ebitmap_node_t *node;
+	avrule_t *avrule;
+	unsigned int i;
+	int add = 1, ret = 0;
+
+	avrule = (avrule_t *) malloc(sizeof(avrule_t));
+	if (!avrule) {
+		yyerror("out of memory");
+		ret = -1;
+		goto out;
+	}
+	avrule_init(avrule);
+	avrule->specified = which;
+	avrule->line = policydb_lineno;
+	avrule->source_line = source_lineno;
+	avrule->source_filename = strdup(source_file);
+	avrule->xperms = NULL;
+	if (!avrule->source_filename) {
+		yyerror("out of memory");
+		return -1;
+	}
+
+	while ((id = queue_remove(id_queue))) {
+		if (set_types
+		    (&avrule->stypes, id, &add,
+		     which == AVRULE_XPERMS_NEVERALLOW ? 1 : 0)) {
+			ret = -1;
+			goto out;
+		}
+	}
+	add = 1;
+	while ((id = queue_remove(id_queue))) {
+		if (strcmp(id, "self") == 0) {
+			free(id);
+			avrule->flags |= RULE_SELF;
+			continue;
+		}
+		if (set_types
+		    (&avrule->ttypes, id, &add,
+		     which == AVRULE_XPERMS_NEVERALLOW ? 1 : 0)) {
+			ret = -1;
+			goto out;
+		}
+	}
+
+	ebitmap_init(&tclasses);
+	ret = read_classes(&tclasses);
+	if (ret)
+		goto out;
+
+	perms = NULL;
+	id = queue_head(id_queue);
+	ebitmap_for_each_bit(&tclasses, node, i) {
+		if (!ebitmap_node_get_bit(node, i))
+			continue;
+		cur_perms =
+		    (class_perm_node_t *) malloc(sizeof(class_perm_node_t));
+		if (!cur_perms) {
+			yyerror("out of memory");
+			ret = -1;
+			goto out;
+		}
+		class_perm_node_init(cur_perms);
+		cur_perms->tclass = i + 1;
+		if (!perms)
+			perms = cur_perms;
+		if (tail)
+			tail->next = cur_perms;
+		tail = cur_perms;
+
+		cladatum = policydbp->class_val_to_struct[i];
+		perdatum = hashtab_search(cladatum->permissions.table, id);
+		if (!perdatum) {
+			if (cladatum->comdatum) {
+				perdatum = hashtab_search(cladatum->comdatum->
+							permissions.table,
+							id);
+			}
+		}
+		if (!perdatum) {
+			yyerror2("permission %s is not defined"
+				     " for class %s", id,
+				     policydbp->p_class_val_to_name[i]);
+			continue;
+		} else if (!is_perm_in_scope(id,
+				    policydbp->p_class_val_to_name[i])) {
+			yyerror2("permission %s of class %s is"
+			     " not within scope", id,
+			     policydbp->p_class_val_to_name[i]);
+			continue;
+		} else {
+			cur_perms->data |= 1U << (perdatum->s.value - 1);
+		}
+	}
+
+	ebitmap_destroy(&tclasses);
+
+	avrule->perms = perms;
+	*rule = avrule;
+
+out:
+	return ret;
+}
+
+/* index of the u32 containing the permission */
+#define XPERM_IDX(x) (x >> 5)
+/* set bits 0 through x-1 within the u32 */
+#define XPERM_SETBITS(x) ((1 << (x & 0x1f)) - 1)
+/* low value for this u32 */
+#define XPERM_LOW(x) (x << 5)
+/* high value for this u32 */
+#define XPERM_HIGH(x) (((x + 1) << 5) - 1)
+void avrule_xperm_setrangebits(uint16_t low, uint16_t high,
+				av_extended_perms_t *xperms)
+{
+	unsigned int i;
+	uint16_t h = high + 1;
+	/* for each u32 that this low-high range touches,
+	 * set driver permissions */
+	for (i = XPERM_IDX(low); i <= XPERM_IDX(high); i++) {
+		/* set all bits in u32 */
+		if ((low <= XPERM_LOW(i)) && (high >= XPERM_HIGH(i)))
+			xperms->perms[i] |= ~0U;
+		/* set low bits */
+		else if ((low <= XPERM_LOW(i)) && (high < XPERM_HIGH(i)))
+			xperms->perms[i] |= XPERM_SETBITS(h);
+		/* set high bits */
+		else if ((low > XPERM_LOW(i)) && (high >= XPERM_HIGH(i)))
+			xperms->perms[i] |= ~0U - XPERM_SETBITS(low);
+		/* set middle bits */
+		else if ((low > XPERM_LOW(i)) && (high <= XPERM_HIGH(i)))
+			xperms->perms[i] |= XPERM_SETBITS(h) - XPERM_SETBITS(low);
+	}
+}
+
+int avrule_xperms_used(av_extended_perms_t *xperms)
+{
+	unsigned int i;
+
+	for (i = 0; i < sizeof(xperms->perms)/sizeof(xperms->perms[0]); i++) {
+		if (xperms->perms[i])
+			return 1;
+	}
+	return 0;
+}
+
+/*
+ * using definitions found in kernel document ioctl-number.txt
+ * The kernel components of an ioctl command are:
+ * dir, size, driver, and fucntion. Only the driver and function fields
+ * are considered here
+ */
+#define IOC_DRIV(x) (x >> 8)
+#define IOC_FUNC(x) (x & 0xff)
+#define IOC_CMD(driver, func) ((driver << 8) + func)
+int avrule_ioctl_partialdriver(struct av_ioctl_range_list *rangelist,
+				av_extended_perms_t *complete_driver,
+				av_extended_perms_t **extended_perms)
+{
+	struct av_ioctl_range_list *r;
+	av_extended_perms_t *xperms;
+	uint8_t low, high;
+
+	xperms = calloc(1, sizeof(av_extended_perms_t));
+	if (!xperms) {
+		yyerror("out of memory");
+		return -1;
+	}
+
+	r = rangelist;
+	while (r) {
+		low = IOC_DRIV(r->range.low);
+		high = IOC_DRIV(r->range.high);
+		if (complete_driver) {
+			if (!xperm_test(low, complete_driver->perms))
+				xperm_set(low, xperms->perms);
+			if (!xperm_test(high, complete_driver->perms))
+				xperm_set(high, xperms->perms);
+		} else {
+			xperm_set(low, xperms->perms);
+			xperm_set(high, xperms->perms);
+		}
+		r = r->next;
+	}
+	if (avrule_xperms_used(xperms)) {
+		*extended_perms = xperms;
+	} else {
+		free(xperms);
+		*extended_perms = NULL;
+	}
+	return 0;
+
+}
+
+int avrule_ioctl_completedriver(struct av_ioctl_range_list *rangelist,
+			av_extended_perms_t **extended_perms)
+{
+	struct av_ioctl_range_list *r;
+	av_extended_perms_t *xperms;
+	uint16_t low, high;
+
+	xperms = calloc(1, sizeof(av_extended_perms_t));
+	if (!xperms) {
+		yyerror("out of memory");
+		return -1;
+	}
+
+	r = rangelist;
+	while (r) {
+		/*
+		 * Any driver code that has sequence 0x00 - 0xff is a
+		 * complete code,
+		 *
+		 * if command number = 0xff, then round high up to next code,
+		 * else 0x00 - 0xfe keep current code
+		 * of this range. temporarily u32 for the + 1
+		 * to account for possible rollover before right shift
+		 */
+		high = IOC_DRIV((uint32_t) (r->range.high + 1));
+		/* if 0x00 keep current driver code else 0x01 - 0xff round up
+		 * to next code*/
+		low = IOC_DRIV(r->range.low);
+		if (IOC_FUNC(r->range.low))
+			low++;
+		if (high > low)
+			avrule_xperm_setrangebits(low, high - 1, xperms);
+		r = r->next;
+	}
+	if (avrule_xperms_used(xperms)) {
+		xperms->driver = 0x00;
+		xperms->specified = AVRULE_XPERMS_IOCTLDRIVER;
+		*extended_perms = xperms;
+	} else {
+		free(xperms);
+		*extended_perms = NULL;
+	}
+	return 0;
+}
+
+int avrule_ioctl_func(struct av_ioctl_range_list *rangelist,
+		av_extended_perms_t **extended_perms, unsigned int driver)
+{
+	struct av_ioctl_range_list *r;
+	av_extended_perms_t *xperms;
+	uint16_t low, high;
+
+	*extended_perms = NULL;
+	xperms = calloc(1, sizeof(av_extended_perms_t));
+	if (!xperms) {
+		yyerror("out of memory");
+		return -1;
+	}
+
+	r = rangelist;
+	/* for the passed in driver code, find the ranges that apply */
+	while (r) {
+		low = r->range.low;
+		high = r->range.high;
+		if ((driver != IOC_DRIV(low)) && (driver != IOC_DRIV(high))) {
+			r = r->next;
+			continue;
+		}
+
+		if (driver == IOC_DRIV(low)) {
+			if (high > IOC_CMD(driver, 0xff))
+				high = IOC_CMD(driver, 0xff);
+
+		} else {
+			if (low < IOC_CMD(driver, 0))
+				low = IOC_CMD(driver, 0);
+		}
+
+		low = IOC_FUNC(low);
+		high = IOC_FUNC(high);
+		avrule_xperm_setrangebits(low, high, xperms);
+		xperms->driver = driver;
+		xperms->specified = AVRULE_XPERMS_IOCTLFUNCTION;
+		r = r->next;
+	}
+
+	if (avrule_xperms_used(xperms)) {
+		*extended_perms = xperms;
+	} else {
+		free(xperms);
+		*extended_perms = NULL;
+	}
+	return 0;
+}
+
+void avrule_ioctl_freeranges(struct av_ioctl_range_list *rangelist)
+{
+	struct av_ioctl_range_list *r, *tmp;
+
+	r = rangelist;
+	while (r) {
+		tmp = r;
+		r = r->next;
+		free(tmp);
+	}
+}
+
+unsigned int xperms_for_each_bit(unsigned int *bit,
+				    av_extended_perms_t *xperms) {
+	unsigned int i;
+
+	for (i = *bit; i < sizeof(xperms->perms)*8; i++) {
+		if (xperm_test(i, xperms->perms)) {
+			xperm_clear(i, xperms->perms);
+			*bit = i;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int avrule_cpy(avrule_t *dest, avrule_t *src)
+{
+	class_perm_node_t *src_perms;
+	class_perm_node_t *dest_perms, *dest_tail;
+
+	dest_tail = NULL;
+
+	avrule_init(dest);
+	dest->specified = src->specified;
+	dest->flags = src->flags;
+	if (type_set_cpy(&dest->stypes, &src->stypes)) {
+		yyerror("out of memory");
+		return -1;
+	}
+	if (type_set_cpy(&dest->ttypes, &src->ttypes)) {
+		yyerror("out of memory");
+		return -1;
+	}
+	dest->line = src->line;
+	dest->source_filename = strdup(source_file);
+	if (!dest->source_filename) {
+		yyerror("out of memory");
+		return -1;
+	}
+	dest->source_line = src->source_line;
+
+	/* increment through the class perms and copy over */
+	src_perms = src->perms;
+	while (src_perms) {
+		dest_perms = (class_perm_node_t *) calloc
+				    (1, sizeof(class_perm_node_t));
+		class_perm_node_init(dest_perms);
+		if (!dest_perms) {
+			yyerror("out of memory");
+			return -1;
+		}
+		if (!dest->perms)
+			dest->perms = dest_perms;
+		else
+			dest_tail->next = dest_perms;
+
+		dest_perms->tclass = src_perms->tclass;
+		dest_perms->data = src_perms->data;
+		dest_perms->next = NULL;
+		dest_tail = dest_perms;
+		src_perms = src_perms->next;
+	}
+	return 0;
+}
+
+int define_te_avtab_ioctl(avrule_t *avrule_template)
+{
+	avrule_t *avrule;
+	struct av_ioctl_range_list *rangelist;
+	av_extended_perms_t *complete_driver, *partial_driver, *xperms;
+	unsigned int i;
+
+
+	/* organize ioctl ranges */
+	if (avrule_ioctl_ranges(&rangelist))
+		return -1;
+
+	/* create rule for ioctl driver types that are entirely enabled */
+	if (avrule_ioctl_completedriver(rangelist, &complete_driver))
+		return -1;
+	if (complete_driver) {
+		avrule = (avrule_t *) calloc(1, sizeof(avrule_t));
+		if (!avrule) {
+			yyerror("out of memory");
+			return -1;
+		}
+		if (avrule_cpy(avrule, avrule_template))
+			return -1;
+		avrule->xperms = complete_driver;
+		append_avrule(avrule);
+	}
+
+	/* flag ioctl driver codes that are partially enabled */
+	if (avrule_ioctl_partialdriver(rangelist, complete_driver,
+						    &partial_driver))
+		return -1;
+
+	if (!partial_driver || !avrule_xperms_used(partial_driver))
+		goto done;
+
+	/*
+	 * create rule for each partially used driver codes
+	 * "partially used" meaning that the code number e.g. socket 0x89
+	 * has some permission bits set and others not set.
+	 */
+	i = 0;
+	while (xperms_for_each_bit(&i, partial_driver)) {
+		if (avrule_ioctl_func(rangelist, &xperms, i))
+			return -1;
+
+		if (xperms) {
+			avrule = (avrule_t *) calloc(1, sizeof(avrule_t));
+			if (!avrule) {
+				yyerror("out of memory");
+				return -1;
+			}
+			if (avrule_cpy(avrule, avrule_template))
+				return -1;
+			avrule->xperms = xperms;
+			append_avrule(avrule);
+		}
+	}
+
+done:
+	if (partial_driver)
+		free(partial_driver);
+
+	return 0;
+}
+
+int define_te_avtab_extended_perms(int which)
+{
+	char *id;
+	unsigned int i;
+	avrule_t *avrule_template;
+
+	if (pass == 1) {
+		for (i = 0; i < 4; i++) {
+			while ((id = queue_remove(id_queue)))
+				free(id);
+		}
+		return 0;
+	}
+
+	/* populate avrule template with source/target/tclass */
+	if (define_te_avtab_xperms_helper(which, &avrule_template))
+		return -1;
+
+	id = queue_remove(id_queue);
+	if (strcmp(id, "ioctl") == 0) {
+		if (define_te_avtab_ioctl(avrule_template))
+			return -1;
+		free(id);
+	} else {
+		yyerror("only ioctl extended permissions are supported");
+		return -1;
+	}
+	return 0;
+}
+/* END XPERMS */
+
 int define_te_avtab_helper(int which, avrule_t ** rule)
 {
 	char *id;
@@ -1766,6 +2459,14 @@ int define_te_avtab_helper(int which, avrule_t ** rule)
 	avrule_init(avrule);
 	avrule->specified = which;
 	avrule->line = policydb_lineno;
+	avrule->source_line = source_lineno;
+	avrule->source_filename = strdup(source_file);
+	avrule->xperms = NULL;
+	if (!avrule->source_filename) {
+		yyerror("out of memory");
+		return -1;
+	}
+
 
 	while ((id = queue_remove(id_queue))) {
 		if (set_types
@@ -2140,7 +2841,7 @@ static int dominate_role_recheck(hashtab_key_t key __attribute__ ((unused)),
 	role_datum_t *rdp = (role_datum_t *) arg;
 	role_datum_t *rdatum = (role_datum_t *) datum;
 	ebitmap_node_t *node;
-	unsigned int i;
+	int i;
 
 	/* Don't bother to process against self role */
 	if (rdatum->s.value == rdp->s.value)
@@ -2232,7 +2933,7 @@ role_datum_t *define_role_dom(role_datum_t * r)
 				break;
 			}
 		default:{
-				abort();	/* should never get here */
+				abort();  /* SETools - should never get here */
 			}
 		}
 		if (ebitmap_set_bit(&role->dominates, role->s.value - 1, TRUE)) {
@@ -2395,7 +3096,7 @@ int define_role_trans(int class_specified)
 			return -1;
 	} else {
 		cladatum = hashtab_search(policydbp->p_classes.table,
-					  (hashtab_key_t)"process");
+				  (hashtab_key_t)"process"); /* SETools */
 		if (!cladatum) {
 			yyerror2("could not find process class for "
 				 "legacy role_transition statement");
@@ -3943,7 +4644,12 @@ bad:
 	return -1;
 }
 
+
+#ifdef HAVE_SEPOL_XEN_DEVICETREE
+int define_iomem_context(uint64_t low, uint64_t high)
+#else
 int define_iomem_context(unsigned long low, unsigned long high)
+#endif
 {
 	ocontext_t *newc, *c, *l, *head;
 	char *id;
@@ -3971,7 +4677,7 @@ int define_iomem_context(unsigned long low, unsigned long high)
 	newc->u.iomem.high_iomem = high;
 
 	if (low > high) {
-		yyerror2("low memory 0x%lx exceeds high memory 0x%lx", low, high);
+		yyerror2("low memory 0x%"PRIx64" exceeds high memory 0x%"PRIx64"", low, high);
 		free(newc);
 		return -1;
 	}
@@ -3983,13 +4689,17 @@ int define_iomem_context(unsigned long low, unsigned long high)
 
 	head = policydbp->ocontexts[OCON_XEN_IOMEM];
 	for (l = NULL, c = head; c; l = c, c = c->next) {
-		unsigned int low2, high2;
+#ifdef HAVE_SEPOL_XEN_DEVICETREE
+		uint64_t low2, high2;
+#else
+		unsigned long low2, high2; /* SETools */
+#endif
 
 		low2 = c->u.iomem.low_iomem;
 		high2 = c->u.iomem.high_iomem;
 		if (low <= high2 && low2 <= high) {
-			yyerror2("iomemcon entry for 0x%lx-0x%lx overlaps with "
-				"earlier entry 0x%x-0x%x", low, high,
+			yyerror2("iomemcon entry for 0x%"PRIx64"-0x%"PRIx64" overlaps with "
+				"earlier entry 0x%"PRIx64"-0x%"PRIx64"", low, high,
 				low2, high2);
 			goto bad;
 		}
@@ -4047,7 +4757,7 @@ int define_ioport_context(unsigned long low, unsigned long high)
 
 	head = policydbp->ocontexts[OCON_XEN_IOPORT];
 	for (l = NULL, c = head; c; l = c, c = c->next) {
-		unsigned int low2, high2;
+		uint32_t low2, high2;
 
 		low2 = c->u.ioport.low_ioport;
 		high2 = c->u.ioport.high_ioport;
@@ -4126,6 +4836,66 @@ bad:
 	return -1;
 }
 
+int define_devicetree_context(void) /* SETools */
+{
+#ifdef HAVE_SEPOL_XEN_DEVICETREE
+	ocontext_t *newc, *c, *l, *head;
+#endif
+	if (policydbp->target_platform != SEPOL_TARGET_XEN) {
+		yyerror("devicetreecon not supported for target");
+		return -1;
+	}
+
+	if (pass == 1) {
+		free(queue_remove(id_queue));
+		parse_security_context(NULL);
+		return 0;
+	}
+
+#ifdef HAVE_SEPOL_XEN_DEVICETREE
+	newc = malloc(sizeof(ocontext_t));
+	if (!newc) {
+		yyerror("out of memory");
+		return -1;
+	}
+	memset(newc, 0, sizeof(ocontext_t));
+
+	newc->u.name = (char *)queue_remove(id_queue);
+	if (!newc->u.name) {
+		free(newc);
+		return -1;
+	}
+
+	if (parse_security_context(&newc->context[0])) {
+		free(newc->u.name);
+		free(newc);
+		return -1;
+	}
+
+	head = policydbp->ocontexts[OCON_XEN_DEVICETREE];
+	for (l = NULL, c = head; c; l = c, c = c->next) {
+		if (strcmp(newc->u.name, c->u.name) == 0) {
+			yyerror2("duplicate devicetree entry for '%s'", newc->u.name);
+			goto bad;
+		}
+	}
+
+	if (l)
+		l->next = newc;
+	else
+		policydbp->ocontexts[OCON_XEN_DEVICETREE] = newc;
+
+	return 0;
+
+bad:
+	free(newc->u.name);
+	free(newc);
+	return -1;
+#else
+	yyerror("This version of SETools does not have devicetreecon support.");
+	return -1;
+#endif
+}
 int define_port_context(unsigned int low, unsigned int high)
 {
 	ocontext_t *newc, *c, *l, *head;
@@ -4273,7 +5043,7 @@ int define_netif_context(void)
 	return 0;
 }
 
-int define_ipv4_node_context(void)
+int define_ipv4_node_context(void) /* SETools */
 {	
 	char *id;
 	int rc = 0;
@@ -4692,7 +5462,7 @@ int define_range_trans(int class_specified)
 			goto out;
 	} else {
 		cladatum = hashtab_search(policydbp->p_classes.table,
-		                          (hashtab_key_t)"process");
+				    (hashtab_key_t)"process"); /* SETools */
 		if (!cladatum) {
 			yyerror2("could not find process class for "
 			         "legacy range_transition statement");

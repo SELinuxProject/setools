@@ -1,14 +1,13 @@
-/**
- * @file policy_parse.y
- *
- * This file is based upon checkpolicy/policy_scan.l fram NSA's SVN
- * repository.  It has been modified to support older policy formats.
- * The older format just seems to be FSUSEPSID support (see fs_use_psid
- * entry.
- *
+/*
+ * This file is a copy of policy_scan.l from checkpolicy 2.4 updated to
+ * support SETools.
+ */
+
+/*
  * Author : Stephen Smalley, <sds@epoch.ncsc.mil> 
- *
- * Updated: David Caplan, <dac@tresys.com>
+ */
+
+/* Updated: David Caplan, <dac@tresys.com>
  *
  * 	Added conditional policy language extensions
  *
@@ -36,7 +35,7 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef int (* require_func_t)(int pass);
+typedef int (* require_func_t)(void);
 
 /* For SETools libqpol services leave this as policy_parse.h */
 #include "policy_parse.h"
@@ -44,7 +43,6 @@ typedef int (* require_func_t)(int pass);
 static char linebuf[2][255];
 static unsigned int lno = 0;
 int yywarn(const char *msg);
-int yyerror(const char *msg);
 
 void set_source_file(const char *name);
 
@@ -159,6 +157,14 @@ AUDITDENY |
 auditdeny		        { return(AUDITDENY); }
 DONTAUDIT |
 dontaudit                       { return(DONTAUDIT); }
+ALLOWXPERM |
+allowxperm		        { return(ALLOWXPERM); }
+AUDITALLOWXPERM |
+auditallowxperm		        { return(AUDITALLOWXPERM); }
+DONTAUDITXPERM |
+dontauditxperm                  { return(DONTAUDITXPERM); }
+NEVERALLOWXPERM |
+neverallowxperm			{ return(NEVERALLOWXPERM); }
 SOURCE |
 source			        { return(SOURCE); }
 TARGET |
@@ -204,6 +210,8 @@ ioportcon |
 IOPORTCON           		{ return(IOPORTCON);}
 pcidevicecon |
 PCIDEVICECON           		{ return(PCIDEVICECON);}
+devicetreecon |
+DEVICETREECON           	{ return(DEVICETREECON);}
 fs_use_xattr |
 FS_USE_XATTR			{ return(FSUSEXATTR);}
 fs_use_task |
@@ -257,10 +265,11 @@ HIGH				{ return(HIGH); }
 low |
 LOW				{ return(LOW); }
 "/"({alnum}|[_\.\-/])*	        { return(PATH); }
+\""/"[ !#-~]*\" 		{ return(QPATH); }
 \"({alnum}|[_\.\-\+\~\: ])+\"	{ return(FILENAME); }
 {letter}({alnum}|[_\-])*([\.]?({alnum}|[_\-]))*	{ return(IDENTIFIER); }
-{alnum}*{letter}{alnum}*        { return(FILESYSTEM); }
 {digit}+|0x{hexval}+            { return(NUMBER); }
+{alnum}*{letter}{alnum}*        { return(FILESYSTEM); }
 {digit}{1,3}(\.{digit}{1,3}){3}    { return(IPV4_ADDR); }
 {hexval}{0,4}":"{hexval}{0,4}":"({hexval}|[:.])*  { return(IPV6_ADDR); }
 {digit}+(\.({alnum}|[_.])*)?    { return(VERSION_IDENTIFIER); }
@@ -325,6 +334,8 @@ void set_source_file(const char *name)
 	source_lineno = 1;
 	strncpy(source_file, name, sizeof(source_file)-1); 
 	source_file[sizeof(source_file)-1] = '\0';
+	if (strlen(source_file) && source_file[strlen(source_file)-1] == '"')
+		source_file[strlen(source_file)-1] = '\0';
 }
 
 /* Required for SETools libqpol services */

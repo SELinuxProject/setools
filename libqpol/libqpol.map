@@ -76,6 +76,12 @@ VERS_1.5 {
 		qpol_policy_polcap_*;
 		qpol_polcap_*;
 		qpol_default_object_*;
+		qpol_iomemcon_*;
+		qpol_ioportcon_*;
+		qpol_pcidevicecon_*;
+		qpol_pirqcon_*;
+		qpol_devicetreecon_*;
+		qpol_xperm_*;
 		init_qpol;
 		PyInit__qpol;
 } VERS_1.4;

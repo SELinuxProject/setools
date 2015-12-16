@@ -1,9 +1,8 @@
-/**
- *  @file
- *
- *  This file is a copy of module_compiler.h from NSA's CVS repository.
- *
- * Author : Joshua Brindle <jbrindle@tresys.com>
+/* This file is a copy of module_compiler.h from checkpolicy 2.4 to support
+ * SETools.
+ */
+
+/* Author : Joshua Brindle <jbrindle@tresys.com>
  *	    Karl MacMillan <kmacmillan@tresys.com>
  *          Jason Tang     <jtang@tresys.com>
  *	Added support for binary policy modules
@@ -12,6 +11,7 @@
  *	This program is free software; you can redistribute it and/or modify
  *  	it under the terms of the GNU General Public License as published by
  *	the Free Software Foundation, version 2.
+ *
  */
 
 #ifndef MODULE_COMPILER_H
@@ -76,12 +76,12 @@ int require_cat(int pass);
 /* Check if an identifier is within the scope of the current
  * declaration or any of its parents.  Return 1 if it is, 0 if not.
  * If the identifier is not known at all then return 1 (truth).  */
-int is_id_in_scope(uint32_t symbol_type, const char * id);
+int is_id_in_scope(uint32_t symbol_type, hashtab_key_t id);
 
 /* Check if a particular permission is within the scope of the current
  * declaration or any of its parents.  Return 1 if it is, 0 if not.
  * If the identifier is not known at all then return 1 (truth).  */
-int is_perm_in_scope(hashtab_key_t perm_id, const char * class_id);
+int is_perm_in_scope(hashtab_key_t perm_id, hashtab_key_t class_id);
 
 /* Search the current avrules block for a conditional with the same
  * expression as 'cond'.  If the conditional does not exist then
@@ -117,6 +117,7 @@ int begin_optional_else(int pass);
  * return -1. */
 int end_avrule_block(int pass);
 
+/* Required for SETools libqpol services */
 #ifdef	__cplusplus
 }
 #endif
