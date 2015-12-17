@@ -65,3 +65,6 @@ from .permmap import PermissionMap
 
 # Domain Transition Analysis
 from .dta import DomainTransitionAnalysis
+
+# Policy difference
+from .diff import PolicyDifference
