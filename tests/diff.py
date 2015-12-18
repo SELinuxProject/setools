@@ -28,19 +28,19 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
                                      SELinuxPolicy("tests/diff_right.conf"))
 
-    def test_001_added_types(self):
+    def test_added_types(self):
         """Diff: added type"""
         self.assertSetEqual(set(["added_type"]), self.diff.added_types)
 
-    def test_002_removed_types(self):
+    def test_removed_types(self):
         """Diff: modified type"""
         self.assertSetEqual(set(["removed_type"]), self.diff.removed_types)
 
-    def test_003_modified_types_count(self):
+    def test_modified_types_count(self):
         """Diff: total modified types"""
         self.assertEqual(6, len(self.diff.modified_types))
 
-    def test_004_modified_types_remove_attr(self):
+    def test_modified_types_remove_attr(self):
         """Diff: modified type with removed attribute."""
         self.assertIn("modified_remove_attr", self.diff.modified_types)
         removed_attrs = self.diff.modified_types["modified_remove_attr"].removed_attributes
@@ -53,7 +53,7 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertFalse(self.diff.modified_types["modified_remove_attr"].removed_aliases)
         self.assertFalse(self.diff.modified_types["modified_remove_attr"].matched_aliases)
 
-    def test_005_modified_types_remove_alias(self):
+    def test_modified_types_remove_alias(self):
         """Diff: modified type with removed alias."""
         self.assertIn("modified_remove_alias", self.diff.modified_types)
         removed_alias = self.diff.modified_types["modified_remove_alias"].removed_aliases
@@ -66,7 +66,7 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertFalse(self.diff.modified_types["modified_remove_alias"].added_aliases)
         self.assertFalse(self.diff.modified_types["modified_remove_alias"].matched_aliases)
 
-    def test_006_modified_types_remove_permissive(self):
+    def test_modified_types_remove_permissive(self):
         """Diff: modified type with removed permissve."""
         self.assertIn("modified_remove_permissive", self.diff.modified_types)
         self.assertFalse(self.diff.modified_types["modified_remove_permissive"].added_attributes)
@@ -78,7 +78,7 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertFalse(self.diff.modified_types["modified_remove_permissive"].removed_aliases)
         self.assertFalse(self.diff.modified_types["modified_remove_permissive"].matched_aliases)
 
-    def test_007_modified_types_add_attr(self):
+    def test_modified_types_add_attr(self):
         """Diff: modified type with added attribute."""
         self.assertIn("modified_add_attr", self.diff.modified_types)
         added_attrs = self.diff.modified_types["modified_add_attr"].added_attributes
@@ -91,7 +91,7 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertFalse(self.diff.modified_types["modified_add_attr"].removed_aliases)
         self.assertFalse(self.diff.modified_types["modified_add_attr"].matched_aliases)
 
-    def test_008_modified_types_add_alias(self):
+    def test_modified_types_add_alias(self):
         """Diff: modified type with added alias."""
         self.assertIn("modified_add_alias", self.diff.modified_types)
         added_alias = self.diff.modified_types["modified_add_alias"].added_aliases
@@ -104,7 +104,7 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertFalse(self.diff.modified_types["modified_add_alias"].removed_aliases)
         self.assertFalse(self.diff.modified_types["modified_add_alias"].matched_aliases)
 
-    def test_009_modified_types_add_permissive(self):
+    def test_modified_types_add_permissive(self):
         """Diff: modified type with added permissive."""
         self.assertIn("modified_add_permissive", self.diff.modified_types)
         self.assertFalse(self.diff.modified_types["modified_add_permissive"].added_attributes)
@@ -125,14 +125,14 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
         self.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
                                      SELinuxPolicy("tests/diff_left.conf"))
 
-    def test_001_added_types(self):
+    def test_added_types(self):
         """NoDiff: no added types"""
         self.assertFalse(self.diff.added_types)
 
-    def test_002_removed_types(self):
+    def test_removed_types(self):
         """NoDiff: no removed types"""
         self.assertFalse(self.diff.removed_types)
 
-    def test_003_modified_types(self):
+    def test_modified_types(self):
         """NoDiff: no modified types"""
         self.assertFalse(self.diff.modified_types)
