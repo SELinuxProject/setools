@@ -1,0 +1,92 @@
+#!/usr/bin/python
+# Copyright 2015, Tresys Technology, LLC
+#
+# This file is part of SETools.
+#
+# SETools is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#
+# SETools is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with SETools.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+from __future__ import print_function
+import setools
+import argparse
+import sys
+import logging
+
+parser = argparse.ArgumentParser(description="SELinux policy difference tool.")
+parser.add_argument("POLICY1", help="Path to the first SELinux policy to diff.", nargs=1)
+parser.add_argument("POLICY2", help="Path to the second SELinux policy to diff.", nargs=1)
+parser.add_argument("--version", action="version", version=setools.__version__)
+parser.add_argument("--stats", action="store_true",
+                    help="Display only statistics.")
+parser.add_argument("-v", "--verbose", action="store_true",
+                    help="Print extra informational messages")
+parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
+
+comp = parser.add_argument_group("Component Differences")
+comp.add_argument("-c", "--class", action="store_true", help="Print class differences",
+                  dest="class_")
+comp.add_argument("-t", "--type", action="store_true", help="Print type differences",
+                  dest="type_")
+comp.add_argument("-a", "--attribute", action="store_true", help="Print type attribute differences")
+comp.add_argument("-r", "--role", action="store_true", help="Print role differences")
+comp.add_argument("-u", "--user", action="store_true", help="Print type differences")
+comp.add_argument("-b", "--bool", action="store_true", help="Print type differences",
+                  dest="bool_")
+comp.add_argument("--sensitivity", action="store_true", help="Print MLS sensitivity differences")
+comp.add_argument("--category", action="store_true", help="Print MLS category differences")
+comp.add_argument("--level", action="store_true", help="Print MLS level definition differences")
+
+terule = parser.add_argument_group("Type Enforcement Rule Differences")
+terule.add_argument("-A", "--allow", action="store_true", help="Print allow rule differences")
+terule.add_argument("--neverallow", action="store_true", help="Print neverallow rule differences")
+terule.add_argument("--auditallow", action="store_true", help="Print auditallow rule differences")
+terule.add_argument("--dontaudit", action="store_true", help="Print dontaudit rule differences")
+terule.add_argument("-T", "--type_trans", action="store_true",
+                    help="Print type_transition rule differences")
+terule.add_argument("--type_change", action="store_true", help="Print type_change rule differences")
+terule.add_argument("--type_memeber", action="store_true",
+                    help="Print type_member rule differences")
+
+rbacrule = parser.add_argument_group("RBAC Rule Differences")
+rbacrule.add_argument("--role_allow", action="store_true", help="Print role allow rule differences")
+rbacrule.add_argument("--role_trans", action="store_true",
+                      help="Print role_transition rule differences")
+
+mlsrule = parser.add_argument_group("MLS Rule Differences")
+mlsrule.add_argument("--range_trans", action="store_true",
+                     help="Print range_transition rule differences")
+
+args = parser.parse_args()
+
+if args.debug:
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
+elif args.verbose:
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+else:
+    logging.basicConfig(level=logging.WARNING, format='%(message)s')
+
+try:
+    p1 = setools.SELinuxPolicy(args.POLICY1[0])
+    p2 = setools.SELinuxPolicy(args.POLICY2[0])
+    diff = setools.PolicyDifference(p1, p2)
+
+except Exception as err:
+    if args.debug:
+        import traceback
+        traceback.print_exc()
+    else:
+        print(err)
+
+    sys.exit(1)
