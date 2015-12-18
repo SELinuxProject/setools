@@ -82,6 +82,81 @@ try:
     p2 = setools.SELinuxPolicy(args.POLICY2[0])
     diff = setools.PolicyDifference(p1, p2)
 
+    if diff.added_roles or diff.removed_roles or diff.modified_roles:
+        print("Roles ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_roles),
+                                                                    len(diff.removed_roles),
+                                                                    len(diff.modified_roles)))
+        if diff.added_roles:
+            print("   Added Roles: {0}".format(len(diff.added_roles)))
+            for r in diff.added_roles:
+                print("      + {0}".format(r))
+        if diff.removed_roles:
+            print("   Removed Roles: {0}".format(len(diff.removed_roles)))
+            for r in diff.removed_roles:
+                print("      - {0}".format(r))
+        if diff.modified_roles:
+            print("   Modified Roles: {0}".format(len(diff.modified_roles)))
+            for name, mod in diff.modified_roles.items():
+                change = []
+                if mod.added_types:
+                    change.append("{0} Added types".format(len(mod.added_types)))
+                if mod.removed_types:
+                    change.append("{0} Removed types".format(len(mod.removed_types)))
+
+                print("      * {0} ({1})".format(name, ", ".join(change)))
+                for t in mod.added_types:
+                    print("          + {0}".format(t))
+                for t in mod.removed_types:
+                    print("          - {0}".format(t))
+        print()
+
+    if diff.added_types or diff.removed_types or diff.modified_types:
+        print("Types ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_types),
+                                                                    len(diff.removed_types),
+                                                                    len(diff.modified_types)))
+        if diff.added_types:
+            print("   Added Types: {0}".format(len(diff.added_types)))
+            for r in diff.added_types:
+                print("      + {0}".format(r))
+        if diff.removed_types:
+            print("   Removed Types: {0}".format(len(diff.removed_types)))
+            for r in diff.removed_types:
+                print("      - {0}".format(r))
+        if diff.modified_types:
+            print("   Modified Types: {0}".format(len(diff.modified_types)))
+            for name, mod in diff.modified_types.items():
+                change = []
+                if mod.added_attributes:
+                    change.append("{0} Added attributes".format(len(mod.added_attributes)))
+                if mod.removed_attributes:
+                    change.append("{0} Removed attributes".format(len(mod.removed_attributes)))
+                if mod.added_aliases:
+                    change.append("{0} Added aliases".format(len(mod.added_aliases)))
+                if mod.removed_aliases:
+                    change.append("{0} Removed aliases".format(len(mod.removed_aliases)))
+                if mod.modified_permissive:
+                    if mod.permissive:
+                        change.append("Removed permissive")
+                    else:
+                        change.append("Added permissive")
+
+                print("      * {0} ({1})".format(name, ", ".join(change)))
+                if mod.added_attributes or mod.removed_attributes:
+                    print("          Attributes:")
+                for t in mod.added_attributes:
+                    print("          + {0}".format(t))
+                for t in mod.removed_attributes:
+                    print("          - {0}".format(t))
+
+                if mod.added_aliases or mod.removed_aliases:
+                    print("          Aliases:")
+                for t in mod.added_aliases:
+                    print("          + {0}".format(t))
+                for t in mod.removed_aliases:
+                    print("          - {0}".format(t))
+
+        print()
+
 except Exception as err:
     if args.debug:
         import traceback
