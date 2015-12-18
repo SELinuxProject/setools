@@ -116,6 +116,31 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertFalse(self.diff.modified_types["modified_add_permissive"].removed_aliases)
         self.assertFalse(self.diff.modified_types["modified_add_permissive"].matched_aliases)
 
+    def test_added_role(self):
+        """Diff: added role."""
+        self.assertSetEqual(set(["added_role"]), self.diff.added_roles)
+
+    def test_removed_role(self):
+        """Diff: removed role."""
+        self.assertSetEqual(set(["removed_role"]), self.diff.removed_roles)
+
+    def test_modified_role_count(self):
+        """Diff: modified role."""
+        self.assertIn("object_r", self.diff.modified_roles)
+        self.assertEqual(3, len(self.diff.modified_roles))
+
+    def test_modified_role_add_type(self):
+        """Diff: modified role with added type."""
+        self.assertSetEqual(set(["system"]),
+                            self.diff.modified_roles["modified_add_type"].added_types)
+        self.assertFalse(self.diff.modified_roles["modified_add_type"].removed_types)
+
+    def test_modified_role_remove_type(self):
+        """Diff: modified role with removed type."""
+        self.assertSetEqual(set(["system"]),
+                            self.diff.modified_roles["modified_remove_type"].removed_types)
+        self.assertFalse(self.diff.modified_roles["modified_remove_type"].added_types)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -136,3 +161,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_types(self):
         """NoDiff: no modified types"""
         self.assertFalse(self.diff.modified_types)
+
+    def test_added_roles(self):
+        """NoDiff: no added roles."""
+        self.assertFalse(self.diff.added_roles)
+
+    def test_removed_roles(self):
+        """NoDiff: no removed roles."""
+        self.assertFalse(self.diff.removed_roles)
+
+    def test_modified_roles(self):
+        """NoDiff: no modified roles."""
+        self.assertFalse(self.diff.modified_roles)
