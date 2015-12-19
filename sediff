@@ -88,15 +88,15 @@ try:
                                                                     len(diff.modified_roles)))
         if diff.added_roles:
             print("   Added Roles: {0}".format(len(diff.added_roles)))
-            for r in diff.added_roles:
+            for r in sorted(diff.added_roles):
                 print("      + {0}".format(r))
         if diff.removed_roles:
             print("   Removed Roles: {0}".format(len(diff.removed_roles)))
-            for r in diff.removed_roles:
+            for r in sorted(diff.removed_roles):
                 print("      - {0}".format(r))
         if diff.modified_roles:
             print("   Modified Roles: {0}".format(len(diff.modified_roles)))
-            for name, mod in diff.modified_roles.items():
+            for name, mod in sorted(diff.modified_roles.items()):
                 change = []
                 if mod.added_types:
                     change.append("{0} Added types".format(len(mod.added_types)))
@@ -104,9 +104,9 @@ try:
                     change.append("{0} Removed types".format(len(mod.removed_types)))
 
                 print("      * {0} ({1})".format(name, ", ".join(change)))
-                for t in mod.added_types:
+                for t in sorted(mod.added_types):
                     print("          + {0}".format(t))
-                for t in mod.removed_types:
+                for t in sorted(mod.removed_types):
                     print("          - {0}".format(t))
         print()
 
@@ -116,15 +116,15 @@ try:
                                                                     len(diff.modified_types)))
         if diff.added_types:
             print("   Added Types: {0}".format(len(diff.added_types)))
-            for r in diff.added_types:
+            for r in sorted(diff.added_types):
                 print("      + {0}".format(r))
         if diff.removed_types:
             print("   Removed Types: {0}".format(len(diff.removed_types)))
-            for r in diff.removed_types:
+            for r in sorted(diff.removed_types):
                 print("      - {0}".format(r))
         if diff.modified_types:
             print("   Modified Types: {0}".format(len(diff.modified_types)))
-            for name, mod in diff.modified_types.items():
+            for name, mod in sorted(diff.modified_types.items()):
                 change = []
                 if mod.added_attributes:
                     change.append("{0} Added attributes".format(len(mod.added_attributes)))
@@ -143,16 +143,16 @@ try:
                 print("      * {0} ({1})".format(name, ", ".join(change)))
                 if mod.added_attributes or mod.removed_attributes:
                     print("          Attributes:")
-                for t in mod.added_attributes:
+                for t in sorted(mod.added_attributes):
                     print("          + {0}".format(t))
-                for t in mod.removed_attributes:
+                for t in sorted(mod.removed_attributes):
                     print("          - {0}".format(t))
 
                 if mod.added_aliases or mod.removed_aliases:
                     print("          Aliases:")
-                for t in mod.added_aliases:
+                for t in sorted(mod.added_aliases):
                     print("          + {0}".format(t))
-                for t in mod.removed_aliases:
+                for t in sorted(mod.removed_aliases):
                     print("          - {0}".format(t))
 
         print()
