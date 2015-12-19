@@ -82,6 +82,34 @@ try:
     p2 = setools.SELinuxPolicy(args.POLICY2[0])
     diff = setools.PolicyDifference(p1, p2)
 
+    if diff.added_commons or diff.removed_commons or diff.modified_commons:
+        print("Commons ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_commons),
+                                                                      len(diff.removed_commons),
+                                                                      len(diff.modified_commons)))
+        if diff.added_commons:
+            print("   Added Commons: {0}".format(len(diff.added_commons)))
+            for c in sorted(diff.added_commons):
+                print("      + {0}".format(c))
+        if diff.removed_commons:
+            print("   Removed Commons: {0}".format(len(diff.removed_commons)))
+            for c in sorted(diff.removed_commons):
+                print("      - {0}".format(c))
+        if diff.modified_commons:
+            print("   Modified Commons: {0}".format(len(diff.modified_commons)))
+            for name, mod in sorted(diff.modified_commons.items()):
+                change = []
+                if mod.added_perms:
+                    change.append("{0} Added permissions".format(len(mod.added_perms)))
+                if mod.removed_perms:
+                    change.append("{0} Removed permissions".format(len(mod.removed_perms)))
+
+                print("      * {0} ({1})".format(name, ", ".join(change)))
+                for p in sorted(mod.added_perms):
+                    print("          + {0}".format(p))
+                for p in sorted(mod.removed_perms):
+                    print("          - {0}".format(p))
+        print()
+
     if diff.added_roles or diff.removed_roles or diff.modified_roles:
         print("Roles ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_roles),
                                                                     len(diff.removed_roles),

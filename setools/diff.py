@@ -23,6 +23,10 @@ from weakref import WeakKeyDictionary
 __all__ = ['PolicyDifference']
 
 
+modified_commons_record = namedtuple("modified_common", ["added_perms",
+                                                         "removed_perms",
+                                                         "matched_perms"])
+
 modified_roles_record = namedtuple("modified_role", ["added_types",
                                                      "removed_types",
                                                      "matched_types"])
@@ -105,6 +109,38 @@ class PolicyDifference(object):
     def right_policy(self, policy):
         self._right_policy = policy
         self._reset_diff()
+
+    #
+    # Common differences
+    #
+    added_commons = DiffResultDescriptor("diff_commons")
+    removed_commons = DiffResultDescriptor("diff_commons")
+    modified_commons = DiffResultDescriptor("diff_commons")
+
+    def diff_commons(self):
+        """Generate the difference in commons between the policies."""
+
+        self.log.info(
+            "Generating common differences from {0.left_policy} to {0.right_policy}".format(self))
+
+        self.added_commons, self.removed_commons, matched_commons = self._set_diff(
+            self.left_policy.commons(), self.right_policy.commons())
+
+        self.modified_commons = dict()
+
+        for name in matched_commons:
+            # Criteria for modified commons
+            # 1. change to permissions
+            left_common = self.left_policy.lookup_common(name)
+            right_common = self.right_policy.lookup_common(name)
+
+            added_perms, removed_perms, matched_perms = self._set_diff(left_common.perms,
+                                                                       right_common.perms)
+
+            if added_perms or removed_perms:
+                self.modified_commons[name] = modified_commons_record(added_perms,
+                                                                      removed_perms,
+                                                                      matched_perms)
 
     #
     # Role differences
@@ -190,6 +226,9 @@ class PolicyDifference(object):
     #
     def _reset_diff(self):
         """Reset diff results on policy changes."""
+        self.added_commons = None
+        self.removed_commons = None
+        self.modified_commons = None
         self.added_roles = None
         self.removed_roles = None
         self.modified_roles = None

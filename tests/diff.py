@@ -141,6 +141,30 @@ class PolicyDifferenceTest(unittest.TestCase):
                             self.diff.modified_roles["modified_remove_type"].removed_types)
         self.assertFalse(self.diff.modified_roles["modified_remove_type"].added_types)
 
+    def test_added_common(self):
+        """Diff: added common."""
+        self.assertSetEqual(set(["added_common"]), self.diff.added_commons)
+
+    def test_removed_common(self):
+        """Diff: removed common."""
+        self.assertSetEqual(set(["removed_common"]), self.diff.removed_commons)
+
+    def test_modified_common_count(self):
+        """Diff: modified common count."""
+        self.assertEqual(2, len(self.diff.modified_commons))
+
+    def test_modified_common_add_perm(self):
+        """Diff: modified common with added perm."""
+        self.assertSetEqual(set(["added_perm"]),
+                            self.diff.modified_commons["modified_add_perm"].added_perms)
+        self.assertFalse(self.diff.modified_commons["modified_add_perm"].removed_perms)
+
+    def test_modified_common_remove_perm(self):
+        """Diff: modified common with removed perm."""
+        self.assertSetEqual(set(["removed_perm"]),
+                            self.diff.modified_commons["modified_remove_perm"].removed_perms)
+        self.assertFalse(self.diff.modified_commons["modified_remove_perm"].added_perms)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -173,3 +197,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_roles(self):
         """NoDiff: no modified roles."""
         self.assertFalse(self.diff.modified_roles)
+
+    def test_added_commons(self):
+        """NoDiff: no added commons."""
+        self.assertFalse(self.diff.added_commons)
+
+    def test_removed_commons(self):
+        """NoDiff: no removed commons."""
+        self.assertFalse(self.diff.removed_commons)
+
+    def test_modified_commons(self):
+        """NoDiff: no modified commons."""
+        self.assertFalse(self.diff.modified_commons)
