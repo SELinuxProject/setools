@@ -28,6 +28,9 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
                                      SELinuxPolicy("tests/diff_right.conf"))
 
+    #
+    # Types
+    #
     def test_added_types(self):
         """Diff: added type"""
         self.assertSetEqual(set(["added_type"]), self.diff.added_types)
@@ -116,6 +119,9 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertFalse(self.diff.modified_types["modified_add_permissive"].removed_aliases)
         self.assertFalse(self.diff.modified_types["modified_add_permissive"].matched_aliases)
 
+    #
+    # Roles
+    #
     def test_added_role(self):
         """Diff: added role."""
         self.assertSetEqual(set(["added_role"]), self.diff.added_roles)
@@ -141,6 +147,9 @@ class PolicyDifferenceTest(unittest.TestCase):
                             self.diff.modified_roles["modified_remove_type"].removed_types)
         self.assertFalse(self.diff.modified_roles["modified_remove_type"].added_types)
 
+    #
+    # Commons
+    #
     def test_added_common(self):
         """Diff: added common."""
         self.assertSetEqual(set(["added_common"]), self.diff.added_commons)
@@ -164,6 +173,40 @@ class PolicyDifferenceTest(unittest.TestCase):
         self.assertSetEqual(set(["removed_perm"]),
                             self.diff.modified_commons["modified_remove_perm"].removed_perms)
         self.assertFalse(self.diff.modified_commons["modified_remove_perm"].added_perms)
+
+    #
+    # Classes
+    #
+    def test_added_class(self):
+        """Diff: added class."""
+        self.assertSetEqual(set(["added_class"]), self.diff.added_classes)
+
+    def test_removed_class(self):
+        """Diff: removed class."""
+        self.assertSetEqual(set(["removed_class"]), self.diff.removed_classes)
+
+    def test_modified_class_count(self):
+        """Diff: modified class count."""
+        self.assertEqual(3, len(self.diff.modified_classes))
+
+    def test_modified_class_add_perm(self):
+        """Diff: modified class with added perm."""
+        self.assertSetEqual(set(["added_perm"]),
+                            self.diff.modified_classes["modified_add_perm"].added_perms)
+        self.assertFalse(self.diff.modified_classes["modified_add_perm"].removed_perms)
+
+    def test_modified_class_remove_perm(self):
+        """Diff: modified class with removed perm."""
+        self.assertSetEqual(set(["removed_perm"]),
+                            self.diff.modified_classes["modified_remove_perm"].removed_perms)
+        self.assertFalse(self.diff.modified_classes["modified_remove_perm"].added_perms)
+
+    def test_modified_class_change_common(self):
+        """Diff: modified class due to modified common."""
+        self.assertSetEqual(set(["old_com"]),
+                            self.diff.modified_classes["modified_change_common"].removed_perms)
+        self.assertSetEqual(set(["new_com"]),
+                            self.diff.modified_classes["modified_change_common"].added_perms)
 
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
@@ -209,3 +252,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_commons(self):
         """NoDiff: no modified commons."""
         self.assertFalse(self.diff.modified_commons)
+
+    def test_added_classes(self):
+        """NoDiff: no added classes."""
+        self.assertFalse(self.diff.added_classes)
+
+    def test_removed_classes(self):
+        """NoDiff: no removed classes."""
+        self.assertFalse(self.diff.removed_classes)
+
+    def test_modified_classes(self):
+        """NoDiff: no modified classes."""
+        self.assertFalse(self.diff.modified_classes)

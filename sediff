@@ -110,6 +110,34 @@ try:
                     print("          - {0}".format(p))
         print()
 
+    if diff.added_classes or diff.removed_classes or diff.modified_classes:
+        print("Classes ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_classes),
+                                                                      len(diff.removed_classes),
+                                                                      len(diff.modified_classes)))
+        if diff.added_classes:
+            print("   Added Classes: {0}".format(len(diff.added_classes)))
+            for c in sorted(diff.added_classes):
+                print("      + {0}".format(c))
+        if diff.removed_classes:
+            print("   Removed Classes: {0}".format(len(diff.removed_classes)))
+            for c in sorted(diff.removed_classes):
+                print("      - {0}".format(c))
+        if diff.modified_classes:
+            print("   Modified Classes: {0}".format(len(diff.modified_classes)))
+            for name, mod in sorted(diff.modified_classes.items()):
+                change = []
+                if mod.added_perms:
+                    change.append("{0} Added permissions".format(len(mod.added_perms)))
+                if mod.removed_perms:
+                    change.append("{0} Removed permissions".format(len(mod.removed_perms)))
+
+                print("      * {0} ({1})".format(name, ", ".join(change)))
+                for p in sorted(mod.added_perms):
+                    print("          + {0}".format(p))
+                for p in sorted(mod.removed_perms):
+                    print("          - {0}".format(p))
+        print()
+
     if diff.added_roles or diff.removed_roles or diff.modified_roles:
         print("Roles ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_roles),
                                                                     len(diff.removed_roles),

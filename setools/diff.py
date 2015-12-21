@@ -20,12 +20,18 @@ import logging
 from collections import namedtuple
 from weakref import WeakKeyDictionary
 
+from .policyrep.exception import NoCommon
+
 __all__ = ['PolicyDifference']
 
 
 modified_commons_record = namedtuple("modified_common", ["added_perms",
                                                          "removed_perms",
                                                          "matched_perms"])
+
+modified_classes_record = namedtuple("modified_class", ["added_perms",
+                                                        "removed_perms",
+                                                        "matched_perms"])
 
 modified_roles_record = namedtuple("modified_role", ["added_types",
                                                      "removed_types",
@@ -143,6 +149,49 @@ class PolicyDifference(object):
                                                                       matched_perms)
 
     #
+    # Object class differences
+    #
+    added_classes = DiffResultDescriptor("diff_classes")
+    removed_classes = DiffResultDescriptor("diff_classes")
+    modified_classes = DiffResultDescriptor("diff_classes")
+
+    def diff_classes(self):
+        """Generate the difference in object classes between the policies."""
+
+        self.log.info(
+            "Generating class differences from {0.left_policy} to {0.right_policy}".format(self))
+
+        self.added_classes, self.removed_classes, matched_classes = self._set_diff(
+            self.left_policy.classes(), self.right_policy.classes())
+
+        self.modified_classes = dict()
+
+        for name in matched_classes:
+            # Criteria for modified classes
+            # 1. change to permissions (inherited common is expanded)
+            left_class = self.left_policy.lookup_class(name)
+            right_class = self.right_policy.lookup_class(name)
+
+            left_perms = left_class.perms
+            try:
+                left_perms |= left_class.common.perms
+            except NoCommon:
+                pass
+
+            right_perms = right_class.perms
+            try:
+                right_perms |= right_class.common.perms
+            except NoCommon:
+                pass
+
+            added_perms, removed_perms, matched_perms = self._set_diff(left_perms, right_perms)
+
+            if added_perms or removed_perms:
+                self.modified_classes[name] = modified_classes_record(added_perms,
+                                                                      removed_perms,
+                                                                      matched_perms)
+
+    #
     # Role differences
     #
     added_roles = DiffResultDescriptor("diff_roles")
@@ -229,6 +278,9 @@ class PolicyDifference(object):
         self.added_commons = None
         self.removed_commons = None
         self.modified_commons = None
+        self.added_classes = None
+        self.removed_classes = None
+        self.modified_classes = None
         self.added_roles = None
         self.removed_roles = None
         self.modified_roles = None
