@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import itertools
+
 from . import exception
 from . import qpol
 from . import rule
@@ -32,6 +34,30 @@ def te_rule_factory(policy, symbol):
         return TERule(policy, symbol)
     else:
         raise TypeError("TE rules cannot be looked-up.")
+
+
+def expanded_te_rule_factory(original, source, target):
+    """
+    Factory function for creating expanded TE rules.
+
+    original    The TE rule the expanded rule originates from.
+    source      The source type of the expanded rule.
+    target      The target type of the expanded rule.
+    """
+
+    if isinstance(original, AVRule):
+        rule = ExpandedAVRule(original.policy, original.qpol_symbol)
+    elif isinstance(original, TERule):
+        rule = ExpandedTERule(original.policy, original.qpol_symbol)
+    elif isinstance(original, (ExpandedAVRule, ExpandedTERule)):
+        return original
+    else:
+        raise TypeError("The original rule must be a TE rule class.")
+
+    rule.source = source
+    rule.target = target
+    rule.origin = original
+    return rule
 
 
 def validate_ruletype(types):
@@ -81,6 +107,11 @@ class BaseTERule(rule.PolicyRule):
             #                 so no member function
             # ValueError:     The rule is not conditional
             raise exception.RuleNotConditional
+
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        for s, t in itertools.product(self.source.expand(), self.target.expand()):
+            yield expanded_te_rule_factory(self, s, t)
 
 
 class AVRule(BaseTERule):
@@ -180,3 +211,21 @@ class TERule(BaseTERule):
             else:
                 raise exception.RuleUseError("{0} rules do not have file names".
                                              format(self.ruletype))
+
+
+class ExpandedAVRule(AVRule):
+
+    """An expanded access vector type enforcement rule."""
+
+    source = None
+    target = None
+    origin = None
+
+
+class ExpandedTERule(TERule):
+
+    """An expanded type_* type enforcement rule."""
+
+    source = None
+    target = None
+    origin = None
