@@ -16,9 +16,14 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from itertools import product
+from collections import namedtuple
+
 from . import exception
 from . import qpol
 from . import symbol
+
+truth_table_row = namedtuple("truth_table_row", ["values", "result"])
 
 
 def boolean_factory(policy, name):
@@ -162,6 +167,77 @@ class ConditionalExpr(symbol.PolicySymbol):
                 bools.add(boolean_factory(self.policy, expr_node.get_boolean(self.policy)))
 
         return bools
+
+    def evaluate(self, **kwargs):
+        """
+        Evaluate the expression with the stated boolean values.
+
+        Keyword Parameters:
+        Each keyword parameter name corresponds to a boolean name
+        in the expression
+
+        Return:     bool
+        """
+        bools = sorted(self.booleans)
+
+        if sorted(kwargs.keys()) != bools:
+            raise ValueError("Boolean values not set correctly.")
+
+        stack = []
+        for expr_node in self.qpol_symbol.expr_node_iter(self.policy):
+            expr_node_type = expr_node.expr_type(self.policy)
+
+            if expr_node_type == qpol.QPOL_COND_EXPR_BOOL:
+                nodebool = boolean_factory(self.policy, expr_node.get_boolean(self.policy))
+                stack.append(kwargs[nodebool])
+            elif expr_node_type == qpol.QPOL_COND_EXPR_NOT:
+                operand = stack.pop()
+                operator = self._cond_expr_val_to_text[expr_node_type]
+                stack.append(not operand)
+            else:
+                operand1 = stack.pop()
+                operand2 = stack.pop()
+                operator = self._cond_expr_val_to_text[expr_node_type]
+                if operator == "||":
+                    stack.append(operand1 or operand2)
+                elif operator == "&&":
+                    stack.append(operand1 and operand2)
+                elif operator == "^":
+                    stack.append(operand1 ^ operand2)
+                elif operator == "==":
+                    stack.append(operand1 == operand2)
+                else:  # not equal
+                    stack.append(operand1 != operand2)
+
+        return stack[0]
+
+    def truth_table(self):
+        """
+        Generate a truth table for this expression.
+
+        Return:     list
+
+        List item:
+        tuple:      values, result
+
+        Tuple item:
+        values:     Dictionary keyed on Boolean names
+                    with each value being T/F.
+        result:     Evaluation result for the expression
+                    given the values.
+        """
+        bools = sorted(str(b) for b in self.booleans)
+
+        truth_table = []
+
+        # create a list of all combinations of T/F for each Boolean
+        truth_list = list(product([True, False], repeat=len(bools)))
+
+        for row in truth_list:
+            values = {bools[i]: row[i] for i in range(len(bools))}
+            truth_table.append(truth_table_row(values, self.evaluate(**values)))
+
+        return truth_table
 
     def statement(self):
         raise exception.NoStatement
