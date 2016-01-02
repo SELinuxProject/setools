@@ -34,6 +34,7 @@ parser.add_argument("-v", "--verbose", action="store_true",
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 comp = parser.add_argument_group("Component Differences")
+comp.add_argument("--common", action="store_true", help="Print common differences")
 comp.add_argument("-c", "--class", action="store_true", help="Print class differences",
                   dest="class_")
 comp.add_argument("-t", "--type", action="store_true", help="Print type differences",
@@ -69,6 +70,12 @@ mlsrule.add_argument("--range_trans", action="store_true",
 
 args = parser.parse_args()
 
+all_differences = not any((args.class_, args.common, args.type_, args.attribute, args.role,
+                           args.user, args.bool_, args.sensitivity, args.category, args.level,
+                           args.allow, args.neverallow, args.auditallow, args.dontaudit,
+                           args.type_trans, args.type_change, args.type_member, args.role_allow,
+                           args.role_trans, args.range_trans))
+
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
@@ -82,136 +89,138 @@ try:
     p2 = setools.SELinuxPolicy(args.POLICY2[0])
     diff = setools.PolicyDifference(p1, p2)
 
-    if diff.added_commons or diff.removed_commons or diff.modified_commons:
-        print("Commons ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_commons),
-                                                                      len(diff.removed_commons),
-                                                                      len(diff.modified_commons)))
-        if diff.added_commons:
-            print("   Added Commons: {0}".format(len(diff.added_commons)))
-            for c in sorted(diff.added_commons):
-                print("      + {0}".format(c))
-        if diff.removed_commons:
-            print("   Removed Commons: {0}".format(len(diff.removed_commons)))
-            for c in sorted(diff.removed_commons):
-                print("      - {0}".format(c))
-        if diff.modified_commons:
-            print("   Modified Commons: {0}".format(len(diff.modified_commons)))
-            for name, mod in sorted(diff.modified_commons.items()):
-                change = []
-                if mod.added_perms:
-                    change.append("{0} Added permissions".format(len(mod.added_perms)))
-                if mod.removed_perms:
-                    change.append("{0} Removed permissions".format(len(mod.removed_perms)))
+    if all_differences or args.common:
+        if diff.added_commons or diff.removed_commons or diff.modified_commons or args.common:
+            print("Commons ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_commons), len(diff.removed_commons), len(diff.modified_commons)))
+            if diff.added_commons:
+                print("   Added Commons: {0}".format(len(diff.added_commons)))
+                for c in sorted(diff.added_commons):
+                    print("      + {0}".format(c))
+            if diff.removed_commons:
+                print("   Removed Commons: {0}".format(len(diff.removed_commons)))
+                for c in sorted(diff.removed_commons):
+                    print("      - {0}".format(c))
+            if diff.modified_commons:
+                print("   Modified Commons: {0}".format(len(diff.modified_commons)))
+                for name, mod in sorted(diff.modified_commons.items()):
+                    change = []
+                    if mod.added_perms:
+                        change.append("{0} Added permissions".format(len(mod.added_perms)))
+                    if mod.removed_perms:
+                        change.append("{0} Removed permissions".format(len(mod.removed_perms)))
 
-                print("      * {0} ({1})".format(name, ", ".join(change)))
-                for p in sorted(mod.added_perms):
-                    print("          + {0}".format(p))
-                for p in sorted(mod.removed_perms):
-                    print("          - {0}".format(p))
-        print()
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    for p in sorted(mod.added_perms):
+                        print("          + {0}".format(p))
+                    for p in sorted(mod.removed_perms):
+                        print("          - {0}".format(p))
+            print()
 
-    if diff.added_classes or diff.removed_classes or diff.modified_classes:
-        print("Classes ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_classes),
-                                                                      len(diff.removed_classes),
-                                                                      len(diff.modified_classes)))
-        if diff.added_classes:
-            print("   Added Classes: {0}".format(len(diff.added_classes)))
-            for c in sorted(diff.added_classes):
-                print("      + {0}".format(c))
-        if diff.removed_classes:
-            print("   Removed Classes: {0}".format(len(diff.removed_classes)))
-            for c in sorted(diff.removed_classes):
-                print("      - {0}".format(c))
-        if diff.modified_classes:
-            print("   Modified Classes: {0}".format(len(diff.modified_classes)))
-            for name, mod in sorted(diff.modified_classes.items()):
-                change = []
-                if mod.added_perms:
-                    change.append("{0} Added permissions".format(len(mod.added_perms)))
-                if mod.removed_perms:
-                    change.append("{0} Removed permissions".format(len(mod.removed_perms)))
+    if all_differences or args.class_:
+        if diff.added_classes or diff.removed_classes or diff.modified_classes or args.class_:
+            print("Classes ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_classes), len(diff.removed_classes), len(diff.modified_classes)))
+            if diff.added_classes:
+                print("   Added Classes: {0}".format(len(diff.added_classes)))
+                for c in sorted(diff.added_classes):
+                    print("      + {0}".format(c))
+            if diff.removed_classes:
+                print("   Removed Classes: {0}".format(len(diff.removed_classes)))
+                for c in sorted(diff.removed_classes):
+                    print("      - {0}".format(c))
+            if diff.modified_classes:
+                print("   Modified Classes: {0}".format(len(diff.modified_classes)))
+                for name, mod in sorted(diff.modified_classes.items()):
+                    change = []
+                    if mod.added_perms:
+                        change.append("{0} Added permissions".format(len(mod.added_perms)))
+                    if mod.removed_perms:
+                        change.append("{0} Removed permissions".format(len(mod.removed_perms)))
 
-                print("      * {0} ({1})".format(name, ", ".join(change)))
-                for p in sorted(mod.added_perms):
-                    print("          + {0}".format(p))
-                for p in sorted(mod.removed_perms):
-                    print("          - {0}".format(p))
-        print()
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    for p in sorted(mod.added_perms):
+                        print("          + {0}".format(p))
+                    for p in sorted(mod.removed_perms):
+                        print("          - {0}".format(p))
+            print()
 
-    if diff.added_roles or diff.removed_roles or diff.modified_roles:
-        print("Roles ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_roles),
-                                                                    len(diff.removed_roles),
-                                                                    len(diff.modified_roles)))
-        if diff.added_roles:
-            print("   Added Roles: {0}".format(len(diff.added_roles)))
-            for r in sorted(diff.added_roles):
-                print("      + {0}".format(r))
-        if diff.removed_roles:
-            print("   Removed Roles: {0}".format(len(diff.removed_roles)))
-            for r in sorted(diff.removed_roles):
-                print("      - {0}".format(r))
-        if diff.modified_roles:
-            print("   Modified Roles: {0}".format(len(diff.modified_roles)))
-            for name, mod in sorted(diff.modified_roles.items()):
-                change = []
-                if mod.added_types:
-                    change.append("{0} Added types".format(len(mod.added_types)))
-                if mod.removed_types:
-                    change.append("{0} Removed types".format(len(mod.removed_types)))
+    if all_differences or args.role:
+        if diff.added_roles or diff.removed_roles or diff.modified_roles or args.role:
+            print("Roles ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_roles),
+                                                                        len(diff.removed_roles),
+                                                                        len(diff.modified_roles)))
+            if diff.added_roles:
+                print("   Added Roles: {0}".format(len(diff.added_roles)))
+                for r in sorted(diff.added_roles):
+                    print("      + {0}".format(r))
+            if diff.removed_roles:
+                print("   Removed Roles: {0}".format(len(diff.removed_roles)))
+                for r in sorted(diff.removed_roles):
+                    print("      - {0}".format(r))
+            if diff.modified_roles:
+                print("   Modified Roles: {0}".format(len(diff.modified_roles)))
+                for name, mod in sorted(diff.modified_roles.items()):
+                    change = []
+                    if mod.added_types:
+                        change.append("{0} Added types".format(len(mod.added_types)))
+                    if mod.removed_types:
+                        change.append("{0} Removed types".format(len(mod.removed_types)))
 
-                print("      * {0} ({1})".format(name, ", ".join(change)))
-                for t in sorted(mod.added_types):
-                    print("          + {0}".format(t))
-                for t in sorted(mod.removed_types):
-                    print("          - {0}".format(t))
-        print()
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    for t in sorted(mod.added_types):
+                        print("          + {0}".format(t))
+                    for t in sorted(mod.removed_types):
+                        print("          - {0}".format(t))
+            print()
 
-    if diff.added_types or diff.removed_types or diff.modified_types:
-        print("Types ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_types),
-                                                                    len(diff.removed_types),
-                                                                    len(diff.modified_types)))
-        if diff.added_types:
-            print("   Added Types: {0}".format(len(diff.added_types)))
-            for r in sorted(diff.added_types):
-                print("      + {0}".format(r))
-        if diff.removed_types:
-            print("   Removed Types: {0}".format(len(diff.removed_types)))
-            for r in sorted(diff.removed_types):
-                print("      - {0}".format(r))
-        if diff.modified_types:
-            print("   Modified Types: {0}".format(len(diff.modified_types)))
-            for name, mod in sorted(diff.modified_types.items()):
-                change = []
-                if mod.added_attributes:
-                    change.append("{0} Added attributes".format(len(mod.added_attributes)))
-                if mod.removed_attributes:
-                    change.append("{0} Removed attributes".format(len(mod.removed_attributes)))
-                if mod.added_aliases:
-                    change.append("{0} Added aliases".format(len(mod.added_aliases)))
-                if mod.removed_aliases:
-                    change.append("{0} Removed aliases".format(len(mod.removed_aliases)))
-                if mod.modified_permissive:
-                    if mod.permissive:
-                        change.append("Removed permissive")
-                    else:
-                        change.append("Added permissive")
+    if all_differences or args.type_:
+        if diff.added_types or diff.removed_types or diff.modified_types or args.type_:
+            print("Types ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_types),
+                                                                        len(diff.removed_types),
+                                                                        len(diff.modified_types)))
+            if diff.added_types:
+                print("   Added Types: {0}".format(len(diff.added_types)))
+                for r in sorted(diff.added_types):
+                    print("      + {0}".format(r))
+            if diff.removed_types:
+                print("   Removed Types: {0}".format(len(diff.removed_types)))
+                for r in sorted(diff.removed_types):
+                    print("      - {0}".format(r))
+            if diff.modified_types:
+                print("   Modified Types: {0}".format(len(diff.modified_types)))
+                for name, mod in sorted(diff.modified_types.items()):
+                    change = []
+                    if mod.added_attributes:
+                        change.append("{0} Added attributes".format(len(mod.added_attributes)))
+                    if mod.removed_attributes:
+                        change.append("{0} Removed attributes".format(len(mod.removed_attributes)))
+                    if mod.added_aliases:
+                        change.append("{0} Added aliases".format(len(mod.added_aliases)))
+                    if mod.removed_aliases:
+                        change.append("{0} Removed aliases".format(len(mod.removed_aliases)))
+                    if mod.modified_permissive:
+                        if mod.permissive:
+                            change.append("Removed permissive")
+                        else:
+                            change.append("Added permissive")
 
-                print("      * {0} ({1})".format(name, ", ".join(change)))
-                if mod.added_attributes or mod.removed_attributes:
-                    print("          Attributes:")
-                for t in sorted(mod.added_attributes):
-                    print("          + {0}".format(t))
-                for t in sorted(mod.removed_attributes):
-                    print("          - {0}".format(t))
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    if mod.added_attributes or mod.removed_attributes:
+                        print("          Attributes:")
+                    for t in sorted(mod.added_attributes):
+                        print("          + {0}".format(t))
+                    for t in sorted(mod.removed_attributes):
+                        print("          - {0}".format(t))
 
-                if mod.added_aliases or mod.removed_aliases:
-                    print("          Aliases:")
-                for t in sorted(mod.added_aliases):
-                    print("          + {0}".format(t))
-                for t in sorted(mod.removed_aliases):
-                    print("          - {0}".format(t))
+                    if mod.added_aliases or mod.removed_aliases:
+                        print("          Aliases:")
+                    for t in sorted(mod.added_aliases):
+                        print("          + {0}".format(t))
+                    for t in sorted(mod.removed_aliases):
+                        print("          - {0}".format(t))
 
-        print()
+            print()
 
 except Exception as err:
     if args.debug:
