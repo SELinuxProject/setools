@@ -22,6 +22,7 @@ import setools
 import argparse
 import sys
 import logging
+from itertools import chain
 
 parser = argparse.ArgumentParser(description="SELinux policy difference tool.")
 parser.add_argument("POLICY1", help="Path to the first SELinux policy to diff.", nargs=1)
@@ -56,7 +57,7 @@ terule.add_argument("--dontaudit", action="store_true", help="Print dontaudit ru
 terule.add_argument("-T", "--type_trans", action="store_true",
                     help="Print type_transition rule differences")
 terule.add_argument("--type_change", action="store_true", help="Print type_change rule differences")
-terule.add_argument("--type_memeber", action="store_true",
+terule.add_argument("--type_member", action="store_true",
                     help="Print type_member rule differences")
 
 rbacrule = parser.add_argument_group("RBAC Rule Differences")
@@ -219,6 +220,270 @@ try:
                         print("          + {0}".format(t))
                     for t in sorted(mod.removed_aliases):
                         print("          - {0}".format(t))
+
+            print()
+
+    if all_differences or args.allow:
+        if diff.added_allows or diff.removed_allows or diff.modified_allows or args.allow:
+            print("Allow Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_allows), len(diff.removed_allows), len(diff.modified_allows)))
+
+            if diff.added_allows:
+                print("   Added Allow Rules: {0}".format(len(diff.added_allows)))
+                for r in sorted(diff.added_allows):
+                    print("      + {0}".format(r))
+
+            if diff.removed_allows:
+                print("   Removed Allow Rules: {0}".format(len(diff.removed_allows)))
+                for r in sorted(diff.removed_allows):
+                    print("      - {0}".format(r))
+
+            if diff.modified_allows:
+                print("   Modified Allow Rules: {0}".format(len(diff.modified_allows)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(diff.modified_allows):
+                    perms = " ".join(chain((p for p in matched_perms),
+                                           ("+" + p for p in added_perms),
+                                           ("-" + p for p in removed_perms)))
+                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
+                        rule, perms)
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+                    print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.neverallow:
+        if diff.added_neverallows or diff.removed_neverallows or diff.modified_neverallows or \
+                args.neverallow:
+            print("Neverallow Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_neverallows), len(diff.removed_neverallows),
+                len(diff.modified_neverallows)))
+
+            if diff.added_neverallows:
+                print("   Added Neverallow Rules: {0}".format(len(diff.added_neverallows)))
+                for r in sorted(diff.added_neverallows):
+                    print("      + {0}".format(r))
+
+            if diff.removed_neverallows:
+                print("   Removed Neverallow Rules: {0}".format(len(diff.removed_neverallows)))
+                for r in sorted(diff.removed_neverallows):
+                    print("      - {0}".format(r))
+
+            if diff.modified_neverallows:
+                print("   Modified Neverallow Rules: {0}".format(len(diff.modified_neverallows)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(
+                        diff.modified_neverallows):
+                    perms = " ".join(chain((p for p in matched_perms),
+                                           ("+" + p for p in added_perms),
+                                           ("-" + p for p in removed_perms)))
+                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
+                        rule, perms)
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+                    print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.auditallow:
+        if diff.added_auditallows or diff.removed_auditallows or diff.modified_auditallows or \
+                args.auditallow:
+            print("Auditallow Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_auditallows), len(diff.removed_auditallows),
+                len(diff.modified_auditallows)))
+
+            if diff.added_auditallows:
+                print("   Added Auditallow Rules: {0}".format(len(diff.added_auditallows)))
+                for r in sorted(diff.added_auditallows):
+                    print("      + {0}".format(r))
+
+            if diff.removed_auditallows:
+                print("   Removed Auditallow Rules: {0}".format(len(diff.removed_auditallows)))
+                for r in sorted(diff.removed_auditallows):
+                    print("      - {0}".format(r))
+
+            if diff.modified_auditallows:
+                print("   Modified Auditallow Rules: {0}".format(len(diff.modified_auditallows)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(
+                        diff.modified_auditallows):
+                    perms = " ".join(chain((p for p in matched_perms),
+                                           ("+" + p for p in added_perms),
+                                           ("-" + p for p in removed_perms)))
+                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
+                        rule, perms)
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+                    print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.dontaudit:
+        if diff.added_dontaudits or diff.removed_dontaudits or diff.modified_dontaudits or \
+                args.dontaudit:
+            print("Dontaudit Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_dontaudits), len(diff.removed_dontaudits),
+                len(diff.modified_dontaudits)))
+
+            if diff.added_dontaudits:
+                print("   Added Dontaudit Rules: {0}".format(len(diff.added_dontaudits)))
+                for r in sorted(diff.added_dontaudits):
+                    print("      + {0}".format(r))
+
+            if diff.removed_dontaudits:
+                print("   Removed Dontaudit Rules: {0}".format(len(diff.removed_dontaudits)))
+                for r in sorted(diff.removed_dontaudits):
+                    print("      - {0}".format(r))
+
+            if diff.modified_dontaudits:
+                print("   Modified Dontaudit Rules: {0}".format(len(diff.modified_dontaudits)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(
+                        diff.modified_dontaudits):
+                    perms = " ".join(chain((p for p in matched_perms),
+                                           ("+" + p for p in added_perms),
+                                           ("-" + p for p in removed_perms)))
+                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
+                        rule, perms)
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+                    print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.type_trans:
+        if diff.added_type_transitions or diff.removed_type_transitions or \
+                diff.modified_type_transitions or args.type_trans:
+            print("Type_transition Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_type_transitions), len(diff.removed_type_transitions),
+                len(diff.modified_type_transitions)))
+
+            if diff.added_type_transitions:
+                print("   Added Type_transition Rules: {0}".format(
+                    len(diff.added_type_transitions)))
+                for r in sorted(diff.added_type_transitions):
+                    print("      + {0}".format(r))
+
+            if diff.removed_type_transitions:
+                print("   Removed Type_transition Rules: {0}".format(
+                    len(diff.removed_type_transitions)))
+                for r in sorted(diff.removed_type_transitions):
+                    print("      - {0}".format(r))
+
+            if diff.modified_type_transitions:
+                print("   Modified Type_transition Rules: {0}".format(
+                    len(diff.modified_type_transitions)))
+
+                for rule, added_default, removed_default in sorted(diff.modified_type_transitions):
+                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
+                        rule, added_default, removed_default)
+
+                    try:
+                        rule_string += " {0}".format(self.filename)
+                    except:
+                        pass
+
+                    rule_string += ";"
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+
+                    print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.type_change:
+        if diff.added_type_changes or diff.removed_type_changes or \
+                diff.modified_type_changes or args.type_change:
+            print("Type_change Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_type_changes), len(diff.removed_type_changes),
+                len(diff.modified_type_changes)))
+
+            if diff.added_type_changes:
+                print("   Added Type_change Rules: {0}".format(len(diff.added_type_changes)))
+                for r in sorted(diff.added_type_changes):
+                    print("      + {0}".format(r))
+
+            if diff.removed_type_changes:
+                print("   Removed Type_change Rules: {0}".format(len(diff.removed_type_changes)))
+                for r in sorted(diff.removed_type_changes):
+                    print("      - {0}".format(r))
+
+            if diff.modified_type_changes:
+                print("   Modified Type_change Rules: {0}".format(len(diff.modified_type_changes)))
+
+                for rule, added_default, removed_default in sorted(diff.modified_type_changes):
+                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
+                        rule, added_default, removed_default)
+
+                    try:
+                        rule_string += " {0}".format(self.filename)
+                    except:
+                        pass
+
+                    rule_string += ";"
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+
+                    print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.type_member:
+        if diff.added_type_members or diff.removed_type_members or \
+                diff.modified_type_members or args.type_member:
+            print("Type_member Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_type_members), len(diff.removed_type_members),
+                len(diff.modified_type_members)))
+
+            if diff.added_type_members:
+                print("   Added Type_member Rules: {0}".format(len(diff.added_type_members)))
+                for r in sorted(diff.added_type_members):
+                    print("      + {0}".format(r))
+
+            if diff.removed_type_members:
+                print("   Removed Type_member Rules: {0}".format(len(diff.removed_type_members)))
+                for r in sorted(diff.removed_type_members):
+                    print("      - {0}".format(r))
+
+            if diff.modified_type_members:
+                print("   Modified Type_member Rules: {0}".format(len(diff.modified_type_members)))
+
+                for rule, added_default, removed_default in sorted(diff.modified_type_members):
+                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
+                        rule, added_default, removed_default)
+
+                    try:
+                        rule_string += " {0}".format(self.filename)
+                    except:
+                        pass
+
+                    rule_string += ";"
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+
+                    print("      * {0}".format(rule_string))
 
             print()
 
