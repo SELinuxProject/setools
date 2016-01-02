@@ -38,7 +38,7 @@ class PolicySymbol(object):
         return self.qpol_symbol.name(self.policy)
 
     def __hash__(self):
-        return hash(self.qpol_symbol.name(self.policy))
+        return hash(str(self))
 
     def __eq__(self, other):
         try:

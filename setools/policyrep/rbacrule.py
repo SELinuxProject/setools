@@ -48,6 +48,9 @@ class RoleAllow(rule.PolicyRule):
     def __str__(self):
         return "allow {0.source} {0.target};".format(self)
 
+    def __hash__(self):
+        return hash("allow|{0.source}|{0.target}".format(self))
+
     @property
     def source(self):
         """The rule's source role."""

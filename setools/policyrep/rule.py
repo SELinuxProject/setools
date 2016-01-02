@@ -28,6 +28,17 @@ class PolicyRule(symbol.PolicySymbol):
     def __str__(self):
         raise NotImplementedError
 
+    def __hash__(self):
+        try:
+            cond = self.conditional
+            cond_block = self.conditional_block
+        except exception.RuleNotConditional:
+            cond = None
+            cond_block = None
+
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".format(
+            self, cond, cond_block))
+
     @property
     def ruletype(self):
         """The rule type for the rule."""

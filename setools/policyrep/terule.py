@@ -131,6 +131,22 @@ class TERule(BaseTERule):
 
         return rule_string
 
+    def __hash__(self):
+        try:
+            cond = self.conditional
+            cond_block = self.conditional_block
+        except exception.RuleNotConditional:
+            cond = None
+            cond_block = None
+
+        try:
+            filename = self.filename
+        except (exception.TERuleNoFilename, exception.RuleUseError):
+            filename = None
+
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
+            self, filename, cond, cond_block))
+
     @property
     def perms(self):
         """The rule's permission set."""
