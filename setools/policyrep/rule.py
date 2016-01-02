@@ -79,5 +79,11 @@ class PolicyRule(symbol.PolicySymbol):
         # Most rules cannot be conditional.
         raise exception.RuleNotConditional
 
+    @property
+    def conditional_block(self):
+        """The conditional block of the rule (T/F)"""
+        # Most rules cannot be conditional.
+        raise exception.RuleNotConditional
+
     def statement(self):
         return str(self)

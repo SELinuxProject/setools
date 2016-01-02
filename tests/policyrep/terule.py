@@ -137,7 +137,7 @@ class AVRuleTest(unittest.TestCase):
     def test_102_statement_one_perm_cond(self):
         """AVRule statement, one permission, conditional."""
         rule = self.mock_avrule_factory("allow", "a", "b", "c", ['d'], cond="cond102")
-        self.assertEqual("allow a b:c d; [ cond102 ]", rule.statement())
+        self.assertEqual("allow a b:c d; [ cond102 ]:True", rule.statement())
 
     def test_103_statement_two_perms_cond(self):
         """AVRule statement, two permissions, conditional."""
@@ -270,7 +270,7 @@ class TERuleTest(unittest.TestCase):
     def test_102_statement_cond(self):
         """TERule statement, conditional."""
         rule = self.mock_terule_factory("type_transition", "a", "b", "c", "d", cond="cond102")
-        self.assertEqual("type_transition a b:c d; [ cond102 ]", rule.statement())
+        self.assertEqual("type_transition a b:c d; [ cond102 ]:True", rule.statement())
 
     def test_103_statement_filename(self):
         """TERule statement, two permissions, conditional."""

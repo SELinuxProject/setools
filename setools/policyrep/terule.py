@@ -71,6 +71,17 @@ class BaseTERule(rule.PolicyRule):
             # ValueError:     The rule is not conditional
             raise exception.RuleNotConditional
 
+    @property
+    def conditional_block(self):
+        """The conditional block of the rule (T/F)"""
+        try:
+            return bool(self.qpol_symbol.which_list(self.policy))
+        except (AttributeError, ValueError):
+            # AttributeError: name filetrans rules cannot be conditional
+            #                 so no member function
+            # ValueError:     The rule is not conditional
+            raise exception.RuleNotConditional
+
 
 class AVRule(BaseTERule):
 
@@ -90,7 +101,7 @@ class AVRule(BaseTERule):
             rule_string += "{0};".format(list(perms)[0])
 
         try:
-            rule_string += " [ {0} ]".format(self.conditional)
+            rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
         except exception.RuleNotConditional:
             pass
 
@@ -125,7 +136,7 @@ class TERule(BaseTERule):
             rule_string += ";"
 
         try:
-            rule_string += " [ {0} ]".format(self.conditional)
+            rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
         except exception.RuleNotConditional:
             pass
 
