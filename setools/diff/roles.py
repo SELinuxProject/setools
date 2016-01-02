@@ -19,7 +19,7 @@
 from collections import namedtuple
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference
+from .difference import Difference, SymbolWrapper
 
 
 modified_roles_record = namedtuple("modified_role", ["added_types",
@@ -42,24 +42,23 @@ class RolesDifference(Difference):
             "Generating role differences from {0.left_policy} to {0.right_policy}".format(self))
 
         self.added_roles, self.removed_roles, matched_roles = self._set_diff(
-            self.left_policy.roles(), self.right_policy.roles())
+            (SymbolWrapper(r) for r in self.left_policy.roles()),
+            (SymbolWrapper(r) for r in self.right_policy.roles()))
 
         self.modified_roles = dict()
 
-        for name in matched_roles:
+        for left_role, right_role in matched_roles:
             # Criteria for modified roles
             # 1. change to type set, or
             # 2. change to attribute set (not implemented)
-            left_role = self.left_policy.lookup_role(name)
-            right_role = self.right_policy.lookup_role(name)
-
-            added_types, removed_types, matched_types = self._set_diff(left_role.types(),
-                                                                       right_role.types())
+            added_types, removed_types, matched_types = self._set_diff(
+                (SymbolWrapper(t) for t in left_role.types()),
+                (SymbolWrapper(t) for t in right_role.types()))
 
             if added_types or removed_types:
-                self.modified_roles[name] = modified_roles_record(added_types,
-                                                                  removed_types,
-                                                                  matched_types)
+                self.modified_roles[left_role] = modified_roles_record(added_types,
+                                                                       removed_types,
+                                                                       matched_types)
 
     #
     # Internal functions

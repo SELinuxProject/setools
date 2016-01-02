@@ -19,7 +19,7 @@
 from collections import namedtuple
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference
+from .difference import Difference, SymbolWrapper
 
 
 modified_types_record = namedtuple("modified_type", ["added_attributes",
@@ -47,20 +47,19 @@ class TypesDifference(Difference):
             "Generating type differences from {0.left_policy} to {0.right_policy}".format(self))
 
         self.added_types, self.removed_types, matched_types = self._set_diff(
-            self.left_policy.types(), self.right_policy.types())
+            (SymbolWrapper(t) for t in self.left_policy.types()),
+            (SymbolWrapper(t) for t in self.right_policy.types()))
 
         self.modified_types = dict()
 
-        for name in matched_types:
+        for left_type, right_type in matched_types:
             # Criteria for modified types
             # 1. change to attribute set, or
             # 2. change to alias set, or
             # 3. different permissive setting
-            left_type = self.left_policy.lookup_type(name)
-            right_type = self.right_policy.lookup_type(name)
-
-            added_attr, removed_attr, matched_attr = self._set_diff(left_type.attributes(),
-                                                                    right_type.attributes())
+            added_attr, removed_attr, matched_attr = self._set_diff(
+                (SymbolWrapper(a) for a in left_type.attributes()),
+                (SymbolWrapper(a) for a in right_type.attributes()))
 
             added_aliases, removed_aliases, matched_aliases = self._set_diff(left_type.aliases(),
                                                                              right_type.aliases())
@@ -70,14 +69,14 @@ class TypesDifference(Difference):
             mod_permissive = left_permissive != right_permissive
 
             if added_attr or removed_attr or added_aliases or removed_aliases or mod_permissive:
-                self.modified_types[name] = modified_types_record(added_attr,
-                                                                  removed_attr,
-                                                                  matched_attr,
-                                                                  mod_permissive,
-                                                                  left_permissive,
-                                                                  added_aliases,
-                                                                  removed_aliases,
-                                                                  matched_aliases)
+                self.modified_types[left_type] = modified_types_record(added_attr,
+                                                                       removed_attr,
+                                                                       matched_attr,
+                                                                       mod_permissive,
+                                                                       left_permissive,
+                                                                       added_aliases,
+                                                                       removed_aliases,
+                                                                       matched_aliases)
 
     #
     # Internal functions

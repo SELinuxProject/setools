@@ -21,7 +21,7 @@ from collections import namedtuple
 from ..policyrep.exception import NoCommon
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference
+from .difference import Difference, SymbolWrapper
 
 
 modified_classes_record = namedtuple("modified_class", ["added_perms",
@@ -47,15 +47,14 @@ class ObjClassDifference(Difference):
             "Generating class differences from {0.left_policy} to {0.right_policy}".format(self))
 
         self.added_classes, self.removed_classes, matched_classes = self._set_diff(
-            self.left_policy.classes(), self.right_policy.classes())
+            (SymbolWrapper(c) for c in self.left_policy.classes()),
+            (SymbolWrapper(c) for c in self.right_policy.classes()))
 
         self.modified_classes = dict()
 
-        for name in matched_classes:
+        for left_class, right_class in matched_classes:
             # Criteria for modified classes
             # 1. change to permissions (inherited common is expanded)
-            left_class = self.left_policy.lookup_class(name)
-            right_class = self.right_policy.lookup_class(name)
 
             left_perms = left_class.perms
             try:
@@ -72,9 +71,9 @@ class ObjClassDifference(Difference):
             added_perms, removed_perms, matched_perms = self._set_diff(left_perms, right_perms)
 
             if added_perms or removed_perms:
-                self.modified_classes[name] = modified_classes_record(added_perms,
-                                                                      removed_perms,
-                                                                      matched_perms)
+                self.modified_classes[left_class] = modified_classes_record(added_perms,
+                                                                            removed_perms,
+                                                                            matched_perms)
 
     #
     # Internal functions

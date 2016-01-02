@@ -30,15 +30,11 @@ class PolicyDifference(CommonDifference,
                        TypesDifference):
 
     """
-    Determine the differences between two policies.
+    Determine the differences from the left policy to the right policy.
 
-    All results are represented as str rather than the
-    original Python objects.  This was done because the
-    source of the object becomes less clear (Python
-    set logic doesn't have any guarantees for set
-    intersection). Using str will prevent problems
-    if you expect to be using a symbol but it is
-    coming from the wrong policy.
+    Parameters:
+    left    A policy
+    right   A policy
     """
 
     def _reset_diff(self):

@@ -19,7 +19,7 @@
 from collections import namedtuple
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference
+from .difference import Difference, SymbolWrapper
 
 
 modified_commons_record = namedtuple("modified_common", ["added_perms",
@@ -45,23 +45,21 @@ class CommonDifference(Difference):
             "Generating common differences from {0.left_policy} to {0.right_policy}".format(self))
 
         self.added_commons, self.removed_commons, matched_commons = self._set_diff(
-            self.left_policy.commons(), self.right_policy.commons())
+            (SymbolWrapper(c) for c in self.left_policy.commons()),
+            (SymbolWrapper(c) for c in self.right_policy.commons()))
 
         self.modified_commons = dict()
 
-        for name in matched_commons:
+        for left_common, right_common in matched_commons:
             # Criteria for modified commons
             # 1. change to permissions
-            left_common = self.left_policy.lookup_common(name)
-            right_common = self.right_policy.lookup_common(name)
-
             added_perms, removed_perms, matched_perms = self._set_diff(left_common.perms,
                                                                        right_common.perms)
 
             if added_perms or removed_perms:
-                self.modified_commons[name] = modified_commons_record(added_perms,
-                                                                      removed_perms,
-                                                                      matched_perms)
+                self.modified_commons[left_common] = modified_commons_record(added_perms,
+                                                                             removed_perms,
+                                                                             matched_perms)
 
     #
     # Internal functions

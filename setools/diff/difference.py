@@ -17,6 +17,9 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from collections import namedtuple
+
+modified_item_record = namedtuple("modified_item", ["left", "right"])
 
 
 class Difference(object):
@@ -72,13 +75,70 @@ class Difference(object):
 
         added       Set of items in right but not left
         removed     Set of items in left but not right
-        matched     Set of items in both left and right
+        matched     Set of items in both left and right.  This is
+                    in the form of tuples with the matching item
+                    from left and right
         """
 
-        left_items = set(str(l) for l in left)
-        right_items = set(str(r) for r in right)
+        left_items = set(left)
+        right_items = set(right)
         added_items = right_items - left_items
         removed_items = left_items - right_items
-        matched_items = left_items & right_items
 
-        return added_items, removed_items, matched_items
+        # The problem here is the symbol from both policies are
+        # needed to build each tuple in the matched items set.
+        # Using the standard Python set intersection code will only result
+        # in one object.
+        #
+        # This tuple-generating code creates lists from the sets, to sort them.
+        # This should result in all of the symbols lining up.  If they don't,
+        # this will break the caller.  This should work since there is no remapping.
+        #
+        # This has extra checking to make sure this assertion holds, to fail
+        # instead of giving wrong results.  If there is a better way to,
+        # ensure the items match up, please let me know how or submit a patch.
+        matched_items = set()
+        left_matched_items = sorted(left_items - removed_items)
+        right_matched_items = sorted(right_items - added_items)
+        assert len(left_matched_items) == len(right_matched_items), \
+            "Matched items assertion failure (this is an SETools bug), {0} != {1}". \
+            format(len(left_matched_items), len(right_matched_items))
+
+        for l, r in zip(left_matched_items, right_matched_items):
+            assert l == r, \
+                "Matched items assertion failure (this is an SETools bug), {0} != {1}".format(l, r)
+
+            matched_items.add((l, r))
+
+        try:
+            # unwrap the objects
+            return set(i.origin for i in added_items), \
+                   set(i.origin for i in removed_items), \
+                   set((l.origin, r.origin) for (l, r) in matched_items)
+        except AttributeError:
+            return added_items, removed_items, matched_items
+
+
+class SymbolWrapper(object):
+
+    """
+    General wrapper for policy symbols, e.g. types, roles
+    to provide a diff-specific equality operation based
+    on its name.
+    """
+
+    def __init__(self, symbol):
+        self.origin = symbol
+        self.name = str(symbol)
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __lt__(self, other):
+        return self.name < other.name
+
+    def __eq__(self, other):
+        return self.name == other.name
+
+    def __ne__(self, other):
+        return not self == other
