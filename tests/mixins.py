@@ -26,7 +26,8 @@ class ValidateRule(unittest.TestCase):
 
     """Mixin for validating policy rules."""
 
-    def validate_rule(self, rule, ruletype, source, target, tclass, last_item, cond=None):
+    def validate_rule(self, rule, ruletype, source, target, tclass, last_item, cond=None,
+                      cond_block=None):
         """Validate a rule."""
         self.assertEqual(ruletype, rule.ruletype)
         self.assertEqual(source, rule.source)
@@ -43,3 +44,6 @@ class ValidateRule(unittest.TestCase):
             self.assertEqual(cond, rule.conditional)
         else:
             self.assertRaises(RuleNotConditional, getattr, rule, "conditional")
+
+        if cond_block is not None:
+            self.assertEqual(cond_block, rule.conditional_block)

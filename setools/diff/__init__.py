@@ -19,6 +19,7 @@
 from .commons import CommonDifference
 from .objclass import ObjClassDifference
 from .roles import RolesDifference
+from .terules import TERulesDifference
 from .types import TypesDifference
 
 __all__ = ['PolicyDifference']
@@ -27,6 +28,7 @@ __all__ = ['PolicyDifference']
 class PolicyDifference(CommonDifference,
                        ObjClassDifference,
                        RolesDifference,
+                       TERulesDifference,
                        TypesDifference):
 
     """
