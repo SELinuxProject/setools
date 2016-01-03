@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -22,7 +22,7 @@ from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFile
 
 from .conditional import ConditionalExprWrapper
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, SymbolWrapper, Wrapper
 
 
 modified_avrule_record = namedtuple("modified_avrule", ["rule",
@@ -350,7 +350,7 @@ class TERulesDifference(Difference):
         self._right_type_members = None
 
 
-class AVRuleWrapper(object):
+class AVRuleWrapper(Wrapper):
 
     """Wrap access vector rules to allow set operations."""
 
@@ -383,9 +383,6 @@ class AVRuleWrapper(object):
                self.tclass == other.tclass and \
                self.conditional == other.conditional and \
                self.conditional_block == other.conditional_block
-
-    def __ne__(self, other):
-        return not self == other
 
 
 class TERuleWrapper(object):
@@ -427,6 +424,3 @@ class TERuleWrapper(object):
                self.conditional == other.conditional and \
                self.conditional_block == other.conditional_block and \
                self.filename == self.filename
-
-    def __ne__(self, other):
-        return not self == other

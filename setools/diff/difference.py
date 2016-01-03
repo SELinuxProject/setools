@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -119,7 +119,29 @@ class Difference(object):
             return added_items, removed_items, matched_items
 
 
-class SymbolWrapper(object):
+class Wrapper(object):
+
+    """Base class for policy object wrappers."""
+
+    origin = None
+
+    def __repr__(self):
+        return "<{0.__class__.__name__}(Wrapping {1})>".format(self, repr(self.origin))
+
+    def __hash__(self):
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        raise NotImplementedError
+
+    def __lt__(self, other):
+        raise NotImplementedError
+
+    def __ne__(self, other):
+        return not self == other
+
+
+class SymbolWrapper(Wrapper):
 
     """
     General wrapper for policy symbols, e.g. types, roles
@@ -139,6 +161,3 @@ class SymbolWrapper(object):
 
     def __eq__(self, other):
         return self.name == other.name
-
-    def __ne__(self, other):
-        return not self == other

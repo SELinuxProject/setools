@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -16,9 +16,10 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from .difference import Wrapper
 
 
-class ConditionalExprWrapper(object):
+class ConditionalExprWrapper(Wrapper):
 
     """Wrap conditional policy expressions to allow comparisons by truth table."""
 
@@ -28,6 +29,3 @@ class ConditionalExprWrapper(object):
 
     def __eq__(self, other):
         return self.truth_table == other.truth_table
-
-    def __ne__(self, other):
-        return not self == other
