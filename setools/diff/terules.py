@@ -373,7 +373,7 @@ class AVRuleWrapper(Wrapper):
         return self.key
 
     def __lt__(self, other):
-        return self.origin < other.origin
+        return self.key < other.key
 
     def __eq__(self, other):
         # because TERuleDifference groups rules by ruletype,
@@ -413,7 +413,7 @@ class TERuleWrapper(object):
         return self.key
 
     def __lt__(self, other):
-        return self.origin < other.origin
+        return self.key < other.key
 
     def __eq__(self, other):
         # because TERuleDifference groups rules by ruletype,
