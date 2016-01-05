@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -119,24 +119,26 @@ class AVRule(BaseTERule):
     """An access vector type enforcement rule."""
 
     def __str__(self):
-        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(
-            self)
-
-        perms = self.perms
-
-        # allow/dontaudit/auditallow/neverallow rules
-        if len(perms) > 1:
-            rule_string += "{{ {0} }};".format(' '.join(perms))
-        else:
-            # convert to list since sets cannot be indexed
-            rule_string += "{0};".format(list(perms)[0])
-
         try:
-            rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-        except exception.RuleNotConditional:
-            pass
+            return self._rule_string
+        except AttributeError:
+            self._rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
 
-        return rule_string
+            perms = self.perms
+
+            # allow/dontaudit/auditallow/neverallow rules
+            if len(perms) > 1:
+                self._rule_string += "{{ {0} }};".format(' '.join(perms))
+            else:
+                # convert to list since sets cannot be indexed
+                self._rule_string += "{0};".format(list(perms)[0])
+
+            try:
+                self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+            except exception.RuleNotConditional:
+                pass
+
+        return self._rule_string
 
     @property
     def perms(self):
@@ -158,20 +160,24 @@ class TERule(BaseTERule):
     """A type_* type enforcement rule."""
 
     def __str__(self):
-        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default}".format(self)
-
         try:
-            rule_string += " \"{0}\";".format(self.filename)
-        except (exception.TERuleNoFilename, exception.RuleUseError):
-            # invalid use for type_change/member
-            rule_string += ";"
+            return self._rule_string
+        except AttributeError:
+            self._rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default}".format(
+                self)
 
-        try:
-            rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-        except exception.RuleNotConditional:
-            pass
+            try:
+                self._rule_string += " \"{0}\";".format(self.filename)
+            except (exception.TERuleNoFilename, exception.RuleUseError):
+                # invalid use for type_change/member
+                self._rule_string += ";"
 
-        return rule_string
+            try:
+                self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+            except exception.RuleNotConditional:
+                pass
+
+            return self._rule_string
 
     def __hash__(self):
         try:
