@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -184,7 +184,7 @@ class InvalidTERuleType(InvalidRuleType):
 #
 # Object use errors
 #
-class SymbolUseError(PolicyrepException):
+class SymbolUseError(AttributeError, PolicyrepException):
 
     """
     Base class for incorrectly using an object.  Typically this is
@@ -222,7 +222,7 @@ class NoStatement(SymbolUseError):
 #
 # Other exceptions
 #
-class NoCommon(PolicyrepException):
+class NoCommon(AttributeError, PolicyrepException):
 
     """
     Exception when a class does not inherit a common permission set.
@@ -236,7 +236,7 @@ class NoDefaults(InvalidSymbol):
     pass
 
 
-class RuleNotConditional(PolicyrepException):
+class RuleNotConditional(AttributeError, PolicyrepException):
 
     """
     Exception when getting the conditional expression for rules
@@ -245,7 +245,7 @@ class RuleNotConditional(PolicyrepException):
     pass
 
 
-class TERuleNoFilename(PolicyrepException):
+class TERuleNoFilename(AttributeError, PolicyrepException):
 
     """
     Exception when getting the file name of a
