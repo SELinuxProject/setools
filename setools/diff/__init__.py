@@ -19,6 +19,7 @@
 from .commons import CommonDifference
 from .mlsrules import MLSRulesDifference
 from .objclass import ObjClassDifference
+from .rbacrules import RBACRulesDifference
 from .roles import RolesDifference
 from .terules import TERulesDifference
 from .types import TypesDifference
@@ -29,6 +30,7 @@ __all__ = ['PolicyDifference']
 class PolicyDifference(CommonDifference,
                        MLSRulesDifference,
                        ObjClassDifference,
+                       RBACRulesDifference,
                        RolesDifference,
                        TERulesDifference,
                        TypesDifference):

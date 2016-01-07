@@ -487,6 +487,57 @@ try:
 
             print()
 
+    if all_differences or args.role_allow:
+        if diff.added_role_allows or diff.removed_role_allows or args.role_allow:
+            print("Role allow Rules ({0} Added, {1} Removed)".format(
+                len(diff.added_role_allows), len(diff.removed_role_allows)))
+
+            if diff.added_role_allows:
+                print("   Added Role allow Rules: {0}".format(
+                    len(diff.added_role_allows)))
+                for r in sorted(diff.added_role_allows):
+                    print("      + {0}".format(r))
+
+            if diff.removed_role_allows:
+                print("   Removed Role allow Rules: {0}".format(
+                    len(diff.removed_role_allows)))
+                for r in sorted(diff.removed_role_allows):
+                    print("      - {0}".format(r))
+
+            print()
+
+    if all_differences or args.role_trans:
+        if diff.added_role_transitions or diff.removed_role_transitions or \
+                diff.modified_role_transitions or args.role_trans:
+            print("Role_transition Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_role_transitions), len(diff.removed_role_transitions),
+                len(diff.modified_role_transitions)))
+
+            if diff.added_role_transitions:
+                print("   Added Role_transition Rules: {0}".format(
+                    len(diff.added_role_transitions)))
+                for r in sorted(diff.added_role_transitions):
+                    print("      + {0}".format(r))
+
+            if diff.removed_role_transitions:
+                print("   Removed Role_transition Rules: {0}".format(
+                    len(diff.removed_role_transitions)))
+                for r in sorted(diff.removed_role_transitions):
+                    print("      - {0}".format(r))
+
+            if diff.modified_role_transitions:
+                print("   Modified Role_transition Rules: {0}".format(
+                    len(diff.modified_role_transitions)))
+
+                for rule, added_default, removed_default in sorted(diff.modified_role_transitions):
+                    rule_string = \
+                        "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
+                            rule, added_default, removed_default)
+
+                    print("      * {0}".format(rule_string))
+
+            print()
+
     if all_differences or args.range_trans:
         if diff.added_range_transitions or diff.removed_range_transitions or \
                 diff.modified_range_transitions or args.range_trans:

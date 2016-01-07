@@ -778,6 +778,81 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("s0:c0,c4 - s1:c0.c2,c4", added_default)
         self.assertEqual("s2:c0 - s3:c0.c2", removed_default)
 
+    #
+    # Role allow rules
+    #
+    def test_added_role_allow_rules(self):
+        """Diff: added role_allow rules."""
+        rules = sorted(self.diff.added_role_allows)
+        self.assertEqual(2, len(rules))
+
+        # added rule with existing roles
+        self.assertEqual("allow", rules[0].ruletype)
+        self.assertEqual("added_role", rules[0].source)
+        self.assertEqual("system", rules[0].target)
+
+        # added rule with new roles
+        self.assertEqual("allow", rules[1].ruletype)
+        self.assertEqual("added_rule_source_r", rules[1].source)
+        self.assertEqual("added_rule_target_r", rules[1].target)
+
+    def test_removed_role_allow_rules(self):
+        """Diff: removed role_allow rules."""
+        rules = sorted(self.diff.removed_role_allows)
+        self.assertEqual(2, len(rules))
+
+        # removed rule with removed role
+        self.assertEqual("allow", rules[0].ruletype)
+        self.assertEqual("removed_role", rules[0].source)
+        self.assertEqual("system", rules[0].target)
+
+        # removed rule with existing roles
+        self.assertEqual("allow", rules[1].ruletype)
+        self.assertEqual("removed_rule_source_r", rules[1].source)
+        self.assertEqual("removed_rule_target_r", rules[1].target)
+
+    #
+    # Role_transition rules
+    #
+    def test_added_role_transition_rules(self):
+        """Diff: added role_transition rules."""
+        rules = sorted(self.diff.added_role_transitions)
+        self.assertEqual(2, len(rules))
+
+        # added rule with new role
+        self.validate_rule(rules[0], "role_transition", "added_role", "system", "infoflow4",
+                           "system")
+
+        # added rule with existing roles
+        self.validate_rule(rules[1], "role_transition", "role_tr_added_rule_source",
+                           "role_tr_added_rule_target", "infoflow6", "system")
+
+    def test_removed_role_transition_rules(self):
+        """Diff: removed role_transition rules."""
+        rules = sorted(self.diff.removed_role_transitions)
+        self.assertEqual(2, len(rules))
+
+        # removed rule with new role
+        self.validate_rule(rules[0], "role_transition", "removed_role", "system", "infoflow4",
+                           "system")
+
+        # removed rule with existing roles
+        self.validate_rule(rules[1], "role_transition", "role_tr_removed_rule_source",
+                           "role_tr_removed_rule_target", "infoflow5", "system")
+
+    def test_modified_role_transition_rules(self):
+        """Diff: modified role_transition rules."""
+        l = sorted(self.diff.modified_role_transitions)
+        self.assertEqual(1, len(l))
+
+        rule, added_default, removed_default = l[0]
+        self.assertEqual("role_transition", rule.ruletype)
+        self.assertEqual("role_tr_matched_source", rule.source)
+        self.assertEqual("role_tr_matched_target", rule.target)
+        self.assertEqual("infoflow3", rule.tclass)
+        self.assertEqual("role_tr_new_role", added_default)
+        self.assertEqual("role_tr_old_role", removed_default)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -930,3 +1005,27 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_range_transitions(self):
         """NoDiff: no modified range_transition rules."""
         self.assertFalse(self.diff.modified_range_transitions)
+
+    def test_added_role_allows(self):
+        """NoDiff: no added role_allow rules."""
+        self.assertFalse(self.diff.added_role_allows)
+
+    def test_removed_role_allows(self):
+        """NoDiff: no removed role_allow rules."""
+        self.assertFalse(self.diff.removed_role_allows)
+
+    def test_modified_role_allows(self):
+        """NoDiff: no modified role_allow rules."""
+        self.assertFalse(self.diff.modified_role_allows)
+
+    def test_added_role_transitions(self):
+        """NoDiff: no added role_transition rules."""
+        self.assertFalse(self.diff.added_role_transitions)
+
+    def test_removed_role_transitions(self):
+        """NoDiff: no removed role_transition rules."""
+        self.assertFalse(self.diff.removed_role_transitions)
+
+    def test_modified_role_transitions(self):
+        """NoDiff: no modified role_transition rules."""
+        self.assertFalse(self.diff.modified_role_transitions)
