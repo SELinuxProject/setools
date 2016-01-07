@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -736,6 +736,48 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("tm_new_type", added_default)
         self.assertEqual("tm_old_type", removed_default)
 
+    #
+    # Range_transition rules
+    #
+    def test_added_range_transition_rules(self):
+        """Diff: added range_transition rules."""
+        rules = sorted(self.diff.added_range_transitions)
+        self.assertEqual(2, len(rules))
+
+        # added rule with new type
+        self.validate_rule(rules[0], "range_transition", "added_type", "system", "infoflow4",
+                           "s3")
+
+        # added rule with existing types
+        self.validate_rule(rules[1], "range_transition", "rt_added_rule_source",
+                           "rt_added_rule_target", "infoflow", "s3")
+
+    def test_removed_range_transition_rules(self):
+        """Diff: removed range_transition rules."""
+        rules = sorted(self.diff.removed_range_transitions)
+        self.assertEqual(2, len(rules))
+
+        # removed rule with new type
+        self.validate_rule(rules[0], "range_transition", "removed_type", "system", "infoflow4",
+                           "s1")
+
+        # removed rule with existing types
+        self.validate_rule(rules[1], "range_transition", "rt_removed_rule_source",
+                           "rt_removed_rule_target", "infoflow", "s1")
+
+    def test_modified_range_transition_rules(self):
+        """Diff: modified range_transition rules."""
+        l = sorted(self.diff.modified_range_transitions)
+        self.assertEqual(1, len(l))
+
+        rule, added_default, removed_default = l[0]
+        self.assertEqual("range_transition", rule.ruletype)
+        self.assertEqual("rt_matched_source", rule.source)
+        self.assertEqual("system", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertEqual("s0:c0,c4 - s1:c0.c2,c4", added_default)
+        self.assertEqual("s2:c0 - s3:c0.c2", removed_default)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -876,3 +918,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_type_members(self):
         """NoDiff: no modified type_member rules."""
         self.assertFalse(self.diff.modified_type_members)
+
+    def test_added_range_transitions(self):
+        """NoDiff: no added range_transition rules."""
+        self.assertFalse(self.diff.added_range_transitions)
+
+    def test_removed_range_transitions(self):
+        """NoDiff: no removed range_transition rules."""
+        self.assertFalse(self.diff.removed_range_transitions)
+
+    def test_modified_range_transitions(self):
+        """NoDiff: no modified range_transition rules."""
+        self.assertFalse(self.diff.modified_range_transitions)

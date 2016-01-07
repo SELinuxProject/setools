@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 from .commons import CommonDifference
+from .mlsrules import MLSRulesDifference
 from .objclass import ObjClassDifference
 from .roles import RolesDifference
 from .terules import TERulesDifference
@@ -26,6 +27,7 @@ __all__ = ['PolicyDifference']
 
 
 class PolicyDifference(CommonDifference,
+                       MLSRulesDifference,
                        ObjClassDifference,
                        RolesDifference,
                        TERulesDifference,

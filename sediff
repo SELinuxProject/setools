@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -470,6 +470,52 @@ try:
                 for rule, added_default, removed_default in sorted(diff.modified_type_members):
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                         rule, added_default, removed_default)
+
+                    try:
+                        rule_string += " {0}".format(self.filename)
+                    except:
+                        pass
+
+                    rule_string += ";"
+
+                    try:
+                        rule_string += " [ {0} ]".format(rule.conditional)
+                    except:
+                        pass
+
+                    print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.range_trans:
+        if diff.added_range_transitions or diff.removed_range_transitions or \
+                diff.modified_range_transitions or args.range_trans:
+            print("Range_transition Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_range_transitions), len(diff.removed_range_transitions),
+                len(diff.modified_range_transitions)))
+
+            if diff.added_range_transitions:
+                print("   Added Range_transition Rules: {0}".format(
+                    len(diff.added_range_transitions)))
+                for r in sorted(diff.added_range_transitions):
+                    print("      + {0}".format(r))
+
+            if diff.removed_range_transitions:
+                print("   Removed Range_transition Rules: {0}".format(
+                    len(diff.removed_range_transitions)))
+                for r in sorted(diff.removed_range_transitions):
+                    print("      - {0}".format(r))
+
+            if diff.modified_range_transitions:
+                print("   Modified Range_transition Rules: {0}".format(
+                    len(diff.modified_range_transitions)))
+
+                for rule, added_default, removed_default in sorted(diff.modified_range_transitions):
+                    # added brackets around range change for clarity since ranges
+                    # can have '-' and spaces.
+                    rule_string = \
+                        "{0.ruletype} {0.source} {0.target}:{0.tclass} +[{1}] -[{2}]".format(
+                            rule, added_default, removed_default)
 
                     try:
                         rule_string += " {0}".format(self.filename)
