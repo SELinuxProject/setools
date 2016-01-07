@@ -24,7 +24,9 @@ import sys
 import logging
 from itertools import chain
 
-parser = argparse.ArgumentParser(description="SELinux policy difference tool.")
+parser = argparse.ArgumentParser(
+    description="SELinux policy difference tool.",
+    epilog="If no differences are selected, all differences will be printed.")
 parser.add_argument("POLICY1", help="Path to the first SELinux policy to diff.", nargs=1)
 parser.add_argument("POLICY2", help="Path to the second SELinux policy to diff.", nargs=1)
 parser.add_argument("--version", action="version", version=setools.__version__)
@@ -42,8 +44,8 @@ comp.add_argument("-t", "--type", action="store_true", help="Print type differen
                   dest="type_")
 comp.add_argument("-a", "--attribute", action="store_true", help="Print type attribute differences")
 comp.add_argument("-r", "--role", action="store_true", help="Print role differences")
-comp.add_argument("-u", "--user", action="store_true", help="Print type differences")
-comp.add_argument("-b", "--bool", action="store_true", help="Print type differences",
+comp.add_argument("-u", "--user", action="store_true", help="Print user differences")
+comp.add_argument("-b", "--bool", action="store_true", help="Print Boolean differences",
                   dest="bool_")
 comp.add_argument("--sensitivity", action="store_true", help="Print MLS sensitivity differences")
 comp.add_argument("--category", action="store_true", help="Print MLS category differences")
@@ -94,15 +96,15 @@ try:
         if diff.added_commons or diff.removed_commons or diff.modified_commons or args.common:
             print("Commons ({0} Added, {1} Removed, {2} Modified)".format(
                 len(diff.added_commons), len(diff.removed_commons), len(diff.modified_commons)))
-            if diff.added_commons:
+            if diff.added_commons and not args.stats:
                 print("   Added Commons: {0}".format(len(diff.added_commons)))
                 for c in sorted(diff.added_commons):
                     print("      + {0}".format(c))
-            if diff.removed_commons:
+            if diff.removed_commons and not args.stats:
                 print("   Removed Commons: {0}".format(len(diff.removed_commons)))
                 for c in sorted(diff.removed_commons):
                     print("      - {0}".format(c))
-            if diff.modified_commons:
+            if diff.modified_commons and not args.stats:
                 print("   Modified Commons: {0}".format(len(diff.modified_commons)))
                 for name, mod in sorted(diff.modified_commons.items()):
                     change = []
@@ -122,15 +124,15 @@ try:
         if diff.added_classes or diff.removed_classes or diff.modified_classes or args.class_:
             print("Classes ({0} Added, {1} Removed, {2} Modified)".format(
                 len(diff.added_classes), len(diff.removed_classes), len(diff.modified_classes)))
-            if diff.added_classes:
+            if diff.added_classes and not args.stats:
                 print("   Added Classes: {0}".format(len(diff.added_classes)))
                 for c in sorted(diff.added_classes):
                     print("      + {0}".format(c))
-            if diff.removed_classes:
+            if diff.removed_classes and not args.stats:
                 print("   Removed Classes: {0}".format(len(diff.removed_classes)))
                 for c in sorted(diff.removed_classes):
                     print("      - {0}".format(c))
-            if diff.modified_classes:
+            if diff.modified_classes and not args.stats:
                 print("   Modified Classes: {0}".format(len(diff.modified_classes)))
                 for name, mod in sorted(diff.modified_classes.items()):
                     change = []
@@ -151,15 +153,15 @@ try:
             print("Roles ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_roles),
                                                                         len(diff.removed_roles),
                                                                         len(diff.modified_roles)))
-            if diff.added_roles:
+            if diff.added_roles and not args.stats:
                 print("   Added Roles: {0}".format(len(diff.added_roles)))
                 for r in sorted(diff.added_roles):
                     print("      + {0}".format(r))
-            if diff.removed_roles:
+            if diff.removed_roles and not args.stats:
                 print("   Removed Roles: {0}".format(len(diff.removed_roles)))
                 for r in sorted(diff.removed_roles):
                     print("      - {0}".format(r))
-            if diff.modified_roles:
+            if diff.modified_roles and not args.stats:
                 print("   Modified Roles: {0}".format(len(diff.modified_roles)))
                 for name, mod in sorted(diff.modified_roles.items()):
                     change = []
@@ -180,15 +182,15 @@ try:
             print("Types ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_types),
                                                                         len(diff.removed_types),
                                                                         len(diff.modified_types)))
-            if diff.added_types:
+            if diff.added_types and not args.stats:
                 print("   Added Types: {0}".format(len(diff.added_types)))
                 for r in sorted(diff.added_types):
                     print("      + {0}".format(r))
-            if diff.removed_types:
+            if diff.removed_types and not args.stats:
                 print("   Removed Types: {0}".format(len(diff.removed_types)))
                 for r in sorted(diff.removed_types):
                     print("      - {0}".format(r))
-            if diff.modified_types:
+            if diff.modified_types and not args.stats:
                 print("   Modified Types: {0}".format(len(diff.modified_types)))
                 for name, mod in sorted(diff.modified_types.items()):
                     change = []
@@ -228,17 +230,17 @@ try:
             print("Allow Rules ({0} Added, {1} Removed, {2} Modified)".format(
                 len(diff.added_allows), len(diff.removed_allows), len(diff.modified_allows)))
 
-            if diff.added_allows:
+            if diff.added_allows and not args.stats:
                 print("   Added Allow Rules: {0}".format(len(diff.added_allows)))
                 for r in sorted(diff.added_allows):
                     print("      + {0}".format(r))
 
-            if diff.removed_allows:
+            if diff.removed_allows and not args.stats:
                 print("   Removed Allow Rules: {0}".format(len(diff.removed_allows)))
                 for r in sorted(diff.removed_allows):
                     print("      - {0}".format(r))
 
-            if diff.modified_allows:
+            if diff.modified_allows and not args.stats:
                 print("   Modified Allow Rules: {0}".format(len(diff.modified_allows)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(diff.modified_allows):
@@ -263,17 +265,17 @@ try:
                 len(diff.added_neverallows), len(diff.removed_neverallows),
                 len(diff.modified_neverallows)))
 
-            if diff.added_neverallows:
+            if diff.added_neverallows and not args.stats:
                 print("   Added Neverallow Rules: {0}".format(len(diff.added_neverallows)))
                 for r in sorted(diff.added_neverallows):
                     print("      + {0}".format(r))
 
-            if diff.removed_neverallows:
+            if diff.removed_neverallows and not args.stats:
                 print("   Removed Neverallow Rules: {0}".format(len(diff.removed_neverallows)))
                 for r in sorted(diff.removed_neverallows):
                     print("      - {0}".format(r))
 
-            if diff.modified_neverallows:
+            if diff.modified_neverallows and not args.stats:
                 print("   Modified Neverallow Rules: {0}".format(len(diff.modified_neverallows)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
@@ -299,17 +301,17 @@ try:
                 len(diff.added_auditallows), len(diff.removed_auditallows),
                 len(diff.modified_auditallows)))
 
-            if diff.added_auditallows:
+            if diff.added_auditallows and not args.stats:
                 print("   Added Auditallow Rules: {0}".format(len(diff.added_auditallows)))
                 for r in sorted(diff.added_auditallows):
                     print("      + {0}".format(r))
 
-            if diff.removed_auditallows:
+            if diff.removed_auditallows and not args.stats:
                 print("   Removed Auditallow Rules: {0}".format(len(diff.removed_auditallows)))
                 for r in sorted(diff.removed_auditallows):
                     print("      - {0}".format(r))
 
-            if diff.modified_auditallows:
+            if diff.modified_auditallows and not args.stats:
                 print("   Modified Auditallow Rules: {0}".format(len(diff.modified_auditallows)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
@@ -335,17 +337,17 @@ try:
                 len(diff.added_dontaudits), len(diff.removed_dontaudits),
                 len(diff.modified_dontaudits)))
 
-            if diff.added_dontaudits:
+            if diff.added_dontaudits and not args.stats:
                 print("   Added Dontaudit Rules: {0}".format(len(diff.added_dontaudits)))
                 for r in sorted(diff.added_dontaudits):
                     print("      + {0}".format(r))
 
-            if diff.removed_dontaudits:
+            if diff.removed_dontaudits and not args.stats:
                 print("   Removed Dontaudit Rules: {0}".format(len(diff.removed_dontaudits)))
                 for r in sorted(diff.removed_dontaudits):
                     print("      - {0}".format(r))
 
-            if diff.modified_dontaudits:
+            if diff.modified_dontaudits and not args.stats:
                 print("   Modified Dontaudit Rules: {0}".format(len(diff.modified_dontaudits)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
@@ -371,19 +373,19 @@ try:
                 len(diff.added_type_transitions), len(diff.removed_type_transitions),
                 len(diff.modified_type_transitions)))
 
-            if diff.added_type_transitions:
+            if diff.added_type_transitions and not args.stats:
                 print("   Added Type_transition Rules: {0}".format(
                     len(diff.added_type_transitions)))
                 for r in sorted(diff.added_type_transitions):
                     print("      + {0}".format(r))
 
-            if diff.removed_type_transitions:
+            if diff.removed_type_transitions and not args.stats:
                 print("   Removed Type_transition Rules: {0}".format(
                     len(diff.removed_type_transitions)))
                 for r in sorted(diff.removed_type_transitions):
                     print("      - {0}".format(r))
 
-            if diff.modified_type_transitions:
+            if diff.modified_type_transitions and not args.stats:
                 print("   Modified Type_transition Rules: {0}".format(
                     len(diff.modified_type_transitions)))
 
@@ -414,17 +416,17 @@ try:
                 len(diff.added_type_changes), len(diff.removed_type_changes),
                 len(diff.modified_type_changes)))
 
-            if diff.added_type_changes:
+            if diff.added_type_changes and not args.stats:
                 print("   Added Type_change Rules: {0}".format(len(diff.added_type_changes)))
                 for r in sorted(diff.added_type_changes):
                     print("      + {0}".format(r))
 
-            if diff.removed_type_changes:
+            if diff.removed_type_changes and not args.stats:
                 print("   Removed Type_change Rules: {0}".format(len(diff.removed_type_changes)))
                 for r in sorted(diff.removed_type_changes):
                     print("      - {0}".format(r))
 
-            if diff.modified_type_changes:
+            if diff.modified_type_changes and not args.stats:
                 print("   Modified Type_change Rules: {0}".format(len(diff.modified_type_changes)))
 
                 for rule, added_default, removed_default in sorted(diff.modified_type_changes):
@@ -454,17 +456,17 @@ try:
                 len(diff.added_type_members), len(diff.removed_type_members),
                 len(diff.modified_type_members)))
 
-            if diff.added_type_members:
+            if diff.added_type_members and not args.stats:
                 print("   Added Type_member Rules: {0}".format(len(diff.added_type_members)))
                 for r in sorted(diff.added_type_members):
                     print("      + {0}".format(r))
 
-            if diff.removed_type_members:
+            if diff.removed_type_members and not args.stats:
                 print("   Removed Type_member Rules: {0}".format(len(diff.removed_type_members)))
                 for r in sorted(diff.removed_type_members):
                     print("      - {0}".format(r))
 
-            if diff.modified_type_members:
+            if diff.modified_type_members and not args.stats:
                 print("   Modified Type_member Rules: {0}".format(len(diff.modified_type_members)))
 
                 for rule, added_default, removed_default in sorted(diff.modified_type_members):
@@ -492,13 +494,13 @@ try:
             print("Role allow Rules ({0} Added, {1} Removed)".format(
                 len(diff.added_role_allows), len(diff.removed_role_allows)))
 
-            if diff.added_role_allows:
+            if diff.added_role_allows and not args.stats:
                 print("   Added Role allow Rules: {0}".format(
                     len(diff.added_role_allows)))
                 for r in sorted(diff.added_role_allows):
                     print("      + {0}".format(r))
 
-            if diff.removed_role_allows:
+            if diff.removed_role_allows and not args.stats:
                 print("   Removed Role allow Rules: {0}".format(
                     len(diff.removed_role_allows)))
                 for r in sorted(diff.removed_role_allows):
@@ -513,19 +515,19 @@ try:
                 len(diff.added_role_transitions), len(diff.removed_role_transitions),
                 len(diff.modified_role_transitions)))
 
-            if diff.added_role_transitions:
+            if diff.added_role_transitions and not args.stats:
                 print("   Added Role_transition Rules: {0}".format(
                     len(diff.added_role_transitions)))
                 for r in sorted(diff.added_role_transitions):
                     print("      + {0}".format(r))
 
-            if diff.removed_role_transitions:
+            if diff.removed_role_transitions and not args.stats:
                 print("   Removed Role_transition Rules: {0}".format(
                     len(diff.removed_role_transitions)))
                 for r in sorted(diff.removed_role_transitions):
                     print("      - {0}".format(r))
 
-            if diff.modified_role_transitions:
+            if diff.modified_role_transitions and not args.stats:
                 print("   Modified Role_transition Rules: {0}".format(
                     len(diff.modified_role_transitions)))
 
@@ -545,19 +547,19 @@ try:
                 len(diff.added_range_transitions), len(diff.removed_range_transitions),
                 len(diff.modified_range_transitions)))
 
-            if diff.added_range_transitions:
+            if diff.added_range_transitions and not args.stats:
                 print("   Added Range_transition Rules: {0}".format(
                     len(diff.added_range_transitions)))
                 for r in sorted(diff.added_range_transitions):
                     print("      + {0}".format(r))
 
-            if diff.removed_range_transitions:
+            if diff.removed_range_transitions and not args.stats:
                 print("   Removed Range_transition Rules: {0}".format(
                     len(diff.removed_range_transitions)))
                 for r in sorted(diff.removed_range_transitions):
                     print("      - {0}".format(r))
 
-            if diff.modified_range_transitions:
+            if diff.modified_range_transitions and not args.stats:
                 print("   Modified Range_transition Rules: {0}".format(
                     len(diff.modified_range_transitions)))
 
