@@ -291,7 +291,7 @@ class TERulesDifference(Difference):
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to default type
-            if str(left_rule.default) != str(right_rule.default):
+            if SymbolWrapper(left_rule.default) != SymbolWrapper(right_rule.default):
                 modified.append(modified_terule_record(left_rule,
                                                        right_rule.default,
                                                        left_rule.default))
