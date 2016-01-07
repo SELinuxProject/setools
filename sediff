@@ -517,18 +517,6 @@ try:
                         "{0.ruletype} {0.source} {0.target}:{0.tclass} +[{1}] -[{2}]".format(
                             rule, added_default, removed_default)
 
-                    try:
-                        rule_string += " {0}".format(self.filename)
-                    except:
-                        pass
-
-                    rule_string += ";"
-
-                    try:
-                        rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
-                        pass
-
                     print("      * {0}".format(rule_string))
 
             print()
