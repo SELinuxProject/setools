@@ -250,7 +250,7 @@ try:
 
                     try:
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
+                    except AttributeError:
                         pass
                     print("      * {0}".format(rule_string))
 
@@ -286,7 +286,7 @@ try:
 
                     try:
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
+                    except AttributeError:
                         pass
                     print("      * {0}".format(rule_string))
 
@@ -322,7 +322,7 @@ try:
 
                     try:
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
+                    except AttributeError:
                         pass
                     print("      * {0}".format(rule_string))
 
@@ -358,7 +358,7 @@ try:
 
                     try:
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
+                    except AttributeError:
                         pass
                     print("      * {0}".format(rule_string))
 
@@ -392,15 +392,15 @@ try:
                         rule, added_default, removed_default)
 
                     try:
-                        rule_string += " {0}".format(self.filename)
-                    except:
+                        rule_string += " {0}".format(rule.filename)
+                    except AttributeError:
                         pass
 
                     rule_string += ";"
 
                     try:
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
+                    except AttributeError:
                         pass
 
                     print("      * {0}".format(rule_string))
@@ -432,15 +432,15 @@ try:
                         rule, added_default, removed_default)
 
                     try:
-                        rule_string += " {0}".format(self.filename)
-                    except:
+                        rule_string += " {0}".format(rule.filename)
+                    except AttributeError:
                         pass
 
                     rule_string += ";"
 
                     try:
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
+                    except AttributeError:
                         pass
 
                     print("      * {0}".format(rule_string))
@@ -472,15 +472,15 @@ try:
                         rule, added_default, removed_default)
 
                     try:
-                        rule_string += " {0}".format(self.filename)
-                    except:
+                        rule_string += " {0}".format(rule.filename)
+                    except AttributeError:
                         pass
 
                     rule_string += ";"
 
                     try:
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except:
+                    except AttributeError:
                         pass
 
                     print("      * {0}".format(rule_string))
