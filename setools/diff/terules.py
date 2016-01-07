@@ -97,7 +97,7 @@ class TERulesDifference(Difference):
             "Generating allow differences from {0.left_policy} to {0.right_policy}".format(self))
 
         if self._left_allows is None or self._right_allows is None:
-            self._create_rule_lists()
+            self._create_te_rule_lists()
 
         self.added_allows, self.removed_allows, self.modified_allows = self._diff_av_rules(
             self._expand_generator(self._left_allows, AVRuleWrapper),
@@ -111,7 +111,7 @@ class TERulesDifference(Difference):
             format(self))
 
         if self._left_auditallows is None or self._right_auditallows is None:
-            self._create_rule_lists()
+            self._create_te_rule_lists()
 
         self.added_auditallows, \
             self.removed_auditallows, \
@@ -127,7 +127,7 @@ class TERulesDifference(Difference):
             format(self))
 
         if self._left_neverallows is None or self._right_neverallows is None:
-            self._create_rule_lists()
+            self._create_te_rule_lists()
 
         self.added_neverallows, \
             self.removed_neverallows, \
@@ -143,7 +143,7 @@ class TERulesDifference(Difference):
             format(self))
 
         if self._left_dontaudits is None or self._right_dontaudits is None:
-            self._create_rule_lists()
+            self._create_te_rule_lists()
 
         self.added_dontaudits, \
             self.removed_dontaudits, \
@@ -159,7 +159,7 @@ class TERulesDifference(Difference):
             format(self))
 
         if self._left_type_transitions is None or self._right_type_transitions is None:
-            self._create_rule_lists()
+            self._create_te_rule_lists()
 
         self.added_type_transitions, \
             self.removed_type_transitions, \
@@ -175,7 +175,7 @@ class TERulesDifference(Difference):
             format(self))
 
         if self._left_type_changes is None or self._right_type_changes is None:
-            self._create_rule_lists()
+            self._create_te_rule_lists()
 
         self.added_type_changes, \
             self.removed_type_changes, \
@@ -191,7 +191,7 @@ class TERulesDifference(Difference):
             format(self))
 
         if self._left_type_members is None or self._right_type_members is None:
-            self._create_rule_lists()
+            self._create_te_rule_lists()
 
         self.added_type_members, \
             self.removed_type_members, \
@@ -202,7 +202,7 @@ class TERulesDifference(Difference):
     #
     # Internal functions
     #
-    def _create_rule_lists(self):
+    def _create_te_rule_lists(self):
         """Create rule lists for both policies."""
 
         self._left_allows = []
