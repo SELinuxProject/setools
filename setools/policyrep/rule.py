@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014, 2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -84,6 +84,10 @@ class PolicyRule(symbol.PolicySymbol):
         """The conditional block of the rule (T/F)"""
         # Most rules cannot be conditional.
         raise exception.RuleNotConditional
+
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        raise NotImplementedError
 
     def statement(self):
         return str(self)

@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014, 2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import itertools
+
 from . import exception
 from . import qpol
 from . import rule
@@ -29,6 +31,28 @@ def mls_rule_factory(policy, symbol):
         raise TypeError("MLS rules cannot be looked-up.")
 
     return MLSRule(policy, symbol)
+
+
+def expanded_mls_rule_factory(original, source, target):
+    """
+    Factory function for creating expanded MLS rules.
+
+    original    The MLS rule the expanded rule originates from.
+    source      The source type of the expanded rule.
+    target      The target type of the expanded rule.
+    """
+
+    if isinstance(original, MLSRule):
+        rule = ExpandedMLSRule(original.policy, original.qpol_symbol)
+    elif isinstance(original, MLSRule):
+        return original
+    else:
+        raise TypeError("The original rule must be a MLS rule class.")
+
+    rule.source = source
+    rule.target = target
+    rule.origin = original
+    return rule
 
 
 def validate_ruletype(types):
@@ -60,3 +84,17 @@ class MLSRule(rule.PolicyRule):
     def default(self):
         """The rule's default range."""
         return mls.range_factory(self.policy, self.qpol_symbol.range(self.policy))
+
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        for s, t in itertools.product(self.source.expand(), self.target.expand()):
+            yield expanded_mls_rule_factory(self, s, t)
+
+
+class ExpandedMLSRule(MLSRule):
+
+    """An expanded MLS rule."""
+
+    source = None
+    target = None
+    origin = None
