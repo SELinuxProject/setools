@@ -62,6 +62,16 @@ class Difference(object):
         raise NotImplementedError
 
     @staticmethod
+    def _expand_generator(rule_list, Wrapper):
+        """Generator that yields a wrapped, expanded rule list."""
+        # this is to delay creating any containers
+        # as long as possible, since rule lists
+        # are typically massive.
+        for unexpanded_rule in rule_list:
+            for expanded_rule in unexpanded_rule.expand():
+                yield Wrapper(expanded_rule)
+
+    @staticmethod
     def _set_diff(left, right):
         """
         Standard diff of two sets.

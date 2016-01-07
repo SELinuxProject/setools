@@ -259,16 +259,6 @@ class TERulesDifference(Difference):
             else:
                 raise TypeError("Unknown rule type: {0}".format(rule.ruletype))
 
-    @staticmethod
-    def _expand_generator(rule_list, Wrapper):
-        """Generator that yields a wrapped, expanded rule list."""
-        # this is to delay creating any containers
-        # as long as possible, since rule lists
-        # are typically massive.
-        for unexpanded_rule in rule_list:
-            for expanded_rule in unexpanded_rule.expand():
-                yield Wrapper(expanded_rule)
-
     def _diff_av_rules(self, left_list, right_list):
         """Common method for comparing access vector rules."""
         added, removed, matched = self._set_diff(left_list, right_list)
