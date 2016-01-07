@@ -18,8 +18,6 @@
 #
 from collections import namedtuple
 
-from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFilename
-
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 from .mls import RangeWrapper
