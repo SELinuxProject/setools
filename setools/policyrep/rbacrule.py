@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014, 2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import itertools
+
 from . import exception
 from . import qpol
 from . import rule
@@ -32,6 +34,30 @@ def rbac_rule_factory(policy, name):
         return RoleTransition(policy, name)
     else:
         raise TypeError("RBAC rules cannot be looked up.")
+
+
+def expanded_rbac_rule_factory(original, source, target):
+    """
+    Factory function for creating expanded RBAC rules.
+
+    original    The RBAC rule the expanded rule originates from.
+    source      The source type of the expanded rule.
+    target      The target type of the expanded rule.
+    """
+
+    if isinstance(original, RoleAllow):
+        rule = ExpandedRoleAllow(original.policy, original.qpol_symbol)
+    elif isinstance(original, RoleTransition):
+        rule = ExpandedRoleTransition(original.policy, original.qpol_symbol)
+    elif isinstance(original, (ExpandedRoleAllow, ExpandedRoleTransition)):
+        return original
+    else:
+        raise TypeError("The original rule must be an RBAC rule class.")
+
+    rule.source = source
+    rule.target = target
+    rule.origin = original
+    return rule
 
 
 def validate_ruletype(types):
@@ -71,6 +97,11 @@ class RoleAllow(rule.PolicyRule):
         """The rule's default role."""
         raise exception.RuleUseError("Role allow rules do not have a default role.")
 
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        for s, t in itertools.product(self.source.expand(), self.target.expand()):
+            yield expanded_rbac_rule_factory(self, s, t)
+
 
 class RoleTransition(rule.PolicyRule):
 
@@ -93,3 +124,26 @@ class RoleTransition(rule.PolicyRule):
     def default(self):
         """The rule's default role."""
         return role.role_factory(self.policy, self.qpol_symbol.default_role(self.policy))
+
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        for s, t in itertools.product(self.source.expand(), self.target.expand()):
+            yield expanded_rbac_rule_factory(self, s, t)
+
+
+class ExpandedRoleAllow(RoleAllow):
+
+    """An expanded role allow rule."""
+
+    source = None
+    target = None
+    origin = None
+
+
+class ExpandedRoleTransition(RoleTransition):
+
+    """An expanded role_transition rule."""
+
+    source = None
+    target = None
+    origin = None
