@@ -375,7 +375,7 @@ class AVRuleWrapper(Wrapper):
                self.conditional_block == other.conditional_block
 
 
-class TERuleWrapper(object):
+class TERuleWrapper(Wrapper):
 
     """Wrap type_* rules to allow set operations."""
 
