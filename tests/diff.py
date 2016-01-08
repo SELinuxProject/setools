@@ -910,6 +910,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set(["modified_remove_attr"]),
                             self.diff.modified_type_attributes["an_attr"].removed_types)
 
+    #
+    # Booleans
+    #
+    def test_added_boolean(self):
+        """Diff: added boolean."""
+        self.assertSetEqual(set(["added_bool"]), self.diff.added_booleans)
+
+    def test_removed_boolean(self):
+        """Diff: removed boolean."""
+        self.assertSetEqual(set(["removed_bool"]), self.diff.removed_booleans)
+
+    def test_modified_boolean(self):
+        """Diff: modified boolean."""
+        self.assertEqual(1, len(self.diff.modified_booleans))
+        self.assertTrue(self.diff.modified_booleans["modified_bool"].added_state)
+        self.assertFalse(self.diff.modified_booleans["modified_bool"].removed_state)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1110,3 +1127,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_type_attributes(self):
         """NoDiff: no modified type attribute rules."""
         self.assertFalse(self.diff.modified_type_attributes)
+
+    def test_added_booleans(self):
+        """NoDiff: no added booleans."""
+        self.assertFalse(self.diff.added_booleans)
+
+    def test_removed_booleans(self):
+        """NoDiff: no removed booleans."""
+        self.assertFalse(self.diff.removed_booleans)
+
+    def test_modified_booleans(self):
+        """NoDiff: no modified booleans."""
+        self.assertFalse(self.diff.modified_booleans)

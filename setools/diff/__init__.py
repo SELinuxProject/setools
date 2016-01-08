@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from .bool import BooleansDifference
 from .commons import CommonDifference
 from .mlsrules import MLSRulesDifference
 from .objclass import ObjClassDifference
@@ -29,7 +30,8 @@ from .users import UsersDifference
 __all__ = ['PolicyDifference']
 
 
-class PolicyDifference(CommonDifference,
+class PolicyDifference(BooleansDifference,
+                       CommonDifference,
                        MLSRulesDifference,
                        ObjClassDifference,
                        RBACRulesDifference,

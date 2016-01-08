@@ -148,6 +148,29 @@ try:
                         print("          - {0}".format(p))
             print()
 
+    if all_differences or args.bool_:
+        if diff.added_booleans or diff.removed_booleans or \
+                diff.modified_booleans or args.bool_:
+            print("Booleans ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_booleans), len(diff.removed_booleans),
+                len(diff.modified_booleans)))
+            if diff.added_booleans and not args.stats:
+                print("   Added Booleans: {0}".format(len(diff.added_booleans)))
+                for a in sorted(diff.added_booleans):
+                    print("      + {0}".format(a))
+            if diff.removed_booleans and not args.stats:
+                print("   Removed Booleans: {0}".format(len(diff.removed_booleans)))
+                for a in sorted(diff.removed_booleans):
+                    print("      - {0}".format(a))
+            if diff.modified_booleans and not args.stats:
+                print("   Modified Booleans: {0}".format(len(diff.modified_booleans)))
+                for name, mod in sorted(diff.modified_booleans.items()):
+                    print("      * {0} (Modified default state)".format(name))
+                    print("          + {0}".format(mod.added_state))
+                    print("          - {0}".format(mod.removed_state))
+
+            print()
+
     if all_differences or args.role:
         if diff.added_roles or diff.removed_roles or diff.modified_roles or args.role:
             print("Roles ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_roles),
