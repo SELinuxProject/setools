@@ -23,6 +23,7 @@ from .rbacrules import RBACRulesDifference
 from .roles import RolesDifference
 from .terules import TERulesDifference
 from .types import TypesDifference
+from .users import UsersDifference
 
 __all__ = ['PolicyDifference']
 
@@ -33,7 +34,8 @@ class PolicyDifference(CommonDifference,
                        RBACRulesDifference,
                        RolesDifference,
                        TERulesDifference,
-                       TypesDifference):
+                       TypesDifference,
+                       UsersDifference):
 
     """
     Determine the differences from the left policy to the right policy.

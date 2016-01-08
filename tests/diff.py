@@ -853,6 +853,45 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("role_tr_new_role", added_default)
         self.assertEqual("role_tr_old_role", removed_default)
 
+    #
+    # Users
+    #
+    def test_added_user(self):
+        """Diff: added user."""
+        self.assertSetEqual(set(["added_user"]), self.diff.added_users)
+
+    def test_removed_user(self):
+        """Diff: removed user."""
+        self.assertSetEqual(set(["removed_user"]), self.diff.removed_users)
+
+    def test_modified_user_count(self):
+        """Diff: modified user count."""
+        self.assertEqual(4, len(self.diff.modified_users))
+
+    def test_modified_user_add_role(self):
+        """Diff: modified user with added role."""
+        self.assertSetEqual(set(["added_role"]),
+                            self.diff.modified_users["modified_add_role"].added_roles)
+        self.assertFalse(self.diff.modified_users["modified_add_role"].removed_roles)
+
+    def test_modified_user_remove_role(self):
+        """Diff: modified user with removed role."""
+        self.assertSetEqual(set(["removed_role"]),
+                            self.diff.modified_users["modified_remove_role"].removed_roles)
+        self.assertFalse(self.diff.modified_users["modified_remove_role"].added_roles)
+
+    def test_modified_user_change_level(self):
+        """Diff: modified user due to modified default level."""
+        self.assertEqual("s2:c0", self.diff.modified_users["modified_change_level"].removed_level)
+        self.assertEqual("s2:c1", self.diff.modified_users["modified_change_level"].added_level)
+
+    def test_modified_user_change_range(self):
+        """Diff: modified user due to modified range."""
+        self.assertEqual("s3:c1.c3",
+                         self.diff.modified_users["modified_change_range"].removed_range)
+        self.assertEqual("s3:c1.c4",
+                         self.diff.modified_users["modified_change_range"].added_range)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1029,3 +1068,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_role_transitions(self):
         """NoDiff: no modified role_transition rules."""
         self.assertFalse(self.diff.modified_role_transitions)
+
+    def test_added_users(self):
+        """NoDiff: no added user rules."""
+        self.assertFalse(self.diff.added_users)
+
+    def test_removed_users(self):
+        """NoDiff: no removed user rules."""
+        self.assertFalse(self.diff.removed_users)
+
+    def test_modified_users(self):
+        """NoDiff: no modified user rules."""
+        self.assertFalse(self.diff.modified_users)

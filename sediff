@@ -225,6 +225,51 @@ try:
 
             print()
 
+    if all_differences or args.user:
+        if diff.added_users or diff.removed_users or diff.modified_users or args.user:
+            print("Users ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_users),
+                                                                        len(diff.removed_users),
+                                                                        len(diff.modified_users)))
+            if diff.added_users and not args.stats:
+                print("   Added Users: {0}".format(len(diff.added_users)))
+                for u in sorted(diff.added_users):
+                    print("      + {0}".format(u))
+            if diff.removed_users and not args.stats:
+                print("   Removed Users: {0}".format(len(diff.removed_users)))
+                for u in sorted(diff.removed_users):
+                    print("      - {0}".format(u))
+            if diff.modified_users and not args.stats:
+                print("   Modified Users: {0}".format(len(diff.modified_users)))
+                for name, mod in sorted(diff.modified_users.items()):
+                    change = []
+                    if mod.added_roles:
+                        change.append("{0} Added roles".format(len(mod.added_roles)))
+                    if mod.removed_roles:
+                        change.append("{0} Removed roles".format(len(mod.removed_roles)))
+                    if mod.removed_level:
+                        change.append("Modified default level")
+                    if mod.removed_range:
+                        change.append("Modified range")
+
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    if mod.added_roles or mod.removed_roles:
+                        print("          Roles:")
+                    for t in sorted(mod.added_roles):
+                        print("          + {0}".format(t))
+                    for t in sorted(mod.removed_roles):
+                        print("          - {0}".format(t))
+
+                    if mod.removed_level:
+                        print("          Default level:")
+                        print("          + {0}".format(mod.added_level))
+                        print("          - {0}".format(mod.removed_level))
+
+                    if mod.removed_range:
+                        print("          Range:")
+                        print("          + {0}".format(mod.added_range))
+                        print("          - {0}".format(mod.removed_range))
+            print()
+
     if all_differences or args.allow:
         if diff.added_allows or diff.removed_allows or diff.modified_allows or args.allow:
             print("Allow Rules ({0} Added, {1} Removed, {2} Modified)".format(
