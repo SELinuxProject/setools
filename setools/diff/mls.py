@@ -29,8 +29,13 @@ class LevelWrapper(Wrapper):
         self.categories = set(SymbolWrapper(c) for c in level.categories())
 
     def __eq__(self, other):
-        return self.sensitivity == other.sensitivity and \
-               self.categories == other.categories
+        try:
+            return self.sensitivity == other.sensitivity and \
+                   self.categories == other.categories
+        except AttributeError:
+            # comparing an MLS policy to non-MLS policy will result in
+            # other being None
+            return False
 
 
 class RangeWrapper(Wrapper):
@@ -49,5 +54,10 @@ class RangeWrapper(Wrapper):
         self.high = LevelWrapper(range_.high)
 
     def __eq__(self, other):
-        return self.low == other.low and \
-               self.high == other.high
+        try:
+            return self.low == other.low and \
+                   self.high == other.high
+        except AttributeError:
+            # comparing an MLS policy to non-MLS policy will result in
+            # other being None
+            return False
