@@ -905,6 +905,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_type_attribute(self):
         """Diff: modified type attribute."""
+        self.assertEqual(1, len(self.diff.modified_type_attributes))
         self.assertSetEqual(set(["modified_add_attr"]),
                             self.diff.modified_type_attributes["an_attr"].added_types)
         self.assertSetEqual(set(["modified_remove_attr"]),
@@ -1105,11 +1106,11 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
         self.assertFalse(self.diff.modified_role_transitions)
 
     def test_added_users(self):
-        """NoDiff: no added user rules."""
+        """NoDiff: no added users."""
         self.assertFalse(self.diff.added_users)
 
     def test_removed_users(self):
-        """NoDiff: no removed user rules."""
+        """NoDiff: no removed users."""
         self.assertFalse(self.diff.removed_users)
 
     def test_modified_users(self):
@@ -1117,15 +1118,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
         self.assertFalse(self.diff.modified_users)
 
     def test_added_type_attributes(self):
-        """NoDiff: no added type attribute rules."""
+        """NoDiff: no added type attribute."""
         self.assertFalse(self.diff.added_type_attributes)
 
     def test_removed_type_attributes(self):
-        """NoDiff: no removed type attribute rules."""
+        """NoDiff: no removed type attributes."""
         self.assertFalse(self.diff.removed_type_attributes)
 
     def test_modified_type_attributes(self):
-        """NoDiff: no modified type attribute rules."""
+        """NoDiff: no modified type attributes."""
         self.assertFalse(self.diff.modified_type_attributes)
 
     def test_added_booleans(self):
