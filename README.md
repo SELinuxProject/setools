@@ -16,7 +16,7 @@ As such it contains a setup.py script that will install the tools.
 To run SETools, the following packages are required:
 * Python 2.7 or 3.3+
 * NetworkX 1.8+
-* PyQt5
+* PyQt5 (only if using graphical tools)
 * setuptools
 * libselinux (Python bindings optional but recommended)
 * libbz2
@@ -67,16 +67,16 @@ during runtime.
 
 ### Graphical tools
 
-TBD
+Tool Name  | Use
+---------- | -------------------------------------------
+apol       | A Qt graphical analysis tool.  Use it to perform various types of analyses.
 
 ### Command-line tools
 
-Some tools in the SETools suite may be run in a terminal
-environment.
-
 Tool Name  | Use
 ---------- | -------------------------------------------
-sedta      | Perform domain transition analyses
+sediff     | Compare two policies to find differences.
+sedta      | Perform domain transition analyses.
 seinfo     | List policy components.
 seinfoflow | Perform information flow analyses.
 sesearch   | Search rules (allow, type_transition, etc.)
