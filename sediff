@@ -225,6 +225,36 @@ try:
 
             print()
 
+    if all_differences or args.attribute:
+        if diff.added_type_attributes or diff.removed_type_attributes or \
+                diff.modified_type_attributes or args.attribute:
+            print("Type Attributes ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_type_attributes), len(diff.removed_type_attributes),
+                len(diff.modified_type_attributes)))
+            if diff.added_type_attributes and not args.stats:
+                print("   Added Type Attributes: {0}".format(len(diff.added_type_attributes)))
+                for a in sorted(diff.added_type_attributes):
+                    print("      + {0}".format(a))
+            if diff.removed_type_attributes and not args.stats:
+                print("   Removed Type Attributes: {0}".format(len(diff.removed_type_attributes)))
+                for a in sorted(diff.removed_type_attributes):
+                    print("      - {0}".format(a))
+            if diff.modified_type_attributes and not args.stats:
+                print("   Modified Type Attributes: {0}".format(len(diff.modified_type_attributes)))
+                for name, mod in sorted(diff.modified_type_attributes.items()):
+                    change = []
+                    if mod.added_types:
+                        change.append("{0} Added types".format(len(mod.added_types)))
+                    if mod.removed_types:
+                        change.append("{0} Removed types".format(len(mod.removed_types)))
+
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    for t in sorted(mod.added_types):
+                        print("          + {0}".format(t))
+                    for t in sorted(mod.removed_types):
+                        print("          - {0}".format(t))
+            print()
+
     if all_differences or args.user:
         if diff.added_users or diff.removed_users or diff.modified_users or args.user:
             print("Users ({0} Added, {1} Removed, {2} Modified)".format(len(diff.added_users),

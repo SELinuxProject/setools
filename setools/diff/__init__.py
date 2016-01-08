@@ -22,6 +22,7 @@ from .objclass import ObjClassDifference
 from .rbacrules import RBACRulesDifference
 from .roles import RolesDifference
 from .terules import TERulesDifference
+from .typeattr import TypeAttributesDifference
 from .types import TypesDifference
 from .users import UsersDifference
 
@@ -34,6 +35,7 @@ class PolicyDifference(CommonDifference,
                        RBACRulesDifference,
                        RolesDifference,
                        TERulesDifference,
+                       TypeAttributesDifference,
                        TypesDifference,
                        UsersDifference):
 

@@ -892,6 +892,24 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("s3:c1.c4",
                          self.diff.modified_users["modified_change_range"].added_range)
 
+    #
+    # Type attributes
+    #
+    def test_added_type_attribute(self):
+        """Diff: added type attribute."""
+        self.assertSetEqual(set(["added_attr"]), self.diff.added_type_attributes)
+
+    def test_removed_type_attribute(self):
+        """Diff: removed type attribute."""
+        self.assertSetEqual(set(["removed_attr"]), self.diff.removed_type_attributes)
+
+    def test_modified_type_attribute(self):
+        """Diff: modified type attribute."""
+        self.assertSetEqual(set(["modified_add_attr"]),
+                            self.diff.modified_type_attributes["an_attr"].added_types)
+        self.assertSetEqual(set(["modified_remove_attr"]),
+                            self.diff.modified_type_attributes["an_attr"].removed_types)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1080,3 +1098,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_users(self):
         """NoDiff: no modified user rules."""
         self.assertFalse(self.diff.modified_users)
+
+    def test_added_type_attributes(self):
+        """NoDiff: no added type attribute rules."""
+        self.assertFalse(self.diff.added_type_attributes)
+
+    def test_removed_type_attributes(self):
+        """NoDiff: no removed type attribute rules."""
+        self.assertFalse(self.diff.removed_type_attributes)
+
+    def test_modified_type_attributes(self):
+        """NoDiff: no modified type attribute rules."""
+        self.assertFalse(self.diff.modified_type_attributes)
