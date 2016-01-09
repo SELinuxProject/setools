@@ -967,12 +967,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(self.diff.modified_sensitivities))
 
         # add alias
-        self.assertEqual(set(["al4"]), self.diff.modified_sensitivities["s1"].added_aliases)
+        self.assertSetEqual(set(["al4"]), self.diff.modified_sensitivities["s1"].added_aliases)
         self.assertFalse(self.diff.modified_sensitivities["s1"].removed_aliases)
 
         # remove alias
         self.assertFalse(self.diff.modified_sensitivities["s0"].added_aliases)
-        self.assertEqual(set(["al2"]), self.diff.modified_sensitivities["s0"].removed_aliases)
+        self.assertSetEqual(set(["al2"]), self.diff.modified_sensitivities["s0"].removed_aliases)
 
     #
     # Initial SIDs
