@@ -25,6 +25,10 @@ modified_cat_record = namedtuple("modified_category", ["added_aliases",
                                                        "removed_aliases",
                                                        "matched_aliases"])
 
+modified_sens_record = namedtuple("modified_sensitivity", ["added_aliases",
+                                                           "removed_aliases",
+                                                           "matched_aliases"])
+
 
 class CategoriesDifference(Difference):
 
@@ -66,6 +70,50 @@ class CategoriesDifference(Difference):
         self.added_categories = None
         self.removed_categories = None
         self.modified_categories = None
+
+
+class SensitivitiesDifference(Difference):
+
+    """Determine the difference in sensitivities between two policies."""
+
+    added_sensitivities = DiffResultDescriptor("diff_sensitivities")
+    removed_sensitivities = DiffResultDescriptor("diff_sensitivities")
+    modified_sensitivities = DiffResultDescriptor("diff_sensitivities")
+
+    def diff_sensitivities(self):
+        """Generate the difference in sensitivities between the policies."""
+
+        self.log.info(
+            "Generating sensitivity differences from {0.left_policy} to {0.right_policy}".
+            format(self))
+
+        self.added_sensitivities, self.removed_sensitivities, matched_sensitivities = \
+            self._set_diff(
+                (SymbolWrapper(s) for s in self.left_policy.sensitivities()),
+                (SymbolWrapper(s) for s in self.right_policy.sensitivities()))
+
+        self.modified_sensitivities = dict()
+
+        for left_category, right_category in matched_sensitivities:
+            # Criteria for modified sensitivities
+            # 1. change to aliases
+            added_aliases, removed_aliases, matched_aliases = self._set_diff(
+                left_category.aliases(), right_category.aliases())
+
+            if added_aliases or removed_aliases:
+                self.modified_sensitivities[left_category] = modified_sens_record(added_aliases,
+                                                                                  removed_aliases,
+                                                                                  matched_aliases)
+
+    #
+    # Internal functions
+    #
+    def _reset_diff(self):
+        """Reset diff results on policy changes."""
+        self.log.debug("Resetting sensitivity differences")
+        self.added_sensitivities = None
+        self.removed_sensitivities = None
+        self.modified_sensitivities = None
 
 
 class LevelWrapper(Wrapper):

@@ -951,6 +951,29 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertFalse(self.diff.modified_categories["c0"].added_aliases)
         self.assertEqual(set(["eggs"]), self.diff.modified_categories["c0"].removed_aliases)
 
+    #
+    # Sensitivity
+    #
+    def test_added_sensitivities(self):
+        """Diff: added sensitivities."""
+        self.assertSetEqual(set(["s46"]), self.diff.added_sensitivities)
+
+    def test_removed_sensitivities(self):
+        """Diff: removed sensitivities."""
+        self.assertSetEqual(set(["s47"]), self.diff.removed_sensitivities)
+
+    def test_modified_sensitivities(self):
+        """Diff: modified sensitivities."""
+        self.assertEqual(2, len(self.diff.modified_sensitivities))
+
+        # add alias
+        self.assertEqual(set(["al4"]), self.diff.modified_sensitivities["s1"].added_aliases)
+        self.assertFalse(self.diff.modified_sensitivities["s1"].removed_aliases)
+
+        # remove alias
+        self.assertFalse(self.diff.modified_sensitivities["s0"].added_aliases)
+        self.assertEqual(set(["al2"]), self.diff.modified_sensitivities["s0"].removed_aliases)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1175,3 +1198,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_categories(self):
         """NoDiff: no modified categories."""
         self.assertFalse(self.diff.modified_categories)
+
+    def test_added_sensitivities(self):
+        """NoDiff: no added sensitivities."""
+        self.assertFalse(self.diff.added_sensitivities)
+
+    def test_removed_sensitivities(self):
+        """NoDiff: no removed sensitivities."""
+        self.assertFalse(self.diff.removed_sensitivities)
+
+    def test_modified_sensitivities(self):
+        """NoDiff: no modified sensitivities."""
+        self.assertFalse(self.diff.modified_sensitivities)

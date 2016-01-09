@@ -355,6 +355,38 @@ try:
 
             print()
 
+    if all_differences or args.sensitivity:
+        if diff.added_sensitivities or diff.removed_sensitivities or diff.modified_sensitivities \
+                or args.sensitivity:
+            print("Sensitivities ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_sensitivities), len(diff.removed_sensitivities),
+                len(diff.modified_sensitivities)))
+            if diff.added_sensitivities and not args.stats:
+                print("   Added Sensitivites: {0}".format(len(diff.added_sensitivities)))
+                for s in sorted(diff.added_sensitivities):
+                    print("      + {0}".format(s))
+            if diff.removed_sensitivities and not args.stats:
+                print("   Removed Sensitivities: {0}".format(len(diff.removed_sensitivities)))
+                for s in sorted(diff.removed_sensitivities):
+                    print("      - {0}".format(s))
+            if diff.modified_sensitivities and not args.stats:
+                print("   Modified Sensitivities: {0}".format(len(diff.modified_sensitivities)))
+                for name, mod in sorted(diff.modified_sensitivities.items()):
+                    change = []
+                    if mod.added_aliases:
+                        change.append("{0} Added Aliases".format(len(mod.added_aliases)))
+                    if mod.removed_aliases:
+                        change.append("{0} Removed Aliases".format(len(mod.removed_aliases)))
+
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    print("          Aliases:")
+                    for a in sorted(mod.added_aliases):
+                        print("          + {0}".format(a))
+                    for a in sorted(mod.removed_aliases):
+                        print("          - {0}".format(a))
+
+            print()
+
     if all_differences or args.allow:
         if diff.added_allows or diff.removed_allows or diff.modified_allows or args.allow:
             print("Allow Rules ({0} Added, {1} Removed, {2} Modified)".format(
