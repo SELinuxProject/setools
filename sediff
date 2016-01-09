@@ -25,18 +25,17 @@ import logging
 from itertools import chain
 
 parser = argparse.ArgumentParser(
-    description="SELinux policy difference tool.",
+    description="SELinux policy semantic difference tool.",
     epilog="If no differences are selected, all differences will be printed.")
 parser.add_argument("POLICY1", help="Path to the first SELinux policy to diff.", nargs=1)
 parser.add_argument("POLICY2", help="Path to the second SELinux policy to diff.", nargs=1)
 parser.add_argument("--version", action="version", version=setools.__version__)
-parser.add_argument("--stats", action="store_true",
-                    help="Display only statistics.")
+parser.add_argument("--stats", action="store_true", help="Display only statistics.")
 parser.add_argument("-v", "--verbose", action="store_true",
                     help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
-comp = parser.add_argument_group("Component Differences")
+comp = parser.add_argument_group("component differences")
 comp.add_argument("--common", action="store_true", help="Print common differences")
 comp.add_argument("-c", "--class", action="store_true", help="Print class differences",
                   dest="class_")
@@ -51,7 +50,7 @@ comp.add_argument("--sensitivity", action="store_true", help="Print MLS sensitiv
 comp.add_argument("--category", action="store_true", help="Print MLS category differences")
 comp.add_argument("--level", action="store_true", help="Print MLS level definition differences")
 
-terule = parser.add_argument_group("Type Enforcement Rule Differences")
+terule = parser.add_argument_group("type enforcement rule differences")
 terule.add_argument("-A", "--allow", action="store_true", help="Print allow rule differences")
 terule.add_argument("--neverallow", action="store_true", help="Print neverallow rule differences")
 terule.add_argument("--auditallow", action="store_true", help="Print auditallow rule differences")
@@ -62,14 +61,21 @@ terule.add_argument("--type_change", action="store_true", help="Print type_chang
 terule.add_argument("--type_member", action="store_true",
                     help="Print type_member rule differences")
 
-rbacrule = parser.add_argument_group("RBAC Rule Differences")
+rbacrule = parser.add_argument_group("RBAC rule differences")
 rbacrule.add_argument("--role_allow", action="store_true", help="Print role allow rule differences")
 rbacrule.add_argument("--role_trans", action="store_true",
                       help="Print role_transition rule differences")
 
-mlsrule = parser.add_argument_group("MLS Rule Differences")
+mlsrule = parser.add_argument_group("MLS rule differences")
 mlsrule.add_argument("--range_trans", action="store_true",
                      help="Print range_transition rule differences")
+
+labeling = parser.add_argument_group("labeling statement differences")
+labeling.add_argument("--initialsid", action="store_true", help="Print initial SID differences")
+labeling.add_argument("--genfscon", action="store_true", help="Print genfscon differences")
+labeling.add_argument("--netifcon", action="store_true", help="Print netifcon differences")
+labeling.add_argument("--nodecon", action="store_true", help="Print nodecon differences")
+labeling.add_argument("--portcon", action="store_true", help="Print portcon differences")
 
 args = parser.parse_args()
 
@@ -77,7 +83,8 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.user, args.bool_, args.sensitivity, args.category, args.level,
                            args.allow, args.neverallow, args.auditallow, args.dontaudit,
                            args.type_trans, args.type_change, args.type_member, args.role_allow,
-                           args.role_trans, args.range_trans))
+                           args.role_trans, args.range_trans, args.initialsid, args.genfscon,
+                           args.netifcon, args.nodecon, args.portcon))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
