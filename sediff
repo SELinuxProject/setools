@@ -323,6 +323,38 @@ try:
                         print("          - {0}".format(mod.removed_range))
             print()
 
+    if all_differences or args.category:
+        if diff.added_categories or diff.removed_categories or diff.modified_categories \
+                or args.category:
+            print("Categories ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_categories), len(diff.removed_categories),
+                len(diff.modified_categories)))
+            if diff.added_categories and not args.stats:
+                print("   Added Categories: {0}".format(len(diff.added_categories)))
+                for c in sorted(diff.added_categories):
+                    print("      + {0}".format(c))
+            if diff.removed_categories and not args.stats:
+                print("   Removed Categories: {0}".format(len(diff.removed_categories)))
+                for c in sorted(diff.removed_categories):
+                    print("      - {0}".format(c))
+            if diff.modified_categories and not args.stats:
+                print("   Modified Categories: {0}".format(len(diff.modified_categories)))
+                for name, mod in sorted(diff.modified_categories.items()):
+                    change = []
+                    if mod.added_aliases:
+                        change.append("{0} Added Aliases".format(len(mod.added_aliases)))
+                    if mod.removed_aliases:
+                        change.append("{0} Removed Aliases".format(len(mod.removed_aliases)))
+
+                    print("      * {0} ({1})".format(name, ", ".join(change)))
+                    print("          Aliases:")
+                    for a in sorted(mod.added_aliases):
+                        print("          + {0}".format(a))
+                    for a in sorted(mod.removed_aliases):
+                        print("          - {0}".format(a))
+
+            print()
+
     if all_differences or args.allow:
         if diff.added_allows or diff.removed_allows or diff.modified_allows or args.allow:
             print("Allow Rules ({0} Added, {1} Removed, {2} Modified)".format(

@@ -928,6 +928,29 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertTrue(self.diff.modified_booleans["modified_bool"].added_state)
         self.assertFalse(self.diff.modified_booleans["modified_bool"].removed_state)
 
+    #
+    # Categories
+    #
+    def test_added_category(self):
+        """Diff: added category."""
+        self.assertSetEqual(set(["c6"]), self.diff.added_categories)
+
+    def test_removed_category(self):
+        """Diff: removed category."""
+        self.assertSetEqual(set(["c5"]), self.diff.removed_categories)
+
+    def test_modified_category(self):
+        """Diff: modified categories."""
+        self.assertEqual(2, len(self.diff.modified_categories))
+
+        # add alias
+        self.assertEqual(set(["foo"]), self.diff.modified_categories["c1"].added_aliases)
+        self.assertFalse(self.diff.modified_categories["c1"].removed_aliases)
+
+        # remove alias
+        self.assertFalse(self.diff.modified_categories["c0"].added_aliases)
+        self.assertEqual(set(["eggs"]), self.diff.modified_categories["c0"].removed_aliases)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1140,3 +1163,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_booleans(self):
         """NoDiff: no modified booleans."""
         self.assertFalse(self.diff.modified_booleans)
+
+    def test_added_categories(self):
+        """NoDiff: no added categories."""
+        self.assertFalse(self.diff.added_categories)
+
+    def test_removed_categories(self):
+        """NoDiff: no removed categories."""
+        self.assertFalse(self.diff.removed_categories)
+
+    def test_modified_categories(self):
+        """NoDiff: no modified categories."""
+        self.assertFalse(self.diff.modified_categories)
