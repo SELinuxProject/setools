@@ -253,12 +253,6 @@ class Sensitivity(BaseMLSComponent):
 
     """An MLS sensitivity"""
 
-    def __eq__(self, other):
-        try:
-            return self._value == other._value
-        except AttributeError:
-            return str(self) == str(other)
-
     def __ge__(self, other):
         return self._value >= other._value
 
