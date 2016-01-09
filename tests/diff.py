@@ -974,6 +974,25 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertFalse(self.diff.modified_sensitivities["s0"].added_aliases)
         self.assertEqual(set(["al2"]), self.diff.modified_sensitivities["s0"].removed_aliases)
 
+    #
+    # Initial SIDs
+    #
+    def test_added_initialsids(self):
+        """Diff: added initialsids."""
+        self.assertSetEqual(set(["added_sid"]), self.diff.added_initialsids)
+
+    def test_removed_initialsids(self):
+        """Diff: removed initialsids."""
+        self.assertSetEqual(set(["removed_sid"]), self.diff.removed_initialsids)
+
+    def test_modified_initialsids(self):
+        """Diff: modified initialsids."""
+        self.assertEqual(1, len(self.diff.modified_initialsids))
+        self.assertEqual("modified_add_role:system:system:s2",
+                         self.diff.modified_initialsids["modified_sid"].added_context)
+        self.assertEqual("system:system:system:s0",
+                         self.diff.modified_initialsids["modified_sid"].removed_context)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1210,3 +1229,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_sensitivities(self):
         """NoDiff: no modified sensitivities."""
         self.assertFalse(self.diff.modified_sensitivities)
+
+    def test_added_initialsids(self):
+        """NoDiff: no added initialsids."""
+        self.assertFalse(self.diff.added_initialsids)
+
+    def test_removed_initialsids(self):
+        """NoDiff: no removed initialsids."""
+        self.assertFalse(self.diff.removed_initialsids)
+
+    def test_modified_initialsids(self):
+        """NoDiff: no modified initialsids."""
+        self.assertFalse(self.diff.modified_initialsids)

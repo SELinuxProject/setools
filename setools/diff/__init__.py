@@ -18,6 +18,7 @@
 #
 from .bool import BooleansDifference
 from .commons import CommonDifference
+from .initsid import InitialSIDsDifference
 from .mls import CategoriesDifference, SensitivitiesDifference
 from .mlsrules import MLSRulesDifference
 from .objclass import ObjClassDifference
@@ -34,6 +35,7 @@ __all__ = ['PolicyDifference']
 class PolicyDifference(BooleansDifference,
                        CategoriesDifference,
                        CommonDifference,
+                       InitialSIDsDifference,
                        MLSRulesDifference,
                        ObjClassDifference,
                        RBACRulesDifference,

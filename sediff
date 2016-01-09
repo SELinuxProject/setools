@@ -743,6 +743,29 @@ try:
 
             print()
 
+    if all_differences or args.initialsid:
+        if diff.added_initialsids or diff.removed_initialsids or diff.modified_initialsids \
+                or args.sensitivity:
+            print("Initial SIDs ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_initialsids), len(diff.removed_initialsids),
+                len(diff.modified_initialsids)))
+            if diff.added_initialsids and not args.stats:
+                print("   Added Initial SIDs: {0}".format(len(diff.added_initialsids)))
+                for s in sorted(diff.added_initialsids):
+                    print("      + {0}".format(s))
+            if diff.removed_initialsids and not args.stats:
+                print("   Removed Initial SIDs: {0}".format(len(diff.removed_initialsids)))
+                for s in sorted(diff.removed_initialsids):
+                    print("      - {0}".format(s))
+            if diff.modified_initialsids and not args.stats:
+                print("   Modified Initial SIDs: {0}".format(len(diff.modified_initialsids)))
+                for name, mod in sorted(diff.modified_initialsids.items()):
+                    print("      * {0} (Modified context)".format(name))
+                    print("          + {0}".format(mod.added_context))
+                    print("          - {0}".format(mod.removed_context))
+
+            print()
+
 except Exception as err:
     if args.debug:
         import traceback
