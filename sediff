@@ -745,7 +745,7 @@ try:
 
     if all_differences or args.initialsid:
         if diff.added_initialsids or diff.removed_initialsids or diff.modified_initialsids \
-                or args.sensitivity:
+                or args.initialsid:
             print("Initial SIDs ({0} Added, {1} Removed, {2} Modified)".format(
                 len(diff.added_initialsids), len(diff.removed_initialsids),
                 len(diff.modified_initialsids)))
