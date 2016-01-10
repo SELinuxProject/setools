@@ -72,6 +72,7 @@ mlsrule.add_argument("--range_trans", action="store_true",
 
 labeling = parser.add_argument_group("labeling statement differences")
 labeling.add_argument("--initialsid", action="store_true", help="Print initial SID differences")
+labeling.add_argument("--fs_use", action="store_true", help="Print fs_use_* differences")
 labeling.add_argument("--genfscon", action="store_true", help="Print genfscon differences")
 labeling.add_argument("--netifcon", action="store_true", help="Print netifcon differences")
 labeling.add_argument("--nodecon", action="store_true", help="Print nodecon differences")
@@ -84,7 +85,7 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.allow, args.neverallow, args.auditallow, args.dontaudit,
                            args.type_trans, args.type_change, args.type_member, args.role_allow,
                            args.role_trans, args.range_trans, args.initialsid, args.genfscon,
-                           args.netifcon, args.nodecon, args.portcon))
+                           args.netifcon, args.nodecon, args.portcon, args.fs_use))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -763,6 +764,28 @@ try:
                     print("      * {0} (Modified context)".format(name))
                     print("          + {0}".format(mod.added_context))
                     print("          - {0}".format(mod.removed_context))
+
+            print()
+
+    if all_differences or args.fs_use:
+        if diff.added_fs_uses or diff.removed_fs_uses or diff.modified_fs_uses \
+                or args.fs_use:
+            print("Fs_use ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_fs_uses), len(diff.removed_fs_uses),
+                len(diff.modified_fs_uses)))
+            if diff.added_fs_uses and not args.stats:
+                print("   Added Fs_use: {0}".format(len(diff.added_fs_uses)))
+                for s in sorted(diff.added_fs_uses):
+                    print("      + {0}".format(s))
+            if diff.removed_fs_uses and not args.stats:
+                print("   Removed Fs_use: {0}".format(len(diff.removed_fs_uses)))
+                for s in sorted(diff.removed_fs_uses):
+                    print("      - {0}".format(s))
+            if diff.modified_fs_uses and not args.stats:
+                print("   Modified Fs_use: {0}".format(len(diff.modified_fs_uses)))
+                for entry in sorted(diff.modified_fs_uses):
+                    print("      * {0.ruletype} {0.fs} +[{1}] -[{2}];".format(
+                          entry.rule, entry.added_context, entry.removed_context))
 
             print()
 

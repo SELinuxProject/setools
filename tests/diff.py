@@ -993,6 +993,40 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("system:system:system:s0",
                          self.diff.modified_initialsids["modified_sid"].removed_context)
 
+    #
+    # fs_use_*
+    #
+    def test_added_fs_uses(self):
+        """Diff: added fs_uses."""
+        l = sorted(self.diff.added_fs_uses)
+        self.assertEqual(1, len(l))
+
+        rule = l[0]
+        self.assertEqual("fs_use_xattr", rule.ruletype)
+        self.assertEqual("added_fsuse", rule.fs)
+        self.assertEqual("system:object_r:system:s0", rule.context)
+
+    def test_removed_fs_uses(self):
+        """Diff: removed fs_uses."""
+        l = sorted(self.diff.removed_fs_uses)
+        self.assertEqual(1, len(l))
+
+        rule = l[0]
+        self.assertEqual("fs_use_task", rule.ruletype)
+        self.assertEqual("removed_fsuse", rule.fs)
+        self.assertEqual("system:object_r:system:s0", rule.context)
+
+    def test_modified_fs_uses(self):
+        """Diff: modified fs_uses."""
+        l = sorted(self.diff.modified_fs_uses)
+        self.assertEqual(1, len(l))
+
+        rule, added_context, removed_context = l[0]
+        self.assertEqual("fs_use_trans", rule.ruletype)
+        self.assertEqual("modified_fsuse", rule.fs)
+        self.assertEqual("added_user:object_r:system:s1", added_context)
+        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1241,3 +1275,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_initialsids(self):
         """NoDiff: no modified initialsids."""
         self.assertFalse(self.diff.modified_initialsids)
+
+    def test_added_fs_uses(self):
+        """NoDiff: no added fs_uses."""
+        self.assertFalse(self.diff.added_fs_uses)
+
+    def test_removed_fs_uses(self):
+        """NoDiff: no removed fs_uses."""
+        self.assertFalse(self.diff.removed_fs_uses)
+
+    def test_modified_fs_uses(self):
+        """NoDiff: no modified fs_uses."""
+        self.assertFalse(self.diff.modified_fs_uses)
