@@ -88,6 +88,9 @@ class Genfscon(FSContext):
         return "genfscon {0.fs} {0.path} {1} {0.context}".format(
             self, self._filetype_to_text[self.filetype])
 
+    def __hash__(self):
+        return hash("genfscon|{0.fs}|{0.path}|{0.filetype}".format(self))
+
     def __eq__(self, other):
         # Libqpol allocates new C objects in the
         # genfscons iterator, so pointer comparison
@@ -124,6 +127,9 @@ class FSUse(FSContext):
 
     def __str__(self):
         return "{0.ruletype} {0.fs} {0.context};".format(self)
+
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.fs}".format(self))
 
     @property
     def ruletype(self):
