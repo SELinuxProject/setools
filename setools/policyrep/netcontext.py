@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014, 2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -129,21 +129,35 @@ class Nodecon(NetContext):
         return self.qpol_symbol.mask(self.policy)
 
 
-class Portcon(NetContext):
+class PortconProtocol(int):
 
-    """A portcon statement."""
+    """
+    A portcon protocol type.
+
+    The possible values are equivalent to protocol
+    values in the socket module, e.g. IPPROTO_TCP, but
+    overrides the string representation with the
+    corresponding protocol string (udp, tcp).
+    """
 
     _proto_to_text = {socket.IPPROTO_TCP: 'tcp',
                       socket.IPPROTO_UDP: 'udp'}
 
     def __str__(self):
+        return self._proto_to_text[self]
+
+
+class Portcon(NetContext):
+
+    """A portcon statement."""
+
+    def __str__(self):
         low, high = self.ports
-        proto = self._proto_to_text[self.protocol]
 
         if low == high:
-            return "portcon {0} {1} {2}".format(proto, low, self.context)
+            return "portcon {0.protocol} {1} {0.context}".format(self, low)
         else:
-            return "portcon {0} {1}-{2} {3}".format(proto, low, high, self.context)
+            return "portcon {0.protocol} {1}-{2} {0.context}".format(self, low, high)
 
     @property
     def protocol(self):
@@ -151,7 +165,7 @@ class Portcon(NetContext):
         The protocol number for the portcon (socket.IPPROTO_TCP
         or socket.IPPROTO_UDP).
         """
-        return self.qpol_symbol.protocol(self.policy)
+        return PortconProtocol(self.qpol_symbol.protocol(self.policy))
 
     @property
     def ports(self):

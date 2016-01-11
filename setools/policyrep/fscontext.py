@@ -1,4 +1,4 @@
-# Copyright 2014, Tresys Technology, LLC
+# Copyright 2014, 2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -70,9 +70,18 @@ class FSContext(symbol.PolicySymbol):
         return str(self)
 
 
-class Genfscon(FSContext):
+class GenfsFiletype(int):
 
-    """A genfscon statement."""
+    """
+    A genfscon file type.
+
+    The possible values are equivalent to file type
+    values in the stat module, e.g. S_IFBLK, but
+    overrides the string representation with the
+    corresponding genfscon file type string
+    (-b, -c, etc.)  If the genfscon has no specific
+    file type, this is 0, (empty string).
+    """
 
     _filetype_to_text = {
         0: "",
@@ -85,8 +94,15 @@ class Genfscon(FSContext):
         stat.S_IFSOCK: "-s"}
 
     def __str__(self):
-        return "genfscon {0.fs} {0.path} {1} {0.context}".format(
-            self, self._filetype_to_text[self.filetype])
+        return self._filetype_to_text[self]
+
+
+class Genfscon(FSContext):
+
+    """A genfscon statement."""
+
+    def __str__(self):
+        return "genfscon {0.fs} {0.path} {0.filetype} {0.context}".format(self)
 
     def __hash__(self):
         return hash("genfscon|{0.fs}|{0.path}|{0.filetype}".format(self))
@@ -106,7 +122,7 @@ class Genfscon(FSContext):
     @property
     def filetype(self):
         """The file type (e.g. stat.S_IFBLK) for this genfscon statement."""
-        return self.qpol_symbol.object_class(self.policy)
+        return GenfsFiletype(self.qpol_symbol.object_class(self.policy))
 
     @property
     def path(self):
