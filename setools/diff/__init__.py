@@ -19,6 +19,7 @@
 from .bool import BooleansDifference
 from .commons import CommonDifference
 from .fsuse import FSUsesDifference
+from .genfscon import GenfsconsDifference
 from .initsid import InitialSIDsDifference
 from .mls import CategoriesDifference, SensitivitiesDifference
 from .mlsrules import MLSRulesDifference
@@ -37,6 +38,7 @@ class PolicyDifference(BooleansDifference,
                        CategoriesDifference,
                        CommonDifference,
                        FSUsesDifference,
+                       GenfsconsDifference,
                        InitialSIDsDifference,
                        MLSRulesDifference,
                        ObjClassDifference,

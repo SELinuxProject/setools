@@ -1027,6 +1027,50 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 
+    #
+    # genfscon
+    #
+    def test_added_genfscons(self):
+        """Diff: added genfscons."""
+        l = sorted(self.diff.added_genfscons)
+        self.assertEqual(2, len(l))
+
+        rule = l[0]
+        self.assertEqual("added_genfs", rule.fs)
+        self.assertEqual("/", rule.path)
+        self.assertEqual("added_user:object_r:system:s0", rule.context)
+
+        rule = l[1]
+        self.assertEqual("change_path", rule.fs)
+        self.assertEqual("/new", rule.path)
+        self.assertEqual("system:object_r:system:s0", rule.context)
+
+    def test_removed_genfscons(self):
+        """Diff: removed genfscons."""
+        l = sorted(self.diff.removed_genfscons)
+        self.assertEqual(2, len(l))
+
+        rule = l[0]
+        self.assertEqual("change_path", rule.fs)
+        self.assertEqual("/old", rule.path)
+        self.assertEqual("system:object_r:system:s0", rule.context)
+
+        rule = l[1]
+        self.assertEqual("removed_genfs", rule.fs)
+        self.assertEqual("/", rule.path)
+        self.assertEqual("system:object_r:system:s0", rule.context)
+
+    def test_modified_genfscons(self):
+        """Diff: modified genfscons."""
+        l = sorted(self.diff.modified_genfscons)
+        self.assertEqual(1, len(l))
+
+        rule, added_context, removed_context = l[0]
+        self.assertEqual("modified_genfs", rule.fs)
+        self.assertEqual("/", rule.path)
+        self.assertEqual("added_user:object_r:system:s0", added_context)
+        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1287,3 +1331,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_fs_uses(self):
         """NoDiff: no modified fs_uses."""
         self.assertFalse(self.diff.modified_fs_uses)
+
+    def test_added_genfscons(self):
+        """NoDiff: no added genfscons."""
+        self.assertFalse(self.diff.added_genfscons)
+
+    def test_removed_genfscons(self):
+        """NoDiff: no removed genfscons."""
+        self.assertFalse(self.diff.removed_genfscons)
+
+    def test_modified_genfscons(self):
+        """NoDiff: no modified genfscons."""
+        self.assertFalse(self.diff.modified_genfscons)

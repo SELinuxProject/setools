@@ -789,6 +789,28 @@ try:
 
             print()
 
+    if all_differences or args.genfscon:
+        if diff.added_genfscons or diff.removed_genfscons or diff.modified_genfscons \
+                or args.genfscon:
+            print("Genfscons ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_genfscons), len(diff.removed_genfscons),
+                len(diff.modified_genfscons)))
+            if diff.added_genfscons and not args.stats:
+                print("   Added Genfscons: {0}".format(len(diff.added_genfscons)))
+                for s in sorted(diff.added_genfscons):
+                    print("      + {0}".format(s))
+            if diff.removed_genfscons and not args.stats:
+                print("   Removed Genfscons: {0}".format(len(diff.removed_genfscons)))
+                for s in sorted(diff.removed_genfscons):
+                    print("      - {0}".format(s))
+            if diff.modified_genfscons and not args.stats:
+                print("   Modified Genfscons: {0}".format(len(diff.modified_genfscons)))
+                for entry in sorted(diff.modified_genfscons):
+                    print("      * genfscon {0.fs} {0.path} {0.filetype} +[{1}] -[{2}];".format(
+                          entry.rule, entry.added_context, entry.removed_context))
+
+            print()
+
 except Exception as err:
     if args.debug:
         import traceback
