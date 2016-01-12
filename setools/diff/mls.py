@@ -99,16 +99,16 @@ class SensitivitiesDifference(Difference):
 
         self.modified_sensitivities = dict()
 
-        for left_category, right_category in matched_sensitivities:
+        for left_sens, right_sens in matched_sensitivities:
             # Criteria for modified sensitivities
             # 1. change to aliases
             added_aliases, removed_aliases, matched_aliases = self._set_diff(
-                left_category.aliases(), right_category.aliases())
+                left_sens.aliases(), right_sens.aliases())
 
             if added_aliases or removed_aliases:
-                self.modified_sensitivities[left_category] = modified_sens_record(added_aliases,
-                                                                                  removed_aliases,
-                                                                                  matched_aliases)
+                self.modified_sensitivities[left_sens] = modified_sens_record(added_aliases,
+                                                                              removed_aliases,
+                                                                              matched_aliases)
 
     #
     # Internal functions
