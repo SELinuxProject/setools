@@ -395,6 +395,36 @@ try:
 
             print()
 
+    if all_differences or args.level:
+        if diff.added_levels or diff.removed_levels or \
+                diff.modified_levels or args.level:
+            print("Levels ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_levels), len(diff.removed_levels),
+                len(diff.modified_levels)))
+            if diff.added_levels and not args.stats:
+                print("   Added Levels: {0}".format(len(diff.added_levels)))
+                for l in sorted(diff.added_levels):
+                    print("      + {0}".format(l))
+            if diff.removed_levels and not args.stats:
+                print("   Removed Levels: {0}".format(len(diff.removed_levels)))
+                for l in sorted(diff.removed_levels):
+                    print("      - {0}".format(l))
+            if diff.modified_levels and not args.stats:
+                print("   Modified Levels: {0}".format(len(diff.modified_levels)))
+                for level, added_categories, removed_categories, _ in sorted(diff.modified_levels):
+                    change = []
+                    if added_categories:
+                        change.append("{0} Added Categories".format(len(added_categories)))
+                    if removed_categories:
+                        change.append("{0} Removed Categories".format(len(removed_categories)))
+
+                    print("      * {0} ({1})".format(level.sensitivity, ", ".join(change)))
+                    for c in sorted(added_categories):
+                        print("          + {0}".format(c))
+                    for c in sorted(removed_categories):
+                        print("          - {0}".format(c))
+            print()
+
     if all_differences or args.allow:
         if diff.added_allows or diff.removed_allows or diff.modified_allows or args.allow:
             print("Allow Rules ({0} Added, {1} Removed, {2} Modified)".format(

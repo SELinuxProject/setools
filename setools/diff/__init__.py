@@ -21,7 +21,7 @@ from .commons import CommonDifference
 from .fsuse import FSUsesDifference
 from .genfscon import GenfsconsDifference
 from .initsid import InitialSIDsDifference
-from .mls import CategoriesDifference, SensitivitiesDifference
+from .mls import CategoriesDifference, LevelDeclsDifference, SensitivitiesDifference
 from .mlsrules import MLSRulesDifference
 from .objclass import ObjClassDifference
 from .rbacrules import RBACRulesDifference
@@ -40,6 +40,7 @@ class PolicyDifference(BooleansDifference,
                        FSUsesDifference,
                        GenfsconsDifference,
                        InitialSIDsDifference,
+                       LevelDeclsDifference,
                        MLSRulesDifference,
                        ObjClassDifference,
                        RBACRulesDifference,

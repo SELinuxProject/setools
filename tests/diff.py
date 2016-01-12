@@ -1071,6 +1071,36 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("added_user:object_r:system:s0", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 
+    #
+    # level decl
+    #
+    def test_added_levels(self):
+        """Diff: added levels."""
+        l = sorted(self.diff.added_levels)
+        self.assertEqual(1, len(l))
+        self.assertEqual("s46:c0.c4", l[0])
+
+    def test_removed_levels(self):
+        """Diff: removed levels."""
+        l = sorted(self.diff.removed_levels)
+        self.assertEqual(1, len(l))
+        self.assertEqual("s47:c0.c4", l[0])
+
+    def test_modified_levels(self):
+        """Diff: modified levels."""
+        l = sorted(self.diff.modified_levels)
+        self.assertEqual(2, len(l))
+
+        level = l[0]
+        self.assertEqual("s40", level.level.sensitivity)
+        self.assertSetEqual(set(["c3"]), level.added_categories)
+        self.assertFalse(level.removed_categories)
+
+        level = l[1]
+        self.assertEqual("s41", level.level.sensitivity)
+        self.assertFalse(level.added_categories)
+        self.assertSetEqual(set(["c4"]), level.removed_categories)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1343,3 +1373,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_genfscons(self):
         """NoDiff: no modified genfscons."""
         self.assertFalse(self.diff.modified_genfscons)
+
+    def test_added_levels(self):
+        """NoDiff: no added levels."""
+        self.assertFalse(self.diff.added_levels)
+
+    def test_removed_levels(self):
+        """NoDiff: no removed levels."""
+        self.assertFalse(self.diff.removed_levels)
+
+    def test_modified_levels(self):
+        """NoDiff: no modified levels."""
+        self.assertFalse(self.diff.modified_levels)

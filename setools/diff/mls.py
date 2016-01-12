@@ -29,6 +29,11 @@ modified_sens_record = namedtuple("modified_sensitivity", ["added_aliases",
                                                            "removed_aliases",
                                                            "matched_aliases"])
 
+modified_level_record = namedtuple("modified_level", ["level",
+                                                      "added_categories",
+                                                      "removed_categories",
+                                                      "matched_categories"])
+
 
 class CategoriesDifference(Difference):
 
@@ -114,6 +119,71 @@ class SensitivitiesDifference(Difference):
         self.added_sensitivities = None
         self.removed_sensitivities = None
         self.modified_sensitivities = None
+
+
+class LevelDeclsDifference(Difference):
+
+    """Determine the difference in levels between two policies."""
+
+    added_levels = DiffResultDescriptor("diff_levels")
+    removed_levels = DiffResultDescriptor("diff_levels")
+    modified_levels = DiffResultDescriptor("diff_levels")
+
+    def diff_levels(self):
+        """Generate the difference in levels between the policies."""
+
+        self.log.info(
+            "Generating level decl differences from {0.left_policy} to {0.right_policy}".
+            format(self))
+
+        self.added_levels, self.removed_levels, matched_levels = \
+            self._set_diff(
+                (LevelDeclWrapper(s) for s in self.left_policy.levels()),
+                (LevelDeclWrapper(s) for s in self.right_policy.levels()))
+
+        self.modified_levels = []
+
+        for left_level, right_level in matched_levels:
+            # Criteria for modified levels
+            # 1. change to allowed categories
+            added_categories, removed_categories, matched_categories = self._set_diff(
+                (SymbolWrapper(c) for c in left_level.categories()),
+                (SymbolWrapper(c) for c in right_level.categories()))
+
+            if added_categories or removed_categories:
+                self.modified_levels.append(modified_level_record(
+                    left_level, added_categories, removed_categories, matched_categories))
+
+    #
+    # Internal functions
+    #
+    def _reset_diff(self):
+        """Reset diff results on policy changes."""
+        self.log.debug("Resetting sensitivity differences")
+        self.added_levels = None
+        self.removed_levels = None
+        self.modified_levels = None
+
+
+class LevelDeclWrapper(Wrapper):
+
+    """Wrap level declarations to allow comparisons."""
+
+    def __init__(self, level):
+        self.origin = level
+        self.sensitivity = SymbolWrapper(level.sensitivity)
+        self.key = hash(level)
+
+    def __hash__(self):
+        return self.key
+
+    def __eq__(self, other):
+        # non-MLS policies have no level declarations so there
+        # should be no AttributeError possiblity here
+        return self.sensitivity == other.sensitivity
+
+    def __lt__(self, other):
+        return self.sensitivity < other.sensitivity
 
 
 class LevelWrapper(Wrapper):
