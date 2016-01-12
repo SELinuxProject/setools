@@ -1,4 +1,4 @@
-# Copyright 2014-2015, Tresys Technology, LLC
+# Copyright 2014-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -324,6 +324,10 @@ class LevelDecl(BaseMLSLevel):
 
     level s7:c0.c1023;
     """
+
+    def __hash__(self):
+        return hash(self.sensitivity)
+
     # below comparisons are only based on sensitivity
     # dominance since, in this context, the allowable
     # category set is being defined for the level.
