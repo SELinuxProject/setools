@@ -76,6 +76,9 @@ class Netifcon(NetContext):
     def __str__(self):
         return "netifcon {0.netif} {0.context} {0.packet}".format(self)
 
+    def __hash__(self):
+        return hash("netifcon|{0.netif}".format(self))
+
     @property
     def netif(self):
         """The network interface name."""
@@ -98,6 +101,9 @@ class Nodecon(NetContext):
 
     def __str__(self):
         return "nodecon {0.address} {0.netmask} {0.context}".format(self)
+
+    def __hash__(self):
+        return hash("nodecon|{0.address}|{0.netmask}".format(self))
 
     def __eq__(self, other):
         # Libqpol allocates new C objects in the
@@ -158,6 +164,9 @@ class Portcon(NetContext):
             return "portcon {0.protocol} {1} {0.context}".format(self, low)
         else:
             return "portcon {0.protocol} {1}-{2} {0.context}".format(self, low, high)
+
+    def __hash__(self):
+            return hash("portcon|{0.protocol}|{0.low}|{0.high}".format(self))
 
     @property
     def protocol(self):
