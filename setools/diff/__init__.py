@@ -26,6 +26,7 @@ from .mlsrules import MLSRulesDifference
 from .netifcon import NetifconsDifference
 from .nodecon import NodeconsDifference
 from .objclass import ObjClassDifference
+from .polcap import PolCapsDifference
 from .rbacrules import RBACRulesDifference
 from .roles import RolesDifference
 from .terules import TERulesDifference
@@ -47,6 +48,7 @@ class PolicyDifference(BooleansDifference,
                        NetifconsDifference,
                        NodeconsDifference,
                        ObjClassDifference,
+                       PolCapsDifference,
                        RBACRulesDifference,
                        RolesDifference,
                        SensitivitiesDifference,

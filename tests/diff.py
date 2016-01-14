@@ -1225,6 +1225,17 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("modified_change_level:object_r:system:s2:c1", added_context)
         self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed_context)
 
+    #
+    # Policy capabilities
+    #
+    def test_added_polcaps(self):
+        """Diff: added polcaps."""
+        self.assertSetEqual(set(["always_check_network"]), self.diff.added_polcaps)
+
+    def test_removed_polcaps(self):
+        """Diff: removed polcaps."""
+        self.assertSetEqual(set(["network_peer_controls"]), self.diff.removed_polcaps)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1533,3 +1544,11 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_nodecons(self):
         """NoDiff: no modified nodecons."""
         self.assertFalse(self.diff.modified_nodecons)
+
+    def test_added_polcaps(self):
+        """NoDiff: no added polcaps."""
+        self.assertFalse(self.diff.added_polcaps)
+
+    def test_removed_polcaps(self):
+        """NoDiff: no removed polcaps."""
+        self.assertFalse(self.diff.removed_polcaps)

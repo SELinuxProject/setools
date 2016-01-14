@@ -78,6 +78,9 @@ labeling.add_argument("--netifcon", action="store_true", help="Print netifcon di
 labeling.add_argument("--nodecon", action="store_true", help="Print nodecon differences")
 labeling.add_argument("--portcon", action="store_true", help="Print portcon differences")
 
+other = parser.add_argument_group("other differences")
+other.add_argument("--polcap", action="store_true", help="Print policy capability differences")
+
 args = parser.parse_args()
 
 all_differences = not any((args.class_, args.common, args.type_, args.attribute, args.role,
@@ -85,7 +88,7 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.allow, args.neverallow, args.auditallow, args.dontaudit,
                            args.type_trans, args.type_change, args.type_member, args.role_allow,
                            args.role_trans, args.range_trans, args.initialsid, args.genfscon,
-                           args.netifcon, args.nodecon, args.portcon, args.fs_use))
+                           args.netifcon, args.nodecon, args.portcon, args.fs_use, args.polcap))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -899,6 +902,21 @@ try:
                 for con, added_context, removed_context in sorted(diff.modified_nodecons):
                     print("      * nodecon {0.address} {0.netmask} +[{1}] -[{2}];".format(
                           con, added_context, removed_context))
+
+            print()
+
+    if all_differences or args.polcap:
+        if diff.added_polcaps or diff.removed_polcaps or args.polcap:
+            print("Policy Capabilities ({0} Added, {1} Removed)".format(
+                len(diff.added_polcaps), len(diff.removed_polcaps)))
+            if diff.added_polcaps and not args.stats:
+                print("   Added Policy Capabilities: {0}".format(len(diff.added_polcaps)))
+                for n in sorted(diff.added_polcaps):
+                    print("      + {0}".format(n))
+            if diff.removed_polcaps and not args.stats:
+                print("   Removed Policy Capabilities: {0}".format(len(diff.removed_polcaps)))
+                for n in sorted(diff.removed_polcaps):
+                    print("      - {0}".format(n))
 
             print()
 
