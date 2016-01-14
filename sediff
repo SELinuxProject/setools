@@ -880,6 +880,28 @@ try:
 
             print()
 
+    if all_differences or args.nodecon:
+        if diff.added_nodecons or diff.removed_nodecons or diff.modified_nodecons \
+                or args.nodecon:
+            print("Nodecons ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_nodecons), len(diff.removed_nodecons),
+                len(diff.modified_nodecons)))
+            if diff.added_nodecons and not args.stats:
+                print("   Added Nodecons: {0}".format(len(diff.added_nodecons)))
+                for n in sorted(diff.added_nodecons):
+                    print("      + {0}".format(n))
+            if diff.removed_nodecons and not args.stats:
+                print("   Removed Nodecons: {0}".format(len(diff.removed_nodecons)))
+                for n in sorted(diff.removed_nodecons):
+                    print("      - {0}".format(n))
+            if diff.modified_nodecons and not args.stats:
+                print("   Modified Nodecons: {0}".format(len(diff.modified_nodecons)))
+                for con, added_context, removed_context in sorted(diff.modified_nodecons):
+                    print("      * nodecon {0.address} {0.netmask} +[{1}] -[{2}];".format(
+                          con, added_context, removed_context))
+
+            print()
+
 except Exception as err:
     if args.debug:
         import traceback

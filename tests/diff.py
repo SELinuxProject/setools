@@ -1153,6 +1153,78 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("added_user:object_r:system:s0", added_packet)
         self.assertEqual("removed_user:object_r:system:s0", removed_packet)
 
+    #
+    # nodecons
+    #
+    def test_added_nodecons(self):
+        """Diff: added nodecons."""
+        l = sorted(self.diff.added_nodecons)
+        self.assertEqual(4, len(l))
+
+        # new IPv4
+        nodecon = l[0]
+        self.assertEqual("127.0.0.4", nodecon.address)
+        self.assertEqual("255.255.255.255", nodecon.netmask)
+
+        # changed IPv4 netmask
+        nodecon = l[1]
+        self.assertEqual("127.0.0.5", nodecon.address)
+        self.assertEqual("255.255.255.0", nodecon.netmask)
+
+        # new IPv6
+        nodecon = l[2]
+        self.assertEqual("::4", nodecon.address)
+        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+
+        # changed IPv6 netmask
+        nodecon = l[3]
+        self.assertEqual("::5", nodecon.address)
+        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0", nodecon.netmask)
+
+    def test_removed_nodecons(self):
+        """Diff: removed nodecons."""
+        l = sorted(self.diff.removed_nodecons)
+        self.assertEqual(4, len(l))
+
+        # new IPv4
+        nodecon = l[0]
+        self.assertEqual("127.0.0.2", nodecon.address)
+        self.assertEqual("255.255.255.255", nodecon.netmask)
+
+        # changed IPv4 netmask
+        nodecon = l[1]
+        self.assertEqual("127.0.0.5", nodecon.address)
+        self.assertEqual("255.255.255.255", nodecon.netmask)
+
+        # new IPv6
+        nodecon = l[2]
+        self.assertEqual("::2", nodecon.address)
+        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+
+        # changed IPv6 netmask
+        nodecon = l[3]
+        self.assertEqual("::5", nodecon.address)
+        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+
+    def test_modified_nodecons(self):
+        """Diff: modified nodecons."""
+        l = sorted(self.diff.modified_nodecons)
+        self.assertEqual(2, len(l))
+
+        # changed IPv4
+        nodecon, added_context, removed_context = l[0]
+        self.assertEqual("127.0.0.3", nodecon.address)
+        self.assertEqual("255.255.255.255", nodecon.netmask)
+        self.assertEqual("modified_change_level:object_r:system:s2:c0", added_context)
+        self.assertEqual("modified_change_level:object_r:system:s2:c1", removed_context)
+
+        # changed IPv6
+        nodecon, added_context, removed_context = l[1]
+        self.assertEqual("::3", nodecon.address)
+        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+        self.assertEqual("modified_change_level:object_r:system:s2:c1", added_context)
+        self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed_context)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1449,3 +1521,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_netifcons(self):
         """NoDiff: no modified netifcons."""
         self.assertFalse(self.diff.modified_netifcons)
+
+    def test_added_nodecons(self):
+        """NoDiff: no added nodecons."""
+        self.assertFalse(self.diff.added_nodecons)
+
+    def test_removed_nodecons(self):
+        """NoDiff: no removed nodecons."""
+        self.assertFalse(self.diff.removed_nodecons)
+
+    def test_modified_nodecons(self):
+        """NoDiff: no modified nodecons."""
+        self.assertFalse(self.diff.modified_nodecons)
