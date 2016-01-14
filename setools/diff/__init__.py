@@ -23,6 +23,7 @@ from .genfscon import GenfsconsDifference
 from .initsid import InitialSIDsDifference
 from .mls import CategoriesDifference, LevelDeclsDifference, SensitivitiesDifference
 from .mlsrules import MLSRulesDifference
+from .netifcon import NetifconsDifference
 from .objclass import ObjClassDifference
 from .rbacrules import RBACRulesDifference
 from .roles import RolesDifference
@@ -42,6 +43,7 @@ class PolicyDifference(BooleansDifference,
                        InitialSIDsDifference,
                        LevelDeclsDifference,
                        MLSRulesDifference,
+                       NetifconsDifference,
                        ObjClassDifference,
                        RBACRulesDifference,
                        RolesDifference,

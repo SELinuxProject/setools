@@ -1101,6 +1101,58 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertFalse(level.added_categories)
         self.assertSetEqual(set(["c4"]), level.removed_categories)
 
+    #
+    # netifcon
+    #
+    def test_added_netifcons(self):
+        """Diff: added netifcons."""
+        l = sorted(self.diff.added_netifcons)
+        self.assertEqual(1, len(l))
+
+        rule = l[0]
+        self.assertEqual("added_netif", rule.netif)
+        self.assertEqual("system:object_r:system:s0", rule.context)
+        self.assertEqual("system:object_r:system:s0", rule.packet)
+
+    def test_removed_netifcons(self):
+        """Diff: removed netifcons."""
+        l = sorted(self.diff.removed_netifcons)
+        self.assertEqual(1, len(l))
+
+        rule = l[0]
+        self.assertEqual("removed_netif", rule.netif)
+        self.assertEqual("system:object_r:system:s0", rule.context)
+        self.assertEqual("system:object_r:system:s0", rule.packet)
+
+    def test_modified_netifcons(self):
+        """Diff: modified netifcons."""
+        l = sorted(self.diff.modified_netifcons)
+        self.assertEqual(3, len(l))
+
+        # modified both contexts
+        rule, added_context, removed_context, added_packet, removed_packet = l[0]
+        self.assertEqual("mod_both_netif", rule.netif)
+        self.assertEqual("added_user:object_r:system:s0", added_context)
+        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+        self.assertEqual("added_user:object_r:system:s0", added_packet)
+        self.assertEqual("removed_user:object_r:system:s0", removed_packet)
+
+        # modified context
+        rule, added_context, removed_context, added_packet, removed_packet = l[1]
+        self.assertEqual("mod_ctx_netif", rule.netif)
+        self.assertEqual("added_user:object_r:system:s0", added_context)
+        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+        self.assertFalse(added_packet)
+        self.assertFalse(removed_packet)
+
+        # modified packet context
+        rule, added_context, removed_context, added_packet, removed_packet = l[2]
+        self.assertEqual("mod_pkt_netif", rule.netif)
+        self.assertFalse(added_context)
+        self.assertFalse(removed_context)
+        self.assertEqual("added_user:object_r:system:s0", added_packet)
+        self.assertEqual("removed_user:object_r:system:s0", removed_packet)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1385,3 +1437,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_levels(self):
         """NoDiff: no modified levels."""
         self.assertFalse(self.diff.modified_levels)
+
+    def test_added_netifcons(self):
+        """NoDiff: no added netifcons."""
+        self.assertFalse(self.diff.added_netifcons)
+
+    def test_removed_netifcons(self):
+        """NoDiff: no removed netifcons."""
+        self.assertFalse(self.diff.removed_netifcons)
+
+    def test_modified_netifcons(self):
+        """NoDiff: no modified netifcons."""
+        self.assertFalse(self.diff.modified_netifcons)

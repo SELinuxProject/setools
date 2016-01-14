@@ -840,6 +840,46 @@ try:
 
             print()
 
+    if all_differences or args.netifcon:
+        if diff.added_netifcons or diff.removed_netifcons or \
+                diff.modified_netifcons or args.netifcon:
+            print("Netifcons ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_netifcons), len(diff.removed_netifcons),
+                len(diff.modified_netifcons)))
+            if diff.added_netifcons and not args.stats:
+                print("   Added Netifcons: {0}".format(len(diff.added_netifcons)))
+                for n in sorted(diff.added_netifcons):
+                    print("      + {0}".format(n))
+            if diff.removed_netifcons and not args.stats:
+                print("   Removed Netifcons: {0}".format(len(diff.removed_netifcons)))
+                for n in sorted(diff.removed_netifcons):
+                    print("      - {0}".format(n))
+            if diff.modified_netifcons and not args.stats:
+                print("   Modified Netifcons: {0}".format(len(diff.modified_netifcons)))
+                for entry in sorted(diff.modified_netifcons):
+                    # This output is different than other statements because
+                    # it becomes difficult to read if this was condensed
+                    # into a single line, especially if both contexts
+                    # are modified.
+                    change = []
+                    if entry.removed_context:
+                        change.append("Modified Context")
+                    if entry.removed_packet:
+                        change.append("Modified Packet Context")
+
+                    print("      * {0.netif} ({1})".format(entry.rule, ", ".join(change)))
+
+                    if entry.removed_context:
+                        print("          Context:")
+                        print("             + {0}".format(entry.added_context))
+                        print("             - {0}".format(entry.removed_context))
+                    if entry.removed_packet:
+                        print("          Packet Context:")
+                        print("             + {0}".format(entry.added_packet))
+                        print("             - {0}".format(entry.removed_packet))
+
+            print()
+
 except Exception as err:
     if args.debug:
         import traceback
