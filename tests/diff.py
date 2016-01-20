@@ -887,9 +887,9 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_user_change_range(self):
         """Diff: modified user due to modified range."""
-        self.assertEqual("s3:c1.c3",
+        self.assertEqual("s3:c1 - s3:c1.c3",
                          self.diff.modified_users["modified_change_range"].removed_range)
-        self.assertEqual("s3:c1.c4",
+        self.assertEqual("s3:c1 - s3:c1.c4",
                          self.diff.modified_users["modified_change_range"].added_range)
 
     #
