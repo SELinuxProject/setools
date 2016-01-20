@@ -62,6 +62,7 @@ class SELinuxPolicyTest(unittest.TestCase):
     def tearDownClass(cls):
         os.unlink(cls.policy_path)
 
+    @unittest.skip("Retired for the SELinuxPolicyLoadError test suite.")
     def test_001_open_policy_error(self):
         """SELinuxPolicy: Invalid policy on open."""
         self.assertRaises(InvalidPolicy, SELinuxPolicy, "tests/policyrep/selinuxpolicy-bad.conf")
@@ -228,3 +229,22 @@ class SELinuxPolicyTest(unittest.TestCase):
     def test_135_validatetrans_count(self):
         """SELinuxPolicy: validatetrans count"""
         self.assertEqual(self.p.validatetrans_count, 5)
+
+
+class SELinuxPolicyLoadError(unittest.TestCase):
+
+    """Test attempted loading of non-compiling policies."""
+
+    def _load_policy(self, policy):
+        self.assertRaises(InvalidPolicy, SELinuxPolicy, "tests/policyrep/invalid_policies/"+policy)
+
+    def test_nodecon_invalid_range(self):
+        """SELinuxPolicy: invalid nodecon range (category not associated) error."""
+        self._load_policy("nodecon-invalid-range.conf")
+        sys.stderr.write("The \"category can not be associated\" error above is expected.")
+
+    # this is not fixed yet. See issue #72
+    @unittest.expectedFailure
+    def test_user_level_not_in_range(self):
+        """SELinuxPolicy: error for user's default level isn't within the range."""
+        self._load_policy("user-level-not-in-range.conf")
