@@ -905,6 +905,33 @@ try:
 
             print()
 
+    if all_differences or args.portcon:
+        if diff.added_portcons or diff.removed_portcons or diff.modified_portcons \
+                or args.portcon:
+            print("Portcons ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_portcons), len(diff.removed_portcons),
+                len(diff.modified_portcons)))
+            if diff.added_portcons and not args.stats:
+                print("   Added Portcons: {0}".format(len(diff.added_portcons)))
+                for n in sorted(diff.added_portcons):
+                    print("      + {0}".format(n))
+            if diff.removed_portcons and not args.stats:
+                print("   Removed Portcons: {0}".format(len(diff.removed_portcons)))
+                for n in sorted(diff.removed_portcons):
+                    print("      - {0}".format(n))
+            if diff.modified_portcons and not args.stats:
+                print("   Modified Portcons: {0}".format(len(diff.modified_portcons)))
+                for con, added_context, removed_context in sorted(diff.modified_portcons):
+                    low, high = con.ports
+                    if low == high:
+                        print("      * portcon {0.protocol} {1} +[{2}] -[{3}];".format(
+                              con, low, added_context, removed_context))
+                    else:
+                        print("      * portcon {0.protocol} {1}-{2} +[{3}] -[{4}];".format(
+                              con, low, high, added_context, removed_context))
+
+            print()
+
     if all_differences or args.polcap:
         if diff.added_polcaps or diff.removed_polcaps or args.polcap:
             print("Policy Capabilities ({0} Added, {1} Removed)".format(

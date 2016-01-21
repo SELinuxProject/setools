@@ -16,6 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
+from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
 
@@ -1236,6 +1237,52 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         """Diff: removed polcaps."""
         self.assertSetEqual(set(["network_peer_controls"]), self.diff.removed_polcaps)
 
+    #
+    # portcons
+    #
+    def test_added_portcons(self):
+        """Diff: added portcons."""
+        l = sorted(self.diff.added_portcons)
+        self.assertEqual(2, len(l))
+
+        portcon = l[0]
+        self.assertEqual(IPPROTO_TCP, portcon.protocol)
+        self.assertTupleEqual((2024, 2026), portcon.ports)
+
+        portcon = l[1]
+        self.assertEqual(IPPROTO_UDP, portcon.protocol)
+        self.assertTupleEqual((2024, 2024), portcon.ports)
+
+    def test_removed_portcons(self):
+        """Diff: removed portcons."""
+        l = sorted(self.diff.removed_portcons)
+        self.assertEqual(2, len(l))
+
+        portcon = l[0]
+        self.assertEqual(IPPROTO_TCP, portcon.protocol)
+        self.assertTupleEqual((1024, 1026), portcon.ports)
+
+        portcon = l[1]
+        self.assertEqual(IPPROTO_UDP, portcon.protocol)
+        self.assertTupleEqual((1024, 1024), portcon.ports)
+
+    def test_modified_portcons(self):
+        """Diff: modified portcons."""
+        l = sorted(self.diff.modified_portcons)
+        self.assertEqual(2, len(l))
+
+        portcon, added_context, removed_context = l[0]
+        self.assertEqual(IPPROTO_TCP, portcon.protocol)
+        self.assertTupleEqual((3024, 3026), portcon.ports)
+        self.assertEqual("added_user:object_r:system:s1", added_context)
+        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+
+        portcon, added_context, removed_context = l[1]
+        self.assertEqual(IPPROTO_UDP, portcon.protocol)
+        self.assertTupleEqual((3024, 3024), portcon.ports)
+        self.assertEqual("added_user:object_r:system:s1", added_context)
+        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1552,3 +1599,15 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_removed_polcaps(self):
         """NoDiff: no removed polcaps."""
         self.assertFalse(self.diff.removed_polcaps)
+
+    def test_added_portcons(self):
+        """NoDiff: no added portcons."""
+        self.assertFalse(self.diff.added_portcons)
+
+    def test_removed_portcons(self):
+        """NoDiff: no removed portcons."""
+        self.assertFalse(self.diff.removed_portcons)
+
+    def test_modified_portcons(self):
+        """NoDiff: no modified portcons."""
+        self.assertFalse(self.diff.modified_portcons)
