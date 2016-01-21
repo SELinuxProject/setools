@@ -43,8 +43,8 @@ class NodeconsDifference(Difference):
                       format(self))
 
         self.added_nodecons, self.removed_nodecons, matched_nodecons = self._set_diff(
-            (NodeconWraper(n) for n in self.left_policy.nodecons()),
-            (NodeconWraper(n) for n in self.right_policy.nodecons()))
+            (NodeconWrapper(n) for n in self.left_policy.nodecons()),
+            (NodeconWrapper(n) for n in self.right_policy.nodecons()))
 
         self.modified_nodecons = []
 
@@ -67,7 +67,7 @@ class NodeconsDifference(Difference):
         self.modified_nodecons = None
 
 
-class NodeconWraper(Wrapper):
+class NodeconWrapper(Wrapper):
 
     """Wrap nodecon statements for diff purposes."""
 
