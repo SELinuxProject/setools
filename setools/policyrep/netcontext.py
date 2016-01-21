@@ -166,7 +166,7 @@ class Portcon(NetContext):
             return "portcon {0.protocol} {1}-{2} {0.context}".format(self, low, high)
 
     def __hash__(self):
-            return hash("portcon|{0.protocol}|{0.low}|{0.high}".format(self))
+            return hash("portcon|{0.protocol}|{1.low}|{1.high}".format(self, self.ports))
 
     @property
     def protocol(self):
