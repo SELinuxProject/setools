@@ -440,88 +440,6 @@ static int qpol_policy_add_isid_names(qpol_policy_t * policy)
 	return 0;
 }
 
-static int extend_assign_role_to_user(hashtab_key_t k __attribute__ ((unused)), hashtab_datum_t d, void *args)
-{
-	user_datum_t *user = (user_datum_t *) d;
-	uint32_t *value = (uint32_t *) args;
-	if (ebitmap_set_bit(&user->roles.roles, *value - 1, 1)) {
-		return -1;
-	}
-	return 0;
-}
-
-/**
- *  Modify the special role 'object_r' by assigning it to all users,
- *  and all types to object_r.  This function modifies the policydb.
- *  @param policy Policy containing object_r.  This policy will be
- *  altered by this function.
- *  @return 0 on success and < 0 on failure; if the call fails, errno
- *  will be set.  On failure, the policy state may be inconsistent.
- */
-static int qpol_policy_add_object_r(qpol_policy_t * policy)
-{
-	policydb_t *db = NULL;
-	int error = 0;
-
-	if (policy == NULL) {
-		ERR(policy, "%s", strerror(EINVAL));
-		errno = EINVAL;
-		return STATUS_ERR;
-	}
-
-	db = &policy->p->p;
-
-	hashtab_datum_t datum = hashtab_search(db->p_roles.table, (hashtab_key_t)OBJECT_R);
-	if (datum == NULL) {
-		ERR(policy, "%s", OBJECT_R " not found in policy!");
-		errno = EIO;
-		assert(0);
-		return STATUS_ERR;
-	}
-
-	role_datum_t *role = (role_datum_t *) datum;
-
-	uint32_t value = role->s.value;
-
-	if (hashtab_map(db->p_users.table, extend_assign_role_to_user, &value) < 0) {
-		return STATUS_ERR;
-	}
-
-	qpol_iterator_t *iter;
-	if (qpol_policy_get_type_iter(policy, &iter) < 0) {
-		return STATUS_ERR;
-	}
-	for (; !qpol_iterator_end(iter); qpol_iterator_next(iter)) {
-		const qpol_type_t *type;
-		unsigned char isattr, isalias;
-		if (qpol_iterator_get_item(iter, (void **)&type) < 0 ||
-		    qpol_type_get_isattr(policy, type, &isattr) < 0 || qpol_type_get_isalias(policy, type, &isalias) < 0) {
-			error = errno;
-			qpol_iterator_destroy(&iter);
-			errno = error;
-			return STATUS_ERR;
-		}
-		if (isattr || isalias) {
-			continue;
-		}
-		if (qpol_type_get_value(policy, type, &value) < 0) {
-			error = errno;
-			qpol_iterator_destroy(&iter);
-			errno = error;
-			return STATUS_ERR;
-		}
-		if (ebitmap_set_bit(&role->types.types, value - 1, 1)) {
-			error = errno;
-			qpol_iterator_destroy(&iter);
-			errno = error;
-			return STATUS_ERR;
-		}
-	}
-	qpol_iterator_destroy(&iter);
-
-	return 0;
-}
-
 /**
  *  If the given policy's version is higher than the running system's
  *  version, then mark it as different.  In a future version of
@@ -1100,12 +1018,6 @@ int policy_extend(qpol_policy_t * policy)
 		error = errno;
 		goto err;
 	}
-	retv = qpol_policy_add_object_r(policy);
-	if (retv) {
-		error = errno;
-		goto err;
-	}
-
 	if ((policy->options & QPOL_POLICY_OPTION_MATCH_SYSTEM) && qpol_policy_match_system(policy)) {
 		error = errno;
 		goto err;

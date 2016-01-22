@@ -135,8 +135,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_role_count(self):
         """Diff: modified role."""
-        self.assertIn("object_r", self.diff.modified_roles)
-        self.assertEqual(3, len(self.diff.modified_roles))
+        self.assertEqual(2, len(self.diff.modified_roles))
 
     def test_modified_role_add_type(self):
         """Diff: modified role with added type."""
