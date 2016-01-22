@@ -57,13 +57,6 @@ class RoleQuery(compquery.ComponentQuery):
                        "eq: {0.types_equal}".format(self))
 
         for r in self.policy.roles():
-            if r == "object_r":
-                # all types are implicitly added to object_r by the compiler.
-                # technically it is incorrect to skip it, but policy writers
-                # and analysts don't expect to see it in results, and it
-                # will confuse, especially for set equality type queries.
-                continue
-
             if not self._match_name(r):
                 continue
 

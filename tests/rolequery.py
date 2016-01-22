@@ -30,8 +30,6 @@ class RoleQueryTest(unittest.TestCase):
         """Role query with no criteria."""
         # query with no parameters gets all types.
         roles = sorted(self.p.roles())
-        # remove object_r, as it is skipped from the role query
-        roles.remove("object_r")
 
         q = RoleQuery(self.p)
         q_roles = sorted(q.results())
