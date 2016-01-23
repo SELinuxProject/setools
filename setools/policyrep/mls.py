@@ -43,7 +43,7 @@ from . import symbol
 
 def enabled(policy):
     """Determine if MLS is enabled."""
-    return policy.capability(qpol.QPOL_CAP_MLS)
+    return bool(policy.capability(qpol.QPOL_CAP_MLS))
 
 
 def category_factory(policy, sym):
