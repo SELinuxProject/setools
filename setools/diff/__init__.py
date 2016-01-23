@@ -28,6 +28,7 @@ from .nodecon import NodeconsDifference
 from .objclass import ObjClassDifference
 from .polcap import PolCapsDifference
 from .portcon import PortconsDifference
+from .properties import PropertiesDifference
 from .rbacrules import RBACRulesDifference
 from .roles import RolesDifference
 from .terules import TERulesDifference
@@ -51,6 +52,7 @@ class PolicyDifference(BooleansDifference,
                        ObjClassDifference,
                        PolCapsDifference,
                        PortconsDifference,
+                       PropertiesDifference,
                        RBACRulesDifference,
                        RolesDifference,
                        SensitivitiesDifference,

@@ -1610,3 +1610,7 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_portcons(self):
         """NoDiff: no modified portcons."""
         self.assertFalse(self.diff.modified_portcons)
+
+    def test_modified_properties(self):
+        """NoDiff: no modified properties."""
+        self.assertFalse(self.diff.modified_properties)

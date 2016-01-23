@@ -79,6 +79,8 @@ labeling.add_argument("--nodecon", action="store_true", help="Print nodecon diff
 labeling.add_argument("--portcon", action="store_true", help="Print portcon differences")
 
 other = parser.add_argument_group("other differences")
+other.add_argument("--property", action="store_true",
+                   help="Print policy property differences (handle_unknown, version, MLS)")
 other.add_argument("--polcap", action="store_true", help="Print policy capability differences")
 
 args = parser.parse_args()
@@ -88,7 +90,8 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.allow, args.neverallow, args.auditallow, args.dontaudit,
                            args.type_trans, args.type_change, args.type_member, args.role_allow,
                            args.role_trans, args.range_trans, args.initialsid, args.genfscon,
-                           args.netifcon, args.nodecon, args.portcon, args.fs_use, args.polcap))
+                           args.netifcon, args.nodecon, args.portcon, args.fs_use, args.polcap,
+                           args.property))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -102,6 +105,15 @@ try:
     p1 = setools.SELinuxPolicy(args.POLICY1[0])
     p2 = setools.SELinuxPolicy(args.POLICY2[0])
     diff = setools.PolicyDifference(p1, p2)
+
+    if all_differences or args.property:
+        print("Policy Properties ({0} Modified)".format(len(diff.modified_properties)))
+
+        if diff.modified_properties and not args.stats:
+            for name, added, removed in sorted(diff.modified_properties):
+                print("      * {0} +{1} -{2}".format(name, added, removed))
+
+        print()
 
     if all_differences or args.common:
         if diff.added_commons or diff.removed_commons or diff.modified_commons or args.common:
