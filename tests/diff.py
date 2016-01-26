@@ -27,9 +27,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     """Policy difference tests."""
 
-    def setUp(self):
-        self.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
-                                     SELinuxPolicy("tests/diff_right.conf"))
+    @classmethod
+    def setUpClass(cls):
+        cls.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
+                                    SELinuxPolicy("tests/diff_right.conf"))
 
     #
     # Types
@@ -1287,9 +1288,10 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
     """Policy difference test with no policy differences."""
 
-    def setUp(self):
-        self.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
-                                     SELinuxPolicy("tests/diff_left.conf"))
+    @classmethod
+    def setUpClass(cls):
+        cls.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
+                                    SELinuxPolicy("tests/diff_left.conf"))
 
     def test_added_types(self):
         """NoDiff: no added types"""
