@@ -1616,3 +1616,349 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_properties(self):
         """NoDiff: no modified properties."""
         self.assertFalse(self.diff.modified_properties)
+
+
+class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
+
+    """
+    Policy difference test between MLS and standard (non-MLS) policy.
+
+    The left policy is an MLS policy.  The right policy is identical to the
+    left policy, except with MLS disabled.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
+                                    SELinuxPolicy("tests/diff_left_standard.conf"))
+
+    def test_added_types(self):
+        """MLSvsStandardDiff: no added types"""
+        self.assertFalse(self.diff.added_types)
+
+    def test_removed_types(self):
+        """MLSvsStandardDiff: no removed types"""
+        self.assertFalse(self.diff.removed_types)
+
+    def test_modified_types(self):
+        """MLSvsStandardDiff: no modified types"""
+        self.assertFalse(self.diff.modified_types)
+
+    def test_added_roles(self):
+        """MLSvsStandardDiff: no added roles."""
+        self.assertFalse(self.diff.added_roles)
+
+    def test_removed_roles(self):
+        """MLSvsStandardDiff: no removed roles."""
+        self.assertFalse(self.diff.removed_roles)
+
+    def test_modified_roles(self):
+        """MLSvsStandardDiff: no modified roles."""
+        self.assertFalse(self.diff.modified_roles)
+
+    def test_added_commons(self):
+        """MLSvsStandardDiff: no added commons."""
+        self.assertFalse(self.diff.added_commons)
+
+    def test_removed_commons(self):
+        """MLSvsStandardDiff: no removed commons."""
+        self.assertFalse(self.diff.removed_commons)
+
+    def test_modified_commons(self):
+        """MLSvsStandardDiff: no modified commons."""
+        self.assertFalse(self.diff.modified_commons)
+
+    def test_added_classes(self):
+        """MLSvsStandardDiff: no added classes."""
+        self.assertFalse(self.diff.added_classes)
+
+    def test_removed_classes(self):
+        """MLSvsStandardDiff: no removed classes."""
+        self.assertFalse(self.diff.removed_classes)
+
+    def test_modified_classes(self):
+        """MLSvsStandardDiff: no modified classes."""
+        self.assertFalse(self.diff.modified_classes)
+
+    def test_added_allows(self):
+        """MLSvsStandardDiff: no added allow rules."""
+        self.assertFalse(self.diff.added_allows)
+
+    def test_removed_allows(self):
+        """MLSvsStandardDiff: no removed allow rules."""
+        self.assertFalse(self.diff.removed_allows)
+
+    def test_modified_allows(self):
+        """MLSvsStandardDiff: no modified allow rules."""
+        self.assertFalse(self.diff.modified_allows)
+
+    def test_added_auditallows(self):
+        """MLSvsStandardDiff: no added auditallow rules."""
+        self.assertFalse(self.diff.added_auditallows)
+
+    def test_removed_auditallows(self):
+        """MLSvsStandardDiff: no removed auditallow rules."""
+        self.assertFalse(self.diff.removed_auditallows)
+
+    def test_modified_auditallows(self):
+        """MLSvsStandardDiff: no modified auditallow rules."""
+        self.assertFalse(self.diff.modified_auditallows)
+
+    def test_added_neverallows(self):
+        """MLSvsStandardDiff: no added neverallow rules."""
+        self.assertFalse(self.diff.added_neverallows)
+
+    def test_removed_neverallows(self):
+        """MLSvsStandardDiff: no removed neverallow rules."""
+        self.assertFalse(self.diff.removed_neverallows)
+
+    def test_modified_neverallows(self):
+        """MLSvsStandardDiff: no modified neverallow rules."""
+        self.assertFalse(self.diff.modified_neverallows)
+
+    def test_added_dontaudits(self):
+        """MLSvsStandardDiff: no added dontaudit rules."""
+        self.assertFalse(self.diff.added_dontaudits)
+
+    def test_removed_dontaudits(self):
+        """MLSvsStandardDiff: no removed dontaudit rules."""
+        self.assertFalse(self.diff.removed_dontaudits)
+
+    def test_modified_dontaudits(self):
+        """MLSvsStandardDiff: no modified dontaudit rules."""
+        self.assertFalse(self.diff.modified_dontaudits)
+
+    def test_added_type_transitions(self):
+        """MLSvsStandardDiff: no added type_transition rules."""
+        self.assertFalse(self.diff.added_type_transitions)
+
+    def test_removed_type_transitions(self):
+        """MLSvsStandardDiff: no removed type_transition rules."""
+        self.assertFalse(self.diff.removed_type_transitions)
+
+    def test_modified_type_transitions(self):
+        """MLSvsStandardDiff: no modified type_transition rules."""
+        self.assertFalse(self.diff.modified_type_transitions)
+
+    def test_added_type_changes(self):
+        """MLSvsStandardDiff: no added type_change rules."""
+        self.assertFalse(self.diff.added_type_changes)
+
+    def test_removed_type_changes(self):
+        """MLSvsStandardDiff: no removed type_change rules."""
+        self.assertFalse(self.diff.removed_type_changes)
+
+    def test_modified_type_changes(self):
+        """MLSvsStandardDiff: no modified type_change rules."""
+        self.assertFalse(self.diff.modified_type_changes)
+
+    def test_added_type_members(self):
+        """MLSvsStandardDiff: no added type_member rules."""
+        self.assertFalse(self.diff.added_type_members)
+
+    def test_removed_type_members(self):
+        """MLSvsStandardDiff: no removed type_member rules."""
+        self.assertFalse(self.diff.removed_type_members)
+
+    def test_modified_type_members(self):
+        """MLSvsStandardDiff: no modified type_member rules."""
+        self.assertFalse(self.diff.modified_type_members)
+
+    def test_added_range_transitions(self):
+        """MLSvsStandardDiff: no added range_transition rules."""
+        self.assertFalse(self.diff.added_range_transitions)
+
+    def test_removed_range_transitions(self):
+        """MLSvsStandardDiff: all range_transition rules removed."""
+        self.assertEqual(self.diff.left_policy.range_transition_count,
+                         len(self.diff.removed_range_transitions))
+
+    def test_modified_range_transitions(self):
+        """MLSvsStandardDiff: no modified range_transition rules."""
+        self.assertFalse(self.diff.modified_range_transitions)
+
+    def test_added_role_allows(self):
+        """MLSvsStandardDiff: no added role_allow rules."""
+        self.assertFalse(self.diff.added_role_allows)
+
+    def test_removed_role_allows(self):
+        """MLSvsStandardDiff: no removed role_allow rules."""
+        self.assertFalse(self.diff.removed_role_allows)
+
+    def test_modified_role_allows(self):
+        """MLSvsStandardDiff: no modified role_allow rules."""
+        self.assertFalse(self.diff.modified_role_allows)
+
+    def test_added_role_transitions(self):
+        """MLSvsStandardDiff: no added role_transition rules."""
+        self.assertFalse(self.diff.added_role_transitions)
+
+    def test_removed_role_transitions(self):
+        """MLSvsStandardDiff: no removed role_transition rules."""
+        self.assertFalse(self.diff.removed_role_transitions)
+
+    def test_modified_role_transitions(self):
+        """MLSvsStandardDiff: no modified role_transition rules."""
+        self.assertFalse(self.diff.modified_role_transitions)
+
+    def test_added_users(self):
+        """MLSvsStandardDiff: no added users."""
+        self.assertFalse(self.diff.added_users)
+
+    def test_removed_users(self):
+        """MLSvsStandardDiff: no removed users."""
+        self.assertFalse(self.diff.removed_users)
+
+    def test_modified_users(self):
+        """MLSvsStandardDiff: all users modified."""
+        self.assertEqual(self.diff.left_policy.user_count, len(self.diff.modified_users))
+
+    def test_added_type_attributes(self):
+        """MLSvsStandardDiff: no added type attribute."""
+        self.assertFalse(self.diff.added_type_attributes)
+
+    def test_removed_type_attributes(self):
+        """MLSvsStandardDiff: no removed type attributes."""
+        self.assertFalse(self.diff.removed_type_attributes)
+
+    def test_modified_type_attributes(self):
+        """MLSvsStandardDiff: no modified type attributes."""
+        self.assertFalse(self.diff.modified_type_attributes)
+
+    def test_added_booleans(self):
+        """MLSvsStandardDiff: no added booleans."""
+        self.assertFalse(self.diff.added_booleans)
+
+    def test_removed_booleans(self):
+        """MLSvsStandardDiff: no removed booleans."""
+        self.assertFalse(self.diff.removed_booleans)
+
+    def test_modified_booleans(self):
+        """MLSvsStandardDiff: no modified booleans."""
+        self.assertFalse(self.diff.modified_booleans)
+
+    def test_added_categories(self):
+        """MLSvsStandardDiff: no added categories."""
+        self.assertFalse(self.diff.added_categories)
+
+    def test_removed_categories(self):
+        """MLSvsStandardDiff: all categories removed."""
+        self.assertEqual(self.diff.left_policy.category_count, len(self.diff.removed_categories))
+
+    def test_modified_categories(self):
+        """MLSvsStandardDiff: no modified categories."""
+        self.assertFalse(self.diff.modified_categories)
+
+    def test_added_sensitivities(self):
+        """MLSvsStandardDiff: no added sensitivities."""
+        self.assertFalse(self.diff.added_sensitivities)
+
+    def test_removed_sensitivities(self):
+        """MLSvsStandardDiff: all sensitivities removed."""
+        self.assertEqual(self.diff.left_policy.level_count, len(self.diff.removed_sensitivities))
+
+    def test_modified_sensitivities(self):
+        """MLSvsStandardDiff: no modified sensitivities."""
+        self.assertFalse(self.diff.modified_sensitivities)
+
+    def test_added_initialsids(self):
+        """MLSvsStandardDiff: no added initialsids."""
+        self.assertFalse(self.diff.added_initialsids)
+
+    def test_removed_initialsids(self):
+        """MLSvsStandardDiff: no removed initialsids."""
+        self.assertFalse(self.diff.removed_initialsids)
+
+    def test_modified_initialsids(self):
+        """MLSvsStandardDiff: all initialsids modified."""
+        self.assertEqual(self.diff.left_policy.initialsids_count,
+                         len(self.diff.modified_initialsids))
+
+    def test_added_fs_uses(self):
+        """MLSvsStandardDiff: no added fs_uses."""
+        self.assertFalse(self.diff.added_fs_uses)
+
+    def test_removed_fs_uses(self):
+        """MLSvsStandardDiff: no removed fs_uses."""
+        self.assertFalse(self.diff.removed_fs_uses)
+
+    def test_modified_fs_uses(self):
+        """MLSvsStandardDiff: all fs_uses modified."""
+        self.assertEqual(self.diff.left_policy.fs_use_count, len(self.diff.modified_fs_uses))
+
+    def test_added_genfscons(self):
+        """MLSvsStandardDiff: no added genfscons."""
+        self.assertFalse(self.diff.added_genfscons)
+
+    def test_removed_genfscons(self):
+        """MLSvsStandardDiff: no removed genfscons."""
+        self.assertFalse(self.diff.removed_genfscons)
+
+    def test_modified_genfscons(self):
+        """MLSvsStandardDiff: all genfscons modified."""
+        self.assertEqual(self.diff.left_policy.genfscon_count, len(self.diff.modified_genfscons))
+
+    def test_added_levels(self):
+        """MLSvsStandardDiff: no added levels."""
+        self.assertFalse(self.diff.added_levels)
+
+    def test_removed_levels(self):
+        """MLSvsStandardDiff: all levels removed."""
+        self.assertEqual(self.diff.left_policy.level_count, len(self.diff.removed_levels))
+
+    def test_modified_levels(self):
+        """MLSvsStandardDiff: no modified levels."""
+        self.assertFalse(self.diff.modified_levels)
+
+    def test_added_netifcons(self):
+        """MLSvsStandardDiff: no added netifcons."""
+        self.assertFalse(self.diff.added_netifcons)
+
+    def test_removed_netifcons(self):
+        """MLSvsStandardDiff: no removed netifcons."""
+        self.assertFalse(self.diff.removed_netifcons)
+
+    def test_modified_netifcons(self):
+        """MLSvsStandardDiff: all netifcons modified."""
+        self.assertEqual(self.diff.left_policy.netifcon_count, len(self.diff.modified_netifcons))
+
+    def test_added_nodecons(self):
+        """MLSvsStandardDiff: no added nodecons."""
+        self.assertFalse(self.diff.added_nodecons)
+
+    def test_removed_nodecons(self):
+        """MLSvsStandardDiff: no removed nodecons."""
+        self.assertFalse(self.diff.removed_nodecons)
+
+    def test_modified_nodecons(self):
+        """MLSvsStandardDiff: all nodecons modified."""
+        self.assertEqual(self.diff.left_policy.nodecon_count, len(self.diff.modified_nodecons))
+
+    def test_added_polcaps(self):
+        """MLSvsStandardDiff: no added polcaps."""
+        self.assertFalse(self.diff.added_polcaps)
+
+    def test_removed_polcaps(self):
+        """MLSvsStandardDiff: no removed polcaps."""
+        self.assertFalse(self.diff.removed_polcaps)
+
+    def test_added_portcons(self):
+        """MLSvsStandardDiff: no added portcons."""
+        self.assertFalse(self.diff.added_portcons)
+
+    def test_removed_portcons(self):
+        """MLSvsStandardDiff: no removed portcons."""
+        self.assertFalse(self.diff.removed_portcons)
+
+    def test_modified_portcons(self):
+        """MLSvsStandardDiff: all portcons modified."""
+        self.assertEqual(self.diff.left_policy.portcon_count, len(self.diff.modified_portcons))
+
+    def test_modified_properties(self):
+        """MLSvsStandardDiff: MLS property modified only."""
+        self.assertEqual(1, len(self.diff.modified_properties))
+
+        name, added, removed = self.diff.modified_properties[0]
+        self.assertEqual("MLS", name)
+        self.assertIs(False, added)
+        self.assertIs(True, removed)
