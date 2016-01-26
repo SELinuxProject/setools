@@ -72,10 +72,12 @@ class RoleAllow(rule.PolicyRule):
     """A role allow rule."""
 
     def __str__(self):
-        return "allow {0.source} {0.target};".format(self)
+        return "{0.ruletype} {0.source} {0.target};".format(self)
 
     def __hash__(self):
-        return hash("allow|{0.source}|{0.target}".format(self))
+        return hash("{0.ruletype}|{0.source}|{0.target}".format(self))
+
+    ruletype = "allow"
 
     @property
     def source(self):
@@ -108,7 +110,9 @@ class RoleTransition(rule.PolicyRule):
     """A role_transition rule."""
 
     def __str__(self):
-        return "role_transition {0.source} {0.target}:{0.tclass} {0.default};".format(self)
+        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
+
+    ruletype = "role_transition"
 
     @property
     def source(self):
