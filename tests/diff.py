@@ -1283,6 +1283,72 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 
+    #
+    # defaults
+    #
+    def test_added_defaults(self):
+        """Diff: added defaults."""
+        l = sorted(self.diff.added_defaults)
+        self.assertEqual(2, len(l))
+
+        default = l[0]
+        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual("infoflow2", default.tclass)
+
+        default = l[1]
+        self.assertEqual("default_user", default.ruletype)
+        self.assertEqual("infoflow2", default.tclass)
+
+    def test_removed_defaults(self):
+        """Diff: removed defaults."""
+        l = sorted(self.diff.removed_defaults)
+        self.assertEqual(2, len(l))
+
+        default = l[0]
+        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual("infoflow3", default.tclass)
+
+        default = l[1]
+        self.assertEqual("default_role", default.ruletype)
+        self.assertEqual("infoflow3", default.tclass)
+
+    def test_modified_defaults(self):
+        """Diff: modified defaults."""
+        l = sorted(self.diff.modified_defaults)
+        self.assertEqual(4, len(l))
+
+        default, added_default, removed_default, added_range, removed_range = l[0]
+        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual("infoflow4", default.tclass)
+        self.assertEqual("target", added_default)
+        self.assertEqual("source", removed_default)
+        self.assertFalse(added_range)
+        self.assertFalse(removed_range)
+
+        default, added_default, removed_default, added_range, removed_range = l[1]
+        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual("infoflow5", default.tclass)
+        self.assertFalse(added_default)
+        self.assertFalse(removed_default)
+        self.assertEqual("high", added_range)
+        self.assertEqual("low", removed_range)
+
+        default, added_default, removed_default, added_range, removed_range = l[2]
+        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual("infoflow6", default.tclass)
+        self.assertEqual("target", added_default)
+        self.assertEqual("source", removed_default)
+        self.assertEqual("low", added_range)
+        self.assertEqual("high", removed_range)
+
+        default, added_default, removed_default, added_range, removed_range = l[3]
+        self.assertEqual("default_type", default.ruletype)
+        self.assertEqual("infoflow4", default.tclass)
+        self.assertEqual("target", added_default)
+        self.assertEqual("source", removed_default)
+        self.assertFalse(added_range)
+        self.assertFalse(removed_range)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1616,6 +1682,18 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_properties(self):
         """NoDiff: no modified properties."""
         self.assertFalse(self.diff.modified_properties)
+
+    def test_added_defaults(self):
+        """NoDiff: no added defaults."""
+        self.assertFalse(self.diff.added_defaults)
+
+    def test_removed_defaults(self):
+        """NoDiff: no removed defaults."""
+        self.assertFalse(self.diff.removed_defaults)
+
+    def test_modified_defaults(self):
+        """NoDiff: no modified defaults."""
+        self.assertFalse(self.diff.modified_defaults)
 
 
 class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
@@ -1962,3 +2040,17 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
         self.assertEqual("MLS", name)
         self.assertIs(False, added)
         self.assertIs(True, removed)
+
+    def test_added_defaults(self):
+        """MLSvsStandardDiff: no added defaults."""
+        self.assertFalse(self.diff.added_defaults)
+
+    def test_removed_defaults(self):
+        """MLSvsStandardDiff: all default_range removed."""
+        self.assertEqual(
+            sum(1 for d in self.diff.left_policy.defaults() if d.ruletype == "default_range"),
+            len(self.diff.removed_defaults))
+
+    def test_modified_defaults(self):
+        """MLSvsStandardDiff: no defaults modified."""
+        self.assertFalse(self.diff.modified_defaults)

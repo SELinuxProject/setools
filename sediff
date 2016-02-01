@@ -79,6 +79,7 @@ labeling.add_argument("--nodecon", action="store_true", help="Print nodecon diff
 labeling.add_argument("--portcon", action="store_true", help="Print portcon differences")
 
 other = parser.add_argument_group("other differences")
+other.add_argument("--default", action="store_true", help="Print default_* differences")
 other.add_argument("--property", action="store_true",
                    help="Print policy property differences (handle_unknown, version, MLS)")
 other.add_argument("--polcap", action="store_true", help="Print policy capability differences")
@@ -91,7 +92,7 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.type_trans, args.type_change, args.type_member, args.role_allow,
                            args.role_trans, args.range_trans, args.initialsid, args.genfscon,
                            args.netifcon, args.nodecon, args.portcon, args.fs_use, args.polcap,
-                           args.property))
+                           args.property, args.default))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -956,6 +957,39 @@ try:
                 print("   Removed Policy Capabilities: {0}".format(len(diff.removed_polcaps)))
                 for n in sorted(diff.removed_polcaps):
                     print("      - {0}".format(n))
+
+            print()
+
+    if all_differences or args.default:
+        if diff.added_defaults or diff.removed_defaults or args.default:
+            print("Defaults ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_defaults), len(diff.removed_defaults), len(diff.modified_defaults)))
+            if diff.added_defaults and not args.stats:
+                print("   Added Defaults: {0}".format(len(diff.added_defaults)))
+                for d in sorted(diff.added_defaults):
+                    print("      + {0}".format(d))
+            if diff.removed_defaults and not args.stats:
+                print("   Removed Defaults: {0}".format(len(diff.removed_defaults)))
+                for d in sorted(diff.removed_defaults):
+                    print("      - {0}".format(d))
+            if diff.modified_defaults and not args.stats:
+                print("   Modified Defaults: {0}".format(len(diff.modified_defaults)))
+                for default, added_default, removed_default, added_range, removed_range in sorted(
+                        diff.modified_defaults):
+                    line = "      * {0.ruletype} {0.tclass} ".format(default)
+                    if removed_default:
+                        line += "+{0} -{1}".format(added_default, removed_default)
+                    else:
+                        line += default.default
+
+                    if removed_range:
+                        line += " +{0} -{1};".format(added_range, removed_range)
+                    else:
+                        try:
+                            line += " {0};".format(default.default_range)
+                        except AttributeError:
+                            line += ";"
+                    print(line)
 
             print()
 

@@ -18,6 +18,7 @@
 #
 from .bool import BooleansDifference
 from .commons import CommonDifference
+from .default import DefaultsDifference
 from .fsuse import FSUsesDifference
 from .genfscon import GenfsconsDifference
 from .initsid import InitialSIDsDifference
@@ -42,6 +43,7 @@ __all__ = ['PolicyDifference']
 class PolicyDifference(BooleansDifference,
                        CategoriesDifference,
                        CommonDifference,
+                       DefaultsDifference,
                        FSUsesDifference,
                        GenfsconsDifference,
                        InitialSIDsDifference,
