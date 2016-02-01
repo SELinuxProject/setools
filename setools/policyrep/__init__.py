@@ -211,6 +211,11 @@ class SELinuxPolicy(object):
         return sum(1 for c in self.constraints() if c.ruletype == "constrain")
 
     @property
+    def default_count(self):
+        """The number of default_* rules."""
+        return sum(1 for d in self.defaults())
+
+    @property
     def dontaudit_count(self):
         """The number of dontaudit rules."""
         return self.policy.avrule_dontaudit_count()

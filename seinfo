@@ -61,6 +61,8 @@ queries.add_argument("--common", help="Print common permission set.", dest="comm
                      nargs='?', const=True, metavar="COMMON")
 queries.add_argument("--constrain", help="Print constraints.", dest="constraintquery",
                      nargs='?', const=True, metavar="CLASS")
+queries.add_argument("--default", help="Print default_* rules.", dest="defaultquery",
+                     nargs='?', const=True, metavar="CLASS")
 queries.add_argument("--fs_use", help="Print fs_use statements.", dest="fsusequery",
                      nargs='?', const=True, metavar="FS_TYPE")
 queries.add_argument("--genfscon", help="Print genfscon statements.", dest="genfsconquery",
@@ -132,6 +134,13 @@ try:
             q.tclass = [args.constraintquery]
 
         components.append(("Constraints", q, lambda x: x.statement()))
+
+    if args.defaultquery or args.all:
+        q = setools.DefaultQuery(p)
+        if isinstance(args.defaultquery, str):
+            q.tclass = [args.defaultquery]
+
+        components.append(("Default rules", q, lambda x: x.statement()))
 
     if args.fsusequery or args.all:
         q = setools.FSUseQuery(p)
@@ -279,6 +288,7 @@ try:
             p.netifcon_count, p.nodecon_count))
         print("  Permissives:   {0:7}    Polcap:        {1:7}".format(
             p.permissives_count, p.polcap_count))
+        print("  Defaults:      {0:7}".format(p.default_count))
 
     for desc, component, expander in components:
         results = sorted(component.results())
