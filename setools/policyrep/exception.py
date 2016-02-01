@@ -157,7 +157,13 @@ class InvalidConstraintType(InvalidSymbol):
     pass
 
 
-class InvalidFSUseType(InvalidSymbol):
+class InvalidDefaultType(InvalidRuleType):
+
+    """Exception for invalid default_* types."""
+    pass
+
+
+class InvalidFSUseType(InvalidRuleType):
 
     """Exception for invalid fs_use_* types."""
     pass
@@ -216,6 +222,21 @@ class NoStatement(SymbolUseError):
     Exception for objects that have no inherent statement, such
     as conditional expressions and MLS ranges.
     """
+    pass
+
+
+#
+# Default rule exceptions
+#
+class InvalidDefaultValue(InvalidSymbol):
+
+    """Exception for invalid default (not source/target)"""
+    pass
+
+
+class InvalidDefaultRange(InvalidSymbol):
+
+    """Exception for invalid default range"""
     pass
 
 

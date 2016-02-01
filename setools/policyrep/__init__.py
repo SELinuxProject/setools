@@ -508,6 +508,21 @@ class SELinuxPolicy(object):
         constraint.validate_ruletype(types)
 
     @staticmethod
+    def validate_default_ruletype(types):
+        """Validate default_* types."""
+        return default.validate_ruletype(types)
+
+    @staticmethod
+    def validate_default_value(value):
+        """Validate default_* values."""
+        return default.validate_default_value(value)
+
+    @staticmethod
+    def validate_default_range(value):
+        """Validate default_range range."""
+        return default.validate_default_range(value)
+
+    @staticmethod
     def validate_fs_use_ruletype(types):
         """Validate fs_use_* rule types."""
         fscontext.validate_ruletype(types)
