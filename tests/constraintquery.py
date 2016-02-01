@@ -57,8 +57,8 @@ class ConstraintQueryTest(unittest.TestCase):
         constraint = sorted(c.tclass for c in q.results())
         self.assertListEqual(["test11a", "test11b"], constraint)
 
-    def test_012_class_list(self):
-        """Constraint query with object class list match."""
+    def test_012_class_regex(self):
+        """Constraint query with object class regex match."""
         q = ConstraintQuery(self.p, tclass="test12(a|c)", tclass_regex=True)
 
         constraint = sorted(c.tclass for c in q.results())
