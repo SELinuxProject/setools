@@ -51,6 +51,9 @@ from .terulequery import TERuleQuery
 # Constraint queries
 from .constraintquery import ConstraintQuery
 
+# Other queries
+from .defaultquery import DefaultQuery
+
 # In-policy Context Queries
 from .fsusequery import FSUseQuery
 from .genfsconquery import GenfsconQuery
