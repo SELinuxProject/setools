@@ -68,7 +68,8 @@ class MLSRulesDifference(Difference):
             if rule.ruletype == "range_transition":
                 self._left_range_transitions.append(rule)
             else:
-                raise TypeError("Unknown rule type: {0}".format(rule.ruletype))
+                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
+                               format(rule.ruletype))
 
         self._right_range_transitions = []
         for rule in self.right_policy.mlsrules():
@@ -77,7 +78,8 @@ class MLSRulesDifference(Difference):
             if rule.ruletype == "range_transition":
                 self._right_range_transitions.append(rule)
             else:
-                raise TypeError("Unknown rule type: {0}".format(rule.ruletype))
+                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
+                               format(rule.ruletype))
 
     def _diff_mls_rules(self, left_list, right_list):
         """Common method for comparing type_* rules."""

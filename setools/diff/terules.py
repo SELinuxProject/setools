@@ -230,7 +230,8 @@ class TERulesDifference(Difference):
             elif rule.ruletype == "type_member":
                 self._left_type_members.append(rule)
             else:
-                raise TypeError("Unknown rule type: {0}".format(rule.ruletype))
+                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
+                               format(rule.ruletype))
 
         self._right_allows = []
         self._right_auditallows = []
@@ -257,7 +258,8 @@ class TERulesDifference(Difference):
             elif rule.ruletype == "type_member":
                 self._right_type_members.append(rule)
             else:
-                raise TypeError("Unknown rule type: {0}".format(rule.ruletype))
+                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
+                               format(rule.ruletype))
 
     def _diff_av_rules(self, left_list, right_list):
         """Common method for comparing access vector rules."""
