@@ -19,7 +19,7 @@
 import logging
 
 from . import mixins, query
-from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 
 
 class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
@@ -43,7 +43,7 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
                      matching the rule's object class.
     """
 
-    ruletype = RuletypeDescriptor("validate_mls_ruletype")
+    ruletype = CriteriaSetDescriptor(lookup_function="validate_mls_ruletype")
     source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
     source_regex = False
     target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")

@@ -38,11 +38,12 @@ def _is_mls(policy, sym):
     return False
 
 
-def validate_ruletype(types):
+def validate_ruletype(t):
     """Validate constraint rule types."""
-    for t in types:
-        if t not in ["constrain", "mlsconstrain", "validatetrans", "mlsvalidatetrans"]:
-            raise exception.InvalidConstraintType("{0} is not a valid constraint type.".format(t))
+    if t not in ["constrain", "mlsconstrain", "validatetrans", "mlsvalidatetrans"]:
+        raise exception.InvalidConstraintType("{0} is not a valid constraint type.".format(t))
+
+    return t
 
 
 def constraint_factory(policy, sym):

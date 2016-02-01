@@ -55,11 +55,12 @@ def expanded_mls_rule_factory(original, source, target):
     return rule
 
 
-def validate_ruletype(types):
+def validate_ruletype(t):
     """Validate MLS rule types."""
-    for t in types:
-        if t not in ["range_transition"]:
-            raise exception.InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t))
+    if t not in ["range_transition"]:
+        raise exception.InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t))
+
+    return t
 
 
 class MLSRule(rule.PolicyRule):

@@ -20,7 +20,7 @@ import logging
 import re
 
 from . import mixins, query
-from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .policyrep.exception import RuleUseError, RuleNotConditional
 
 
@@ -80,7 +80,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                       will match.  Default is false.
     """
 
-    ruletype = RuletypeDescriptor("validate_te_ruletype")
+    ruletype = CriteriaSetDescriptor(lookup_function="validate_te_ruletype")
     source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
     source_regex = False
     source_indirect = True

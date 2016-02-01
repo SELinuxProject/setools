@@ -20,7 +20,7 @@ import logging
 import re
 
 from . import contextquery
-from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 
 
 class FSUseQuery(contextquery.ContextQuery):
@@ -56,7 +56,7 @@ class FSUseQuery(contextquery.ContextQuery):
                     No effect if not using set operations.
     """
 
-    ruletype = RuletypeDescriptor("validate_fs_use_ruletype")
+    ruletype = CriteriaSetDescriptor(lookup_function="validate_fs_use_ruletype")
     fs = CriteriaDescriptor("fs_regex")
     fs_regex = False
 

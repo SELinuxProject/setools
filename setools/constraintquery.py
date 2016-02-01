@@ -20,7 +20,7 @@ import logging
 import re
 
 from . import mixins, query
-from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .policyrep.exception import ConstraintUseError
 
 
@@ -62,7 +62,7 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.Policy
                       be used on the user.
     """
 
-    ruletype = RuletypeDescriptor("validate_constraint_ruletype")
+    ruletype = CriteriaSetDescriptor(lookup_function="validate_constraint_ruletype")
     user = CriteriaDescriptor("user_regex", "lookup_user")
     user_regex = False
     role = CriteriaDescriptor("role_regex", "lookup_role")

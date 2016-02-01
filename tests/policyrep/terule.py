@@ -62,8 +62,8 @@ class AVRuleTest(unittest.TestCase):
 
     def test_001_validate_ruletype(self):
         """AVRule valid rule types."""
-        # no return value means a return of None
-        self.assertIsNone(validate_ruletype(["allow", "neverallow", "auditallow", "dontaudit"]))
+        for r in ["allow", "neverallow", "auditallow", "dontaudit"]:
+            self.assertEqual(r, validate_ruletype(r))
 
     def test_002_validate_ruletype_invalid(self):
         """AVRule valid rule types."""
@@ -193,8 +193,8 @@ class TERuleTest(unittest.TestCase):
 
     def test_001_validate_ruletype(self):
         """TERule valid rule types."""
-        # no return value means a return of None
-        self.assertIsNone(validate_ruletype(["type_transition", "type_change", "type_member"]))
+        for r in ["type_transition", "type_change", "type_member"]:
+            self.assertEqual(r, validate_ruletype(r))
 
     def test_002_validate_ruletype_invalid(self):
         """TERule valid rule types."""

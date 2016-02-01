@@ -60,12 +60,13 @@ def expanded_te_rule_factory(original, source, target):
     return rule
 
 
-def validate_ruletype(types):
+def validate_ruletype(t):
     """Validate TE Rule types."""
-    for t in types:
-        if t not in ["allow", "auditallow", "dontaudit", "neverallow",
-                     "type_transition", "type_member", "type_change"]:
-            raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
+    if t not in ["allow", "auditallow", "dontaudit", "neverallow",
+                 "type_transition", "type_member", "type_change"]:
+        raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
+
+    return t
 
 
 class BaseTERule(rule.PolicyRule):

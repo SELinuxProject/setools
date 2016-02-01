@@ -52,8 +52,7 @@ class MLSRuleTest(unittest.TestCase):
 
     def test_001_validate_ruletype(self):
         """RangeTransition valid rule types."""
-        # no return value means a return of None
-        self.assertIsNone(validate_ruletype(["range_transition"]))
+        self.assertEqual("range_transition", validate_ruletype("range_transition"))
 
     def test_002_validate_ruletype_invalid(self):
         """RangeTransition valid rule types."""

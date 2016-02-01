@@ -505,7 +505,7 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_constraint_ruletype(types):
         """Validate constraint types."""
-        constraint.validate_ruletype(types)
+        return constraint.validate_ruletype(types)
 
     @staticmethod
     def validate_default_ruletype(types):
@@ -525,22 +525,22 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_fs_use_ruletype(types):
         """Validate fs_use_* rule types."""
-        fscontext.validate_ruletype(types)
+        return fscontext.validate_ruletype(types)
 
     @staticmethod
     def validate_mls_ruletype(types):
         """Validate MLS rule types."""
-        mlsrule.validate_ruletype(types)
+        return mlsrule.validate_ruletype(types)
 
     @staticmethod
     def validate_rbac_ruletype(types):
         """Validate RBAC rule types."""
-        rbacrule.validate_ruletype(types)
+        return rbacrule.validate_ruletype(types)
 
     @staticmethod
     def validate_te_ruletype(types):
         """Validate type enforcement rule types."""
-        terule.validate_ruletype(types)
+        return terule.validate_ruletype(types)
 
     #
     # Constraints generators

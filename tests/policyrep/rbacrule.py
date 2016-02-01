@@ -49,7 +49,7 @@ class RoleAllowTest(unittest.TestCase):
     def test_001_validate_ruletype(self):
         """RoleAllow valid rule types."""
         # no return value means a return of None
-        self.assertIsNone(validate_ruletype(["allow"]))
+        self.assertEqual("allow", validate_ruletype("allow"))
 
     def test_002_validate_ruletype_invalid(self):
         """RoleAllow valid rule types."""
@@ -120,8 +120,7 @@ class RoleTransitionTest(unittest.TestCase):
 
     def test_001_validate_ruletype(self):
         """RoleTransition valid rule types."""
-        # no return value means a return of None
-        self.assertIsNone(validate_ruletype(["role_transition"]))
+        self.assertEqual("role_transition", validate_ruletype("role_transition"))
 
     def test_002_validate_ruletype_invalid(self):
         """RoleTransition valid rule types."""

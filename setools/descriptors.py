@@ -106,44 +106,6 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
             self.instances[obj] = set(value)
 
 
-class RuletypeDescriptor(object):
-
-    """
-    Descriptor for a list of rule types.
-
-    Parameters:
-    validator       The name of the SELinuxPolicy ruletype
-                    validator function, e.g. validate_te_ruletype
-    default_value   The default value of the criteria.  The default
-                    is None.
-
-    Read-only instance attribute use (obj parameter):
-    policy          The instance of SELinuxPolicy
-    """
-
-    def __init__(self, validator):
-        self.validator = validator
-
-        # use weak references so instances can be
-        # garbage collected, rather than unnecessarily
-        # kept around due to this descriptor.
-        self.instances = WeakKeyDictionary()
-
-    def __get__(self, obj, objtype=None):
-        if obj is None:
-            return self
-
-        return self.instances.setdefault(obj, None)
-
-    def __set__(self, obj, value):
-        if value:
-            validate = getattr(obj.policy, self.validator)
-            validate(value)
-            self.instances[obj] = value
-        else:
-            self.instances[obj] = None
-
-
 #
 # NetworkX Graph Descriptors
 #

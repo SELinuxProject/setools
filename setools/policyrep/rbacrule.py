@@ -60,11 +60,12 @@ def expanded_rbac_rule_factory(original, source, target):
     return rule
 
 
-def validate_ruletype(types):
+def validate_ruletype(t):
     """Validate RBAC rule types."""
-    for t in types:
-        if t not in ["allow", "role_transition"]:
-            raise exception.InvalidRBACRuleType("{0} is not a valid RBAC rule type.".format(t))
+    if t not in ["allow", "role_transition"]:
+        raise exception.InvalidRBACRuleType("{0} is not a valid RBAC rule type.".format(t))
+
+    return t
 
 
 class RoleAllow(rule.PolicyRule):

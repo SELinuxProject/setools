@@ -20,7 +20,7 @@ import logging
 import re
 
 from . import mixins, query
-from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, RuletypeDescriptor
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .policyrep.exception import InvalidType, RuleUseError
 
 
@@ -54,7 +54,7 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
                     be used on the default role.
     """
 
-    ruletype = RuletypeDescriptor("validate_rbac_ruletype")
+    ruletype = CriteriaSetDescriptor(lookup_function="validate_rbac_ruletype")
     source = CriteriaDescriptor("source_regex", "lookup_role")
     source_regex = False
     source_indirect = True
