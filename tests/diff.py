@@ -266,7 +266,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_allow_rules(self):
         """Diff: modified allow rules."""
-        l = sorted(self.diff.modified_allows)
+        l = sorted(self.diff.modified_allows, key=lambda x: x.rule)
         self.assertEqual(3, len(l))
 
         # add permissions
@@ -354,7 +354,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_auditallow_rules(self):
         """Diff: modified auditallow rules."""
-        l = sorted(self.diff.modified_auditallows)
+        l = sorted(self.diff.modified_auditallows, key=lambda x: x.rule)
         self.assertEqual(3, len(l))
 
         # add permissions
@@ -442,7 +442,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_dontaudit_rules(self):
         """Diff: modified dontaudit rules."""
-        l = sorted(self.diff.modified_dontaudits)
+        l = sorted(self.diff.modified_dontaudits, key=lambda x: x.rule)
         self.assertEqual(3, len(l))
 
         # add permissions
@@ -506,7 +506,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_neverallow_rules(self):
         """Diff: modified neverallow rules."""
-        l = sorted(self.diff.modified_neverallows)
+        l = sorted(self.diff.modified_neverallows, key=lambda x: x.rule)
         self.assertEqual(3, len(l))
 
         # add permissions
@@ -594,7 +594,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_type_transition_rules(self):
         """Diff: modified type_transition rules."""
-        l = sorted(self.diff.modified_type_transitions)
+        l = sorted(self.diff.modified_type_transitions, key=lambda x: x.rule)
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
@@ -660,7 +660,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_type_change_rules(self):
         """Diff: modified type_change rules."""
-        l = sorted(self.diff.modified_type_changes)
+        l = sorted(self.diff.modified_type_changes, key=lambda x: x.rule)
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
@@ -726,7 +726,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_type_member_rules(self):
         """Diff: modified type_member rules."""
-        l = sorted(self.diff.modified_type_members)
+        l = sorted(self.diff.modified_type_members, key=lambda x: x.rule)
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
@@ -768,7 +768,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_range_transition_rules(self):
         """Diff: modified range_transition rules."""
-        l = sorted(self.diff.modified_range_transitions)
+        l = sorted(self.diff.modified_range_transitions, key=lambda x: x.rule)
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
@@ -843,7 +843,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_role_transition_rules(self):
         """Diff: modified role_transition rules."""
-        l = sorted(self.diff.modified_role_transitions)
+        l = sorted(self.diff.modified_role_transitions, key=lambda x: x.rule)
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
@@ -1019,7 +1019,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_fs_uses(self):
         """Diff: modified fs_uses."""
-        l = sorted(self.diff.modified_fs_uses)
+        l = sorted(self.diff.modified_fs_uses, key=lambda x: x.rule)
         self.assertEqual(1, len(l))
 
         rule, added_context, removed_context = l[0]
@@ -1063,7 +1063,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_genfscons(self):
         """Diff: modified genfscons."""
-        l = sorted(self.diff.modified_genfscons)
+        l = sorted(self.diff.modified_genfscons, key=lambda x: x.rule)
         self.assertEqual(1, len(l))
 
         rule, added_context, removed_context = l[0]
@@ -1127,7 +1127,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_netifcons(self):
         """Diff: modified netifcons."""
-        l = sorted(self.diff.modified_netifcons)
+        l = sorted(self.diff.modified_netifcons, key=lambda x: x.rule)
         self.assertEqual(3, len(l))
 
         # modified both contexts
@@ -1209,7 +1209,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_nodecons(self):
         """Diff: modified nodecons."""
-        l = sorted(self.diff.modified_nodecons)
+        l = sorted(self.diff.modified_nodecons, key=lambda x: x.rule)
         self.assertEqual(2, len(l))
 
         # changed IPv4
@@ -1268,7 +1268,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_portcons(self):
         """Diff: modified portcons."""
-        l = sorted(self.diff.modified_portcons)
+        l = sorted(self.diff.modified_portcons, key=lambda x: x.rule)
         self.assertEqual(2, len(l))
 
         portcon, added_context, removed_context = l[0]
@@ -1314,7 +1314,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_defaults(self):
         """Diff: modified defaults."""
-        l = sorted(self.diff.modified_defaults)
+        l = sorted(self.diff.modified_defaults, key=lambda x: x.rule)
         self.assertEqual(4, len(l))
 
         default, added_default, removed_default, added_range, removed_range = l[0]
