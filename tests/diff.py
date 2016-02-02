@@ -1143,14 +1143,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("mod_ctx_netif", rule.netif)
         self.assertEqual("added_user:object_r:system:s0", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
-        self.assertFalse(added_packet)
-        self.assertFalse(removed_packet)
+        self.assertIsNone(added_packet)
+        self.assertIsNone(removed_packet)
 
         # modified packet context
         rule, added_context, removed_context, added_packet, removed_packet = l[2]
         self.assertEqual("mod_pkt_netif", rule.netif)
-        self.assertFalse(added_context)
-        self.assertFalse(removed_context)
+        self.assertIsNone(added_context)
+        self.assertIsNone(removed_context)
         self.assertEqual("added_user:object_r:system:s0", added_packet)
         self.assertEqual("removed_user:object_r:system:s0", removed_packet)
 
@@ -1322,14 +1322,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("infoflow4", default.tclass)
         self.assertEqual("target", added_default)
         self.assertEqual("source", removed_default)
-        self.assertFalse(added_range)
-        self.assertFalse(removed_range)
+        self.assertIsNone(added_range)
+        self.assertIsNone(removed_range)
 
         default, added_default, removed_default, added_range, removed_range = l[1]
         self.assertEqual("default_range", default.ruletype)
         self.assertEqual("infoflow5", default.tclass)
-        self.assertFalse(added_default)
-        self.assertFalse(removed_default)
+        self.assertIsNone(added_default)
+        self.assertIsNone(removed_default)
         self.assertEqual("high", added_range)
         self.assertEqual("low", removed_range)
 
@@ -1346,8 +1346,8 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("infoflow4", default.tclass)
         self.assertEqual("target", added_default)
         self.assertEqual("source", removed_default)
-        self.assertFalse(added_range)
-        self.assertFalse(removed_range)
+        self.assertIsNone(added_range)
+        self.assertIsNone(removed_range)
 
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
