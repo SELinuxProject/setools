@@ -201,6 +201,10 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
 	memset(&buff, 0, 10 * sizeof(char));
 
 	for (i = 0; i < db->p_types.nprim; i++) {
+		/* skip types */
+		if (db->type_val_to_struct[i]->flavor == TYPE_TYPE)
+			continue;
+
 		count = 0;
 		ebitmap_for_each_bit(&db->attr_type_map[i], node, bit) {
 			if (ebitmap_node_get_bit(node, bit))
