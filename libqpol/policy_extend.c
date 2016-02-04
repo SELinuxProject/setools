@@ -213,6 +213,10 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
 		if (count == 0) {
 			continue;
 		}
+
+		if (db->type_val_to_struct[i]->flavor == TYPE_TYPE)
+			continue;
+
 		/* first create a new type_datum_t for the attribute,
 		 * with the attribute's type_list consisting of types
 		 * with this attribute */
