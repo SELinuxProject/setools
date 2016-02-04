@@ -725,13 +725,13 @@ try:
                 len(diff.added_role_allows), len(diff.removed_role_allows)))
 
             if diff.added_role_allows and not args.stats:
-                print("   Added Role allow Rules: {0}".format(
+                print("   Added Role Allow Rules: {0}".format(
                     len(diff.added_role_allows)))
                 for r in sorted(diff.added_role_allows):
                     print("      + {0}".format(r))
 
             if diff.removed_role_allows and not args.stats:
-                print("   Removed Role allow Rules: {0}".format(
+                print("   Removed Role Allow Rules: {0}".format(
                     len(diff.removed_role_allows)))
                 for r in sorted(diff.removed_role_allows):
                     print("      - {0}".format(r))
