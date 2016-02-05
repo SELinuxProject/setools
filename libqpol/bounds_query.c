@@ -87,7 +87,28 @@ int qpol_typebounds_get_child_name(const qpol_policy_t *policy, const qpol_typeb
 	return STATUS_SUCCESS;
 }
 
-/* As type bounds are in types use these, however will need to calc number of bounds manually in top.tcl*/
+static int hash_state_next_typebounds(qpol_iterator_t * iter)
+{
+	void *datum = NULL;
+	type_datum_t *internal_datum = NULL;
+
+	do {
+		hash_state_next(iter);
+		if (qpol_iterator_end(iter))
+			break;
+
+		qpol_iterator_get_item(iter, &datum);
+		internal_datum = (type_datum_t *) datum;
+
+		/* keep going on attributes */
+		if (internal_datum -> flavor != TYPE_TYPE)
+			continue;
+	/* keep going if type has no bounding */
+	} while (internal_datum->bounds == 0);
+
+	return STATUS_SUCCESS;
+}
+
 int qpol_policy_get_typebounds_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
 {
 	policydb_t *db;
@@ -103,21 +124,6 @@ int qpol_policy_get_typebounds_iter(const qpol_policy_t *policy, qpol_iterator_t
 	}
 
 	db = &policy->p->p;
-/*
-	struct type_datum *type;
-	size_t i;
-	int count = 0;
-
-	for (i = 0; i < db->p_types.nprim - 1; i++) {
-		type = db->type_val_to_struct[i];
-		if (type->flavor == TYPE_TYPE && type->bounds != 0) {
-			printf("PARENT DOMAIN: %s\n", db->p_type_val_to_name[type->bounds - 1]);
-			printf("CHILD NAME: %s\n", db->p_type_val_to_name[type->s.value - 1]);
-			count++;
-		}
-	}
-	printf("Type Bounds count: %d\n", count);
-*/
 	hs = calloc(1, sizeof(hash_state_t));
 	if (hs == NULL) {
 		error = errno;
@@ -129,13 +135,25 @@ int qpol_policy_get_typebounds_iter(const qpol_policy_t *policy, qpol_iterator_t
 	hs->node = (*(hs->table))->htable[0];
 
 	if (qpol_iterator_create(policy, (void *)hs, hash_state_get_cur,
-				 hash_state_next, hash_state_end, hash_state_size, free, iter)) {
+				 hash_state_next_typebounds, hash_state_end, hash_state_size, free, iter)) {
 		free(hs);
 		return STATUS_ERR;
 	}
 
 	if (hs->node == NULL)
-		hash_state_next(*iter);
+		hash_state_next_typebounds(*iter);
+
+	/* since we are iterating over all types, ensure our first item is actually bounded. */
+	if (!qpol_iterator_end(*iter)) {
+		void *datum = NULL;
+		type_datum_t *internal_datum = NULL;
+
+		qpol_iterator_get_item(*iter, &datum);
+		internal_datum = (type_datum_t *) datum;
+
+		if (internal_datum -> flavor != TYPE_TYPE || internal_datum->bounds == 0)
+			hash_state_next_typebounds(*iter);
+	}
 
 	return STATUS_SUCCESS;
 }

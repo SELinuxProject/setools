@@ -888,6 +888,7 @@ typedef enum qpol_capability
     };
 
     %newobject typebounds_iter();
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_typebounds_from_void) %}
     qpol_iterator_t *typebounds_iter() {
         qpol_iterator_t *iter;
         if (qpol_policy_get_typebounds_iter(self, &iter)) {
@@ -896,18 +897,6 @@ typedef enum qpol_capability
         return iter;
     fail:
         return NULL;
-    };
-
-    size_t typebounds_count() {
-        qpol_iterator_t *iter;
-        size_t count = 0;
-        if (qpol_policy_get_typebounds_iter(self, &iter)) {
-            SWIG_exception(SWIG_MemoryError, "Out of Memory");
-        }
-        qpol_iterator_get_size(iter, &count);
-        return count;
-    fail:
-        return 0;
     };
 
     %newobject polcap_iter();

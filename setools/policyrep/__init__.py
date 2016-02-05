@@ -1,4 +1,4 @@
-# Copyright 2014-2015, Tresys Technology, LLC
+# Copyright 2014-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -46,6 +46,7 @@ from . import exception
 
 # Components
 from . import boolcond
+from . import bounds
 from . import default
 from . import mls
 from . import objclass
@@ -331,6 +332,11 @@ class SELinuxPolicy(object):
         return self.policy.terule_trans_count() + self.policy.filename_trans_count()
 
     @property
+    def typebounds_count(self):
+        """The number of typebounds rules."""
+        return sum(1 for b in self.bounds() if b.ruletype == "typebounds")
+
+    @property
     def user_count(self):
         """The number of users."""
         return self.policy.user_count()
@@ -399,6 +405,11 @@ class SELinuxPolicy(object):
         """Generator which yields all Booleans."""
         for bool_ in self.policy.bool_iter():
             yield boolcond.boolean_factory(self.policy, bool_)
+
+    def bounds(self):
+        """Generator which yields all *bounds statements (typebounds, etc.)"""
+        for bound in self.policy.typebounds_iter():
+            yield bounds.bounds_factory(self.policy, bound)
 
     def categories(self):
         """Generator which yields all MLS categories."""
