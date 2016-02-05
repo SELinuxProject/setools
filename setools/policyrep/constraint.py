@@ -1,4 +1,4 @@
-# Copyright 2014-2015, Tresys Technology, LLC
+# Copyright 2014-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -16,13 +16,13 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from . import exception
 from . import qpol
-from . import role
-from . import symbol
-from . import objclass
-from . import typeattr
-from . import user
+from .exception import ConstraintUseError, InvalidConstraintType
+from .role import role_factory
+from .symbol import PolicySymbol
+from .objclass import class_factory
+from .typeattr import type_or_attr_factory
+from .user import user_factory
 
 
 def _is_mls(policy, sym):
@@ -41,7 +41,7 @@ def _is_mls(policy, sym):
 def validate_ruletype(t):
     """Validate constraint rule types."""
     if t not in ["constrain", "mlsconstrain", "validatetrans", "mlsvalidatetrans"]:
-        raise exception.InvalidConstraintType("{0} is not a valid constraint type.".format(t))
+        raise InvalidConstraintType("{0} is not a valid constraint type.".format(t))
 
     return t
 
@@ -65,127 +65,213 @@ def constraint_factory(policy, sym):
         raise TypeError("Constraints cannot be looked-up.")
 
 
-class BaseConstraint(symbol.PolicySymbol):
+class BaseConstraint(PolicySymbol):
 
     """Base class for constraint rules."""
 
-    _expr_type_to_text = {
-        qpol.QPOL_CEXPR_TYPE_NOT: "not",
-        qpol.QPOL_CEXPR_TYPE_AND: "and",
-        qpol.QPOL_CEXPR_TYPE_OR: "\n\tor"}
+    _role_syms = [qpol.QPOL_CEXPR_SYM_ROLE,
+                  qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_TARGET,
+                  qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_XTARGET]
 
-    _expr_op_to_text = {
-        qpol.QPOL_CEXPR_OP_EQ: "==",
-        qpol.QPOL_CEXPR_OP_NEQ: "!=",
-        qpol.QPOL_CEXPR_OP_DOM: "dom",
-        qpol.QPOL_CEXPR_OP_DOMBY: "domby",
-        qpol.QPOL_CEXPR_OP_INCOMP: "incomp"}
+    _type_syms = [qpol.QPOL_CEXPR_SYM_TYPE,
+                  qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_TARGET,
+                  qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_XTARGET]
 
-    _sym_to_text = {
-        qpol.QPOL_CEXPR_SYM_USER: "u1",
-        qpol.QPOL_CEXPR_SYM_ROLE: "r1",
-        qpol.QPOL_CEXPR_SYM_TYPE: "t1",
-        qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_TARGET: "u2",
-        qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_TARGET: "r2",
-        qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_TARGET: "t2",
-        qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_XTARGET: "u3",
-        qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_XTARGET: "r3",
-        qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_XTARGET: "t3",
-        qpol.QPOL_CEXPR_SYM_L1L2: "l1",
-        qpol.QPOL_CEXPR_SYM_L1H2: "l1",
-        qpol.QPOL_CEXPR_SYM_H1L2: "h1",
-        qpol.QPOL_CEXPR_SYM_H1H2: "h1",
-        qpol.QPOL_CEXPR_SYM_L1H1: "l1",
-        qpol.QPOL_CEXPR_SYM_L2H2: "l2",
-        qpol.QPOL_CEXPR_SYM_L1L2 + qpol.QPOL_CEXPR_SYM_TARGET: "l2",
-        qpol.QPOL_CEXPR_SYM_L1H2 + qpol.QPOL_CEXPR_SYM_TARGET: "h2",
-        qpol.QPOL_CEXPR_SYM_H1L2 + qpol.QPOL_CEXPR_SYM_TARGET: "l2",
-        qpol.QPOL_CEXPR_SYM_H1H2 + qpol.QPOL_CEXPR_SYM_TARGET: "h2",
-        qpol.QPOL_CEXPR_SYM_L1H1 + qpol.QPOL_CEXPR_SYM_TARGET: "h1",
-        qpol.QPOL_CEXPR_SYM_L2H2 + qpol.QPOL_CEXPR_SYM_TARGET: "h2"}
-
-    # Boolean operators
-    _expr_type_to_precedence = {
-        qpol.QPOL_CEXPR_TYPE_NOT: 3,
-        qpol.QPOL_CEXPR_TYPE_AND: 2,
-        qpol.QPOL_CEXPR_TYPE_OR: 1}
-
-    # Logical operators have the same precedence
-    _logical_op_precedence = 4
+    _user_syms = [qpol.QPOL_CEXPR_SYM_USER,
+                  qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_TARGET,
+                  qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_XTARGET]
 
     def __init__(self, policy, qpol_symbol, ruletype):
-        symbol.PolicySymbol.__init__(self, policy, qpol_symbol)
+        PolicySymbol.__init__(self, policy, qpol_symbol)
         self.ruletype = ruletype
 
     def __str__(self):
         raise NotImplementedError
 
-    def _build_expression(self):
+    # There is no levels function as specific
+    # levels cannot be used in expressions, only
+    # the l1, h1, etc. symbols
+
+    @property
+    def roles(self):
+        """The roles used in the expression."""
+        return set(self._get_symbols(self._role_syms, role_factory))
+
+    @property
+    def perms(self):
+        raise NotImplementedError
+
+    def statement(self):
+        return str(self)
+
+    @property
+    def tclass(self):
+        """Object class for this constraint."""
+        return class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
+
+    @property
+    def types(self):
+        """The types and type attributes used in the expression."""
+
+        return set(self._get_symbols(self._type_syms, type_or_attr_factory))
+
+    @property
+    def users(self):
+        """The users used in the expression."""
+        return set(self._get_symbols(self._user_syms, user_factory))
+
+    def expression(self):
+        """
+        The constraint's expression in infix notation.
+
+        Return: list
+        """
+
+        _precedence = {
+            "not": 4,
+            "and": 2,
+            "or": 1,
+            "==": 3,
+            "!=": 3,
+            "dom": 3,
+            "domby": 3,
+            "incomp": 3}
+
+        _max_precedence = 4
+
+        _operands = ["u1", "u2", "u3",
+                     "r1", "r2", "r3",
+                     "t1", "t2", "t3",
+                     "l1", "l2",
+                     "h1", "h2"]
+
         # qpol representation is in postfix notation.  This code
         # converts it to infix notation.  Parentheses are added
         # to ensure correct expressions, though they may end up
         # being overused.  Set previous operator at start to the
         # highest precedence (op) so if there is a single binary
         # operator, no parentheses are output
-
         stack = []
-        prev_op_precedence = self._logical_op_precedence
+        prev_op_precedence = _max_precedence
+        for op in self.postfix_expression():
+            if isinstance(op, frozenset) or op in _operands:
+                # operands
+                stack.append(op)
+            else:
+                # operators
+                if op == "not":
+                    # unary operator
+                    operator = op
+                    operand = stack.pop()
+                    op_precedence = _precedence[op]
+                    stack.append([operator, "(", operand, ")"])
+                else:
+                    # binary operators
+                    operand2 = stack.pop()
+                    operand1 = stack.pop()
+                    operator = op
+
+                    # if previous operator is of higher precedence
+                    # no parentheses are needed.
+                    if _precedence[op] < prev_op_precedence:
+                        stack.append([operand1, operator, operand2])
+                    else:
+                        stack.append(["(", operand1, operator, operand2, ")"])
+
+                prev_op_precedence = _precedence[op]
+
+        return self._flatten_expression(stack)
+
+    def postfix_expression(self):
+        """
+        The constraint's expression in postfix notation.
+
+        Return: list
+        """
+
+        _expr_type_to_text = {
+            qpol.QPOL_CEXPR_TYPE_NOT: "not",
+            qpol.QPOL_CEXPR_TYPE_AND: "and",
+            qpol.QPOL_CEXPR_TYPE_OR: "or"}
+
+        _expr_op_to_text = {
+            qpol.QPOL_CEXPR_OP_EQ: "==",
+            qpol.QPOL_CEXPR_OP_NEQ: "!=",
+            qpol.QPOL_CEXPR_OP_DOM: "dom",
+            qpol.QPOL_CEXPR_OP_DOMBY: "domby",
+            qpol.QPOL_CEXPR_OP_INCOMP: "incomp"}
+
+        _sym_to_text = {
+            qpol.QPOL_CEXPR_SYM_USER: "u1",
+            qpol.QPOL_CEXPR_SYM_ROLE: "r1",
+            qpol.QPOL_CEXPR_SYM_TYPE: "t1",
+            qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_TARGET: "u2",
+            qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_TARGET: "r2",
+            qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_TARGET: "t2",
+            qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_XTARGET: "u3",
+            qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_XTARGET: "r3",
+            qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_XTARGET: "t3",
+            qpol.QPOL_CEXPR_SYM_L1L2: "l1",
+            qpol.QPOL_CEXPR_SYM_L1H2: "l1",
+            qpol.QPOL_CEXPR_SYM_H1L2: "h1",
+            qpol.QPOL_CEXPR_SYM_H1H2: "h1",
+            qpol.QPOL_CEXPR_SYM_L1H1: "l1",
+            qpol.QPOL_CEXPR_SYM_L2H2: "l2",
+            qpol.QPOL_CEXPR_SYM_L1L2 + qpol.QPOL_CEXPR_SYM_TARGET: "l2",
+            qpol.QPOL_CEXPR_SYM_L1H2 + qpol.QPOL_CEXPR_SYM_TARGET: "h2",
+            qpol.QPOL_CEXPR_SYM_H1L2 + qpol.QPOL_CEXPR_SYM_TARGET: "l2",
+            qpol.QPOL_CEXPR_SYM_H1H2 + qpol.QPOL_CEXPR_SYM_TARGET: "h2",
+            qpol.QPOL_CEXPR_SYM_L1H1 + qpol.QPOL_CEXPR_SYM_TARGET: "h1",
+            qpol.QPOL_CEXPR_SYM_L2H2 + qpol.QPOL_CEXPR_SYM_TARGET: "h2"}
+
+        expression = []
         for expr_node in self.qpol_symbol.expr_iter(self.policy):
             op = expr_node.op(self.policy)
             sym_type = expr_node.sym_type(self.policy)
             expr_type = expr_node.expr_type(self.policy)
 
             if expr_type == qpol.QPOL_CEXPR_TYPE_ATTR:
-                # logical operator with symbol (e.g. u1 == u2)
-                operand1 = self._sym_to_text[sym_type]
-                operand2 = self._sym_to_text[sym_type + qpol.QPOL_CEXPR_SYM_TARGET]
-                operator = self._expr_op_to_text[op]
+                # logical operator with symbols (e.g. u1 == u2)
+                operand1 = _sym_to_text[sym_type]
+                operand2 = _sym_to_text[sym_type + qpol.QPOL_CEXPR_SYM_TARGET]
+                operator = _expr_op_to_text[op]
 
-                stack.append([operand1, operator, operand2])
-
-                prev_op_precedence = self._logical_op_precedence
+                expression.extend([operand1, operand2, operator])
             elif expr_type == qpol.QPOL_CEXPR_TYPE_NAMES:
                 # logical operator with type or attribute list (e.g. t1 == { spam_t eggs_t })
-                operand1 = self._sym_to_text[sym_type]
-                operator = self._expr_op_to_text[op]
+                operand1 = _sym_to_text[sym_type]
+                operator = _expr_op_to_text[op]
 
                 names = list(expr_node.names_iter(self.policy))
 
-                if not names:
-                    operand2 = "<empty set>"
-                elif len(names) == 1:
-                    operand2 = names[0]
+                if sym_type in self._role_syms:
+                    operand2 = frozenset(role_factory(self.policy, n) for n in names)
+                elif sym_type in self._type_syms:
+                    operand2 = frozenset(type_or_attr_factory(self.policy, n) for n in names)
                 else:
-                    operand2 = "{{ {0} }}".format(' '.join(names))
+                    operand2 = frozenset(user_factory(self.policy, n) for n in names)
 
-                stack.append([operand1, operator, operand2])
-
-                prev_op_precedence = self._logical_op_precedence
-            elif expr_type == qpol.QPOL_CEXPR_TYPE_NOT:
-                # unary operator (not)
-                operand = stack.pop()
-                operator = self._expr_type_to_text[expr_type]
-
-                stack.append([operator, "(", operand, ")"])
-
-                prev_op_precedence = self._expr_type_to_precedence[expr_type]
+                expression.extend([operand1, operand2, operator])
             else:
-                # binary operator (and/or)
-                operand1 = stack.pop()
-                operand2 = stack.pop()
-                operator = self._expr_type_to_text[expr_type]
-                op_precedence = self._expr_type_to_precedence[expr_type]
+                # individual operators (and/or/not)
+                expression.append(_expr_type_to_text[expr_type])
 
-                # if previous operator is of higher precedence
-                # no parentheses are needed.
-                if op_precedence < prev_op_precedence:
-                    stack.append([operand1, operator, operand2])
-                else:
-                    stack.append(["(", operand1, operator, operand2, ")"])
+        return expression
 
-                prev_op_precedence = op_precedence
+    #
+    # Internal functions
+    #
+    def _flatten_expression(self, expr):
+        """Flatten the expression into a flat list."""
+        ret = []
 
-        return self.__unwind_subexpression(stack)
+        for i in expr:
+            if isinstance(i, list):
+                ret.extend(self._flatten_expression(i))
+            else:
+                ret.append(i)
+
+        return ret
 
     def _get_symbols(self, syms, factory):
         """
@@ -205,60 +291,21 @@ class BaseConstraint(symbol.PolicySymbol):
                 for s in expr_node.names_iter(self.policy):
                     yield factory(self.policy, s)
 
-    def __unwind_subexpression(self, expr):
+    @staticmethod
+    def _expression_str(expr):
+        """Generate the string representation of the expression."""
         ret = []
 
-        # do a string.join on sublists (subexpressions)
-        for i in expr:
-            if isinstance(i, list):
-                ret.append(self.__unwind_subexpression(i))
+        for item in expr:
+            if isinstance(item, frozenset):
+                if len(item) > 1:
+                    ret.append("{{ {0} }} ".format(" ".join(str(j) for j in item)))
+                else:
+                    ret.append("{0}".format(" ".join(str(j) for j in item)))
             else:
-                ret.append(i)
+                ret.append(item)
 
-        return ' '.join(ret)
-
-    # There is no levels function as specific
-    # levels cannot be used in expressions, only
-    # the l1, h1, etc. symbols
-
-    @property
-    def roles(self):
-        """The roles used in the expression."""
-        role_syms = [qpol.QPOL_CEXPR_SYM_ROLE,
-                     qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_TARGET,
-                     qpol.QPOL_CEXPR_SYM_ROLE + qpol.QPOL_CEXPR_SYM_XTARGET]
-
-        return set(self._get_symbols(role_syms, role.role_factory))
-
-    @property
-    def perms(self):
-        raise NotImplementedError
-
-    def statement(self):
-        return str(self)
-
-    @property
-    def tclass(self):
-        """Object class for this constraint."""
-        return objclass.class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
-
-    @property
-    def types(self):
-        """The types and type attributes used in the expression."""
-        type_syms = [qpol.QPOL_CEXPR_SYM_TYPE,
-                     qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_TARGET,
-                     qpol.QPOL_CEXPR_SYM_TYPE + qpol.QPOL_CEXPR_SYM_XTARGET]
-
-        return set(self._get_symbols(type_syms, typeattr.type_or_attr_factory))
-
-    @property
-    def users(self):
-        """The users used in the expression."""
-        user_syms = [qpol.QPOL_CEXPR_SYM_USER,
-                     qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_TARGET,
-                     qpol.QPOL_CEXPR_SYM_USER + qpol.QPOL_CEXPR_SYM_XTARGET]
-
-        return set(self._get_symbols(user_syms, user.user_factory))
+        return " ".join(ret)
 
 
 class Constraint(BaseConstraint):
@@ -270,12 +317,12 @@ class Constraint(BaseConstraint):
 
         perms = self.perms
         if len(perms) > 1:
-            rule_string += "{{ {0} }} (\n".format(' '.join(perms))
+            rule_string += "{{ {0} }} (".format(' '.join(perms))
         else:
             # convert to list since sets cannot be indexed
-            rule_string += "{0} (\n".format(list(perms)[0])
+            rule_string += "{0} (".format(list(perms)[0])
 
-        rule_string += "\t{0}\n);".format(self._build_expression())
+        rule_string += "{0});".format(self._expression_str(self.expression()))
 
         return rule_string
 
@@ -290,9 +337,9 @@ class Validatetrans(BaseConstraint):
     """A validatetrans rule (validatetrans/mlsvalidatetrans)."""
 
     def __str__(self):
-        return "{0.ruletype} {0.tclass}\n\t{1}\n);".format(self, self._build_expression())
+        return "{0.ruletype} {0.tclass} ({1});".format(self,
+                                                       self._expression_str(self.expression()))
 
     @property
     def perms(self):
-        raise exception.ConstraintUseError("{0} rules do not have permissions.".
-                                           format(self.ruletype))
+        raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
