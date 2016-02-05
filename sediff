@@ -70,6 +70,14 @@ mlsrule = parser.add_argument_group("MLS rule differences")
 mlsrule.add_argument("--range_trans", action="store_true",
                      help="Print range_transition rule differences")
 
+constrain = parser.add_argument_group("Constraint differences")
+constrain.add_argument("--constrain", action="store_true", help="Print constrain differences")
+constrain.add_argument("--mlsconstrain", action="store_true", help="Print mlsconstrain differences")
+constrain.add_argument("--validatetrans", action="store_true",
+                       help="Print validatetrans differences")
+constrain.add_argument("--mlsvalidatetrans", action="store_true",
+                       help="Print mlsvalidatetrans differences")
+
 labeling = parser.add_argument_group("labeling statement differences")
 labeling.add_argument("--initialsid", action="store_true", help="Print initial SID differences")
 labeling.add_argument("--fs_use", action="store_true", help="Print fs_use_* differences")
@@ -92,7 +100,8 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.type_trans, args.type_change, args.type_member, args.role_allow,
                            args.role_trans, args.range_trans, args.initialsid, args.genfscon,
                            args.netifcon, args.nodecon, args.portcon, args.fs_use, args.polcap,
-                           args.property, args.default))
+                           args.property, args.default, args.constrain, args.mlsconstrain,
+                           args.validatetrans, args.mlsvalidatetrans))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -794,6 +803,82 @@ try:
                             rule, added_default, removed_default)
 
                     print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.constrain:
+        if diff.added_constrains or diff.removed_constrains or args.constrain:
+            print("Constraints ({0} Added, {1} Removed)".format(
+                len(diff.added_constrains), len(diff.removed_constrains)))
+
+            if diff.added_constrains and not args.stats:
+                print("   Added Constraints: {0}".format(
+                    len(diff.added_constrains)))
+                for r in sorted(diff.added_constrains):
+                    print("      + {0}".format(r))
+
+            if diff.removed_constrains and not args.stats:
+                print("   Removed Constraints: {0}".format(
+                    len(diff.removed_constrains)))
+                for r in sorted(diff.removed_constrains):
+                    print("      - {0}".format(r))
+
+            print()
+
+    if all_differences or args.mlsconstrain:
+        if diff.added_mlsconstrains or diff.removed_mlsconstrains or args.mlsconstrain:
+            print("MLS Constraints ({0} Added, {1} Removed)".format(
+                len(diff.added_mlsconstrains), len(diff.removed_mlsconstrains)))
+
+            if diff.added_mlsconstrains and not args.stats:
+                print("   Added MLS Constraints: {0}".format(
+                    len(diff.added_mlsconstrains)))
+                for r in sorted(diff.added_mlsconstrains):
+                    print("      + {0}".format(r))
+
+            if diff.removed_mlsconstrains and not args.stats:
+                print("   Removed MLS Constraints: {0}".format(
+                    len(diff.removed_mlsconstrains)))
+                for r in sorted(diff.removed_mlsconstrains):
+                    print("      - {0}".format(r))
+
+            print()
+
+    if all_differences or args.validatetrans:
+        if diff.added_validatetrans or diff.removed_validatetrans or args.validatetrans:
+            print("Validatetrans ({0} Added, {1} Removed)".format(
+                len(diff.added_validatetrans), len(diff.removed_validatetrans)))
+
+            if diff.added_validatetrans and not args.stats:
+                print("   Added Validatetrans: {0}".format(
+                    len(diff.added_validatetrans)))
+                for r in sorted(diff.added_validatetrans):
+                    print("      + {0}".format(r))
+
+            if diff.removed_validatetrans and not args.stats:
+                print("   Removed Validatetrans: {0}".format(
+                    len(diff.removed_validatetrans)))
+                for r in sorted(diff.removed_validatetrans):
+                    print("      - {0}".format(r))
+
+            print()
+
+    if all_differences or args.mlsvalidatetrans:
+        if diff.added_mlsvalidatetrans or diff.removed_mlsvalidatetrans or args.mlsvalidatetrans:
+            print("MLS Validatetrans ({0} Added, {1} Removed)".format(
+                len(diff.added_mlsvalidatetrans), len(diff.removed_mlsvalidatetrans)))
+
+            if diff.added_mlsvalidatetrans and not args.stats:
+                print("   Added MLS Validatetrans: {0}".format(
+                    len(diff.added_mlsvalidatetrans)))
+                for r in sorted(diff.added_mlsvalidatetrans):
+                    print("      + {0}".format(r))
+
+            if diff.removed_mlsvalidatetrans and not args.stats:
+                print("   Removed MLS Validatetrans: {0}".format(
+                    len(diff.removed_mlsvalidatetrans)))
+                for r in sorted(diff.removed_mlsvalidatetrans):
+                    print("      - {0}".format(r))
 
             print()
 

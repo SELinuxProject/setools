@@ -1349,6 +1349,178 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertIsNone(added_range)
         self.assertIsNone(removed_range)
 
+    #
+    # constrains
+    #
+    def test_added_constrains(self):
+        """Diff: added constrains."""
+        l = sorted(self.diff.added_constrains)
+        self.assertEqual(2, len(l))
+
+        constrain = l[0]
+        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual("infoflow3", constrain.tclass)
+        self.assertSetEqual(set(["null"]), constrain.perms)
+        self.assertListEqual(["u1", "u2", "!="], constrain.postfix_expression())
+
+        constrain = l[1]
+        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual("infoflow5", constrain.tclass)
+        self.assertSetEqual(set(["hi_r"]), constrain.perms)
+        self.assertListEqual(
+            ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '!=', 'or'],
+            constrain.postfix_expression())
+
+    def test_removed_constrains(self):
+        """Diff: removed constrains."""
+        l = sorted(self.diff.removed_constrains)
+        self.assertEqual(2, len(l))
+
+        constrain = l[0]
+        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual("infoflow4", constrain.tclass)
+        self.assertSetEqual(set(["hi_w"]), constrain.perms)
+        self.assertListEqual(["u1", "u2", "!="], constrain.postfix_expression())
+
+        constrain = l[1]
+        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual("infoflow5", constrain.tclass)
+        self.assertSetEqual(set(["hi_r"]), constrain.perms)
+        self.assertListEqual(
+            ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '==', 'or'],
+            constrain.postfix_expression())
+
+    #
+    # mlsconstrains
+    #
+    def test_added_mlsconstrains(self):
+        """Diff: added mlsconstrains."""
+        l = sorted(self.diff.added_mlsconstrains)
+        self.assertEqual(2, len(l))
+
+        mlsconstrain = l[0]
+        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual("infoflow3", mlsconstrain.tclass)
+        self.assertSetEqual(set(["null"]), mlsconstrain.perms)
+        self.assertListEqual(
+            ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
+                't1', set(["mls_exempt"]), '!=', 'or'],
+            mlsconstrain.postfix_expression())
+
+        mlsconstrain = l[1]
+        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual("infoflow5", mlsconstrain.tclass)
+        self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
+        self.assertListEqual(
+            ['l1', 'l2', 'domby', 'h1', 'h2', 'incomp',
+                'and', 't1', set(["mls_exempt"]), '==', 'or'],
+            mlsconstrain.postfix_expression())
+
+    def test_removed_mlsconstrains(self):
+        """Diff: removed mlsconstrains."""
+        l = sorted(self.diff.removed_mlsconstrains)
+        self.assertEqual(2, len(l))
+
+        mlsconstrain = l[0]
+        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual("infoflow4", mlsconstrain.tclass)
+        self.assertSetEqual(set(["hi_w"]), mlsconstrain.perms)
+        self.assertListEqual(
+            ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
+                't1', set(["mls_exempt"]), '==', 'or'],
+            mlsconstrain.postfix_expression())
+
+        mlsconstrain = l[1]
+        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual("infoflow5", mlsconstrain.tclass)
+        self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
+        self.assertListEqual(
+            ['l1', 'l2', 'domby', 'h1', 'h2', 'dom', 'and', 't1', set(["mls_exempt"]), '==', 'or'],
+            mlsconstrain.postfix_expression())
+
+    #
+    # validatetrans
+    #
+    def test_added_validatetrans(self):
+        """Diff: added validatetrans."""
+        l = sorted(self.diff.added_validatetrans)
+        self.assertEqual(2, len(l))
+
+        validatetrans = l[0]
+        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual("infoflow3", validatetrans.tclass)
+        self.assertListEqual(
+            ['t1', 't2', '==', 't3', set(["system"]), '==', 'or'],
+            validatetrans.postfix_expression())
+
+        validatetrans = l[1]
+        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual("infoflow5", validatetrans.tclass)
+        self.assertListEqual(
+            ['u1', 'u2', '!=', 'r1', 'r2', '==', 'and', 't3', set(["system"]), '==', 'or'],
+            validatetrans.postfix_expression())
+
+    def test_removed_validatetrans(self):
+        """Diff: removed validatetrans."""
+        l = sorted(self.diff.removed_validatetrans)
+        self.assertEqual(2, len(l))
+
+        validatetrans = l[0]
+        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual("infoflow4", validatetrans.tclass)
+        self.assertListEqual(
+            ['u1', 'u2', '==', 't3', set(["system"]), '==', 'or'],
+            validatetrans.postfix_expression())
+
+        validatetrans = l[1]
+        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual("infoflow5", validatetrans.tclass)
+        self.assertListEqual(
+            ['u1', 'u2', '==', 'r1', 'r2', '!=', 'and', 't3', set(["system"]), '==', 'or'],
+            validatetrans.postfix_expression())
+
+    #
+    # mlsvalidatetrans
+    #
+    def test_added_mlsvalidatetrans(self):
+        """Diff: added mlsvalidatetrans."""
+        l = sorted(self.diff.added_mlsvalidatetrans)
+        self.assertEqual(2, len(l))
+
+        mlsvalidatetrans = l[0]
+        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual("infoflow3", mlsvalidatetrans.tclass)
+        self.assertListEqual(
+            ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
+            mlsvalidatetrans.postfix_expression())
+
+        mlsvalidatetrans = l[1]
+        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
+        self.assertListEqual(
+            ['l1', 'l2', 'incomp', 'h1', 'h2', 'domby',
+                'and', 't3', set(["mls_exempt"]), '==', 'or'],
+            mlsvalidatetrans.postfix_expression())
+
+    def test_removed_mlsvalidatetrans(self):
+        """Diff: removed mlsvalidatetrans."""
+        l = sorted(self.diff.removed_mlsvalidatetrans)
+        self.assertEqual(2, len(l))
+
+        mlsvalidatetrans = l[0]
+        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual("infoflow4", mlsvalidatetrans.tclass)
+        self.assertListEqual(
+            ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
+            mlsvalidatetrans.postfix_expression())
+
+        mlsvalidatetrans = l[1]
+        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
+        self.assertListEqual(
+            ['l1', 'l2', 'dom', 'h1', 'h2', 'dom', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
+            mlsvalidatetrans.postfix_expression())
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1694,6 +1866,38 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_defaults(self):
         """NoDiff: no modified defaults."""
         self.assertFalse(self.diff.modified_defaults)
+
+    def test_added_constrains(self):
+        """NoDiff: no added constrains."""
+        self.assertFalse(self.diff.added_constrains)
+
+    def test_removed_constrains(self):
+        """NoDiff: no removed constrains."""
+        self.assertFalse(self.diff.removed_constrains)
+
+    def test_added_mlsconstrains(self):
+        """NoDiff: no added mlsconstrains."""
+        self.assertFalse(self.diff.added_mlsconstrains)
+
+    def test_removed_mlsconstrains(self):
+        """NoDiff: no removed mlsconstrains."""
+        self.assertFalse(self.diff.removed_mlsconstrains)
+
+    def test_added_validatetrans(self):
+        """NoDiff: no added validatetrans."""
+        self.assertFalse(self.diff.added_validatetrans)
+
+    def test_removed_validatetrans(self):
+        """NoDiff: no removed validatetrans."""
+        self.assertFalse(self.diff.removed_validatetrans)
+
+    def test_added_mlsvalidatetrans(self):
+        """NoDiff: no added mlsvalidatetrans."""
+        self.assertFalse(self.diff.added_mlsvalidatetrans)
+
+    def test_removed_mlsvalidatetrans(self):
+        """NoDiff: no removed mlsvalidatetrans."""
+        self.assertFalse(self.diff.removed_mlsvalidatetrans)
 
 
 class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
@@ -2054,3 +2258,39 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     def test_modified_defaults(self):
         """MLSvsStandardDiff: no defaults modified."""
         self.assertFalse(self.diff.modified_defaults)
+
+    def test_added_constraints(self):
+        """MLSvsStandardDiff: no added constraints."""
+        self.assertFalse(self.diff.added_constrains)
+
+    def test_removed_constraints(self):
+        """MLSvsStandardDiff: no removed constraints."""
+        self.assertFalse(self.diff.removed_constrains)
+
+    def test_added_validatetrans(self):
+        """MLSvsStandardDiff: no added validatetrans."""
+        self.assertFalse(self.diff.added_validatetrans)
+
+    def test_removed_validatetrans(self):
+        """MLSvsStandardDiff: no removed validatetrans."""
+        self.assertFalse(self.diff.removed_validatetrans)
+
+    def test_added_mlsconstraints(self):
+        """MLSvsStandardDiff: no added mlsconstraints."""
+        self.assertFalse(self.diff.added_mlsconstrains)
+
+    def test_removed_mlsconstraints(self):
+        """MLSvsStandardDiff: all mlsconstraints removed."""
+        self.assertEqual(
+            sum(1 for m in self.diff.left_policy.constraints() if m.ruletype == "mlsconstrain"),
+            len(self.diff.removed_mlsconstrains))
+
+    def test_added_mlsvalidatetrans(self):
+        """MLSvsStandardDiff: no added mlsvalidatetrans."""
+        self.assertFalse(self.diff.added_mlsvalidatetrans)
+
+    def test_removed_mlsvalidatetrans(self):
+        """MLSvsStandardDiff: all mlsvalidatetrans removed."""
+        self.assertEqual(
+            sum(1 for m in self.diff.left_policy.constraints() if m.ruletype == "mlsvalidatetrans"),
+            len(self.diff.removed_mlsvalidatetrans))

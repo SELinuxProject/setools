@@ -18,6 +18,7 @@
 #
 from .bool import BooleansDifference
 from .commons import CommonDifference
+from .constraints import ConstraintsDifference
 from .default import DefaultsDifference
 from .fsuse import FSUsesDifference
 from .genfscon import GenfsconsDifference
@@ -43,6 +44,7 @@ __all__ = ['PolicyDifference']
 class PolicyDifference(BooleansDifference,
                        CategoriesDifference,
                        CommonDifference,
+                       ConstraintsDifference,
                        DefaultsDifference,
                        FSUsesDifference,
                        GenfsconsDifference,
