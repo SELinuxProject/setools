@@ -44,7 +44,7 @@ def expanded_mls_rule_factory(original, source, target):
 
     if isinstance(original, MLSRule):
         rule = ExpandedMLSRule(original.policy, original.qpol_symbol)
-    elif isinstance(original, MLSRule):
+    elif isinstance(original, ExpandedMLSRule):
         return original
     else:
         raise TypeError("The original rule must be a MLS rule class.")
