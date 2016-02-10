@@ -91,6 +91,7 @@ other.add_argument("--default", action="store_true", help="Print default_* diffe
 other.add_argument("--property", action="store_true",
                    help="Print policy property differences (handle_unknown, version, MLS)")
 other.add_argument("--polcap", action="store_true", help="Print policy capability differences")
+other.add_argument("--typebounds", action="store_true", help="Print typebounds differences")
 
 args = parser.parse_args()
 
@@ -101,7 +102,7 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.role_trans, args.range_trans, args.initialsid, args.genfscon,
                            args.netifcon, args.nodecon, args.portcon, args.fs_use, args.polcap,
                            args.property, args.default, args.constrain, args.mlsconstrain,
-                           args.validatetrans, args.mlsvalidatetrans))
+                           args.validatetrans, args.mlsvalidatetrans, args.typebounds))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -1084,6 +1085,28 @@ try:
                         except AttributeError:
                             line += ";"
                     print(line)
+
+            print()
+
+    if all_differences or args.typebounds:
+        if diff.added_typebounds or diff.removed_typebounds or args.typebounds:
+            print("Typebounds ({0} Added, {1} Removed, {2} Modified)".format(
+                  len(diff.added_typebounds), len(diff.removed_typebounds),
+                  len(diff.modified_typebounds)))
+            if diff.added_typebounds and not args.stats:
+                print("   Added Typebounds: {0}".format(len(diff.added_typebounds)))
+                for d in sorted(diff.added_typebounds):
+                    print("      + {0}".format(d))
+            if diff.removed_typebounds and not args.stats:
+                print("   Removed Typebounds: {0}".format(len(diff.removed_typebounds)))
+                for d in sorted(diff.removed_typebounds):
+                    print("      - {0}".format(d))
+            if diff.modified_typebounds and not args.stats:
+                print("   Modified Typebounds: {0}".format(len(diff.modified_typebounds)))
+                for bound, added_bound, removed_bound in sorted(
+                        diff.modified_typebounds, key=lambda x: x.rule):
+                    print("      * {0.ruletype} +{1} -{2} {0.child};".format(
+                          bound, added_bound, removed_bound))
 
             print()
 

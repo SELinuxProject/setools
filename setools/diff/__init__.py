@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 from .bool import BooleansDifference
+from .bounds import BoundsDifference
 from .commons import CommonDifference
 from .constraints import ConstraintsDifference
 from .default import DefaultsDifference
@@ -42,6 +43,7 @@ __all__ = ['PolicyDifference']
 
 
 class PolicyDifference(BooleansDifference,
+                       BoundsDifference,
                        CategoriesDifference,
                        CommonDifference,
                        ConstraintsDifference,

@@ -1521,6 +1521,40 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
             ['l1', 'l2', 'dom', 'h1', 'h2', 'dom', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
             mlsvalidatetrans.postfix_expression())
 
+    #
+    # typebounds
+    #
+    def test_added_typebounds(self):
+        """Diff: added typebounds."""
+        l = sorted(self.diff.added_typebounds)
+        self.assertEqual(1, len(l))
+
+        bounds = l[0]
+        self.assertEqual("typebounds", bounds.ruletype)
+        self.assertEqual("added_parent", bounds.parent)
+        self.assertEqual("added_child", bounds.child)
+
+    def test_removed_typebounds(self):
+        """Diff: removed typebounds."""
+        l = sorted(self.diff.removed_typebounds)
+        self.assertEqual(1, len(l))
+
+        bounds = l[0]
+        self.assertEqual("typebounds", bounds.ruletype)
+        self.assertEqual("removed_parent", bounds.parent)
+        self.assertEqual("removed_child", bounds.child)
+
+    def test_modified_typebounds(self):
+        """Diff: modified typebounds."""
+        l = sorted(self.diff.modified_typebounds, key=lambda x: x.rule)
+        self.assertEqual(1, len(l))
+
+        bounds, added_bound, removed_bound = l[0]
+        self.assertEqual("typebounds", bounds.ruletype)
+        self.assertEqual("mod_child", bounds.child)
+        self.assertEqual("mod_parent_added", added_bound)
+        self.assertEqual("mod_parent_removed", removed_bound)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1898,6 +1932,18 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_removed_mlsvalidatetrans(self):
         """NoDiff: no removed mlsvalidatetrans."""
         self.assertFalse(self.diff.removed_mlsvalidatetrans)
+
+    def test_added_typebounds(self):
+        """NoDiff: no added typebounds."""
+        self.assertFalse(self.diff.added_typebounds)
+
+    def test_removed_typebounds(self):
+        """NoDiff: no removed typebounds."""
+        self.assertFalse(self.diff.removed_typebounds)
+
+    def test_modified_typebounds(self):
+        """NoDiff: no modified typebounds."""
+        self.assertFalse(self.diff.modified_typebounds)
 
 
 class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
@@ -2294,3 +2340,15 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
         self.assertEqual(
             sum(1 for m in self.diff.left_policy.constraints() if m.ruletype == "mlsvalidatetrans"),
             len(self.diff.removed_mlsvalidatetrans))
+
+    def test_added_typebounds(self):
+        """MLSvsStandardDiff: no added typebounds."""
+        self.assertFalse(self.diff.added_typebounds)
+
+    def test_removed_typebounds(self):
+        """MLSvsStandardDiff: no removed typebounds."""
+        self.assertFalse(self.diff.removed_typebounds)
+
+    def test_modified_typebounds(self):
+        """MLSvsStandardDiff: no modified typebounds."""
+        self.assertFalse(self.diff.modified_typebounds)

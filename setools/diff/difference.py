@@ -72,7 +72,7 @@ class Difference(object):
                 yield Wrapper(expanded_rule)
 
     @staticmethod
-    def _set_diff(left, right):
+    def _set_diff(left, right, key=None):
         """
         Standard diff of two sets.
 
@@ -108,8 +108,8 @@ class Difference(object):
         # instead of giving wrong results.  If there is a better way to,
         # ensure the items match up, please let me know how or submit a patch.
         matched_items = set()
-        left_matched_items = sorted((left_items - removed_items))
-        right_matched_items = sorted((right_items - added_items))
+        left_matched_items = sorted((left_items - removed_items), key=key)
+        right_matched_items = sorted((right_items - added_items), key=key)
         assert len(left_matched_items) == len(right_matched_items), \
             "Matched items assertion failure (this is an SETools bug), {0} != {1}". \
             format(len(left_matched_items), len(right_matched_items))

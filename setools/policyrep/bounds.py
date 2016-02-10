@@ -37,6 +37,9 @@ class Bounds(PolicySymbol):
     def __str__(self):
         return "{0.ruletype} {0.parent} {0.child};".format(self)
 
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.child};".format(self))
+
     ruletype = "typebounds"
 
     @property
