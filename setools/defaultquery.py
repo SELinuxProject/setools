@@ -50,6 +50,9 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
         """Generator which yields all matching default_* statements."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
+        self.log.debug("Default: {0.default}".format(self))
+        self.log.debug("Range: {0.default_range}".format(self))
 
         for d in self.policy.defaults():
             if self.ruletype and d.ruletype not in self.ruletype:
