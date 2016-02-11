@@ -519,6 +519,11 @@ class SELinuxPolicy(object):
     # Policy rule type validators
     #
     @staticmethod
+    def validate_bounds_ruletype(types):
+        """Validate constraint types."""
+        return bounds.validate_ruletype(types)
+
+    @staticmethod
     def validate_constraint_ruletype(types):
         """Validate constraint types."""
         return constraint.validate_ruletype(types)

@@ -150,10 +150,15 @@ class InvalidRuleType(InvalidSymbol):
     pass
 
 
+class InvalidBoundsType(InvalidSymbol):
+
+    """Exception for invalid *bounds rule types."""
+    pass
+
+
 class InvalidConstraintType(InvalidSymbol):
 
     """Exception for invalid constraint types."""
-    # This is not a rule but is similar.
     pass
 
 

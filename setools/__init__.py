@@ -52,6 +52,7 @@ from .terulequery import TERuleQuery
 from .constraintquery import ConstraintQuery
 
 # Other queries
+from .boundsquery import BoundsQuery
 from .defaultquery import DefaultQuery
 
 # In-policy Context Queries

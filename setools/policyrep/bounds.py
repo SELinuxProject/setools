@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from . import exception
 from .symbol import PolicySymbol
 from .qpol import qpol_typebounds_t
 from .typeattr import type_factory
@@ -28,6 +29,14 @@ def bounds_factory(policy, sym):
         return Bounds(policy, sym)
     else:
         raise TypeError("typebounds rules cannot be looked up.")
+
+
+def validate_ruletype(t):
+    """Validate *bounds rule types."""
+    if t not in ["typebounds"]:
+        raise exception.InvalidBoundsType("{0} is not a valid *bounds  rule type.".format(t))
+
+    return t
 
 
 class Bounds(PolicySymbol):
