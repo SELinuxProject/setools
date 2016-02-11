@@ -81,6 +81,8 @@ queries.add_argument("--portcon", help="Print portcon statements.", dest="portco
                      nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
 queries.add_argument("--sensitivity", help="Print MLS sensitivities.", dest="mlssensquery",
                      nargs='?', const=True, metavar="SENS")
+queries.add_argument("--typebounds", help="Print typebounds statements.", dest="typeboundsquery",
+                     nargs='?', const=True, metavar="BOUND_TYPE")
 queries.add_argument("--validatetrans", help="Print validatetrans.", dest="validatetransquery",
                      nargs='?', const=True, metavar="CLASS")
 queries.add_argument("--all", help="Print all of the above.",
@@ -222,6 +224,13 @@ try:
 
         components.append(("Sensitivities", q, lambda x: x.statement()))
 
+    if args.typeboundsquery or args.all:
+        q = setools.BoundsQuery(p, ruletype=["typebounds"])
+        if isinstance(args.typeboundsquery, str):
+            q.child = args.typeboundsquery
+
+        components.append(("Typebounds", q, lambda x: x.statement()))
+
     if args.typequery or args.all:
         q = setools.TypeQuery(p)
         if isinstance(args.typequery, str):
@@ -288,7 +297,8 @@ try:
             p.netifcon_count, p.nodecon_count))
         print("  Permissives:   {0:7}    Polcap:        {1:7}".format(
             p.permissives_count, p.polcap_count))
-        print("  Defaults:      {0:7}".format(p.default_count))
+        print("  Defaults:      {0:7}    Typebounds:    {1:7}".format(
+            p.default_count, p.typebounds_count))
 
     for desc, component, expander in components:
         results = sorted(component.results())
