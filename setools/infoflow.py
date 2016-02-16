@@ -354,6 +354,7 @@ class Edge(object):
     A graph edge.  Also used for returning information flow steps.
 
     Parameters:
+    graph       The NetworkX graph.
     source      The source type of the edge.
     target      The target type of the edge.
 
@@ -376,12 +377,6 @@ class Edge(object):
         self.source = source
         self.target = target
 
-        # a bit of a hack to make edges work
-        # in NetworkX functions that work on
-        # 2-tuples of (source, target)
-        # (see __getitem__ below)
-        self.st_tuple = (source, target)
-
         if not self.G.has_edge(source, target):
             if create:
                 self.G.add_edge(source, target, weight=1)
@@ -391,4 +386,18 @@ class Edge(object):
                 raise ValueError("Edge does not exist in graph")
 
     def __getitem__(self, key):
-        return self.st_tuple[key]
+        # This is implemented so this object can be used in NetworkX
+        # functions that operate on (source, target) tuples
+        if isinstance(key, slice):
+            return [self._index_to_item(i) for i in range(* key.indices(2))]
+        else:
+            return self._index_to_item(key)
+
+    def _index_to_item(self, index):
+        """Return source or target based on index."""
+        if index == 0:
+            return self.source
+        elif index == 1:
+            return self.target
+        else:
+            raise IndexError("Invalid index (edges only have 2 items): {0}".format(index))
