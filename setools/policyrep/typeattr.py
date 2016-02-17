@@ -159,16 +159,19 @@ class TypeAttribute(BaseType):
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
-        raise TypeError("{0} is an attribute, thus does not have attributes.".format(self))
+        raise exception.SymbolUseError("{0} is an attribute, thus does not have attributes.".
+                                       format(self))
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        raise TypeError("{0} is an attribute, thus does not have aliases.".format(self))
+        raise exception.SymbolUseError("{0} is an attribute, thus does not have aliases.".
+                                       format(self))
 
     @property
     def ispermissive(self):
         """(T/F) the type is permissive."""
-        raise TypeError("{0} is an attribute, thus cannot be permissive.".format(self))
+        raise exception.SymbolUseError("{0} is an attribute, thus cannot be permissive.".
+                                       format(self))
 
     def statement(self):
         return "attribute {0};".format(self)

@@ -24,7 +24,7 @@ except ImportError:
 
 from setools import SELinuxPolicy
 from setools.policyrep import qpol
-from setools.policyrep.exception import InvalidType
+from setools.policyrep.exception import InvalidType, SymbolUseError
 from setools.policyrep.typeattr import type_factory, type_or_attr_factory, attribute_factory
 
 
@@ -239,13 +239,13 @@ class TypeAttributeTest(unittest.TestCase):
     def test_020_attrs(self):
         """TypeAttribute attributes"""
         attr = self.mock_attr_factory("name20")
-        with self.assertRaises(TypeError):
+        with self.assertRaises(SymbolUseError):
             attr.attributes()
 
     def test_030_aliases(self):
         """TypeAttribute aliases"""
         attr = self.mock_attr_factory("name30")
-        with self.assertRaises(TypeError):
+        with self.assertRaises(SymbolUseError):
             attr.aliases()
 
     def test_040_expand(self):
@@ -254,7 +254,7 @@ class TypeAttributeTest(unittest.TestCase):
         self.assertEqual(['type31a', 'type31b', 'type31c'], sorted(attr.expand()))
 
     def test_050_permissive(self):
-        with self.assertRaises(TypeError):
+        with self.assertRaises(SymbolUseError):
             attr = self.mock_attr_factory("name20")
             attr.ispermissive
 
