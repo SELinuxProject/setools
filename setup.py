@@ -132,7 +132,7 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                          swig_opts=['-Ilibqpol/include'])]
 
 setup(name='setools',
-      version='4.0.0-alpha3',
+      version='4.0.0-beta',
       description='SELinux Policy tools.',
       author='Tresys Technology, LLC',
       author_email='setools@tresys.com',
