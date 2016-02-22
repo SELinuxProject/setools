@@ -6,6 +6,7 @@ include libqpol/*.l
 include libqpol/*.y
 include libqpol/libqpol.map
 include libqpol/include/qpol/*.h
+include man/*
 include tests/*.conf
 include tests/*.py
 include tests/perm_map
