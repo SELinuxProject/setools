@@ -109,7 +109,7 @@ def level_factory(policy, sym):
     try:
         semantic_level = qpol.qpol_semantic_level_t(policy, sens)
     except ValueError:
-        raise exception.InvalidLevel("{0} is invalid ({1} is not a valid sensitivity)".
+        raise exception.InvalidLevel("{0} is not a valid level ({1} is not a valid sensitivity)".
                                      format(sym, sens))
 
     try:
@@ -125,23 +125,25 @@ def level_factory(policy, sym):
                     semantic_level.add_cats(policy, catrange[0], catrange[1])
                 except ValueError:
                     raise exception.InvalidLevel(
-                        "{0} is invalid ({1} is not a valid category range)".format(sym, group))
+                        "{0} is not a valid level ({1} is not a valid category range)".
+                        format(sym, group))
             elif len(catrange) == 1:
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[0])
                 except ValueError:
-                    raise exception.InvalidLevel("{0} is invalid  ({1} is not a valid category)".
-                                                 format(sym, group))
+                    raise exception.InvalidLevel(
+                        "{0} is not a valid level ({1} is not a valid category)".format(sym, group))
             else:
-                raise exception.InvalidLevel("{0} is invalid (level parsing error)".format(sym))
+                raise exception.InvalidLevel(
+                    "{0} is not a valid level (level parsing error)".format(sym))
 
     # convert to level object
     try:
         policy_level = qpol.qpol_mls_level_t(policy, semantic_level)
     except ValueError:
         raise exception.InvalidLevel(
-            "{0} is invalid (one or more categories are not associated with the sensitivity)".
-            format(sym))
+            "{0} is not a valid level (one or more categories are not associated with the "
+            "sensitivity)".format(sym))
 
     return Level(policy, policy_level)
 
