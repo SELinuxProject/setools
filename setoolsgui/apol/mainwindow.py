@@ -31,6 +31,7 @@ from .infoflow import InfoFlowAnalysisTab
 from .mlsrulequery import MLSRuleQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .terulequery import TERuleQueryTab
+from .userquery import UserQueryTab
 
 
 class ApolMainWindow(SEToolsWidget, QMainWindow):
@@ -197,42 +198,15 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     The item_mapping attribute will be populated to
     map the tree list items to the analysis tab widgets.
     """
-#    _components_map = {"Attributes (Type)": TERuleQueryTab,
-#                       "Booleans": TERuleQueryTab,
-#                       "Categories": TERuleQueryTab,
-#                       "Common Permission Sets": TERuleQueryTab,
-#                       "Object Classes": TERuleQueryTab,
-#                       "Policy Capabilities": TERuleQueryTab,
-#                       "Roles": TERuleQueryTab,
-#                       "Types": TERuleQueryTab,
-#                       "Users": TERuleQueryTab}
-#
-#    _rule_map = {"TE Rules": TERuleQueryTab,
-#                 "RBAC Rules": TERuleQueryTab,
-#                 "MLS Rules": TERuleQueryTab,
-#                 "Constraints": TERuleQueryTab}
-#
-#    _analysis_map = {"Domain Transition Analysis": TERuleQueryTab,
-#                     "Information Flow Analysis": TERuleQueryTab}
-#
-#    _labeling_map = {"fs_use Statements": TERuleQueryTab,
-#                     "Genfscon Statements": TERuleQueryTab,
-#                     "Initial SID Statements": TERuleQueryTab,
-#                     "Netifcon Statements": TERuleQueryTab,
-#                     "Nodecon Statements": TERuleQueryTab,
-#                     "Portcon Statements": TERuleQueryTab}
-#
-#    _analysis_choices = {"Components": _components_map,
-#                         "Rules": _rule_map,
-#                         "Analysis": _analysis_map,
-#                         "Labeling Statements": _labeling_map}
 
     _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
                      "Information Flow Analysis": InfoFlowAnalysisTab}
+    _components_map = {"Users": UserQueryTab}
     _rule_map = {"MLS Rules": MLSRuleQueryTab,
                  "RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
-    _analysis_choices = {"Rules": _rule_map,
+    _analysis_choices = {"Components": _components_map,
+                         "Rules": _rule_map,
                          "Analyses": _analysis_map}
 
     def __init__(self, parent):
