@@ -90,6 +90,7 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
         self.busy.setRange(0, 0)
         self.busy.setMinimumDuration(0)
         self.busy.canceled.connect(self.thread.requestInterruption)
+        self.busy.reset()
 
         # Ensure settings are consistent with the initial .ui state
         self.notes.setHidden(not self.notes_expander.isChecked())
