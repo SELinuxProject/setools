@@ -63,11 +63,13 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
 
+        # setup indications of errors on level/range
+        self.orig_palette = self.name.palette()
+        self.error_palette = self.name.palette()
+        self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.clear_name_error()
+
         if self.policy.mls:
-            # setup indications of errors on level/range
-            self.orig_palette = self.level.palette()
-            self.error_palette = self.level.palette()
-            self.error_palette.setColor(QPalette.Base, Qt.red)
             self.clear_level_error()
             self.clear_range_error()
         else:
@@ -98,6 +100,9 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
         # connect signals
         self.users.doubleClicked.connect(self.get_detail)
         self.users.get_detail.triggered.connect(self.get_detail)
+        self.name.textEdited.connect(self.clear_name_error)
+        self.name.editingFinished.connect(self.set_name)
+        self.name_regex.toggled.connect(self.set_name_regex)
         self.roles.selectionModel().selectionChanged.connect(self.set_roles)
         self.invert_roles.clicked.connect(self.invert_role_selection)
         self.level.textEdited.connect(self.clear_level_error)
@@ -116,6 +121,26 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
 
         self.log.debug("Generating detail window for {0}".format(item))
         user_detail(self, item)
+
+    #
+    # Name criteria
+    #
+    def clear_name_error(self):
+        self.name.setToolTip("Match the user name.")
+        self.name.setPalette(self.orig_palette)
+
+    def set_name(self):
+        try:
+            self.query.name = self.name.text()
+        except Exception as ex:
+            self.name.setToolTip("Error: " + str(ex))
+            self.name.setPalette(self.error_palette)
+
+    def set_name_regex(self, state):
+        self.log.debug("Setting name_regex {0}".format(state))
+        self.query.name_regex = state
+        self.clear_name_error()
+        self.set_name()
 
     #
     # Role criteria
