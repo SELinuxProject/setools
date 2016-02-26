@@ -1,0 +1,60 @@
+diff --git a/apol b/apol
+index c3e58f9..d8f6496 100755
+--- a/apol
++++ b/apol
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2015, Tresys Technology, LLC
+ #
+ # This file is part of SETools.
+diff --git a/sediff b/sediff
+index 34268ca..48b1a54 100755
+--- a/sediff
++++ b/sediff
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2015-2016, Tresys Technology, LLC
+ #
+ # This file is part of SETools.
+diff --git a/sedta b/sedta
+index e4d4914..279019c 100755
+--- a/sedta
++++ b/sedta
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2014-2015, Tresys Technology, LLC
+ #
+ # This file is part of SETools.
+diff --git a/seinfo b/seinfo
+index 2b50393..ad83496 100755
+--- a/seinfo
++++ b/seinfo
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2014-2015, Tresys Technology, LLC
+ #
+ # This file is part of SETools.
+diff --git a/seinfoflow b/seinfoflow
+index 7a2d288..1c75f8e 100755
+--- a/seinfoflow
++++ b/seinfoflow
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2014-2015, Tresys Technology, LLC
+ #
+ # This file is part of SETools.
+diff --git a/sesearch b/sesearch
+index 7bcdfd2..e2cd4c3 100755
+--- a/sesearch
++++ b/sesearch
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ # Copyright 2014-2015, Tresys Technology, LLC
+ #
+ # This file is part of SETools.
