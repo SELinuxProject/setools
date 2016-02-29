@@ -115,7 +115,6 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.set_target_regex(self.target_regex.isChecked())
         self.set_default_regex(self.default_regex.isChecked())
         self.criteria_frame.setHidden(not self.criteria_expander.isChecked())
-        self.results_frame.setHidden(not self.results_expander.isChecked())
         self.notes.setHidden(not self.notes_expander.isChecked())
 
         # connect signals

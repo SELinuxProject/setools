@@ -86,7 +86,6 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         self.source.setEnabled(not self.flows_in.isChecked())
         self.target.setEnabled(not self.flows_out.isChecked())
         self.criteria_frame.setHidden(not self.criteria_expander.isChecked())
-        self.results_frame.setHidden(not self.results_expander.isChecked())
         self.notes.setHidden(not self.notes_expander.isChecked())
 
         # connect signals
