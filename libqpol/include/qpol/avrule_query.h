@@ -39,11 +39,19 @@ extern "C"
 	typedef struct qpol_avrule qpol_avrule_t;
 
 /* rule type defines (values copied from "sepol/policydb/policydb.h") */
-#define QPOL_RULE_ALLOW         1
-#define QPOL_RULE_NEVERALLOW  128
-#define QPOL_RULE_AUDITALLOW    2
+#define QPOL_RULE_ALLOW         0x0001
+#define QPOL_RULE_NEVERALLOW    0x0080
+#define QPOL_RULE_AUDITALLOW    0x0002
 /* dontaudit is actually stored as auditdeny so that value is used here */
-#define QPOL_RULE_DONTAUDIT     4
+#define QPOL_RULE_DONTAUDIT     0x0004
+#define QPOL_RULE_AV (QPOL_RULE_ALLOW | QPOL_RULE_NEVERALLOW | QPOL_RULE_AUDITALLOW | QPOL_RULE_DONTAUDIT)
+
+#define QPOL_RULE_XPERMS_ALLOW        0x0100
+#define QPOL_RULE_XPERMS_AUDITALLOW   0x0200
+#define QPOL_RULE_XPERMS_DONTAUDIT    0x0400
+#define QPOL_RULE_XPERMS_NEVERALLOW   0x0800
+#define QPOL_RULE_XPERMS (QPOL_RULE_XPERMS_ALLOW | QPOL_RULE_XPERMS_AUDITALLOW | QPOL_RULE_XPERMS_DONTAUDIT | QPOL_RULE_XPERMS_NEVERALLOW)
+
 
 /**
  *  Get an iterator over all av rules in a policy of a rule type in
@@ -100,7 +108,8 @@ extern "C"
 						const qpol_class_t ** obj_class);
 
 /**
- *  Get an iterator over the permissions in an av rule.
+ *  Get an iterator over the permissions in an av rule. It is an error to call
+ *  this function on an extended avrule.
  *  @param policy Policy from which the rule comes.
  *  @param rule The rule from which to get the permissions.
  *  @param perms Iterator over items of type char* returned.
@@ -113,6 +122,43 @@ extern "C"
  *  errno will be set and *perms will be NULL.
  */
 	extern int qpol_avrule_get_perm_iter(const qpol_policy_t * policy, const qpol_avrule_t * rule, qpol_iterator_t ** perms);
+
+/**
+ *  Get an iterator over the extended permissions in an extended av rule. It is
+ *  an error to call this function an an avrule that is not an extended avrule.
+ *  @param policy Policy from which the rule comes.
+ *  @param rule The rule from which to get the permissions.
+ *  @param perms Iterator over items of type int* returned.
+ *  The caller is responsible for calling qpol_iterator_destroy()
+ *  to free memory used by this iterator. The caller <b>should call</b>
+ *  <b>free() on the ints returned by qpol_iterator_get_item().</b>
+ *  It is important to note that this iterator is only valid as long as
+ *  the policy is unmodifed.
+ *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  errno will be set and *xperms will be NULL.
+ */
+	extern int qpol_avrule_get_xperm_iter(const qpol_policy_t * policy, const qpol_avrule_t * rule, qpol_iterator_t ** xperms);
+
+/**
+ *  Determine if a rule is extnded.
+ *  @param policy Policy from which the rule comes.
+ *  @param rule The rule to check.
+ *  @param is_extended Integer in which to store the result: set to 1 if extended
+ *  and 0 otherwise.
+ *  @return 0 on success and < 0 on failure; if the call fails,
+ *  errno will be set and *is_extended will be 0.
+ */
+	extern int qpol_avrule_get_is_extended(const qpol_policy_t * policy, const qpol_avrule_t * rule, uint32_t * is_extended);
+
+/**
+ *  Get the type of an extended permission
+ *  @param policy Policy from which the rule comes.
+ *  @param rule The extended rule from which to get the type.
+ *  @param type String in which to store the result.
+ *  @return 0 on success and < 0 on failure; if the call fails,
+ *  errno will be set and *type will be NULL.
+ */
+	int qpol_avrule_get_xperm_type(const qpol_policy_t * policy, const qpol_avrule_t * rule, char ** type);
 
 /**
  *  Get the rule type value for an av rule.

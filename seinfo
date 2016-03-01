@@ -330,9 +330,9 @@ try:
 
         if p.target_platform == "selinux":
             print("  Allowxperm:      {0:7}    Neverallowxperm: {1:7}".format(
-                p.xprule_allow_count, p.xprule_neverallow_count))
+                p.allowx_count, p.neverallowx_count))
             print("  Auditallowxperm: {0:7}    Dontauditxperm:  {1:7}".format(
-                p.xprule_auditallow_count, p.xprule_dontaudit_count))
+                p.auditallowx_count, p.dontauditx_count))
             print("  Initial SIDs:    {0:7}    Fs_use:          {1:7}".format(
                 p.initialsids_count, p.fs_use_count))
             print("  Genfscon:        {0:7}    Portcon:         {1:7}".format(

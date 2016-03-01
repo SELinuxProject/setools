@@ -65,6 +65,15 @@ extern "C"
 		uint8_t cur;
 	} perm_state_t;
 
+	typedef struct xperm_state
+	{
+		avtab_extended_perms_t *xperms;
+		uint32_t cur; // an extended perm value ranges between 0x0000 and
+					  // 0xFFFF. So only 16 bits are necessary to store the
+					  // current value, but we want greater than 0xFFFF to represent
+					  // reaching the end, so we need a 32 bit int
+	} xperm_state_t;
+
 	typedef struct avtab_state
 	{
 		uint32_t rule_type_mask;
@@ -95,24 +104,28 @@ extern "C"
 	void *ebitmap_state_get_cur_polcap(const qpol_iterator_t * iter);
 	void *ocon_state_get_cur(const qpol_iterator_t * iter);
 	void *perm_state_get_cur(const qpol_iterator_t * iter);
+	void *xperm_state_get_cur(const qpol_iterator_t * iter);
 	void *avtab_state_get_cur(const qpol_iterator_t * iter);
 
 	int hash_state_next(qpol_iterator_t * iter);
 	int ebitmap_state_next(qpol_iterator_t * iter);
 	int ocon_state_next(qpol_iterator_t * iter);
 	int perm_state_next(qpol_iterator_t * iter);
+	int xperm_state_next(qpol_iterator_t * iter);
 	int avtab_state_next(qpol_iterator_t * iter);
 
 	int hash_state_end(const qpol_iterator_t * iter);
 	int ebitmap_state_end(const qpol_iterator_t * iter);
 	int ocon_state_end(const qpol_iterator_t * iter);
 	int perm_state_end(const qpol_iterator_t * iter);
+	int xperm_state_end(const qpol_iterator_t * iter);
 	int avtab_state_end(const qpol_iterator_t * iter);
 
 	size_t hash_state_size(const qpol_iterator_t * iter);
 	size_t ebitmap_state_size(const qpol_iterator_t * iter);
 	size_t ocon_state_size(const qpol_iterator_t * iter);
 	size_t perm_state_size(const qpol_iterator_t * iter);
+	size_t xperm_state_size(const qpol_iterator_t * iter);
 	size_t avtab_state_size(const qpol_iterator_t * iter);
 
 	void ebitmap_state_destroy(void *es);

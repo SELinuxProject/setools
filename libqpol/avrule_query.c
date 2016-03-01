@@ -192,6 +192,84 @@ int qpol_avrule_get_perm_iter(const qpol_policy_t * policy, const qpol_avrule_t 
 	return STATUS_SUCCESS;
 }
 
+int qpol_avrule_get_xperm_iter(const qpol_policy_t * policy, const qpol_avrule_t * rule, qpol_iterator_t ** xperms_iter)
+{
+	avtab_ptr_t avrule = NULL;
+	xperm_state_t *xps = NULL;
+	avtab_extended_perms_t *xperms = NULL;
+
+	if (xperms_iter) {
+		*xperms_iter = NULL;
+	}
+
+	if (!policy || !rule || !xperms_iter) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	avrule = (avtab_ptr_t) rule;
+	if (!(avrule->key.specified & QPOL_RULE_XPERMS)) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	xperms = avrule->datum.xperms;
+
+	xps = calloc(1, sizeof(xperm_state_t));
+	if (!xps) {
+		return STATUS_ERR;
+	}
+	xps->xperms = xperms;
+	xps->cur = 0;
+
+	if (qpol_iterator_create(policy, (void *)xps, xperm_state_get_cur,
+				 xperm_state_next, xperm_state_end, xperm_state_size, free, xperms_iter)) {
+		return STATUS_ERR;
+	}
+
+	if (!((xperms->perms[0] & 1) && ((xperms->specified & AVTAB_XPERMS_IOCTLDRIVER) || xperms->driver == 0))) /* defaults to bit 0, if off: advance */
+		xperm_state_next(*xperms_iter);
+	
+	return STATUS_SUCCESS;
+}
+
+int qpol_avrule_get_xperm_type(const qpol_policy_t * policy, const qpol_avrule_t * rule, char ** type)
+{
+	avtab_ptr_t avrule = NULL;
+	avtab_extended_perms_t *xperms = NULL;
+
+	if (type) {
+		*type = NULL;
+	}
+
+	if (!policy || !rule || !type) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	avrule = (avtab_ptr_t) rule;
+	if (!(avrule->key.specified & QPOL_RULE_XPERMS)) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	xperms = avrule->datum.xperms;
+	if (xperms->specified & AVTAB_XPERMS_IOCTLFUNCTION ||
+		xperms->specified & AVTAB_XPERMS_IOCTLDRIVER) {
+		*type = strdup("ioctl");
+	} else {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	return STATUS_SUCCESS;
+}
+
 int qpol_avrule_get_rule_type(const qpol_policy_t * policy, const qpol_avrule_t * rule, uint32_t * rule_type)
 {
 	avtab_ptr_t avrule = NULL;
@@ -209,7 +287,28 @@ int qpol_avrule_get_rule_type(const qpol_policy_t * policy, const qpol_avrule_t 
 	avrule = (avtab_ptr_t) rule;
 
 	*rule_type =
-		(avrule->key.specified & (QPOL_RULE_ALLOW | QPOL_RULE_NEVERALLOW | QPOL_RULE_AUDITALLOW | QPOL_RULE_DONTAUDIT));
+		(avrule->key.specified & (QPOL_RULE_AV | QPOL_RULE_XPERMS));
+
+	return STATUS_SUCCESS;
+}
+
+int qpol_avrule_get_is_extended(const qpol_policy_t * policy, const qpol_avrule_t * rule, uint32_t * is_extended)
+{
+	avtab_ptr_t avrule = NULL;
+
+	if (is_extended) {
+		*is_extended = 0;
+	}
+
+	if (!policy || !rule || !is_extended) {
+		ERR(policy, "%s", strerror(EINVAL));
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	avrule = (avtab_ptr_t) rule;
+
+	*is_extended = (avrule->key.specified & QPOL_RULE_XPERMS) ? 1 : 0;
 
 	return STATUS_SUCCESS;
 }

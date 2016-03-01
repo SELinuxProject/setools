@@ -793,3 +793,141 @@ size_t perm_state_size(const qpol_iterator_t * iter)
 
 	return count;
 }
+
+#define XPERMS_DRIV(x) (x >> 8)
+#define XPERMS_FUNC(x) (x & 0xFF)
+#define XPERMS_GETBIT(xperms, bit) (xperms[(bit) >> 5] & (1 << ((bit) & 0x1F)))
+
+int xperm_state_end(const qpol_iterator_t * iter)
+{
+	xperm_state_t *xps = NULL;
+	const policydb_t *db = NULL;
+
+	if (iter == NULL || (xps = qpol_iterator_state(iter)) == NULL || (db = qpol_iterator_policy(iter)) == NULL) {
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	if (xps->cur > 0xFFFF)
+		return 1;
+
+	return 0;
+}
+
+void *xperm_state_get_cur(const qpol_iterator_t * iter)
+{
+	const policydb_t *db = NULL;
+	xperm_state_t *xps = NULL;
+	avtab_extended_perms_t *xperms = NULL;
+	int bitset;
+	int *cur;
+
+	if (iter == NULL || (db = qpol_iterator_policy(iter)) == NULL ||
+	    (xps = (xperm_state_t *) qpol_iterator_state(iter)) == NULL || xperm_state_end(iter)) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (xps->cur > 0xFFFF) {
+		errno = ERANGE;
+		return NULL;
+	}
+
+	xperms = xps->xperms;
+		
+	if (xperms->specified & AVTAB_XPERMS_IOCTLDRIVER) {
+		bitset = XPERMS_GETBIT(xperms->perms, XPERMS_DRIV(xps->cur));
+	} else {
+		bitset = (xperms->driver == XPERMS_DRIV(xps->cur)) && XPERMS_GETBIT(xperms->perms, XPERMS_FUNC(xps->cur));
+	}
+
+	if (!bitset) { /* xperm bit not set? */
+		errno = EINVAL;
+		return NULL;
+	}
+
+	// the caller is responsible for freeing the returned integer. this is
+	// similar to how the caller must also free the resulting string of
+	// perm_state_get_cur
+	cur = calloc(1, sizeof(int));
+	if (cur == NULL) {
+		return NULL;
+	}
+	*cur = xps->cur;
+	return cur;
+}
+
+int xperm_state_next(qpol_iterator_t * iter)
+{
+	xperm_state_t *xps = NULL;
+	const policydb_t *db = NULL;
+	avtab_extended_perms_t *xperms = NULL;
+	int bitset = 0;
+
+	if (iter == NULL || (xps = qpol_iterator_state(iter)) == NULL ||
+	    (db = qpol_iterator_policy(iter)) == NULL || xperm_state_end(iter)) {
+		errno = EINVAL;
+		return STATUS_ERR;
+	}
+
+	if (xps->cur > 0xFFFF) {
+		errno = ERANGE;
+		return STATUS_ERR;
+	}
+
+	xperms = xps->xperms;
+
+	while (1) {
+		xps->cur++;
+		if (xps->cur > 0xFFFF) {
+			break;
+		}
+
+		if (xperms->specified & AVTAB_XPERMS_IOCTLDRIVER) {
+			bitset = XPERMS_GETBIT(xperms->perms, XPERMS_DRIV(xps->cur));
+		} else {
+			bitset = (xperms->driver == XPERMS_DRIV(xps->cur)) && XPERMS_GETBIT(xperms->perms, XPERMS_FUNC(xps->cur));
+		}
+
+		if (bitset) {
+			break;
+		}
+	}
+
+	return STATUS_SUCCESS;
+}
+
+
+size_t xperm_state_size(const qpol_iterator_t * iter)
+{
+	xperm_state_t *xps = NULL;
+	const policydb_t *db = NULL;
+	avtab_extended_perms_t *xperms = NULL;
+	size_t i, j, count = 0;
+
+	if (iter == NULL || (xps = qpol_iterator_state(iter)) == NULL ||
+	    (db = qpol_iterator_policy(iter)) == NULL || xperm_state_end(iter)) {
+		errno = EINVAL;
+		return 0;	       /* as a size_t 0 is error */
+	}
+
+	xperms = xps->xperms;
+
+	// just count how many bits are set in the perms array (size == 8) of uint32_t's
+	for (i = 0; i < 8; i++) {
+		for (j = 0; j < 32; j++) {
+			if (xperms->perms[i] & (1 << j)) {
+				count++;
+			}
+		}
+	}
+
+	if (xperms->specified & AVTAB_XPERMS_IOCTLDRIVER) {
+		// when icotl driver is true, each bit in the perms array represents
+		// the enabling of all 256 function bits of driver
+		count *= 256;
+	}
+
+	return count;
+}
+

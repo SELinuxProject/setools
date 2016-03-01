@@ -56,7 +56,6 @@ from . import user
 from . import mlsrule
 from . import rbacrule
 from . import terule
-from . import xpermrule
 
 # Constraints
 from . import constraint
@@ -379,24 +378,24 @@ class SELinuxPolicy(object):
         return self.policy.devicetreecon_count()
 
     @property
-    def xprule_allow_count(self):
-        """The number of allowxperm rules."""
-        return self.policy.xprule_allow_count()
+    def allowx_count(self):
+        """The number of allowx rules."""
+        return self.policy.avrule_allowx_count()
 
     @property
-    def xprule_auditallow_count(self):
-        """The number of auditallowxperm rules."""
-        return self.policy.xprule_auditallow_count()
+    def auditallowx_count(self):
+        """The number of auditallowx rules."""
+        return self.policy.avrule_auditallowx_count()
 
     @property
-    def xprule_dontaudit_count(self):
-        """The number of dontauditxperm rules."""
-        return self.policy.xprule_dontaudit_count()
+    def dontauditx_count(self):
+        """The number of dontauditx rules."""
+        return self.policy.avrule_dontauditx_count()
 
     @property
-    def xprule_neverallow_count(self):
+    def neverallowx_count(self):
         """The number of neverallowxperm rules."""
-        return self.policy.xprule_neverallow_count()
+        return self.policy.avrule_neverallowx_count()
 
     #
     # Policy components lookup functions
@@ -563,14 +562,10 @@ class SELinuxPolicy(object):
     def terules(self):
         """Generator which yields all type enforcement rules."""
         for rule in chain(self.policy.avrule_iter(),
+                          self.policy.avrulex_iter(),
                           self.policy.terule_iter(),
                           self.policy.filename_trans_iter()):
             yield terule.te_rule_factory(self.policy, rule)
-
-    def xpermrules(self):
-        """Generator which yields all XPERM rules."""
-        for rule in self.policy.xprule_iter():
-            yield xpermrule.xperm_rule_factory(self.policy, rule)
 
     #
     # Policy rule type validators
@@ -619,11 +614,6 @@ class SELinuxPolicy(object):
     def validate_te_ruletype(types):
         """Validate type enforcement rule types."""
         return terule.validate_ruletype(types)
-
-    @staticmethod
-    def validate_xperm_ruletype(types):
-        """Validate XPERM rule types."""
-        xpermrule.validate_ruletype(types)
 
     #
     # Constraints generators

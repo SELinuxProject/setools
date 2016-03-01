@@ -63,7 +63,8 @@ def expanded_te_rule_factory(original, source, target):
 def validate_ruletype(t):
     """Validate TE Rule types."""
     if t not in ["allow", "auditallow", "dontaudit", "neverallow",
-                 "type_transition", "type_member", "type_change"]:
+                 "type_transition", "type_member", "type_change",
+                 "allowx", "auditallowx", "dontauditx", "neverallowx"]:
         raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
 
     return t
@@ -119,26 +120,78 @@ class AVRule(BaseTERule):
         except AttributeError:
             self._rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
 
-            perms = self.perms
+            if not self.qpol_symbol.is_extended(self.policy):
+                # allow/dontaudit/auditallow/neverallow rules
+                perms = self.perms
+                if len(perms) > 1:
+                    self._rule_string += "{{ {0} }};".format(' '.join(perms))
+                else:
+                    # convert to list since sets cannot be indexed
+                    self._rule_string += "{0};".format(list(perms)[0])
 
-            # allow/dontaudit/auditallow/neverallow rules
-            if len(perms) > 1:
-                self._rule_string += "{{ {0} }};".format(' '.join(perms))
+                try:
+                    self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+                except exception.RuleNotConditional:
+                    pass
             else:
-                # convert to list since sets cannot be indexed
-                self._rule_string += "{0};".format(list(perms)[0])
-
-            try:
-                self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-            except exception.RuleNotConditional:
-                pass
+                # extended avrules
+                xperms = self.xperms
+                if len(xperms) > 1:
+                    self._rule_string += "{0} {{{1} }};".format(self.xperm_type, self.xperms_as_string)
+                else:
+                    self._rule_string += "{0} {1};".format(self.xperm_type, self.xperms_as_string)
 
         return self._rule_string
 
     @property
     def perms(self):
         """The rule's permission set."""
+        if self.qpol_symbol.is_extended(self.policy):
+            raise exception.RuleUseError("{0} rules do not have permissions.".format(self.ruletype))
         return set(self.qpol_symbol.perm_iter(self.policy))
+
+    @property
+    def xperms_as_string(self):
+        """The rules extended permissions as a pretty string"""
+        if not self.qpol_symbol.is_extended(self.policy):
+            raise exception.RuleUseError("{0} rules do not have extended permissions.".format(self.ruletype))
+
+        def create_range_string(start, end):
+            if start == end:
+                return " 0x{0:04X}".format(start)
+            else:
+                return " 0x{0:04X}-0x{1:04X}".format(start, end)
+
+        xperms_str = ""
+        xperms = self.qpol_symbol.xperm_iter(self.policy)
+        range_start = xperms.next()
+        range_end = range_start
+
+        for xperm in xperms:
+            if xperm == range_end + 1:
+                range_end = xperm
+            else:
+                xperms_str += create_range_string(range_start, range_end)
+                range_start = xperm
+                range_end = xperm
+
+        xperms_str += create_range_string(range_start, range_end)
+
+        return xperms_str
+
+    @property
+    def xperms(self):
+        """The rules extended permissions."""
+        if not self.qpol_symbol.is_extended(self.policy):
+            raise exception.RuleUseError("{0} rules do not have extended permissions.".format(self.ruletype))
+        return set(self.qpol_symbol.xperm_iter(self.policy))
+
+    @property
+    def xperm_type(self):
+        """The type of an extended permission."""
+        if not self.qpol_symbol.is_extended(self.policy):
+            raise exception.RuleUseError("{0} rules do not have extended permissions.".format(self.ruletype))
+        return self.qpol_symbol.xperm_type(self.policy)
 
     @property
     def default(self):

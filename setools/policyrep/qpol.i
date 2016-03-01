@@ -54,7 +54,6 @@
 #include "include/qpol/user_query.h"
 #include "include/qpol/util.h"
 #include "include/qpol/xen_query.h"
-#include "include/qpol/xprule_query.h"
 
 /* Provide hooks so that language-specific modules can define the
  * callback function, used by the handler in
@@ -79,6 +78,13 @@ typedef uint32_t size_t;
     /* cast void * to char * as it can't have a constructor */
     const char * to_str(void *x) {
         return (const char *)x;
+    }
+
+    /* cast a void * to int, while freeing the pointer */
+    int to_int_with_free(void *x) {
+        int i = *(int *)x;
+        free(x);
+        return i;
     }
 %}
 %{
@@ -780,16 +786,16 @@ typedef enum qpol_capability
         return 0;
     };
 
-    %newobject xprule_iter(int);
-    %pythoncode %{ @QpolGenerator(_qpol.qpol_xprule_from_void) %}
-    qpol_iterator_t *xprule_iter() {
+    %newobject avulex_iter(int);
+    %pythoncode %{ @QpolGenerator(_qpol.qpol_avrule_from_void) %}
+    qpol_iterator_t *avrulex_iter() {
         qpol_iterator_t *iter;
-        uint32_t rule_types = QPOL_RULE_ALLOWXPERM | QPOL_RULE_AUDITALLOWXPERM | QPOL_RULE_DONTAUDITXPERM;
+        uint32_t rule_types = QPOL_RULE_XPERMS_ALLOW | QPOL_RULE_XPERMS_AUDITALLOW | QPOL_RULE_XPERMS_DONTAUDIT;
 
         if (qpol_policy_has_capability(self, QPOL_CAP_NEVERALLOW))
-            rule_types |= QPOL_RULE_NEVERALLOWXPERM;
+            rule_types |= QPOL_RULE_XPERMS_NEVERALLOW;
 
-        if (qpol_policy_get_xprule_iter(self, rule_types, &iter)) {
+        if (qpol_policy_get_avrule_iter(self, rule_types, &iter)) {
             SWIG_exception(SWIG_MemoryError, "Out of Memory");
         }
         return iter;
@@ -797,10 +803,10 @@ typedef enum qpol_capability
         return NULL;
     };
 
-    size_t xprule_allow_count() {
+    size_t avrule_allowx_count() {
         qpol_iterator_t *iter;
         size_t count = 0;
-        if (qpol_policy_get_xprule_iter(self, QPOL_RULE_ALLOWXPERM, &iter)) {
+        if (qpol_policy_get_avrule_iter(self, QPOL_RULE_XPERMS_ALLOW, &iter)) {
             SWIG_exception(SWIG_MemoryError, "Out of Memory");
         }
         qpol_iterator_get_size(iter, &count);
@@ -809,10 +815,10 @@ typedef enum qpol_capability
         return 0;
     };
 
-    size_t xprule_auditallow_count() {
+    size_t avrule_auditallowx_count() {
         qpol_iterator_t *iter;
         size_t count = 0;
-        if (qpol_policy_get_xprule_iter(self, QPOL_RULE_AUDITALLOWXPERM, &iter)) {
+        if (qpol_policy_get_avrule_iter(self, QPOL_RULE_XPERMS_AUDITALLOW, &iter)) {
             SWIG_exception(SWIG_MemoryError, "Out of Memory");
         }
         qpol_iterator_get_size(iter, &count);
@@ -821,11 +827,11 @@ typedef enum qpol_capability
         return 0;
     };
 
-    size_t xprule_neverallow_count() {
+    size_t avrule_neverallowx_count() {
         if (qpol_policy_has_capability(self, QPOL_CAP_NEVERALLOW)) {
             qpol_iterator_t *iter;
             size_t count = 0;
-            if (qpol_policy_get_xprule_iter(self, QPOL_RULE_NEVERALLOWXPERM, &iter)) {
+            if (qpol_policy_get_avrule_iter(self, QPOL_RULE_XPERMS_NEVERALLOW, &iter)) {
                 SWIG_exception(SWIG_MemoryError, "Out of Memory");
             }
             qpol_iterator_get_size(iter, &count);
@@ -837,10 +843,10 @@ typedef enum qpol_capability
         return 0;
     };
 
-    size_t xprule_dontaudit_count() {
+    size_t avrule_dontauditx_count() {
         qpol_iterator_t *iter;
         size_t count = 0;
-        if (qpol_policy_get_xprule_iter(self, QPOL_RULE_DONTAUDITXPERM, &iter)) {
+        if (qpol_policy_get_avrule_iter(self, QPOL_RULE_XPERMS_DONTAUDIT, &iter)) {
             SWIG_exception(SWIG_MemoryError, "Out of Memory");
         }
         qpol_iterator_get_size(iter, &count);
@@ -2645,10 +2651,14 @@ typedef struct qpol_range_trans {} qpol_range_trans_t;
 %}
 
 /* qpol av rule */
-#define QPOL_RULE_ALLOW         1
-#define QPOL_RULE_NEVERALLOW  128
-#define QPOL_RULE_AUDITALLOW    2
-#define QPOL_RULE_DONTAUDIT     4
+#define QPOL_RULE_ALLOW                0x0001
+#define QPOL_RULE_NEVERALLOW           0x0080
+#define QPOL_RULE_AUDITALLOW           0x0002
+#define QPOL_RULE_DONTAUDIT            0x0004
+#define QPOL_RULE_XPERMS_ALLOW         0x0100
+#define QPOL_RULE_XPERMS_AUDITALLOW    0x0200
+#define QPOL_RULE_XPERMS_DONTAUDIT     0x0400
+#define QPOL_RULE_XPERMS_NEVERALLOW    0x0800
 typedef struct qpol_avrule {} qpol_avrule_t;
 %extend qpol_avrule {
     qpol_avrule() {
@@ -2670,6 +2680,10 @@ typedef struct qpol_avrule {} qpol_avrule_t;
             case QPOL_RULE_NEVERALLOW: return "neverallow"; break;
             case QPOL_RULE_AUDITALLOW: return "auditallow"; break;
             case QPOL_RULE_DONTAUDIT: return "dontaudit"; break;
+            case QPOL_RULE_XPERMS_ALLOW: return "allowx"; break;
+            case QPOL_RULE_XPERMS_NEVERALLOW: return "neverallowx"; break;
+            case QPOL_RULE_XPERMS_AUDITALLOW: return "auditallowx"; break;
+            case QPOL_RULE_XPERMS_DONTAUDIT: return "dontauditx"; break;
         }
     fail:
         return NULL;
@@ -2708,6 +2722,34 @@ typedef struct qpol_avrule {} qpol_avrule_t;
         }
     fail:
         return iter;
+    };
+
+    /* TODO, do I need an exception (similar to cond) that is thrown if you ask this on a non extended avrule? Likewise for asking for prems an an extended rule */
+    %newobject xperm_iter(qpol_policy_t *p);
+    %pythoncode %{ @QpolGenerator(_qpol.to_int_with_free) %}
+    qpol_iterator_t *xperm_iter(qpol_policy_t *p) {
+        qpol_iterator_t *iter;
+        if (qpol_avrule_get_xperm_iter(p, self, &iter)) {
+            SWIG_exception(SWIG_MemoryError, "Out of memory");
+        }
+    fail:
+        return iter;
+    };
+    int is_extended(qpol_policy_t *p) {
+        uint32_t e;
+        if (qpol_avrule_get_is_extended(p, self, &e)) {
+            SWIG_exception(SWIG_ValueError, "Could not determine if av rule is extended");
+        }
+    fail:
+        return (int) e;
+    };
+    const char * xperm_type(qpol_policy_t *p) {
+        char *xt;
+        if (qpol_avrule_get_xperm_type(p, self, &xt)) {
+            SWIG_exception(SWIG_ValueError, "Could not get xperm type for av rule");
+        }
+    fail:
+        return xt;
     };
 
     %exception cond {
@@ -2762,85 +2804,6 @@ typedef struct qpol_avrule {} qpol_avrule_t;
 %inline %{
     qpol_avrule_t *qpol_avrule_from_void(void *x) {
         return (qpol_avrule_t*)x;
-    };
-%}
-
-/* qpol xperm rules */
-#define QPOL_RULE_ALLOWXPERM	 	0x0100
-#define QPOL_RULE_AUDITALLOWXPERM	0x0200
-#define QPOL_RULE_DONTAUDITXPERM	0x0400
-#define QPOL_RULE_NEVERALLOWXPERM	0x0800
-
-typedef struct qpol_xprule {} qpol_xprule_t;
-%extend qpol_xprule {
-    qpol_xprule() {
-        SWIG_exception(SWIG_RuntimeError, "Cannot directly create qpol_xprule_t objects");
-    fail:
-        return NULL;
-    };
-    ~qpol_xprule() {
-        /* no op */
-        return;
-    };
-    const char * rule_type(qpol_policy_t *p) {
-        uint32_t rt;
-        if (qpol_xprule_get_rule_type(p, self, &rt)) {
-            SWIG_exception(SWIG_ValueError, "Could not get rule type for xperm rule");
-        }
-        switch (rt) {
-            case QPOL_RULE_ALLOWXPERM: return "allowxperm"; break;
-            case QPOL_RULE_NEVERALLOWXPERM: return "neverallowxperm"; break;
-            case QPOL_RULE_AUDITALLOWXPERM: return "auditallowxperm"; break;
-            case QPOL_RULE_DONTAUDITXPERM: return "dontauditxperm"; break;
-        }
-    fail:
-        return NULL;
-    };
-    const qpol_type_t *source_type(qpol_policy_t *p) {
-        const qpol_type_t *t;
-        if (qpol_xprule_get_source_type(p, self, &t)) {
-            SWIG_exception(SWIG_ValueError, "Could not get source for xperm rule");
-        }
-    fail:
-        return t;
-    };
-    const qpol_type_t *target_type(qpol_policy_t *p) {
-        const qpol_type_t *t;
-        if (qpol_xprule_get_target_type(p, self, &t)) {
-            SWIG_exception(SWIG_ValueError, "Could not get target for xperm rule");
-        }
-    fail:
-        return t;
-    };
-    const qpol_class_t *object_class(qpol_policy_t *p) {
-        const qpol_class_t *cls;
-        if (qpol_xprule_get_object_class(p, self, &cls)) {
-            SWIG_exception(SWIG_ValueError, "Could not get class for xperm rule");
-        }
-    fail:
-        return cls;
-    };
-    /* This function gets the cmd (e.g. ioctl) and xperms via sepol_extended_perms_to_string() */
-    char *xprule_xperm_string(qpol_policy_t *p) {
-        char *xprule_xperm_string = NULL;
-        if (qpol_xprule_get_xperm_string(p, self, &xprule_xperm_string)) {
-            SWIG_exception(SWIG_ValueError, "Could not get extended permissions for xperm rule");
-        }
-    fail:
-        return xprule_xperm_string;
-    };
-    const char *xprule_command(qpol_policy_t *p) {
-        const char *xprule_command = NULL;
-        if (qpol_xprule_get_command(p, self, &xprule_command)) {
-            SWIG_exception(SWIG_ValueError, "Could not get command for xperm rule");
-        }
-    fail:
-        return xprule_command;
-    };
-};
-%inline %{
-    qpol_xprule_t *qpol_xprule_from_void(void *x) {
-        return (qpol_xprule_t*)x;
     };
 %}
 
