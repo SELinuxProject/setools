@@ -71,8 +71,6 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         # configure tab bar context menu
         tabBar = self.AnalysisTabs.tabBar()
-        self.rename_tab_action = QAction("&Rename active tab", tabBar)
-        self.close_tab_action = QAction("&Close active tab", tabBar)
         tabBar.addAction(self.rename_tab_action)
         tabBar.addAction(self.close_tab_action)
         tabBar.setContextMenuPolicy(Qt.ActionsContextMenu)

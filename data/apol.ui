@@ -185,6 +185,25 @@
     <string>Open permission map used for information flow analysis</string>
    </property>
   </action>
+  <action name="rename_tab_action">
+   <property name="text">
+    <string>&amp;Rename Tab</string>
+   </property>
+   <property name="toolTip">
+    <string>Rename the active tab.</string>
+   </property>
+  </action>
+  <action name="close_tab_action">
+   <property name="text">
+    <string>&amp;Close Tab</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the active tab.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
