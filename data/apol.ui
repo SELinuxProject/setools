@@ -81,9 +81,9 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="actionCut"/>
-    <addaction name="actionCopy"/>
-    <addaction name="actionPaste"/>
+    <addaction name="cut_action"/>
+    <addaction name="copy_action"/>
+    <addaction name="paste_action"/>
    </widget>
    <widget class="QMenu" name="menuPerm_Map">
     <property name="title">
@@ -153,7 +153,7 @@
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="actionCut">
+  <action name="cut_action">
    <property name="text">
     <string>Cut</string>
    </property>
@@ -161,7 +161,7 @@
     <string>Ctrl+X</string>
    </property>
   </action>
-  <action name="actionCopy">
+  <action name="copy_action">
    <property name="text">
     <string>Copy</string>
    </property>
@@ -169,7 +169,7 @@
     <string>Ctrl+C</string>
    </property>
   </action>
-  <action name="actionPaste">
+  <action name="paste_action">
    <property name="text">
     <string>Paste</string>
    </property>

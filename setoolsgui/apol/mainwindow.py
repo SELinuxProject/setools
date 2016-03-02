@@ -20,8 +20,8 @@
 import logging
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QAction, QDialog, QFileDialog, QLineEdit, QMainWindow, QMenu, \
-                            QMessageBox, QTreeWidgetItem, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QLineEdit, QMainWindow, \
+                            QMenu, QMessageBox, QTreeWidgetItem, QVBoxLayout, QWidget
 from setools import PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
@@ -84,6 +84,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.tab_editor.editingFinished.connect(self.rename_tab)
         self.rename_tab_action.triggered.connect(self.rename_active_tab)
         self.close_tab_action.triggered.connect(self.close_active_tab)
+        self.copy_action.triggered.connect(self.copy)
+        self.cut_action.triggered.connect(self.cut)
+        self.paste_action.triggered.connect(self.paste)
 
         self.show()
 
@@ -182,6 +185,27 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         self.tab_editor.hide()
         self.AnalysisTabs.setTabText(index, self.tab_editor.text())
+
+    def copy(self):
+        """Copy text from the currently-focused widget."""
+        try:
+            QApplication.instance().focusWidget().copy()
+        except AttributeError:
+            pass
+
+    def cut(self):
+        """Cut text from the currently-focused widget."""
+        try:
+            QApplication.instance().focusWidget().cut()
+        except AttributeError:
+            pass
+
+    def paste(self):
+        """Paste text into the currently-focused widget."""
+        try:
+            QApplication.instance().focusWidget().paste()
+        except AttributeError:
+            pass
 
 
 class ChooseAnalysis(SEToolsWidget, QDialog):
