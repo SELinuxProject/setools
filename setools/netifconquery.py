@@ -60,7 +60,7 @@ class NetifconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching netifcons."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating netifcon results from {0.policy}".format(self))
         self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))

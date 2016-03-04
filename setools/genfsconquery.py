@@ -70,7 +70,7 @@ class GenfsconQuery(contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching genfscons."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating genfscon results from {0.policy}".format(self))
         self.log.debug("FS: {0.fs!r}, regex: {0.fs_regex}".format(self))
         self.log.debug("Path: {0.path!r}, regex: {0.path_regex}".format(self))
         self.log.debug("Filetype: {0.filetype!r}".format(self))

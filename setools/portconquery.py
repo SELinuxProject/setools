@@ -120,7 +120,7 @@ class PortconQuery(contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching portcons."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating portcon results from {0.policy}".format(self))
         self.log.debug("Ports: {0.ports}, overlap: {0.ports_overlap}, "
                        "subset: {0.ports_subset}, superset: {0.ports_superset}, "
                        "proper: {0.ports_proper}".format(self))

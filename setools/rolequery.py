@@ -55,7 +55,7 @@ class RoleQuery(compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching roles."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating role results from {0.policy}".format(self))
         self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
         self.log.debug("Types: {0.types!r}, regex: {0.types_regex}, "
                        "eq: {0.types_equal}".format(self))

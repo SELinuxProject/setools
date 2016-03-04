@@ -73,7 +73,7 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching types."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating type results from {0.policy}".format(self))
         self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
         self.log.debug("Alias: {0.alias}, regex: {0.alias_regex}".format(self))
         self.log.debug("Attrs: {0.attrs!r}, regex: {0.attrs_regex}, "

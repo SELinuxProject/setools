@@ -41,7 +41,7 @@ class PolCapQuery(compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching policy capabilities."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating policy capability results from {0.policy}".format(self))
         self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
 
         for cap in self.policy.polcaps():

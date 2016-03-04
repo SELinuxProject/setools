@@ -52,7 +52,7 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
 
     def results(self):
         """Generator which yields all matching default_* statements."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating default_* results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
         self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
         self.log.debug("Default: {0.default}".format(self))

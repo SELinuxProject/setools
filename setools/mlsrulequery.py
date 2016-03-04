@@ -62,7 +62,7 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
 
     def results(self):
         """Generator which yields all matching MLS rules."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating MLS rule results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
         self.log.debug("Source: {0.source!r}, regex: {0.source_regex}".format(self))
         self.log.debug("Target: {0.target!r}, regex: {0.target_regex}".format(self))

@@ -56,7 +56,7 @@ class BoolQuery(compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all Booleans matching the criteria."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating Boolean results from {0.policy}".format(self))
         self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
         self.log.debug("Default: {0.default}".format(self))
 

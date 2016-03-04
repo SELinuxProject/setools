@@ -99,7 +99,7 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.Policy
 
     def results(self):
         """Generator which yields all matching constraints rules."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating constraint results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
         self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
         self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".

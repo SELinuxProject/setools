@@ -103,7 +103,7 @@ class NodeconQuery(contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching nodecons."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating nodecon results from {0.policy}".format(self))
         self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
         self.log.debug("IP Version: {0.ip_version}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))

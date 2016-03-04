@@ -107,7 +107,7 @@ class DomainTransitionAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating one shortest path from {0} to {1}...".format(s, t))
+        self.log.info("Generating one domain transition path from {0} to {1}...".format(s, t))
 
         try:
             yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
@@ -143,7 +143,8 @@ class DomainTransitionAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all paths from {0} to {1}, max len {2}...".format(s, t, maxlen))
+        self.log.info("Generating all domain transition paths from {0} to {1}, max length {2}...".
+                      format(s, t, maxlen))
 
         try:
             for path in nx.all_simple_paths(self.subG, s, t, maxlen):
@@ -175,7 +176,8 @@ class DomainTransitionAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all shortest paths from {0} to {1}...".format(s, t))
+        self.log.info("Generating all shortest domain transition paths from {0} to {1}...".
+                      format(s, t))
 
         try:
             for path in nx.all_shortest_paths(self.subG, s, t):
@@ -207,7 +209,7 @@ class DomainTransitionAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all transitions {1} {0}".
+        self.log.info("Generating all domain transitions {1} {0}".
                       format(s, "in to" if self.reverse else "out from"))
 
         try:
@@ -361,7 +363,7 @@ class DomainTransitionAnalysis(object):
         self.G.clear()
         self.G.name = "Domain transition graph for {0}.".format(self.policy)
 
-        self.log.info("Building graph from {0}...".format(self.policy))
+        self.log.info("Building domain transition graph from {0}...".format(self.policy))
 
         # hash tables keyed on domain type
         setexec = defaultdict(list)
@@ -500,7 +502,7 @@ class DomainTransitionAnalysis(object):
 
         self.rebuildgraph = False
         self.rebuildsubgraph = True
-        self.log.info("Completed building graph.")
+        self.log.info("Completed building domain transition graph.")
 
     def __remove_excluded_entrypoints(self):
         invalid_edges = []
@@ -535,7 +537,7 @@ class DomainTransitionAnalysis(object):
         if self.rebuildgraph:
             self._build_graph()
 
-        self.log.info("Building subgraph.")
+        self.log.info("Building domain transition subgraph.")
         self.log.debug("Excluding {0}".format(self.exclude))
         self.log.debug("Reverse {0}".format(self.reverse))
 
@@ -553,7 +555,7 @@ class DomainTransitionAnalysis(object):
             self.__remove_excluded_entrypoints()
 
         self.rebuildsubgraph = False
-        self.log.info("Completed building subgraph.")
+        self.log.info("Completed building domain transition subgraph.")
 
 
 class Edge(object):

@@ -113,7 +113,8 @@ class InfoFlowAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating one shortest path from {0} to {1}...".format(s, t))
+        self.log.info("Generating one shortest information flow path from {0} to {1}...".
+                      format(s, t))
 
         try:
             yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
@@ -153,7 +154,8 @@ class InfoFlowAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all paths from {0} to {1}, max len {2}...".format(s, t, maxlen))
+        self.log.info("Generating all information flow paths from {0} to {1}, max length {2}...".
+                      format(s, t, maxlen))
 
         try:
             for path in nx.all_simple_paths(self.subG, s, t, maxlen):
@@ -188,7 +190,8 @@ class InfoFlowAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all shortest paths from {0} to {1}...".format(s, t))
+        self.log.info("Generating all shortest information flow paths from {0} to {1}...".
+                      format(s, t))
 
         try:
             for path in nx.all_shortest_paths(self.subG, s, t):
@@ -226,7 +229,8 @@ class InfoFlowAnalysis(object):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all infoflows {0} {1}".format("out of" if out else "into", s))
+        self.log.info("Generating all information flows {0} {1}".
+                      format("out of" if out else "into", s))
 
         if out:
             flows = self.subG.out_edges_iter(s)
@@ -294,7 +298,7 @@ class InfoFlowAnalysis(object):
 
         self.perm_map.map_policy(self.policy)
 
-        self.log.info("Building graph from {0}...".format(self.policy))
+        self.log.info("Building information flow graph from {0}...".format(self.policy))
 
         for rule in self.policy.terules():
             if rule.ruletype != "allow":
@@ -318,13 +322,13 @@ class InfoFlowAnalysis(object):
 
         self.rebuildgraph = False
         self.rebuildsubgraph = True
-        self.log.info("Completed building graph.")
+        self.log.info("Completed building information flow graph.")
 
     def _build_subgraph(self):
         if self.rebuildgraph:
             self._build_graph()
 
-        self.log.info("Building subgraph...")
+        self.log.info("Building information flow subgraph...")
         self.log.debug("Excluding {0!r}".format(self.exclude))
         self.log.debug("Min weight {0}".format(self.min_weight))
 
@@ -345,7 +349,7 @@ class InfoFlowAnalysis(object):
             self.subG.remove_edges_from(delete_list)
 
         self.rebuildsubgraph = False
-        self.log.info("Completed building subgraph.")
+        self.log.info("Completed building information flow subgraph.")
 
 
 class Edge(object):

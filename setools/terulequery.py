@@ -99,7 +99,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
 
     def results(self):
         """Generator which yields all matching TE rules."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating TE rule results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
         self.log.debug("Source: {0.source!r}, indirect: {0.source_indirect}, "
                        "regex: {0.source_regex}".format(self))

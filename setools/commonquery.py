@@ -49,7 +49,7 @@ class CommonQuery(mixins.MatchPermission, compquery.ComponentQuery):
 
     def results(self):
         """Generator which yields all matching commons."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating common results from {0.policy}".format(self))
         self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
         self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
                        format(self))

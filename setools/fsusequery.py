@@ -66,7 +66,7 @@ class FSUseQuery(contextquery.ContextQuery):
 
     def results(self):
         """Generator which yields all matching fs_use_* statements."""
-        self.log.info("Generating results from {0.policy}".format(self))
+        self.log.info("Generating fs_use_* results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
         self.log.debug("FS: {0.fs!r}, regex: {0.fs_regex}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
