@@ -74,6 +74,10 @@ class UserQuery(compquery.ComponentQuery):
     roles_equal = False
     roles_regex = False
 
+    def __init__(self, policy, **kwargs):
+        super(UserQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching users."""
         self.log.info("Generating results from {0.policy}".format(self))

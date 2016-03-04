@@ -67,6 +67,10 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
         else:
             self._permissive = bool(value)
 
+    def __init__(self, policy, **kwargs):
+        super(TypeQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching types."""
         self.log.info("Generating results from {0.policy}".format(self))

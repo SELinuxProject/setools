@@ -38,7 +38,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
     def __init__(self, filename):
         super(ApolMainWindow, self).__init__()
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
 
         if filename:
             self._policy = SELinuxPolicy(filename)

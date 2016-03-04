@@ -39,6 +39,10 @@ class CategoryQuery(mixins.MatchAlias, compquery.ComponentQuery):
                  will be used on the alias names.
     """
 
+    def __init__(self, policy, **kwargs):
+        super(CategoryQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching categories."""
         self.log.info("Generating results from {0.policy}".format(self))

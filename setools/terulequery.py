@@ -93,6 +93,10 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
     boolean_regex = False
     boolean_equal = False
 
+    def __init__(self, policy, **kwargs):
+        super(TERuleQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching TE rules."""
         self.log.info("Generating results from {0.policy}".format(self))

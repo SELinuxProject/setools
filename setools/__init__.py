@@ -24,6 +24,8 @@ try:
 except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
+import logging
+
 # Python classes for policy representation
 from . import policyrep
 from .policyrep import SELinuxPolicy
@@ -72,3 +74,5 @@ from .dta import DomainTransitionAnalysis
 
 # Policy difference
 from .diff import PolicyDifference
+
+logging.getLogger(__name__).addHandler(logging.NullHandler())

@@ -49,6 +49,10 @@ class RoleQuery(compquery.ComponentQuery):
     types_equal = False
     types_regex = False
 
+    def __init__(self, policy, **kwargs):
+        super(RoleQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching roles."""
         self.log.info("Generating results from {0.policy}".format(self))

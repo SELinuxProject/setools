@@ -24,8 +24,6 @@ class PolicyQuery(object):
     """Base class for SELinux policy queries."""
 
     def __init__(self, policy, **kwargs):
-        self.log = logging.getLogger(self.__class__.__name__)
-
         self.policy = policy
 
         # keys are sorted in reverse order so regex settings

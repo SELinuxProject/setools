@@ -50,6 +50,10 @@ class BoolQuery(compquery.ComponentQuery):
         else:
             self._default = bool(value)
 
+    def __init__(self, policy, **kwargs):
+        super(BoolQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all Booleans matching the criteria."""
         self.log.info("Generating results from {0.policy}".format(self))

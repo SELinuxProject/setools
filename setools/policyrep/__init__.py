@@ -79,7 +79,7 @@ class SELinuxPolicy(object):
         policyfile  Path to a policy to open.
         """
 
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
         self.policy = None
         self.filename = None
 

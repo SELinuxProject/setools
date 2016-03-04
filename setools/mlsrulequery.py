@@ -56,6 +56,10 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
     default_superset = False
     default_proper = False
 
+    def __init__(self, policy, **kwargs):
+        super(MLSRuleQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching MLS rules."""
         self.log.info("Generating results from {0.policy}".format(self))

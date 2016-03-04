@@ -82,6 +82,10 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             except InvalidType:
                 self._target = self.policy.lookup_role(value)
 
+    def __init__(self, policy, **kwargs):
+        super(RBACRuleQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching RBAC rules."""
         self.log.info("Generating results from {0.policy}".format(self))

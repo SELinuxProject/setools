@@ -35,6 +35,10 @@ class PolCapQuery(compquery.ComponentQuery):
                 be used for matching the name.
     """
 
+    def __init__(self, policy, **kwargs):
+        super(PolCapQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching policy capabilities."""
         self.log.info("Generating results from {0.policy}".format(self))

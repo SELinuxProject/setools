@@ -72,6 +72,10 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.Policy
     type_regex = False
     type_indirect = True
 
+    def __init__(self, policy, **kwargs):
+        super(ConstraintQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def _match_expr(self, expr, criteria, indirect, regex):
         """
         Match roles/types/users in a constraint expression,

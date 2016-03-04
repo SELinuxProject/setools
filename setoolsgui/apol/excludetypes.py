@@ -30,7 +30,7 @@ class ExcludeTypes(SEToolsWidget, QDialog):
 
     def __init__(self, parent, policy):
         super(ExcludeTypes, self).__init__(parent)
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
         self.parent = parent
         self.policy = policy
         self.excluded_list = [str(e) for e in self.parent.query.exclude]

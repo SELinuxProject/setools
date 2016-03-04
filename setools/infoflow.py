@@ -41,7 +41,7 @@ class InfoFlowAnalysis(object):
         exclude     The types excluded from the information flow analysis.
                     (default is none)
         """
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
 
         self.policy = policy
 

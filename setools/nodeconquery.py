@@ -97,6 +97,10 @@ class NodeconQuery(contextquery.ContextQuery):
         else:
             self._network = None
 
+    def __init__(self, policy, **kwargs):
+        super(NodeconQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching nodecons."""
         self.log.info("Generating results from {0.policy}".format(self))

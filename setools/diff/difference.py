@@ -27,7 +27,7 @@ class Difference(object):
     """Base class for all policy differences."""
 
     def __init__(self, left_policy, right_policy):
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
         self.left_policy = left_policy
         self.right_policy = right_policy
 

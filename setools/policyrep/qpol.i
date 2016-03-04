@@ -141,7 +141,7 @@ def QpolGenerator(cast):
 
 def qpol_logger(level, msg):
     """Log qpol messages via Python logging."""
-    logging.getLogger("libqpol").debug(msg)
+    logging.getLogger(__name__).debug(msg)
 
 def qpol_policy_factory(path):
     """Factory function for qpol policy objects."""

@@ -34,7 +34,7 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
 
     def __init__(self, parent, policy, perm_map):
         super(DomainTransitionAnalysisTab, self).__init__(parent)
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
         self.policy = policy
         self.query = DomainTransitionAnalysis(policy)
         self.setupUi()

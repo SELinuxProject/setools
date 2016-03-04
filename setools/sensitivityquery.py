@@ -49,6 +49,10 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
     sens_dom = False
     sens_domby = False
 
+    def __init__(self, policy, **kwargs):
+        super(SensitivityQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching sensitivities."""
         self.log.info("Generating results from {0.policy}".format(self))

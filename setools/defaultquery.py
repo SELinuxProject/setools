@@ -46,6 +46,10 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
     default = CriteriaDescriptor(lookup_function="validate_default_value")
     default_range = CriteriaDescriptor(lookup_function="validate_default_range")
 
+    def __init__(self, policy, **kwargs):
+        super(DefaultQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching default_* statements."""
         self.log.info("Generating results from {0.policy}".format(self))

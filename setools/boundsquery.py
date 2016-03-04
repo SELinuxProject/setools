@@ -41,6 +41,10 @@ class BoundsQuery(PolicyQuery):
     child = CriteriaDescriptor("child_regex")
     child_regex = False
 
+    def __init__(self, policy, **kwargs):
+        super(BoundsQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching *bounds statements."""
         self.log.info("Generating results from {0.policy}".format(self))

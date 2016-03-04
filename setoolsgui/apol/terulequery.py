@@ -35,7 +35,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
 
     def __init__(self, parent, policy, perm_map):
         super(TERuleQueryTab, self).__init__(parent)
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
         self.policy = policy
         self.query = TERuleQuery(policy)
         self.setupUi()

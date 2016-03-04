@@ -34,7 +34,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
 
     def __init__(self, parent, policy, perm_map):
         super(InfoFlowAnalysisTab, self).__init__(parent)
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
         self.policy = policy
         self.query = InfoFlowAnalysis(policy, perm_map)
         self.setupUi()

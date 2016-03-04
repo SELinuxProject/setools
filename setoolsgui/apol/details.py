@@ -32,7 +32,7 @@ class DetailsPopup(SEToolsWidget, QDialog):
 
     def __init__(self, parent, title=None):
         super(DetailsPopup, self).__init__(parent)
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
         self.setupUi(title)
 
     def setupUi(self, title):

@@ -54,7 +54,7 @@ class DomainTransitionAnalysis(object):
         Parameter:
         policy   The policy to analyze.
         """
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
 
         self.policy = policy
         self.exclude = exclude

@@ -43,6 +43,10 @@ class CommonQuery(mixins.MatchPermission, compquery.ComponentQuery):
                  on the permission names instead of set logic.
     """
 
+    def __init__(self, policy, **kwargs):
+        super(CommonQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching commons."""
         self.log.info("Generating results from {0.policy}".format(self))

@@ -37,7 +37,7 @@ class PermissionMap(object):
         Parameter:
         permmapfile     The path to the permission map to load.
         """
-        self.log = logging.getLogger(self.__class__.__name__)
+        self.log = logging.getLogger(__name__)
 
         if permmapfile:
             self.load(permmapfile)

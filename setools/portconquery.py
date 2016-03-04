@@ -114,6 +114,10 @@ class PortconQuery(contextquery.ContextQuery):
         else:
             self._protocol = None
 
+    def __init__(self, policy, **kwargs):
+        super(PortconQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching portcons."""
         self.log.info("Generating results from {0.policy}".format(self))
