@@ -35,13 +35,22 @@ parser.add_argument("--debug", action="store_true", dest="debug", help="Enable d
 
 args = parser.parse_args()
 
+logging.basicConfig(level=logging.DEBUG, filename="/dev/null")
+
+console_handler = logging.StreamHandler()
+
 if args.debug:
-    logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(
+        logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(message)s'))
 elif args.verbose:
-    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(logging.Formatter('%(message)s'))
 else:
-    logging.basicConfig(level=logging.WARNING, format='%(message)s')
+    console_handler.setLevel(logging.WARNING)
+    console_handler.setFormatter(logging.Formatter('%(message)s'))
+
+logging.getLogger().addHandler(console_handler)
 
 try:
     app = QApplication(sys.argv)

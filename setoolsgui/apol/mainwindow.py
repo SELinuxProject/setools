@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import QAction, QApplication, QDialog, QFileDialog, QLineEd
 from setools import PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
+from ..logtosignal import LogToSignalHandler
 # Analysis tabs:
 from .dta import DomainTransitionAnalysisTab
 from .infoflow import InfoFlowAnalysisTab
@@ -74,6 +75,13 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         tabBar.addAction(self.rename_tab_action)
         tabBar.addAction(self.close_tab_action)
         tabBar.setContextMenuPolicy(Qt.ActionsContextMenu)
+
+        # capture INFO and higher Python messages from setools lib for status bar
+        handler = LogToSignalHandler()
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter('%(message)s'))
+        handler.message.connect(self.statusbar.showMessage)
+        logging.getLogger("setools").addHandler(handler)
 
         # connect signals
         self.open_policy.triggered.connect(self.select_policy)
