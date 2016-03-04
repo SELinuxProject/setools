@@ -198,9 +198,8 @@ try:
 
 except Exception as err:
     if args.debug:
-        import traceback
-        traceback.print_exc()
+        logging.exception(str(err))
     else:
         print(err)
 
-    sys.exit(-1)
+    sys.exit(1)
