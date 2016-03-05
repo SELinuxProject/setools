@@ -37,6 +37,8 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.log = logging.getLogger(__name__)
         self.policy = policy
         self.query = DomainTransitionAnalysis(policy)
+        self.query.source = None
+        self.query.target = None
         self.setupUi()
 
     def __del__(self):
@@ -104,9 +106,13 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
     # Analysis mode
     #
     def all_paths_toggled(self, value):
+        self.clear_source_error()
+        self.clear_target_error()
         self.max_path_length.setEnabled(value)
 
     def flows_in_toggled(self, value):
+        self.clear_source_error()
+        self.clear_target_error()
         self.source.setEnabled(not value)
         self.reverse.setEnabled(not value)
 
@@ -117,6 +123,8 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
             self.reverse.setChecked(self.reverse_old)
 
     def flows_out_toggled(self, value):
+        self.clear_source_error()
+        self.clear_target_error()
         self.target.setEnabled(not value)
         self.reverse.setEnabled(not value)
 
@@ -129,6 +137,9 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
     #
     # Source criteria
     #
+    def set_source_error(self, error_text):
+        self.source.setToolTip(error_text)
+        self.source.setPalette(self.error_palette)
 
     def clear_source_error(self):
         self.source.setToolTip("The source domain of the analysis.")
@@ -143,12 +154,14 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
             else:
                 self.query.source = None
         except Exception as ex:
-            self.source.setToolTip("Error: " + str(ex))
-            self.source.setPalette(self.error_palette)
+            self.set_source_error("Error: " + str(ex))
 
     #
     # Target criteria
     #
+    def set_target_error(self, error_text):
+        self.target.setToolTip(error_text)
+        self.target.setPalette(self.error_palette)
 
     def clear_target_error(self):
         self.target.setToolTip("The target domain of the analysis.")
@@ -163,8 +176,7 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
             else:
                 self.query.target = None
         except Exception as ex:
-            self.target.setToolTip("Error: " + str(ex))
-            self.target.setPalette(self.error_palette)
+            self.set_target_error("Error: " + str(ex))
 
     #
     # Options
@@ -182,6 +194,18 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
 
     def run(self, button):
         # right now there is only one button.
+        fail = False
+        if self.source.isEnabled() and not self.query.source:
+            self.set_source_error("Error: a source domain is required")
+            fail = True
+
+        if self.target.isEnabled() and not self.query.target:
+            self.set_target_error("Error: a target domain is required.")
+            fail = True
+
+        if fail:
+            return
+
         for mode in [self.all_paths, self.all_shortest_paths, self.flows_in, self.flows_out]:
             if mode.isChecked():
                 break
