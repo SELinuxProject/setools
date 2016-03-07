@@ -82,6 +82,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         handler.setFormatter(logging.Formatter('%(message)s'))
         handler.message.connect(self.statusbar.showMessage)
         logging.getLogger("setools").addHandler(handler)
+        logging.getLogger("setoolsgui").addHandler(handler)
 
         # connect signals
         self.open_policy.triggered.connect(self.select_policy)

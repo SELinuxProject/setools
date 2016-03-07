@@ -24,6 +24,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import MLSRuleQuery
 
+from ..logtosignal import LogToSignalHandler
 from ..widget import SEToolsWidget
 from .rulemodels import MLSRuleListModel
 from .models import SEToolsListModel, invert_list_selection
@@ -43,6 +44,7 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
     def __del__(self):
         self.thread.quit()
         self.thread.wait(5000)
+        logging.getLogger("setools.mlsrulequery").removeHandler(self.handler)
 
     def setupUi(self):
         self.load_ui("mlsrulequery.ui")
@@ -92,6 +94,13 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
         self.busy.setMinimumDuration(0)
         self.busy.canceled.connect(self.thread.requestInterruption)
         self.busy.reset()
+
+        # update busy dialog from query INFO logs
+        self.handler = LogToSignalHandler()
+        self.handler.setLevel(logging.INFO)
+        self.handler.setFormatter(logging.Formatter('%(message)s'))
+        self.handler.message.connect(self.busy.setLabelText)
+        logging.getLogger("setools.mlsrulequery").addHandler(self.handler)
 
         # Ensure settings are consistent with the initial .ui state
         self.set_source_regex(self.source_regex.isChecked())
@@ -255,6 +264,7 @@ class ResultsUpdater(QObject):
     def __init__(self, query, model):
         super(ResultsUpdater, self).__init__()
         self.query = query
+        self.log = logging.getLogger(__name__)
         self.table_results_model = model
 
     def update(self):
@@ -277,5 +287,7 @@ class ResultsUpdater(QObject):
 
         self.table_results_model.resultlist = results
         self.table_results_model.endResetModel()
+
+        self.log.info("{0} MLS rule(s) found.".format(counter))
 
         self.finished.emit()

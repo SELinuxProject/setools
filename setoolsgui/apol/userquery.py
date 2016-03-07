@@ -24,6 +24,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import UserQuery
 
+from ..logtosignal import LogToSignalHandler
 from ..widget import SEToolsWidget
 from .models import SEToolsListModel, invert_list_selection
 from .usermodel import UserTableModel, user_detail
@@ -43,6 +44,7 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
     def __del__(self):
         self.thread.quit()
         self.thread.wait(5000)
+        logging.getLogger("setools.userquery").removeHandler(self.handler)
 
     def setupUi(self):
         self.load_ui("userquery.ui")
@@ -93,6 +95,13 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
         self.busy.setMinimumDuration(0)
         self.busy.canceled.connect(self.thread.requestInterruption)
         self.busy.reset()
+
+        # update busy dialog from query INFO logs
+        self.handler = LogToSignalHandler()
+        self.handler.setLevel(logging.INFO)
+        self.handler.setFormatter(logging.Formatter('%(message)s'))
+        self.handler.message.connect(self.busy.setLabelText)
+        logging.getLogger("setools.userquery").addHandler(self.handler)
 
         # Ensure settings are consistent with the initial .ui state
         self.notes.setHidden(not self.notes_expander.isChecked())
@@ -244,6 +253,7 @@ class ResultsUpdater(QObject):
     def __init__(self, query, model):
         super(ResultsUpdater, self).__init__()
         self.query = query
+        self.log = logging.getLogger(__name__)
         self.table_results_model = model
 
     def update(self):
@@ -266,5 +276,7 @@ class ResultsUpdater(QObject):
 
         self.table_results_model.resultlist = results
         self.table_results_model.endResetModel()
+
+        self.log.info("{0} user(s) found.".format(counter))
 
         self.finished.emit()

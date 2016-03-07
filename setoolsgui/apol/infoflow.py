@@ -24,6 +24,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import InfoFlowAnalysis
 
+from ..logtosignal import LogToSignalHandler
 from .excludetypes import ExcludeTypes
 from ..widget import SEToolsWidget
 
@@ -44,6 +45,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
     def __del__(self):
         self.thread.quit()
         self.thread.wait(5000)
+        logging.getLogger("setools.infoflow").removeHandler(self.handler)
 
     def setupUi(self):
         self.log.debug("Initializing UI.")
@@ -77,11 +79,17 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         # create a "busy, please wait" dialog
         self.busy = QProgressDialog(self)
         self.busy.setModal(True)
-        self.busy.setLabelText("Processing analysis...")
         self.busy.setRange(0, 0)
         self.busy.setMinimumDuration(0)
         self.busy.canceled.connect(self.thread.requestInterruption)
         self.busy.reset()
+
+        # update busy dialog from infoflow INFO logs
+        self.handler = LogToSignalHandler()
+        self.handler.setLevel(logging.INFO)
+        self.handler.setFormatter(logging.Formatter('%(message)s'))
+        self.handler.message.connect(self.busy.setLabelText)
+        logging.getLogger("setools.infoflow").addHandler(self.handler)
 
         # Ensure settings are consistent with the initial .ui state
         self.max_path_length.setEnabled(self.all_paths.isChecked())
@@ -201,6 +209,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         self.query.limit = self.limit_paths.value()
 
         # start processing
+        self.busy.setLabelText("Processing query...")
         self.busy.show()
         self.raw_results.clear()
         self.thread.start()
@@ -232,6 +241,7 @@ class ResultsUpdater(QObject):
     def __init__(self, query):
         super(ResultsUpdater, self).__init__()
         self.query = query
+        self.log = logging.getLogger(__name__)
 
     def update(self):
         """Run the query and update results."""
@@ -271,6 +281,7 @@ class ResultsUpdater(QObject):
             self.raw_line.emit("")
 
         self.raw_line.emit("{0} information flow path(s) found.\n".format(pathnum))
+        self.log.info("{0} information flow path(s) found.".format(pathnum))
 
     def direct(self, flows):
         flownum = 0
@@ -287,3 +298,4 @@ class ResultsUpdater(QObject):
                 QThread.yieldCurrentThread()
 
         self.raw_line.emit("{0} information flow(s) found.\n".format(flownum))
+        self.log.info("{0} information flow(s) found.".format(flownum))
