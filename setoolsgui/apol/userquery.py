@@ -24,7 +24,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import UserQuery
 
-from ..logtosignal import LogToSignalHandler
+from ..logtosignal import LogHandlerToSignal
 from ..widget import SEToolsWidget
 from .models import SEToolsListModel, invert_list_selection
 from .usermodel import UserTableModel, user_detail
@@ -97,7 +97,7 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
         self.busy.reset()
 
         # update busy dialog from query INFO logs
-        self.handler = LogToSignalHandler()
+        self.handler = LogHandlerToSignal()
         self.handler.setLevel(logging.INFO)
         self.handler.setFormatter(logging.Formatter('%(message)s'))
         self.handler.message.connect(self.busy.setLabelText)

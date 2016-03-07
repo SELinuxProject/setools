@@ -21,7 +21,7 @@ from logging import Handler
 from PyQt5.QtCore import pyqtSignal, QObject
 
 
-class LogToSignalHandler(Handler, QObject):
+class LogHandlerToSignal(Handler, QObject):
 
     """
     A Python logging Handler that sends log messages over

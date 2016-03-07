@@ -24,7 +24,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import RBACRuleQuery
 
-from ..logtosignal import LogToSignalHandler
+from ..logtosignal import LogHandlerToSignal
 from ..widget import SEToolsWidget
 from .rulemodels import RBACRuleListModel
 from .models import SEToolsListModel, invert_list_selection
@@ -106,7 +106,7 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
         self.busy.reset()
 
         # update busy dialog from query INFO logs
-        self.handler = LogToSignalHandler()
+        self.handler = LogHandlerToSignal()
         self.handler.setLevel(logging.INFO)
         self.handler.setFormatter(logging.Formatter('%(message)s'))
         self.handler.message.connect(self.busy.setLabelText)

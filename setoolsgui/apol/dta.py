@@ -24,7 +24,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import DomainTransitionAnalysis
 
-from ..logtosignal import LogToSignalHandler
+from ..logtosignal import LogHandlerToSignal
 from .excludetypes import ExcludeTypes
 from ..widget import SEToolsWidget
 
@@ -85,7 +85,7 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.busy.reset()
 
         # update busy dialog from DTA INFO logs
-        self.handler = LogToSignalHandler()
+        self.handler = LogHandlerToSignal()
         self.handler.setLevel(logging.INFO)
         self.handler.setFormatter(logging.Formatter('%(message)s'))
         self.handler.message.connect(self.busy.setLabelText)
