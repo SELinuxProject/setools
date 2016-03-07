@@ -161,6 +161,7 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
         try:
             self.query.source = self.source.text()
         except Exception as ex:
+            self.log.error("Source role error: {0}".format(ex))
             self.source.setToolTip("Error: " + str(ex))
             self.source.setPalette(self.error_palette)
 
@@ -182,6 +183,7 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
         try:
             self.query.target = self.target.text()
         except Exception as ex:
+            self.log.error("Target type/role error: {0}".format(ex))
             self.target.setToolTip("Error: " + str(ex))
             self.target.setPalette(self.error_palette)
 
@@ -219,6 +221,7 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
         try:
             self.query.default = self.default_role.text()
         except Exception as ex:
+            self.log.error("Default role error: {0}".format(ex))
             self.default_role.setToolTip("Error: " + str(ex))
             self.default_role.setPalette(self.error_palette)
 

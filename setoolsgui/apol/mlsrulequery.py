@@ -148,7 +148,8 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
         try:
             self.query.source = self.source.text()
         except Exception as ex:
-            self.source.setToolTip("Error: " + str(ex))
+            self.log.error("Source type/attribute error: {0}".format(ex))
+            self.source.setToolTip("Error: {0}".format(ex))
             self.source.setPalette(self.error_palette)
 
     def set_source_regex(self, state):
@@ -169,7 +170,8 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
         try:
             self.query.target = self.target.text()
         except Exception as ex:
-            self.target.setToolTip("Error: " + str(ex))
+            self.log.error("Target type/attribute error: {0}".format(ex))
+            self.target.setToolTip("Error: {0}".format(ex))
             self.target.setPalette(self.error_palette)
 
     def set_target_regex(self, state):
@@ -204,7 +206,8 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
         try:
             self.query.default = self.default_range.text()
         except Exception as ex:
-            self.default_range.setToolTip("Error: " + str(ex))
+            self.log.error("Default range error: {0}".format(ex))
+            self.default_range.setToolTip("Error: {0}".format(ex))
             self.default_range.setPalette(self.error_palette)
 
     #

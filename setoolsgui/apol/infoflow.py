@@ -132,7 +132,8 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
     # Source criteria
     #
     def set_source_error(self, error_text):
-        self.source.setToolTip(error_text)
+        self.log.error("Source type error: {0}".format(error_text))
+        self.source.setToolTip("Error: {0}".format(error_text))
         self.source.setPalette(self.error_palette)
 
     def clear_source_error(self):
@@ -148,13 +149,14 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
             else:
                 self.query.source = None
         except Exception as ex:
-            self.set_source_error("Error: " + str(ex))
+            self.set_source_error(ex)
 
     #
     # Target criteria
     #
     def set_target_error(self, error_text):
-        self.target.setToolTip(error_text)
+        self.log.error("Target type error: {0}".format(error_text))
+        self.target.setToolTip("Error: {0}".format(error_text))
         self.target.setPalette(self.error_palette)
 
     def clear_target_error(self):
@@ -170,7 +172,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
             else:
                 self.query.target = None
         except Exception as ex:
-            self.set_target_error("Error: " + str(ex))
+            self.set_target_error(ex)
 
     #
     # Options
@@ -190,11 +192,11 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         # right now there is only one button.
         fail = False
         if self.source.isEnabled() and not self.query.source:
-            self.set_source_error("Error: a source type is required")
+            self.set_source_error("A source type is required")
             fail = True
 
         if self.target.isEnabled() and not self.query.target:
-            self.set_target_error("Error: a target type is required.")
+            self.set_target_error("A target type is required.")
             fail = True
 
         if fail:

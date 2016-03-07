@@ -142,6 +142,7 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
         try:
             self.query.name = self.name.text()
         except Exception as ex:
+            self.log.error("User name error: {0}".format(ex))
             self.name.setToolTip("Error: " + str(ex))
             self.name.setPalette(self.error_palette)
 
