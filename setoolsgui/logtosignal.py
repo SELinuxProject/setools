@@ -37,8 +37,8 @@ class LogToSignalHandler(Handler, QObject):
         Handler.__init__(self)
         QObject.__init__(self)
 
-    def emit(self, message):
-        msg = self.format(message)
+    def emit(self, record):
+        msg = self.format(record)
 
         if msg:
             self.message.emit(msg)
