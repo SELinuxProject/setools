@@ -78,8 +78,6 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         # capture INFO and higher Python messages from setools lib for status bar
         handler = LogHandlerToSignal()
-        handler.setLevel(logging.INFO)
-        handler.setFormatter(logging.Formatter('%(message)s'))
         handler.message.connect(self.statusbar.showMessage)
         logging.getLogger("setools").addHandler(handler)
         logging.getLogger("setoolsgui").addHandler(handler)

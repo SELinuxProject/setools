@@ -86,8 +86,6 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
 
         # update busy dialog from DTA INFO logs
         self.handler = LogHandlerToSignal()
-        self.handler.setLevel(logging.INFO)
-        self.handler.setFormatter(logging.Formatter('%(message)s'))
         self.handler.message.connect(self.busy.setLabelText)
         logging.getLogger("setools.dta").addHandler(self.handler)
 

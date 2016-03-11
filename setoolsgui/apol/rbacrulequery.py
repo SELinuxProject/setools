@@ -107,8 +107,6 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
 
         # update busy dialog from query INFO logs
         self.handler = LogHandlerToSignal()
-        self.handler.setLevel(logging.INFO)
-        self.handler.setFormatter(logging.Formatter('%(message)s'))
         self.handler.message.connect(self.busy.setLabelText)
         logging.getLogger("setools.rbacrulequery").addHandler(self.handler)
 
