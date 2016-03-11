@@ -2548,7 +2548,6 @@ typedef struct qpol_avrule {} qpol_avrule_t;
         } else if (qpol_avrule_get_which_list(p, self, &which)) {
             return -1;
         }
-    fail:
         return (int) which;
     };
     %newobject syn_avrule_iter(qpol_policy_t*);
@@ -2665,7 +2664,6 @@ typedef struct qpol_terule {} qpol_terule_t;
         } else if (qpol_terule_get_which_list(p, self, &which)) {
             return -1;
         }
-    fail:
         return (int) which;
     };
 
