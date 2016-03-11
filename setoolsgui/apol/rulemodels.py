@@ -159,11 +159,13 @@ class TERuleListModel(RuleListModel):
                 return "Permissons/Default Type"
             elif section == 5:
                 return "Conditional Expression"
+            elif section == 6:
+                return "Conditional Block"
             else:
                 raise ValueError("Invalid column number: {0}".format(section))
 
     def columnCount(self, parent=QModelIndex()):
-        return 6
+        return 7
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -189,6 +191,11 @@ class TERuleListModel(RuleListModel):
             elif col == 5:
                 try:
                     return str(self.resultlist[row].conditional)
+                except RuleNotConditional:
+                    return None
+            elif col == 6:
+                try:
+                    return str(self.resultlist[row].conditional_block)
                 except RuleNotConditional:
                     return None
             else:
