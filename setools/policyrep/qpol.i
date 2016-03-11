@@ -2514,16 +2514,13 @@ typedef struct qpol_avrule {} qpol_avrule_t;
     %exception cond {
         $action
         if (!result) {
-            PyErr_SetString(PyExc_ValueError, "Rule is not conditional.");
+            PyErr_SetString(PyExc_AttributeError, "Rule is not conditional.");
             return NULL;
         }
     }
     const qpol_cond_t *cond(qpol_policy_t *p) {
         const qpol_cond_t *c;
-        if (qpol_avrule_get_cond(p, self, &c)) {
-            SWIG_exception(SWIG_ValueError, "Could not get conditional for av rule");
-        }
-    fail:
+        qpol_avrule_get_cond(p, self, &c);
         return c;
     };
     int is_enabled(qpol_policy_t *p) {
@@ -2534,14 +2531,22 @@ typedef struct qpol_avrule {} qpol_avrule_t;
     fail:
         return (int) e;
     };
+
+    %exception which_list {
+        $action
+        if (result < 0) {
+            PyErr_SetString(PyExc_AttributeError, "Rule is not conditional.");
+            return NULL;
+        }
+    }
     int which_list(qpol_policy_t *p) {
         const qpol_cond_t *c;
         uint32_t which = 0;
         qpol_avrule_get_cond(p, self, &c);
         if (c == NULL) {
-            SWIG_exception(SWIG_TypeError, "Rule is not conditional");
+            return -1;
         } else if (qpol_avrule_get_which_list(p, self, &which)) {
-            SWIG_exception(SWIG_ValueError, "Could not get conditional list for av rule");
+            return -1;
         }
     fail:
         return (int) which;
@@ -2626,16 +2631,13 @@ typedef struct qpol_terule {} qpol_terule_t;
     %exception cond {
         $action
         if (!result) {
-            PyErr_SetString(PyExc_ValueError, "Rule is not conditional.");
+            PyErr_SetString(PyExc_AttributeError, "Rule is not conditional.");
             return NULL;
         }
     }
     const qpol_cond_t *cond(qpol_policy_t *p) {
         const qpol_cond_t *c;
-        if (qpol_terule_get_cond(p, self, &c)) {
-            SWIG_exception(SWIG_ValueError, "Could not get conditional for te rule");
-        }
-    fail:
+        qpol_terule_get_cond(p, self, &c);
         return c;
     };
     int is_enabled(qpol_policy_t *p) {
@@ -2646,18 +2648,27 @@ typedef struct qpol_terule {} qpol_terule_t;
     fail:
         return (int) e;
     };
+
+    %exception which_list {
+        $action
+        if (result < 0) {
+            PyErr_SetString(PyExc_AttributeError, "Rule is not conditional.");
+            return NULL;
+        }
+    }
     int which_list(qpol_policy_t *p) {
         const qpol_cond_t *c;
         uint32_t which = 0;
         qpol_terule_get_cond(p, self, &c);
         if (c == NULL) {
-            SWIG_exception(SWIG_TypeError, "Rule is not conditional");
+            return -1;
         } else if (qpol_terule_get_which_list(p, self, &which)) {
-            SWIG_exception(SWIG_ValueError, "Could not get conditional list for te rule");
+            return -1;
         }
     fail:
         return (int) which;
     };
+
     %newobject syn_terule_iter(qpol_policy_t*);
     qpol_iterator_t *syn_terule_iter(qpol_policy_t *p) {
         qpol_iterator_t *iter;

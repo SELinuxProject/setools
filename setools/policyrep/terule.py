@@ -92,10 +92,7 @@ class BaseTERule(rule.PolicyRule):
         """The rule's conditional expression."""
         try:
             return boolcond.condexpr_factory(self.policy, self.qpol_symbol.cond(self.policy))
-        except (AttributeError, ValueError):
-            # AttributeError: name filetrans rules cannot be conditional
-            #                 so no member function
-            # ValueError:     The rule is not conditional
+        except AttributeError:
             raise exception.RuleNotConditional
 
     @property
@@ -103,10 +100,7 @@ class BaseTERule(rule.PolicyRule):
         """The conditional block of the rule (T/F)"""
         try:
             return bool(self.qpol_symbol.which_list(self.policy))
-        except (AttributeError, ValueError):
-            # AttributeError: name filetrans rules cannot be conditional
-            #                 so no member function
-            # ValueError:     The rule is not conditional
+        except AttributeError:
             raise exception.RuleNotConditional
 
     def expand(self):

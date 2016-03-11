@@ -48,7 +48,7 @@ class AVRuleTest(unittest.TestCase):
         else:
             # this actually comes out of condexpr_factory
             # but it's simpler to have here
-            mock_rule.cond.side_effect = ValueError
+            mock_rule.cond.side_effect = AttributeError
 
         return te_rule_factory(self.p, mock_rule)
 
@@ -173,7 +173,7 @@ class TERuleTest(unittest.TestCase):
             else:
                 # this actually comes out of condexpr_factory
                 # but it's simpler to have here
-                mock_rule.cond.side_effect = ValueError
+                mock_rule.cond.side_effect = AttributeError
 
         mock_rule.rule_type.return_value = ruletype
         mock_rule.source_type.return_value = source
