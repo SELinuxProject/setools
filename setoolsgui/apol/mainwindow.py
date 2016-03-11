@@ -140,7 +140,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             # tries to start an analysis with no policy open, but then
             # cancels out of the policy file chooser or there is an
             # error opening the policy file.
-            chooser = ChooseAnalysis(self)
+            chooser = ChooseAnalysis(self, self._policy.mls)
             chooser.show()
 
     def create_new_analysis(self, tabtitle, tabclass):
@@ -231,23 +231,25 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
                      "Information Flow Analysis": InfoFlowAnalysisTab}
     _components_map = {"Users": UserQueryTab}
-    _rule_map = {"MLS Rules": MLSRuleQueryTab,
-                 "RBAC Rules": RBACRuleQueryTab,
+    _rule_map = {"RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
     _analysis_choices = {"Components": _components_map,
                          "Rules": _rule_map,
                          "Analyses": _analysis_map}
 
-    def __init__(self, parent):
+    def __init__(self, parent, mls):
         super(ChooseAnalysis, self).__init__(parent)
         self.item_mapping = {}
         self.parent = parent
-        self.setupUi()
+        self.setupUi(mls)
 
-    def setupUi(self):
+    def setupUi(self, mls):
         self.load_ui("choose_analysis.ui")
         self.buttonBox.accepted.connect(self.ok_clicked)
         self.analysisTypes.doubleClicked.connect(self.ok_clicked)
+
+        if mls:
+            self._rule_map["MLS Rules"] = MLSRuleQueryTab
 
         # populate the item list:
         self.analysisTypes.clear()
