@@ -61,12 +61,12 @@ class CommonTest(unittest.TestCase):
     def test_010_string(self):
         """Common: string representation"""
         com = self.mock_common("test10", ["perm1", "perm2"])
-        self.assertEquals("test10", str(com))
+        self.assertEqual("test10", str(com))
 
     def test_020_perms(self):
         """Common: permissions"""
         com = self.mock_common("test20", ["perm1", "perm2"])
-        self.assertEquals(set(["perm1", "perm2"]), com.perms)
+        self.assertEqual(set(["perm1", "perm2"]), com.perms)
 
     def test_030_statment(self):
         """Common: statement."""
@@ -127,12 +127,12 @@ class ObjClassTest(unittest.TestCase):
     def test_010_string(self):
         """ObjClass: string representation"""
         cls = self.mock_class("test10", ["perm1", "perm2"])
-        self.assertEquals("test10", str(cls))
+        self.assertEqual("test10", str(cls))
 
     def test_020_perms(self):
         """ObjClass: permissions"""
         cls = self.mock_class("test20", ["perm1", "perm2"], com_perms=["perm3", "perm4"])
-        self.assertEquals(set(["perm1", "perm2"]), cls.perms)
+        self.assertEqual(set(["perm1", "perm2"]), cls.perms)
 
     def test_030_statment(self):
         """ObjClass: statement, no common."""
