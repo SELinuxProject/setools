@@ -17,8 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
-from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QAction, QListView, QMenu
 from setools.policyrep.exception import MLSDisabled
 
 from .details import DetailsPopup
@@ -51,22 +49,6 @@ def user_detail(parent, user):
         detail.append("    {0}".format(r))
 
     detail.show()
-
-
-class UserList(QListView):
-
-    """A QListView widget for listing users."""
-
-    def __init__(self, parent):
-        super(UserList, self).__init__(parent)
-
-        # set up right-click context menu
-        self.get_detail = QAction("More details...", self)
-        self.menu = QMenu(self)
-        self.menu.addAction(self.get_detail)
-
-    def contextMenuEvent(self, event):
-        self.menu.popup(QCursor.pos())
 
 
 class UserTableModel(QAbstractTableModel):

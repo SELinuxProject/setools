@@ -134,7 +134,7 @@
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="UserList" name="users"/>
+         <widget class="GetDetailsListView" name="users"/>
         </item>
        </layout>
       </widget>
@@ -647,9 +647,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>UserList</class>
+   <class>GetDetailsListView</class>
    <extends>QListView</extends>
-   <header>setoolsgui/apol/usermodel.h</header>
+   <header>setoolsgui/getdetailslist.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
