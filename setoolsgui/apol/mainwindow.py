@@ -31,6 +31,7 @@ from .dta import DomainTransitionAnalysisTab
 from .infoflow import InfoFlowAnalysisTab
 from .mlsrulequery import MLSRuleQueryTab
 from .rbacrulequery import RBACRuleQueryTab
+from .rolequery import RoleQueryTab
 from .terulequery import TERuleQueryTab
 from .userquery import UserQueryTab
 
@@ -230,7 +231,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 
     _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
                      "Information Flow Analysis": InfoFlowAnalysisTab}
-    _components_map = {"Users": UserQueryTab}
+    _components_map = {"Roles": RoleQueryTab,
+                       "Users": UserQueryTab}
     _rule_map = {"RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
     _analysis_choices = {"Components": _components_map,
