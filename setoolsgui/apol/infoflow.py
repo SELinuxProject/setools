@@ -215,8 +215,10 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         self.thread.start()
 
     def update_complete(self):
-        # update location of result display
-        self.raw_results.moveCursor(QTextCursor.Start)
+        if not self.busy.wasCanceled():
+            self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
+            self.busy.repaint()
+            self.raw_results.moveCursor(QTextCursor.Start)
 
         self.busy.reset()
 
