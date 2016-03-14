@@ -18,7 +18,7 @@
 #
 import logging
 
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QTextCursor
 from PyQt5.QtWidgets import QDialog
 
 from ..widget import SEToolsWidget
@@ -58,3 +58,7 @@ class DetailsPopup(SEToolsWidget, QDialog):
         self.contents.setFontWeight(QFont.Black)
         self.contents.setFontPointSize(11)
         self.contents.append(text)
+
+    def show(self):
+        self.contents.moveCursor(QTextCursor.Start)
+        super(DetailsPopup, self).show()
