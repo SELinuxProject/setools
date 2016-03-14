@@ -25,9 +25,9 @@ from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialo
 from setools import TERuleQuery
 
 from ..logtosignal import LogHandlerToSignal
+from ..models import PermListModel, SEToolsListModel, invert_list_selection
+from ..rulemodels import TERuleListModel
 from ..widget import SEToolsWidget
-from .rulemodels import TERuleListModel
-from .models import PermListModel, SEToolsListModel, invert_list_selection
 
 
 class TERuleQueryTab(SEToolsWidget, QScrollArea):

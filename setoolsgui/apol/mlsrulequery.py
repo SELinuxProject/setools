@@ -25,9 +25,9 @@ from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialo
 from setools import MLSRuleQuery
 
 from ..logtosignal import LogHandlerToSignal
+from ..models import SEToolsListModel, invert_list_selection
+from ..rulemodels import MLSRuleListModel
 from ..widget import SEToolsWidget
-from .rulemodels import MLSRuleListModel
-from .models import SEToolsListModel, invert_list_selection
 
 
 class MLSRuleQueryTab(SEToolsWidget, QScrollArea):

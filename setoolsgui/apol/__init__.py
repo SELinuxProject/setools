@@ -17,8 +17,4 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-from .mainwindow import ApolMainWindow, ChooseAnalysis
-
-from .models import PermListModel, SEToolsListModel
-from .rulemodels import TERuleListModel
-from .terulequery import TERuleQueryTab
+from .mainwindow import ApolMainWindow

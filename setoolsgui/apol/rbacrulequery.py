@@ -25,9 +25,9 @@ from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialo
 from setools import RBACRuleQuery
 
 from ..logtosignal import LogHandlerToSignal
+from ..models import SEToolsListModel, invert_list_selection
+from ..rulemodels import RBACRuleListModel
 from ..widget import SEToolsWidget
-from .rulemodels import RBACRuleListModel
-from .models import SEToolsListModel, invert_list_selection
 
 
 class RBACRuleQueryTab(SEToolsWidget, QScrollArea):

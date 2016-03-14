@@ -21,7 +21,7 @@ import logging
 from PyQt5.QtGui import QFont, QTextCursor
 from PyQt5.QtWidgets import QDialog
 
-from ..widget import SEToolsWidget
+from .widget import SEToolsWidget
 
 
 class DetailsPopup(SEToolsWidget, QDialog):

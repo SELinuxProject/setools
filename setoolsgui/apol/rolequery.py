@@ -25,9 +25,9 @@ from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialo
 from setools import RoleQuery
 
 from ..logtosignal import LogHandlerToSignal
+from ..models import SEToolsListModel, invert_list_selection
+from ..rolemodel import RoleTableModel, role_detail
 from ..widget import SEToolsWidget
-from .models import SEToolsListModel, invert_list_selection
-from .rolemodel import RoleTableModel, role_detail
 
 
 class RoleQueryTab(SEToolsWidget, QScrollArea):

@@ -25,9 +25,9 @@ from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialo
 from setools import UserQuery
 
 from ..logtosignal import LogHandlerToSignal
+from ..models import SEToolsListModel, invert_list_selection
+from ..usermodel import UserTableModel, user_detail
 from ..widget import SEToolsWidget
-from .models import SEToolsListModel, invert_list_selection
-from .usermodel import UserTableModel, user_detail
 
 
 class UserQueryTab(SEToolsWidget, QScrollArea):
