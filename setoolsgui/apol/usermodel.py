@@ -32,9 +32,11 @@ def user_detail(parent, user):
     """
 
     detail = DetailsPopup(parent, "SELinux user detail: {0}".format(user))
-    detail.append_header("Roles:")
 
-    for r in user.roles:
+    roles = sorted(user.roles)
+    detail.append_header("Roles ({0}):".format(len(roles)))
+
+    for r in roles:
         detail.append("    {0}".format(r))
 
     try:
