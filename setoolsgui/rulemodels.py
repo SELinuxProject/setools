@@ -61,8 +61,6 @@ class MLSRuleListModel(RuleListModel):
                 return "Object Class"
             elif section == 4:
                 return "Default Range"
-            else:
-                raise ValueError("Invalid column number: {0}".format(section))
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -82,8 +80,7 @@ class MLSRuleListModel(RuleListModel):
                 return str(self.resultlist[row].tclass)
             elif col == 4:
                 return str(self.resultlist[row].default)
-            else:
-                raise ValueError("Invalid column number: {0}".format(col))
+
         elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()
@@ -105,8 +102,6 @@ class RBACRuleListModel(RuleListModel):
                 return "Object Class"
             elif section == 4:
                 return "Default Role"
-            else:
-                raise ValueError("Invalid column number: {0}".format(section))
 
     def data(self, index, role):
         if role == Qt.DisplayRole:
@@ -134,8 +129,7 @@ class RBACRuleListModel(RuleListModel):
                     return str(self.resultlist[row].default)
                 except RuleUseError:
                     return None
-            else:
-                raise ValueError("Invalid column number: {0}".format(col))
+
         elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()
@@ -161,8 +155,6 @@ class TERuleListModel(RuleListModel):
                 return "Conditional Expression"
             elif section == 6:
                 return "Conditional Block"
-            else:
-                raise ValueError("Invalid column number: {0}".format(section))
 
     def columnCount(self, parent=QModelIndex()):
         return 7
@@ -198,8 +190,7 @@ class TERuleListModel(RuleListModel):
                     return str(self.resultlist[row].conditional_block)
                 except RuleNotConditional:
                     return None
-            else:
-                raise ValueError("Invalid column number: {0}".format(col))
+
         elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()

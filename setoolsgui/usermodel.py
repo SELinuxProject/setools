@@ -72,8 +72,6 @@ class UserTableModel(QAbstractTableModel):
                 return "Default Level"
             elif section == 3:
                 return "Range"
-            else:
-                raise ValueError("Invalid column number: {0}".format(section))
 
     def columnCount(self, parent=QModelIndex()):
         if self.mls:
@@ -109,8 +107,7 @@ class UserTableModel(QAbstractTableModel):
                     return str(self.resultlist[row].mls_range)
                 except MLSDisabled:
                     return None
-            else:
-                raise ValueError("Invalid column number: {0}".format(col))
+
         elif role == Qt.UserRole:
             # get the whole rule for user role
             return self.resultlist[row].statement()

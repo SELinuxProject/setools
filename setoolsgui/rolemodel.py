@@ -80,8 +80,7 @@ class RoleTableModel(QAbstractTableModel):
                 return str(self.resultlist[row])
             elif col == 1:
                 return ", ".join(sorted(str(t) for t in self.resultlist[row].types()))
-            else:
-                raise ValueError("Invalid column number: {0}".format(col))
+
         elif role == Qt.UserRole:
             # get the whole rule for role role
             return self.resultlist[row].statement()
