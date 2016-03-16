@@ -64,6 +64,16 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.validate_rule(r[0], "range_transition", "test3s", "test3t", "infoflow", "s1")
         self.validate_rule(r[1], "range_transition", "test3s", "test3t", "infoflow2", "s2")
 
+    def test_005_issue111(self):
+        """MLS rule query with attribute source criteria, indirect match."""
+        # https://github.com/TresysTechnology/setools/issues/111
+        q = MLSRuleQuery(self.p, source="test5b", source_indirect=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "range_transition", "test5t1", "test5target", "infoflow", "s1")
+        self.validate_rule(r[1], "range_transition", "test5t2", "test5target", "infoflow7", "s2")
+
     def test_010_target_direct(self):
         """MLS rule query with exact, direct, target match."""
         q = MLSRuleQuery(
@@ -82,6 +92,16 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], "range_transition", "test12s", "test12aFAIL", "infoflow", "s2")
+
+    def test_014_issue111(self):
+        """MLS rule query with attribute target criteria, indirect match."""
+        # https://github.com/TresysTechnology/setools/issues/111
+        q = MLSRuleQuery(self.p, target="test14b", target_indirect=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "range_transition", "test14source", "test14t1", "infoflow", "s1")
+        self.validate_rule(r[1], "range_transition", "test14source", "test14t2", "infoflow7", "s2")
 
     @unittest.skip("Setting tclass to a string is no longer supported.")
     def test_020_class(self):

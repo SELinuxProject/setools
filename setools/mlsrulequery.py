@@ -46,8 +46,10 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
     ruletype = CriteriaSetDescriptor(lookup_function="validate_mls_ruletype")
     source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
     source_regex = False
+    source_indirect = True
     target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
     target_regex = False
+    target_indirect = True
     tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
     tclass_regex = False
     default = CriteriaDescriptor(lookup_function="lookup_range")
@@ -64,8 +66,10 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
         """Generator which yields all matching MLS rules."""
         self.log.info("Generating MLS rule results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Source: {0.source!r}, regex: {0.source_regex}".format(self))
-        self.log.debug("Target: {0.target!r}, regex: {0.target_regex}".format(self))
+        self.log.debug("Source: {0.source!r}, indirect: {0.source_indirect}, "
+                       "regex: {0.source_regex}".format(self))
+        self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
+                       "regex: {0.target_regex}".format(self))
         self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
         self.log.debug("Default: {0.default!r}, overlap: {0.default_overlap}, "
                        "subset: {0.default_subset}, superset: {0.default_superset}, "
@@ -82,18 +86,20 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on source type
             #
-            if self.source and not self._match_regex(
+            if self.source and not self._match_indirect_regex(
                     rule.source,
                     self.source,
+                    self.source_indirect,
                     self.source_regex):
                 continue
 
             #
             # Matching on target type
             #
-            if self.target and not self._match_regex(
+            if self.target and not self._match_indirect_regex(
                     rule.target,
                     self.target,
+                    self.target_indirect,
                     self.target_regex):
                 continue
 

@@ -87,7 +87,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
     target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
     target_regex = False
     target_indirect = True
-    default = CriteriaDescriptor("default_regex", "lookup_type")
+    default = CriteriaDescriptor("default_regex", "lookup_type_or_attr")
     default_regex = False
     boolean = CriteriaSetDescriptor("boolean_regex", "lookup_boolean")
     boolean_regex = False
@@ -160,9 +160,13 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             #
             if self.default:
                 try:
-                    if not self._match_regex(
+                    # because default type is always a single
+                    # type, hard-code indirect to True
+                    # so the criteria can be an attribute
+                    if not self._match_indirect_regex(
                             rule.default,
                             self.default,
+                            True,
                             self.default_regex):
                         continue
                 except RuleUseError:

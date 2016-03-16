@@ -139,9 +139,13 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             if self.default:
                 try:
-                    if not self._match_regex(
+                    # because default role is always a single
+                    # role, hard-code indirect to True
+                    # so the criteria can be an attribute
+                    if not self._match_indirect_regex(
                             rule.default,
                             self.default,
+                            True,
                             self.default_regex):
                         continue
                 except RuleUseError:

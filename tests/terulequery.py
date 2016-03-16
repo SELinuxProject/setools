@@ -244,3 +244,41 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            set(["super_none"]), cond="test202a")
         self.validate_rule(r[1], "allow", "test202t2", "test202t2", "infoflow7",
                            set(["super_unmapped"]), cond="test202b || test202c")
+
+    def test_300_issue111(self):
+        """TE rule query with attribute source criteria, indirect match."""
+        # https://github.com/TresysTechnology/setools/issues/111
+        q = TERuleQuery(self.p, source="test300b", source_indirect=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 4)
+        self.validate_rule(r[0], "allow", "test300a", "test300target", "infoflow7", set(["hi_w"]))
+        self.validate_rule(r[1], "allow", "test300b", "test300target", "infoflow7",
+                           set(["super_w"]))
+        self.validate_rule(r[2], "allow", "test300t1", "test300t1", "infoflow7", set(["hi_r"]))
+        self.validate_rule(r[3], "allow", "test300t2", "test300t2", "infoflow7", set(["med_w"]))
+
+    def test_301_issue111(self):
+        """TE rule query with attribute target criteria, indirect match."""
+        # https://github.com/TresysTechnology/setools/issues/111
+        q = TERuleQuery(self.p, target="test301b", target_indirect=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 4)
+        self.validate_rule(r[0], "allow", "test301source", "test301a", "infoflow7", set(["hi_w"]))
+        self.validate_rule(r[1], "allow", "test301source", "test301b", "infoflow7",
+                           set(["super_w"]))
+        self.validate_rule(r[2], "allow", "test301t1", "test301t1", "infoflow7", set(["hi_r"]))
+        self.validate_rule(r[3], "allow", "test301t2", "test301t2", "infoflow7", set(["med_w"]))
+
+    def test_302_issue111(self):
+        """TE rule query with attribute default type criteria."""
+        # https://github.com/TresysTechnology/setools/issues/111
+        q = TERuleQuery(self.p, default="test302")
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "type_transition", "test302source", "test302t1", "infoflow7",
+                           "test302t1")
+        self.validate_rule(r[1], "type_transition", "test302source", "test302t2", "infoflow7",
+                           "test302t2")
