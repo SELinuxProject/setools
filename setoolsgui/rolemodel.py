@@ -33,7 +33,7 @@ def role_detail(parent, role):
     role        The role
     """
 
-    detail = DetailsPopup(parent, "SELinux role detail: {0}".format(role))
+    detail = DetailsPopup(parent, "Role detail: {0}".format(role))
 
     types = sorted(role.types())
     detail.append_header("Types ({0}): ".format(len(types)))
@@ -55,7 +55,7 @@ class RoleTableModel(QAbstractTableModel):
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             if section == 0:
-                return "Role Name"
+                return "Name"
             elif section == 1:
                 return "Types"
 

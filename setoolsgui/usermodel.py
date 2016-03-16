@@ -31,7 +31,7 @@ def user_detail(parent, user):
     user        The user
     """
 
-    detail = DetailsPopup(parent, "SELinux user detail: {0}".format(user))
+    detail = DetailsPopup(parent, "User detail: {0}".format(user))
 
     roles = sorted(user.roles)
     detail.append_header("Roles ({0}):".format(len(roles)))
@@ -65,7 +65,7 @@ class UserTableModel(QAbstractTableModel):
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
             if section == 0:
-                return "User Name"
+                return "Name"
             elif section == 1:
                 return "Roles"
             elif section == 2:
