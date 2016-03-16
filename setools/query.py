@@ -102,7 +102,10 @@ class PolicyQuery(object):
         """
 
         if indirect:
-            return PolicyQuery._match_in_set((obj.expand()), criteria, regex)
+            if regex:
+                return [o for o in obj.expand() if criteria.search(str(o))]
+            else:
+                return set(criteria.expand()).intersection(obj.expand())
         else:
             return PolicyQuery._match_regex(obj, criteria, regex)
 
