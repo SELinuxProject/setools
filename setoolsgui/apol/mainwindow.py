@@ -33,6 +33,7 @@ from .mlsrulequery import MLSRuleQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
 from .terulequery import TERuleQueryTab
+from .typequery import TypeQueryTab
 from .userquery import UserQueryTab
 
 
@@ -232,6 +233,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
                      "Information Flow Analysis": InfoFlowAnalysisTab}
     _components_map = {"Roles": RoleQueryTab,
+                       "Types": TypeQueryTab,
                        "Users": UserQueryTab}
     _rule_map = {"RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
