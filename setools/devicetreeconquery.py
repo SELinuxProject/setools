@@ -21,6 +21,7 @@ import logging
 from . import contextquery
 from .policyrep.xencontext import dev_path
 
+
 class DevicetreeconQuery(contextquery.ContextQuery):
 
     """
@@ -56,7 +57,6 @@ class DevicetreeconQuery(contextquery.ContextQuery):
     """
 
     _path = None
-
 
     @property
     def path(self):
@@ -95,4 +95,5 @@ class DevicetreeconQuery(contextquery.ContextQuery):
 
             if not self._match_context(devicetreecon.context):
                 continue
+
             yield devicetreecon

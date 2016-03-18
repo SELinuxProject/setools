@@ -122,4 +122,5 @@ class IomemconQuery(contextquery.ContextQuery):
 
             if not self._match_context(iomemcon.context):
                 continue
+
             yield iomemcon

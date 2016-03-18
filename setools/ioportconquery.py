@@ -119,6 +119,8 @@ class IoportconQuery(contextquery.ContextQuery):
                     self.ports_superset,
                     self.ports_proper):
                 continue
+
             if not self._match_context(ioportcon.context):
                 continue
+
             yield ioportcon

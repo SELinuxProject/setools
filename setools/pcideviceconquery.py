@@ -21,6 +21,7 @@ import logging
 from . import contextquery
 from .policyrep.xencontext import device_id
 
+
 class PcideviceconQuery(contextquery.ContextQuery):
 
     """
@@ -56,7 +57,6 @@ class PcideviceconQuery(contextquery.ContextQuery):
     """
 
     _device = None
-
 
     @property
     def device(self):
@@ -95,4 +95,5 @@ class PcideviceconQuery(contextquery.ContextQuery):
 
             if not self._match_context(pcidevicecon.context):
                 continue
+
             yield pcidevicecon

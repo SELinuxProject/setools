@@ -157,50 +157,56 @@ class DevicetreeconQueryTest(unittest.TestCase):
 
     def test_044_range_proper_subset2(self):
         """Devicetreecon query with context range proper subset match (equal)"""
-        q = DevicetreeconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = DevicetreeconQuery(self.p,
+                               range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
 
         path = sorted(p.path for p in q.results())
         self.assertListEqual([], path)
 
     def test_044_range_proper_subset3(self):
         """Devicetreecon query with context range proper subset match (equal low only)"""
-        q = DevicetreeconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+        q = DevicetreeconQuery(self.p,
+                               range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
 
         path = sorted(p.path for p in q.results())
         self.assertListEqual([("/dev/tree44")], path)
 
     def test_044_range_proper_subset4(self):
         """Devicetreecon query with context range proper subset match (equal high only)"""
-        q = DevicetreeconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = DevicetreeconQuery(self.p,
+                               range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
 
         path = sorted(p.path for p in q.results())
         self.assertListEqual([("/dev/tree44")], path)
 
     def test_045_range_proper_superset1(self):
         """Devicetreecon query with context range proper superset match"""
-        q = DevicetreeconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+        q = DevicetreeconQuery(self.p,
+                               range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
 
         path = sorted(p.path for p in q.results())
         self.assertListEqual([("/dev/tree45")], path)
 
     def test_045_range_proper_superset2(self):
         """Devicetreecon query with context range proper superset match (equal)"""
-        q = DevicetreeconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = DevicetreeconQuery(self.p,
+                               range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
 
         path = sorted(p.path for p in q.results())
         self.assertListEqual([], path)
 
     def test_045_range_proper_superset3(self):
         """Devicetreecon query with context range proper superset match (equal low)"""
-        q = DevicetreeconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+        q = DevicetreeconQuery(self.p,
+                               range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
 
         path = sorted(p.path for p in q.results())
         self.assertListEqual([("/dev/tree45")], path)
 
     def test_045_range_proper_superset4(self):
         """Devicetreecon query with context range proper superset match (equal high)"""
-        q = DevicetreeconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = DevicetreeconQuery(self.p,
+                               range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
 
         path = sorted(p.path for p in q.results())
         self.assertListEqual([("/dev/tree45")], path)
-

@@ -157,50 +157,56 @@ class PcideviceconQueryTest(unittest.TestCase):
 
     def test_044_range_proper_subset2(self):
         """Pcidevicecon query with context range proper subset match (equal)"""
-        q = PcideviceconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = PcideviceconQuery(self.p,
+                              range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
 
         device = sorted(p.device for p in q.results())
         self.assertListEqual([], device)
 
     def test_044_range_proper_subset3(self):
         """Pcidevicecon query with context range proper subset match (equal low only)"""
-        q = PcideviceconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+        q = PcideviceconQuery(self.p,
+                              range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
 
         device = sorted(p.device for p in q.results())
         self.assertListEqual([(44)], device)
 
     def test_044_range_proper_subset4(self):
         """Pcidevicecon query with context range proper subset match (equal high only)"""
-        q = PcideviceconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = PcideviceconQuery(self.p,
+                              range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
 
         device = sorted(p.device for p in q.results())
         self.assertListEqual([(44)], device)
 
     def test_045_range_proper_superset1(self):
         """Pcidevicecon query with context range proper superset match"""
-        q = PcideviceconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+        q = PcideviceconQuery(self.p,
+                              range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
 
         device = sorted(p.device for p in q.results())
         self.assertListEqual([(45)], device)
 
     def test_045_range_proper_superset2(self):
         """Pcidevicecon query with context range proper superset match (equal)"""
-        q = PcideviceconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = PcideviceconQuery(self.p,
+                              range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
 
         device = sorted(p.device for p in q.results())
         self.assertListEqual([], device)
 
     def test_045_range_proper_superset3(self):
         """Pcidevicecon query with context range proper superset match (equal low)"""
-        q = PcideviceconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+        q = PcideviceconQuery(self.p,
+                              range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
 
         device = sorted(p.device for p in q.results())
         self.assertListEqual([(45)], device)
 
     def test_045_range_proper_superset4(self):
         """Pcidevicecon query with context range proper superset match (equal high)"""
-        q = PcideviceconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = PcideviceconQuery(self.p,
+                              range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
 
         device = sorted(p.device for p in q.results())
         self.assertListEqual([(45)], device)
-

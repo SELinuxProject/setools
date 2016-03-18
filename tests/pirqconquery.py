@@ -203,4 +203,3 @@ class PirqconQueryTest(unittest.TestCase):
 
         irq = sorted(p.irq for p in q.results())
         self.assertListEqual([(45)], irq)
-

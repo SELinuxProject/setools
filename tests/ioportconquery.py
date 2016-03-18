@@ -171,7 +171,8 @@ class IoportconQueryTest(unittest.TestCase):
 
     def test_044_range_proper_subset4(self):
         """Portcon query with context range proper subset match (equal high only)"""
-        q = IoportconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = IoportconQuery(self.p,
+                           range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
 
         ports = sorted(p.ports for p in q.results())
         self.assertListEqual([(44, 44)], ports)
@@ -185,14 +186,16 @@ class IoportconQueryTest(unittest.TestCase):
 
     def test_045_range_proper_superset2(self):
         """Portcon query with context range proper superset match (equal)"""
-        q = IoportconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = IoportconQuery(self.p,
+                           range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
 
         ports = sorted(p.ports for p in q.results())
         self.assertListEqual([], ports)
 
     def test_045_range_proper_superset3(self):
         """Portcon query with context range proper superset match (equal low)"""
-        q = IoportconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+        q = IoportconQuery(self.p,
+                           range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
 
         ports = sorted(p.ports for p in q.results())
         self.assertListEqual([(45, 45)], ports)

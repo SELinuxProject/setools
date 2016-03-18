@@ -171,7 +171,8 @@ class IomemconQueryTest(unittest.TestCase):
 
     def test_044_range_proper_subset4(self):
         """Iomemcon query with context range proper subset match (equal high only)"""
-        q = IomemconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = IomemconQuery(self.p,
+                          range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
 
         mem_addr = sorted(p.mem_addr for p in q.results())
         self.assertListEqual([(44, 44)], mem_addr)

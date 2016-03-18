@@ -28,6 +28,7 @@ device_id = namedtuple("device_id", ["low"])
 pirq = namedtuple("irq", ["low"])
 dev_path = namedtuple("dev_path", ["path"])
 
+
 def iomemcon_factory(policy, name):
     """Factory function for creating iomemcon objects."""
 
@@ -114,6 +115,7 @@ class Iomemcon(XenContext):
         high = self.qpol_symbol.high_addr(self.policy)
         return addr_range(low, high)
 
+
 class Ioportcon(XenContext):
 
     """A ioportcon statement."""
@@ -140,6 +142,7 @@ class Ioportcon(XenContext):
         high = self.qpol_symbol.high_port(self.policy)
         return port_range(low, high)
 
+
 class Pcidevicecon(XenContext):
 
     """A pcidevicecon statement."""
@@ -160,6 +163,7 @@ class Pcidevicecon(XenContext):
         device_id = self.qpol_symbol.device(self.policy)
         return device_id
 
+
 class Pirqcon(XenContext):
 
     """A pirqcon statement."""
@@ -179,6 +183,7 @@ class Pirqcon(XenContext):
         """
         pirq = self.qpol_symbol.irq(self.policy)
         return pirq
+
 
 class Devicetreecon(XenContext):
 

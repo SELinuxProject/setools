@@ -65,6 +65,9 @@ from . import fscontext
 from . import initsid
 from . import netcontext
 
+# Xen
+from . import xencontext
+
 # Classes useful for policyrep users:
 from . import exception
 from .netcontext import PortconProtocol, port_range
@@ -659,7 +662,9 @@ class SELinuxPolicy(object):
         for port in self.policy.portcon_iter():
             yield netcontext.portcon_factory(self.policy, port)
 
-    ### Start XEN statements
+    #
+    # Xen labeling statements
+    #
     def iomemcons(self):
         """Generator which yields all iomemcon statements."""
         for mem_addr in self.policy.iomemcon_iter():
@@ -684,4 +689,3 @@ class SELinuxPolicy(object):
         """Generator which yields all devicetreecon statements."""
         for path in self.policy.devicetreecon_iter():
             yield xencontext.devicetreecon_factory(self.policy, path)
-    ### End XEN statements

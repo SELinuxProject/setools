@@ -54,7 +54,7 @@ rtypes.add_argument("--type_change", action="append_const",
 rtypes.add_argument("--type_member", action="append_const",
                     const="type_member", dest="tertypes",
                     help="Search type_member rules.")
-rtypes.add_argument( "--allowx", action="append_const",
+rtypes.add_argument("--allowx", action="append_const",
                     const="allowx", dest="tertypes",
                     help="Search allowx rules.")
 rtypes.add_argument("--auditallowx", action="append_const",

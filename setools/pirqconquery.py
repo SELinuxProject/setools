@@ -21,6 +21,7 @@ import logging
 from . import contextquery
 from .policyrep.xencontext import pirq
 
+
 class PirqconQuery(contextquery.ContextQuery):
 
     """
@@ -56,7 +57,6 @@ class PirqconQuery(contextquery.ContextQuery):
     """
 
     _irq = None
-
 
     @property
     def irq(self):
@@ -95,4 +95,5 @@ class PirqconQuery(contextquery.ContextQuery):
 
             if not self._match_context(pirqcon.context):
                 continue
+
             yield pirqcon
