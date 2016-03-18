@@ -74,6 +74,9 @@ class DevicetreeconQuery(contextquery.ContextQuery):
         else:
             self._path = None
 
+    def __init__(self, policy, **kwargs):
+        super(DevicetreeconQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
 
     def results(self):
         """Generator which yields all matching devicetreecons."""

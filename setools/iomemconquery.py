@@ -93,6 +93,10 @@ class IomemconQuery(contextquery.ContextQuery):
         else:
             self._mem_addr = None
 
+    def __init__(self, policy, **kwargs):
+        super(IomemconQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
+
     def results(self):
         """Generator which yields all matching iomemcons."""
         self.log.info("Generating results from {0.policy}".format(self))

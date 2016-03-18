@@ -74,6 +74,9 @@ class PirqconQuery(contextquery.ContextQuery):
         else:
             self._irq = None
 
+    def __init__(self, policy, **kwargs):
+        super(PirqconQuery, self).__init__(policy, **kwargs)
+        self.log = logging.getLogger(__name__)
 
     def results(self):
         """Generator which yields all matching pirqcons."""
