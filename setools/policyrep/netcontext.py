@@ -149,6 +149,14 @@ class PortconProtocol(int):
     _proto_to_text = {socket.IPPROTO_TCP: 'tcp',
                       socket.IPPROTO_UDP: 'udp'}
 
+    def __new__(cls, value):
+        if value not in cls._proto_to_text:
+            raise ValueError("{0} is not a supported IP protocol number. "
+                             "Values such as {1} (TCP) or {2} (UDP) should be used.".
+                             format(value, socket.IPPROTO_TCP, socket.IPPROTO_UDP))
+
+        return super(PortconProtocol, cls).__new__(cls, value)
+
     def __str__(self):
         return self._proto_to_text[self]
 

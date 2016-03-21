@@ -20,7 +20,7 @@ import logging
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from . import contextquery
-from .policyrep.netcontext import port_range
+from .policyrep import port_range, PortconProtocol
 
 
 class PortconQuery(contextquery.ContextQuery):
@@ -105,12 +105,7 @@ class PortconQuery(contextquery.ContextQuery):
     @protocol.setter
     def protocol(self, value):
         if value:
-            if not (value == IPPROTO_TCP or value == IPPROTO_UDP):
-                raise ValueError(
-                    "The protocol must be {0} for TCP or {1} for UDP.".
-                    format(IPPROTO_TCP, IPPROTO_UDP))
-
-            self._protocol = value
+            self._protocol = PortconProtocol(value)
         else:
             self._protocol = None
 
