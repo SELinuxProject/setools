@@ -33,18 +33,31 @@ parser.add_argument("-v", "--verbose", action="store_true",
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 rtypes = parser.add_argument_group("TE Rule Types")
-rtypes.add_argument("-A", "--allow", action="append_const",
+rtypes.add_argument("-A", action="store_true", help="Search allow and allowxperm rules.")
+rtypes.add_argument("--allow", action="append_const",
                     const="allow", dest="tertypes",
                     help="Search allow rules.")
+rtypes.add_argument("--allowx", action="append_const",
+                    const="allowxperm", dest="tertypes",
+                    help="Search allowxperm rules.")
 rtypes.add_argument("--auditallow", action="append_const",
                     const="auditallow", dest="tertypes",
                     help="Search auditallow rules.")
+rtypes.add_argument("--auditallowx", action="append_const",
+                    const="auditallowxperm", dest="tertypes",
+                    help="Search auditallowxperm rules.")
 rtypes.add_argument("--dontaudit", action="append_const",
                     const="dontaudit", dest="tertypes",
                     help="Search dontaudit rules.")
+rtypes.add_argument("--dontauditx", action="append_const",
+                    const="dontauditxperm", dest="tertypes",
+                    help="Search dontauditxperm rules.")
 rtypes.add_argument("--neverallow", action="append_const",
                     const="neverallow", dest="tertypes",
                     help="Search neverallow rules.")
+rtypes.add_argument("--neverallowx", action="append_const",
+                    const="neverallowxperm", dest="tertypes",
+                    help="Search neverallowxperm rules.")
 rtypes.add_argument("-T", "--type_trans", action="append_const",
                     const="type_transition", dest="tertypes",
                     help="Search type_transition rules.")
@@ -54,18 +67,6 @@ rtypes.add_argument("--type_change", action="append_const",
 rtypes.add_argument("--type_member", action="append_const",
                     const="type_member", dest="tertypes",
                     help="Search type_member rules.")
-rtypes.add_argument("--allowx", action="append_const",
-                    const="allowx", dest="tertypes",
-                    help="Search allowx rules.")
-rtypes.add_argument("--auditallowx", action="append_const",
-                    const="auditallowx", dest="tertypes",
-                    help="Search auditallowx rules.")
-rtypes.add_argument("--dontauditx", action="append_const",
-                    const="dontauditx", dest="tertypes",
-                    help="Search dontauditx rules.")
-rtypes.add_argument("--neverallowx", action="append_const",
-                    const="neverallowx", dest="tertypes",
-                    help="Search neverallowx rules.")
 rbacrtypes = parser.add_argument_group("RBAC Rule Types")
 rbacrtypes.add_argument("--role_allow", action="append_const",
                         const="allow", dest="rbacrtypes",
@@ -88,6 +89,8 @@ expr.add_argument("-c", "--class", dest="tclass",
                   help="Comma separated list of object classes")
 expr.add_argument("-p", "--perms", metavar="PERMS",
                   help="Comma separated list of permissions.")
+expr.add_argument("-x", "--xperms", metavar="XPERMS",
+                  help="Comma separated list of extended permissions.")
 expr.add_argument("-D", "--default",
                   help="Default of the rule. (type/role/range transition rules)")
 expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL",
@@ -98,6 +101,9 @@ opts.add_argument("-eb", action="store_true", dest="boolean_equal",
                   help="Match Boolean list exactly instead of matching any listed Boolean.")
 opts.add_argument("-ep", action="store_true", dest="perms_equal",
                   help="Match permission set exactly instead of matching any listed permission.")
+opts.add_argument("-ex", action="store_true", dest="xperms_equal",
+                  help="Match extended permission set exactly instead of matching any listed "
+                  "permission.")
 opts.add_argument("-ds", action="store_false", dest="source_indirect",
                   help="Match source attributes directly instead of matching member types/roles.")
 opts.add_argument("-dt", action="store_false", dest="target_indirect",
@@ -114,6 +120,12 @@ opts.add_argument("-rb", action="store_true", dest="boolean_regex",
                   help="Use regular expression matching for Booleans.")
 
 args = parser.parse_args()
+
+if args.A:
+    try:
+        args.tertypes.extend(["allow", "allowxperm"])
+    except AttributeError:
+        args.tertypes = ["allow", "allowxperm"]
 
 if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
     parser.error("At least one rule type must be specified.")
@@ -140,6 +152,7 @@ try:
                                 target_regex=args.target_regex,
                                 tclass_regex=args.tclass_regex,
                                 perms_equal=args.perms_equal,
+                                xperms_equal=args.xperms_equal,
                                 default=args.default,
                                 default_regex=args.default_regex,
                                 boolean_regex=args.boolean_regex,
@@ -155,6 +168,20 @@ try:
 
         if args.perms:
             q.perms = args.perms.split(",")
+
+        if args.xperms:
+            xperms = []
+            for item in args.xperms.split(","):
+                rng = item.split("-")
+                if len(rng) == 2:
+                    xperms.append((int(rng[0], base=16), int(rng[1], base=16)))
+                elif len(rng) == 1:
+                    xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
+                else:
+                    parser.error("Enter an extended permission or extended permission range, e.g. "
+                                 "0x5411 or 0x8800-0x88ff.")
+
+            q.xperms = xperms
 
         if args.boolean:
             if args.boolean_regex:
