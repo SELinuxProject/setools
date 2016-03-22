@@ -282,3 +282,178 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
                            "test302t1")
         self.validate_rule(r[1], "type_transition", "test302source", "test302t2", "infoflow7",
                            "test302t2")
+
+
+class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
+
+    """TE Rule Query with extended permission rules."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.p = SELinuxPolicy("tests/terulequery2.conf")
+
+    def test_001_source_direct(self):
+        """Xperm rule query with exact, direct, source match."""
+        q = TERuleQuery(
+            self.p, source="test1a", source_indirect=False, source_regex=False)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "allowxperm", "test1a", "test1t", "infoflow",
+                           set(range(0xebe0, 0xebff+1)), xperm="ioctl")
+
+    def test_002_source_indirect(self):
+        """Xperm rule query with exact, indirect, source match."""
+        q = TERuleQuery(
+            self.p, source="test2s", source_indirect=True, source_regex=False)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "allowxperm", "test2a", "test2t", "infoflow",
+                           set([0x5411, 0x5451]), xperm="ioctl")
+
+    def test_003_source_direct_regex(self):
+        """Xperm rule query with regex, direct, source match."""
+        q = TERuleQuery(
+            self.p, source="test3a.*", source_indirect=False, source_regex=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "allowxperm", "test3aS", "test3t", "infoflow",
+                           set([0x1111]), xperm="ioctl")
+
+    def test_004_source_indirect_regex(self):
+        """Xperm rule query with regex, indirect, source match."""
+        q = TERuleQuery(
+            self.p, source="test4(s|t)", source_indirect=True, source_regex=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "allowxperm", "test4a1", "test4a1", "infoflow",
+                           set([0x9999]), xperm="ioctl")
+        self.validate_rule(r[1], "allowxperm", "test4a2", "test4a2", "infoflow",
+                           set([0x1111]), xperm="ioctl")
+
+    def test_005_target_direct(self):
+        """Xperm rule query with exact, direct, target match."""
+        q = TERuleQuery(
+            self.p, target="test5a", target_indirect=False, target_regex=False)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "allowxperm", "test5s", "test5a", "infoflow", set([0x9999]),
+                           xperm="ioctl")
+
+    def test_006_target_indirect(self):
+        """Xperm rule query with exact, indirect, target match."""
+        q = TERuleQuery(
+            self.p, target="test6t", target_indirect=True, target_regex=False)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "allowxperm", "test6s", "test6a", "infoflow", set([0x9999]),
+                           xperm="ioctl")
+        self.validate_rule(r[1], "allowxperm", "test6s", "test6t", "infoflow", set([0x1111]),
+                           xperm="ioctl")
+
+    def test_007_target_direct_regex(self):
+        """Xperm rule query with regex, direct, target match."""
+        q = TERuleQuery(
+            self.p, target="test7a.*", target_indirect=False, target_regex=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "allowxperm", "test7s", "test7aPASS", "infoflow", set([0x1111]),
+                           xperm="ioctl")
+
+    def test_008_target_indirect_regex(self):
+        """Xperm rule query with regex, indirect, target match."""
+        q = TERuleQuery(
+            self.p, target="test8(s|t)", target_indirect=True, target_regex=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "allowxperm", "test8a1", "test8a1", "infoflow", set([0x9999]),
+                           xperm="ioctl")
+        self.validate_rule(r[1], "allowxperm", "test8a2", "test8a2", "infoflow", set([0x1111]),
+                           xperm="ioctl")
+
+    def test_010_class_list(self):
+        """Xperm rule query with object class list match."""
+        q = TERuleQuery(
+            self.p, tclass=["infoflow3", "infoflow4"], tclass_regex=False)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "allowxperm", "test10", "test10", "infoflow3", set([0]),
+                           xperm="ioctl")
+        self.validate_rule(r[1], "allowxperm", "test10", "test10", "infoflow4", set([0x9999]),
+                           xperm="ioctl")
+
+    def test_011_class_regex(self):
+        """Xperm rule query with object class regex match."""
+        q = TERuleQuery(self.p, tclass="infoflow(5|6)", tclass_regex=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "allowxperm", "test11", "test11", "infoflow5", set([0x1111]),
+                           xperm="ioctl")
+        self.validate_rule(r[1], "allowxperm", "test11", "test11", "infoflow6", set([0x5555]),
+                           xperm="ioctl")
+
+    def test_014_ruletype(self):
+        """Xperm rule query with rule type match."""
+        q = TERuleQuery(self.p, ruletype=["auditallowxperm", "dontauditxperm"])
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "auditallowxperm", "test14", "test14", "infoflow7", set([0x1234]),
+                           xperm="ioctl")
+        self.validate_rule(r[1], "dontauditxperm", "test14", "test14", "infoflow7", set([0x4321]),
+                           xperm="ioctl")
+
+    def test_100_std_perm_any(self):
+        """Xperm rule query match by standard permission."""
+        q = TERuleQuery(self.p, ruletype=["neverallow", "neverallowxperm"],
+                        perms=set(["ioctl", "hi_w"]), perms_equal=False)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], "neverallow", "test100", "system", "infoflow2",
+                           set(["ioctl", "hi_w"]))
+        self.validate_rule(r[1], "neverallowxperm", "test100", "test100", "infoflow2",
+                           set([0x1234]), xperm="ioctl")
+
+    def test_100_std_perm_equal(self):
+        """Xperm rule query match by standard permission, equal perm set."""
+        q = TERuleQuery(self.p, ruletype=["neverallow", "neverallowxperm"],
+                        perms=set(["ioctl", "hi_w"]), perms_equal=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "neverallow", "test100", "system", "infoflow2",
+                           set(["ioctl", "hi_w"]))
+
+    def test_101_xperm_any(self):
+        """Xperm rule query match any perm set."""
+        q = TERuleQuery(self.p, xperms=[(0x9011, 0x9013)], xperms_equal=False)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 4)
+        self.validate_rule(r[0], "allowxperm", "test101a", "test101a", "infoflow7",
+                           set([0x9011]), xperm="ioctl")
+        self.validate_rule(r[1], "allowxperm", "test101b", "test101b", "infoflow7",
+                           set([0x9011, 0x9012]), xperm="ioctl")
+        self.validate_rule(r[2], "allowxperm", "test101c", "test101c", "infoflow7",
+                           set([0x9011, 0x9012, 0x9013]), xperm="ioctl")
+        self.validate_rule(r[3], "allowxperm", "test101d", "test101d", "infoflow7",
+                           set([0x9011, 0x9012, 0x9013, 0x9014]), xperm="ioctl")
+
+    def test_101_xperm_equal(self):
+        """Xperm rule query match equal perm set."""
+        q = TERuleQuery(self.p, xperms=[(0x9011, 0x9013)], xperms_equal=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], "allowxperm", "test101c", "test101c", "infoflow7",
+                           set([0x9011, 0x9012, 0x9013]), xperm="ioctl")

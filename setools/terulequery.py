@@ -21,6 +21,7 @@ import re
 
 from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .policyrep import ioctlSet
 from .policyrep.exception import RuleUseError, RuleNotConditional
 
 
@@ -92,6 +93,31 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
     boolean = CriteriaSetDescriptor("boolean_regex", "lookup_boolean")
     boolean_regex = False
     boolean_equal = False
+    _xperms = None
+    xperms_equal = False
+
+    @property
+    def xperms(self):
+        return self._xperms
+
+    @xperms.setter
+    def xperms(self, value):
+        pending_xperms = ioctlSet()
+
+        for low, high in value:
+            if not (0 <= low <= 0xffff):
+                raise ValueError("{0:04x} is not a valid ioctl.".format(low))
+
+            if not (0 <= high <= 0xffff):
+                raise ValueError("{0:04x} is not a valid ioctl.".format(high))
+
+            if high < low:
+                raise ValueError("0x{0:04x}-0x{1:04x} is not a valid ioctl range.".
+                                 format(low, high))
+
+            pending_xperms.update(i for i in range(low, high+1))
+
+        self._xperms = pending_xperms
 
     def __init__(self, policy, **kwargs):
         super(TERuleQuery, self).__init__(policy, **kwargs)
@@ -108,6 +134,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
         self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
         self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
                        format(self))
+        self.log.debug("Xperms: {0.xperms!r}, eq: {0.xperms_equal}".format(self))
         self.log.debug("Default: {0.default!r}, regex: {0.default_regex}".format(self))
         self.log.debug("Boolean: {0.boolean!r}, eq: {0.boolean_equal}, "
                        "regex: {0.boolean_regex}".format(self))
@@ -150,8 +177,31 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             # Matching on permission set
             #
             try:
-                if not self._match_perms(rule):
+                if self.perms and rule.extended:
+                    if self.perms_equal and len(self.perms) > 1:
+                        # if criteria is more than one standard permission,
+                        # extended perm rules can never match if the
+                        # permission set equality option is on.
+                        continue
+
+                    if rule.xperm_type not in self.perms:
+                        continue
+                elif not self._match_perms(rule):
                     continue
+            except RuleUseError:
+                continue
+
+            #
+            # Matching on extended permissions
+            #
+            try:
+                if self.xperms and not self._match_regex_or_set(
+                        rule.perms,
+                        self.xperms,
+                        self.xperms_equal,
+                        False):
+                    continue
+
             except RuleUseError:
                 continue
 
