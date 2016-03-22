@@ -26,7 +26,7 @@ addition to the development packages from the above list:
 * gcc
 * bison
 * flex
-* libsepol 2.4+
+* libsepol 2.5+
 * SWIG 2.0.12+ or 3.0+
 
 To run SETools unit tests, the following packages are required, in
