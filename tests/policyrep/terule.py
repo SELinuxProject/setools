@@ -37,6 +37,7 @@ class AVRuleTest(unittest.TestCase):
 
     def mock_avrule_factory(self, ruletype, source, target, tclass, perms, cond=None):
         mock_rule = Mock(qpol_avrule_t)
+        mock_rule.is_extended.return_value = False
         mock_rule.rule_type.return_value = ruletype
         mock_rule.source_type.return_value = source
         mock_rule.target_type.return_value = target
@@ -149,6 +150,117 @@ class AVRuleTest(unittest.TestCase):
                                  "|"
                                  "allow a b:c { d2 d1 }; \[ cond103 ]"
                                  ")")
+
+
+@patch('setools.policyrep.boolcond.condexpr_factory', lambda x, y: y)
+@patch('setools.policyrep.typeattr.type_or_attr_factory', lambda x, y: y)
+@patch('setools.policyrep.objclass.class_factory', lambda x, y: y)
+class AVRuleXpermTest(unittest.TestCase):
+
+    def mock_avrule_factory(self, ruletype, source, target, tclass, xperm, perms):
+        mock_rule = Mock(qpol_avrule_t)
+        mock_rule.is_extended.return_value = True
+        mock_rule.rule_type.return_value = ruletype
+        mock_rule.source_type.return_value = source
+        mock_rule.target_type.return_value = target
+        mock_rule.object_class.return_value = tclass
+        mock_rule.xperm_type.return_value = xperm
+        mock_rule.xperm_iter = lambda x: iter(perms)
+
+        # this actually comes out of condexpr_factory
+        # but it's simpler to have here
+        mock_rule.cond.side_effect = AttributeError
+
+        return te_rule_factory(self.p, mock_rule)
+
+    def setUp(self):
+        self.p = Mock(qpol_policy_t)
+
+    def test_000_factory(self):
+        """AVRuleXperm factory lookup."""
+        with self.assertRaises(TypeError):
+            te_rule_factory(self.p, "INVALID")
+
+    def test_001_validate_ruletype(self):
+        """AVRuleXperm valid rule types."""
+        for r in ["allowxperm", "neverallowxperm", "auditallowxperm", "dontauditxperm"]:
+            self.assertEqual(r, validate_ruletype(r))
+
+    def test_010_ruletype(self):
+        """AVRuleXperm rule type"""
+        rule = self.mock_avrule_factory("neverallowxperm", "a", "b", "c", "d", [0x0001])
+        self.assertEqual("neverallowxperm", rule.ruletype)
+
+    def test_020_source_type(self):
+        """AVRuleXperm source type"""
+        rule = self.mock_avrule_factory("allowxperm", "source20", "b", "c", "d", [0x0001])
+        self.assertEqual("source20", rule.source)
+
+    def test_030_target_type(self):
+        """AVRuleXperm target type"""
+        rule = self.mock_avrule_factory("allowxperm", "a", "target30", "c", "d", [0x0001])
+        self.assertEqual("target30", rule.target)
+
+    def test_040_object_class(self):
+        """AVRuleXperm object class"""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "class40", "d", [0x0001])
+        self.assertEqual("class40", rule.tclass)
+
+    def test_050_permissions(self):
+        """AVRuleXperm permissions"""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d", [0x0001, 0x0002, 0x0003])
+        self.assertSetEqual(set([0x0001, 0x0002, 0x0003]), rule.perms)
+
+    def test_060_xperm_type(self):
+        """AVRuleXperm xperm type"""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "xperm60", [0x0001])
+        self.assertEqual("xperm60", rule.xperm_type)
+
+    def test_070_unconditional(self):
+        """AVRuleXperm conditional expression (none)"""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d", [0x0001])
+        with self.assertRaises(RuleNotConditional):
+            rule.conditional
+
+    def test_080_default(self):
+        """AVRuleXperm default type"""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d", [0x0001])
+        with self.assertRaises(RuleUseError):
+            rule.default
+
+    def test_090_filename(self):
+        """AVRuleXperm filename (none)"""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d", [0x0001])
+        with self.assertRaises(RuleUseError):
+            rule.filename
+
+    def test_100_statement_one_perm(self):
+        """AVRuleXperm statement, one permission."""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d", [0x0001])
+        self.assertEqual("allowxperm a b:c d 0x0001;", rule.statement())
+
+    def test_101_statement_two_perms(self):
+        """AVRuleXperm statement, two permissions."""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d", [0x0001, 0x0003])
+        self.assertEqual(rule.statement(), "allowxperm a b:c d { 0x0001 0x0003 };")
+
+    def test_102_statement_range_perms(self):
+        """AVRuleXperm statement, range of permissions."""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d",
+                                        list(range(0x0010, 0x0015)))
+        self.assertEqual(rule.statement(), "allowxperm a b:c d 0x0010-0x0014;")
+
+    def test_103_statement_single_perm_range_perms(self):
+        """AVRuleXperm statement, single perm with range of permissions."""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d",
+                                        [0x0001, 0x0003, 0x0004, 0x0005])
+        self.assertEqual(rule.statement(), "allowxperm a b:c d { 0x0001 0x0003-0x0005 };")
+
+    def test_104_statement_two_range_perms(self):
+        """AVRuleXperm statement, two ranges of permissions."""
+        rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d",
+                                        [0x0003, 0x0004, 0x0005, 0x0007, 0x0008, 0x0009])
+        self.assertEqual(rule.statement(), "allowxperm a b:c d { 0x0003-0x0005 0x0007-0x0009 };")
 
 
 @patch('setools.policyrep.boolcond.condexpr_factory', lambda x, y: y)

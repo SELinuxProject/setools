@@ -71,6 +71,7 @@ from . import xencontext
 # Classes useful for policyrep users:
 from . import exception
 from .netcontext import PortconProtocol, port_range
+from .terule import ioctlSet
 
 
 class SELinuxPolicy(object):

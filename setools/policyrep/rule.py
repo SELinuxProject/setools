@@ -25,6 +25,8 @@ class PolicyRule(symbol.PolicySymbol):
 
     """This is base class for policy rules."""
 
+    extended = False
+
     def __str__(self):
         raise NotImplementedError
 

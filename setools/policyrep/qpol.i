@@ -2680,10 +2680,10 @@ typedef struct qpol_avrule {} qpol_avrule_t;
             case QPOL_RULE_NEVERALLOW: return "neverallow"; break;
             case QPOL_RULE_AUDITALLOW: return "auditallow"; break;
             case QPOL_RULE_DONTAUDIT: return "dontaudit"; break;
-            case QPOL_RULE_XPERMS_ALLOW: return "allowx"; break;
-            case QPOL_RULE_XPERMS_NEVERALLOW: return "neverallowx"; break;
-            case QPOL_RULE_XPERMS_AUDITALLOW: return "auditallowx"; break;
-            case QPOL_RULE_XPERMS_DONTAUDIT: return "dontauditx"; break;
+            case QPOL_RULE_XPERMS_ALLOW: return "allowxperm"; break;
+            case QPOL_RULE_XPERMS_NEVERALLOW: return "neverallowxperm"; break;
+            case QPOL_RULE_XPERMS_AUDITALLOW: return "auditallowxperm"; break;
+            case QPOL_RULE_XPERMS_DONTAUDIT: return "dontauditxperm"; break;
         }
     fail:
         return NULL;

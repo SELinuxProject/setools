@@ -29,7 +29,10 @@ def te_rule_factory(policy, symbol):
     """Factory function for creating TE rule objects."""
 
     if isinstance(symbol, qpol.qpol_avrule_t):
-        return AVRule(policy, symbol)
+        if symbol.is_extended(policy):
+            return AVRuleXperm(policy, symbol)
+        else:
+            return AVRule(policy, symbol)
     elif isinstance(symbol, (qpol.qpol_terule_t, qpol.qpol_filename_trans_t)):
         return TERule(policy, symbol)
     else:
@@ -47,9 +50,11 @@ def expanded_te_rule_factory(original, source, target):
 
     if isinstance(original, AVRule):
         rule = ExpandedAVRule(original.policy, original.qpol_symbol)
+    elif isinstance(original, AVRuleXperm):
+        rule = ExpandedAVRuleXperm(original.policy, original.qpol_symbol)
     elif isinstance(original, TERule):
         rule = ExpandedTERule(original.policy, original.qpol_symbol)
-    elif isinstance(original, (ExpandedAVRule, ExpandedTERule)):
+    elif isinstance(original, (ExpandedAVRule, ExpandedAVRuleXperm, ExpandedTERule)):
         return original
     else:
         raise TypeError("The original rule must be a TE rule class.")
@@ -64,7 +69,7 @@ def validate_ruletype(t):
     """Validate TE Rule types."""
     if t not in ["allow", "auditallow", "dontaudit", "neverallow",
                  "type_transition", "type_member", "type_change",
-                 "allowx", "auditallowx", "dontauditx", "neverallowx"]:
+                 "allowxperm", "auditallowxperm", "dontauditxperm", "neverallowxperm"]:
         raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
 
     return t
@@ -120,78 +125,25 @@ class AVRule(BaseTERule):
         except AttributeError:
             self._rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
 
-            if not self.qpol_symbol.is_extended(self.policy):
-                # allow/dontaudit/auditallow/neverallow rules
-                perms = self.perms
-                if len(perms) > 1:
-                    self._rule_string += "{{ {0} }};".format(' '.join(perms))
-                else:
-                    # convert to list since sets cannot be indexed
-                    self._rule_string += "{0};".format(list(perms)[0])
-
-                try:
-                    self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-                except exception.RuleNotConditional:
-                    pass
+            # allow/dontaudit/auditallow/neverallow rules
+            perms = self.perms
+            if len(perms) > 1:
+                self._rule_string += "{{ {0} }};".format(' '.join(perms))
             else:
-                # extended avrules
-                xperms = self.xperms
-                if len(xperms) > 1:
-                    self._rule_string += "{0} {{{1} }};".format(self.xperm_type, self.xperms_as_string)
-                else:
-                    self._rule_string += "{0} {1};".format(self.xperm_type, self.xperms_as_string)
+                # convert to list since sets cannot be indexed
+                self._rule_string += "{0};".format(list(perms)[0])
+
+            try:
+                self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+            except exception.RuleNotConditional:
+                pass
 
         return self._rule_string
 
     @property
     def perms(self):
         """The rule's permission set."""
-        if self.qpol_symbol.is_extended(self.policy):
-            raise exception.RuleUseError("{0} rules do not have permissions.".format(self.ruletype))
         return set(self.qpol_symbol.perm_iter(self.policy))
-
-    @property
-    def xperms_as_string(self):
-        """The rules extended permissions as a pretty string"""
-        if not self.qpol_symbol.is_extended(self.policy):
-            raise exception.RuleUseError("{0} rules do not have extended permissions.".format(self.ruletype))
-
-        def create_range_string(start, end):
-            if start == end:
-                return " 0x{0:04X}".format(start)
-            else:
-                return " 0x{0:04X}-0x{1:04X}".format(start, end)
-
-        xperms_str = ""
-        xperms = self.qpol_symbol.xperm_iter(self.policy)
-        range_start = xperms.next()
-        range_end = range_start
-
-        for xperm in xperms:
-            if xperm == range_end + 1:
-                range_end = xperm
-            else:
-                xperms_str += create_range_string(range_start, range_end)
-                range_start = xperm
-                range_end = xperm
-
-        xperms_str += create_range_string(range_start, range_end)
-
-        return xperms_str
-
-    @property
-    def xperms(self):
-        """The rules extended permissions."""
-        if not self.qpol_symbol.is_extended(self.policy):
-            raise exception.RuleUseError("{0} rules do not have extended permissions.".format(self.ruletype))
-        return set(self.qpol_symbol.xperm_iter(self.policy))
-
-    @property
-    def xperm_type(self):
-        """The type of an extended permission."""
-        if not self.qpol_symbol.is_extended(self.policy):
-            raise exception.RuleUseError("{0} rules do not have extended permissions.".format(self.ruletype))
-        return self.qpol_symbol.xperm_type(self.policy)
 
     @property
     def default(self):
@@ -201,6 +153,72 @@ class AVRule(BaseTERule):
     @property
     def filename(self):
         raise exception.RuleUseError("{0} rules do not have file names".format(self.ruletype))
+
+
+class ioctlSet(set):
+
+    """
+    A set with an overridden str function which compresses
+    the output into ioctl ranges.
+    """
+
+    def __str__(self):
+        # generate short permission notation
+        perms = sorted(self)
+        shortlist = []
+        for _, i in itertools.groupby(perms, key=lambda k, c=itertools.count(): k - next(c)):
+            group = list(i)
+            if len(group) > 1:
+                shortlist.append("0x{0:04x}-0x{1:04x}".format(group[0], group[-1]))
+            else:
+                shortlist.append("0x{0:04x}".format(group[0]))
+
+        return " ".join(shortlist)
+
+    def __repr__(self):
+        return "{{ {0} }}".format(self)
+
+    def ranges(self):
+        """
+        Return the number of ranges in the set.  Main use
+        is to determine if brackets need to be used in
+        string output.
+        """
+        return sum(1 for (_a, _b) in itertools.groupby(
+            sorted(self), key=lambda k, c=itertools.count(): k - next(c)))
+
+
+class AVRuleXperm(AVRule):
+
+    """An extended permission access vector type enforcement rule."""
+
+    extended = True
+
+    def __str__(self):
+        try:
+            return self._rule_string
+        except AttributeError:
+            self._rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} ". \
+                                format(self)
+
+            # generate short permission notation
+            perms = self.perms
+            if perms.ranges() > 1:
+                self._rule_string += "{{ {0} }};".format(perms)
+            else:
+                self._rule_string += "{0};".format(perms)
+
+        return self._rule_string
+
+    @property
+    def perms(self):
+        """The rule's extended permission set."""
+        return ioctlSet(self.qpol_symbol.xperm_iter(self.policy))
+
+    @property
+    def xperm_type(self):
+        """The standard permission extended by these permissions (e.g. ioctl)."""
+        return self.qpol_symbol.xperm_type(self.policy)
 
 
 class TERule(BaseTERule):
@@ -270,6 +288,15 @@ class TERule(BaseTERule):
 class ExpandedAVRule(AVRule):
 
     """An expanded access vector type enforcement rule."""
+
+    source = None
+    target = None
+    origin = None
+
+
+class ExpandedAVRuleXperm(AVRuleXperm):
+
+    """An expanded extended permission access vector type enforcement rule."""
 
     source = None
     target = None
