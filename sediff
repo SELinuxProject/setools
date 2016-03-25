@@ -51,10 +51,18 @@ comp.add_argument("--category", action="store_true", help="Print MLS category di
 comp.add_argument("--level", action="store_true", help="Print MLS level definition differences")
 
 terule = parser.add_argument_group("type enforcement rule differences")
-terule.add_argument("-A", "--allow", action="store_true", help="Print allow rule differences")
+terule.add_argument("-A", action="store_true", help="Print allow and allowxperm rule differences")
+terule.add_argument("--allow", action="store_true", help="Print allow rule differences")
 terule.add_argument("--neverallow", action="store_true", help="Print neverallow rule differences")
 terule.add_argument("--auditallow", action="store_true", help="Print auditallow rule differences")
 terule.add_argument("--dontaudit", action="store_true", help="Print dontaudit rule differences")
+terule.add_argument("--allowxperm", action="store_true", help="Print allowxperm rule differences")
+terule.add_argument("--neverallowxperm", action="store_true",
+                    help="Print neverallowxperm rule differences")
+terule.add_argument("--auditallowxperm", action="store_true",
+                    help="Print auditallowxperm rule differences")
+terule.add_argument("--dontauditxperm", action="store_true",
+                    help="Print dontauditxperm rule differences")
 terule.add_argument("-T", "--type_trans", action="store_true",
                     help="Print type_transition rule differences")
 terule.add_argument("--type_change", action="store_true", help="Print type_change rule differences")
@@ -95,6 +103,10 @@ other.add_argument("--typebounds", action="store_true", help="Print typebounds d
 
 args = parser.parse_args()
 
+if args.A:
+    args.allow = True
+    args.allowxperm = True
+
 all_differences = not any((args.class_, args.common, args.type_, args.attribute, args.role,
                            args.user, args.bool_, args.sensitivity, args.category, args.level,
                            args.allow, args.neverallow, args.auditallow, args.dontaudit,
@@ -102,7 +114,9 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.role_trans, args.range_trans, args.initialsid, args.genfscon,
                            args.netifcon, args.nodecon, args.portcon, args.fs_use, args.polcap,
                            args.property, args.default, args.constrain, args.mlsconstrain,
-                           args.validatetrans, args.mlsvalidatetrans, args.typebounds))
+                           args.validatetrans, args.mlsvalidatetrans, args.typebounds,
+                           args.allowxperm, args.neverallowxperm, args.auditallowxperm,
+                           args.dontauditxperm))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -486,6 +500,62 @@ try:
 
             print()
 
+    if all_differences or args.allowxperm:
+        if diff.added_allowxperms or diff.removed_allowxperms or diff.modified_allowxperms \
+                or args.allowxperm:
+
+            print("Allowxperm Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_allowxperms), len(diff.removed_allowxperms),
+                len(diff.modified_allowxperms)))
+
+            if diff.added_allowxperms and not args.stats:
+                print("   Added Allowxperm Rules: {0}".format(len(diff.added_allowxperms)))
+                for r in sorted(diff.added_allowxperms):
+                    print("      + {0}".format(r))
+
+            if diff.removed_allowxperms and not args.stats:
+                print("   Removed Allowxperm Rules: {0}".format(len(diff.removed_allowxperms)))
+                for r in sorted(diff.removed_allowxperms):
+                    print("      - {0}".format(r))
+
+            if diff.modified_allowxperms and not args.stats:
+                print("   Modified Allowxperm Rules: {0}".format(len(diff.modified_allowxperms)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(
+                        diff.modified_allowxperms, key=lambda x: x.rule):
+
+                    # Process the string representation of the sets
+                    # so hex representation and ranges are preserved.
+                    # Check if the perm sets have contents, otherwise
+                    # split on empty string will be an empty string.
+                    # Add brackets to added and removed permissions
+                    # in case there is a range of permissions.
+                    perms = []
+                    if matched_perms:
+                        for p in str(matched_perms).split(" "):
+                            perms.append(p)
+                    if added_perms:
+                        for p in str(added_perms).split(" "):
+                            if '-' in p:
+                                perms.append("+[{0}]".format(p))
+                            else:
+                                perms.append("+{0}".format(p))
+                    if removed_perms:
+                        for p in str(removed_perms).split(" "):
+                            if '-' in p:
+                                perms.append("-[{0}]".format(p))
+                            else:
+                                perms.append("-{0}".format(p))
+
+                    rule_string = \
+                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
+                        format(rule, perms)
+
+                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
+                          "{{ {1} }};".format(rule, " ".join(perms)))
+
+            print()
+
     if all_differences or args.neverallow:
         if diff.added_neverallows or diff.removed_neverallows or diff.modified_neverallows or \
                 args.neverallow:
@@ -519,6 +589,65 @@ try:
                     except AttributeError:
                         pass
                     print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.neverallowxperm:
+        if diff.added_neverallowxperms or diff.removed_neverallowxperms or \
+                diff.modified_neverallowxperms or args.neverallowxperm:
+
+            print("Neverallowxperm Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_neverallowxperms), len(diff.removed_neverallowxperms),
+                len(diff.modified_neverallowxperms)))
+
+            if diff.added_neverallowxperms and not args.stats:
+                print("   Added Neverallowxperm Rules: {0}".format(
+                      len(diff.added_neverallowxperms)))
+                for r in sorted(diff.added_neverallowxperms):
+                    print("      + {0}".format(r))
+
+            if diff.removed_neverallowxperms and not args.stats:
+                print("   Removed Neverallowxperm Rules: {0}".format(
+                      len(diff.removed_neverallowxperms)))
+                for r in sorted(diff.removed_neverallowxperms):
+                    print("      - {0}".format(r))
+
+            if diff.modified_neverallowxperms and not args.stats:
+                print("   Modified Neverallowxperm Rules: {0}".format(
+                      len(diff.modified_neverallowxperms)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(
+                        diff.modified_neverallowxperms, key=lambda x: x.rule):
+
+                    # Process the string representation of the sets
+                    # so hex representation and ranges are preserved.
+                    # Check if the perm sets have contents, otherwise
+                    # split on empty string will be an empty string.
+                    # Add brackets to added and removed permissions
+                    # in case there is a range of permissions.
+                    perms = []
+                    if matched_perms:
+                        for p in str(matched_perms).split(" "):
+                            perms.append(p)
+                    if added_perms:
+                        for p in str(added_perms).split(" "):
+                            if '-' in p:
+                                perms.append("+[{0}]".format(p))
+                            else:
+                                perms.append("+{0}".format(p))
+                    if removed_perms:
+                        for p in str(removed_perms).split(" "):
+                            if '-' in p:
+                                perms.append("-[{0}]".format(p))
+                            else:
+                                perms.append("-{0}".format(p))
+
+                    rule_string = \
+                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
+                        format(rule, perms)
+
+                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
+                          "{{ {1} }};".format(rule, " ".join(perms)))
 
             print()
 
@@ -558,6 +687,65 @@ try:
 
             print()
 
+    if all_differences or args.auditallowxperm:
+        if diff.added_auditallowxperms or diff.removed_auditallowxperms or \
+                diff.modified_auditallowxperms or args.auditallowxperm:
+
+            print("Auditallowxperm Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_auditallowxperms), len(diff.removed_auditallowxperms),
+                len(diff.modified_auditallowxperms)))
+
+            if diff.added_auditallowxperms and not args.stats:
+                print("   Added Auditallowxperm Rules: {0}".format(
+                      len(diff.added_auditallowxperms)))
+                for r in sorted(diff.added_auditallowxperms):
+                    print("      + {0}".format(r))
+
+            if diff.removed_auditallowxperms and not args.stats:
+                print("   Removed Auditallowxperm Rules: {0}".format(
+                      len(diff.removed_auditallowxperms)))
+                for r in sorted(diff.removed_auditallowxperms):
+                    print("      - {0}".format(r))
+
+            if diff.modified_auditallowxperms and not args.stats:
+                print("   Modified Auditallowxperm Rules: {0}".format(
+                      len(diff.modified_auditallowxperms)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(
+                        diff.modified_auditallowxperms, key=lambda x: x.rule):
+
+                    # Process the string representation of the sets
+                    # so hex representation and ranges are preserved.
+                    # Check if the perm sets have contents, otherwise
+                    # split on empty string will be an empty string.
+                    # Add brackets to added and removed permissions
+                    # in case there is a range of permissions.
+                    perms = []
+                    if matched_perms:
+                        for p in str(matched_perms).split(" "):
+                            perms.append(p)
+                    if added_perms:
+                        for p in str(added_perms).split(" "):
+                            if '-' in p:
+                                perms.append("+[{0}]".format(p))
+                            else:
+                                perms.append("+{0}".format(p))
+                    if removed_perms:
+                        for p in str(removed_perms).split(" "):
+                            if '-' in p:
+                                perms.append("-[{0}]".format(p))
+                            else:
+                                perms.append("-{0}".format(p))
+
+                    rule_string = \
+                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
+                        format(rule, perms)
+
+                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
+                          "{{ {1} }};".format(rule, " ".join(perms)))
+
+            print()
+
     if all_differences or args.dontaudit:
         if diff.added_dontaudits or diff.removed_dontaudits or diff.modified_dontaudits or \
                 args.dontaudit:
@@ -591,6 +779,65 @@ try:
                     except AttributeError:
                         pass
                     print("      * {0}".format(rule_string))
+
+            print()
+
+    if all_differences or args.dontauditxperm:
+        if diff.added_dontauditxperms or diff.removed_dontauditxperms or \
+                diff.modified_dontauditxperms or args.dontauditxperm:
+
+            print("Dontauditxperm Rules ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_dontauditxperms), len(diff.removed_dontauditxperms),
+                len(diff.modified_dontauditxperms)))
+
+            if diff.added_dontauditxperms and not args.stats:
+                print("   Added Dontauditxperm Rules: {0}".format(
+                      len(diff.added_dontauditxperms)))
+                for r in sorted(diff.added_dontauditxperms):
+                    print("      + {0}".format(r))
+
+            if diff.removed_dontauditxperms and not args.stats:
+                print("   Removed Dontauditxperm Rules: {0}".format(
+                      len(diff.removed_dontauditxperms)))
+                for r in sorted(diff.removed_dontauditxperms):
+                    print("      - {0}".format(r))
+
+            if diff.modified_dontauditxperms and not args.stats:
+                print("   Modified Dontauditxperm Rules: {0}".format(
+                      len(diff.modified_dontauditxperms)))
+
+                for rule, added_perms, removed_perms, matched_perms in sorted(
+                        diff.modified_dontauditxperms, key=lambda x: x.rule):
+
+                    # Process the string representation of the sets
+                    # so hex representation and ranges are preserved.
+                    # Check if the perm sets have contents, otherwise
+                    # split on empty string will be an empty string.
+                    # Add brackets to added and removed permissions
+                    # in case there is a range of permissions.
+                    perms = []
+                    if matched_perms:
+                        for p in str(matched_perms).split(" "):
+                            perms.append(p)
+                    if added_perms:
+                        for p in str(added_perms).split(" "):
+                            if '-' in p:
+                                perms.append("+[{0}]".format(p))
+                            else:
+                                perms.append("+{0}".format(p))
+                    if removed_perms:
+                        for p in str(removed_perms).split(" "):
+                            if '-' in p:
+                                perms.append("-[{0}]".format(p))
+                            else:
+                                perms.append("-{0}".format(p))
+
+                    rule_string = \
+                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
+                        format(rule, perms)
+
+                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
+                          "{{ {1} }};".format(rule, " ".join(perms)))
 
             print()
 
