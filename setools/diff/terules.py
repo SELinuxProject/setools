@@ -18,6 +18,7 @@
 #
 from collections import namedtuple
 
+from ..policyrep import ioctlSet
 from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 
 from .conditional import ConditionalExprWrapper
@@ -56,6 +57,22 @@ class TERulesDifference(Difference):
     removed_dontaudits = DiffResultDescriptor("diff_dontaudits")
     modified_dontaudits = DiffResultDescriptor("diff_dontaudits")
 
+    added_allowxperms = DiffResultDescriptor("diff_allowxperms")
+    removed_allowxperms = DiffResultDescriptor("diff_allowxperms")
+    modified_allowxperms = DiffResultDescriptor("diff_allowxperms")
+
+    added_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
+    removed_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
+    modified_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
+
+    added_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
+    removed_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
+    modified_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
+
+    added_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
+    removed_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
+    modified_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
+
     added_type_transitions = DiffResultDescriptor("diff_type_transitions")
     removed_type_transitions = DiffResultDescriptor("diff_type_transitions")
     modified_type_transitions = DiffResultDescriptor("diff_type_transitions")
@@ -80,6 +97,18 @@ class TERulesDifference(Difference):
 
     _left_dontaudits = None
     _right_dontaudits = None
+
+    _left_allowxperms = None
+    _right_allowxperms = None
+
+    _left_auditallowxperms = None
+    _right_auditallowxperms = None
+
+    _left_neverallowxperms = None
+    _right_neverallowxperms = None
+
+    _left_dontauditxperms = None
+    _right_dontauditxperms = None
 
     _left_type_transitions = None
     _right_type_transitions = None
@@ -151,6 +180,70 @@ class TERulesDifference(Difference):
                 self._expand_generator(self._left_dontaudits, AVRuleWrapper),
                 self._expand_generator(self._right_dontaudits, AVRuleWrapper))
 
+    def diff_allowxperms(self):
+        """Generate the difference in allowxperm rules between the policies."""
+
+        self.log.info(
+            "Generating allowxperm differences from {0.left_policy} to {0.right_policy}".
+            format(self))
+
+        if self._left_allowxperms is None or self._right_allowxperms is None:
+            self._create_te_rule_lists()
+
+        self.added_allowxperms, \
+            self.removed_allowxperms, \
+            self.modified_allowxperms = self._diff_avx_rules(
+                self._expand_generator(self._left_allowxperms, AVRuleXpermWrapper),
+                self._expand_generator(self._right_allowxperms, AVRuleXpermWrapper))
+
+    def diff_auditallowxperms(self):
+        """Generate the difference in auditallowxperm rules between the policies."""
+
+        self.log.info(
+            "Generating auditallowxperm differences from {0.left_policy} to {0.right_policy}".
+            format(self))
+
+        if self._left_auditallowxperms is None or self._right_auditallowxperms is None:
+            self._create_te_rule_lists()
+
+        self.added_auditallowxperms, \
+            self.removed_auditallowxperms, \
+            self.modified_auditallowxperms = self._diff_avx_rules(
+                self._expand_generator(self._left_auditallowxperms, AVRuleXpermWrapper),
+                self._expand_generator(self._right_auditallowxperms, AVRuleXpermWrapper))
+
+    def diff_neverallowxperms(self):
+        """Generate the difference in neverallowxperm rules between the policies."""
+
+        self.log.info(
+            "Generating neverallowxperm differences from {0.left_policy} to {0.right_policy}".
+            format(self))
+
+        if self._left_neverallowxperms is None or self._right_neverallowxperms is None:
+            self._create_te_rule_lists()
+
+        self.added_neverallowxperms, \
+            self.removed_neverallowxperms, \
+            self.modified_neverallowxperms = self._diff_avx_rules(
+                self._expand_generator(self._left_neverallowxperms, AVRuleXpermWrapper),
+                self._expand_generator(self._right_neverallowxperms, AVRuleXpermWrapper))
+
+    def diff_dontauditxperms(self):
+        """Generate the difference in dontauditxperm rules between the policies."""
+
+        self.log.info(
+            "Generating dontauditxperm differences from {0.left_policy} to {0.right_policy}".
+            format(self))
+
+        if self._left_dontauditxperms is None or self._right_dontauditxperms is None:
+            self._create_te_rule_lists()
+
+        self.added_dontauditxperms, \
+            self.removed_dontauditxperms, \
+            self.modified_dontauditxperms = self._diff_avx_rules(
+                self._expand_generator(self._left_dontauditxperms, AVRuleXpermWrapper),
+                self._expand_generator(self._right_dontauditxperms, AVRuleXpermWrapper))
+
     def diff_type_transitions(self):
         """Generate the difference in type_transition rules between the policies."""
 
@@ -209,6 +302,10 @@ class TERulesDifference(Difference):
         self._left_auditallows = []
         self._left_neverallows = []
         self._left_dontaudits = []
+        self._left_allowxperms = []
+        self._left_auditallowxperms = []
+        self._left_neverallowxperms = []
+        self._left_dontauditxperms = []
         self._left_type_transitions = []
         self._left_type_changes = []
         self._left_type_members = []
@@ -223,6 +320,14 @@ class TERulesDifference(Difference):
                 self._left_neverallows.append(rule)
             elif rule.ruletype == "dontaudit":
                 self._left_dontaudits.append(rule)
+            elif rule.ruletype == "allowxperm":
+                self._left_allowxperms.append(rule)
+            elif rule.ruletype == "auditallowxperm":
+                self._left_auditallowxperms.append(rule)
+            elif rule.ruletype == "neverallowxperm":
+                self._left_neverallowxperms.append(rule)
+            elif rule.ruletype == "dontauditxperm":
+                self._left_dontauditxperms.append(rule)
             elif rule.ruletype == "type_transition":
                 self._left_type_transitions.append(rule)
             elif rule.ruletype == "type_change":
@@ -237,6 +342,10 @@ class TERulesDifference(Difference):
         self._right_auditallows = []
         self._right_neverallows = []
         self._right_dontaudits = []
+        self._right_allowxperms = []
+        self._right_auditallowxperms = []
+        self._right_neverallowxperms = []
+        self._right_dontauditxperms = []
         self._right_type_transitions = []
         self._right_type_changes = []
         self._right_type_members = []
@@ -251,6 +360,14 @@ class TERulesDifference(Difference):
                 self._right_neverallows.append(rule)
             elif rule.ruletype == "dontaudit":
                 self._right_dontaudits.append(rule)
+            elif rule.ruletype == "allowxperm":
+                self._right_allowxperms.append(rule)
+            elif rule.ruletype == "auditallowxperm":
+                self._right_auditallowxperms.append(rule)
+            elif rule.ruletype == "neverallowxperm":
+                self._right_neverallowxperms.append(rule)
+            elif rule.ruletype == "dontauditxperm":
+                self._right_dontauditxperms.append(rule)
             elif rule.ruletype == "type_transition":
                 self._right_type_transitions.append(rule)
             elif rule.ruletype == "type_change":
@@ -281,6 +398,29 @@ class TERulesDifference(Difference):
                                                        added_perms,
                                                        removed_perms,
                                                        set(p[0] for p in matched_perms)))
+
+        return added, removed, modified
+
+    def _diff_avx_rules(self, left_list, right_list):
+        """Common method for comparing extended permission access vector rules."""
+        added, removed, matched = self._set_diff(left_list, right_list)
+
+        modified = []
+
+        for left_rule, right_rule in matched:
+            # Criteria for modified rules
+            # 1. change to permissions
+            added_perms, removed_perms, matched_perms = self._set_diff(left_rule.perms,
+                                                                       right_rule.perms)
+
+            # the final set comprehension is to avoid having lists
+            # like [("perm1", "perm1"), ("perm2", "perm2")], as the
+            # matched_perms return from _set_diff is a set of tuples
+            if added_perms or removed_perms:
+                modified.append(modified_avrule_record(left_rule,
+                                                       ioctlSet(added_perms),
+                                                       ioctlSet(removed_perms),
+                                                       ioctlSet(p[0] for p in matched_perms)))
 
         return added, removed, modified
 
@@ -315,6 +455,18 @@ class TERulesDifference(Difference):
         self.added_dontaudits = None
         self.removed_dontaudits = None
         self.modified_dontaudits = None
+        self.added_allowxperms = None
+        self.removed_allowxperms = None
+        self.modified_allowxperms = None
+        self.added_auditallowxperms = None
+        self.removed_auditallowxperms = None
+        self.modified_auditallowxperms = None
+        self.added_neverallowxperms = None
+        self.removed_neverallowxperms = None
+        self.modified_neverallowxperms = None
+        self.added_dontauditxperms = None
+        self.removed_dontauditxperms = None
+        self.modified_dontauditxperms = None
         self.added_type_transitions = None
         self.removed_type_transitions = None
         self.modified_type_transitions = None
@@ -334,6 +486,14 @@ class TERulesDifference(Difference):
         self._right_neverallows = None
         self._left_dontaudits = None
         self._right_dontaudits = None
+        self._left_allowxperms = None
+        self._right_allowxperms = None
+        self._left_auditallowxperms = None
+        self._right_auditallowxperms = None
+        self._left_neverallowxperms = None
+        self._right_neverallowxperms = None
+        self._left_dontauditxperms = None
+        self._right_dontauditxperms = None
         self._left_type_transitions = None
         self._right_type_transitions = None
         self._left_type_changes = None
@@ -375,6 +535,34 @@ class AVRuleWrapper(Wrapper):
                self.tclass == other.tclass and \
                self.conditional == other.conditional and \
                self.conditional_block == other.conditional_block
+
+
+class AVRuleXpermWrapper(Wrapper):
+
+    """Wrap extended permission access vector rules to allow set operations."""
+
+    def __init__(self, rule):
+        self.origin = rule
+        self.ruletype = rule.ruletype
+        self.source = SymbolWrapper(rule.source)
+        self.target = SymbolWrapper(rule.target)
+        self.tclass = SymbolWrapper(rule.tclass)
+        self.xperm_type = rule.xperm_type
+        self.key = hash(rule)
+
+    def __hash__(self):
+        return self.key
+
+    def __lt__(self, other):
+        return self.key < other.key
+
+    def __eq__(self, other):
+        # because TERuleDifference groups rules by ruletype,
+        # the ruletype always matches.
+        return self.source == other.source and \
+               self.target == other.target and \
+               self.tclass == other.tclass and \
+               self.xperm_type == other.xperm_type
 
 
 class TERuleWrapper(Wrapper):

@@ -1555,6 +1555,262 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("mod_parent_added", added_bound)
         self.assertEqual("mod_parent_removed", removed_bound)
 
+    #
+    # Allowxperm rules
+    #
+    def test_added_allowxperm_rules(self):
+        """Diff: added allowxperm rules."""
+        rules = sorted(self.diff.added_allowxperms)
+        self.assertEqual(2, len(rules))
+
+        # added rule with new type
+        self.validate_rule(rules[0], "allowxperm", "added_type", "added_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+        # added rule with existing types
+        self.validate_rule(rules[1], "allowxperm", "ax_added_rule_source", "ax_added_rule_target",
+                           "infoflow", set([0x0002]), xperm="ioctl")
+
+    def test_removed_allowxperm_rules(self):
+        """Diff: removed allowxperm rules."""
+        rules = sorted(self.diff.removed_allowxperms)
+        self.assertEqual(2, len(rules))
+
+        # removed rule with existing types
+        self.validate_rule(rules[0], "allowxperm", "ax_removed_rule_source",
+                           "ax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+
+        # removed rule with new type
+        self.validate_rule(rules[1], "allowxperm", "removed_type", "removed_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+    def test_modified_allowxperm_rules(self):
+        """Diff: modified allowxperm rules."""
+        l = sorted(self.diff.modified_allowxperms, key=lambda x: x.rule)
+        self.assertEqual(3, len(l))
+
+        # add permissions
+        rule, added_perms, removed_perms, matched_perms = l[0]
+        self.assertEqual("allowxperm", rule.ruletype)
+        self.assertEqual("ax_modified_rule_add_perms", rule.source)
+        self.assertEqual("ax_modified_rule_add_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertSetEqual(set([0x000f]), added_perms)
+        self.assertFalse(removed_perms)
+        self.assertSetEqual(set([0x0004]), matched_perms)
+
+        # add and remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[1]
+        self.assertEqual("allowxperm", rule.ruletype)
+        self.assertEqual("ax_modified_rule_add_remove_perms", rule.source)
+        self.assertEqual("ax_modified_rule_add_remove_perms", rule.target)
+        self.assertEqual("infoflow2", rule.tclass)
+        self.assertSetEqual(set([0x0006]), added_perms)
+        self.assertSetEqual(set([0x0007]), removed_perms)
+        self.assertSetEqual(set([0x0008]), matched_perms)
+
+        # remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[2]
+        self.assertEqual("allowxperm", rule.ruletype)
+        self.assertEqual("ax_modified_rule_remove_perms", rule.source)
+        self.assertEqual("ax_modified_rule_remove_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertFalse(added_perms)
+        self.assertSetEqual(set([0x0006]), removed_perms)
+        self.assertSetEqual(set([0x0005]), matched_perms)
+
+    #
+    # Auditallowxperm rules
+    #
+    def test_added_auditallowxperm_rules(self):
+        """Diff: added auditallowxperm rules."""
+        rules = sorted(self.diff.added_auditallowxperms)
+        self.assertEqual(2, len(rules))
+
+        # added rule with existing types
+        self.validate_rule(rules[0], "auditallowxperm", "aax_added_rule_source",
+                           "aax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+
+        # added rule with new type
+        self.validate_rule(rules[1], "auditallowxperm", "added_type", "added_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+    def test_removed_auditallowxperm_rules(self):
+        """Diff: removed auditallowxperm rules."""
+        rules = sorted(self.diff.removed_auditallowxperms)
+        self.assertEqual(2, len(rules))
+
+        # removed rule with existing types
+        self.validate_rule(rules[0], "auditallowxperm", "aax_removed_rule_source",
+                           "aax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+
+        # removed rule with new type
+        self.validate_rule(rules[1], "auditallowxperm", "removed_type", "removed_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+    def test_modified_auditallowxperm_rules(self):
+        """Diff: modified auditallowxperm rules."""
+        l = sorted(self.diff.modified_auditallowxperms, key=lambda x: x.rule)
+        self.assertEqual(3, len(l))
+
+        # add permissions
+        rule, added_perms, removed_perms, matched_perms = l[0]
+        self.assertEqual("auditallowxperm", rule.ruletype)
+        self.assertEqual("aax_modified_rule_add_perms", rule.source)
+        self.assertEqual("aax_modified_rule_add_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertSetEqual(set([0x000f]), added_perms)
+        self.assertFalse(removed_perms)
+        self.assertSetEqual(set([0x0004]), matched_perms)
+
+        # add and remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[1]
+        self.assertEqual("auditallowxperm", rule.ruletype)
+        self.assertEqual("aax_modified_rule_add_remove_perms", rule.source)
+        self.assertEqual("aax_modified_rule_add_remove_perms", rule.target)
+        self.assertEqual("infoflow2", rule.tclass)
+        self.assertSetEqual(set([0x0006]), added_perms)
+        self.assertSetEqual(set([0x0007]), removed_perms)
+        self.assertSetEqual(set([0x0008]), matched_perms)
+
+        # remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[2]
+        self.assertEqual("auditallowxperm", rule.ruletype)
+        self.assertEqual("aax_modified_rule_remove_perms", rule.source)
+        self.assertEqual("aax_modified_rule_remove_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertFalse(added_perms)
+        self.assertSetEqual(set([0x0006]), removed_perms)
+        self.assertSetEqual(set([0x0005]), matched_perms)
+
+    #
+    # Neverallowxperm rules
+    #
+    def test_added_neverallowxperm_rules(self):
+        """Diff: added neverallowxperm rules."""
+        rules = sorted(self.diff.added_neverallowxperms)
+        self.assertEqual(2, len(rules))
+
+        # added rule with new type
+        self.validate_rule(rules[0], "neverallowxperm", "added_type", "added_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+        # added rule with existing types
+        self.validate_rule(rules[1], "neverallowxperm", "nax_added_rule_source",
+                           "nax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+
+    def test_removed_neverallowxperm_rules(self):
+        """Diff: removed neverallowxperm rules."""
+        rules = sorted(self.diff.removed_neverallowxperms)
+        self.assertEqual(2, len(rules))
+
+        # removed rule with existing types
+        self.validate_rule(rules[0], "neverallowxperm", "nax_removed_rule_source",
+                           "nax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+
+        # removed rule with new type
+        self.validate_rule(rules[1], "neverallowxperm", "removed_type", "removed_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+    def test_modified_neverallowxperm_rules(self):
+        """Diff: modified neverallowxperm rules."""
+        l = sorted(self.diff.modified_neverallowxperms, key=lambda x: x.rule)
+        self.assertEqual(3, len(l))
+
+        # add permissions
+        rule, added_perms, removed_perms, matched_perms = l[0]
+        self.assertEqual("neverallowxperm", rule.ruletype)
+        self.assertEqual("nax_modified_rule_add_perms", rule.source)
+        self.assertEqual("nax_modified_rule_add_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertSetEqual(set([0x000f]), added_perms)
+        self.assertFalse(removed_perms)
+        self.assertSetEqual(set([0x0004]), matched_perms)
+
+        # add and remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[1]
+        self.assertEqual("neverallowxperm", rule.ruletype)
+        self.assertEqual("nax_modified_rule_add_remove_perms", rule.source)
+        self.assertEqual("nax_modified_rule_add_remove_perms", rule.target)
+        self.assertEqual("infoflow2", rule.tclass)
+        self.assertSetEqual(set([0x0006]), added_perms)
+        self.assertSetEqual(set([0x0007]), removed_perms)
+        self.assertSetEqual(set([0x0008]), matched_perms)
+
+        # remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[2]
+        self.assertEqual("neverallowxperm", rule.ruletype)
+        self.assertEqual("nax_modified_rule_remove_perms", rule.source)
+        self.assertEqual("nax_modified_rule_remove_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertFalse(added_perms)
+        self.assertSetEqual(set([0x0006]), removed_perms)
+        self.assertSetEqual(set([0x0005]), matched_perms)
+
+    #
+    # Dontauditxperm rules
+    #
+    def test_added_dontauditxperm_rules(self):
+        """Diff: added dontauditxperm rules."""
+        rules = sorted(self.diff.added_dontauditxperms)
+        self.assertEqual(2, len(rules))
+
+        # added rule with new type
+        self.validate_rule(rules[0], "dontauditxperm", "added_type", "added_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+        # added rule with existing types
+        self.validate_rule(rules[1], "dontauditxperm", "dax_added_rule_source",
+                           "dax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+
+    def test_removed_dontauditxperm_rules(self):
+        """Diff: removed dontauditxperm rules."""
+        rules = sorted(self.diff.removed_dontauditxperms)
+        self.assertEqual(2, len(rules))
+
+        # removed rule with existing types
+        self.validate_rule(rules[0], "dontauditxperm", "dax_removed_rule_source",
+                           "dax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+
+        # removed rule with new type
+        self.validate_rule(rules[1], "dontauditxperm", "removed_type", "removed_type", "infoflow7",
+                           set([0x0009]), xperm="ioctl")
+
+    def test_modified_dontauditxperm_rules(self):
+        """Diff: modified dontauditxperm rules."""
+        l = sorted(self.diff.modified_dontauditxperms, key=lambda x: x.rule)
+        self.assertEqual(3, len(l))
+
+        # add permissions
+        rule, added_perms, removed_perms, matched_perms = l[0]
+        self.assertEqual("dontauditxperm", rule.ruletype)
+        self.assertEqual("dax_modified_rule_add_perms", rule.source)
+        self.assertEqual("dax_modified_rule_add_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertSetEqual(set([0x000f]), added_perms)
+        self.assertFalse(removed_perms)
+        self.assertSetEqual(set([0x0004]), matched_perms)
+
+        # add and remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[1]
+        self.assertEqual("dontauditxperm", rule.ruletype)
+        self.assertEqual("dax_modified_rule_add_remove_perms", rule.source)
+        self.assertEqual("dax_modified_rule_add_remove_perms", rule.target)
+        self.assertEqual("infoflow2", rule.tclass)
+        self.assertSetEqual(set([0x0006]), added_perms)
+        self.assertSetEqual(set([0x0007]), removed_perms)
+        self.assertSetEqual(set([0x0008]), matched_perms)
+
+        # remove permissions
+        rule, added_perms, removed_perms, matched_perms = l[2]
+        self.assertEqual("dontauditxperm", rule.ruletype)
+        self.assertEqual("dax_modified_rule_remove_perms", rule.source)
+        self.assertEqual("dax_modified_rule_remove_perms", rule.target)
+        self.assertEqual("infoflow", rule.tclass)
+        self.assertFalse(added_perms)
+        self.assertSetEqual(set([0x0006]), removed_perms)
+        self.assertSetEqual(set([0x0005]), matched_perms)
+
 
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
@@ -1944,6 +2200,54 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
     def test_modified_typebounds(self):
         """NoDiff: no modified typebounds."""
         self.assertFalse(self.diff.modified_typebounds)
+
+    def test_added_allowxperms(self):
+        """NoDiff: no added allowxperm rules."""
+        self.assertFalse(self.diff.added_allowxperms)
+
+    def test_removed_allowxperms(self):
+        """NoDiff: no removed allowxperm rules."""
+        self.assertFalse(self.diff.removed_allowxperms)
+
+    def test_modified_allowxperms(self):
+        """NoDiff: no modified allowxperm rules."""
+        self.assertFalse(self.diff.modified_allowxperms)
+
+    def test_added_auditallowxperms(self):
+        """NoDiff: no added auditallowxperm rules."""
+        self.assertFalse(self.diff.added_auditallowxperms)
+
+    def test_removed_auditallowxperms(self):
+        """NoDiff: no removed auditallowxperm rules."""
+        self.assertFalse(self.diff.removed_auditallowxperms)
+
+    def test_modified_auditallowxperms(self):
+        """NoDiff: no modified auditallowxperm rules."""
+        self.assertFalse(self.diff.modified_auditallowxperms)
+
+    def test_added_neverallowxperms(self):
+        """NoDiff: no added neverallowxperm rules."""
+        self.assertFalse(self.diff.added_neverallowxperms)
+
+    def test_removed_neverallowxperms(self):
+        """NoDiff: no removed neverallowxperm rules."""
+        self.assertFalse(self.diff.removed_neverallowxperms)
+
+    def test_modified_neverallowxperms(self):
+        """NoDiff: no modified neverallowxperm rules."""
+        self.assertFalse(self.diff.modified_neverallowxperms)
+
+    def test_added_dontauditxperms(self):
+        """NoDiff: no added dontauditxperm rules."""
+        self.assertFalse(self.diff.added_dontauditxperms)
+
+    def test_removed_dontauditxperms(self):
+        """NoDiff: no removed dontauditxperm rules."""
+        self.assertFalse(self.diff.removed_dontauditxperms)
+
+    def test_modified_dontauditxperms(self):
+        """NoDiff: no modified dontauditxperm rules."""
+        self.assertFalse(self.diff.modified_dontauditxperms)
 
 
 class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
@@ -2352,3 +2656,51 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     def test_modified_typebounds(self):
         """MLSvsStandardDiff: no modified typebounds."""
         self.assertFalse(self.diff.modified_typebounds)
+
+    def test_added_allowxperms(self):
+        """NoDiff: no added allowxperm rules."""
+        self.assertFalse(self.diff.added_allowxperms)
+
+    def test_removed_allowxperms(self):
+        """NoDiff: no removed allowxperm rules."""
+        self.assertFalse(self.diff.removed_allowxperms)
+
+    def test_modified_allowxperms(self):
+        """NoDiff: no modified allowxperm rules."""
+        self.assertFalse(self.diff.modified_allowxperms)
+
+    def test_added_auditallowxperms(self):
+        """NoDiff: no added auditallowxperm rules."""
+        self.assertFalse(self.diff.added_auditallowxperms)
+
+    def test_removed_auditallowxperms(self):
+        """NoDiff: no removed auditallowxperm rules."""
+        self.assertFalse(self.diff.removed_auditallowxperms)
+
+    def test_modified_auditallowxperms(self):
+        """NoDiff: no modified auditallowxperm rules."""
+        self.assertFalse(self.diff.modified_auditallowxperms)
+
+    def test_added_neverallowxperms(self):
+        """NoDiff: no added neverallowxperm rules."""
+        self.assertFalse(self.diff.added_neverallowxperms)
+
+    def test_removed_neverallowxperms(self):
+        """NoDiff: no removed neverallowxperm rules."""
+        self.assertFalse(self.diff.removed_neverallowxperms)
+
+    def test_modified_neverallowxperms(self):
+        """NoDiff: no modified neverallowxperm rules."""
+        self.assertFalse(self.diff.modified_neverallowxperms)
+
+    def test_added_dontauditxperms(self):
+        """NoDiff: no added dontauditxperm rules."""
+        self.assertFalse(self.diff.added_dontauditxperms)
+
+    def test_removed_dontauditxperms(self):
+        """NoDiff: no removed dontauditxperm rules."""
+        self.assertFalse(self.diff.removed_dontauditxperms)
+
+    def test_modified_dontauditxperms(self):
+        """NoDiff: no modified dontauditxperm rules."""
+        self.assertFalse(self.diff.modified_dontauditxperms)
