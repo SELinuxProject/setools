@@ -45,12 +45,12 @@ def expanded_rbac_rule_factory(original, source, target):
     target      The target type of the expanded rule.
     """
 
-    if isinstance(original, RoleAllow):
+    if isinstance(original, (ExpandedRoleAllow, ExpandedRoleTransition)):
+        return original
+    elif isinstance(original, RoleAllow):
         rule = ExpandedRoleAllow(original.policy, original.qpol_symbol)
     elif isinstance(original, RoleTransition):
         rule = ExpandedRoleTransition(original.policy, original.qpol_symbol)
-    elif isinstance(original, (ExpandedRoleAllow, ExpandedRoleTransition)):
-        return original
     else:
         raise TypeError("The original rule must be an RBAC rule class.")
 

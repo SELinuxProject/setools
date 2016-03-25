@@ -42,10 +42,10 @@ def expanded_mls_rule_factory(original, source, target):
     target      The target type of the expanded rule.
     """
 
-    if isinstance(original, MLSRule):
-        rule = ExpandedMLSRule(original.policy, original.qpol_symbol)
-    elif isinstance(original, ExpandedMLSRule):
+    if isinstance(original, ExpandedMLSRule):
         return original
+    elif isinstance(original, MLSRule):
+        rule = ExpandedMLSRule(original.policy, original.qpol_symbol)
     else:
         raise TypeError("The original rule must be a MLS rule class.")
 

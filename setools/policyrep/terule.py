@@ -48,14 +48,14 @@ def expanded_te_rule_factory(original, source, target):
     target      The target type of the expanded rule.
     """
 
-    if isinstance(original, AVRule):
-        rule = ExpandedAVRule(original.policy, original.qpol_symbol)
+    if isinstance(original, (ExpandedAVRule, ExpandedAVRuleXperm, ExpandedTERule)):
+        return original
     elif isinstance(original, AVRuleXperm):
         rule = ExpandedAVRuleXperm(original.policy, original.qpol_symbol)
+    elif isinstance(original, AVRule):
+        rule = ExpandedAVRule(original.policy, original.qpol_symbol)
     elif isinstance(original, TERule):
         rule = ExpandedTERule(original.policy, original.qpol_symbol)
-    elif isinstance(original, (ExpandedAVRule, ExpandedAVRuleXperm, ExpandedTERule)):
-        return original
     else:
         raise TypeError("The original rule must be a TE rule class.")
 
