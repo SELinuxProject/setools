@@ -24,9 +24,6 @@ from . import context
 
 addr_range = namedtuple("memory_range", ["low", "high"])
 port_range = namedtuple("port_range", ["low", "high"])
-device_id = namedtuple("device_id", ["low"])
-pirq = namedtuple("irq", ["low"])
-dev_path = namedtuple("dev_path", ["path"])
 
 
 def iomemcon_factory(policy, name):
@@ -95,7 +92,7 @@ class Iomemcon(XenContext):
     """A iomemcon statement."""
 
     def __str__(self):
-        low, high = self.mem_addr
+        low, high = self.addr
 
         if low == high:
             return "iomemcon {0} {1}".format(low, self.context)
@@ -103,7 +100,7 @@ class Iomemcon(XenContext):
             return "iomemcon {0}-{1} {2}".format(low, high, self.context)
 
     @property
-    def mem_addr(self):
+    def addr(self):
         """
         The memory range for this iomemcon.
 
@@ -148,20 +145,16 @@ class Pcidevicecon(XenContext):
     """A pcidevicecon statement."""
 
     def __str__(self):
-        device_id = self.device
-
-        return "pcidevicecon {0} {1}".format(device_id, self.context)
+        return "pcidevicecon {0.device} {0.context}".format(self)
 
     @property
     def device(self):
         """
         The device for this pcidevicecon.
 
-        Return: Tuple(low)
-        low    The PCI device ID.
+        Return: The PCI device ID.
         """
-        device_id = self.qpol_symbol.device(self.policy)
-        return device_id
+        return self.qpol_symbol.device(self.policy)
 
 
 class Pirqcon(XenContext):
@@ -169,20 +162,16 @@ class Pirqcon(XenContext):
     """A pirqcon statement."""
 
     def __str__(self):
-        pirq = self.irq
-
-        return "pirqcon {0} {1}".format(pirq, self.context)
+        return "pirqcon {0.irq} {0.context}".format(self)
 
     @property
     def irq(self):
         """
         The irq for this pirqcon.
 
-        Return: Tuple(low)
-        low     The irq.
+        Return: The irq.
         """
-        pirq = self.qpol_symbol.irq(self.policy)
-        return pirq
+        return self.qpol_symbol.irq(self.policy)
 
 
 class Devicetreecon(XenContext):
@@ -190,17 +179,13 @@ class Devicetreecon(XenContext):
     """A devicetreecon statement."""
 
     def __str__(self):
-        dev_path = self.path
-
-        return "devicetreecon {0} {1}".format(dev_path, self.context)
+        return "devicetreecon {0.path} {0.context}".format(self)
 
     @property
     def path(self):
         """
         The path for this devicetreecon.
 
-        Return: Tuple(path)
-        path    The device path name.
+        Return: The device path name.
         """
-        dev_path = self.qpol_symbol.path(self.policy)
-        return dev_path
+        return self.qpol_symbol.path(self.policy)

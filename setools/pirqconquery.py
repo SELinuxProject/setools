@@ -19,7 +19,6 @@
 import logging
 
 from . import contextquery
-from .policyrep.xencontext import pirq
 
 
 class PirqconQuery(contextquery.ContextQuery):
@@ -64,13 +63,11 @@ class PirqconQuery(contextquery.ContextQuery):
 
     @irq.setter
     def irq(self, value):
-        pending_irq = pirq(*value)
+        if value:
+            if value < 1:
+                raise ValueError("The IRQ must be positive: {0}".format(value))
 
-        if all(pending_irq):
-            if pending_irq.low < 1:
-                raise ValueError("The IRQ must be positive: {0}".format(pending_irq))
-
-            self._irq = pending_irq
+            self._irq = value
         else:
             self._irq = None
 
@@ -81,7 +78,7 @@ class PirqconQuery(contextquery.ContextQuery):
     def results(self):
         """Generator which yields all matching pirqcons."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("irq: {0.irq}".format(self))
+        self.log.debug("IRQ: {0.irq!r}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
         self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))

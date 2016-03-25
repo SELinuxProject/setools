@@ -31,15 +31,15 @@ class IomemconQuery(contextquery.ContextQuery):
     policy          The policy to query.
 
     Keyword Parameters/Class attributes:
-    mem_addr           A 2-tuple of the memory addr range to match. (Set both to
+    addr            A 2-tuple of the memory addr range to match. (Set both to
                     the same value for a single mem addr)
-    mem_addr_subset    If true, the criteria will match if it is a subset
+    addr_subset     If true, the criteria will match if it is a subset
                     of the iomemcon's range.
-    mem_addr_overlap   If true, the criteria will match if it overlaps
+    addr_overlap    If true, the criteria will match if it overlaps
                     any of the iomemcon's range.
-    mem_addr_superset  If true, the criteria will match if it is a superset
+    addr_superset   If true, the criteria will match if it is a superset
                     of the iomemcon's range.
-    mem_addr_proper    If true, use proper superset/subset operations.
+    addr_proper     If true, use proper superset/subset operations.
                     No effect if not using set operations.
 
     user            The criteria to match the context's user.
@@ -65,33 +65,33 @@ class IomemconQuery(contextquery.ContextQuery):
                     No effect if not using set operations.
     """
 
-    _mem_addr = None
-    mem_addr_subset = False
-    mem_addr_overlap = False
-    mem_addr_superset = False
-    mem_addr_proper = False
+    _addr = None
+    addr_subset = False
+    addr_overlap = False
+    addr_superset = False
+    addr_proper = False
 
     @property
-    def mem_addr(self):
-        return self._mem_addr
+    def addr(self):
+        return self._addr
 
-    @mem_addr.setter
-    def mem_addr(self, value):
-        pending_mem_addr = addr_range(*value)
+    @addr.setter
+    def addr(self, value):
+        pending_addr = addr_range(*value)
 
-        if all(pending_mem_addr):
-            if pending_mem_addr.low < 1 or pending_mem_addr.high < 1:
+        if all(pending_addr):
+            if pending_addr.low < 1 or pending_addr.high < 1:
                 raise ValueError("Memory address must be positive: {0.low}-{0.high}".
-                                 format(pending_mem_addr))
+                                 format(pending_addr))
 
-            if pending_mem_addr.low > pending_mem_addr.high:
+            if pending_addr.low > pending_addr.high:
                 raise ValueError(
                     "The low mem addr must be smaller than the high mem addr: {0.low}-{0.high}".
-                    format(pending_mem_addr))
+                    format(pending_addr))
 
-            self._mem_addr = pending_mem_addr
+            self._addr = pending_addr
         else:
-            self._mem_addr = None
+            self._addr = None
 
     def __init__(self, policy, **kwargs):
         super(IomemconQuery, self).__init__(policy, **kwargs)
@@ -100,9 +100,9 @@ class IomemconQuery(contextquery.ContextQuery):
     def results(self):
         """Generator which yields all matching iomemcons."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("mem_addr: {0.mem_addr}, overlap: {0.mem_addr_overlap}, "
-                       "subset: {0.mem_addr_subset}, superset: {0.mem_addr_superset}, "
-                       "proper: {0.mem_addr_proper}".format(self))
+        self.log.debug("Address: {0.addr!r}, overlap: {0.addr_overlap}, "
+                       "subset: {0.addr_subset}, superset: {0.addr_superset}, "
+                       "proper: {0.addr_proper}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
         self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
@@ -111,13 +111,13 @@ class IomemconQuery(contextquery.ContextQuery):
 
         for iomemcon in self.policy.iomemcons():
 
-            if self.mem_addr and not self._match_range(
-                    iomemcon.mem_addr,
-                    self.mem_addr,
-                    self.mem_addr_subset,
-                    self.mem_addr_overlap,
-                    self.mem_addr_superset,
-                    self.mem_addr_proper):
+            if self.addr and not self._match_range(
+                    iomemcon.addr,
+                    self.addr,
+                    self.addr_subset,
+                    self.addr_overlap,
+                    self.addr_superset,
+                    self.addr_proper):
                 continue
 
             if not self._match_context(iomemcon.context):

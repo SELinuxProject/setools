@@ -100,7 +100,7 @@ class IoportconQuery(contextquery.ContextQuery):
     def results(self):
         """Generator which yields all matching ioportcons."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Ports: {0.ports}, overlap: {0.ports_overlap}, "
+        self.log.debug("Ports: {0.ports!r}, overlap: {0.ports_overlap}, "
                        "subset: {0.ports_subset}, superset: {0.ports_superset}, "
                        "proper: {0.ports_proper}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))

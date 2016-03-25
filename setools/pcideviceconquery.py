@@ -19,7 +19,6 @@
 import logging
 
 from . import contextquery
-from .policyrep.xencontext import device_id
 
 
 class PcideviceconQuery(contextquery.ContextQuery):
@@ -31,7 +30,7 @@ class PcideviceconQuery(contextquery.ContextQuery):
     policy          The policy to query.
 
     Keyword Parameters/Class attributes:
-    device           A single PCI device ID.
+    device          A single PCI device ID.
 
     user            The criteria to match the context's user.
     user_regex      If true, regular expression matching
@@ -64,13 +63,11 @@ class PcideviceconQuery(contextquery.ContextQuery):
 
     @device.setter
     def device(self, value):
-        pending_device = device_id(*value)
+        if value:
+            if value < 1:
+                raise ValueError("PCI device ID must be positive: {0}".format(value))
 
-        if all(pending_device):
-            if pending_device.low < 1:
-                raise ValueError("PCI device ID must be positive: {0}".format(pending_device))
-
-            self._device = pending_device
+            self._device = value
         else:
             self._device = None
 
@@ -81,7 +78,7 @@ class PcideviceconQuery(contextquery.ContextQuery):
     def results(self):
         """Generator which yields all matching pcidevicecons."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("device id: {0.device}".format(self))
+        self.log.debug("Device ID: {0.device!r}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
         self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))

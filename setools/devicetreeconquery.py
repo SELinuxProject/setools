@@ -19,7 +19,6 @@
 import logging
 
 from . import contextquery
-from .policyrep.xencontext import dev_path
 
 
 class DevicetreeconQuery(contextquery.ContextQuery):
@@ -56,23 +55,7 @@ class DevicetreeconQuery(contextquery.ContextQuery):
                     No effect if not using set operations.
     """
 
-    _path = None
-
-    @property
-    def path(self):
-        return self._path
-
-    @path.setter
-    def path(self, value):
-        pending_path = dev_path(*value)
-
-        if all(pending_path):
-            if type(pending_path.path) != str:
-                raise ValueError("The path must a string: {0}".format(pending_path))
-
-            self._path = pending_path
-        else:
-            self._path = None
+    path = None
 
     def __init__(self, policy, **kwargs):
         super(DevicetreeconQuery, self).__init__(policy, **kwargs)
@@ -81,7 +64,7 @@ class DevicetreeconQuery(contextquery.ContextQuery):
     def results(self):
         """Generator which yields all matching devicetreecons."""
         self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("path: {0.path}".format(self))
+        self.log.debug("Path: {0.path!r}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
         self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
