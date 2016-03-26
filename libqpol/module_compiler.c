@@ -307,7 +307,7 @@ role_datum_t *declare_role(unsigned char isattr)
 			return dest_role;	/* role already declared for this block */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -370,7 +370,7 @@ type_datum_t *declare_type(unsigned char primary, unsigned char isattr)
 			return typdatum;
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -506,7 +506,7 @@ user_datum_t *declare_user(void)
 			return dest_user;	/* user already declared for this block */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -811,7 +811,7 @@ int require_class(int pass)
 			break;
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 
@@ -924,7 +924,7 @@ static int require_role_or_attribute(int pass, unsigned char isattr)
 			return 0;	/* role already required */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -987,7 +987,7 @@ static int require_type_or_attribute(int pass, unsigned char isattr)
 			return 0;	/* type already required */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1048,7 +1048,7 @@ int require_user(int pass)
 			return 0;	/* user already required */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1099,7 +1099,7 @@ static int require_bool_tunable(int pass, int is_tunable)
 			return 0;	/* boolean already required */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1172,7 +1172,7 @@ int require_sens(int pass)
 			return 0;	/* sensitivity already required */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }
@@ -1225,7 +1225,7 @@ int require_cat(int pass)
 			return 0;	/* category already required */
 		}
 	default:{
-			abort();	/* SETools - should never get here */
+			abort();	/* should never get here */
 		}
 	}
 }

@@ -158,11 +158,11 @@ auditdeny		        { return(AUDITDENY); }
 DONTAUDIT |
 dontaudit                       { return(DONTAUDIT); }
 ALLOWXPERM |
-allowxperm		        { return(ALLOWXPERM); }
+allowxperm			{ return(ALLOWXPERM); }
 AUDITALLOWXPERM |
-auditallowxperm		        { return(AUDITALLOWXPERM); }
+auditallowxperm			{ return(AUDITALLOWXPERM); }
 DONTAUDITXPERM |
-dontauditxperm                  { return(DONTAUDITXPERM); }
+dontauditxperm			{ return(DONTAUDITXPERM); }
 NEVERALLOWXPERM |
 neverallowxperm			{ return(NEVERALLOWXPERM); }
 SOURCE |
