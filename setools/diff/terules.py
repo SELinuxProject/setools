@@ -16,7 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 
 from ..policyrep import ioctlSet
 from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFilename
@@ -34,356 +34,30 @@ modified_avrule_record = namedtuple("modified_avrule", ["rule",
 modified_terule_record = namedtuple("modified_terule", ["rule", "added_default", "removed_default"])
 
 
-class TERulesDifference(Difference):
+def av_diff_template(ruletype):
 
     """
-    Determine the difference in type enforcement rules
-    between two policies.
+    This is a template for the access vector diff functions.
+
+    Parameters:
+    ruletype    The rule type, e.g. "allow".
     """
 
-    added_allows = DiffResultDescriptor("diff_allows")
-    removed_allows = DiffResultDescriptor("diff_allows")
-    modified_allows = DiffResultDescriptor("diff_allows")
-
-    added_auditallows = DiffResultDescriptor("diff_auditallows")
-    removed_auditallows = DiffResultDescriptor("diff_auditallows")
-    modified_auditallows = DiffResultDescriptor("diff_auditallows")
-
-    added_neverallows = DiffResultDescriptor("diff_neverallows")
-    removed_neverallows = DiffResultDescriptor("diff_neverallows")
-    modified_neverallows = DiffResultDescriptor("diff_neverallows")
-
-    added_dontaudits = DiffResultDescriptor("diff_dontaudits")
-    removed_dontaudits = DiffResultDescriptor("diff_dontaudits")
-    modified_dontaudits = DiffResultDescriptor("diff_dontaudits")
-
-    added_allowxperms = DiffResultDescriptor("diff_allowxperms")
-    removed_allowxperms = DiffResultDescriptor("diff_allowxperms")
-    modified_allowxperms = DiffResultDescriptor("diff_allowxperms")
-
-    added_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
-    removed_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
-    modified_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
-
-    added_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
-    removed_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
-    modified_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
-
-    added_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
-    removed_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
-    modified_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
-
-    added_type_transitions = DiffResultDescriptor("diff_type_transitions")
-    removed_type_transitions = DiffResultDescriptor("diff_type_transitions")
-    modified_type_transitions = DiffResultDescriptor("diff_type_transitions")
-
-    added_type_changes = DiffResultDescriptor("diff_type_changes")
-    removed_type_changes = DiffResultDescriptor("diff_type_changes")
-    modified_type_changes = DiffResultDescriptor("diff_type_changes")
-
-    added_type_members = DiffResultDescriptor("diff_type_members")
-    removed_type_members = DiffResultDescriptor("diff_type_members")
-    modified_type_members = DiffResultDescriptor("diff_type_members")
-
-    # Lists of rules for each policy
-    _left_allows = None
-    _right_allows = None
-
-    _left_auditallows = None
-    _right_auditallows = None
-
-    _left_neverallows = None
-    _right_neverallows = None
-
-    _left_dontaudits = None
-    _right_dontaudits = None
-
-    _left_allowxperms = None
-    _right_allowxperms = None
-
-    _left_auditallowxperms = None
-    _right_auditallowxperms = None
-
-    _left_neverallowxperms = None
-    _right_neverallowxperms = None
-
-    _left_dontauditxperms = None
-    _right_dontauditxperms = None
-
-    _left_type_transitions = None
-    _right_type_transitions = None
-
-    _left_type_changes = None
-    _right_type_changes = None
-
-    _left_type_members = None
-    _right_type_members = None
-
-    def diff_allows(self):
-        """Generate the difference in allow rules between the policies."""
+    def diff(self):
+        """Generate the difference in rules between the policies."""
 
         self.log.info(
-            "Generating allow differences from {0.left_policy} to {0.right_policy}".format(self))
+            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
+            format(ruletype, self))
 
-        if self._left_allows is None or self._right_allows is None:
+        if ruletype not in self._left_te_rules or ruletype not in self._right_te_rules:
             self._create_te_rule_lists()
 
-        self.added_allows, self.removed_allows, self.modified_allows = self._diff_av_rules(
-            self._expand_generator(self._left_allows, AVRuleWrapper),
-            self._expand_generator(self._right_allows, AVRuleWrapper))
-
-    def diff_auditallows(self):
-        """Generate the difference in auditallow rules between the policies."""
-
-        self.log.info(
-            "Generating auditallow differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_auditallows is None or self._right_auditallows is None:
-            self._create_te_rule_lists()
-
-        self.added_auditallows, \
-            self.removed_auditallows, \
-            self.modified_auditallows = self._diff_av_rules(
-                self._expand_generator(self._left_auditallows, AVRuleWrapper),
-                self._expand_generator(self._right_auditallows, AVRuleWrapper))
-
-    def diff_neverallows(self):
-        """Generate the difference in neverallow rules between the policies."""
-
-        self.log.info(
-            "Generating neverallow differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_neverallows is None or self._right_neverallows is None:
-            self._create_te_rule_lists()
-
-        self.added_neverallows, \
-            self.removed_neverallows, \
-            self.modified_neverallows = self._diff_av_rules(
-                self._expand_generator(self._left_neverallows, AVRuleWrapper),
-                self._expand_generator(self._right_neverallows, AVRuleWrapper))
-
-    def diff_dontaudits(self):
-        """Generate the difference in dontaudit rules between the policies."""
-
-        self.log.info(
-            "Generating dontaudit differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_dontaudits is None or self._right_dontaudits is None:
-            self._create_te_rule_lists()
-
-        self.added_dontaudits, \
-            self.removed_dontaudits, \
-            self.modified_dontaudits = self._diff_av_rules(
-                self._expand_generator(self._left_dontaudits, AVRuleWrapper),
-                self._expand_generator(self._right_dontaudits, AVRuleWrapper))
-
-    def diff_allowxperms(self):
-        """Generate the difference in allowxperm rules between the policies."""
-
-        self.log.info(
-            "Generating allowxperm differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_allowxperms is None or self._right_allowxperms is None:
-            self._create_te_rule_lists()
-
-        self.added_allowxperms, \
-            self.removed_allowxperms, \
-            self.modified_allowxperms = self._diff_avx_rules(
-                self._expand_generator(self._left_allowxperms, AVRuleXpermWrapper),
-                self._expand_generator(self._right_allowxperms, AVRuleXpermWrapper))
-
-    def diff_auditallowxperms(self):
-        """Generate the difference in auditallowxperm rules between the policies."""
-
-        self.log.info(
-            "Generating auditallowxperm differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_auditallowxperms is None or self._right_auditallowxperms is None:
-            self._create_te_rule_lists()
-
-        self.added_auditallowxperms, \
-            self.removed_auditallowxperms, \
-            self.modified_auditallowxperms = self._diff_avx_rules(
-                self._expand_generator(self._left_auditallowxperms, AVRuleXpermWrapper),
-                self._expand_generator(self._right_auditallowxperms, AVRuleXpermWrapper))
-
-    def diff_neverallowxperms(self):
-        """Generate the difference in neverallowxperm rules between the policies."""
-
-        self.log.info(
-            "Generating neverallowxperm differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_neverallowxperms is None or self._right_neverallowxperms is None:
-            self._create_te_rule_lists()
-
-        self.added_neverallowxperms, \
-            self.removed_neverallowxperms, \
-            self.modified_neverallowxperms = self._diff_avx_rules(
-                self._expand_generator(self._left_neverallowxperms, AVRuleXpermWrapper),
-                self._expand_generator(self._right_neverallowxperms, AVRuleXpermWrapper))
-
-    def diff_dontauditxperms(self):
-        """Generate the difference in dontauditxperm rules between the policies."""
-
-        self.log.info(
-            "Generating dontauditxperm differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_dontauditxperms is None or self._right_dontauditxperms is None:
-            self._create_te_rule_lists()
-
-        self.added_dontauditxperms, \
-            self.removed_dontauditxperms, \
-            self.modified_dontauditxperms = self._diff_avx_rules(
-                self._expand_generator(self._left_dontauditxperms, AVRuleXpermWrapper),
-                self._expand_generator(self._right_dontauditxperms, AVRuleXpermWrapper))
-
-    def diff_type_transitions(self):
-        """Generate the difference in type_transition rules between the policies."""
-
-        self.log.info(
-            "Generating type_transition differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_type_transitions is None or self._right_type_transitions is None:
-            self._create_te_rule_lists()
-
-        self.added_type_transitions, \
-            self.removed_type_transitions, \
-            self.modified_type_transitions = self._diff_te_rules(
-                self._expand_generator(self._left_type_transitions, TERuleWrapper),
-                self._expand_generator(self._right_type_transitions, TERuleWrapper))
-
-    def diff_type_changes(self):
-        """Generate the difference in type_change rules between the policies."""
-
-        self.log.info(
-            "Generating type_change differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_type_changes is None or self._right_type_changes is None:
-            self._create_te_rule_lists()
-
-        self.added_type_changes, \
-            self.removed_type_changes, \
-            self.modified_type_changes = self._diff_te_rules(
-                self._expand_generator(self._left_type_changes, TERuleWrapper),
-                self._expand_generator(self._right_type_changes, TERuleWrapper))
-
-    def diff_type_members(self):
-        """Generate the difference in type_member rules between the policies."""
-
-        self.log.info(
-            "Generating type_member differences from {0.left_policy} to {0.right_policy}".
-            format(self))
-
-        if self._left_type_members is None or self._right_type_members is None:
-            self._create_te_rule_lists()
-
-        self.added_type_members, \
-            self.removed_type_members, \
-            self.modified_type_members = self._diff_te_rules(
-                self._expand_generator(self._left_type_members, TERuleWrapper),
-                self._expand_generator(self._right_type_members, TERuleWrapper))
-
-    #
-    # Internal functions
-    #
-    def _create_te_rule_lists(self):
-        """Create rule lists for both policies."""
-
-        self._left_allows = []
-        self._left_auditallows = []
-        self._left_neverallows = []
-        self._left_dontaudits = []
-        self._left_allowxperms = []
-        self._left_auditallowxperms = []
-        self._left_neverallowxperms = []
-        self._left_dontauditxperms = []
-        self._left_type_transitions = []
-        self._left_type_changes = []
-        self._left_type_members = []
-        for rule in self.left_policy.terules():
-            # do not expand yet, to keep memory
-            # use down as long as possible
-            if rule.ruletype == "allow":
-                self._left_allows.append(rule)
-            elif rule.ruletype == "auditallow":
-                self._left_auditallows.append(rule)
-            elif rule.ruletype == "neverallow":
-                self._left_neverallows.append(rule)
-            elif rule.ruletype == "dontaudit":
-                self._left_dontaudits.append(rule)
-            elif rule.ruletype == "allowxperm":
-                self._left_allowxperms.append(rule)
-            elif rule.ruletype == "auditallowxperm":
-                self._left_auditallowxperms.append(rule)
-            elif rule.ruletype == "neverallowxperm":
-                self._left_neverallowxperms.append(rule)
-            elif rule.ruletype == "dontauditxperm":
-                self._left_dontauditxperms.append(rule)
-            elif rule.ruletype == "type_transition":
-                self._left_type_transitions.append(rule)
-            elif rule.ruletype == "type_change":
-                self._left_type_changes.append(rule)
-            elif rule.ruletype == "type_member":
-                self._left_type_members.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
-
-        self._right_allows = []
-        self._right_auditallows = []
-        self._right_neverallows = []
-        self._right_dontaudits = []
-        self._right_allowxperms = []
-        self._right_auditallowxperms = []
-        self._right_neverallowxperms = []
-        self._right_dontauditxperms = []
-        self._right_type_transitions = []
-        self._right_type_changes = []
-        self._right_type_members = []
-        for rule in self.right_policy.terules():
-            # do not expand yet, to keep memory
-            # use down as long as possible
-            if rule.ruletype == "allow":
-                self._right_allows.append(rule)
-            elif rule.ruletype == "auditallow":
-                self._right_auditallows.append(rule)
-            elif rule.ruletype == "neverallow":
-                self._right_neverallows.append(rule)
-            elif rule.ruletype == "dontaudit":
-                self._right_dontaudits.append(rule)
-            elif rule.ruletype == "allowxperm":
-                self._right_allowxperms.append(rule)
-            elif rule.ruletype == "auditallowxperm":
-                self._right_auditallowxperms.append(rule)
-            elif rule.ruletype == "neverallowxperm":
-                self._right_neverallowxperms.append(rule)
-            elif rule.ruletype == "dontauditxperm":
-                self._right_dontauditxperms.append(rule)
-            elif rule.ruletype == "type_transition":
-                self._right_type_transitions.append(rule)
-            elif rule.ruletype == "type_change":
-                self._right_type_changes.append(rule)
-            elif rule.ruletype == "type_member":
-                self._right_type_members.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
-
-    def _diff_av_rules(self, left_list, right_list):
-        """Common method for comparing access vector rules."""
-        added, removed, matched = self._set_diff(left_list, right_list)
+        added, removed, matched = self._set_diff(
+                self._expand_generator(self._left_te_rules[ruletype], AVRuleWrapper),
+                self._expand_generator(self._right_te_rules[ruletype], AVRuleWrapper))
 
         modified = []
-
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to permissions
@@ -399,14 +73,37 @@ class TERulesDifference(Difference):
                                                        removed_perms,
                                                        set(p[0] for p in matched_perms)))
 
-        return added, removed, modified
+        setattr(self, "added_{0}s".format(ruletype), added)
+        setattr(self, "removed_{0}s".format(ruletype), removed)
+        setattr(self, "modified_{0}s".format(ruletype), modified)
 
-    def _diff_avx_rules(self, left_list, right_list):
-        """Common method for comparing extended permission access vector rules."""
-        added, removed, matched = self._set_diff(left_list, right_list)
+    return diff
+
+
+def avx_diff_template(ruletype):
+
+    """
+    This is a template for the extended permission access vector diff functions.
+
+    Parameters:
+    ruletype    The rule type, e.g. "allowxperm".
+    """
+
+    def diff(self):
+        """Generate the difference in rules between the policies."""
+
+        self.log.info(
+            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
+            format(ruletype, self))
+
+        if ruletype not in self._left_te_rules or ruletype not in self._right_te_rules:
+            self._create_te_rule_lists()
+
+        added, removed, matched = self._set_diff(
+                self._expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
+                self._expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper))
 
         modified = []
-
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to permissions
@@ -422,14 +119,37 @@ class TERulesDifference(Difference):
                                                        ioctlSet(removed_perms),
                                                        ioctlSet(p[0] for p in matched_perms)))
 
-        return added, removed, modified
+        setattr(self, "added_{0}s".format(ruletype), added)
+        setattr(self, "removed_{0}s".format(ruletype), removed)
+        setattr(self, "modified_{0}s".format(ruletype), modified)
 
-    def _diff_te_rules(self, left_list, right_list):
-        """Common method for comparing type_* rules."""
-        added, removed, matched = self._set_diff(left_list, right_list)
+    return diff
+
+
+def te_diff_template(ruletype):
+
+    """
+    This is a template for the type_* diff functions.
+
+    Parameters:
+    ruletype    The rule type, e.g. "type_transition".
+    """
+
+    def diff(self):
+        """Generate the difference in rules between the policies."""
+
+        self.log.info(
+            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
+            format(ruletype, self))
+
+        if ruletype not in self._left_te_rules or ruletype not in self._right_te_rules:
+            self._create_te_rule_lists()
+
+        added, removed, matched = self._set_diff(
+                self._expand_generator(self._left_te_rules[ruletype], TERuleWrapper),
+                self._expand_generator(self._right_te_rules[ruletype], TERuleWrapper))
 
         modified = []
-
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to default type
@@ -438,7 +158,91 @@ class TERulesDifference(Difference):
                                                        right_rule.default,
                                                        left_rule.default))
 
-        return added, removed, modified
+        setattr(self, "added_{0}s".format(ruletype), added)
+        setattr(self, "removed_{0}s".format(ruletype), removed)
+        setattr(self, "modified_{0}s".format(ruletype), modified)
+
+    return diff
+
+
+class TERulesDifference(Difference):
+
+    """
+    Determine the difference in type enforcement rules
+    between two policies.
+    """
+
+    diff_allows = av_diff_template("allow")
+    added_allows = DiffResultDescriptor("diff_allows")
+    removed_allows = DiffResultDescriptor("diff_allows")
+    modified_allows = DiffResultDescriptor("diff_allows")
+
+    diff_auditallows = av_diff_template("auditallow")
+    added_auditallows = DiffResultDescriptor("diff_auditallows")
+    removed_auditallows = DiffResultDescriptor("diff_auditallows")
+    modified_auditallows = DiffResultDescriptor("diff_auditallows")
+
+    diff_neverallows = av_diff_template("neverallow")
+    added_neverallows = DiffResultDescriptor("diff_neverallows")
+    removed_neverallows = DiffResultDescriptor("diff_neverallows")
+    modified_neverallows = DiffResultDescriptor("diff_neverallows")
+
+    diff_dontaudits = av_diff_template("dontaudit")
+    added_dontaudits = DiffResultDescriptor("diff_dontaudits")
+    removed_dontaudits = DiffResultDescriptor("diff_dontaudits")
+    modified_dontaudits = DiffResultDescriptor("diff_dontaudits")
+
+    diff_allowxperms = avx_diff_template("allowxperm")
+    added_allowxperms = DiffResultDescriptor("diff_allowxperms")
+    removed_allowxperms = DiffResultDescriptor("diff_allowxperms")
+    modified_allowxperms = DiffResultDescriptor("diff_allowxperms")
+
+    diff_auditallowxperms = avx_diff_template("auditallowxperm")
+    added_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
+    removed_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
+    modified_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
+
+    diff_neverallowxperms = avx_diff_template("neverallowxperm")
+    added_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
+    removed_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
+    modified_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
+
+    diff_dontauditxperms = avx_diff_template("dontauditxperm")
+    added_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
+    removed_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
+    modified_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
+
+    diff_type_transitions = te_diff_template("type_transition")
+    added_type_transitions = DiffResultDescriptor("diff_type_transitions")
+    removed_type_transitions = DiffResultDescriptor("diff_type_transitions")
+    modified_type_transitions = DiffResultDescriptor("diff_type_transitions")
+
+    diff_type_changes = te_diff_template("type_change")
+    added_type_changes = DiffResultDescriptor("diff_type_changes")
+    removed_type_changes = DiffResultDescriptor("diff_type_changes")
+    modified_type_changes = DiffResultDescriptor("diff_type_changes")
+
+    diff_type_members = te_diff_template("type_member")
+    added_type_members = DiffResultDescriptor("diff_type_members")
+    removed_type_members = DiffResultDescriptor("diff_type_members")
+    modified_type_members = DiffResultDescriptor("diff_type_members")
+
+    # Lists of rules for each policy
+    _left_te_rules = defaultdict(list)
+    _right_te_rules = defaultdict(list)
+
+    #
+    # Internal functions
+    #
+    def _create_te_rule_lists(self):
+        """Create rule lists for both policies."""
+        # do not expand yet, to keep memory
+        # use down as long as possible
+        for rule in self.left_policy.terules():
+            self._left_te_rules[rule.ruletype].append(rule)
+
+        for rule in self.right_policy.terules():
+            self._right_te_rules[rule.ruletype].append(rule)
 
     def _reset_diff(self):
         """Reset diff results on policy changes."""
@@ -478,28 +282,8 @@ class TERulesDifference(Difference):
         self.modified_type_members = None
 
         # Sets of rules for each policy
-        self._left_allows = None
-        self._right_allows = None
-        self._left_auditallows = None
-        self._right_auditallows = None
-        self._left_neverallows = None
-        self._right_neverallows = None
-        self._left_dontaudits = None
-        self._right_dontaudits = None
-        self._left_allowxperms = None
-        self._right_allowxperms = None
-        self._left_auditallowxperms = None
-        self._right_auditallowxperms = None
-        self._left_neverallowxperms = None
-        self._right_neverallowxperms = None
-        self._left_dontauditxperms = None
-        self._right_dontauditxperms = None
-        self._left_type_transitions = None
-        self._right_type_transitions = None
-        self._left_type_changes = None
-        self._right_type_changes = None
-        self._left_type_members = None
-        self._right_type_members = None
+        self._left_te_rules.clear()
+        self._right_te_rules.clear()
 
 
 class AVRuleWrapper(Wrapper):

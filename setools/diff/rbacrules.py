@@ -16,7 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
@@ -40,11 +40,8 @@ class RBACRulesDifference(Difference):
     modified_role_transitions = DiffResultDescriptor("diff_role_transitions")
 
     # Lists of rules for each policy
-    _left_role_allows = None
-    _right_role_allows = None
-
-    _left_role_transitions = None
-    _right_role_transitions = None
+    _left_rbac_rules = defaultdict(list)
+    _right_rbac_rules = defaultdict(list)
 
     def diff_role_allows(self):
         """Generate the difference in role allow rules between the policies."""
@@ -53,12 +50,12 @@ class RBACRulesDifference(Difference):
             "Generating role allow differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if self._left_role_allows is None or self._right_role_allows is None:
+        if "allow" not in self._left_rbac_rules or "allow" not in self._right_rbac_rules:
             self._create_rbac_rule_lists()
 
-        self.added_role_allows, self.removed_role_allows, _ = \
-            self._set_diff(self._expand_generator(self._left_role_allows, RoleAllowWrapper),
-                           self._expand_generator(self._right_role_allows, RoleAllowWrapper))
+        self.added_role_allows, self.removed_role_allows, _ = self._set_diff(
+            self._expand_generator(self._left_rbac_rules["allow"], RoleAllowWrapper),
+            self._expand_generator(self._right_rbac_rules["allow"], RoleAllowWrapper))
 
     def diff_role_transitions(self):
         """Generate the difference in role_transition rules between the policies."""
@@ -67,52 +64,16 @@ class RBACRulesDifference(Difference):
             "Generating role_transition differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if self._left_role_transitions is None or self._right_role_transitions is None:
+        if "role_transition" not in self._left_rbac_rules or \
+                "role_transition" not in self._right_rbac_rules:
             self._create_rbac_rule_lists()
 
-        self.added_role_transitions, \
-            self.removed_role_transitions, \
-            self.modified_role_transitions = self._diff_rbac_rules(
-                self._expand_generator(self._left_role_transitions, RoleTransitionWrapper),
-                self._expand_generator(self._right_role_transitions, RoleTransitionWrapper))
-
-    #
-    # Internal functions
-    #
-    def _create_rbac_rule_lists(self):
-        """Create rule lists for both policies."""
-        self._left_role_allows = []
-        self._left_role_transitions = []
-        for rule in self.left_policy.rbacrules():
-            # do not expand yet, to keep memory
-            # use down as long as possible
-            if rule.ruletype == "allow":
-                self._left_role_allows.append(rule)
-            elif rule.ruletype == "role_transition":
-                self._left_role_transitions.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
-
-        self._right_role_allows = []
-        self._right_role_transitions = []
-        for rule in self.right_policy.rbacrules():
-            # do not expand yet, to keep memory
-            # use down as long as possible
-            if rule.ruletype == "allow":
-                self._right_role_allows.append(rule)
-            elif rule.ruletype == "role_transition":
-                self._right_role_transitions.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
-
-    def _diff_rbac_rules(self, left_list, right_list):
-        """Common method for comparing rbac rules."""
-        added, removed, matched = self._set_diff(left_list, right_list)
+        added, removed, matched = self._set_diff(
+            self._expand_generator(self._left_rbac_rules["role_transition"], RoleTransitionWrapper),
+            self._expand_generator(self._right_rbac_rules["role_transition"],
+                                   RoleTransitionWrapper))
 
         modified = []
-
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to default role
@@ -121,7 +82,22 @@ class RBACRulesDifference(Difference):
                                                          right_rule.default,
                                                          left_rule.default))
 
-        return added, removed, modified
+        self.added_role_transitions = added
+        self.removed_role_transitions = removed
+        self.modified_role_transitions = modified
+
+    #
+    # Internal functions
+    #
+    def _create_rbac_rule_lists(self):
+        """Create rule lists for both policies."""
+        # do not expand yet, to keep memory
+        # use down as long as possible
+        for rule in self.left_policy.rbacrules():
+            self._left_rbac_rules[rule.ruletype].append(rule)
+
+        for rule in self.right_policy.rbacrules():
+            self._right_rbac_rules[rule.ruletype].append(rule)
 
     def _reset_diff(self):
         """Reset diff results on policy changes."""
@@ -134,10 +110,8 @@ class RBACRulesDifference(Difference):
         self.modified_role_transitions = None
 
         # Sets of rules for each policy
-        self._left_role_allows = None
-        self._right_role_allows = None
-        self._left_role_transitions = None
-        self._right_role_transitions = None
+        self._left_rbac_rules.clear()
+        self._right_rbac_rules.clear()
 
 
 class RoleAllowWrapper(Wrapper):

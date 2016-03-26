@@ -16,7 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
@@ -37,8 +37,8 @@ class MLSRulesDifference(Difference):
     modified_range_transitions = DiffResultDescriptor("diff_range_transitions")
 
     # Lists of rules for each policy
-    _left_range_transitions = None
-    _right_range_transitions = None
+    _left_mls_rules = defaultdict(list)
+    _right_mls_rules = defaultdict(list)
 
     def diff_range_transitions(self):
         """Generate the difference in range_transition rules between the policies."""
@@ -47,43 +47,13 @@ class MLSRulesDifference(Difference):
             "Generating range_transition differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if self._left_range_transitions is None or self._right_range_transitions is None:
+        if "range_transition" not in self._left_mls_rules or \
+                "range_transition" not in self._right_mls_rules:
             self._create_mls_rule_lists()
 
-        self.added_range_transitions, \
-            self.removed_range_transitions, \
-            self.modified_range_transitions = self._diff_mls_rules(
-                self._expand_generator(self._left_range_transitions, MLSRuleWrapper),
-                self._expand_generator(self._right_range_transitions, MLSRuleWrapper))
-
-    #
-    # Internal functions
-    #
-    def _create_mls_rule_lists(self):
-        """Create rule lists for both policies."""
-        self._left_range_transitions = []
-        for rule in self.left_policy.mlsrules():
-            # do not expand yet, to keep memory
-            # use down as long as possible
-            if rule.ruletype == "range_transition":
-                self._left_range_transitions.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
-
-        self._right_range_transitions = []
-        for rule in self.right_policy.mlsrules():
-            # do not expand yet, to keep memory
-            # use down as long as possible
-            if rule.ruletype == "range_transition":
-                self._right_range_transitions.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
-
-    def _diff_mls_rules(self, left_list, right_list):
-        """Common method for comparing type_* rules."""
-        added, removed, matched = self._set_diff(left_list, right_list)
+        added, removed, matched = self._set_diff(
+                self._expand_generator(self._left_mls_rules["range_transition"], MLSRuleWrapper),
+                self._expand_generator(self._right_mls_rules["range_transition"], MLSRuleWrapper))
 
         modified = []
 
@@ -95,7 +65,22 @@ class MLSRulesDifference(Difference):
                                                         right_rule.default,
                                                         left_rule.default))
 
-        return added, removed, modified
+        self.added_range_transitions = added
+        self.removed_range_transitions = removed
+        self.modified_range_transitions = modified
+
+    #
+    # Internal functions
+    #
+    def _create_mls_rule_lists(self):
+        """Create rule lists for both policies."""
+        # do not expand yet, to keep memory
+        # use down as long as possible
+        for rule in self.left_policy.mlsrules():
+            self._left_mls_rules[rule.ruletype].append(rule)
+
+        for rule in self.right_policy.mlsrules():
+            self._right_mls_rules[rule.ruletype].append(rule)
 
     def _reset_diff(self):
         """Reset diff results on policy changes."""
@@ -105,8 +90,8 @@ class MLSRulesDifference(Difference):
         self.modified_range_transitions = None
 
         # Sets of rules for each policy
-        self._left_range_transitions = None
-        self._right_range_transitions = None
+        self._left_mls_rules.clear()
+        self._right_mls_rules.clear()
 
 
 class MLSRuleWrapper(Wrapper):
