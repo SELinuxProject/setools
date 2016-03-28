@@ -326,7 +326,7 @@ try:
             p.mlsconstraint_count, p.mlsvalidatetrans_count))
         print("  Permissives:     {0:7}    Polcap:          {1:7}".format(
             p.permissives_count, p.polcap_count))
-        print("  Defaults:      {0:7}    Typebounds:    {1:7}".format(
+        print("  Defaults:        {0:7}    Typebounds:      {1:7}".format(
             p.default_count, p.typebounds_count))
 
         if p.target_platform == "selinux":
