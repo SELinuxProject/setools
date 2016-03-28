@@ -158,11 +158,24 @@ class AVRule(BaseTERule):
 class ioctlSet(set):
 
     """
-    A set with an overridden str function which compresses
-    the output into ioctl ranges.
+    A set with overridden string functions which compresses
+    the output into ioctl ranges instead of individual elements.
     """
 
-    def __str__(self):
+    def __format__(self, spec):
+        """
+        String formating.
+
+        The standard formatting (no specification) will render the
+        ranges of ioctls, space separated.
+
+        The , option by itself will render the ranges of ioctls,
+        comma separated
+
+        Any other combination of formatting options will fall back
+        to set's formatting behavior.
+        """
+
         # generate short permission notation
         perms = sorted(self)
         shortlist = []
@@ -173,10 +186,18 @@ class ioctlSet(set):
             else:
                 shortlist.append("0x{0:04x}".format(group[0]))
 
-        return " ".join(shortlist)
+        if not spec:
+            return " ".join(shortlist)
+        elif spec == ",":
+            return ", ".join(shortlist)
+        else:
+            return super(ioctlSet, self).__format__(spec)
+
+    def __str__(self):
+        return "{0}".format(self)
 
     def __repr__(self):
-        return "{{ {0} }}".format(self)
+        return "{{ {0:,} }}".format(self)
 
     def ranges(self):
         """
