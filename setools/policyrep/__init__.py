@@ -187,9 +187,19 @@ class SELinuxPolicy(object):
         return self.policy.avrule_allow_count()
 
     @property
+    def allowxperm_count(self):
+        """The number of allowxperm rules."""
+        return self.policy.avrule_allowx_count()
+
+    @property
     def auditallow_count(self):
         """The number of auditallow rules."""
         return self.policy.avrule_auditallow_count()
+
+    @property
+    def auditallowxperm_count(self):
+        """The number of auditallowxperm rules."""
+        return self.policy.avrule_auditallowx_count()
 
     @property
     def boolean_count(self):
@@ -227,9 +237,19 @@ class SELinuxPolicy(object):
         return sum(1 for d in self.defaults())
 
     @property
+    def devicetreecon_count(self):
+        """The number of Xen devicetreecon statements."""
+        return self.policy.devicetreecon_count()
+
+    @property
     def dontaudit_count(self):
         """The number of dontaudit rules."""
         return self.policy.avrule_dontaudit_count()
+
+    @property
+    def dontauditxperm_count(self):
+        """The number of dontauditxperm rules."""
+        return self.policy.avrule_dontauditx_count()
 
     @property
     def fs_use_count(self):
@@ -245,6 +265,16 @@ class SELinuxPolicy(object):
     def initialsids_count(self):
         """The number of initial sid statements."""
         return self.policy.isid_count()
+
+    @property
+    def iomemcon_count(self):
+        """The number of Xen iomemcon statements."""
+        return self.policy.iomemcon_count()
+
+    @property
+    def ioportcon_count(self):
+        """The number of Xen ioportcon statements."""
+        return self.policy.ioportcon_count()
 
     @property
     def level_count(self):
@@ -272,9 +302,19 @@ class SELinuxPolicy(object):
         return self.policy.avrule_neverallow_count()
 
     @property
+    def neverallowxperm_count(self):
+        """The number of neverallowxperm rules."""
+        return self.policy.avrule_neverallowx_count()
+
+    @property
     def nodecon_count(self):
         """The number of nodecon statements."""
         return self.policy.nodecon_count()
+
+    @property
+    def pcidevicecon_count(self):
+        """The number of Xen pcidevicecon statements."""
+        return self.policy.pcidevicecon_count()
 
     @property
     def permission_count(self):
@@ -285,6 +325,11 @@ class SELinuxPolicy(object):
     def permissives_count(self):
         """The number of permissive types."""
         return self.policy.permissive_count()
+
+    @property
+    def pirqcon_count(self):
+        """The number of Xen pirqcon statements."""
+        return self.policy.pirqcon_count()
 
     @property
     def polcap_count(self):
@@ -355,51 +400,6 @@ class SELinuxPolicy(object):
     def validatetrans_count(self):
         """The number of validatetrans."""
         return sum(1 for v in self.constraints() if v.ruletype == "validatetrans")
-
-    @property
-    def iomemcon_count(self):
-        """The number of iomemcon statements."""
-        return self.policy.iomemcon_count()
-
-    @property
-    def ioportcon_count(self):
-        """The number of ioportcon statements."""
-        return self.policy.ioportcon_count()
-
-    @property
-    def pcidevicecon_count(self):
-        """The number of pcidevicecon statements."""
-        return self.policy.pcidevicecon_count()
-
-    @property
-    def pirqcon_count(self):
-        """The number of pirqcon statements."""
-        return self.policy.pirqcon_count()
-
-    @property
-    def devicetreecon_count(self):
-        """The number of devicetreecon statements."""
-        return self.policy.devicetreecon_count()
-
-    @property
-    def allowx_count(self):
-        """The number of allowx rules."""
-        return self.policy.avrule_allowx_count()
-
-    @property
-    def auditallowx_count(self):
-        """The number of auditallowx rules."""
-        return self.policy.avrule_auditallowx_count()
-
-    @property
-    def dontauditx_count(self):
-        """The number of dontauditx rules."""
-        return self.policy.avrule_dontauditx_count()
-
-    @property
-    def neverallowx_count(self):
-        """The number of neverallowxperm rules."""
-        return self.policy.avrule_neverallowx_count()
 
     #
     # Policy components lookup functions
