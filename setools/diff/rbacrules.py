@@ -50,7 +50,7 @@ class RBACRulesDifference(Difference):
             "Generating role allow differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if "allow" not in self._left_rbac_rules or "allow" not in self._right_rbac_rules:
+        if not self._left_rbac_rules or not self._right_rbac_rules:
             self._create_rbac_rule_lists()
 
         self.added_role_allows, self.removed_role_allows, _ = self._set_diff(
@@ -64,8 +64,7 @@ class RBACRulesDifference(Difference):
             "Generating role_transition differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if "role_transition" not in self._left_rbac_rules or \
-                "role_transition" not in self._right_rbac_rules:
+        if not self._left_rbac_rules or not self._right_rbac_rules:
             self._create_rbac_rule_lists()
 
         added, removed, matched = self._set_diff(
@@ -93,11 +92,15 @@ class RBACRulesDifference(Difference):
         """Create rule lists for both policies."""
         # do not expand yet, to keep memory
         # use down as long as possible
+        self.log.debug("Building RBAC rule lists from {0.left_policy}".format(self))
         for rule in self.left_policy.rbacrules():
             self._left_rbac_rules[rule.ruletype].append(rule)
 
+        self.log.debug("Building RBAC rule lists from {0.right_policy}".format(self))
         for rule in self.right_policy.rbacrules():
             self._right_rbac_rules[rule.ruletype].append(rule)
+
+        self.log.debug("Completed building RBAC rule lists.")
 
     def _reset_diff(self):
         """Reset diff results on policy changes."""

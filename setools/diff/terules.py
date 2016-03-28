@@ -50,7 +50,7 @@ def av_diff_template(ruletype):
             "Generating {0} differences from {1.left_policy} to {1.right_policy}".
             format(ruletype, self))
 
-        if ruletype not in self._left_te_rules or ruletype not in self._right_te_rules:
+        if not self._left_te_rules or not self._right_te_rules:
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
@@ -96,7 +96,7 @@ def avx_diff_template(ruletype):
             "Generating {0} differences from {1.left_policy} to {1.right_policy}".
             format(ruletype, self))
 
-        if ruletype not in self._left_te_rules or ruletype not in self._right_te_rules:
+        if not self._left_te_rules or not self._right_te_rules:
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
@@ -142,7 +142,7 @@ def te_diff_template(ruletype):
             "Generating {0} differences from {1.left_policy} to {1.right_policy}".
             format(ruletype, self))
 
-        if ruletype not in self._left_te_rules or ruletype not in self._right_te_rules:
+        if not self._left_te_rules or not self._right_te_rules:
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
@@ -238,11 +238,15 @@ class TERulesDifference(Difference):
         """Create rule lists for both policies."""
         # do not expand yet, to keep memory
         # use down as long as possible
+        self.log.debug("Building TE rule lists from {0.left_policy}".format(self))
         for rule in self.left_policy.terules():
             self._left_te_rules[rule.ruletype].append(rule)
 
+        self.log.debug("Building TE rule lists from {0.right_policy}".format(self))
         for rule in self.right_policy.terules():
             self._right_te_rules[rule.ruletype].append(rule)
+
+        self.log.debug("Completed building TE rule lists.")
 
     def _reset_diff(self):
         """Reset diff results on policy changes."""

@@ -47,8 +47,7 @@ class MLSRulesDifference(Difference):
             "Generating range_transition differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if "range_transition" not in self._left_mls_rules or \
-                "range_transition" not in self._right_mls_rules:
+        if not self._left_mls_rules or not self._right_mls_rules:
             self._create_mls_rule_lists()
 
         added, removed, matched = self._set_diff(
@@ -76,11 +75,15 @@ class MLSRulesDifference(Difference):
         """Create rule lists for both policies."""
         # do not expand yet, to keep memory
         # use down as long as possible
+        self.log.debug("Building MLS rule lists from {0.left_policy}".format(self))
         for rule in self.left_policy.mlsrules():
             self._left_mls_rules[rule.ruletype].append(rule)
 
+        self.log.debug("Building MLS rule lists from {0.right_policy}".format(self))
         for rule in self.right_policy.mlsrules():
             self._right_mls_rules[rule.ruletype].append(rule)
+
+        self.log.debug("Completed building MLS rule lists.")
 
     def _reset_diff(self):
         """Reset diff results on policy changes."""
