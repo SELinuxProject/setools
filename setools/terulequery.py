@@ -102,22 +102,25 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
 
     @xperms.setter
     def xperms(self, value):
-        pending_xperms = ioctlSet()
+        if value:
+            pending_xperms = ioctlSet()
 
-        for low, high in value:
-            if not (0 <= low <= 0xffff):
-                raise ValueError("{0:04x} is not a valid ioctl.".format(low))
+            for low, high in value:
+                if not (0 <= low <= 0xffff):
+                    raise ValueError("{0:04x} is not a valid ioctl.".format(low))
 
-            if not (0 <= high <= 0xffff):
-                raise ValueError("{0:04x} is not a valid ioctl.".format(high))
+                if not (0 <= high <= 0xffff):
+                    raise ValueError("{0:04x} is not a valid ioctl.".format(high))
 
-            if high < low:
-                raise ValueError("0x{0:04x}-0x{1:04x} is not a valid ioctl range.".
-                                 format(low, high))
+                if high < low:
+                    raise ValueError("0x{0:04x}-0x{1:04x} is not a valid ioctl range.".
+                                     format(low, high))
 
-            pending_xperms.update(i for i in range(low, high+1))
+                pending_xperms.update(i for i in range(low, high+1))
 
-        self._xperms = pending_xperms
+            self._xperms = pending_xperms
+        else:
+            self._xperms = None
 
     def __init__(self, policy, **kwargs):
         super(TERuleQuery, self).__init__(policy, **kwargs)
