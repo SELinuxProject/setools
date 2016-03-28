@@ -177,7 +177,10 @@ class TERuleListModel(RuleListModel):
                 return str(self.resultlist[row].tclass)
             elif col == 4:
                 try:
-                    return ", ".join(sorted(self.resultlist[row].perms))
+                    if self.resultlist[row].extended:
+                        return "{0.xperm_type}: {0.perms:,}".format(self.resultlist[row])
+                    else:
+                        return ", ".join(sorted(self.resultlist[row].perms))
                 except RuleUseError:
                     return str(self.resultlist[row].default)
             elif col == 5:

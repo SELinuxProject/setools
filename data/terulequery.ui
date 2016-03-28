@@ -428,20 +428,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="type_transition">
-            <property name="text">
-             <string>Type_transition</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="type_change">
-            <property name="text">
-             <string>Type_change</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="7">
            <spacer name="horizontalSpacer">
             <property name="orientation">
@@ -465,13 +451,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
-           <widget class="QCheckBox" name="type_member">
-            <property name="text">
-             <string>Type_member</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QCheckBox" name="neverallow">
             <property name="text">
@@ -486,6 +465,58 @@
             </property>
             <property name="checkable">
              <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="neverallowxperm">
+            <property name="text">
+             <string>Neverallowxperms</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="allowxperm">
+            <property name="text">
+             <string>Allowxperms</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QCheckBox" name="auditallowxperm">
+            <property name="text">
+             <string>Auditallowxperms</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="type_transition">
+            <property name="text">
+             <string>Type_transition</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QCheckBox" name="type_change">
+            <property name="text">
+             <string>Type_change</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QCheckBox" name="type_member">
+            <property name="text">
+             <string>Type_member</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QCheckBox" name="dontauditxperm">
+            <property name="text">
+             <string>Dontauditxperms</string>
             </property>
            </widget>
           </item>
@@ -555,102 +586,6 @@
             </property>
             <property name="text">
              <string>Regex</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QGroupBox" name="perms_criteria">
-         <property name="title">
-          <string>Permission Set</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_6">
-          <property name="leftMargin">
-           <number>6</number>
-          </property>
-          <property name="topMargin">
-           <number>6</number>
-          </property>
-          <property name="rightMargin">
-           <number>6</number>
-          </property>
-          <property name="bottomMargin">
-           <number>6</number>
-          </property>
-          <property name="spacing">
-           <number>3</number>
-          </property>
-          <item row="1" column="2">
-           <widget class="QPushButton" name="invert_perms">
-            <property name="text">
-             <string>Invert</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="clear_perms">
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="4">
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="3">
-           <widget class="QCheckBox" name="perms_equal">
-            <property name="toolTip">
-             <string>A matching rule will have all of the selected permissions.</string>
-            </property>
-            <property name="text">
-             <string>Match All</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2">
-           <spacer name="verticalSpacer">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="0" column="0" rowspan="3" colspan="2">
-           <widget class="QListView" name="perms">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>250</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>The list of permissions common to selected object classes.</string>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::ExtendedSelection</enum>
             </property>
            </widget>
           </item>
@@ -927,6 +862,119 @@
          </property>
         </widget>
        </item>
+       <item row="2" column="1">
+        <widget class="QGroupBox" name="perms_criteria">
+         <property name="title">
+          <string>Permission Set</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <property name="topMargin">
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
+          </property>
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <item row="3" column="2">
+           <widget class="QCheckBox" name="xperms_equal">
+            <property name="toolTip">
+             <string>A matching rule will have all of the extended permissions.</string>
+            </property>
+            <property name="text">
+             <string>Match All</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="invert_perms">
+            <property name="text">
+             <string>Invert</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="clear_perms">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="3">
+           <widget class="QCheckBox" name="perms_equal">
+            <property name="toolTip">
+             <string>A matching rule will have all of the selected permissions.</string>
+            </property>
+            <property name="text">
+             <string>Match All</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0" rowspan="3" colspan="2">
+           <widget class="QListView" name="perms">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>250</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>The list of permissions common to selected object classes.</string>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::ExtendedSelection</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLineEdit" name="xperms">
+            <property name="placeholderText">
+             <string>Enter extended permissions here.</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
       </layout>
       <zorder>ruletype_criteria</zorder>
       <zorder>source_criteria</zorder>
@@ -948,9 +996,6 @@
   <tabstop>neverallow</tabstop>
   <tabstop>auditallow</tabstop>
   <tabstop>dontaudit</tabstop>
-  <tabstop>type_transition</tabstop>
-  <tabstop>type_change</tabstop>
-  <tabstop>type_member</tabstop>
   <tabstop>clear_ruletypes</tabstop>
   <tabstop>all_ruletypes</tabstop>
   <tabstop>source</tabstop>

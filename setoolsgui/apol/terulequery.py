@@ -74,6 +74,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.clear_source_error()
         self.clear_target_error()
         self.clear_default_error()
+        self.clear_xperm_error()
 
         # populate class list
         self.class_model = SEToolsListModel(self)
@@ -121,11 +122,16 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.set_source_regex(self.source_regex.isChecked())
         self.set_target_regex(self.target_regex.isChecked())
         self.set_default_regex(self.default_regex.isChecked())
+        self.toggle_xperm_criteria()
         self.criteria_frame.setHidden(not self.criteria_expander.isChecked())
         self.notes.setHidden(not self.notes_expander.isChecked())
 
         # connect signals
         self.buttonBox.clicked.connect(self.run)
+        self.allowxperm.toggled.connect(self.toggle_xperm_criteria)
+        self.auditallowxperm.toggled.connect(self.toggle_xperm_criteria)
+        self.neverallowxperm.toggled.connect(self.toggle_xperm_criteria)
+        self.dontauditxperm.toggled.connect(self.toggle_xperm_criteria)
         self.clear_ruletypes.clicked.connect(self.clear_all_ruletypes)
         self.all_ruletypes.clicked.connect(self.set_all_ruletypes)
         self.source.textEdited.connect(self.clear_source_error)
@@ -138,6 +144,8 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.invert_class.clicked.connect(self.invert_tclass_selection)
         self.perms.selectionModel().selectionChanged.connect(self.set_perms)
         self.invert_perms.clicked.connect(self.invert_perms_selection)
+        self.xperms.textEdited.connect(self.clear_xperm_error)
+        self.xperms.editingFinished.connect(self.set_xperm)
         self.default_type.textEdited.connect(self.clear_default_error)
         self.default_type.editingFinished.connect(self.set_default_type)
         self.default_regex.toggled.connect(self.set_default_regex)
@@ -149,9 +157,13 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
 
     def _set_ruletypes(self, value):
         self.allow.setChecked(value)
+        self.allowxperm.setChecked(value)
         self.auditallow.setChecked(value)
+        self.auditallowxperm.setChecked(value)
         self.neverallow.setChecked(value)
+        self.neverallowxperm.setChecked(value)
         self.dontaudit.setChecked(value)
+        self.dontauditxperm.setChecked(value)
         self.type_transition.setChecked(value)
         self.type_member.setChecked(value)
         self.type_change.setChecked(value)
@@ -236,6 +248,48 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         invert_list_selection(self.perms.selectionModel())
 
     #
+    # Extended permission criteria
+    #
+    def toggle_xperm_criteria(self):
+        mode = any((self.allowxperm.isChecked(),
+                    self.auditallowxperm.isChecked(),
+                    self.neverallowxperm.isChecked(),
+                    self.dontauditxperm.isChecked()))
+
+        self.xperms.setEnabled(mode)
+        self.xperms_equal.setEnabled(mode)
+
+    def clear_xperm_error(self):
+        self.xperms.setToolTip("Match the extended permissions of the rule. Comma-separated "
+                               "permissions or ranges of permissions.")
+        self.xperms.setPalette(self.orig_palette)
+
+    def set_xperm(self):
+        xperms = []
+        try:
+            text = self.xperms.text()
+
+            if text:
+                for item in self.xperms.text().split(","):
+                    rng = item.split("-")
+                    if len(rng) == 2:
+                        xperms.append((int(rng[0], base=16), int(rng[1], base=16)))
+                    elif len(rng) == 1:
+                        xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
+                    else:
+                        raise ValueError("Enter an extended permission or extended permission "
+                                         "range, e.g. 0x5411 or 0x8800-0x88ff.")
+
+                self.query.xperms = xperms
+            else:
+                self.query.xperms = None
+
+        except Exception as ex:
+            self.log.error("Extended permissions error: {0}".format(ex))
+            self.xperms.setToolTip("Error: " + str(ex))
+            self.xperms.setPalette(self.error_palette)
+
+    #
     # Default criteria
     #
 
@@ -282,15 +336,27 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         if self.allow.isChecked():
             rule_types.append("allow")
             max_results += self.policy.allow_count
+        if self.allowxperm.isChecked():
+            rule_types.append("allowxperm")
+            max_results += self.policy.allowxperm_count
         if self.auditallow.isChecked():
             rule_types.append("auditallow")
             max_results += self.policy.auditallow_count
+        if self.auditallowxperm.isChecked():
+            rule_types.append("auditallowxperm")
+            max_results += self.policy.auditallowxperm_count
         if self.neverallow.isChecked():
             rule_types.append("neverallow")
             max_results += self.policy.neverallow_count
+        if self.neverallowxperm.isChecked():
+            rule_types.append("neverallowxperm")
+            max_results += self.policy.neverallowxperm_count
         if self.dontaudit.isChecked():
             rule_types.append("dontaudit")
             max_results += self.policy.dontaudit_count
+        if self.dontauditxperm.isChecked():
+            rule_types.append("dontauditxperm")
+            max_results += self.policy.dontauditxperm_count
         if self.type_transition.isChecked():
             rule_types.append("type_transition")
             max_results += self.policy.type_transition_count
@@ -308,8 +374,8 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.query.boolean_equal = self.bools_equal.isChecked()
 
         # if query is broad, show warning.
-        if not self.query.source and not self.query.target and not self.query.tclass and \
-                not self.query.perms and not self.query.default and not self.query.boolean:
+        if not any((self.query.source, self.query.target, self.query.tclass, self.query.perms,
+                    self.query.xperms, self.query.default, self.query.boolean)):
             reply = QMessageBox.question(
                 self, "Continue?",
                 "This is a broad query, estimated to return {0} results.  Continue?".
