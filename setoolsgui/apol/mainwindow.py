@@ -34,6 +34,7 @@ from .mlsrulequery import MLSRuleQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
 from .terulequery import TERuleQueryTab
+from .typeattrquery import TypeAttributeQueryTab
 from .typequery import TypeQueryTab
 from .userquery import UserQueryTab
 
@@ -236,6 +237,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     _components_map = {"Booleans": BoolQueryTab,
                        "Roles": RoleQueryTab,
                        "Types": TypeQueryTab,
+                       "Type Attributes": TypeAttributeQueryTab,
                        "Users": UserQueryTab}
     _rule_map = {"RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
