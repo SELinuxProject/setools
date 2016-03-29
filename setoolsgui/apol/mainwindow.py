@@ -27,6 +27,7 @@ from setools import PermissionMap, SELinuxPolicy
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 # Analysis tabs:
+from .boolquery import BoolQueryTab
 from .dta import DomainTransitionAnalysisTab
 from .infoflow import InfoFlowAnalysisTab
 from .mlsrulequery import MLSRuleQueryTab
@@ -232,7 +233,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 
     _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
                      "Information Flow Analysis": InfoFlowAnalysisTab}
-    _components_map = {"Roles": RoleQueryTab,
+    _components_map = {"Booleans": BoolQueryTab,
+                       "Roles": RoleQueryTab,
                        "Types": TypeQueryTab,
                        "Users": UserQueryTab}
     _rule_map = {"RBAC Rules": RBACRuleQueryTab,
