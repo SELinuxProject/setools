@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from collections import defaultdict
 
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from setools.policyrep.exception import RuleNotConditional, RuleUseError
@@ -25,12 +26,15 @@ class RuleListModel(QAbstractTableModel):
 
     """Base class for rule list models."""
 
+    headers = None
+
     def __init__(self, parent):
         super(RuleListModel, self).__init__(parent)
         self.resultlist = []
 
     def headerData(self, section, orientation, role):
-        raise NotImplementedError
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self.headers[section]
 
     def columnCount(self, parent=QModelIndex()):
         return 5
@@ -49,151 +53,112 @@ class MLSRuleListModel(RuleListModel):
 
     """MLS rule model.  Represents rules as a column."""
 
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            if section == 0:
-                return "Rule Type"
-            elif section == 1:
-                return "Source"
-            elif section == 2:
-                return "Target"
-            elif section == 3:
-                return "Object Class"
-            elif section == 4:
-                return "Default Range"
+    headers = defaultdict(None, {0: "Rule Type", 1: "Source", 2: "Target",
+                                 3: "Object Class", 4: "Default Range"})
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
-            if not self.resultlist:
-                return None
-
+        if self.resultlist:
             row = index.row()
             col = index.column()
+            rule = self.resultlist[row]
 
-            if col == 0:
-                return self.resultlist[row].ruletype
-            elif col == 1:
-                return str(self.resultlist[row].source)
-            elif col == 2:
-                return str(self.resultlist[row].target)
-            elif col == 3:
-                return str(self.resultlist[row].tclass)
-            elif col == 4:
-                return str(self.resultlist[row].default)
+            if role == Qt.DisplayRole:
+                if col == 0:
+                    return rule.ruletype
+                elif col == 1:
+                    return str(rule.source)
+                elif col == 2:
+                    return str(rule.target)
+                elif col == 3:
+                    return str(rule.tclass)
+                elif col == 4:
+                    return str(rule.default)
 
-        elif role == Qt.UserRole:
-            # get the whole rule for user role
-            return self.resultlist[row].statement()
+            elif role == Qt.UserRole:
+                return rule
 
 
 class RBACRuleListModel(RuleListModel):
 
     """RBAC rule model.  Represents rules as a column."""
 
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            if section == 0:
-                return "Rule Type"
-            elif section == 1:
-                return "Source"
-            elif section == 2:
-                return "Target"
-            elif section == 3:
-                return "Object Class"
-            elif section == 4:
-                return "Default Role"
+    headers = defaultdict(None, {0: "Rule Type", 1: "Source", 2: "Target",
+                                 3: "Object Class", 4: "Default Role"})
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
-            if not self.resultlist:
-                return None
-
+        if self.resultlist:
             row = index.row()
             col = index.column()
+            rule = self.resultlist[row]
 
-            if col == 0:
-                return self.resultlist[row].ruletype
-            elif col == 1:
-                return str(self.resultlist[row].source)
-            elif col == 2:
-                return str(self.resultlist[row].target)
-            elif col == 3:
-                try:
-                    return str(self.resultlist[row].tclass)
-                except RuleUseError:
-                    # role allow
-                    return None
-            elif col == 4:
-                # next most common: default
-                try:
-                    return str(self.resultlist[row].default)
-                except RuleUseError:
-                    return None
+            if role == Qt.DisplayRole:
+                if col == 0:
+                    return rule.ruletype
+                elif col == 1:
+                    return str(rule.source)
+                elif col == 2:
+                    return str(rule.target)
+                elif col == 3:
+                    try:
+                        return str(rule.tclass)
+                    except RuleUseError:
+                        # role allow
+                        return None
+                elif col == 4:
+                    # next most common: default
+                    try:
+                        return str(rule.default)
+                    except RuleUseError:
+                        return None
 
-        elif role == Qt.UserRole:
-            # get the whole rule for user role
-            return self.resultlist[row].statement()
+            elif role == Qt.UserRole:
+                return rule
 
 
 class TERuleListModel(RuleListModel):
 
     """Type Enforcement rule model.  Represents rules as a column."""
 
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            if section == 0:
-                return "Rule Type"
-            elif section == 1:
-                return "Source"
-            elif section == 2:
-                return "Target"
-            elif section == 3:
-                return "Object Class"
-            elif section == 4:
-                return "Permissons/Default Type"
-            elif section == 5:
-                return "Conditional Expression"
-            elif section == 6:
-                return "Conditional Block"
+    headers = defaultdict(None, {0: "Rule Type", 1: "Source", 2: "Target",
+                                 3: "Object Class", 4: "Permissions/Default Type",
+                                 5: "Conditional Expression", 6: "Conditional Block"})
 
     def columnCount(self, parent=QModelIndex()):
         return 7
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
-            if not self.resultlist:
-                return None
-
+        if self.resultlist:
             row = index.row()
             col = index.column()
+            rule = self.resultlist[row]
 
-            if col == 0:
-                return self.resultlist[row].ruletype
-            elif col == 1:
-                return str(self.resultlist[row].source)
-            elif col == 2:
-                return str(self.resultlist[row].target)
-            elif col == 3:
-                return str(self.resultlist[row].tclass)
-            elif col == 4:
-                try:
-                    if self.resultlist[row].extended:
-                        return "{0.xperm_type}: {0.perms:,}".format(self.resultlist[row])
-                    else:
-                        return ", ".join(sorted(self.resultlist[row].perms))
-                except RuleUseError:
-                    return str(self.resultlist[row].default)
-            elif col == 5:
-                try:
-                    return str(self.resultlist[row].conditional)
-                except RuleNotConditional:
-                    return None
-            elif col == 6:
-                try:
-                    return str(self.resultlist[row].conditional_block)
-                except RuleNotConditional:
-                    return None
+            if role == Qt.DisplayRole:
+                if col == 0:
+                    return rule.ruletype
+                elif col == 1:
+                    return str(rule.source)
+                elif col == 2:
+                    return str(rule.target)
+                elif col == 3:
+                    return str(rule.tclass)
+                elif col == 4:
+                    try:
+                        if rule.extended:
+                            return "{0.xperm_type}: {0.perms:,}".format(rule)
+                        else:
+                            return ", ".join(sorted(rule.perms))
+                    except RuleUseError:
+                        return str(rule.default)
+                elif col == 5:
+                    try:
+                        return str(rule.conditional)
+                    except RuleNotConditional:
+                        return None
+                elif col == 6:
+                    try:
+                        return str(rule.conditional_block)
+                    except RuleNotConditional:
+                        return None
 
-        elif role == Qt.UserRole:
-            # get the whole rule for user role
-            return self.resultlist[row].statement()
+            elif role == Qt.UserRole:
+                return rule

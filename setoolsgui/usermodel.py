@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from collections import defaultdict
+
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from setools.policyrep.exception import MLSDisabled
 
@@ -57,6 +59,8 @@ class UserTableModel(QAbstractTableModel):
 
     """Table-based model for users."""
 
+    headers = defaultdict(None, {0: "Name", 1: "Roles", 2: "Default Level", 3: "Range"})
+
     def __init__(self, parent, mls):
         super(UserTableModel, self).__init__(parent)
         self.resultlist = []
@@ -64,14 +68,7 @@ class UserTableModel(QAbstractTableModel):
 
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            if section == 0:
-                return "Name"
-            elif section == 1:
-                return "Roles"
-            elif section == 2:
-                return "Default Level"
-            elif section == 3:
-                return "Range"
+            return self.headers[section]
 
     def columnCount(self, parent=QModelIndex()):
         if self.mls:
@@ -86,28 +83,26 @@ class UserTableModel(QAbstractTableModel):
             return 0
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
-            if not self.resultlist:
-                return None
+        if self.resultlist:
+            if role == Qt.DisplayRole:
+                row = index.row()
+                col = index.column()
+                user = self.resultlist[row]
 
-            row = index.row()
-            col = index.column()
+                if col == 0:
+                    return str(user)
+                elif col == 1:
+                    return ", ".join(sorted(str(r) for r in user.roles))
+                elif col == 2:
+                    try:
+                        return str(user.mls_level)
+                    except MLSDisabled:
+                        return None
+                elif col == 3:
+                    try:
+                        return str(user.mls_range)
+                    except MLSDisabled:
+                        return None
 
-            if col == 0:
-                return str(self.resultlist[row])
-            elif col == 1:
-                return ", ".join(sorted(str(r) for r in self.resultlist[row].roles))
-            elif col == 2:
-                try:
-                    return str(self.resultlist[row].mls_level)
-                except MLSDisabled:
-                    return None
-            elif col == 3:
-                try:
-                    return str(self.resultlist[row].mls_range)
-                except MLSDisabled:
-                    return None
-
-        elif role == Qt.UserRole:
-            # get the whole rule for user role
-            return self.resultlist[row].statement()
+            elif role == Qt.UserRole:
+                return user

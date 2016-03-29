@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from collections import defaultdict
+
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PyQt5.QtGui import QPalette, QTextCursor
 
@@ -48,16 +50,15 @@ class RoleTableModel(QAbstractTableModel):
 
     """Table-based model for roles."""
 
+    headers = defaultdict(None, {0: "Name", 1: "Types"})
+
     def __init__(self, parent):
         super(RoleTableModel, self).__init__(parent)
         self.resultlist = []
 
     def headerData(self, section, orientation, role):
         if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            if section == 0:
-                return "Name"
-            elif section == 1:
-                return "Types"
+            return self.headers[section]
 
     def columnCount(self, parent=QModelIndex()):
         return 2
@@ -69,18 +70,19 @@ class RoleTableModel(QAbstractTableModel):
             return 0
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
-            if not self.resultlist:
-                return None
-
+        # There are two roles here.
+        # The parameter, role, is the Qt role
+        # The below item is a role in the list.
+        if self.resultlist:
             row = index.row()
             col = index.column()
+            item = self.resultlist[row]
 
-            if col == 0:
-                return str(self.resultlist[row])
-            elif col == 1:
-                return ", ".join(sorted(str(t) for t in self.resultlist[row].types()))
-
-        elif role == Qt.UserRole:
-            # get the whole rule for role role
-            return self.resultlist[row].statement()
+            if role == Qt.DisplayRole:
+                if col == 0:
+                    return str(item)
+                elif col == 1:
+                    return ", ".join(sorted(str(t) for t in item.types()))
+            elif role == Qt.UserRole:
+                # get the whole object
+                return item

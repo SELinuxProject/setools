@@ -66,11 +66,12 @@ class SEToolsListModel(QAbstractListModel):
     def data(self, index, role):
         if self.item_list:
             row = index.row()
+            item = self.item_list[row]
 
             if role == Qt.DisplayRole:
-                return str(self.item_list[row])
+                return str(item)
             elif role == Qt.UserRole:
-                return self.item_list[row]
+                return item
 
 
 class PermListModel(SEToolsListModel):

@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from collections import defaultdict
+
 from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
 from PyQt5.QtGui import QPalette, QTextCursor
 
@@ -54,20 +56,15 @@ class TypeTableModel(QAbstractTableModel):
 
     """Table-based model for types."""
 
+    headers = defaultdict(None, {0: "Name", 1: "Attributes", 2: "Aliases", 3: "Permissive"})
+
     def __init__(self, parent):
         super(TypeTableModel, self).__init__(parent)
         self.resultlist = []
 
-    def headerData(self, section, orientation, type):
-        if type == Qt.DisplayRole and orientation == Qt.Horizontal:
-            if section == 0:
-                return "Name"
-            elif section == 1:
-                return "Attributes"
-            elif section == 2:
-                return "Aliases"
-            elif section == 3:
-                return "Permissive"
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self.headers[section]
 
     def columnCount(self, parent=QModelIndex()):
         return 4
@@ -78,23 +75,21 @@ class TypeTableModel(QAbstractTableModel):
         else:
             return 0
 
-    def data(self, index, type):
-        if type == Qt.DisplayRole:
-            if not self.resultlist:
-                return None
-
+    def data(self, index, role):
+        if self.resultlist:
             row = index.row()
             col = index.column()
+            item = self.resultlist[row]
 
-            if col == 0:
-                return str(self.resultlist[row])
-            elif col == 1:
-                return ", ".join(sorted(str(a) for a in self.resultlist[row].attributes()))
-            elif col == 2:
-                return ", ".join(sorted(str(a) for a in self.resultlist[row].aliases()))
-            elif col == 3 and self.resultlist[row].ispermissive:
-                return "Permissive"
+            if role == Qt.DisplayRole:
+                if col == 0:
+                    return str(item)
+                elif col == 1:
+                    return ", ".join(sorted(str(a) for a in item.attributes()))
+                elif col == 2:
+                    return ", ".join(sorted(str(a) for a in item.aliases()))
+                elif col == 3 and item.ispermissive:
+                    return "Permissive"
 
-        elif type == Qt.UserRole:
-            # get the whole rule for type type
-            return self.resultlist[row].statement()
+            elif role == Qt.UserRole:
+                return item
