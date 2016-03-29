@@ -159,7 +159,7 @@
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
            <item row="1" column="0">
-            <widget class="QGroupBox" name="role_criteria">
+            <widget class="QGroupBox" name="type_criteria">
              <property name="title">
               <string>Types</string>
              </property>
@@ -180,7 +180,7 @@
                <number>3</number>
               </property>
               <item row="2" column="1">
-               <widget class="QPushButton" name="clear_roles">
+               <widget class="QPushButton" name="clear_types">
                 <property name="text">
                  <string>Clear</string>
                 </property>
@@ -319,7 +319,7 @@
               <item row="0" column="2">
                <widget class="QCheckBox" name="name_regex">
                 <property name="toolTip">
-                 <string>Use regular expressions to match the user's name.</string>
+                 <string>Use regular expressions to match the role's name.</string>
                 </property>
                 <property name="text">
                  <string>Regex</string>
@@ -481,7 +481,7 @@
   <tabstop>types</tabstop>
   <tabstop>types_any</tabstop>
   <tabstop>types_equal</tabstop>
-  <tabstop>clear_roles</tabstop>
+  <tabstop>clear_types</tabstop>
   <tabstop>invert_types</tabstop>
   <tabstop>results_frame</tabstop>
   <tabstop>table_results</tabstop>
@@ -491,7 +491,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>clear_roles</sender>
+   <sender>clear_types</sender>
    <signal>clicked()</signal>
    <receiver>types</receiver>
    <slot>clearSelection()</slot>
