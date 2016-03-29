@@ -53,8 +53,8 @@ class MLSRuleListModel(RuleListModel):
 
     """MLS rule model.  Represents rules as a column."""
 
-    headers = defaultdict(None, {0: "Rule Type", 1: "Source", 2: "Target",
-                                 3: "Object Class", 4: "Default Range"})
+    headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
+                                3: "Object Class", 4: "Default Range"})
 
     def data(self, index, role):
         if self.resultlist:
@@ -82,8 +82,8 @@ class RBACRuleListModel(RuleListModel):
 
     """RBAC rule model.  Represents rules as a column."""
 
-    headers = defaultdict(None, {0: "Rule Type", 1: "Source", 2: "Target",
-                                 3: "Object Class", 4: "Default Role"})
+    headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
+                                3: "Object Class", 4: "Default Role"})
 
     def data(self, index, role):
         if self.resultlist:
@@ -119,9 +119,9 @@ class TERuleListModel(RuleListModel):
 
     """Type Enforcement rule model.  Represents rules as a column."""
 
-    headers = defaultdict(None, {0: "Rule Type", 1: "Source", 2: "Target",
-                                 3: "Object Class", 4: "Permissions/Default Type",
-                                 5: "Conditional Expression", 6: "Conditional Block"})
+    headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
+                                3: "Object Class", 4: "Permissions/Default Type",
+                                5: "Conditional Expression", 6: "Conditional Block"})
 
     def columnCount(self, parent=QModelIndex()):
         return 7

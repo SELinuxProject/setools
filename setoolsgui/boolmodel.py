@@ -44,7 +44,7 @@ class BooleanTableModel(QAbstractTableModel):
 
     """Table-based model for booleans."""
 
-    headers = defaultdict(None, {0: "Name", 1: "Default State"})
+    headers = defaultdict(str, {0: "Name", 1: "Default State"})
 
     def __init__(self, parent):
         super(BooleanTableModel, self).__init__(parent)

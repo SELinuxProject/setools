@@ -59,7 +59,7 @@ class UserTableModel(QAbstractTableModel):
 
     """Table-based model for users."""
 
-    headers = defaultdict(None, {0: "Name", 1: "Roles", 2: "Default Level", 3: "Range"})
+    headers = defaultdict(str, {0: "Name", 1: "Roles", 2: "Default Level", 3: "Range"})
 
     def __init__(self, parent, mls):
         super(UserTableModel, self).__init__(parent)

@@ -50,7 +50,7 @@ class RoleTableModel(QAbstractTableModel):
 
     """Table-based model for roles."""
 
-    headers = defaultdict(None, {0: "Name", 1: "Types"})
+    headers = defaultdict(str, {0: "Name", 1: "Types"})
 
     def __init__(self, parent):
         super(RoleTableModel, self).__init__(parent)

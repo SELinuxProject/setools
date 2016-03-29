@@ -56,7 +56,7 @@ class TypeTableModel(QAbstractTableModel):
 
     """Table-based model for types."""
 
-    headers = defaultdict(None, {0: "Name", 1: "Attributes", 2: "Aliases", 3: "Permissive"})
+    headers = defaultdict(str, {0: "Name", 1: "Attributes", 2: "Aliases", 3: "Permissive"})
 
     def __init__(self, parent):
         super(TypeTableModel, self).__init__(parent)
