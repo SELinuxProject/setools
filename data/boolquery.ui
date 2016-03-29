@@ -402,6 +402,9 @@
   <tabstop>bools</tabstop>
   <tabstop>name</tabstop>
   <tabstop>name_regex</tabstop>
+  <tabstop>default_any</tabstop>
+  <tabstop>default_true</tabstop>
+  <tabstop>default_false</tabstop>
   <tabstop>results_frame</tabstop>
   <tabstop>table_results</tabstop>
   <tabstop>raw_results</tabstop>
