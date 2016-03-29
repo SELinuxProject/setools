@@ -230,6 +230,22 @@ class SELinuxPolicyTest(unittest.TestCase):
         """SELinuxPolicy: validatetrans count"""
         self.assertEqual(self.p.validatetrans_count, 5)
 
+    def test_136_allowxperm_count(self):
+        """SELinuxPolicy: allowxperm rount"""
+        self.assertEqual(self.p.allowxperm_count, 179)
+
+    def test_137_allowxperm_count(self):
+        """SELinuxPolicy: auditallowxperm rount"""
+        self.assertEqual(self.p.auditallowxperm_count, 181)
+
+    def test_138_neverallowxperm_count(self):
+        """SELinuxPolicy: neverallowxperm rount"""
+        self.assertEqual(self.p.neverallowxperm_count, 191)
+
+    def test_139_allowxperm_count(self):
+        """SELinuxPolicy: dontauditxperm rount"""
+        self.assertEqual(self.p.dontauditxperm_count, 193)
+
 
 class SELinuxPolicyLoadError(unittest.TestCase):
 
