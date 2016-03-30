@@ -46,11 +46,11 @@ class FSUseTableModel(QAbstractTableModel):
 
     def data(self, index, role):
         if self.resultlist:
-            if role == Qt.DisplayRole:
-                row = index.row()
-                col = index.column()
-                rule = self.resultlist[row]
+            row = index.row()
+            col = index.column()
+            rule = self.resultlist[row]
 
+            if role == Qt.DisplayRole:
                 if col == 0:
                     return rule.ruletype
                 elif col == 1:
