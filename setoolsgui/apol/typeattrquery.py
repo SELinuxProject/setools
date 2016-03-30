@@ -19,7 +19,7 @@
 
 import logging
 
-from PyQt5.QtCore import pyqtSignal, Qt, QObject, QSortFilterProxyModel, QStringListModel, QThread
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import TypeAttributeQuery
@@ -28,6 +28,7 @@ from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..typeattrmodel import TypeAttributeTableModel, typeattr_detail
 from ..widget import SEToolsWidget
+from .queryupdater import QueryResultsUpdater
 
 
 class TypeAttributeQueryTab(SEToolsWidget, QScrollArea):
@@ -73,7 +74,7 @@ class TypeAttributeQueryTab(SEToolsWidget, QScrollArea):
 
         # set up processing thread
         self.thread = QThread()
-        self.worker = ResultsUpdater(self.query, self.table_results_model)
+        self.worker = QueryResultsUpdater(self.query, self.table_results_model)
         self.worker.moveToThread(self.thread)
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
         self.worker.finished.connect(self.update_complete)
@@ -165,7 +166,9 @@ class TypeAttributeQueryTab(SEToolsWidget, QScrollArea):
         self.raw_results.clear()
         self.thread.start()
 
-    def update_complete(self):
+    def update_complete(self, count):
+        self.log.info("{0} attribute(s) found.".format(count))
+
         # update sizes/location of result displays
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Resizing the result table's columns; GUI may be unresponsive")
@@ -188,52 +191,3 @@ class TypeAttributeQueryTab(SEToolsWidget, QScrollArea):
             self.raw_results.moveCursor(QTextCursor.Start)
 
         self.busy.reset()
-
-
-class ResultsUpdater(QObject):
-
-    """
-    Thread for processing queries and updating result widgets.
-
-    Parameters:
-    query       The query object
-    model       The model for the results
-
-    Qt signals:
-    finished    The update has completed.
-    raw_line    (str) A string to be appended to the raw results.
-    """
-
-    finished = pyqtSignal()
-    raw_line = pyqtSignal(str)
-
-    def __init__(self, query, model):
-        super(ResultsUpdater, self).__init__()
-        self.query = query
-        self.log = logging.getLogger(__name__)
-        self.table_results_model = model
-
-    def update(self):
-        """Run the query and update results."""
-        self.table_results_model.beginResetModel()
-
-        results = []
-        counter = 0
-
-        for counter, item in enumerate(self.query.results(), start=1):
-            results.append(item)
-
-            self.raw_line.emit(item.statement())
-
-            if QThread.currentThread().isInterruptionRequested():
-                break
-            elif not counter % 10:
-                # yield execution every 10 rules
-                QThread.yieldCurrentThread()
-
-        self.table_results_model.resultlist = results
-        self.table_results_model.endResetModel()
-
-        self.log.info("{0} attribute(s) found.".format(counter))
-
-        self.finished.emit()
