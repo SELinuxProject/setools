@@ -166,6 +166,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         index = self.AnalysisTabs.addTab(newtab, counted_name)
         self.AnalysisTabs.setTabToolTip(index, tabtitle)
+        self.AnalysisTabs.setCurrentIndex(index)
 
     def tab_name_editor(self, index):
         if index >= 0:
