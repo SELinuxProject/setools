@@ -96,6 +96,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
+        self.table_results.sortByColumn(0, Qt.AscendingOrder)
 
         # set up processing thread
         self.thread = QThread()
