@@ -30,6 +30,7 @@ from ..logtosignal import LogHandlerToSignal
 from .boolquery import BoolQueryTab
 from .dta import DomainTransitionAnalysisTab
 from .fsusequery import FSUseQueryTab
+from .genfsconquery import GenfsconQueryTab
 from .infoflow import InfoFlowAnalysisTab
 from .mlsrulequery import MLSRuleQueryTab
 from .rbacrulequery import RBACRuleQueryTab
@@ -242,7 +243,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                        "Users": UserQueryTab}
     _rule_map = {"RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
-    _labeling_map = {"fs_use_* Statements": FSUseQueryTab}
+    _labeling_map = {"fs_use_* Statements": FSUseQueryTab,
+                     "Genfscon Statements": GenfsconQueryTab}
     _analysis_choices = {"Components": _components_map,
                          "Rules": _rule_map,
                          "Analyses": _analysis_map,
