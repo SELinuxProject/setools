@@ -215,6 +215,9 @@ class AVRuleXperm(AVRule):
 
     extended = True
 
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}".format(self))
+
     def __str__(self):
         try:
             return self._rule_string
