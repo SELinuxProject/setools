@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -46,27 +46,21 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
     def __init__(self, filename):
         super(ApolMainWindow, self).__init__()
         self.log = logging.getLogger(__name__)
+        self._permmap = None
+        self._policy = None
+        self.setupUi()
+
+        self.load_permmap()
 
         if filename:
-            self._policy = SELinuxPolicy(filename)
-        else:
-            self._policy = None
+            self.load_policy(filename)
 
-        try:
-            # try to load default permission map
-            self._permmap = PermissionMap()
-        except (IOError, OSError) as ex:
-            self.log.info("Failed to load default permission map: {0}".format(ex))
-            self._permmap = None
-
-        self.setupUi()
+        self.update_window_title()
 
     def setupUi(self):
         self.load_ui("apol.ui")
 
         self.tab_counter = 0
-
-        self.update_window_title()
 
         # set up error message dialog
         self.error_msg = QMessageBox(self)
@@ -112,27 +106,34 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
     def select_policy(self):
         filename = QFileDialog.getOpenFileName(self, "Open policy file", ".")[0]
         if filename:
-            try:
-                self._policy = SELinuxPolicy(filename)
-            except Exception as ex:
-                self.error_msg.critical(self, "Policy loading error", str(ex))
-            else:
-                self.update_window_title()
+            self.load_policy(filename)
 
-                if self._permmap:
-                    self._permmap.map_policy(self._policy)
+    def load_policy(self, filename):
+        try:
+            self._policy = SELinuxPolicy(filename)
+        except Exception as ex:
+            self.log.critical("Failed to load policy \"{0}\"".format(filename))
+            self.error_msg.critical(self, "Policy loading error", str(ex))
+        else:
+            self.update_window_title()
+
+            if self._permmap:
+                self._permmap.map_policy(self._policy)
 
     def select_permmap(self):
         filename = QFileDialog.getOpenFileName(self, "Open permission map file", ".")[0]
         if filename:
-            try:
-                self._permmap = PermissionMap(filename)
-            except Exception as ex:
-                self.error_msg.critical(self, "Permission map loading error", str(ex))
-            else:
+            self.load_permmap(filename)
 
-                if self._policy:
-                    self._permmap.map_policy(self._policy)
+    def load_permmap(self, filename=None):
+        try:
+            self._permmap = PermissionMap(filename)
+        except Exception as ex:
+            self.log.critical("Failed to load default permission map: {0}".format(ex))
+            self.error_msg.critical(self, "Permission map loading error", str(ex))
+        else:
+            if self._policy:
+                self._permmap.map_policy(self._policy)
 
     def choose_analysis(self):
         if not self._policy:
