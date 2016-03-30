@@ -151,6 +151,8 @@ class PermissionMap(object):
                     if perm_count >= num_perms:
                         state = 2
 
+        self.log.info("Successfully opened permission map \"{0}\"".format(permmapfile))
+
     def exclude_class(self, class_):
         """
         Exclude all permissions in an object class for calculating rule weights.
@@ -242,7 +244,7 @@ class PermissionMap(object):
             class_name = str(class_)
 
             if class_name not in self.permmap:
-                self.log.info("Adding unmapped class {0} from {1}".format(class_name, policy))
+                self.log.debug("Adding unmapped class {0} from {1}".format(class_name, policy))
                 self.permmap[class_name] = dict()
 
             perms = class_.perms
@@ -254,8 +256,8 @@ class PermissionMap(object):
 
             for perm_name in perms:
                 if perm_name not in self.permmap[class_name]:
-                    self.log.info("Adding unmapped permission {0} in {1} from {2}".
-                                  format(perm_name, class_name, policy))
+                    self.log.debug("Adding unmapped permission {0} in {1} from {2}".
+                                   format(perm_name, class_name, policy))
                     self.permmap[class_name][perm_name] = {'direction': 'u',
                                                            'weight': 1,
                                                            'enabled': True}
