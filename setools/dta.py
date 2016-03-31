@@ -503,6 +503,9 @@ class DomainTransitionAnalysis(object):
         self.rebuildgraph = False
         self.rebuildsubgraph = True
         self.log.info("Completed building domain transition graph.")
+        self.log.debug("Graph stats: nodes: {0}, edges: {1}.".format(
+            nx.number_of_nodes(self.G),
+            nx.number_of_edges(self.G)))
 
     def __remove_excluded_entrypoints(self):
         invalid_edges = []
@@ -556,6 +559,9 @@ class DomainTransitionAnalysis(object):
 
         self.rebuildsubgraph = False
         self.log.info("Completed building domain transition subgraph.")
+        self.log.debug("Subgraph stats: nodes: {0}, edges: {1}.".format(
+            nx.number_of_nodes(self.subG),
+            nx.number_of_edges(self.subG)))
 
 
 class Edge(object):

@@ -323,6 +323,9 @@ class InfoFlowAnalysis(object):
         self.rebuildgraph = False
         self.rebuildsubgraph = True
         self.log.info("Completed building information flow graph.")
+        self.log.debug("Graph stats: nodes: {0}, edges: {1}.".format(
+            nx.number_of_nodes(self.G),
+            nx.number_of_edges(self.G)))
 
     def _build_subgraph(self):
         if self.rebuildgraph:
@@ -350,6 +353,9 @@ class InfoFlowAnalysis(object):
 
         self.rebuildsubgraph = False
         self.log.info("Completed building information flow subgraph.")
+        self.log.debug("Subgraph stats: nodes: {0}, edges: {1}.".format(
+            nx.number_of_nodes(self.subG),
+            nx.number_of_edges(self.subG)))
 
 
 class Edge(object):
