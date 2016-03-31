@@ -72,9 +72,9 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.worker = ResultsUpdater(self.query)
         self.worker.moveToThread(self.thread)
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
+        self.worker.finished.connect(self.update_complete)
         self.worker.finished.connect(self.thread.quit)
         self.thread.started.connect(self.worker.update)
-        self.thread.finished.connect(self.update_complete)
 
         # create a "busy, please wait" dialog
         self.busy = QProgressDialog(self)
