@@ -377,7 +377,9 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
 
         # if query is broad, show warning.
         if not any((self.query.source, self.query.target, self.query.tclass, self.query.perms,
-                    self.query.xperms, self.query.default, self.query.boolean)):
+                    self.query.xperms, self.query.default, self.query.boolean)) \
+                and max_results > 1000:
+
             reply = QMessageBox.question(
                 self, "Continue?",
                 "This is a broad query, estimated to return {0} results.  Continue?".

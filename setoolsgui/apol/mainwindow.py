@@ -85,6 +85,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         # connect signals
         self.open_policy.triggered.connect(self.select_policy)
+        self.close_policy_action.triggered.connect(self.close_policy)
         self.open_permmap.triggered.connect(self.select_permmap)
         self.new_analysis.triggered.connect(self.choose_analysis)
         self.AnalysisTabs.tabCloseRequested.connect(self.close_tab)
@@ -105,9 +106,25 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.setWindowTitle("apol")
 
     def select_policy(self):
+        old_policy = self._policy
+
+        if old_policy and self.AnalysisTabs.count() > 0:
+            reply = QMessageBox.question(
+                self, "Continue?",
+                "Loading a policy will close all existing analyses.  Continue?",
+                QMessageBox.Yes | QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                return
+
         filename = QFileDialog.getOpenFileName(self, "Open policy file", ".")[0]
         if filename:
             self.load_policy(filename)
+
+        if self._policy != old_policy:
+            # policy loading succeeded, clear any
+            # existing tabs
+            self.AnalysisTabs.clear()
 
     def load_policy(self, filename):
         try:
@@ -120,6 +137,20 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
             if self._permmap:
                 self._permmap.map_policy(self._policy)
+
+    def close_policy(self):
+        if self.AnalysisTabs.count() > 0:
+            reply = QMessageBox.question(
+                self, "Continue?",
+                "Loading a policy will close all existing analyses.  Continue?",
+                QMessageBox.Yes | QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                return
+
+        self.AnalysisTabs.clear()
+        self._policy = None
+        self.update_window_title()
 
     def select_permmap(self):
         filename = QFileDialog.getOpenFileName(self, "Open permission map file", ".")[0]
@@ -159,6 +190,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         newtab.setObjectName(counted_name)
 
         newanalysis = tabclass(newtab, self._policy, self._permmap)
+        newanalysis.setAttribute(Qt.WA_DeleteOnClose)
 
         # create a vertical layout in the tab, place the analysis ui inside.
         tabLayout = QVBoxLayout()
@@ -180,19 +212,21 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.tab_editor.setFocus()
 
     def close_active_tab(self):
+        """Close the active tab. This is called from the context menu."""
         index = self.AnalysisTabs.currentIndex()
         if index >= 0:
             self.close_tab(index)
 
     def rename_active_tab(self):
+        """Rename the active tab."""
         index = self.AnalysisTabs.currentIndex()
         if index >= 0:
             self.tab_name_editor(index)
 
     def close_tab(self, index):
+        """Close a tab specified by index."""
         widget = self.AnalysisTabs.widget(index)
         widget.close()
-        widget.deleteLater()
         self.AnalysisTabs.removeTab(index)
 
     def rename_tab(self):

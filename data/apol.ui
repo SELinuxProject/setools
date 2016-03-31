@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>ApolMainWindow_ui</class>
+ <widget class="QMainWindow" name="ApolMainWindow_ui">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -68,6 +68,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="open_policy"/>
+    <addaction name="close_policy_action"/>
     <addaction name="separator"/>
     <addaction name="exit_apol"/>
    </widget>
@@ -204,13 +205,21 @@
     <string>Ctrl+W</string>
    </property>
   </action>
+  <action name="close_policy_action">
+   <property name="text">
+    <string>Close Policy</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the current policy. Closes all analyses too.</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
   <connection>
    <sender>exit_apol</sender>
    <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
+   <receiver>ApolMainWindow_ui</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
