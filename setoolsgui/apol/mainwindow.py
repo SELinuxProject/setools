@@ -32,6 +32,7 @@ from .dta import DomainTransitionAnalysisTab
 from .fsusequery import FSUseQueryTab
 from .genfsconquery import GenfsconQueryTab
 from .infoflow import InfoFlowAnalysisTab
+from .initsidquery import InitialSIDQueryTab
 from .mlsrulequery import MLSRuleQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
@@ -246,7 +247,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     _rule_map = {"RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
     _labeling_map = {"fs_use_* Statements": FSUseQueryTab,
-                     "Genfscon Statements": GenfsconQueryTab}
+                     "Genfscon Statements": GenfsconQueryTab,
+                     "Initial SID Statements": InitialSIDQueryTab}
     _analysis_choices = {"Components": _components_map,
                          "Rules": _rule_map,
                          "Analyses": _analysis_map,
