@@ -26,7 +26,7 @@ from setools import TERuleQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..models import PermListModel, SEToolsListModel, invert_list_selection
-from ..rulemodels import TERuleListModel
+from ..terulemodel import TERuleListModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
 

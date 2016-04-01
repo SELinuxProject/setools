@@ -16,8 +16,10 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from collections import defaultdict
 
-from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QModelIndex, QStringListModel, Qt
+from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QAbstractTableModel, \
+                         QModelIndex, QStringListModel, Qt
 from setools.policyrep.exception import NoCommon
 
 
@@ -111,3 +113,30 @@ class PermListModel(SEToolsListModel):
             permlist.intersection_update(cls_perms)
 
         self.item_list = sorted(permlist)
+
+
+class SEToolsTableModel(QAbstractTableModel):
+
+    """Base class for SETools table models."""
+
+    headers = defaultdict(str)
+
+    def __init__(self, parent):
+        super(SEToolsTableModel, self).__init__(parent)
+        self.resultlist = []
+
+    def headerData(self, section, orientation, role):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            return self.headers[section]
+
+    def rowCount(self, parent=QModelIndex()):
+        if self.resultlist:
+            return len(self.resultlist)
+        else:
+            return 0
+
+    def columnCount(self, parent=QModelIndex()):
+        raise NotImplementedError
+
+    def data(self, index, role):
+        raise NotImplementedError

@@ -19,57 +19,37 @@
 from collections import defaultdict
 
 from PyQt5.QtCore import Qt, QModelIndex
-from PyQt5.QtGui import QPalette, QTextCursor
 
-from setools.policyrep.exception import MLSDisabled
-
-from .details import DetailsPopup
 from .models import SEToolsTableModel
 
 
-def role_detail(parent, role):
-    """
-    Create a dialog box for role details.
+class MLSRuleListModel(SEToolsTableModel):
 
-    Parameters:
-    parent      The parent Qt Widget
-    role        The role
-    """
+    """MLS rule model.  Represents rules as a column."""
 
-    detail = DetailsPopup(parent, "Role detail: {0}".format(role))
-
-    types = sorted(role.types())
-    detail.append_header("Types ({0}): ".format(len(types)))
-
-    for t in types:
-        detail.append("    {0}".format(t))
-
-    detail.show()
-
-
-class RoleTableModel(SEToolsTableModel):
-
-    """Table-based model for roles."""
-
-    headers = defaultdict(str, {0: "Name", 1: "Types"})
+    headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
+                                3: "Object Class", 4: "Default Range"})
 
     def columnCount(self, parent=QModelIndex()):
-        return 2
+        return 5
 
     def data(self, index, role):
-        # There are two roles here.
-        # The parameter, role, is the Qt role
-        # The below item is a role in the list.
         if self.resultlist:
             row = index.row()
             col = index.column()
-            item = self.resultlist[row]
+            rule = self.resultlist[row]
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(item)
+                    return rule.ruletype
                 elif col == 1:
-                    return ", ".join(sorted(str(t) for t in item.types()))
+                    return str(rule.source)
+                elif col == 2:
+                    return str(rule.target)
+                elif col == 3:
+                    return str(rule.tclass)
+                elif col == 4:
+                    return str(rule.default)
+
             elif role == Qt.UserRole:
-                # get the whole object
-                return item
+                return rule

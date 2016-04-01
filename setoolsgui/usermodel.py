@@ -18,10 +18,11 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PyQt5.QtCore import Qt, QModelIndex
 from setools.policyrep.exception import MLSDisabled
 
 from .details import DetailsPopup
+from .models import SEToolsTableModel
 
 
 def user_detail(parent, user):
@@ -55,7 +56,7 @@ def user_detail(parent, user):
     detail.show()
 
 
-class UserTableModel(QAbstractTableModel):
+class UserTableModel(SEToolsTableModel):
 
     """Table-based model for users."""
 
@@ -63,24 +64,10 @@ class UserTableModel(QAbstractTableModel):
 
     def __init__(self, parent, mls):
         super(UserTableModel, self).__init__(parent)
-        self.resultlist = []
-        self.mls = mls
-
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            return self.headers[section]
+        self.col_count = 4 if mls else 2
 
     def columnCount(self, parent=QModelIndex()):
-        if self.mls:
-            return 4
-        else:
-            return 2
-
-    def rowCount(self, parent=QModelIndex()):
-        if self.resultlist:
-            return len(self.resultlist)
-        else:
-            return 0
+        return self.col_count
 
     def data(self, index, role):
         if self.resultlist:

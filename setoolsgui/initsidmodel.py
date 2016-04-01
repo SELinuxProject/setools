@@ -18,31 +18,19 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PyQt5.QtCore import Qt, QModelIndex
+
+from .models import SEToolsTableModel
 
 
-class InitialSIDTableModel(QAbstractTableModel):
+class InitialSIDTableModel(SEToolsTableModel):
 
-    """Table-based model for fs_use_*."""
+    """Table-based model for initial SIDs."""
 
     headers = defaultdict(str, {0: "SID", 1: "Context"})
 
-    def __init__(self, parent):
-        super(InitialSIDTableModel, self).__init__(parent)
-        self.resultlist = []
-
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            return self.headers[section]
-
     def columnCount(self, parent=QModelIndex()):
         return 2
-
-    def rowCount(self, parent=QModelIndex()):
-        if self.resultlist:
-            return len(self.resultlist)
-        else:
-            return 0
 
     def data(self, index, role):
         if self.resultlist:

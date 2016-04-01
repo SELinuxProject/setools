@@ -26,7 +26,7 @@ from setools import MLSRuleQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
-from ..rulemodels import MLSRuleListModel
+from ..mlsrulemodel import MLSRuleListModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
 

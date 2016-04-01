@@ -19,10 +19,12 @@
 import stat
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PyQt5.QtCore import Qt, QModelIndex
+
+from .models import SEToolsTableModel
 
 
-class GenfsconTableModel(QAbstractTableModel):
+class GenfsconTableModel(SEToolsTableModel):
 
     """Table-based model for genfscons."""
 
@@ -39,22 +41,8 @@ class GenfsconTableModel(QAbstractTableModel):
         stat.S_IFLNK: "Symbolic Link",
         stat.S_IFSOCK: "Socket"}
 
-    def __init__(self, parent):
-        super(GenfsconTableModel, self).__init__(parent)
-        self.resultlist = []
-
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            return self.headers[section]
-
     def columnCount(self, parent=QModelIndex()):
         return 4
-
-    def rowCount(self, parent=QModelIndex()):
-        if self.resultlist:
-            return len(self.resultlist)
-        else:
-            return 0
 
     def data(self, index, role):
         if self.resultlist:

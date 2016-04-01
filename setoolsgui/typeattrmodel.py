@@ -18,12 +18,13 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QAbstractTableModel, QModelIndex
+from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtGui import QPalette, QTextCursor
 
 from setools.policyrep.exception import MLSDisabled
 
 from .details import DetailsPopup
+from .models import SEToolsTableModel
 
 
 def typeattr_detail(parent, attr):
@@ -46,28 +47,14 @@ def typeattr_detail(parent, attr):
     detail.show()
 
 
-class TypeAttributeTableModel(QAbstractTableModel):
+class TypeAttributeTableModel(SEToolsTableModel):
 
     """Table-based model for roles."""
 
     headers = defaultdict(str, {0: "Name", 1: "Types"})
 
-    def __init__(self, parent):
-        super(TypeAttributeTableModel, self).__init__(parent)
-        self.resultlist = []
-
-    def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
-            return self.headers[section]
-
     def columnCount(self, parent=QModelIndex()):
         return 2
-
-    def rowCount(self, parent=QModelIndex()):
-        if self.resultlist:
-            return len(self.resultlist)
-        else:
-            return 0
 
     def data(self, index, role):
         if self.resultlist:
