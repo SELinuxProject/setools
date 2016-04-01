@@ -34,6 +34,7 @@ from .genfsconquery import GenfsconQueryTab
 from .infoflow import InfoFlowAnalysisTab
 from .initsidquery import InitialSIDQueryTab
 from .mlsrulequery import MLSRuleQueryTab
+from .netifconquery import NetifconQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
 from .terulequery import TERuleQueryTab
@@ -282,7 +283,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                  "TE Rules": TERuleQueryTab}
     _labeling_map = {"fs_use_* Statements": FSUseQueryTab,
                      "Genfscon Statements": GenfsconQueryTab,
-                     "Initial SID Statements": InitialSIDQueryTab}
+                     "Initial SID Statements": InitialSIDQueryTab,
+                     "Netifcon Statements": NetifconQueryTab}
     _analysis_choices = {"Components": _components_map,
                          "Rules": _rule_map,
                          "Analyses": _analysis_map,
