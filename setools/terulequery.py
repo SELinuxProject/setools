@@ -107,14 +107,13 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
 
             for low, high in value:
                 if not (0 <= low <= 0xffff):
-                    raise ValueError("{0:04x} is not a valid ioctl.".format(low))
+                    raise ValueError("{0:#07x} is not a valid ioctl.".format(low))
 
                 if not (0 <= high <= 0xffff):
-                    raise ValueError("{0:04x} is not a valid ioctl.".format(high))
+                    raise ValueError("{0:#07x} is not a valid ioctl.".format(high))
 
                 if high < low:
-                    raise ValueError("0x{0:04x}-0x{1:04x} is not a valid ioctl range.".
-                                     format(low, high))
+                    high, low = low, high
 
                 pending_xperms.update(i for i in range(low, high+1))
 

@@ -182,9 +182,9 @@ class ioctlSet(set):
         for _, i in itertools.groupby(perms, key=lambda k, c=itertools.count(): k - next(c)):
             group = list(i)
             if len(group) > 1:
-                shortlist.append("0x{0:04x}-0x{1:04x}".format(group[0], group[-1]))
+                shortlist.append("{0:#06x}-{1:#06x}".format(group[0], group[-1]))
             else:
-                shortlist.append("0x{0:04x}".format(group[0]))
+                shortlist.append("{0:#06x}".format(group[0]))
 
         if not spec:
             return " ".join(shortlist)
