@@ -26,7 +26,7 @@ from setools import MLSRuleQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
-from ..mlsrulemodel import MLSRuleListModel
+from ..mlsrulemodel import MLSRuleTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
 
@@ -74,7 +74,7 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
         self.tclass.setModel(self.class_model)
 
         # set up results
-        self.table_results_model = MLSRuleListModel(self)
+        self.table_results_model = MLSRuleTableModel(self)
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)

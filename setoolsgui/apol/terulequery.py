@@ -26,7 +26,7 @@ from setools import TERuleQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..models import PermListModel, SEToolsListModel, invert_list_selection
-from ..terulemodel import TERuleListModel
+from ..terulemodel import TERuleTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
 
@@ -92,7 +92,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.bool_criteria.setModel(self.bool_model)
 
         # set up results
-        self.table_results_model = TERuleListModel(self)
+        self.table_results_model = TERuleTableModel(self)
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)

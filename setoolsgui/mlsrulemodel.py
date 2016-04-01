@@ -23,9 +23,9 @@ from PyQt5.QtCore import Qt, QModelIndex
 from .models import SEToolsTableModel
 
 
-class MLSRuleListModel(SEToolsTableModel):
+class MLSRuleTableModel(SEToolsTableModel):
 
-    """MLS rule model.  Represents rules as a column."""
+    """A table-based model for MLS rules."""
 
     headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
                                 3: "Object Class", 4: "Default Range"})

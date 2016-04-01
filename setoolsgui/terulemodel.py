@@ -24,9 +24,9 @@ from setools.policyrep.exception import RuleNotConditional, RuleUseError
 from .models import SEToolsTableModel
 
 
-class TERuleListModel(SEToolsTableModel):
+class TERuleTableModel(SEToolsTableModel):
 
-    """Type Enforcement rule model.  Represents rules as a column."""
+    """A table-based model for TE rules."""
 
     headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
                                 3: "Object Class", 4: "Permissions/Default Type",

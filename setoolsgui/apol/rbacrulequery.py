@@ -26,7 +26,7 @@ from setools import RBACRuleQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
-from ..rbacrulemodel import RBACRuleListModel
+from ..rbacrulemodel import RBACRuleTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
 
@@ -84,7 +84,7 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
         self.tclass.setModel(self.class_model)
 
         # set up results
-        self.table_results_model = RBACRuleListModel(self)
+        self.table_results_model = RBACRuleTableModel(self)
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)

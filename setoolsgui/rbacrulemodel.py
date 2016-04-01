@@ -24,9 +24,9 @@ from setools.policyrep.exception import RuleUseError
 from .models import SEToolsTableModel
 
 
-class RBACRuleListModel(SEToolsTableModel):
+class RBACRuleTableModel(SEToolsTableModel):
 
-    """RBAC rule model.  Represents rules as a column."""
+    """A table-based model for RBAC rules."""
 
     headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
                                 3: "Object Class", 4: "Default Role"})
