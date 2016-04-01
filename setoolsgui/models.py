@@ -136,7 +136,7 @@ class SEToolsTableModel(QAbstractTableModel):
             return 0
 
     def columnCount(self, parent=QModelIndex()):
-        raise NotImplementedError
+        return len(self.headers)
 
     def data(self, index, role):
         raise NotImplementedError

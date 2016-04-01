@@ -18,7 +18,7 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
 
@@ -28,9 +28,6 @@ class PortconTableModel(SEToolsTableModel):
     """Table-based model for portcons."""
 
     headers = defaultdict(str, {0: "Port/Port Range", 1: "Protocol", 2: "Context"})
-
-    def columnCount(self, parent=QModelIndex()):
-        return 3
 
     def data(self, index, role):
         if self.resultlist:

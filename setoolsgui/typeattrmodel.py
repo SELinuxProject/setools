@@ -18,7 +18,7 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette, QTextCursor
 
 from setools.policyrep.exception import MLSDisabled
@@ -52,9 +52,6 @@ class TypeAttributeTableModel(SEToolsTableModel):
     """Table-based model for roles."""
 
     headers = defaultdict(str, {0: "Name", 1: "Types"})
-
-    def columnCount(self, parent=QModelIndex()):
-        return 2
 
     def data(self, index, role):
         if self.resultlist:

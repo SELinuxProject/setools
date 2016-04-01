@@ -19,7 +19,7 @@
 import stat
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
 
@@ -40,9 +40,6 @@ class GenfsconTableModel(SEToolsTableModel):
         stat.S_IFREG: "Regular File",
         stat.S_IFLNK: "Symbolic Link",
         stat.S_IFSOCK: "Socket"}
-
-    def columnCount(self, parent=QModelIndex()):
-        return 4
 
     def data(self, index, role):
         if self.resultlist:

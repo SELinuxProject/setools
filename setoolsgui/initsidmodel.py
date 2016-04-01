@@ -18,7 +18,7 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
 
@@ -28,9 +28,6 @@ class InitialSIDTableModel(SEToolsTableModel):
     """Table-based model for initial SIDs."""
 
     headers = defaultdict(str, {0: "SID", 1: "Context"})
-
-    def columnCount(self, parent=QModelIndex()):
-        return 2
 
     def data(self, index, role):
         if self.resultlist:

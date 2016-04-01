@@ -18,7 +18,7 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette, QTextCursor
 
 from .details import DetailsPopup
@@ -46,9 +46,6 @@ class BooleanTableModel(SEToolsTableModel):
     """Table-based model for booleans."""
 
     headers = defaultdict(str, {0: "Name", 1: "Default State"})
-
-    def columnCount(self, parent=QModelIndex()):
-        return 2
 
     def data(self, index, role):
         if self.resultlist:

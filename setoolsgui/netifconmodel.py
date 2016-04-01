@@ -18,7 +18,7 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
 
@@ -28,9 +28,6 @@ class NetifconTableModel(SEToolsTableModel):
     """Table-based model for netifcons."""
 
     headers = defaultdict(str, {0: "Device", 1: "Device Context", 2: "Packet Context"})
-
-    def columnCount(self, parent=QModelIndex()):
-        return 3
 
     def data(self, index, role):
         if self.resultlist:

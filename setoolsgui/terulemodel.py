@@ -18,7 +18,7 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 from setools.policyrep.exception import RuleNotConditional, RuleUseError
 
 from .models import SEToolsTableModel
@@ -31,9 +31,6 @@ class TERuleTableModel(SEToolsTableModel):
     headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
                                 3: "Object Class", 4: "Permissions/Default Type",
                                 5: "Conditional Expression", 6: "Conditional Block"})
-
-    def columnCount(self, parent=QModelIndex()):
-        return 7
 
     def data(self, index, role):
         if self.resultlist:
