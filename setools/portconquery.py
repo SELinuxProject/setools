@@ -119,6 +119,7 @@ class PortconQuery(contextquery.ContextQuery):
         self.log.debug("Ports: {0.ports}, overlap: {0.ports_overlap}, "
                        "subset: {0.ports_subset}, superset: {0.ports_superset}, "
                        "proper: {0.ports_proper}".format(self))
+        self.log.debug("Protocol: {0.protocol!r}".format(self))
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
         self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
