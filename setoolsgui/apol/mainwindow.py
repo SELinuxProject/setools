@@ -35,6 +35,7 @@ from .infoflow import InfoFlowAnalysisTab
 from .initsidquery import InitialSIDQueryTab
 from .mlsrulequery import MLSRuleQueryTab
 from .netifconquery import NetifconQueryTab
+from .nodeconquery import NodeconQueryTab
 from .portconquery import PortconQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
@@ -286,6 +287,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                      "Genfscon Statements": GenfsconQueryTab,
                      "Initial SID Statements": InitialSIDQueryTab,
                      "Netifcon Statements": NetifconQueryTab,
+                     "Nodecon Statements": NodeconQueryTab,
                      "Portcon Statements": PortconQueryTab}
     _analysis_choices = {"Components": _components_map,
                          "Rules": _rule_map,
