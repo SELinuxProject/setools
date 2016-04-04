@@ -117,8 +117,15 @@ class InitialSIDQueryTab(SEToolsWidget, QScrollArea):
         self.criteria_frame.setHidden(not self.criteria_expander.isChecked())
         self.notes.setHidden(not self.notes_expander.isChecked())
 
-        # Range criteria is visible only if policy is MLS
-        self.range_criteria.setVisible(self.policy.mls)
+        # Range criteria is available only if policy is MLS
+        if not self.policy.mls:
+            self.range_criteria.setEnabled(False)
+            self.range_criteria.setToolTip("MLS is disabled in this policy.")
+            self.range_.setToolTip("MLS is disabled in this policy.")
+            self.range_exact.setToolTip("MLS is disabled in this policy.")
+            self.range_overlap.setToolTip("MLS is disabled in this policy.")
+            self.range_subset.setToolTip("MLS is disabled in this policy.")
+            self.range_superset.setToolTip("MLS is disabled in this policy.")
 
         # connect signals
         self.buttonBox.clicked.connect(self.run)

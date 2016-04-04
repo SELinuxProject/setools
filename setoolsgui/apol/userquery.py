@@ -77,9 +77,20 @@ class UserQueryTab(SEToolsWidget, QScrollArea):
             self.clear_level_error()
             self.clear_range_error()
         else:
-            # hide level and range criteria
-            self.level_criteria.setHidden(True)
-            self.range_criteria.setHidden(True)
+            # disable level and range criteria
+            self.level_criteria.setEnabled(False)
+            self.level_criteria.setToolTip("MLS is disabled in this policy.")
+            self.level.setToolTip("MLS is disabled in this policy.")
+            self.level_exact.setToolTip("MLS is disabled in this policy.")
+            self.level_dom.setToolTip("MLS is disabled in this policy.")
+            self.level_domby.setToolTip("MLS is disabled in this policy.")
+            self.range_criteria.setEnabled(False)
+            self.range_criteria.setToolTip("MLS is disabled in this policy.")
+            self.range_.setToolTip("MLS is disabled in this policy.")
+            self.range_exact.setToolTip("MLS is disabled in this policy.")
+            self.range_overlap.setToolTip("MLS is disabled in this policy.")
+            self.range_subset.setToolTip("MLS is disabled in this policy.")
+            self.range_superset.setToolTip("MLS is disabled in this policy.")
 
         # set up processing thread
         self.thread = QThread()
