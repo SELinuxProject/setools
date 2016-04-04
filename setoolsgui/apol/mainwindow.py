@@ -36,6 +36,7 @@ from .initsidquery import InitialSIDQueryTab
 from .mlsrulequery import MLSRuleQueryTab
 from .netifconquery import NetifconQueryTab
 from .nodeconquery import NodeconQueryTab
+from .objclassquery import ObjClassQueryTab
 from .portconquery import PortconQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
@@ -278,6 +279,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                      "Information Flow Analysis": InfoFlowAnalysisTab}
     _components_map = {"Booleans": BoolQueryTab,
                        "Roles": RoleQueryTab,
+                       "Object Classes": ObjClassQueryTab,
                        "Types": TypeQueryTab,
                        "Type Attributes": TypeAttributeQueryTab,
                        "Users": UserQueryTab}
