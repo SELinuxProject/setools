@@ -64,10 +64,10 @@ class UserTableModel(SEToolsTableModel):
 
     def __init__(self, parent, mls):
         super(UserTableModel, self).__init__(parent)
-        if not mls:
-            # remove MLS columns if irrelevant
-            del self.headers[2]
-            del self.headers[3]
+        self.col_count = 4 if mls else 2
+
+    def columnCount(self, parent=QModelIndex()):
+        return self.col_count
 
     def data(self, index, role):
         if self.resultlist:
