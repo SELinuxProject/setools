@@ -282,7 +282,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                        "Users": UserQueryTab}
     _rule_map = {"RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
-    _labeling_map = {"fs_use_* Statements": FSUseQueryTab,
+    _labeling_map = {"Fs_use_* Statements": FSUseQueryTab,
                      "Genfscon Statements": GenfsconQueryTab,
                      "Initial SID Statements": InitialSIDQueryTab,
                      "Netifcon Statements": NetifconQueryTab,
