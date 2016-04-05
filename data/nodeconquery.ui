@@ -708,6 +708,10 @@
  <tabstops>
   <tabstop>criteria_expander</tabstop>
   <tabstop>notes_expander</tabstop>
+  <tabstop>network</tabstop>
+  <tabstop>network_exact</tabstop>
+  <tabstop>network_overlap</tabstop>
+  <tabstop>ip_version</tabstop>
   <tabstop>user</tabstop>
   <tabstop>user_regex</tabstop>
   <tabstop>role</tabstop>

@@ -490,6 +490,11 @@
   <tabstop>classes</tabstop>
   <tabstop>name</tabstop>
   <tabstop>name_regex</tabstop>
+  <tabstop>common</tabstop>
+  <tabstop>perms</tabstop>
+  <tabstop>clear_perms</tabstop>
+  <tabstop>invert_perms</tabstop>
+  <tabstop>perms_equal</tabstop>
   <tabstop>results_frame</tabstop>
   <tabstop>table_results</tabstop>
   <tabstop>raw_results</tabstop>

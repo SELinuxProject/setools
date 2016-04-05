@@ -725,6 +725,12 @@
  <tabstops>
   <tabstop>criteria_expander</tabstop>
   <tabstop>notes_expander</tabstop>
+  <tabstop>ports</tabstop>
+  <tabstop>ports_exact</tabstop>
+  <tabstop>ports_overlap</tabstop>
+  <tabstop>ports_subset</tabstop>
+  <tabstop>ports_superset</tabstop>
+  <tabstop>protocol</tabstop>
   <tabstop>user</tabstop>
   <tabstop>user_regex</tabstop>
   <tabstop>role</tabstop>
