@@ -28,6 +28,7 @@ from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 # Analysis tabs:
 from .boolquery import BoolQueryTab
+from .constraintquery import ConstraintQueryTab
 from .dta import DomainTransitionAnalysisTab
 from .fsusequery import FSUseQueryTab
 from .genfsconquery import GenfsconQueryTab
@@ -283,7 +284,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                        "Types": TypeQueryTab,
                        "Type Attributes": TypeAttributeQueryTab,
                        "Users": UserQueryTab}
-    _rule_map = {"RBAC Rules": RBACRuleQueryTab,
+    _rule_map = {"Constraints": ConstraintQueryTab,
+                 "RBAC Rules": RBACRuleQueryTab,
                  "TE Rules": TERuleQueryTab}
     _labeling_map = {"Fs_use_* Statements": FSUseQueryTab,
                      "Genfscon Statements": GenfsconQueryTab,
