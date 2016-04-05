@@ -28,6 +28,7 @@ from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 # Analysis tabs:
 from .boolquery import BoolQueryTab
+from .commonquery import CommonQueryTab
 from .constraintquery import ConstraintQueryTab
 from .dta import DomainTransitionAnalysisTab
 from .fsusequery import FSUseQueryTab
@@ -279,6 +280,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
                      "Information Flow Analysis": InfoFlowAnalysisTab}
     _components_map = {"Booleans": BoolQueryTab,
+                       "Commons": CommonQueryTab,
                        "Roles": RoleQueryTab,
                        "Object Classes": ObjClassQueryTab,
                        "Types": TypeQueryTab,
