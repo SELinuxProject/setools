@@ -74,7 +74,7 @@
       <property name="sizePolicy">
        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
         <horstretch>0</horstretch>
-        <verstretch>1</verstretch>
+        <verstretch>2</verstretch>
        </sizepolicy>
       </property>
       <property name="currentIndex">
@@ -183,6 +183,12 @@
     </item>
     <item row="0" column="4">
      <widget class="QCheckBox" name="notes_expander">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
       <property name="toolTip">
        <string>Show or hide the notes field (no data is lost)</string>
       </property>
@@ -258,6 +264,12 @@
     </item>
     <item row="2" column="0" colspan="5">
      <widget class="QFrame" name="criteria_frame">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
