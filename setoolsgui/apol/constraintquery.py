@@ -270,7 +270,7 @@ class ConstraintQueryTab(SEToolsWidget, QScrollArea):
                 rule_types.append(mode.objectName())
 
         self.query.ruletype = rule_types
-        self.query.perms_equal = self.perms_equal.isChecked()
+        self.query.perms_subset = self.perms_subset.isChecked()
 
         # start processing
         self.busy.setLabelText("Processing query...")

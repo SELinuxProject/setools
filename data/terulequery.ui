@@ -844,10 +844,10 @@
           <item row="0" column="3">
            <widget class="QCheckBox" name="bools_equal">
             <property name="toolTip">
-             <string>A matching rule will have all of the selected Booleans in its conditional expression..</string>
+             <string>A matching rule will use a set of Booleans in its conditional expression equal to the selected Booleans.</string>
             </property>
             <property name="text">
-             <string>Match All</string>
+             <string>Equal</string>
             </property>
            </widget>
           </item>
@@ -898,10 +898,10 @@
           <item row="3" column="2">
            <widget class="QCheckBox" name="xperms_equal">
             <property name="toolTip">
-             <string>A matching rule will have all of the extended permissions.</string>
+             <string>A matching rule will have an extended permission set equal to the listed extended permissions.</string>
             </property>
             <property name="text">
-             <string>Match All</string>
+             <string>Equal</string>
             </property>
            </widget>
           </item>
@@ -933,7 +933,7 @@
            </spacer>
           </item>
           <item row="0" column="3">
-           <widget class="QCheckBox" name="perms_equal">
+           <widget class="QCheckBox" name="perms_subset">
             <property name="toolTip">
              <string>A matching rule will have all of the selected permissions.</string>
             </property>
@@ -1022,7 +1022,7 @@
   <tabstop>perms</tabstop>
   <tabstop>clear_perms</tabstop>
   <tabstop>invert_perms</tabstop>
-  <tabstop>perms_equal</tabstop>
+  <tabstop>perms_subset</tabstop>
   <tabstop>default_type</tabstop>
   <tabstop>default_regex</tabstop>
   <tabstop>bool_criteria</tabstop>

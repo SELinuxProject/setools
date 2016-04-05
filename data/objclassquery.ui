@@ -298,10 +298,10 @@
               <item row="0" column="2">
                <widget class="QCheckBox" name="perms_equal">
                 <property name="toolTip">
-                 <string>A matching class will have all of the selected permissions.</string>
+                 <string>A matching class will have a permission set equal to the selected permissions.</string>
                 </property>
                 <property name="text">
-                 <string>Match All</string>
+                 <string>Equal</string>
                 </property>
                </widget>
               </item>

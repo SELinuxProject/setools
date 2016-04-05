@@ -372,7 +372,7 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
         self.query.ruletype = rule_types
         self.query.source_indirect = self.source_indirect.isChecked()
         self.query.target_indirect = self.target_indirect.isChecked()
-        self.query.perms_equal = self.perms_equal.isChecked()
+        self.query.perms_subset = self.perms_subset.isChecked()
         self.query.boolean_equal = self.bools_equal.isChecked()
 
         # if query is broad, show warning.

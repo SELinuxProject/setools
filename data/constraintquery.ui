@@ -657,7 +657,7 @@
            </spacer>
           </item>
           <item row="0" column="3">
-           <widget class="QCheckBox" name="perms_equal">
+           <widget class="QCheckBox" name="perms_subset">
             <property name="toolTip">
              <string>A matching rule will have all of the selected permissions.</string>
             </property>
@@ -783,7 +783,7 @@
   <tabstop>perms</tabstop>
   <tabstop>clear_perms</tabstop>
   <tabstop>invert_perms</tabstop>
-  <tabstop>perms_equal</tabstop>
+  <tabstop>perms_subset</tabstop>
   <tabstop>results_frame</tabstop>
   <tabstop>table_results</tabstop>
   <tabstop>raw_results</tabstop>
