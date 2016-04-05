@@ -70,7 +70,7 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
                        "regex: {0.source_regex}".format(self))
         self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
                        "regex: {0.target_regex}".format(self))
-        self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
+        self._match_object_class_debug(self.log)
         self.log.debug("Default: {0.default!r}, overlap: {0.default_overlap}, "
                        "subset: {0.default_subset}, superset: {0.default_superset}, "
                        "proper: {0.default_proper}".format(self))

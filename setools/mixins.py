@@ -29,6 +29,10 @@ class MatchAlias(object):
     alias = CriteriaDescriptor("alias_regex")
     alias_regex = False
 
+    def _match_alias_debug(self, log):
+        """Emit log debugging info for alias matching."""
+        log.debug("Alias: {0.alias}, regex: {0.alias_regex}".format(self))
+
     def _match_alias(self, obj):
         """
         Match the alias criteria
@@ -50,6 +54,10 @@ class MatchObjClass(object):
 
     tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
     tclass_regex = False
+
+    def _match_object_class_debug(self, log):
+        """Emit log debugging info for permission matching."""
+        log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
 
     def _match_object_class(self, obj):
         """
@@ -76,6 +84,11 @@ class MatchPermission(object):
     perms_equal = False
     perms_regex = False
     perms_subset = False
+
+    def _match_perms_debug(self, log):
+        """Emit log debugging info for permission matching."""
+        log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}, "
+                  "subset: {0.perms_subset!r}".format(self))
 
     def _match_perms(self, obj):
         """

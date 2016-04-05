@@ -133,9 +133,8 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                        "regex: {0.source_regex}".format(self))
         self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
                        "regex: {0.target_regex}".format(self))
-        self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
-        self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
-                       format(self))
+        self._match_object_class_debug(self.log)
+        self._match_perms_debug(self.log)
         self.log.debug("Xperms: {0.xperms!r}, eq: {0.xperms_equal}".format(self))
         self.log.debug("Default: {0.default!r}, regex: {0.default_regex}".format(self))
         self.log.debug("Boolean: {0.boolean!r}, eq: {0.boolean_equal}, "

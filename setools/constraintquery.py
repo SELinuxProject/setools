@@ -101,9 +101,8 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.Policy
         """Generator which yields all matching constraints rules."""
         self.log.info("Generating constraint results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
-        self.log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}".
-                       format(self))
+        self._match_object_class_debug(self.log)
+        self._match_perms_debug(self.log)
         self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
         self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))

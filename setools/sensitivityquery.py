@@ -57,7 +57,7 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
         """Generator which yields all matching sensitivities."""
         self.log.info("Generating sensitivity results from {0.policy}".format(self))
         self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
-        self.log.debug("Alias: {0.alias}, regex: {0.alias_regex}".format(self))
+        self._match_alias_debug(self.log)
         self.log.debug("Sens: {0.sens!r}, dom: {0.sens_dom}, domby: {0.sens_domby}".format(self))
 
         for s in self.policy.sensitivities():
