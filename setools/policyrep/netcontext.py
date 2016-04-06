@@ -25,6 +25,10 @@ from . import context
 
 port_range = namedtuple("port_range", ["low", "high"])
 
+# Python does not have a constant
+# for the DCCP protocol.
+IPPROTO_DCCP = getprotobyname("dccp")
+
 
 def netifcon_factory(policy, name):
     """Factory function for creating netifcon objects."""
@@ -146,7 +150,8 @@ class PortconProtocol(int):
     corresponding protocol string (udp, tcp).
     """
 
-    _proto_to_text = {IPPROTO_TCP: 'tcp',
+    _proto_to_text = {IPPROTO_DCCP: 'dccp',
+                      IPPROTO_TCP: 'tcp',
                       IPPROTO_UDP: 'udp'}
 
     def __new__(cls, value):

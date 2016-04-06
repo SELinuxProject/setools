@@ -696,6 +696,11 @@
             </item>
             <item>
              <property name="text">
+              <string>DCCP</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>TCP</string>
              </property>
             </item>
