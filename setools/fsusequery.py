@@ -19,11 +19,13 @@
 import logging
 import re
 
-from . import contextquery
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .mixins import MatchContext
+from .query import PolicyQuery
+from .util import match_regex
 
 
-class FSUseQuery(contextquery.ContextQuery):
+class FSUseQuery(MatchContext, PolicyQuery):
 
     """
     Query fs_use_* statements.
@@ -69,17 +71,13 @@ class FSUseQuery(contextquery.ContextQuery):
         self.log.info("Generating fs_use_* results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
         self.log.debug("FS: {0.fs!r}, regex: {0.fs_regex}".format(self))
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self._match_context_debug(self.log)
 
         for fsu in self.policy.fs_uses():
             if self.ruletype and fsu.ruletype not in self.ruletype:
                 continue
 
-            if self.fs and not self._match_regex(
+            if self.fs and not match_regex(
                     fsu.fs,
                     self.fs,
                     self.fs_regex):

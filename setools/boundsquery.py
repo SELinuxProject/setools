@@ -19,8 +19,9 @@
 import logging
 import re
 
-from .query import PolicyQuery
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .query import PolicyQuery
+from .util import match_regex
 
 
 class BoundsQuery(PolicyQuery):
@@ -56,13 +57,13 @@ class BoundsQuery(PolicyQuery):
             if self.ruletype and b.ruletype not in self.ruletype:
                 continue
 
-            if self.parent and not self._match_regex(
+            if self.parent and not match_regex(
                     b.parent,
                     self.parent,
                     self.parent_regex):
                 continue
 
-            if self.child and not self._match_regex(
+            if self.child and not match_regex(
                     b.child,
                     self.child,
                     self.child_regex):

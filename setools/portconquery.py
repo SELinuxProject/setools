@@ -19,11 +19,13 @@
 import logging
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
-from . import contextquery
+from .mixins import MatchContext
+from .query import PolicyQuery
 from .policyrep import port_range, PortconProtocol
+from .util import match_range
 
 
-class PortconQuery(contextquery.ContextQuery):
+class PortconQuery(MatchContext, PolicyQuery):
 
     """
     Port context query.
@@ -120,15 +122,11 @@ class PortconQuery(contextquery.ContextQuery):
                        "subset: {0.ports_subset}, superset: {0.ports_superset}, "
                        "proper: {0.ports_proper}".format(self))
         self.log.debug("Protocol: {0.protocol!r}".format(self))
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self._match_context_debug(self.log)
 
         for portcon in self.policy.portcons():
 
-            if self.ports and not self._match_range(
+            if self.ports and not match_range(
                     portcon.ports,
                     self.ports,
                     self.ports_subset,

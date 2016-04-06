@@ -18,11 +18,13 @@
 #
 import logging
 
-from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .mixins import MatchObjClass
+from .query import PolicyQuery
+from .util import match_indirect_regex, match_range
 
 
-class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
+class MLSRuleQuery(MatchObjClass, PolicyQuery):
 
     """
     Query MLS rules.
@@ -86,7 +88,7 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on source type
             #
-            if self.source and not self._match_indirect_regex(
+            if self.source and not match_indirect_regex(
                     rule.source,
                     self.source,
                     self.source_indirect,
@@ -96,7 +98,7 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on target type
             #
-            if self.target and not self._match_indirect_regex(
+            if self.target and not match_indirect_regex(
                     rule.target,
                     self.target,
                     self.target_indirect,
@@ -112,7 +114,7 @@ class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on range
             #
-            if self.default and not self._match_range(
+            if self.default and not match_range(
                     rule.default,
                     self.default,
                     self.default_subset,

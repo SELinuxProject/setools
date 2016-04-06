@@ -23,6 +23,7 @@ from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .policyrep import ioctlSet
 from .policyrep.exception import RuleUseError, RuleNotConditional
+from .util import match_regex, match_indirect_regex, match_regex_or_set
 
 
 class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuery):
@@ -151,7 +152,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             #
             # Matching on source type
             #
-            if self.source and not self._match_indirect_regex(
+            if self.source and not match_indirect_regex(
                     rule.source,
                     self.source,
                     self.source_indirect,
@@ -161,7 +162,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             #
             # Matching on target type
             #
-            if self.target and not self._match_indirect_regex(
+            if self.target and not match_indirect_regex(
                     rule.target,
                     self.target,
                     self.target_indirect,
@@ -196,7 +197,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             # Matching on extended permissions
             #
             try:
-                if self.xperms and not self._match_regex_or_set(
+                if self.xperms and not match_regex_or_set(
                         rule.perms,
                         self.xperms,
                         self.xperms_equal,
@@ -214,7 +215,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                     # because default type is always a single
                     # type, hard-code indirect to True
                     # so the criteria can be an attribute
-                    if not self._match_indirect_regex(
+                    if not match_indirect_regex(
                             rule.default,
                             self.default,
                             True,
@@ -228,7 +229,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             #
             if self.boolean:
                 try:
-                    if not self._match_regex_or_set(
+                    if not match_regex_or_set(
                             rule.conditional.booleans,
                             self.boolean,
                             self.boolean_equal,

@@ -18,12 +18,13 @@
 #
 import logging
 
-from . import compquery
-from . import mixins
 from .descriptors import CriteriaDescriptor
+from .mixins import MatchAlias, MatchName
+from .query import PolicyQuery
+from .util import match_level
 
 
-class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
+class SensitivityQuery(MatchAlias, MatchName, PolicyQuery):
 
     """
     Query MLS Sensitivities
@@ -56,7 +57,7 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
     def results(self):
         """Generator which yields all matching sensitivities."""
         self.log.info("Generating sensitivity results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self._match_name_debug(self.log)
         self._match_alias_debug(self.log)
         self.log.debug("Sens: {0.sens!r}, dom: {0.sens_dom}, domby: {0.sens_domby}".format(self))
 
@@ -67,7 +68,7 @@ class SensitivityQuery(mixins.MatchAlias, compquery.ComponentQuery):
             if not self._match_alias(s):
                 continue
 
-            if self.sens and not self._match_level(
+            if self.sens and not match_level(
                     s,
                     self.sens,
                     self.sens_dom,

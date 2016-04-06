@@ -19,11 +19,13 @@
 import logging
 import re
 
-from . import compquery
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .mixins import MatchName
+from .query import PolicyQuery
+from .util import match_regex_or_set, match_level, match_range
 
 
-class UserQuery(compquery.ComponentQuery):
+class UserQuery(MatchName, PolicyQuery):
 
     """
     Query SELinux policy users.
@@ -81,7 +83,7 @@ class UserQuery(compquery.ComponentQuery):
     def results(self):
         """Generator which yields all matching users."""
         self.log.info("Generating user results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self._match_name_debug(self.log)
         self.log.debug("Roles: {0.roles!r}, regex: {0.roles_regex}, "
                        "eq: {0.roles_equal}".format(self))
         self.log.debug("Level: {0.level!r}, dom: {0.level_dom}, domby: {0.level_domby}, "
@@ -93,14 +95,14 @@ class UserQuery(compquery.ComponentQuery):
             if not self._match_name(user):
                 continue
 
-            if self.roles and not self._match_regex_or_set(
+            if self.roles and not match_regex_or_set(
                     user.roles,
                     self.roles,
                     self.roles_equal,
                     self.roles_regex):
                 continue
 
-            if self.level and not self._match_level(
+            if self.level and not match_level(
                     user.mls_level,
                     self.level,
                     self.level_dom,
@@ -108,7 +110,7 @@ class UserQuery(compquery.ComponentQuery):
                     self.level_incomp):
                 continue
 
-            if self.range_ and not self._match_range(
+            if self.range_ and not match_range(
                     user.mls_range,
                     self.range_,
                     self.range_subset,

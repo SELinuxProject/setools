@@ -18,11 +18,13 @@
 #
 import logging
 
-from . import contextquery
+from .mixins import MatchContext
 from .policyrep.xencontext import port_range
+from .query import PolicyQuery
+from .util import match_range
 
 
-class IoportconQuery(contextquery.ContextQuery):
+class IoportconQuery(MatchContext, PolicyQuery):
 
     """
     Ioportcon context query.
@@ -103,15 +105,11 @@ class IoportconQuery(contextquery.ContextQuery):
         self.log.debug("Ports: {0.ports!r}, overlap: {0.ports_overlap}, "
                        "subset: {0.ports_subset}, superset: {0.ports_superset}, "
                        "proper: {0.ports_proper}".format(self))
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self._match_context_debug(self.log)
 
         for ioportcon in self.policy.ioportcons():
 
-            if self.ports and not self._match_range(
+            if self.ports and not match_range(
                     ioportcon.ports,
                     self.ports,
                     self.ports_subset,

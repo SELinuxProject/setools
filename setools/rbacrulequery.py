@@ -22,6 +22,7 @@ import re
 from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .policyrep.exception import InvalidType, RuleUseError
+from .util import match_indirect_regex
 
 
 class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
@@ -108,7 +109,7 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on source role
             #
-            if self.source and not self._match_indirect_regex(
+            if self.source and not match_indirect_regex(
                     rule.source,
                     self.source,
                     self.source_indirect,
@@ -118,7 +119,7 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on target type (role_transition)/role(allow)
             #
-            if self.target and not self._match_indirect_regex(
+            if self.target and not match_indirect_regex(
                     rule.target,
                     self.target,
                     self.target_indirect,
@@ -142,7 +143,7 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
                     # because default role is always a single
                     # role, hard-code indirect to True
                     # so the criteria can be an attribute
-                    if not self._match_indirect_regex(
+                    if not match_indirect_regex(
                             rule.default,
                             self.default,
                             True,

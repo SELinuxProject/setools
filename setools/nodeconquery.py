@@ -24,10 +24,11 @@ except ImportError:  # pragma: no cover
 import logging
 from socket import AF_INET, AF_INET6
 
-from . import contextquery
+from .mixins import MatchContext
+from .query import PolicyQuery
 
 
-class NodeconQuery(contextquery.ContextQuery):
+class NodeconQuery(MatchContext, PolicyQuery):
 
     """
     Query nodecon statements.
@@ -106,11 +107,7 @@ class NodeconQuery(contextquery.ContextQuery):
         self.log.info("Generating nodecon results from {0.policy}".format(self))
         self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
         self.log.debug("IP Version: {0.ip_version}".format(self))
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self._match_context_debug(self.log)
 
         for nodecon in self.policy.nodecons():
 

@@ -19,11 +19,13 @@
 import logging
 import re
 
-from . import compquery
 from .descriptors import CriteriaSetDescriptor
+from .mixins import MatchName
+from .query import PolicyQuery
+from .util import match_regex_or_set
 
 
-class RoleQuery(compquery.ComponentQuery):
+class RoleQuery(MatchName, PolicyQuery):
 
     """
     Query SELinux policy roles.
@@ -56,7 +58,7 @@ class RoleQuery(compquery.ComponentQuery):
     def results(self):
         """Generator which yields all matching roles."""
         self.log.info("Generating role results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self._match_name_debug(self.log)
         self.log.debug("Types: {0.types!r}, regex: {0.types_regex}, "
                        "eq: {0.types_equal}".format(self))
 
@@ -64,7 +66,7 @@ class RoleQuery(compquery.ComponentQuery):
             if not self._match_name(r):
                 continue
 
-            if self.types and not self._match_regex_or_set(
+            if self.types and not match_regex_or_set(
                     set(r.types()),
                     self.types,
                     self.types_equal,

@@ -20,6 +20,7 @@
 import re
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .util import match_in_set, match_regex, match_range, match_regex_or_set
 
 
 class MatchAlias(object):
@@ -45,7 +46,113 @@ class MatchAlias(object):
             # if there is no criteria, everything matches.
             return True
 
-        return self._match_in_set(obj.aliases(), self.alias, self.alias_regex)
+        return match_in_set(obj.aliases(), self.alias, self.alias_regex)
+
+
+class MatchContext(object):
+
+    """
+    Mixin for matching contexts.
+
+    Class attributes:
+    user            The user to match in the context.
+    user_regex      If true, regular expression matching
+                    will be used on the user.
+    role            The role to match in the context.
+    role_regex      If true, regular expression matching
+                    will be used on the role.
+    type_           The type to match in the context.
+    type_regex      If true, regular expression matching
+                    will be used on the type.
+    range_          The range to match in the context.
+    range_subset    If true, the criteria will match if it
+                    is a subset of the context's range.
+    range_overlap   If true, the criteria will match if it
+                    overlaps any of the context's range.
+    range_superset  If true, the criteria will match if it
+                    is a superset of the context's range.
+    range_proper    If true, use proper superset/subset
+                    on range matching operations.
+                    No effect if not using set operations.
+    """
+
+    user = CriteriaDescriptor("user_regex", "lookup_user")
+    user_regex = False
+    role = CriteriaDescriptor("role_regex", "lookup_role")
+    role_regex = False
+    type_ = CriteriaDescriptor("type_regex", "lookup_type")
+    type_regex = False
+    range_ = CriteriaDescriptor(lookup_function="lookup_range")
+    range_overlap = False
+    range_subset = False
+    range_superset = False
+    range_proper = False
+
+    def _match_context_debug(self, log):
+        """Emit log debugging info for context matching."""
+        log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
+        log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
+        log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
+        log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
+                  "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+
+    def _match_context(self, context):
+        """
+        Match the context criteria.
+
+        Parameter:
+        obj     An object with context attributes "user", "role",
+                "type_" and "range_".
+        """
+
+        if self.user and not match_regex(
+                context.user,
+                self.user,
+                self.user_regex):
+            return False
+
+        if self.role and not match_regex(
+                context.role,
+                self.role,
+                self.role_regex):
+            return False
+
+        if self.type_ and not match_regex(
+                context.type_,
+                self.type_,
+                self.type_regex):
+            return False
+
+        if self.range_ and not match_range(
+                context.range_,
+                self.range_,
+                self.range_subset,
+                self.range_overlap,
+                self.range_superset,
+                self.range_proper):
+            return False
+
+        return True
+
+
+class MatchName(object):
+
+    """Mixin for matching an object's name."""
+
+    name = CriteriaDescriptor("name_regex")
+    name_regex = False
+
+    def _match_name_debug(self, log):
+        """Log debugging messages for name matching."""
+        log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+
+    def _match_name(self, obj):
+        """Match the object to the name criteria."""
+        if not self.name:
+            # if there is no criteria, everything matches.
+            return True
+
+        return match_regex(obj, self.name, self.name_regex)
 
 
 class MatchObjClass(object):
@@ -105,5 +212,4 @@ class MatchPermission(object):
         if self.perms_subset:
             return obj.perms >= self.perms
         else:
-            return self._match_regex_or_set(obj.perms, self.perms, self.perms_equal,
-                                            self.perms_regex)
+            return match_regex_or_set(obj.perms, self.perms, self.perms_equal, self.perms_regex)

@@ -18,10 +18,11 @@
 #
 import logging
 
-from . import contextquery
+from .mixins import MatchContext
+from .query import PolicyQuery
 
 
-class PcideviceconQuery(contextquery.ContextQuery):
+class PcideviceconQuery(MatchContext, PolicyQuery):
 
     """
     Pcidevicecon context query.
@@ -79,11 +80,7 @@ class PcideviceconQuery(contextquery.ContextQuery):
         """Generator which yields all matching pcidevicecons."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Device ID: {0.device!r}".format(self))
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self._match_context_debug(self.log)
 
         for pcidevicecon in self.policy.pcidevicecons():
 

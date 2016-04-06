@@ -19,12 +19,14 @@
 import logging
 import re
 
-from . import compquery
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .mixins import MatchName
 from .policyrep.exception import NoCommon
+from .query import PolicyQuery
+from .util import match_regex, match_regex_or_set
 
 
-class ObjClassQuery(compquery.ComponentQuery):
+class ObjClassQuery(MatchName, PolicyQuery):
 
     """
     Query object classes.
@@ -67,7 +69,7 @@ class ObjClassQuery(compquery.ComponentQuery):
     def results(self):
         """Generator which yields all matching object classes."""
         self.log.info("Generating object class results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self._match_name_debug(self.log)
         self.log.debug("Common: {0.common!r}, regex: {0.common_regex}".format(self))
         self.log.debug("Perms: {0.perms}, regex: {0.perms_regex}, "
                        "eq: {0.perms_equal}, indirect: {0.perms_indirect}".format(self))
@@ -78,7 +80,7 @@ class ObjClassQuery(compquery.ComponentQuery):
 
             if self.common:
                 try:
-                    if not self._match_regex(
+                    if not match_regex(
                             class_.common,
                             self.common,
                             self.common_regex):
@@ -95,7 +97,7 @@ class ObjClassQuery(compquery.ComponentQuery):
                     except NoCommon:
                         pass
 
-                if not self._match_regex_or_set(
+                if not match_regex_or_set(
                         perms,
                         self.perms,
                         self.perms_equal,

@@ -19,12 +19,13 @@
 import logging
 import re
 
-from . import compquery
-from . import mixins
 from .descriptors import CriteriaSetDescriptor
+from .mixins import MatchAlias, MatchName
+from .query import PolicyQuery
+from .util import match_regex_or_set
 
 
-class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
+class TypeQuery(MatchAlias, MatchName, PolicyQuery):
 
     """
     Query SELinux policy types.
@@ -74,7 +75,7 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
     def results(self):
         """Generator which yields all matching types."""
         self.log.info("Generating type results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self._match_name_debug(self.log)
         self._match_alias_debug(self.log)
         self.log.debug("Attrs: {0.attrs!r}, regex: {0.attrs_regex}, "
                        "eq: {0.attrs_equal}".format(self))
@@ -87,7 +88,7 @@ class TypeQuery(mixins.MatchAlias, compquery.ComponentQuery):
             if not self._match_alias(t):
                 continue
 
-            if self.attrs and not self._match_regex_or_set(
+            if self.attrs and not match_regex_or_set(
                     set(t.attributes()),
                     self.attrs,
                     self.attrs_equal,

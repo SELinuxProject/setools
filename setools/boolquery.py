@@ -18,11 +18,12 @@
 #
 import logging
 
-from . import compquery
 from .descriptors import CriteriaDescriptor
+from .mixins import MatchName
+from .query import PolicyQuery
 
 
-class BoolQuery(compquery.ComponentQuery):
+class BoolQuery(MatchName, PolicyQuery):
 
     """Query SELinux policy Booleans.
 
@@ -57,7 +58,7 @@ class BoolQuery(compquery.ComponentQuery):
     def results(self):
         """Generator which yields all Booleans matching the criteria."""
         self.log.info("Generating Boolean results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self._match_name_debug(self.log)
         self.log.debug("Default: {0.default}".format(self))
 
         for boolean in self.policy.bools():

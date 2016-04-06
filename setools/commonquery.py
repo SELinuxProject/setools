@@ -19,10 +19,11 @@
 import logging
 import re
 
-from . import compquery, mixins
+from .mixins import MatchName, MatchPermission
+from .query import PolicyQuery
 
 
-class CommonQuery(mixins.MatchPermission, compquery.ComponentQuery):
+class CommonQuery(MatchPermission, MatchName, PolicyQuery):
 
     """
     Query common permission sets.
@@ -50,7 +51,7 @@ class CommonQuery(mixins.MatchPermission, compquery.ComponentQuery):
     def results(self):
         """Generator which yields all matching commons."""
         self.log.info("Generating common results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        self._match_name_debug(self.log)
         self._match_perms_debug(self.log)
 
         for com in self.policy.commons():

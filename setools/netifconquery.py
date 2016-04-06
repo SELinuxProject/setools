@@ -18,11 +18,12 @@
 #
 import logging
 
-from . import compquery
-from . import contextquery
+from .mixins import MatchContext, MatchName
+from .query import PolicyQuery
+from .util import match_regex
 
 
-class NetifconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
+class NetifconQuery(MatchContext, MatchName, PolicyQuery):
 
     """
     Network interface context query.
@@ -61,15 +62,11 @@ class NetifconQuery(compquery.ComponentQuery, contextquery.ContextQuery):
     def results(self):
         """Generator which yields all matching netifcons."""
         self.log.info("Generating netifcon results from {0.policy}".format(self))
-        self.log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self._match_name_debug(self.log)
+        self._match_context_debug(self.log)
 
         for netif in self.policy.netifcons():
-            if self.name and not self._match_regex(
+            if self.name and not match_regex(
                     netif.netif,
                     self.name,
                     self.name_regex):

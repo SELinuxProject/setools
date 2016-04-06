@@ -19,12 +19,14 @@
 import logging
 import re
 
-from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .mixins import MatchObjClass, MatchPermission
 from .policyrep.exception import ConstraintUseError
+from .query import PolicyQuery
+from .util import match_in_set
 
 
-class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuery):
+class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
 
     """
     Query constraint rules, (mls)constrain/(mls)validatetrans.
@@ -95,7 +97,7 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.Policy
         else:
             obj = expr
 
-        return self._match_in_set(obj, criteria, regex)
+        return match_in_set(obj, criteria, regex)
 
     def results(self):
         """Generator which yields all matching constraints rules."""
