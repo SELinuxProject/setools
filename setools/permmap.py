@@ -23,14 +23,14 @@ from errno import ENOENT
 from . import exception
 from . import policyrep
 
+infoflow_directions = ["r", "w", "b", "n", "u"]
+min_weight = 1
+max_weight = 10
+
 
 class PermissionMap(object):
 
     """Permission Map for information flow analysis."""
-
-    valid_infoflow_directions = ["r", "w", "b", "n", "u"]
-    min_weight = 1
-    max_weight = 10
 
     def __init__(self, permmapfile=None):
         """
@@ -125,7 +125,7 @@ class PermissionMap(object):
                     perm_name = str(entry[0])
 
                     flow_direction = str(entry[1])
-                    if flow_direction not in self.valid_infoflow_directions:
+                    if flow_direction not in infoflow_directions:
                         raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid information flow direction: {2}".
                             format(permmapfile, line_num, entry[1]))
@@ -137,11 +137,11 @@ class PermissionMap(object):
                             "{0}:{1}:Invalid permission weight: {2}".
                             format(permmapfile, line_num, entry[2]))
 
-                    if not self.min_weight <= weight <= self.max_weight:
+                    if not min_weight <= weight <= max_weight:
                         raise exception.PermissionMapParseError(
                             "{0}:{1}:Permission weight must be {3}-{4}: {2}".
                             format(permmapfile, line_num, entry[2],
-                                   self.min_weight, self.max_weight))
+                                   min_weight, max_weight))
 
                     self.permmap[class_name][perm_name] = {'direction': flow_direction,
                                                            'weight': weight,
@@ -322,7 +322,7 @@ class PermissionMap(object):
         UnmappedPermission  The specified permission is not mapped for the object class.
         """
 
-        if direction not in self.valid_infoflow_directions:
+        if direction not in infoflow_directions:
             raise ValueError("Invalid information flow direction: {0}".format(direction))
 
         classname = str(class_)
@@ -350,7 +350,7 @@ class PermissionMap(object):
         UnmappedPermission  The specified permission is not mapped for the object class.
         """
 
-        if not self.min_weight <= weight <= self.max_weight:
+        if not min_weight <= weight <= max_weight:
             raise ValueError("Permission weights must be 1-10: {0}".format(weight))
 
         classname = str(class_)
