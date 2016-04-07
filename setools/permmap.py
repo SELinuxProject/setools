@@ -18,6 +18,7 @@
 #
 import sys
 import logging
+from collections import OrderedDict
 from errno import ENOENT
 
 from . import exception
@@ -38,6 +39,7 @@ class PermissionMap(object):
         permmapfile     The path to the permission map to load.
         """
         self.log = logging.getLogger(__name__)
+        self.permmap = OrderedDict()
 
         if permmapfile:
             self.load(permmapfile)
@@ -64,11 +66,12 @@ class PermissionMap(object):
         # 2 = read class name and number of perms
         # 3 = read perms
         with open(permmapfile, "r") as mapfile:
+            total_perms = 0
             class_count = 0
             num_classes = 0
             state = 1
 
-            self.permmap = dict()
+            self.permmap.clear()
 
             for line_num, line in enumerate(mapfile, start=1):
                 entry = line.split()
@@ -117,7 +120,7 @@ class PermissionMap(object):
                             "{0}:{1}:Extra class found: {2}".
                             format(permmapfile, line_num, class_name))
 
-                    self.permmap[class_name] = dict()
+                    self.permmap[class_name] = OrderedDict()
                     perm_count = 0
                     state = 3
 
@@ -143,15 +146,25 @@ class PermissionMap(object):
                             format(permmapfile, line_num, entry[2],
                                    min_weight, max_weight))
 
+                    self.log.debug("Read {0}:{1} {2} {3}".format(
+                                   class_name, perm_name, flow_direction, weight))
+
+                    if flow_direction == 'u':
+                        self.log.info("Permission {0}:{1} is unmapped.".format(
+                                      class_name, perm_name))
+
                     self.permmap[class_name][perm_name] = {'direction': flow_direction,
                                                            'weight': weight,
                                                            'enabled': True}
 
+                    total_perms += 1
                     perm_count += 1
                     if perm_count >= num_perms:
                         state = 2
 
         self.log.info("Successfully opened permission map \"{0}\"".format(permmapfile))
+        self.log.debug("Read {0} classes and {1} total permissions.".format(
+                       class_count, total_perms))
 
     def save(self, permmapfile):
         """
