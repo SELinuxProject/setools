@@ -153,6 +153,43 @@ class PermissionMap(object):
 
         self.log.info("Successfully opened permission map \"{0}\"".format(permmapfile))
 
+    def save(self, permmapfile):
+        """
+        Save the permission map to the specified path.  Existing files
+        will be overwritten.
+
+        Parameter:
+        permmapfile         The path to write the permission map.
+        """
+        with open(permmapfile, "w") as mapfile:
+            self.log.info("Writing permission map to \"{0}\"".format(permmapfile))
+            mapfile.write("{0}\n\n".format(len(self.permmap)))
+
+            for classname, perms in self.permmap.items():
+                mapfile.write("class {0} {1}\n".format(classname, len(perms)))
+
+                for permname, settings in perms.items():
+                    direction = settings['direction']
+                    weight = settings['weight']
+
+                    assert min_weight <= weight <= max_weight, \
+                        "{0}:{1} weight is out of range ({2}). This is an SETools bug.".format(
+                            classname, permname, weight)
+
+                    assert direction in infoflow_directions, \
+                        "{0}:{1} flow direction ({2}) is invalid. This is an SETools bug.".format(
+                            classname, permname, direction)
+
+                    if direction == 'u':
+                        self.log.warning("Warning: permission {0} in class {1} is unmapped.".format(
+                                         permname, classname))
+
+                    mapfile.write("{0:>20} {1:>9} {2:>9}\n".format(permname, direction, weight))
+
+                mapfile.write("\n")
+
+            self.log.info("Successfully wrote permission map to \"{0}\"".format(permmapfile))
+
     def exclude_class(self, class_):
         """
         Exclude all permissions in an object class for calculating rule weights.
