@@ -33,6 +33,14 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
 
     """An information flow analysis tab."""
 
+    @property
+    def perm_map(self):
+        return self.query.perm_map
+
+    @perm_map.setter
+    def perm_map(self, pmap):
+        self.query.perm_map = pmap
+
     def __init__(self, parent, policy, perm_map):
         super(InfoFlowAnalysisTab, self).__init__(parent)
         self.log = logging.getLogger(__name__)
@@ -50,6 +58,10 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
     def setupUi(self):
         self.log.debug("Initializing UI.")
         self.load_ui("infoflow.ui")
+
+        # set up error message for missing perm map
+        self.error_msg = QMessageBox(self)
+        self.error_msg.setStandardButtons(QMessageBox.Ok)
 
         # set up source/target autocompletion
         type_completion_list = [str(t) for t in self.policy.types()]
@@ -195,6 +207,13 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
 
         if self.target.isEnabled() and not self.query.target:
             self.set_target_error("A target type is required.")
+            fail = True
+
+        if not self.perm_map:
+            self.log.critical("A permission map is required to begin the analysis.")
+            self.error_msg.critical(self,
+                                    "No permission map available.",
+                                    "Please load a permission map to begin the analysis.")
             fail = True
 
         if fail:
