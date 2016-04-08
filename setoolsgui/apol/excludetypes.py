@@ -40,7 +40,6 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         self.load_ui("exclude_types.ui")
         self.exclude_a_type.clicked.connect(self.exclude_clicked)
         self.include_a_type.clicked.connect(self.include_clicked)
-        self.buttonBox.accepted.connect(self.ok_clicked)
 
         # populate the lists:
         self.included_types.clear()
@@ -62,7 +61,7 @@ class ExcludeTypes(SEToolsWidget, QDialog):
             self.excluded_types.addItem(item.text())
             self.included_types.takeItem(self.included_types.row(item))
 
-    def ok_clicked(self):
+    def accept(self):
         exclude = []
 
         item = self.excluded_types.takeItem(0)
@@ -73,4 +72,4 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         self.log.debug("Chosen for exclusion: {0!r}".format(exclude))
 
         self.parent.query.exclude = exclude
-        self.accept()
+        super(ExcludeTypes, self).accept()
