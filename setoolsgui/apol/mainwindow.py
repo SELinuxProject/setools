@@ -49,6 +49,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         self.tab_counter = 0
 
+        # set up analysis menu
+        self.chooser = ChooseAnalysis(self)
+
         # set up error message dialog
         self.error_msg = QMessageBox(self)
         self.error_msg.setStandardButtons(QMessageBox.Ok)
@@ -165,8 +168,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             # tries to start an analysis with no policy open, but then
             # cancels out of the policy file chooser or there is an
             # error opening the policy file.
-            chooser = ChooseAnalysis(self, self._policy.mls)
-            chooser.show()
+            self.chooser.show(self._policy.mls)
 
     def create_new_analysis(self, tabtitle, tabclass):
         self.tab_counter += 1

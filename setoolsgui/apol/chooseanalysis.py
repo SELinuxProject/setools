@@ -52,51 +52,47 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     The below class attributes are used for populating
     the GUI contents and mapping them to the appropriate
     tab widget class for the analysis.
-
-    The item_mapping attribute will be populated to
-    map the tree list items to the analysis tab widgets.
     """
 
-    _analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
-                     "Information Flow Analysis": InfoFlowAnalysisTab}
-    _components_map = {"Booleans": BoolQueryTab,
-                       "Commons": CommonQueryTab,
-                       "Roles": RoleQueryTab,
-                       "Object Classes": ObjClassQueryTab,
-                       "Types": TypeQueryTab,
-                       "Type Attributes": TypeAttributeQueryTab,
-                       "Users": UserQueryTab}
-    _rule_map = {"Constraints": ConstraintQueryTab,
-                 "RBAC Rules": RBACRuleQueryTab,
-                 "TE Rules": TERuleQueryTab}
-    _labeling_map = {"Fs_use_* Statements": FSUseQueryTab,
-                     "Genfscon Statements": GenfsconQueryTab,
-                     "Initial SID Statements": InitialSIDQueryTab,
-                     "Netifcon Statements": NetifconQueryTab,
-                     "Nodecon Statements": NodeconQueryTab,
-                     "Portcon Statements": PortconQueryTab}
-    _analysis_choices = {"Components": _components_map,
-                         "Rules": _rule_map,
-                         "Analyses": _analysis_map,
-                         "Labeling": _labeling_map}
-
-    def __init__(self, parent, mls):
+    def __init__(self, parent):
         super(ChooseAnalysis, self).__init__(parent)
-        self.item_mapping = {}
         self.parent = parent
-        self.setupUi(mls)
+        self.setupUi()
 
-    def setupUi(self, mls):
+    def setupUi(self):
         self.load_ui("choose_analysis.ui")
-        self.buttonBox.accepted.connect(self.ok_clicked)
-        self.analysisTypes.doubleClicked.connect(self.ok_clicked)
+        self.analysisTypes.doubleClicked.connect(self.accept)
+
+    def show(self, mls):
+        analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
+                        "Information Flow Analysis": InfoFlowAnalysisTab}
+        components_map = {"Booleans": BoolQueryTab,
+                          "Commons": CommonQueryTab,
+                          "Roles": RoleQueryTab,
+                          "Object Classes": ObjClassQueryTab,
+                          "Types": TypeQueryTab,
+                          "Type Attributes": TypeAttributeQueryTab,
+                          "Users": UserQueryTab}
+        rule_map = {"Constraints": ConstraintQueryTab,
+                    "RBAC Rules": RBACRuleQueryTab,
+                    "TE Rules": TERuleQueryTab}
+        labeling_map = {"Fs_use_* Statements": FSUseQueryTab,
+                        "Genfscon Statements": GenfsconQueryTab,
+                        "Initial SID Statements": InitialSIDQueryTab,
+                        "Netifcon Statements": NetifconQueryTab,
+                        "Nodecon Statements": NodeconQueryTab,
+                        "Portcon Statements": PortconQueryTab}
+        analysis_choices = {"Components": components_map,
+                            "Rules": rule_map,
+                            "Analyses": analysis_map,
+                            "Labeling": labeling_map}
 
         if mls:
-            self._rule_map["MLS Rules"] = MLSRuleQueryTab
+            rule_map["MLS Rules"] = MLSRuleQueryTab
 
         # populate the item list:
         self.analysisTypes.clear()
-        for groupname, group in self._analysis_choices.items():
+        for groupname, group in analysis_choices.items():
             groupitem = QTreeWidgetItem(self.analysisTypes)
             groupitem.setText(0, groupname)
             groupitem._tab_class = None
@@ -108,8 +104,9 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 
         self.analysisTypes.expandAll()
         self.analysisTypes.sortByColumn(0, Qt.AscendingOrder)
+        super(ChooseAnalysis, self).show()
 
-    def ok_clicked(self):
+    def accept(self):
         try:
             # .ui is set for single item selection.
             item = self.analysisTypes.selectedItems()[0]
@@ -120,4 +117,4 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
             # TypeError: one of the group items was selected.
             pass
         else:
-            self.accept()
+            super(ChooseAnalysis, self).accept()
