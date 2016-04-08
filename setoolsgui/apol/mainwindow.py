@@ -192,19 +192,11 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.tab_counter += 1
         counted_name = "{0}: {1}".format(self.tab_counter, tabtitle)
 
-        newtab = QWidget()
-        newtab.setObjectName(counted_name)
-
-        newanalysis = tabclass(newtab, self._policy, self._permmap)
+        newanalysis = tabclass(self, self._policy, self._permmap)
         newanalysis.setAttribute(Qt.WA_DeleteOnClose)
+        newanalysis.setObjectName(counted_name)
 
-        # create a vertical layout in the tab, place the analysis ui inside.
-        tabLayout = QVBoxLayout()
-        tabLayout.setContentsMargins(0, 0, 0, 0)
-        tabLayout.addWidget(newanalysis)
-        newtab.setLayout(tabLayout)
-
-        index = self.AnalysisTabs.addTab(newtab, counted_name)
+        index = self.AnalysisTabs.addTab(newanalysis, counted_name)
         self.AnalysisTabs.setTabToolTip(index, tabtitle)
         self.AnalysisTabs.setCurrentIndex(index)
 
