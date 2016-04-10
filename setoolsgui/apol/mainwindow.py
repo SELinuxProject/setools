@@ -26,6 +26,7 @@ from setools import PermissionMap, SELinuxPolicy
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 from .chooseanalysis import ChooseAnalysis
+from .summary import SummaryTab
 
 
 class ApolMainWindow(SEToolsWidget, QMainWindow):
@@ -41,6 +42,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         if filename:
             self.load_policy(filename)
+
+        if self._policy:
+            self.create_new_analysis("Summary", SummaryTab)
 
         self.update_window_title()
 
@@ -114,6 +118,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             # policy loading succeeded, clear any
             # existing tabs
             self.AnalysisTabs.clear()
+            self.create_new_analysis("Summary", SummaryTab)
 
     def load_policy(self, filename):
         try:

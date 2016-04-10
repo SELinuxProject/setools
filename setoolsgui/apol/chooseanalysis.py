@@ -38,6 +38,7 @@ from .objclassquery import ObjClassQueryTab
 from .portconquery import PortconQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
+from .summary import SummaryTab
 from .terulequery import TERuleQueryTab
 from .typeattrquery import TypeAttributeQueryTab
 from .typequery import TypeQueryTab
@@ -82,10 +83,12 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                         "Netifcon Statements": NetifconQueryTab,
                         "Nodecon Statements": NodeconQueryTab,
                         "Portcon Statements": PortconQueryTab}
+        general_choices = {"Summary": SummaryTab}
         analysis_choices = {"Components": components_map,
                             "Rules": rule_map,
                             "Analyses": analysis_map,
-                            "Labeling": labeling_map}
+                            "Labeling": labeling_map,
+                            "General": general_choices}
 
         if mls:
             rule_map["MLS Rules"] = MLSRuleQueryTab
