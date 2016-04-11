@@ -95,7 +95,7 @@
        <item row="1" column="1">
         <widget class="QLabel" name="policy_version">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -115,7 +115,7 @@
        <item row="2" column="1">
         <widget class="QLabel" name="handle_unknown">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -135,7 +135,7 @@
        <item row="0" column="1">
         <widget class="QLabel" name="mls">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -342,77 +342,77 @@
        <item row="0" column="1">
         <widget class="QLabel" name="allow_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
         <widget class="QLabel" name="allowxperm_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="QLabel" name="auditallow_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
         <widget class="QLabel" name="auditallowxperm_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
         <widget class="QLabel" name="neverallow_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
         <widget class="QLabel" name="neverallowxperm_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="6" column="1">
         <widget class="QLabel" name="dontaudit_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="7" column="1">
         <widget class="QLabel" name="dontauditxperm_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="8" column="1">
         <widget class="QLabel" name="type_transition_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="9" column="1">
         <widget class="QLabel" name="type_change_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="10" column="1">
         <widget class="QLabel" name="type_member_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -443,7 +443,7 @@
         </widget>
        </item>
        <item row="13" column="0">
-        <widget class="QLabel" name="label_27">
+        <widget class="QLabel" name="range_trans_label">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -458,21 +458,21 @@
        <item row="11" column="1">
         <widget class="QLabel" name="role_allow_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="12" column="1">
         <widget class="QLabel" name="role_transition_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="13" column="1">
         <widget class="QLabel" name="range_transition_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -501,7 +501,7 @@
        <item row="0" column="1">
         <widget class="QLabel" name="class_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -534,14 +534,14 @@
        <item row="1" column="1">
         <widget class="QLabel" name="perms_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="QLabel" name="type_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -561,7 +561,7 @@
        <item row="3" column="1">
         <widget class="QLabel" name="attribute_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -605,7 +605,7 @@
         </widget>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="label_47">
+        <widget class="QLabel" name="sens_label">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -618,7 +618,7 @@
         </widget>
        </item>
        <item row="8" column="0">
-        <widget class="QLabel" name="label_48">
+        <widget class="QLabel" name="cats_label">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -633,35 +633,35 @@
        <item row="4" column="1">
         <widget class="QLabel" name="role_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
         <widget class="QLabel" name="user_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="6" column="1">
         <widget class="QLabel" name="bool_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="7" column="1">
         <widget class="QLabel" name="sensitivity_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="8" column="1">
         <widget class="QLabel" name="category_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -690,7 +690,7 @@
        <item row="0" column="1">
         <widget class="QLabel" name="constrain_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -710,12 +710,12 @@
        <item row="1" column="1">
         <widget class="QLabel" name="validatetrans_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="label_30">
+        <widget class="QLabel" name="mlsconstrain_label">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -730,12 +730,12 @@
        <item row="2" column="1">
         <widget class="QLabel" name="mlsconstrain_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_32">
+        <widget class="QLabel" name="mlsvalidatetrans_label">
          <property name="font">
           <font>
            <weight>75</weight>
@@ -750,7 +750,7 @@
        <item row="3" column="1">
         <widget class="QLabel" name="mlsvalidatetrans_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -779,7 +779,7 @@
        <item row="0" column="1">
         <widget class="QLabel" name="permissive_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -799,7 +799,7 @@
        <item row="1" column="1">
         <widget class="QLabel" name="default_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -819,7 +819,7 @@
        <item row="2" column="1">
         <widget class="QLabel" name="typebounds_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -900,35 +900,35 @@
        <item row="0" column="1">
         <widget class="QLabel" name="initsid_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="2" column="1">
         <widget class="QLabel" name="genfscon_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="1" column="1">
         <widget class="QLabel" name="fs_use_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
         <widget class="QLabel" name="portcon_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
        <item row="5" column="1">
         <widget class="QLabel" name="nodecon_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
@@ -948,7 +948,7 @@
        <item row="4" column="1">
         <widget class="QLabel" name="netifcon_count">
          <property name="text">
-          <string>TextLabel</string>
+          <string>0</string>
          </property>
         </widget>
        </item>
