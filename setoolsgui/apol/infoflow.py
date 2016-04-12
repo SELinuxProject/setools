@@ -18,15 +18,18 @@
 #
 
 import logging
+import copy
 
 from PyQt5.QtCore import pyqtSignal, Qt, QObject, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
 from setools import InfoFlowAnalysis
+from setools.exception import UnmappedClass, UnmappedPermission
 
 from ..logtosignal import LogHandlerToSignal
-from .excludetypes import ExcludeTypes
 from ..widget import SEToolsWidget
+from .excludetypes import ExcludeTypes
+from .permmapedit import PermissionMapEditor
 
 
 class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
@@ -39,7 +42,21 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
 
     @perm_map.setter
     def perm_map(self, pmap):
-        self.query.perm_map = pmap
+        # copy permission map to keep enabled/disabled
+        # settings private to this map.
+        perm_map = copy.deepcopy(pmap)
+
+        # transfer enabled/disabled settings from
+        # current permission map, to the new map
+        for classname in self.query.perm_map.classes():
+            for mapping in self.query.perm_map.perms(classname):
+                try:
+                    perm_map.mapping(classname, mapping.perm).enabled = mapping.enabled
+                except (UnmappedClass, UnmappedPermission):
+                    pass
+
+        # apply updated permission map
+        self.query.perm_map = perm_map
 
     def __init__(self, parent, policy, perm_map):
         super(InfoFlowAnalysisTab, self).__init__(parent)
@@ -62,6 +79,9 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         # set up error message for missing perm map
         self.error_msg = QMessageBox(self)
         self.error_msg.setStandardButtons(QMessageBox.Ok)
+
+        # set up perm map editor
+        self.permmap_editor = PermissionMapEditor(self, False)
 
         # set up source/target autocompletion
         type_completion_list = [str(t) for t in self.policy.types()]
@@ -119,6 +139,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         self.flows_out.toggled.connect(self.flows_out_toggled)
         self.min_perm_weight.valueChanged.connect(self.set_min_weight)
         self.exclude_types.clicked.connect(self.choose_excluded_types)
+        self.edit_permmap.clicked.connect(self.open_permmap_editor)
 
     #
     # Analysis mode
@@ -193,6 +214,13 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
     def choose_excluded_types(self):
         chooser = ExcludeTypes(self, self.policy)
         chooser.show()
+
+    def open_permmap_editor(self):
+        self.permmap_editor.show(self.perm_map)
+
+    def apply_permmap(self, pmap):
+        # used only by permission map editor
+        self.query.perm_map = pmap
 
     #
     # Results runner
