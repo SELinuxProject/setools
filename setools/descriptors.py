@@ -190,3 +190,38 @@ class EdgeAttrList(NetworkXGraphEdgeDescriptor):
         # in Python3 a .clear() function was added for lists
         # keep this implementation for Python 2 compat
         del obj.G[obj.source][obj.target][self.name][:]
+
+
+#
+# Permission map descriptors
+#
+class PermissionMapDescriptor(object):
+
+    """
+    Descriptor for Permission Map mappings.
+
+    Parameter:
+    name        The map setting name.
+    validator   A callable for validating the setting.
+
+    Instance class attribute use (obj parameter):
+    perm_map    The full permission map.
+    class_      The mapping's object class
+    perm        The mapping's permission
+    """
+
+    def __init__(self, propname, validator):
+        self.name = propname
+        self.validator = validator
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+
+        return obj.perm_map[obj.class_][obj.perm][self.name]
+
+    def __set__(self, obj, value):
+        obj.perm_map[obj.class_][obj.perm][self.name] = self.validator(value)
+
+    def __delete__(self, obj):
+        raise AttributeError

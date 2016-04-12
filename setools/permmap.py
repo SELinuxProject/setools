@@ -23,6 +23,7 @@ from errno import ENOENT
 
 from . import exception
 from . import policyrep
+from .descriptors import PermissionMapDescriptor
 
 infoflow_directions = ["r", "w", "b", "n", "u"]
 min_weight = 1
@@ -153,9 +154,9 @@ class PermissionMap(object):
                         self.log.info("Permission {0}:{1} is unmapped.".format(
                                       class_name, perm_name))
 
-                    self.permmap[class_name][perm_name] = {'direction': flow_direction,
-                                                           'weight': weight,
-                                                           'enabled': True}
+                    mapping = Mapping(self.permmap, class_name, perm_name, create=True)
+                    mapping.direction = flow_direction
+                    mapping.weight = weight
 
                     total_perms += 1
                     perm_count += 1
@@ -203,6 +204,36 @@ class PermissionMap(object):
 
             self.log.info("Successfully wrote permission map to \"{0}\"".format(permmapfile))
 
+    def classes(self):
+        """
+        Generate class names in the permission map.
+
+        Yield:
+        class       An object class name.
+        """
+        for cls in self.permmap.keys():
+            yield cls
+
+    def perms(self, class_):
+        """
+        Generate permission mappings for the specified class.
+
+        Parameter:
+        class_      An object class name.
+
+        Yield:
+        Mapping     A permission's complete map (weight, direction, enabled)
+        """
+        try:
+            for perm in self.permmap[class_].keys():
+                yield Mapping(self.permmap, class_, perm)
+        except KeyError:
+            raise exception.UnmappedClass("{0} is not mapped.".format(class_))
+
+    def mapping(self, class_, perm):
+        """Retrieve a specific permission's mapping."""
+        return Mapping(self.permmap, class_, perm)
+
     def exclude_class(self, class_):
         """
         Exclude all permissions in an object class for calculating rule weights.
@@ -213,14 +244,8 @@ class PermissionMap(object):
         Exceptions:
         UnmappedClass       The specified object class is not mapped.
         """
-
-        classname = str(class_)
-
-        try:
-            for perm in self.permmap[classname]:
-                self.permmap[classname][perm]['enabled'] = False
-        except KeyError:
-            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
+        for perm in self.perms(class_):
+            perm.enabled = False
 
     def exclude_permission(self, class_, permission):
         """
@@ -234,16 +259,7 @@ class PermissionMap(object):
         UnmappedClass       The specified object class is not mapped.
         UnmappedPermission  The specified permission is not mapped for the object class.
         """
-        classname = str(class_)
-
-        if classname not in self.permmap:
-            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
-
-        try:
-            self.permmap[classname][permission]['enabled'] = False
-        except KeyError:
-            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
-                                               format(classname, permission))
+        Mapping(self.permmap, class_, permission).enabled = False
 
     def include_class(self, class_):
         """
@@ -256,13 +272,8 @@ class PermissionMap(object):
         UnmappedClass       The specified object class is not mapped.
         """
 
-        classname = str(class_)
-
-        try:
-            for perm in self.permmap[classname]:
-                self.permmap[classname][perm]['enabled'] = True
-        except KeyError:
-            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
+        for perm in self.perms(class_):
+            perm.enabled = True
 
     def include_permission(self, class_, permission):
         """
@@ -277,16 +288,7 @@ class PermissionMap(object):
         UnmappedPermission  The specified permission is not mapped for the object class.
         """
 
-        classname = str(class_)
-
-        if classname not in self.permmap:
-            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
-
-        try:
-            self.permmap[classname][permission]['enabled'] = True
-        except KeyError:
-            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
-                                               format(classname, permission))
+        Mapping(self.permmap, class_, permission).enabled = True
 
     def map_policy(self, policy):
         """Create mappings for all classes and permissions in the specified policy."""
@@ -295,7 +297,7 @@ class PermissionMap(object):
 
             if class_name not in self.permmap:
                 self.log.debug("Adding unmapped class {0} from {1}".format(class_name, policy))
-                self.permmap[class_name] = dict()
+                self.permmap[class_name] = OrderedDict()
 
             perms = class_.perms
 
@@ -308,9 +310,7 @@ class PermissionMap(object):
                 if perm_name not in self.permmap[class_name]:
                     self.log.debug("Adding unmapped permission {0} in {1} from {2}".
                                    format(perm_name, class_name, policy))
-                    self.permmap[class_name][perm_name] = {'direction': 'u',
-                                                           'weight': 1,
-                                                           'enabled': True}
+                    Mapping(self.permmap, class_name, perm_name, create=True)
 
     def rule_weight(self, rule):
         """
@@ -332,29 +332,22 @@ class PermissionMap(object):
             raise exception.RuleTypeError("{0} rules cannot be used for calculating a weight".
                                           format(rule.ruletype))
 
-        if class_name not in self.permmap:
-            raise exception.UnmappedClass("{0} is not mapped.".format(class_name))
-
         # iterate over the permissions and determine the
         # weight of the rule in each direction. The result
         # is the largest-weight permission in each direction
         for perm_name in rule.perms:
-            try:
-                mapping = self.permmap[class_name][perm_name]
-            except KeyError:
-                raise exception.UnmappedPermission("{0}:{1} is not mapped.".
-                                                   format(class_name, perm_name))
+            mapping = Mapping(self.permmap, class_name, perm_name)
 
-            if not mapping['enabled']:
+            if not mapping.enabled:
                 continue
 
-            if mapping['direction'] == "r":
-                read_weight = max(read_weight, mapping['weight'])
-            elif mapping['direction'] == "w":
-                write_weight = max(write_weight, mapping['weight'])
-            elif mapping['direction'] == "b":
-                read_weight = max(read_weight, mapping['weight'])
-                write_weight = max(write_weight, mapping['weight'])
+            if mapping.direction == "r":
+                read_weight = max(read_weight, mapping.weight)
+            elif mapping.direction == "w":
+                write_weight = max(write_weight, mapping.weight)
+            elif mapping.direction == "b":
+                read_weight = max(read_weight, mapping.weight)
+                write_weight = max(write_weight, mapping.weight)
 
         return (read_weight, write_weight)
 
@@ -371,20 +364,7 @@ class PermissionMap(object):
         UnmappedClass       The specified object class is not mapped.
         UnmappedPermission  The specified permission is not mapped for the object class.
         """
-
-        if direction not in infoflow_directions:
-            raise ValueError("Invalid information flow direction: {0}".format(direction))
-
-        classname = str(class_)
-
-        if classname not in self.permmap:
-            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
-
-        try:
-            self.permmap[classname][permission]['direction'] = direction
-        except KeyError:
-            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
-                                               format(classname, permission))
+        Mapping(self.permmap, class_, permission).direction = direction
 
     def set_weight(self, class_, permission, weight):
         """
@@ -399,17 +379,61 @@ class PermissionMap(object):
         UnmappedClass       The specified object class is not mapped.
         UnmappedPermission  The specified permission is not mapped for the object class.
         """
+        Mapping(self.permmap, class_, permission).weight = weight
 
-        if not min_weight <= weight <= max_weight:
-            raise ValueError("Permission weights must be 1-10: {0}".format(weight))
 
-        classname = str(class_)
+#
+# Settings Validation Functions
+#
+def validate_weight(weight):
+    if not min_weight <= weight <= max_weight:
+        raise ValueError("Permission weights must be 1-10: {0}".format(weight))
 
-        if classname not in self.permmap:
-            raise exception.UnmappedClass("{0} is not mapped.".format(classname))
+    return weight
 
-        try:
-            self.permmap[classname][permission]['weight'] = weight
-        except KeyError:
-            raise exception.UnmappedPermission("{0}:{1} is not mapped.".
-                                               format(classname, permission))
+
+def validate_direction(direction):
+    if direction not in infoflow_directions:
+        raise ValueError("Invalid information flow direction: {0}".format(direction))
+
+    return direction
+
+
+def validate_enabled(enabled):
+    return bool(enabled)
+
+
+class Mapping(object):
+
+    """A mapping for a permission in the permission map."""
+
+    weight = PermissionMapDescriptor("weight", validate_weight)
+    direction = PermissionMapDescriptor("direction", validate_direction)
+    enabled = PermissionMapDescriptor("enabled", validate_enabled)
+
+    def __init__(self, perm_map, classname, permission, create=False):
+        self.perm_map = perm_map
+        self.class_ = classname
+        self.perm = permission
+
+        if create:
+            if classname not in self.perm_map:
+                self.perm_map[classname] = OrderedDict()
+
+            self.perm_map[classname][permission] = {'direction': 'u',
+                                                    'weight': 1,
+                                                    'enabled': True}
+
+        else:
+            if classname not in self.perm_map:
+                raise exception.UnmappedClass("{0} is not mapped.".format(classname))
+
+            if permission not in self.perm_map[classname]:
+                raise exception.UnmappedPermission("{0}:{1} is not mapped.".
+                                                   format(classname, permission))
+
+    def __lt__(self, other):
+        if self.class_ == other.class_:
+            return self.perm < other.perm
+        else:
+            return self.class_ < other.class_
