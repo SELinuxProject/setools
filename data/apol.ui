@@ -91,6 +91,8 @@
      <string>Permission &amp;Map</string>
     </property>
     <addaction name="open_permmap"/>
+    <addaction name="edit_permmap_action"/>
+    <addaction name="save_permmap_action"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Edit"/>
@@ -211,6 +213,16 @@
    </property>
    <property name="toolTip">
     <string>Close the current policy. Closes all analyses too.</string>
+   </property>
+  </action>
+  <action name="edit_permmap_action">
+   <property name="text">
+    <string>Edit Permission Map</string>
+   </property>
+  </action>
+  <action name="save_permmap_action">
+   <property name="text">
+    <string>Save Permission Map</string>
    </property>
   </action>
  </widget>

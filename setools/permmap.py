@@ -18,6 +18,7 @@
 #
 import sys
 import logging
+import copy
 from collections import OrderedDict
 from errno import ENOENT
 
@@ -41,6 +42,7 @@ class PermissionMap(object):
         """
         self.log = logging.getLogger(__name__)
         self.permmap = OrderedDict()
+        self.permmapfile = None
 
         if permmapfile:
             self.load(permmapfile)
@@ -54,6 +56,17 @@ class PermissionMap(object):
                         raise
             else:
                 raise RuntimeError("Unable to load default permission map.")
+
+    def __str__(self):
+        return self.permmapfile
+
+    def __deepcopy__(self, memo):
+        newobj = PermissionMap.__new__(PermissionMap)
+        newobj.log = self.log
+        newobj.permmap = copy.deepcopy(self.permmap)
+        newobj.permmapfile = self.permmapfile
+        memo[id(self)] = newobj
+        return newobj
 
     def load(self, permmapfile):
         """
@@ -163,6 +176,7 @@ class PermissionMap(object):
                     if perm_count >= num_perms:
                         state = 2
 
+        self.permmapfile = permmapfile
         self.log.info("Successfully opened permission map \"{0}\"".format(permmapfile))
         self.log.debug("Read {0} classes and {1} total permissions.".format(
                        class_count, total_perms))

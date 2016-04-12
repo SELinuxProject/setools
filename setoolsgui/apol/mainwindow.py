@@ -26,6 +26,7 @@ from setools import PermissionMap, SELinuxPolicy
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 from .chooseanalysis import ChooseAnalysis
+from .permmapedit import PermissionMapEditor
 from .summary import SummaryTab
 
 
@@ -60,6 +61,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.error_msg = QMessageBox(self)
         self.error_msg.setStandardButtons(QMessageBox.Ok)
 
+        # set up permission map editor
+        self.permmap_editor = PermissionMapEditor(self, True)
+
         # set up tab name editor
         self.tab_editor = QLineEdit(self.AnalysisTabs)
         self.tab_editor.setWindowFlags(Qt.Popup)
@@ -89,6 +93,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.copy_action.triggered.connect(self.copy)
         self.cut_action.triggered.connect(self.cut)
         self.paste_action.triggered.connect(self.paste)
+        self.edit_permmap_action.triggered.connect(self.edit_permmap)
+        self.save_permmap_action.triggered.connect(self.save_permmap)
 
         self.show()
 
@@ -98,6 +104,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         else:
             self.setWindowTitle("apol")
 
+    #
+    # Policy handling
+    #
     def select_policy(self):
         old_policy = self._policy
 
@@ -131,6 +140,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
             if self._permmap:
                 self._permmap.map_policy(self._policy)
+                self.apply_permmap()
 
     def close_policy(self):
         if self.AnalysisTabs.count() > 0:
@@ -146,6 +156,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self._policy = None
         self.update_window_title()
 
+    #
+    # Permission map handling
+    #
     def select_permmap(self):
         filename = QFileDialog.getOpenFileName(self, "Open permission map file", ".")[0]
         if filename:
@@ -160,7 +173,41 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         else:
             if self._policy:
                 self._permmap.map_policy(self._policy)
+                self.apply_permmap()
 
+    def edit_permmap(self):
+        if not self._permmap:
+            self.error_msg.critical(self, "No open permission map",
+                                    "Cannot edit permission map. Please open a map first.")
+            self.select_permmap()
+
+        # in case user cancels out of
+        # choosing a permmap, recheck
+        if self._permmap:
+            self.permmap_editor.show(self._permmap)
+
+    def apply_permmap(self, perm_map=None):
+        if perm_map:
+            self._permmap = perm_map
+
+        for index in range(self.AnalysisTabs.count()):
+            tab = self.AnalysisTabs.widget(index)
+            self.log.debug("Updating permmap in tab {0} ({1}: \"{2}\")".format(
+                           index, tab, tab.objectName()))
+            tab.perm_map = self._permmap
+
+    def save_permmap(self):
+        filename = QFileDialog.getSaveFileName(self, "Save permission map file", ".")[0]
+        if filename:
+            try:
+                self._permmap.save(filename)
+            except Exception as ex:
+                self.log.critical("Failed to save permission map: {0}".format(ex))
+                self.error_msg.critical(self, "Permission map saving error", str(ex))
+
+    #
+    # Analysis tab handling
+    #
     def choose_analysis(self):
         if not self._policy:
             self.error_msg.critical(self, "No open policy",
@@ -221,6 +268,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.tab_editor.hide()
         self.AnalysisTabs.setTabText(index, self.tab_editor.text())
 
+    #
+    # Edit actions
+    #
     def copy(self):
         """Copy text from the currently-focused widget."""
         try:
