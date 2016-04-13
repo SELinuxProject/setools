@@ -24,6 +24,7 @@ from ..widget import SEToolsWidget
 
 # Analysis tabs:
 from .boolquery import BoolQueryTab
+from .categoryquery import CategoryQueryTab
 from .commonquery import CommonQueryTab
 from .constraintquery import ConstraintQueryTab
 from .dta import DomainTransitionAnalysisTab
@@ -92,6 +93,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 
         if mls:
             rule_map["MLS Rules"] = MLSRuleQueryTab
+            components_map["Categories"] = CategoryQueryTab
 
         # populate the item list:
         self.analysisTypes.clear()
