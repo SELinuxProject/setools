@@ -113,7 +113,7 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
         self.busy.setModal(True)
         self.busy.setRange(0, 0)
         self.busy.setMinimumDuration(0)
-        self.busy.canceled.connect(self.thread.requestInterruption)
+        self.busy.setCancelButton(None)
         self.busy.reset()
 
         # update busy dialog from infoflow INFO logs
