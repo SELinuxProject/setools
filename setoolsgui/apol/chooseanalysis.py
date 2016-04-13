@@ -39,6 +39,7 @@ from .objclassquery import ObjClassQueryTab
 from .portconquery import PortconQueryTab
 from .rbacrulequery import RBACRuleQueryTab
 from .rolequery import RoleQueryTab
+from .sensitivityquery import SensitivityQueryTab
 from .summary import SummaryTab
 from .terulequery import TERuleQueryTab
 from .typeattrquery import TypeAttributeQueryTab
@@ -94,6 +95,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
         if mls:
             rule_map["MLS Rules"] = MLSRuleQueryTab
             components_map["Categories"] = CategoryQueryTab
+            components_map["Sensitivities"] = SensitivityQueryTab
 
         # populate the item list:
         self.analysisTypes.clear()

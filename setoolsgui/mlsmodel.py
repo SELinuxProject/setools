@@ -55,6 +55,17 @@ def category_detail(parent, obj):
     _mls_detail(parent, obj, "Category")
 
 
+def sensitivity_detail(parent, obj):
+    """
+    Create a dialog box for sensitivity details.
+
+    Parameters:
+    parent      The parent Qt Widget
+    type_       The type
+    """
+    _mls_detail(parent, obj, "Sensitivity")
+
+
 class MLSComponentTableModel(SEToolsTableModel):
 
     """Table-based model for sensitivities and categories."""
