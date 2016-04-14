@@ -28,6 +28,7 @@ from .boundsquery import BoundsQueryTab
 from .categoryquery import CategoryQueryTab
 from .commonquery import CommonQueryTab
 from .constraintquery import ConstraintQueryTab
+from .defaultquery import DefaultQueryTab
 from .dta import DomainTransitionAnalysisTab
 from .fsusequery import FSUseQueryTab
 from .genfsconquery import GenfsconQueryTab
@@ -87,7 +88,8 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                         "Nodecon Statements": NodeconQueryTab,
                         "Portcon Statements": PortconQueryTab}
         general_choices = {"Summary": SummaryTab}
-        other_choices = {"Bounds": BoundsQueryTab}
+        other_choices = {"Bounds": BoundsQueryTab,
+                         "Defaults": DefaultQueryTab}
         analysis_choices = {"Components": components_map,
                             "Rules": rule_map,
                             "Analyses": analysis_map,
