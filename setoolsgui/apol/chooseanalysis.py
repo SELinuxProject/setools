@@ -24,6 +24,7 @@ from ..widget import SEToolsWidget
 
 # Analysis tabs:
 from .boolquery import BoolQueryTab
+from .boundsquery import BoundsQueryTab
 from .categoryquery import CategoryQueryTab
 from .commonquery import CommonQueryTab
 from .constraintquery import ConstraintQueryTab
@@ -86,11 +87,13 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                         "Nodecon Statements": NodeconQueryTab,
                         "Portcon Statements": PortconQueryTab}
         general_choices = {"Summary": SummaryTab}
+        other_choices = {"Bounds": BoundsQueryTab}
         analysis_choices = {"Components": components_map,
                             "Rules": rule_map,
                             "Analyses": analysis_map,
                             "Labeling": labeling_map,
-                            "General": general_choices}
+                            "General": general_choices,
+                            "Other": other_choices}
 
         if mls:
             rule_map["MLS Rules"] = MLSRuleQueryTab
