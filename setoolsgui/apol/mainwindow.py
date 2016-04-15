@@ -119,7 +119,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             if reply == QMessageBox.No:
                 return
 
-        filename = QFileDialog.getOpenFileName(self, "Open policy file", ".")[0]
+        filename = QFileDialog.getOpenFileName(self, "Open policy file", ".",
+                                               "SELinux Policies (policy.* sepolicy);;"
+                                               "All Files (*)")[0]
         if filename:
             self.load_policy(filename)
 
@@ -197,7 +199,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             tab.perm_map = self._permmap
 
     def save_permmap(self):
-        filename = QFileDialog.getSaveFileName(self, "Save permission map file", ".")[0]
+        path = str(self._permmap) if self._permmap else "perm_map"
+        filename = QFileDialog.getSaveFileName(self, "Save permission map file", path)[0]
         if filename:
             try:
                 self._permmap.save(filename)
