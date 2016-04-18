@@ -464,6 +464,16 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="4">
+     <widget class="QCheckBox" name="notes_expander">
+      <property name="toolTip">
+       <string>Show or hide the notes field (no data is lost)</string>
+      </property>
+      <property name="text">
+       <string>Notes</string>
+      </property>
+     </widget>
+    </item>
     <item row="2" column="0" colspan="6">
      <widget class="QTabWidget" name="results_frame">
       <property name="sizePolicy">
@@ -471,6 +481,9 @@
         <horstretch>0</horstretch>
         <verstretch>1</verstretch>
        </sizepolicy>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
       <widget class="QWidget" name="results_framePage2">
        <property name="sizePolicy">
@@ -530,16 +543,46 @@
         </item>
        </layout>
       </widget>
-     </widget>
-    </item>
-    <item row="0" column="4">
-     <widget class="QCheckBox" name="notes_expander">
-      <property name="toolTip">
-       <string>Show or hide the notes field (no data is lost)</string>
-      </property>
-      <property name="text">
-       <string>Notes</string>
-      </property>
+      <widget class="QWidget" name="browser_tab">
+       <attribute name="title">
+        <string>Browser</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QTreeWidget" name="browser">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <column>
+            <property name="text">
+             <string>Type</string>
+            </property>
+           </column>
+          </widget>
+          <widget class="QPlainTextEdit" name="browser_details">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>4</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <family>Monospace</family>
+            </font>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

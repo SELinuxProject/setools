@@ -19,9 +19,10 @@
 
 import logging
 
-from PyQt5.QtCore import pyqtSignal, Qt, QObject, QStringListModel, QThread
+from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
+from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea, \
+                            QTreeWidgetItem
 from setools import DomainTransitionAnalysis
 
 from ..logtosignal import LogHandlerToSignal
@@ -68,13 +69,14 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.clear_target_error()
 
         # set up processing thread
-        self.thread = QThread()
-        self.worker = ResultsUpdater(self.query)
-        self.worker.moveToThread(self.thread)
-        self.worker.raw_line.connect(self.raw_results.appendPlainText)
-        self.worker.finished.connect(self.update_complete)
-        self.worker.finished.connect(self.thread.quit)
-        self.thread.started.connect(self.worker.update)
+        self.thread = ResultsUpdater(self.query)
+        self.thread.raw_line.connect(self.raw_results.appendPlainText)
+        self.thread.finished.connect(self.update_complete)
+        self.thread.trans.connect(self.reset_browser)
+
+        # set up browser thread
+        self.browser_thread = BrowserUpdater(self.query)
+        self.browser_thread.trans.connect(self.add_browser_children)
 
         # create a "busy, please wait" dialog
         self.busy = QProgressDialog(self)
@@ -95,6 +97,7 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.target.setEnabled(not self.flows_out.isChecked())
         self.criteria_frame.setHidden(not self.criteria_expander.isChecked())
         self.notes.setHidden(not self.notes_expander.isChecked())
+        self.browser_tab.setEnabled(self.flows_in.isChecked() or self.flows_out.isChecked())
 
         # connect signals
         self.buttonBox.clicked.connect(self.run)
@@ -107,6 +110,7 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.flows_out.toggled.connect(self.flows_out_toggled)
         self.reverse.stateChanged.connect(self.reverse_toggled)
         self.exclude_types.clicked.connect(self.choose_excluded_types)
+        self.browser.currentItemChanged.connect(self.browser_item_selected)
 
     #
     # Analysis mode
@@ -121,6 +125,8 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.clear_target_error()
         self.source.setEnabled(not value)
         self.reverse.setEnabled(not value)
+        self.limit_paths.setEnabled(not value)
+        self.browser_tab.setEnabled(value)
 
         if value:
             self.reverse_old = self.reverse.isChecked()
@@ -133,6 +139,8 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.clear_target_error()
         self.target.setEnabled(not value)
         self.reverse.setEnabled(not value)
+        self.limit_paths.setEnabled(not value)
+        self.browser_tab.setEnabled(value)
 
         if value:
             self.reverse_old = self.reverse.isChecked()
@@ -197,9 +205,90 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.query.reverse = value
 
     #
+    # Infoflow browser
+    #
+    def _new_browser_item(self, type_, parent, rules=None, children=None):
+        # build main item
+        item = QTreeWidgetItem(parent if parent else self.browser)
+        item.setText(0, str(type_))
+        item.type_ = type_
+        item.children = children if children else []
+        item.rules = rules if rules else []
+        item.child_populated = children is not None
+
+        # add child items
+        for child_type, child_rules in item.children:
+            child_item = self._new_browser_item(child_type, item, rules=child_rules)
+            item.addChild(child_item)
+
+        item.setExpanded(children is not None)
+
+        self.log.debug("Built item for {0} with {1} children and {2} rules".format(
+                       type_, len(item.children), len(item.rules)))
+
+        return item
+
+    def reset_browser(self, root_type, out, children):
+        self.log.debug("Resetting browser.")
+
+        # clear results
+        self.browser.clear()
+        self.browser_details.clear()
+
+        # save browser details independent
+        # from main analysis UI settings
+        self.browser_root_type = root_type
+        self.browser_mode = out
+
+        root = self._new_browser_item(self.browser_root_type, self.browser, children=children)
+
+        self.browser.insertTopLevelItem(0, root)
+
+    def browser_item_selected(self, current, previous):
+        if not current:
+            # browser is being reset
+            return
+
+        self.log.debug("{0} selected in browser.".format(current.type_))
+        self.browser_details.clear()
+
+        try:
+            parent_type = current.parent().type_
+        except AttributeError:
+            # should only hit his on the root item
+            pass
+        else:
+            self.browser_details.appendPlainText("Domain Transitions {0} {1} {2}\n".format(
+                current.parent().type_, "->" if self.browser_mode else "<-", current.type_))
+
+            print_transition(self.browser_details.appendPlainText, current.rules)
+
+            self.browser_details.moveCursor(QTextCursor.Start)
+
+        if not current.child_populated:
+            self.busy.setLabelText("Gathering additional browser details for {0}...".format(
+                                   current.type_))
+            self.busy.show()
+            self.browser_thread.out = self.browser_mode
+            self.browser_thread.type_ = current.type_
+            self.browser_thread.start()
+
+    def add_browser_children(self, children):
+        item = self.browser.currentItem()
+        item.children = children
+
+        self.log.debug("Adding children for {0}".format(item.type_))
+
+        for child_type, child_rules in item.children:
+            child_item = self._new_browser_item(child_type, item, rules=child_rules)
+            item.addChild(child_item)
+
+        item.child_populated = True
+        self.busy.reset()
+
+    #
     # Results runner
     #
-
     def run(self, button):
         # right now there is only one button.
         fail = False
@@ -234,10 +323,67 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
             self.busy.repaint()
             self.raw_results.moveCursor(QTextCursor.Start)
 
+            if self.flows_in.isChecked() or self.flows_out.isChecked():
+                # move to browser tab for transitions in/out
+                self.results_frame.setCurrentIndex(1)
+            else:
+                self.results_frame.setCurrentIndex(0)
+
         self.busy.reset()
 
 
-class ResultsUpdater(QObject):
+def print_transition(renderer, trans):
+    """
+    Raw rendering of a domain transition.
+
+    Parameters:
+    renderer    A callable which will render the output, e.g. print
+    trans       A step (transition object) generated by the DTA.
+    """
+
+    if trans.transition:
+        renderer("Domain transition rule(s):")
+        for t in trans.transition:
+            renderer(str(t))
+
+        if trans.setexec:
+            renderer("\nSet execution context rule(s):")
+            for s in trans.setexec:
+                renderer(str(s))
+
+        for entrypoint in trans.entrypoints:
+            renderer("\nEntrypoint {0}:".format(entrypoint.name))
+
+            renderer("\tDomain entrypoint rule(s):")
+            for e in entrypoint.entrypoint:
+                renderer("\t{0}".format(e))
+
+            renderer("\n\tFile execute rule(s):")
+            for e in entrypoint.execute:
+                renderer("\t{0}".format(e))
+
+            if entrypoint.type_transition:
+                renderer("\n\tType transition rule(s):")
+                for t in entrypoint.type_transition:
+                    renderer("\t{0}".format(t))
+
+            renderer("")
+
+    if trans.dyntransition:
+        renderer("Dynamic transition rule(s):")
+        for d in trans.dyntransition:
+            renderer(str(d))
+
+        renderer("\nSet current process context rule(s):")
+        for s in trans.setcurrent:
+            renderer(str(s))
+
+        renderer("")
+
+    renderer("")
+
+
+class ResultsUpdater(QThread):
 
     """
     Thread for processing queries and updating result widgets.
@@ -247,22 +393,28 @@ class ResultsUpdater(QObject):
     model       The model for the results
 
     Qt signals:
-    finished    The update has completed.
     raw_line    (str) A string to be appended to the raw results.
+    trans       (str, bool, list) Initial information for populating
+                the transitions browser.
     """
 
-    finished = pyqtSignal()
     raw_line = pyqtSignal(str)
+    trans = pyqtSignal(str, bool, list)
 
     def __init__(self, query):
         super(ResultsUpdater, self).__init__()
         self.query = query
         self.log = logging.getLogger(__name__)
 
-    def update(self):
+    def __del__(self):
+        self.wait()
+
+    def run(self):
         """Run the query and update results."""
 
         assert self.query.limit, "Code doesn't currently handle unlimited (limit=0) paths."
+        self.out = self.query.mode == "flows_out"
+
         if self.query.mode == "all_paths":
             self.transitive(self.query.all_paths(self.query.source, self.query.target,
                                                  self.query.max_path_len))
@@ -273,52 +425,6 @@ class ResultsUpdater(QObject):
         else:  # flows_in
             self.direct(self.query.transitions(self.query.target))
 
-        self.finished.emit()
-
-    def print_transition(self, trans):
-        """Raw rendering of a domain transition."""
-
-        if trans.transition:
-            self.raw_line.emit("Domain transition rule(s):")
-            for t in trans.transition:
-                self.raw_line.emit(str(t))
-
-            if trans.setexec:
-                self.raw_line.emit("\nSet execution context rule(s):")
-                for s in trans.setexec:
-                    self.raw_line.emit(str(s))
-
-            for entrypoint in trans.entrypoints:
-                self.raw_line.emit("\nEntrypoint {0}:".format(entrypoint.name))
-
-                self.raw_line.emit("\tDomain entrypoint rule(s):")
-                for e in entrypoint.entrypoint:
-                    self.raw_line.emit("\t{0}".format(e))
-
-                self.raw_line.emit("\n\tFile execute rule(s):")
-                for e in entrypoint.execute:
-                    self.raw_line.emit("\t{0}".format(e))
-
-                if entrypoint.type_transition:
-                    self.raw_line.emit("\n\tType transition rule(s):")
-                    for t in entrypoint.type_transition:
-                        self.raw_line.emit("\t{0}".format(t))
-
-                self.raw_line.emit("")
-
-        if trans.dyntransition:
-            self.raw_line.emit("Dynamic transition rule(s):")
-            for d in trans.dyntransition:
-                self.raw_line.emit(str(d))
-
-            self.raw_line.emit("\nSet current process context rule(s):")
-            for s in trans.setcurrent:
-                self.raw_line.emit(str(s))
-
-            self.raw_line.emit("")
-
-        self.raw_line.emit("")
-
     def transitive(self, paths):
         i = 0
         for i, path in enumerate(paths, start=1):
@@ -328,7 +434,7 @@ class ResultsUpdater(QObject):
 
                 self.raw_line.emit("Step {0}: {1} -> {2}\n".format(stepnum, step.source,
                                                                    step.target))
-                self.print_transition(step)
+                print_transition(self.raw_line.emit, step)
 
             if QThread.currentThread().isInterruptionRequested() or (i >= self.query.limit):
                 break
@@ -340,14 +446,72 @@ class ResultsUpdater(QObject):
 
     def direct(self, transitions):
         i = 0
+        child_types = []
         for i, step in enumerate(transitions, start=1):
             self.raw_line.emit("Transition {0}: {1} -> {2}\n".format(i, step.source, step.target))
-            self.print_transition(step)
+            print_transition(self.raw_line.emit, step)
 
-            if QThread.currentThread().isInterruptionRequested() or (i >= self.query.limit):
+            # Generate results for flow browser
+            if self.out:
+                child_types.append((step.target, step))
+            else:
+                child_types.append((step.source, step))
+
+            if QThread.currentThread().isInterruptionRequested():
                 break
             else:
                 QThread.yieldCurrentThread()
 
         self.raw_line.emit("{0} domain transition(s) found.".format(i))
         self.log.info("{0} domain transition(s) found.".format(i))
+
+        # Update browser:
+        root_type = self.query.source if self.out else self.query.target
+        self.trans.emit(str(root_type), self.out, sorted(child_types))
+
+
+class BrowserUpdater(QThread):
+
+    """
+    Thread for processing additional analysis for the browser.
+
+    Parameters:
+    query       The query object
+    model       The model for the results
+
+    Qt signals:
+    trans       A list of child types to render in the
+                transitions browser.
+    """
+
+    trans = pyqtSignal(list)
+
+    def __init__(self, query):
+        super(BrowserUpdater, self).__init__()
+        self.query = query
+        self.type_ = None
+        self.out = None
+        self.log = logging.getLogger(__name__)
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        transnum = 0
+        child_types = []
+        for transnum, trans in enumerate(self.query.transitions(self.type_), start=1):
+            # Generate results for browser
+            if self.out:
+                child_types.append((trans.target, trans))
+            else:
+                child_types.append((trans.source, trans))
+
+            if QThread.currentThread().isInterruptionRequested():
+                break
+            else:
+                QThread.yieldCurrentThread()
+
+        self.log.debug("{0} additional domain transition(s) found.".format(transnum))
+
+        # Update browser:
+        self.trans.emit(sorted(child_types))
