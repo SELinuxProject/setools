@@ -21,7 +21,7 @@ import logging
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QFileDialog, QLineEdit, QMainWindow, QMessageBox
-from setools import PermissionMap, SELinuxPolicy
+from setools import __version__, PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
@@ -95,6 +95,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.paste_action.triggered.connect(self.paste)
         self.edit_permmap_action.triggered.connect(self.edit_permmap)
         self.save_permmap_action.triggered.connect(self.save_permmap)
+        self.about_apol_action.triggered.connect(self.about_apol)
 
         self.show()
 
@@ -294,3 +295,13 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             QApplication.instance().focusWidget().paste()
         except AttributeError:
             pass
+
+    #
+    # Help actions
+    #
+    def about_apol(self):
+        QMessageBox.about(self, "About Apol", "Version {0}<br>"
+                          "Apol is a graphical SELinux policy analysis tool and part of "
+                          "<a href=\"https://github.com/TresysTechnology/setools/wiki\">"
+                          "SETools</a>.<p>"
+                          "Copyright (C) 2015-2016, Tresys Technology.".format(__version__))

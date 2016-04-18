@@ -76,7 +76,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
-    <addaction name="about_Apol"/>
+    <addaction name="about_apol_action"/>
    </widget>
    <widget class="QMenu" name="menu_Edit">
     <property name="title">
@@ -136,7 +136,7 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="about_Apol">
+  <action name="about_apol_action">
    <property name="text">
     <string>About Apol</string>
    </property>
