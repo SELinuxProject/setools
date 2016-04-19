@@ -16,10 +16,13 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-
+import os
+import sys
+import stat
 import logging
+from errno import ENOENT
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import pyqtSlot, Qt, QProcess
 from PyQt5.QtWidgets import QApplication, QFileDialog, QLineEdit, QMainWindow, QMessageBox
 from setools import __version__, PermissionMap, SELinuxPolicy
 
@@ -80,6 +83,9 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         logging.getLogger("setools").addHandler(handler)
         logging.getLogger("setoolsgui").addHandler(handler)
 
+        # set up help browser process
+        self.help_process = QProcess()
+
         # connect signals
         self.open_policy.triggered.connect(self.select_policy)
         self.close_policy_action.triggered.connect(self.close_policy)
@@ -96,6 +102,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.edit_permmap_action.triggered.connect(self.edit_permmap)
         self.save_permmap_action.triggered.connect(self.save_permmap)
         self.about_apol_action.triggered.connect(self.about_apol)
+        self.apol_help_action.triggered.connect(self.apol_help)
 
         self.show()
 
@@ -305,3 +312,42 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                           "<a href=\"https://github.com/TresysTechnology/setools/wiki\">"
                           "SETools</a>.<p>"
                           "Copyright (C) 2015-2016, Tresys Technology.".format(__version__))
+
+    def apol_help(self):
+        """Open the main help window."""
+        if self.help_process.state() != QProcess.NotRunning:
+            return
+
+        for path in ["qhc", sys.prefix + "/share/setools"]:
+            helpfile = "{0}/apol.qhc".format(path)
+
+            try:
+                if stat.S_ISREG(os.stat(helpfile).st_mode):
+                    break
+            except (IOError, OSError) as err:
+                if err.errno != ENOENT:
+                    raise
+        else:
+            self.log.critical("Unable to find apol help data (apol.qhc).")
+
+        self.log.debug("Starting assistant with help file {0}".format(helpfile))
+        self.help_process.start("assistant",
+                                ["-collectionFile", helpfile, "-showUrl",
+                                 "qthelp://com.github.tresystechnology.setools/doc/index.html",
+                                 "-show", "contents", "-enableRemoteControl"])
+
+    @pyqtSlot(str)
+    def set_help(self, location):
+        """Set the help window to the specified document."""
+        if self.help_process.state() == QProcess.NotStarted:
+            self.apol_help()
+            if not self.help_process.waitForStarted():
+                self.log.warning("Timed out waiting for Qt assistant to start.")
+                return
+        elif self.help_process.state() == QProcess.Starting:
+            if not self.help_process.waitForStarted():
+                self.log.warning("Timed out waiting for Qt assistant to start.")
+                return
+
+        self.help_process.write("setSource qthelp://com.github.tresystechnology.setools/doc/{0}\n".
+                                format(location))

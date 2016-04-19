@@ -76,6 +76,8 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="apol_help_action"/>
+    <addaction name="separator"/>
     <addaction name="about_apol_action"/>
    </widget>
    <widget class="QMenu" name="menu_Edit">
@@ -223,6 +225,11 @@
   <action name="save_permmap_action">
    <property name="text">
     <string>Save Permission Map</string>
+   </property>
+  </action>
+  <action name="apol_help_action">
+   <property name="text">
+    <string>Apol Help</string>
    </property>
   </action>
  </widget>

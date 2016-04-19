@@ -13,6 +13,26 @@ import os
 from os.path import join
 
 
+class QtHelpCommand(Command):
+    description = "Build Qt help files."
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        command = ['qcollectiongenerator', 'apol.qhcp', '-o', 'apol.qhc']
+        self.announce("Building Qt help files", level=log.INFO)
+        self.announce(' '.join(command), level=log.INFO)
+        pwd = os.getcwd()
+        os.chdir("./qhc")
+        subprocess.check_call(command)
+        os.chdir(pwd)
+
+
 class YaccCommand(Command):
     description = "Build yacc parsers."
     user_options = []
@@ -140,11 +160,13 @@ setup(name='setools',
       url='https://github.com/TresysTechnology/setools',
       cmdclass={'build_yacc': YaccCommand,
                 'build_lex': LexCommand,
-                'build_ext': BuildExtCommand},
+                'build_ext': BuildExtCommand,
+                'build_help': QtHelpCommand},
       packages=['setools', 'setools.diff', 'setools.policyrep', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1") ),
-                  (join(sys.prefix, 'share/setools'), glob.glob("data/*.ui") + ["data/perm_map"] ),
+                  (join(sys.prefix, 'share/setools'), glob.glob("data/*.ui") +
+                                                      ["data/perm_map", "qhc/apol.qhc"] ),
                   (join(sys.prefix, 'share/setools/icons'), glob.glob("data/icons/*.png"))],
       ext_modules=ext_py_mods,
       test_suite='tests',
