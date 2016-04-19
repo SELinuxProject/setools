@@ -82,7 +82,7 @@ class DomainTransitionAnalysis(object):
         if types:
             self._exclude = [self.policy.lookup_type(t) for t in types]
         else:
-            self._exclude = None
+            self._exclude = []
 
         self.rebuildsubgraph = True
 
