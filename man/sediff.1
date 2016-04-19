@@ -1,5 +1,5 @@
 .\" Copyright (c) 2016 Tresys Technology, LLC.  All rights reserved.
-.TH sediff 1 2016-02-20 "Tresys Technology, LLC" "SETools: SELinux Policy Analysis Tools"
+.TH sediff 1 2016-04-19 "Tresys Technology, LLC" "SETools: SELinux Policy Analysis Tools"
 
 .SH NAME
 sediff \- SELinux policy difference tool
@@ -49,7 +49,9 @@ Find differences in category definitions.
 Find differences in MLS level definitions.
 
 .SS Type Enforcement Rule Differences
-.IP "-A, --allow"
+.IP "-A"
+Find differences in allow and allowxperm rules.
+.IP "--allow"
 Find differences in allow rules.
 .IP "--auditallow"
 Find differences in auditallow rules.
@@ -57,6 +59,14 @@ Find differences in auditallow rules.
 Find differences in dontaudit rules.
 .IP "--neverallow"
 Find differences in neverallow rules.
+.IP "--allowxperm"
+Find differences in allowxperm rules.
+.IP "--auditallowxperm"
+Find differences in auditallowxperm rules.
+.IP "--dontauditxperm"
+Find differences in dontauditxperm rules.
+.IP "--neverallowxperm"
+Find differences in neverallowxperm rules.
 .IP "-T, --type_trans"
 Find differences in type_transition rules.
 .IP "--type_member"

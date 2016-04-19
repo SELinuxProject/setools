@@ -1,5 +1,5 @@
 .\" Copyright (c) 2016 Tresys Technology, LLC.  All rights reserved.
-.TH sesearch 1 2016-02-20 "Tresys Technology, LLC" "SETools: SELinux Policy Analysis Tools"
+.TH sesearch 1 2016-04-19 "Tresys Technology, LLC" "SETools: SELinux Policy Analysis Tools"
 
 .SH NAME
 sesearch \- SELinux policy query tool
@@ -29,30 +29,40 @@ If no expression is specified or if none of the specified fields apply to a give
 all rules of that type are considered to match the expression.
 
 .SS Type Enforcement Rule Types
-.IP "-A, --allow"
-Find differences in allow rules.
+.IP "-A"
+Find allow and allowxperm rules.
+.IP "--allow"
+Find allow rules.
 .IP "--auditallow"
-Find differences in auditallow rules.
+Find auditallow rules.
 .IP "--dontaudit"
-Find differences in dontaudit rules.
+Find dontaudit rules.
 .IP "--neverallow"
-Find differences in neverallow rules.
+Find neverallow rules.
+.IP "--allowxperm"
+Find allowxperm rules.
+.IP "--auditallowxperm"
+Find auditallowxperm rules.
+.IP "--dontauditxperm"
+Find dontauditxperm rules.
+.IP "--neverallowxperm"
+Find neverallowxperm rules.
 .IP "-T, --type_trans"
-Find differences in type_transition rules.
+Find type_transition rules.
 .IP "--type_member"
-Find differences in type_member rules.
+Find type_member rules.
 .IP "--type_change"
-Find differences in type_change rules.
+Find type_change rules.
 
 .SS RBAC Rule Types
 .IP "--role_allow"
-Find differences in role allow rules.
+Find role allow rules.
 .IP "--role_trans"
-Find differences in role_transition rules.
+Find role_transition rules.
 
 .SS MLS Rule Types
 .IP "--range_trans"
-Find differences in range_transition rules.
+Find range_transition rules.
 
 .SS Rule Fields
 .IP "-s NAME, --source NAME"
