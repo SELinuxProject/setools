@@ -28,7 +28,7 @@
         </keywords>
         <files>
             <file>*.html</file>
-            <file>../data/icons/*.png</file>
+            <file>*.png</file>
         </files>
     </filterSection>
 </QtHelpProject>
