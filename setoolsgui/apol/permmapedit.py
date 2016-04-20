@@ -138,7 +138,9 @@ class PermissionMapEditor(SEToolsWidget, QDialog):
         for mapping in self.widgets:
             mapping.close()
 
-        self.widgets.clear()
+        # in Python3 a .clear() function was added for lists
+        # keep this implementation for Python 2 compat
+        del self.widgets[:]
 
 
 index_to_setting = ["r", "w", "b", "n"]
