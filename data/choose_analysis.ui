@@ -75,5 +75,37 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>ChooseAnalysis</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>400</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>210</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>analysisTypes</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>ChooseAnalysis</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>199</x>
+     <y>206</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>210</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>

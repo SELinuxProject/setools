@@ -66,7 +66,6 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
 
     def setupUi(self):
         self.load_ui("choose_analysis.ui")
-        self.analysisTypes.doubleClicked.connect(self.accept)
 
     def show(self, mls):
         analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
@@ -118,10 +117,12 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
         self.analysisTypes.sortByColumn(0, Qt.AscendingOrder)
         super(ChooseAnalysis, self).show()
 
-    def accept(self):
+    def accept(self, item=None):
         try:
-            # .ui is set for single item selection.
-            item = self.analysisTypes.selectedItems()[0]
+            if not item:
+                # .ui is set for single item selection.
+                item = self.analysisTypes.selectedItems()[0]
+
             title = item.text(0)
             self.parent.create_new_analysis(title, item._tab_class)
         except (IndexError, TypeError):
