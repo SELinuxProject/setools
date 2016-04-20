@@ -13,13 +13,17 @@ KNOWN-BUGS file prior to reporting bugs.
 SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
-To run SETools, the following packages are required:
+To run SETools command line tools, the following packages are required:
 * Python 2.7 or 3.3+
 * NetworkX 1.8+
-* PyQt5 (only if using graphical tools)
 * setuptools
 * libselinux (Python bindings optional but recommended)
 * libbz2
+
+To run SETools graphical tools, the following packages are also required:
+* PyQt5
+* qt5-assistant
+* qt-devel (only if rebuilding the help file)
 
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
@@ -34,12 +38,32 @@ addition to the above dependencies:
 * mock (on Python 2.7 only)
 * tox (optional)
 
-### Building SETools
+### Building SETools for Local Use
+
+To use SETools locally, without installing it onto the system,
+unpack the official distribution or check out the git repository,
+and perform the following at the root:
+```
+  $ python setup.py build_ext -i
+```
+This will compile the C portion of SETools locally, and then
+the tools can be ran from the current directory (e.g. ```./seinfo```).
+
+### Rebuilding the Apol Help File
+
+For convenience, a prebuilt copy of the apol help data file is included.
+To rebuild this file, the Qt5 development tools are required
+(particularly, the ```qcollectiongenerator``` tool).  At the root
+of the SETools soures, perform the following:
+```
+  $ python setup.py build_qhc
+```
+
+### Installing SETools
 
 Unpack the official distribution or check out the git repository,
 and perform the following at the root:
 ```
-  $ python setup.py build
   $ python setup.py install
 ```
 This will put the applications in /usr/bin, data files in /usr/share/setools,
