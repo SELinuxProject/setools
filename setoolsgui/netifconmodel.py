@@ -30,7 +30,7 @@ class NetifconTableModel(SEToolsTableModel):
     headers = defaultdict(str, {0: "Device", 1: "Device Context", 2: "Packet Context"})
 
     def data(self, index, role):
-        if self.resultlist:
+        if self.resultlist and index.isValid():
             row = index.row()
             col = index.column()
             rule = self.resultlist[row]

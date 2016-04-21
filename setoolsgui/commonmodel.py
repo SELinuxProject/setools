@@ -52,7 +52,7 @@ class CommonTableModel(SEToolsTableModel):
     headers = defaultdict(str, {0: "Name", 1: "Permissions"})
 
     def data(self, index, role):
-        if self.resultlist:
+        if self.resultlist and index.isValid():
             row = index.row()
             col = index.column()
             item = self.resultlist[row]

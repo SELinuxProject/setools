@@ -66,7 +66,7 @@ class SEToolsListModel(QAbstractListModel):
         return 1
 
     def data(self, index, role):
-        if self.item_list:
+        if self.item_list and index.isValid():
             row = index.row()
             item = self.item_list[row]
 

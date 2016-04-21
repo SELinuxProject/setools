@@ -70,7 +70,7 @@ class UserTableModel(SEToolsTableModel):
         return self.col_count
 
     def data(self, index, role):
-        if self.resultlist:
+        if self.resultlist and index.isValid():
             if role == Qt.DisplayRole:
                 row = index.row()
                 col = index.column()

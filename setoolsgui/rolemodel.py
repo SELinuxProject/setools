@@ -57,7 +57,7 @@ class RoleTableModel(SEToolsTableModel):
         # There are two roles here.
         # The parameter, role, is the Qt role
         # The below item is a role in the list.
-        if self.resultlist:
+        if self.resultlist and index.isValid():
             row = index.row()
             col = index.column()
             item = self.resultlist[row]

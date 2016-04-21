@@ -30,7 +30,7 @@ class PortconTableModel(SEToolsTableModel):
     headers = defaultdict(str, {0: "Port/Port Range", 1: "Protocol", 2: "Context"})
 
     def data(self, index, role):
-        if self.resultlist:
+        if self.resultlist and index.isValid():
             row = index.row()
             col = index.column()
             rule = self.resultlist[row]

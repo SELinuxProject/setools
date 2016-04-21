@@ -42,7 +42,7 @@ class GenfsconTableModel(SEToolsTableModel):
         stat.S_IFSOCK: "Socket"}
 
     def data(self, index, role):
-        if self.resultlist:
+        if self.resultlist and index.isValid():
             row = index.row()
             col = index.column()
             rule = self.resultlist[row]
