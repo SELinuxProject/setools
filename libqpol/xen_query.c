@@ -29,6 +29,9 @@
 #include "qpol_internal.h"
 #include "iterator_internal.h"
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 /******************************* iomemcon **************************/
 int qpol_policy_get_iomemcon_by_addr(const qpol_policy_t *policy,
 				    uint64_t low, uint64_t high,
@@ -56,7 +59,7 @@ int qpol_policy_get_iomemcon_by_addr(const qpol_policy_t *policy,
 	*ocon = (qpol_iomemcon_t *) tmp;
 
 	if (*ocon == NULL) {
-		ERR(policy, "could not find iomemcon statement for %lu-%lu",
+		ERR(policy, "could not find iomemcon statement for %" PRIu64 "-%" PRIu64,
 								    low, high);
 		errno = ENOENT;
 		return STATUS_ERR;
