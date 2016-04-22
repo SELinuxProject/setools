@@ -16,9 +16,6 @@
 /* Define to 1 if you have the `bz2' library (-lbz2). */
 #define HAVE_LIBBZ2 1
 
-/* Define to 1 if you have the `selinux' library (-lselinux). */
-#define HAVE_LIBSELINUX 1
-
 /* Define to 1 if you have the `sepol' library (-lsepol). */
 #define HAVE_LIBSEPOL 1
 
@@ -110,9 +107,6 @@
 
 /* libsefs version */
 #define LIBSEFS_VERSION_STRING "4.0.4"
-
-/* enable libselinux-specific code */
-#define LIBSELINUX 1
 
 /* link programs using shared libraries */
 #define LINK_SHARED 1
