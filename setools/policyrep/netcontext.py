@@ -19,6 +19,8 @@
 from socket import IPPROTO_TCP, IPPROTO_UDP, getprotobyname
 from collections import namedtuple
 
+import socket
+
 from . import qpol
 from . import symbol
 from . import context
@@ -27,7 +29,10 @@ port_range = namedtuple("port_range", ["low", "high"])
 
 # Python does not have a constant
 # for the DCCP protocol.
-IPPROTO_DCCP = getprotobyname("dccp")
+try:
+    IPPROTO_DCCP = getprotobyname("dccp")
+except socket.error:
+    IPPROTO_DCCP = 33
 
 
 def netifcon_factory(policy, name):
