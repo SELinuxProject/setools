@@ -37,6 +37,31 @@ addition to the above dependencies:
 * mock (on Python 2.7 only)
 * tox (optional)
 
+### Obtaining SETools
+
+SETools is included in most Linux distributions which support
+SELinux, such as Fedora, Red Hat Enterprise Linux, Gentoo,
+and Debian.
+
+Official releases of SETools may be freely downloaded from:
+
+https://github.com/TresysTechnology/setools/releases
+
+SETools source code is maintained within a GitHub repository.
+From the command line do:
+```
+  $ git clone https://github.com/TresysTechnology/setools.git
+```
+You may also browse the GitHub repository at
+https://github.com/TresysTechnology/setools.  The master branch
+has development code that may not be stable.  Each release series
+is considered stable, and has its own branch, e.g. "4.0" for all
+4.0.* releases.  To checkout a stable branch, do:
+```
+  $ git checkout 4.0
+```
+Where `4.0` is the release series.  Each release will have a tag.
+
 ### Building SETools for Local Use
 
 To use SETools locally, without installing it onto the system,
@@ -109,24 +134,6 @@ sesearch   | Search rules (allow, type_transition, etc.)
 The SETools libraries are available for use in third-party
 applications.  Although this is not officially supported, we will
 do our best to maintain API stability.
-
-### Obtaining SETools
-
-Official releases of SETools may be freely downloaded from:
-
-https://github.com/TresysTechnology/setools/releases
-
-SETools source code is maintained within a GitHub repository.
-From the command line do:
-```
-  $ git clone https://github.com/TresysTechnology/setools.git
-```
-You may also browse the GitHub repository at
-https://github.com/TresysTechnology/setools.
-
-SETools included in most Linux distributions which support
-SELinux, such as Fedora, Red Hat Enterprise Linux, Gentoo,
-and Debian.
 
 ### Reporting bugs
 
