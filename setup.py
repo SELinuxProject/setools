@@ -84,8 +84,13 @@ except KeyError:
     # chooses dynamic libraries over static ones, so
     # this assumes that the static lib is in the same directory
     # as the dynamic lib.
-    dynamic_sepol = UnixCCompiler().find_library_file(['/usr/lib64', '/usr/lib'], 'sepol')
+    dynamic_sepol = UnixCCompiler().find_library_file(['.', '/usr/lib64', '/usr/lib'], 'sepol')
     static_sepol = dynamic_sepol.replace(".so", ".a")
+
+if sys.platform.startswith('darwin'):
+    macros=[('DARWIN',1)]
+else:
+    macros=[]
 
 ext_py_mods = [Extension('setools.policyrep._qpol',
                          ['setools/policyrep/qpol.i',
@@ -126,8 +131,8 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                           'libqpol/policy_parse.c',
                           'libqpol/policy_scan.c',
                           'libqpol/xen_query.c'],
-                         include_dirs=['libqpol', 'libqpol/include'],
-                         libraries=['bz2', 'selinux', 'sepol'],
+                         include_dirs=['libqpol', 'libqpol/include', 'include'],
+                         libraries=['bz2'],
                          extra_compile_args=['-Werror', '-Wextra',
                                              '-Waggregate-return',
                                              '-Wcast-align',
@@ -145,12 +150,12 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                                              '-Wwrite-strings',
                                              '-Wno-missing-field-initializers', # SWIG 3.0.2 generates partially-initialized structs
                                              '-Wno-unused-parameter', # SWIG generates functions with unused parameters
-                                             '-Wno-cast-qual', # libsepol/libselinux uses const-to-nonconst casts
+                                             '-Wno-cast-qual', # libsepol uses const-to-nonconst casts
                                              '-Wno-shadow', # SWIG generates shadow variables
                                              '-fno-exceptions'],
-                         extra_objects=[static_sepol],
-                         extra_link_args=['-Wl,--version-script=libqpol/libqpol.map'],
-                         swig_opts=['-Ilibqpol/include'])]
+                         swig_opts=['-Ilibqpol/include'],
+                         define_macros=macros,
+                         extra_objects=[static_sepol])]
 
 setup(name='setools',
       version='4.0.0-beta',

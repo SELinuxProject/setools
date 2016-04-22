@@ -39,7 +39,6 @@
 #include <qpol/policy.h>
 #include <qpol/policy_extend.h>
 #include <qpol/iterator.h>
-#include <selinux/selinux.h>
 #include <errno.h>
 #include <assert.h>
 #include <stdio.h>
@@ -443,35 +442,6 @@ static int qpol_policy_add_isid_names(qpol_policy_t * policy)
 		}
 	}
 
-	return 0;
-}
-
-/**
- *  If the given policy's version is higher than the running system's
- *  version, then mark it as different.  In a future version of
- *  libqpol, accessors will return data as if the policy were really
- *  the new version rather than what it actually is.
- */
-static int qpol_policy_match_system(qpol_policy_t * policy)
-{
-	int kernvers = security_policyvers();
-	unsigned int currentvers = policy->p->p.policyvers;
-	int error;
-	if (kernvers < 0) {
-		error = errno;
-		ERR(policy, "%s", "Could not determine running system's policy version.");
-		errno = error;
-		return -1;
-	}
-	if (currentvers > (unsigned)kernvers) {
-		if (sepol_policydb_set_vers(policy->p, kernvers)) {
-			error = errno;
-			ERR(policy, "Could not downgrade policy to version %d.", kernvers);
-			errno = error;
-			return -1;
-		}
-		WARN(policy, "Policy would be downgraded from version %d to %d.", currentvers, kernvers);
-	}
 	return 0;
 }
 
@@ -1022,10 +992,6 @@ int policy_extend(qpol_policy_t * policy)
 	}
 	retv = qpol_policy_add_isid_names(policy);
 	if (retv) {
-		error = errno;
-		goto err;
-	}
-	if ((policy->options & QPOL_POLICY_OPTION_MATCH_SYSTEM) && qpol_policy_match_system(policy)) {
 		error = errno;
 		goto err;
 	}

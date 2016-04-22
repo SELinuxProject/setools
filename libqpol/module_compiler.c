@@ -152,7 +152,7 @@ int declare_symbol(uint32_t symbol_type,
 		assert(s != NULL);
 		
 		if (symbol_type == SYM_LEVELS) {
-			*dest_value = ((level_datum_t *)s)->level->sens;
+			*dest_value = ((level_datum_t *)(void *)s)->level->sens;
 		} else {
 			*dest_value = s->value;
 		}
@@ -647,7 +647,7 @@ int require_symbol(uint32_t symbol_type,
 		assert(s != NULL);
 		
 		if (symbol_type == SYM_LEVELS) {
-			*dest_value = ((level_datum_t *)s)->level->sens;
+			*dest_value = ((level_datum_t *)(void *)s)->level->sens;
 		} else {
 			*dest_value = s->value;
 		}
@@ -1074,7 +1074,7 @@ static int require_bool_tunable(int pass, int is_tunable)
 	if (is_tunable)
 		booldatum->flags |= COND_BOOL_FLAGS_TUNABLE;
 	retval =
-	    require_symbol(SYM_BOOLS, id, (hashtab_datum_t *) booldatum,
+	    require_symbol(SYM_BOOLS, id, (hashtab_datum_t *) (void *) booldatum,
 			   &booldatum->s.value, &booldatum->s.value);
 	if (retval != 0) {
 		cond_destroy_bool(id, booldatum, NULL);
@@ -1198,7 +1198,7 @@ int require_cat(int pass)
 	}
 	cat_datum_init(cat);
 
-	retval = require_symbol(SYM_CATS, id, (hashtab_datum_t *) cat,
+	retval = require_symbol(SYM_CATS, id, (hashtab_datum_t *) (void *)cat,
 				&cat->s.value, &cat->s.value);
 	if (retval != 0) {
 		free(id);

@@ -28,8 +28,6 @@
 
 #include "qpol_internal.h"
 #include <assert.h>
-#include <byteswap.h>
-#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -37,7 +35,15 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <asm/types.h>
+
+#ifdef DARWIN
+# include "linux_types.h"
+# include <machine/endian.h>
+# include <sys/types.h>
+#else
+# include <endian.h>
+# include <asm/types.h>
+#endif
 
 #include <sepol/debug.h>
 #include <sepol/handle.h>
@@ -779,15 +785,6 @@ err:
 struct qpol_extended_image;
 extern void qpol_extended_image_destroy(struct qpol_extended_image **ext);
 
-#if LINK_SHARED == 1
-__asm__(".symver qpol_policy_open_from_file_old,qpol_policy_open_from_file@");
-__asm__(".symver qpol_policy_open_from_file_opt,qpol_policy_open_from_file@@VERS_1.3");
-__asm__(".symver qpol_policy_open_from_memory_old,qpol_policy_open_from_memory@");
-__asm__(".symver qpol_policy_open_from_memory_opt,qpol_policy_open_from_memory@VERS_1.3");
-__asm__(".symver qpol_policy_rebuild_old,qpol_policy_rebuild@");
-__asm__(".symver qpol_policy_rebuild_opt,qpol_policy_rebuild@@VERS_1.3");
-#endif
-
 /**
  * @brief Internal version of qpol_policy_rebuild() version 1.3
  *
@@ -795,7 +792,7 @@ __asm__(".symver qpol_policy_rebuild_opt,qpol_policy_rebuild@@VERS_1.3");
  * for version 1.3; this symbol name is not exported.
  * @see qpol_policy_rebuild()
  */
-int qpol_policy_rebuild_opt(qpol_policy_t * policy, const int options)
+int qpol_policy_rebuild(qpol_policy_t * policy, const int options)
 {
 	sepol_policydb_t *old_p = NULL;
 	sepol_policydb_t **modules = NULL;
@@ -928,39 +925,6 @@ int qpol_policy_rebuild_opt(qpol_policy_t * policy, const int options)
 	return STATUS_ERR;
 }
 
-#if LINK_SHARED == 0
-int qpol_policy_rebuild(qpol_policy_t * policy, int options)
-{
-	return qpol_policy_rebuild_opt(policy, options);
-}
-#endif
-
-/**
- * @brief Internal version of qpol_policy_rebuild() version 1.2 or earlier
- * @deprecated use the 1.3 version.
- * @see qpol_policy_rebuild()
- */
-int qpol_policy_rebuild_old(qpol_policy_t * policy)
-{
-	if (!policy) {
-		ERR(NULL, "%s", strerror(EINVAL));
-		errno = EINVAL;
-		return STATUS_ERR;
-	}
-
-	/* fail if not a modular policy */
-	if (policy->type != QPOL_POLICY_MODULE_BINARY) {
-		ERR(policy, "%s", strerror(ENOTSUP));
-		errno = ENOTSUP;
-		return STATUS_ERR;
-	}
-
-	if (!policy->modified)
-		return STATUS_SUCCESS;
-
-	return qpol_policy_rebuild_opt(policy, policy->options);
-}
-
 /**
  * @brief Internal version of qpol_policy_open_from_file() version 1.3
  *
@@ -968,7 +932,7 @@ int qpol_policy_rebuild_old(qpol_policy_t * policy)
  * for version 1.3; this symbol name is not exported.
  * @see qpol_policy_open_from_file()
  */
-int qpol_policy_open_from_file_opt(const char *path, qpol_policy_t ** policy, qpol_callback_fn_t fn, void *varg, const int options)
+int qpol_policy_open_from_file(const char *path, qpol_policy_t ** policy, qpol_callback_fn_t fn, void *varg, const int options)
 {
 	int error = 0, retv = -1;
 	FILE *infile = NULL;
@@ -1057,7 +1021,7 @@ int qpol_policy_open_from_file_opt(const char *path, qpol_policy_t ** policy, qp
 		}
 		/* *policy now owns mod */
 		mod = NULL;
-		if (qpol_policy_rebuild_opt(*policy, options)) {
+		if (qpol_policy_rebuild(*policy, options)) {
 			error = errno;
 			goto err;
 		}
@@ -1146,18 +1110,6 @@ int qpol_policy_open_from_file_opt(const char *path, qpol_policy_t ** policy, qp
 	return -1;
 }
 
-#if LINK_SHARED == 0
-int qpol_policy_open_from_file(const char *path, qpol_policy_t ** policy, qpol_callback_fn_t fn, void *varg, const int options)
-{
-	return qpol_policy_open_from_file_opt(path, policy, fn, varg, options);
-}
-#endif
-
-int qpol_policy_open_from_file_no_rules(const char *path, qpol_policy_t ** policy, qpol_callback_fn_t fn, void *varg)
-{
-	return qpol_policy_open_from_file_opt(path, policy, fn, varg, QPOL_POLICY_OPTION_NO_RULES);
-}
-
 /**
  * @brief Internal version of qpol_policy_open_from_memory() version 1.3
  *
@@ -1165,7 +1117,7 @@ int qpol_policy_open_from_file_no_rules(const char *path, qpol_policy_t ** polic
  * for version 1.3; this symbol name is not exported.
  * @see qpol_policy_open_from_memory()
  */
-int qpol_policy_open_from_memory_opt(qpol_policy_t ** policy, const char *filedata, size_t size, qpol_callback_fn_t fn, void *varg,
+int qpol_policy_open_from_memory(qpol_policy_t ** policy, const char *filedata, size_t size, qpol_callback_fn_t fn, void *varg,
 				     const int options)
 {
 	int error = 0;
@@ -1256,34 +1208,6 @@ int qpol_policy_open_from_memory_opt(qpol_policy_t ** policy, const char *fileda
 	errno = error;
 	return -1;
 
-}
-
-#if LINK_SHARED == 0
-int qpol_policy_open_from_memory(qpol_policy_t ** policy, const char *filedata, size_t size, qpol_callback_fn_t fn, void *varg,
-				 const int options)
-{
-	return qpol_policy_open_from_memory_opt(policy, filedata, size, fn, varg, options);
-}
-#endif
-
-/**
- * @brief Internal version of qpol_policy_open_from_file() version 1.2 or earlier
- * @deprecated use the 1.3 version.
- * @see qpol_policy_open_from_file()
- */
-int qpol_policy_open_from_file_old(const char *path, qpol_policy_t ** policy, qpol_callback_fn_t fn, void *varg)
-{
-	return qpol_policy_open_from_file(path, policy, fn, varg, 0);
-}
-
-/**
- * @brief Internal version of qpol_policy_open_from_memory() version 1.2 or earlier
- * @deprecated use the 1.3 version.
- * @see qpol_policy_open_from_memory()
- */
-int qpol_policy_open_from_memory_old(qpol_policy_t ** policy, const char *filedata, size_t size, qpol_callback_fn_t fn, void *varg)
-{
-	return qpol_policy_open_from_memory_opt(policy, filedata, size, fn, varg, 0);
 }
 
 void qpol_policy_destroy(qpol_policy_t ** policy)
