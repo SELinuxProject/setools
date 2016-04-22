@@ -52,7 +52,6 @@
 #include "include/qpol/terule_query.h"
 #include "include/qpol/type_query.h"
 #include "include/qpol/user_query.h"
-#include "include/qpol/util.h"
 #include "include/qpol/xen_query.h"
 
 /* Provide hooks so that language-specific modules can define the
