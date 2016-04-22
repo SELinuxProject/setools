@@ -161,7 +161,6 @@ def qpol_policy_factory(path):
 /* qpol_policy */
 #define QPOL_POLICY_OPTION_NO_NEVERALLOWS 0x00000001
 #define QPOL_POLICY_OPTION_NO_RULES       0x00000002
-#define QPOL_POLICY_OPTION_MATCH_SYSTEM   0x00000004
 /* add maximum and minimum policy versions supported by the statically linked libsepol */
 %constant int QPOL_POLICY_MAX_VERSION = POLICYDB_VERSION_MAX;
 %constant int QPOL_POLICY_MIN_VERSION = POLICYDB_VERSION_MIN;
