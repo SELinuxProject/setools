@@ -57,6 +57,10 @@
 #include <sepol/policydb/polcaps.h>
 #include "queue.h"
 
+#ifdef DARWIN
+#include "linux_types.h"
+#endif
+
 /* Required for SETools libqpol - Removed #include "checkpolicy.h"*/
 #include <qpol/policy.h>
 

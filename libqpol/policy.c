@@ -28,8 +28,6 @@
 
 #include "qpol_internal.h"
 #include <assert.h>
-#include <byteswap.h>
-#include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
@@ -37,7 +35,15 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <asm/types.h>
+
+#ifdef DARWIN
+# include "linux_types.h"
+# include <machine/endian.h>
+# include <sys/types.h>
+#else
+# include <endian.h>
+# include <asm/types.h>
+#endif
 
 #include <sepol/debug.h>
 #include <sepol/handle.h>

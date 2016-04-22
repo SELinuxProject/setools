@@ -46,7 +46,6 @@ const char *libqpol_get_version(void)
 #include <stdlib.h>
 #include <bzlib.h>
 #include <string.h>
-#include <sys/sendfile.h>
 
 #define BZ2_MAGICSTR "BZh"
 #define BZ2_MAGICLEN (sizeof(BZ2_MAGICSTR)-1)
