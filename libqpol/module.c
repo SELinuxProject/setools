@@ -31,7 +31,6 @@
 #include <string.h>
 
 #include <qpol/module.h>
-#include <qpol/util.h>
 #include "qpol_internal.h"
 
 #include <sepol/policydb.h>
