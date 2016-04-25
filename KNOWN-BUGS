@@ -1,7 +1,5 @@
 The following is a list of known bugs with SETools.
 
-* SETools 4 is still in development.  Not all functions are available.
-
 * A bug in libsepol 2.4 will cause some invalid level and ranges to pass
   validation.  A patch is included in the patches/ directory, along with more
   information on the unit tests that will fail due to this bug.
