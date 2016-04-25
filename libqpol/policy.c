@@ -37,7 +37,7 @@
 #include <sys/stat.h>
 
 #ifdef DARWIN
-# include "linux_types.h"
+# include <qpol/linux_types.h>
 # include <machine/endian.h>
 # include <sys/types.h>
 #else

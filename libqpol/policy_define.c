@@ -58,7 +58,7 @@
 #include "queue.h"
 
 #ifdef DARWIN
-#include "linux_types.h"
+#include <qpol/linux_types.h>
 #endif
 
 /* Required for SETools libqpol - Removed #include "checkpolicy.h"*/
