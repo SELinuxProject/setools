@@ -37,6 +37,9 @@ from . import qpol
 # This also makes sense since an object would only
 # be valid for the policy it comes from.
 
+# Exceptions
+from . import exception
+
 # Components
 from . import boolcond
 from . import bounds
@@ -63,11 +66,6 @@ from . import netcontext
 
 # Xen
 from . import xencontext
-
-# Classes useful for policyrep users:
-from . import exception
-from .netcontext import PortconProtocol, port_range
-from .terule import ioctlSet
 
 
 class SELinuxPolicy(object):
