@@ -22,8 +22,8 @@ from . import qpol
 from . import symbol
 from . import context
 
-addr_range = namedtuple("memory_range", ["low", "high"])
-port_range = namedtuple("port_range", ["low", "high"])
+IomemconRange = namedtuple("IomemconRange", ["low", "high"])
+IoportconRange = namedtuple("IoportconRange", ["low", "high"])
 
 
 def iomemcon_factory(policy, name):
@@ -110,7 +110,7 @@ class Iomemcon(XenContext):
         """
         low = self.qpol_symbol.low_addr(self.policy)
         high = self.qpol_symbol.high_addr(self.policy)
-        return addr_range(low, high)
+        return IomemconRange(low, high)
 
 
 class Ioportcon(XenContext):
@@ -137,7 +137,7 @@ class Ioportcon(XenContext):
 
         low = self.qpol_symbol.low_port(self.policy)
         high = self.qpol_symbol.high_port(self.policy)
-        return port_range(low, high)
+        return IoportconRange(low, high)
 
 
 class Pcidevicecon(XenContext):

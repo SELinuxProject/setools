@@ -18,7 +18,7 @@
 #
 from collections import defaultdict, namedtuple
 
-from ..policyrep import ioctlSet
+from ..policyrep import IoctlSet
 from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 
 from .conditional import ConditionalExprWrapper
@@ -115,9 +115,9 @@ def avx_diff_template(ruletype):
             # matched_perms return from _set_diff is a set of tuples
             if added_perms or removed_perms:
                 modified.append(modified_avrule_record(left_rule,
-                                                       ioctlSet(added_perms),
-                                                       ioctlSet(removed_perms),
-                                                       ioctlSet(p[0] for p in matched_perms)))
+                                                       IoctlSet(added_perms),
+                                                       IoctlSet(removed_perms),
+                                                       IoctlSet(p[0] for p in matched_perms)))
 
         setattr(self, "added_{0}s".format(ruletype), added)
         setattr(self, "removed_{0}s".format(ruletype), removed)

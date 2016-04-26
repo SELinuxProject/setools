@@ -22,6 +22,7 @@
 # structures.
 
 from . import exception
-from .netcontext import PortconProtocol, port_range
+from .netcontext import PortconProtocol, PortconRange
 from .selinuxpolicy import SELinuxPolicy
-from .terule import ioctlSet
+from .terule import IoctlSet
+from .xencontext import IomemconRange, IoportconRange

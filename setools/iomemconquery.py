@@ -19,7 +19,7 @@
 import logging
 
 from .mixins import MatchContext
-from .policyrep.xencontext import addr_range
+from .policyrep.xencontext import IomemconRange
 from .query import PolicyQuery
 from .util import match_range
 
@@ -79,7 +79,7 @@ class IomemconQuery(MatchContext, PolicyQuery):
 
     @addr.setter
     def addr(self, value):
-        pending_addr = addr_range(*value)
+        pending_addr = IomemconRange(*value)
 
         if all(pending_addr):
             if pending_addr.low < 1 or pending_addr.high < 1:

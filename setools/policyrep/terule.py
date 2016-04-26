@@ -155,7 +155,7 @@ class AVRule(BaseTERule):
         raise exception.RuleUseError("{0} rules do not have file names".format(self.ruletype))
 
 
-class ioctlSet(set):
+class IoctlSet(set):
 
     """
     A set with overridden string functions which compresses
@@ -191,7 +191,7 @@ class ioctlSet(set):
         elif spec == ",":
             return ", ".join(shortlist)
         else:
-            return super(ioctlSet, self).__format__(spec)
+            return super(IoctlSet, self).__format__(spec)
 
     def __str__(self):
         return "{0}".format(self)
@@ -237,7 +237,7 @@ class AVRuleXperm(AVRule):
     @property
     def perms(self):
         """The rule's extended permission set."""
-        return ioctlSet(self.qpol_symbol.xperm_iter(self.policy))
+        return IoctlSet(self.qpol_symbol.xperm_iter(self.policy))
 
     @property
     def xperm_type(self):

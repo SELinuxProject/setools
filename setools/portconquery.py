@@ -21,7 +21,7 @@ from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from .mixins import MatchContext
 from .query import PolicyQuery
-from .policyrep import port_range, PortconProtocol
+from .policyrep import PortconRange, PortconProtocol
 from .util import match_range
 
 
@@ -84,7 +84,7 @@ class PortconQuery(MatchContext, PolicyQuery):
 
     @ports.setter
     def ports(self, value):
-        pending_ports = port_range(*value)
+        pending_ports = PortconRange(*value)
 
         if all(pending_ports):
             if pending_ports.low < 1 or pending_ports.high < 1:

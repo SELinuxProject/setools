@@ -25,7 +25,7 @@ from . import qpol
 from . import symbol
 from . import context
 
-port_range = namedtuple("port_range", ["low", "high"])
+PortconRange = namedtuple("PortconRange", ["low", "high"])
 
 # Python does not have a constant
 # for the DCCP protocol.
@@ -211,4 +211,4 @@ class Portcon(NetContext):
         """
         low = self.qpol_symbol.low_port(self.policy)
         high = self.qpol_symbol.high_port(self.policy)
-        return port_range(low, high)
+        return PortconRange(low, high)

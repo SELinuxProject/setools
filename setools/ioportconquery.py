@@ -19,7 +19,7 @@
 import logging
 
 from .mixins import MatchContext
-from .policyrep.xencontext import port_range
+from .policyrep import IoportconRange
 from .query import PolicyQuery
 from .util import match_range
 
@@ -79,7 +79,7 @@ class IoportconQuery(MatchContext, PolicyQuery):
 
     @ports.setter
     def ports(self, value):
-        pending_ports = port_range(*value)
+        pending_ports = IoportconRange(*value)
 
         if all(pending_ports):
             if pending_ports.low < 1 or pending_ports.high < 1:

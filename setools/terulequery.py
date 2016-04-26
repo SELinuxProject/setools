@@ -21,7 +21,7 @@ import re
 
 from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .policyrep import ioctlSet
+from .policyrep import IoctlSet
 from .policyrep.exception import RuleUseError, RuleNotConditional
 from .util import match_regex, match_indirect_regex, match_regex_or_set
 
@@ -104,7 +104,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
     @xperms.setter
     def xperms(self, value):
         if value:
-            pending_xperms = ioctlSet()
+            pending_xperms = IoctlSet()
 
             for low, high in value:
                 if not (0 <= low <= 0xffff):
