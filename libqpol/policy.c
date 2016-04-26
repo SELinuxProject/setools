@@ -386,13 +386,6 @@ int qpol_is_file_mod_pkg(FILE * fp)
 static int infer_policy_version(qpol_policy_t * policy)
 {
 	policydb_t *db = NULL;
-	const qpol_class_t *obj_class = NULL;
-	qpol_iterator_t *iter = NULL;
-	qpol_fs_use_t *fsuse = NULL;
-	qpol_range_trans_t *rangetrans = NULL;
-	uint32_t behavior = 0;
-	size_t nvtrans = 0, fsusexattr = 0;
-	const char *obj_name = NULL;
 
 	if (!policy) {
 		ERR(policy, "%s", strerror(EINVAL));
@@ -407,139 +400,11 @@ static int infer_policy_version(qpol_policy_t * policy)
 		return STATUS_SUCCESS;
 	}
 
-	/* check fs_use for xattr and psid */
-	qpol_policy_get_fs_use_iter(policy, &iter);
-	for (; !qpol_iterator_end(iter); qpol_iterator_next(iter)) {
-		qpol_iterator_get_item(iter, (void **)&fsuse);
-		qpol_fs_use_get_behavior(policy, fsuse, &behavior);
-		/* not possible to have xattr and psid in same policy */
-		if (behavior == QPOL_FS_USE_XATTR) {
-			fsusexattr = 1;
-			break;
-		} else if (behavior == QPOL_FS_USE_PSID) {
-			qpol_iterator_destroy(&iter);
-			db->policyvers = 12;
-			return STATUS_SUCCESS;
-		}
-	}
-	qpol_iterator_destroy(&iter);
-
-/* Check each version change from 30 to 24 */
-/* If these are available set version 30 */
-#if defined(HAVE_SEPOL_XPERM_IOCTL) || defined(HAVE_SEPOL_XEN_DEVICETREE)
-	db->policyvers = 30;
-	return STATUS_SUCCESS;
-#endif
-
-/* If this is available then set version 29 */
-#ifdef HAVE_SEPOL_CONSTRAINT_NAMES
-	db->policyvers = 29;
-	return STATUS_SUCCESS;
-#endif
-
-/*
- * These will remove the rules from policy_define.c if libsepol
- * does not have the support listed in policydb.h. The earlier code
- * checked for at least one rule before enabling - this patch does not
- * as if in policydb.h then must be capable of being built.
- */
-#ifdef HAVE_SEPOL_DEFAULT_TYPE
-	db->policyvers = 28;
-	return STATUS_SUCCESS;
-#endif
-
-#ifdef HAVE_SEPOL_NEW_OBJECT_DEFAULTS
-	db->policyvers = 27;
-	return STATUS_SUCCESS;
-#endif
-
-/* This seems to be in place already ??
-#ifdef HAVE_SEPOL_ROLETRANS
-	db->policyvers = 26;
-	return STATUS_SUCCESS;
-#endif */
-
-#ifdef HAVE_SEPOL_FILENAME_TRANS
-	db->policyvers = 25;
-	return STATUS_SUCCESS;
-#endif
-
-#ifdef HAVE_SEPOL_BOUNDARY
-	db->policyvers = 24;
-	return STATUS_SUCCESS;
-#endif
-
-#if defined(HAVE_SEPOL_PERMISSIVE_TYPES) || defined(HAVE_SEPOL_POLICYCAPS)
-	ebitmap_node_t *node = NULL;
-	unsigned int i = 0;
-#endif
-
-	/* 23 : there exists at least one type that is permissive */
-#ifdef HAVE_SEPOL_PERMISSIVE_TYPES
-	ebitmap_for_each_bit(&db->permissive_map, node, i) {
-		if (ebitmap_get_bit(&db->permissive_map, i)) {
-			db->policyvers = 23;
-			return STATUS_SUCCESS;
-		}
-	}
-#endif
-
-	/* 22 : there exists at least one policy capability */
-#ifdef HAVE_SEPOL_POLICYCAPS
-	ebitmap_for_each_bit(&db->policycaps, node, i) {
-		if (ebitmap_get_bit(&db->policycaps, i)) {
-			db->policyvers = 22;
-			return STATUS_SUCCESS;
-		}
-	}
-#endif
-
-	/* 21 : object classes other than process for range_transitions */
-	qpol_policy_get_range_trans_iter(policy, &iter);
-	for (; !qpol_iterator_end(iter); qpol_iterator_next(iter)) {
-		qpol_iterator_get_item(iter, (void **)&rangetrans);
-		qpol_range_trans_get_target_class(policy, rangetrans, &obj_class);
-		qpol_class_get_name(policy, obj_class, &obj_name);
-		if (strcmp(obj_name, "process")) {
-			db->policyvers = 21;
-			qpol_iterator_destroy(&iter);
-			return STATUS_SUCCESS;
-		}
-	}
-	qpol_iterator_destroy(&iter);
-
-	/* 19 & 20 : mls and validatetrans statements added */
-	qpol_policy_get_validatetrans_iter(policy, &iter);
-	qpol_iterator_get_size(iter, &nvtrans);
-	qpol_iterator_destroy(&iter);
-	if (db->mls || nvtrans) {
-		db->policyvers = 19;
-	}
-
-	/* 18 : the netlink_audit_socket class added */
-	else if (hashtab_search(db->p_classes.table, (hashtab_key_t)"netlink_audit_socket")) {
-		db->policyvers = 18;
-	}
-
-	/* 17 : IPv6 nodecon statements added */
-	else if (db->ocontexts[OCON_NODE6]) {
-		db->policyvers = 17;
-	}
-
-	/* 16 : conditional policy added */
-	else if (db->p_bool_val_to_name && db->p_bool_val_to_name[0]) {
-		db->policyvers = 16;
-
-	}
-	/* 15 */
-	else if (fsusexattr) {
-		db->policyvers = 15;
-	}
-
-	/* 12 */
-	else {
-		db->policyvers = 12;
-	}
+	/* Do not try to infer policy version, as it is
+	 * a compile-time setting, and the policy can
+	 * be downgraded.
+	 */
+	db->policyvers = POLICYDB_VERSION_MAX;
 
 	return STATUS_SUCCESS;
 }
