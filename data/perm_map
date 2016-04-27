@@ -27,7 +27,7 @@
 # Look to the examples below for further clarification.
 #
 # Number of object classes.
-93
+95
 
 class netlink_audit_socket 27
          nlmsg_relay         w        10
@@ -1516,3 +1516,44 @@ class netlink_fib_lookup_socket 22
            relabelto         w        10
               listen         r         1
 
+class cap_userns 32
+             setfcap         n         1
+             setpcap         n         1
+              fowner         n         1
+            sys_boot         n         1
+      sys_tty_config         n         1
+             net_raw         n         1
+           sys_admin         n         1
+          sys_chroot         n         1
+          sys_module         n         1
+           sys_rawio         n         1
+        dac_override         n         1
+           ipc_owner         n         1
+                kill         n         1
+     dac_read_search         n         1
+           sys_pacct         n         1
+       net_broadcast         n         1
+    net_bind_service         n         1
+            sys_nice         n         1
+            sys_time         n         1
+              fsetid         n         1
+               mknod         n         1
+              setgid         n         1
+              setuid         n         1
+               lease         n         1
+           net_admin         n         1
+         audit_write         n         1
+     linux_immutable         n         1
+          sys_ptrace         n         1
+       audit_control         n         1
+            ipc_lock         n         1
+        sys_resource         n         1
+               chown         n         1
+
+class cap2_userns 6
+        mac_override         n         1
+           mac_admin         n         1
+              syslog         n         1
+       block_suspend         n         1
+          wake_alarm         n         1
+          audit_read         n         1
