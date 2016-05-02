@@ -22,6 +22,21 @@ from errno import ENOENT
 from PyQt5.uic import loadUi
 
 
+# Stylesheet that adds a frame around QGroupBoxes
+stylesheet = "\
+QGroupBox {\
+    border: 1px solid lightgrey;\
+    margin-top: 0.5em;\
+    }\
+\
+QGroupBox::title {\
+    subcontrol-origin: margin;\
+    left: 10px;\
+    padding: 0 3px 0 3px;\
+}\
+"
+
+
 class SEToolsWidget(object):
     def load_ui(self, filename):
         # If we are in the git repo, look at the local
@@ -35,3 +50,5 @@ class SEToolsWidget(object):
                     raise
         else:
             raise RuntimeError("Unable to load Qt UI file \"{0}\"".format(filename))
+
+        self.setStyleSheet(stylesheet)
