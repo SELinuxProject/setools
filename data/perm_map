@@ -1257,7 +1257,7 @@ class x_keyboard 19
               manage         w        10
                  use         r         1
 
-class security 12
+class security 13
       compute_member         n         1
         compute_user         n         1
       compute_create         n         1
@@ -1270,6 +1270,7 @@ class security 12
          read_policy         n         1
          setsecparam         n         1
           compute_av         n         1
+      validate_trans         n         1
 
 class x_pointer 19
         get_property         r         7
