@@ -84,7 +84,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_cond_get_av_true_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask,
@@ -102,7 +102,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_cond_get_te_true_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask,
@@ -120,7 +120,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_cond_get_av_false_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask,
@@ -138,7 +138,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_cond_get_te_false_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask,

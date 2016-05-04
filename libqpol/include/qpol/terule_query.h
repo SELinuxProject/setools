@@ -53,7 +53,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_policy_get_terule_iter(const qpol_policy_t * policy, uint32_t rule_type_mask, qpol_iterator_t ** iter);
@@ -64,7 +64,7 @@ extern "C"
  *  @param rule The rule from which to get the source type.
  *  @param source Pointer in which to store the source type.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *source will be NULL.
  */
 	extern int qpol_terule_get_source_type(const qpol_policy_t * policy, const qpol_terule_t * rule,
@@ -76,7 +76,7 @@ extern "C"
  *  @param rule The rule from which to get the target type.
  *  @param target Pointer in which to store the target type.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *target will be NULL.
  */
 	extern int qpol_terule_get_target_type(const qpol_policy_t * policy, const qpol_terule_t * rule,
@@ -88,7 +88,7 @@ extern "C"
  *  @param rule The rule from which to get the object class.
  *  @param obj_class Pointer in which to store the object class.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *obj_class will be NULL.
  */
 	extern int qpol_terule_get_object_class(const qpol_policy_t * policy, const qpol_terule_t * rule,
@@ -100,7 +100,7 @@ extern "C"
  *  @param rule The rule from which to get the default type.
  *  @param dflt Pointer in which to store the default type.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *dflt will be NULL.
  */
 	extern int qpol_terule_get_default_type(const qpol_policy_t * policy, const qpol_terule_t * rule,
@@ -112,7 +112,7 @@ extern "C"
  *  @param rule The rule from which to get the rule type.
  *  @param rule_type Integer in which to store the rule type value.
  *  The value will be one of the QPOL_RULE_* values above.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *rule_type will be 0.
  */
 	extern int qpol_terule_get_rule_type(const qpol_policy_t * policy, const qpol_terule_t * rule, uint32_t * rule_type);

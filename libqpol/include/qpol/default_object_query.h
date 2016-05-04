@@ -65,7 +65,7 @@ extern "C"
  *  Get the value of a default user source/dest from its datum.
  *  @param policy The policy with which the default object is associated.
  *  @param datum default_object datum for which to get the value. Must be non-NULL.
- *  @param default Pointer to the value in which to store the default.
+ *  @param value Pointer to the value in which to store the default.
  *  Must be non-NULL. The caller should not free the string.
  *  @return Returns 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *default will be 0.
@@ -76,7 +76,7 @@ extern "C"
  *  Get the value of a default role source/dest from its datum.
  *  @param policy The policy with which the default object type is associated.
  *  @param datum default_object datum for which to get the value. Must be non-NULL.
- *  @param default Pointer to the value in which to store the default.
+ *  @param value Pointer to the value in which to store the default.
  *  Must be non-NULL. The caller should not free the string.
  *  @return Returns 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *default will be 0.
@@ -87,7 +87,7 @@ extern "C"
  *  Get the value of a default type source/dest from its datum.
  *  @param policy The policy with which the default object type is associated.
  *  @param datum default_object datum for which to get the value. Must be non-NULL.
- *  @param default Pointer to the value in which to store the default.
+ *  @param value Pointer to the value in which to store the default.
  *  Must be non-NULL. The caller should not free the string.
  *  @return Returns 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *default will be 0.
@@ -98,7 +98,7 @@ extern "C"
  *  Get the value of a default range source/dest from its datum.
  *  @param policy The policy with which the default object type is associated.
  *  @param datum default_object datum for which to get the value. Must be non-NULL.
- *  @param default Pointer to the value in which to store the default.
+ *  @param value Pointer to the value in which to store the default.
  *  Must be non-NULL. The caller should not free the string.
  *  @return Returns 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *default will be 0.

@@ -135,7 +135,7 @@ extern "C"
 /**
  *  Get the name which identifies a class.
  *  @param policy The policy with which the class is associated.
- *  @param datum Class for which to get the name. Must be non-NULL.
+ *  @param obj_class Class for which to get the name. Must be non-NULL.
  *  @param name Pointer to the string in which to store the name.
  *  Must be non-NULL. Caller should not free the string.
  *  @return Returns 0 on success and < 0 on failure; if the call fails,
