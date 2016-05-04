@@ -1294,7 +1294,7 @@ typedef struct qpol_type {} qpol_type_t;
 %inline %{
     qpol_type_t *qpol_type_from_void(void *x) {
         return (qpol_type_t*)x;
-    };
+    }
 %}
 
 /* qpol role */
@@ -1358,7 +1358,7 @@ typedef struct qpol_role {} qpol_role_t;
 %inline %{
     qpol_role_t *qpol_role_from_void(void *x) {
         return (qpol_role_t*)x;
-    };
+    }
 %}
 
 /* qpol level */
@@ -1437,7 +1437,7 @@ typedef struct qpol_level {} qpol_level_t;
 %inline %{
     qpol_level_t *qpol_level_from_void(void *x) {
         return (qpol_level_t*)x;
-    };
+    }
 %}
 
 /* qpol cat */
@@ -1504,7 +1504,7 @@ typedef struct qpol_cat {} qpol_cat_t;
 %inline %{
     qpol_cat_t *qpol_cat_from_void(void *x) {
         return (qpol_cat_t*)x;
-    };
+    }
 %}
 
 /* qpol mls range */
@@ -1558,7 +1558,7 @@ typedef struct qpol_mls_range {} qpol_mls_range_t;
 %inline %{
     qpol_mls_range_t *qpol_mls_range_from_void(void *x) {
         return (qpol_mls_range_t*)x;
-    };
+    }
 %}
 
 /* qpol semantic mls level */
@@ -1639,7 +1639,7 @@ typedef struct qpol_mls_level {} qpol_mls_level_t;
 %inline %{
     qpol_mls_level_t *qpol_mls_level_from_void(void *x) {
         return (qpol_mls_level_t*)x;
-    };
+    }
 %}
 
 /* qpol user */
@@ -1709,7 +1709,7 @@ typedef struct qpol_user {} qpol_user_t;
 %inline %{
     qpol_user_t *qpol_user_from_void(void *x) {
         return (qpol_user_t*)x;
-    };
+    }
 %}
 
 /* qpol bool */
@@ -1756,7 +1756,7 @@ typedef struct qpol_bool {} qpol_bool_t;
 %inline %{
     qpol_bool_t *qpol_bool_from_void(void *x) {
         return (qpol_bool_t*)x;
-    };
+    }
 %}
 
 /* qpol context */
@@ -1807,7 +1807,7 @@ typedef struct qpol_context {} qpol_context_t;
 %inline %{
     qpol_context_t *qpol_context_from_void(void *x) {
         return (qpol_context_t*)x;
-    };
+    }
 %}
 
 /* qpol class */
@@ -1904,7 +1904,7 @@ typedef struct qpol_class {} qpol_class_t;
 %inline %{
     qpol_class_t *qpol_class_from_void(void *x) {
         return (qpol_class_t*)x;
-    };
+    }
 %}
 
 /* qpol common */
@@ -1964,7 +1964,7 @@ typedef struct qpol_common {} qpol_common_t;
 %inline %{
     qpol_common_t *qpol_common_from_void(void *x) {
         return (qpol_common_t*)x;
-    };
+    }
 %}
 
 /* qpol fs_use */
@@ -2023,7 +2023,7 @@ typedef struct qpol_fs_use {} qpol_fs_use_t;
 %inline %{
     qpol_fs_use_t *qpol_fs_use_from_void(void *x) {
         return (qpol_fs_use_t*)x;
-    };
+    }
 %}
 
 /* qpol genfscon */
@@ -2095,7 +2095,7 @@ typedef struct qpol_genfscon {} qpol_genfscon_t;
 %inline %{
     qpol_genfscon_t *qpol_genfscon_from_void(void *x) {
         return (qpol_genfscon_t*)x;
-    };
+    }
 %}
 
 /* qpol isid */
@@ -2143,7 +2143,7 @@ typedef struct qpol_isid {} qpol_isid_t;
 %inline %{
     qpol_isid_t *qpol_isid_from_void(void *x) {
         return (qpol_isid_t*)x;
-    };
+    }
 %}
 
 /* qpol netifcon */
@@ -2189,7 +2189,7 @@ typedef struct qpol_netifcon {} qpol_netifcon_t;
 %inline %{
     qpol_netifcon_t *qpol_netifcon_from_void(void *x) {
         return (qpol_netifcon_t*)x;
-    };
+    }
 %}
 
 /* qpol nodecon */
@@ -2279,7 +2279,7 @@ typedef struct qpol_nodecon {} qpol_nodecon_t;
 %inline %{
     qpol_nodecon_t *qpol_nodecon_from_void(void *x) {
         return (qpol_nodecon_t*)x;
-    };
+    }
 %}
 
 /* qpol portcon */
@@ -2336,7 +2336,7 @@ typedef struct qpol_portcon {} qpol_portcon_t;
 %inline %{
     qpol_portcon_t *qpol_portcon_from_void(void *x) {
         return (qpol_portcon_t*)x;
-    };
+    }
 %}
 
 /* qpol constraint */
@@ -2384,7 +2384,7 @@ typedef struct qpol_constraint {} qpol_constraint_t;
 %inline %{
     qpol_constraint_t *qpol_constraint_from_void(void *x) {
         return (qpol_constraint_t*)x;
-    };
+    }
 %}
 
 /* qpol validatetrans */
@@ -2420,7 +2420,7 @@ typedef struct qpol_validatetrans {} qpol_validatetrans_t;
 %inline %{
     qpol_validatetrans_t *qpol_validatetrans_from_void(void *x) {
         return (qpol_validatetrans_t*)x;
-    };
+    }
 %}
 
 /* qpol constraint expression node */
@@ -2497,7 +2497,7 @@ typedef struct qpol_constraint_expr_node {} qpol_constraint_expr_node_t;
 %inline %{
     qpol_constraint_expr_node_t *qpol_constraint_expr_node_from_void(void *x) {
         return (qpol_constraint_expr_node_t*)x;
-    };
+    }
 %}
 
 /* qpol role allow */
@@ -2536,7 +2536,7 @@ typedef struct qpol_role_allow {} qpol_role_allow_t;
 %inline %{
     qpol_role_allow_t *qpol_role_allow_from_void(void *x) {
         return (qpol_role_allow_t*)x;
-    };
+    }
 %}
 
 /* qpol role trans */
@@ -2591,7 +2591,7 @@ typedef struct qpol_role_trans {} qpol_role_trans_t;
 %inline %{
     qpol_role_trans_t *qpol_role_trans_from_void(void *x) {
         return (qpol_role_trans_t*)x;
-    };
+    }
 %}
 
 /* qpol range trans */
@@ -2645,7 +2645,7 @@ typedef struct qpol_range_trans {} qpol_range_trans_t;
 %inline %{
     qpol_range_trans_t *qpol_range_trans_from_void(void *x) {
         return (qpol_range_trans_t*)x;
-    };
+    }
 %}
 
 /* qpol av rule */
@@ -2802,7 +2802,7 @@ typedef struct qpol_avrule {} qpol_avrule_t;
 %inline %{
     qpol_avrule_t *qpol_avrule_from_void(void *x) {
         return (qpol_avrule_t*)x;
-    };
+    }
 %}
 
 /* qpol te rule */
@@ -2919,7 +2919,7 @@ typedef struct qpol_terule {} qpol_terule_t;
 %inline %{
     qpol_terule_t *qpol_terule_from_void(void *x) {
         return (qpol_terule_t*)x;
-    };
+    }
 %}
 
 /* qpol conditional */
@@ -2994,7 +2994,7 @@ typedef struct qpol_cond {} qpol_cond_t;
 %inline %{
     qpol_cond_t *qpol_cond_from_void(void *x) {
         return (qpol_cond_t*)x;
-    };
+    }
 %}
 
 /* qpol conditional expression node */
@@ -3040,7 +3040,7 @@ typedef struct qpol_cond_expr_node {} qpol_cond_expr_node_t;
 %inline %{
     qpol_cond_expr_node_t *qpol_cond_expr_node_from_void(void *x) {
         return (qpol_cond_expr_node_t*)x;
-    };
+    }
 %}
 
 /* qpol filename trans */
@@ -3103,7 +3103,7 @@ typedef struct qpol_filename_trans {} qpol_filename_trans_t;
 %inline %{
     qpol_filename_trans_t *qpol_filename_trans_from_void(void *x) {
         return (qpol_filename_trans_t*)x;
-    };
+    }
 %}
 
 /* qpol polcap */
@@ -3131,7 +3131,7 @@ typedef struct qpol_polcap {} qpol_polcap_t;
 %inline %{
     qpol_polcap_t *qpol_polcap_from_void(void *x) {
         return (qpol_polcap_t*)x;
-    };
+    }
 %}
 
 /* qpol typebounds */
@@ -3166,7 +3166,7 @@ typedef struct qpol_typebounds {} qpol_typebounds_t;
 %inline %{
     qpol_typebounds_t *qpol_typebounds_from_void(void *x) {
         return (qpol_typebounds_t*)x;
-    };
+    }
 %}
 
 /* qpol rolebounds */
@@ -3201,7 +3201,7 @@ typedef struct qpol_rolebounds {} qpol_rolebounds_t;
 %inline %{
     qpol_rolebounds_t *qpol_rolebounds_from_void(void *x) {
         return (qpol_rolebounds_t*)x;
-    };
+    }
 %}
 
 /* qpol userbounds */
@@ -3236,7 +3236,7 @@ typedef struct qpol_userbounds {} qpol_userbounds_t;
 %inline %{
     qpol_userbounds_t *qpol_userbounds_from_void(void *x) {
         return (qpol_userbounds_t*)x;
-    };
+    }
 %}
 
 /* qpol default_object */
@@ -3298,7 +3298,7 @@ typedef struct qpol_default_object {} qpol_default_object_t;
 %inline %{
     qpol_default_object_t *qpol_default_object_from_void(void *x) {
         return (qpol_default_object_t*)x;
-    };
+    }
 %}
 
 /* qpol iomemcon */
@@ -3344,7 +3344,7 @@ typedef struct qpol_iomemcon {} qpol_iomemcon_t;
 %inline %{
     qpol_iomemcon_t *qpol_iomemcon_from_void(void *x) {
         return (qpol_iomemcon_t*)x;
-    };
+    }
 %}
 
 /* qpol ioportcon */
@@ -3390,7 +3390,7 @@ typedef struct qpol_ioportcon {} qpol_ioportcon_t;
 %inline %{
     qpol_ioportcon_t *qpol_ioportcon_from_void(void *x) {
         return (qpol_ioportcon_t*)x;
-    };
+    }
 %}
 
 /* qpol pcidevicecon */
@@ -3424,7 +3424,7 @@ typedef struct qpol_pcidevicecon {} qpol_pcidevicecon_t;
 %inline %{
     qpol_pcidevicecon_t *qpol_pcidevicecon_from_void(void *x) {
         return (qpol_pcidevicecon_t*)x;
-    };
+    }
 %}
 
 /* qpol pirqcon */
@@ -3458,7 +3458,7 @@ typedef struct qpol_pirqcon {} qpol_pirqcon_t;
 %inline %{
     qpol_pirqcon_t *qpol_pirqcon_from_void(void *x) {
         return (qpol_pirqcon_t*)x;
-    };
+    }
 %}
 
 /* qpol devicetreecon */
@@ -3491,6 +3491,6 @@ typedef struct qpol_devicetreecon {} qpol_devicetreecon_t;
 %inline %{
     qpol_devicetreecon_t *qpol_devicetreecon_from_void(void *x) {
         return (qpol_devicetreecon_t*)x;
-    };
+    }
 %}
 
