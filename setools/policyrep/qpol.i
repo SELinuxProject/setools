@@ -2674,14 +2674,14 @@ typedef struct qpol_avrule {} qpol_avrule_t;
             SWIG_exception(SWIG_ValueError, "Could not get rule type for av rule");
         }
         switch (rt) {
-            case QPOL_RULE_ALLOW: return "allow"; break;
-            case QPOL_RULE_NEVERALLOW: return "neverallow"; break;
-            case QPOL_RULE_AUDITALLOW: return "auditallow"; break;
-            case QPOL_RULE_DONTAUDIT: return "dontaudit"; break;
-            case QPOL_RULE_XPERMS_ALLOW: return "allowxperm"; break;
-            case QPOL_RULE_XPERMS_NEVERALLOW: return "neverallowxperm"; break;
-            case QPOL_RULE_XPERMS_AUDITALLOW: return "auditallowxperm"; break;
-            case QPOL_RULE_XPERMS_DONTAUDIT: return "dontauditxperm"; break;
+            case QPOL_RULE_ALLOW: return "allow";
+            case QPOL_RULE_NEVERALLOW: return "neverallow";
+            case QPOL_RULE_AUDITALLOW: return "auditallow";
+            case QPOL_RULE_DONTAUDIT: return "dontaudit";
+            case QPOL_RULE_XPERMS_ALLOW: return "allowxperm";
+            case QPOL_RULE_XPERMS_NEVERALLOW: return "neverallowxperm";
+            case QPOL_RULE_XPERMS_AUDITALLOW: return "auditallowxperm";
+            case QPOL_RULE_XPERMS_DONTAUDIT: return "dontauditxperm";
         }
     fail:
         return NULL;
@@ -2826,9 +2826,9 @@ typedef struct qpol_terule {} qpol_terule_t;
             SWIG_exception(SWIG_ValueError, "Could not get rule type for te rule");
         }
         switch (rt) {
-            case QPOL_RULE_TYPE_TRANS: return "type_transition"; break;
-            case QPOL_RULE_TYPE_CHANGE: return "type_change"; break;
-            case QPOL_RULE_TYPE_MEMBER: return "type_member"; break;
+            case QPOL_RULE_TYPE_TRANS: return "type_transition";
+            case QPOL_RULE_TYPE_CHANGE: return "type_change";
+            case QPOL_RULE_TYPE_MEMBER: return "type_member";
         }
     fail:
         return NULL;
