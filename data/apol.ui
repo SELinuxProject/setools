@@ -117,8 +117,7 @@
   </widget>
   <action name="open_policy">
    <property name="icon">
-    <iconset>
-     <normaloff>icons/Folder.png</normaloff>icons/Folder.png</iconset>
+    <iconset theme="folder-open"/>
    </property>
    <property name="text">
     <string>&amp;Open Policy</string>
@@ -145,8 +144,7 @@
   </action>
   <action name="new_analysis">
    <property name="icon">
-    <iconset>
-     <normaloff>icons/Add.png</normaloff>icons/Add.png</iconset>
+    <iconset theme="list-add"/>
    </property>
    <property name="text">
     <string>New Analysis</string>

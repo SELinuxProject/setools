@@ -88,11 +88,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
-       <normaloff>icons/Button_Next.png</normaloff>icons/Button_Next.png</iconset>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
+      <iconset theme="go-next"/>
      </property>
     </widget>
    </item>
@@ -105,11 +101,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
-       <normaloff>icons/Button_Back.png</normaloff>icons/Button_Back.png</iconset>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
+      <iconset theme="go-previous"/>
      </property>
     </widget>
    </item>
