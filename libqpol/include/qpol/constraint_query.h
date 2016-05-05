@@ -148,7 +148,7 @@ extern "C"
 
 /**
  *  Get the code for the expression type of by an expression node.
- *  @patam policy The policy from which the expression comes.
+ *  @param policy The policy from which the expression comes.
  *  @param expr The expression node from which to get the expression type.
  *  @param expr_type Integer in which to store the expression type; the value
  *  will be one of QPOL_CEXPR_TYPE_* above.

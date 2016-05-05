@@ -45,7 +45,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_policy_get_role_allow_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter);
@@ -82,7 +82,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_policy_get_role_trans_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter);

@@ -66,7 +66,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_policy_get_avrule_iter(const qpol_policy_t * policy, uint32_t rule_type_mask, qpol_iterator_t ** iter);
@@ -77,7 +77,7 @@ extern "C"
  *  @param rule The rule from which to get the source type.
  *  @param source Pointer in which to store the source type.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *source will be NULL.
  */
 	extern int qpol_avrule_get_source_type(const qpol_policy_t * policy, const qpol_avrule_t * rule,
@@ -89,7 +89,7 @@ extern "C"
  *  @param rule The rule from which to get the target type.
  *  @param target Pointer in which to store the target type.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *target will be NULL.
  */
 	extern int qpol_avrule_get_target_type(const qpol_policy_t * policy, const qpol_avrule_t * rule,
@@ -101,7 +101,7 @@ extern "C"
  *  @param rule The rule from which to get the object class.
  *  @param obj_class Pointer in which to store the object class.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *obj_class will be NULL.
  */
 	extern int qpol_avrule_get_object_class(const qpol_policy_t * policy, const qpol_avrule_t * rule,
@@ -118,7 +118,7 @@ extern "C"
  *  <b>free() on the strings returned by qpol_iterator_get_item().</b>
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *perms will be NULL.
  */
 	extern int qpol_avrule_get_perm_iter(const qpol_policy_t * policy, const qpol_avrule_t * rule, qpol_iterator_t ** perms);
@@ -128,13 +128,13 @@ extern "C"
  *  an error to call this function an an avrule that is not an extended avrule.
  *  @param policy Policy from which the rule comes.
  *  @param rule The rule from which to get the permissions.
- *  @param perms Iterator over items of type int* returned.
+ *  @param xperms Iterator over items of type int* returned.
  *  The caller is responsible for calling qpol_iterator_destroy()
  *  to free memory used by this iterator. The caller <b>should call</b>
  *  <b>free() on the ints returned by qpol_iterator_get_item().</b>
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *xperms will be NULL.
  */
 	extern int qpol_avrule_get_xperm_iter(const qpol_policy_t * policy, const qpol_avrule_t * rule, qpol_iterator_t ** xperms);
@@ -166,7 +166,7 @@ extern "C"
  *  @param rule The rule from which to get the rule type.
  *  @param rule_type Integer in which to store the rule type value.
  *  The value will be one of the QPOL_RULE_* values above.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *rule_type will be 0.
  */
 	extern int qpol_avrule_get_rule_type(const qpol_policy_t * policy, const qpol_avrule_t * rule, uint32_t * rule_type);

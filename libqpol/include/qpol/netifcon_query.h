@@ -77,7 +77,7 @@ extern "C"
  *  Get the message context from a netifcon statement.
  *  @param policy The policy associated with the netifcon statement.
  *  @param ocon The netifcon statement from which to get the message context.
- *  @parma context Pointer in which to store the context.
+ *  @param context Pointer in which to store the context.
  *  The caller should not free this pointer.
  *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *context will be NULL.
@@ -89,7 +89,7 @@ extern "C"
  *  Get the interface context from a netifcon statement.
  *  @param policy The policy associated with the netifcon statement.
  *  @param ocon The netifcon statement from which to get the interface context.
- *  @parma context Pointer in which to store the context.
+ *  @param context Pointer in which to store the context.
  *  The caller should not free this pointer.
  *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *context will be NULL.

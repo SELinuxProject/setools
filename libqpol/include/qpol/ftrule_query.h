@@ -101,7 +101,7 @@ extern "C"
  *  Get the filename from a filename transition rule.
  *  @param policy Policy from which the rule comes.
  *  @param rule The rule from which to get the transition filename.
- *  @param target Pointer in which to store the filename.
+ *  @param name Pointer in which to store the filename.
  *  The caller should not free this pointer.
  *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *target will be NULL.

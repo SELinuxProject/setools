@@ -44,7 +44,7 @@ extern "C"
  *  to free memory used by this iterator.
  *  It is important to note that this iterator is only valid as long as
  *  the policy is unmodifed.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *iter will be NULL.
  */
 	extern int qpol_policy_get_range_trans_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter);
@@ -55,7 +55,7 @@ extern "C"
  *  @param rule The rule from which to get the source type.
  *  @param source Pointer in which to store the source type.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *source will be NULL.
  */
 	extern int qpol_range_trans_get_source_type(const qpol_policy_t * policy, const qpol_range_trans_t * rule,
@@ -67,7 +67,7 @@ extern "C"
  *  @param rule The rule from which to get the target type.
  *  @param target Pointer in which to store the target type.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *target will be NULL.
  */
 	extern int qpol_range_trans_get_target_type(const qpol_policy_t * policy, const qpol_range_trans_t * rule,
@@ -79,7 +79,7 @@ extern "C"
  *  @param rule The rule from which to get the target class.
  *  @param target Pointer in which to store the target class.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *target will be NULL.
  */
 	extern int qpol_range_trans_get_target_class(const qpol_policy_t * policy, const qpol_range_trans_t * rule,
@@ -91,7 +91,7 @@ extern "C"
  *  @param rule The rule from which to get the range.
  *  @param range Pointer in which to store the range.
  *  The caller should not free this pointer.
- *  @returm 0 on success and < 0 on failure; if the call fails,
+ *  @return 0 on success and < 0 on failure; if the call fails,
  *  errno will be set and *range will be NULL.
  */
 	extern int qpol_range_trans_get_range(const qpol_policy_t * policy, const qpol_range_trans_t * rule,
