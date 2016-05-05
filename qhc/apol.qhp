@@ -28,7 +28,6 @@
         </keywords>
         <files>
             <file>*.html</file>
-            <file>*.png</file>
         </files>
     </filterSection>
 </QtHelpProject>
