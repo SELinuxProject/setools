@@ -332,6 +332,19 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         self.busy.reset()
 
 
+def sort_transition(trans):
+    """Sort the rules of a transition in-place."""
+    trans.transition.sort()
+    trans.setexec.sort()
+    trans.entrypoints.sort()
+    trans.dyntransition.sort()
+    trans.setcurrent.sort()
+    for e in trans.entrypoints:
+        e.entrypoint.sort()
+        e.execute.sort()
+        e.type_transition.sort()
+
+
 def print_transition(renderer, trans):
     """
     Raw rendering of a domain transition.
@@ -434,6 +447,7 @@ class ResultsUpdater(QThread):
 
                 self.raw_line.emit("Step {0}: {1} -> {2}\n".format(stepnum, step.source,
                                                                    step.target))
+                sort_transition(step)
                 print_transition(self.raw_line.emit, step)
 
             if QThread.currentThread().isInterruptionRequested() or (i >= self.query.limit):
@@ -449,6 +463,7 @@ class ResultsUpdater(QThread):
         child_types = []
         for i, step in enumerate(transitions, start=1):
             self.raw_line.emit("Transition {0}: {1} -> {2}\n".format(i, step.source, step.target))
+            sort_transition(step)
             print_transition(self.raw_line.emit, step)
 
             # Generate results for flow browser
@@ -501,6 +516,8 @@ class BrowserUpdater(QThread):
         child_types = []
         for transnum, trans in enumerate(self.query.transitions(self.type_), start=1):
             # Generate results for browser
+            sort_transition(trans)
+
             if self.out:
                 child_types.append((trans.target, trans))
             else:
