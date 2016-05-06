@@ -249,21 +249,21 @@ class DomainTransitionAnalysis(object):
     @staticmethod
     def __generate_entrypoints(edge):
         """
-        Generator which yields the entrypoint, execute, and
+        Creates a list of entrypoint, execute, and
         type_transition rules for each entrypoint.
 
         Parameter:
         data     The dictionary of entrypoints.
 
-        Yield: tuple(type, entry, exec, trans)
+        Return: list of tuple(type, entry, exec, trans)
 
         type     The entrypoint type.
         entry    The list of entrypoint rules.
         exec     The list of execute rules.
         trans    The list of type_transition rules.
         """
-        for e in edge.entrypoint:
-            yield entrypoint_output(e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e])
+        return [entrypoint_output(e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e])
+                for e in edge.entrypoint]
 
     def __generate_steps(self, path):
         """
