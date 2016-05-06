@@ -27,8 +27,8 @@ before_install:
   - sudo apt-get install -qq libaudit-dev libcap-ng-dev libustr-dev libpcre3-dev
 
   # Install newer swig
-  - curl -sS -L http://prdownloads.sourceforge.net/swig/swig-2.0.12.tar.gz | tar xz
-  - cd swig-2.0.12
+  - curl -sS -L http://prdownloads.sourceforge.net/swig/swig-3.0.8.tar.gz | tar xz
+  - cd swig-3.0.8
   - ./configure
   - make
   - sudo make install
