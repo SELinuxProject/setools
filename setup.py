@@ -147,6 +147,7 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                                              '-Wno-unused-parameter', # SWIG generates functions with unused parameters
                                              '-Wno-cast-qual', # libsepol/libselinux uses const-to-nonconst casts
                                              '-Wno-shadow', # SWIG generates shadow variables
+                                             '-Wno-unreachable-code', # Bison generates unreachable code
                                              '-fno-exceptions'],
                          extra_objects=[static_sepol],
                          extra_link_args=['-Wl,--version-script=libqpol/libqpol.map'],
