@@ -129,22 +129,16 @@
     </widget>
    </item>
    <item row="1" column="0" rowspan="4">
-    <widget class="QListWidget" name="included_types">
+    <widget class="QListView" name="included_types">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
      </property>
     </widget>
    </item>
    <item row="1" column="2" rowspan="4">
-    <widget class="QListWidget" name="excluded_types">
+    <widget class="QListView" name="excluded_types">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
      </property>
     </widget>
    </item>
