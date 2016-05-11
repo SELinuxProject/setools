@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 from collections import defaultdict
 
 from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QAbstractTableModel, \
@@ -40,10 +41,14 @@ class SEToolsListModel(QAbstractListModel):
     objects return their string representations
     for Qt.DisplayRole and return the object
     for Qt.UserRole.
+
+    Some Python list-like functions are provided
+    for altering the model: append and remove
     """
 
     def __init__(self, parent):
         super(SEToolsListModel, self).__init__(parent)
+        self.log = logging.getLogger(__name__)
         self._item_list = None
 
     @property
@@ -64,6 +69,24 @@ class SEToolsListModel(QAbstractListModel):
 
     def columnCount(self, parent=QModelIndex()):
         return 1
+
+    def append(self, item):
+        """Append the item to the list."""
+        index = self.rowCount()
+        self.beginInsertRows(QModelIndex(), index, index)
+        self.item_list.append(item)
+        self.endInsertRows()
+
+    def remove(self, item):
+        """Remove the first instance of the specified item from the list."""
+        try:
+            row = self.item_list.index(item)
+        except ValueError:
+            self.log.debug("Attempted to remove item {0!r} but it is not in the list".format(item))
+        else:
+            self.beginRemoveRows(QModelIndex(), row, row)
+            del self.item_list[row]
+            self.endRemoveRows()
 
     def data(self, index, role):
         if self.item_list and index.isValid():
