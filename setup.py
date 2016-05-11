@@ -85,6 +85,12 @@ except KeyError:
     # this assumes that the static lib is in the same directory
     # as the dynamic lib.
     dynamic_sepol = UnixCCompiler().find_library_file(['.', '/usr/lib64', '/usr/lib'], 'sepol')
+
+    if dynamic_sepol is None:
+        print('Unable to find a libsepol.so on your system!')
+        print('Please set the SEPOL environment variable. Exiting.')
+        exit(1)
+
     static_sepol = dynamic_sepol.replace(".so", ".a")
 
 if sys.platform.startswith('darwin'):
