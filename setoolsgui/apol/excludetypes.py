@@ -41,24 +41,32 @@ class ExcludeTypes(SEToolsWidget, QDialog):
 
     def setupUi(self):
         self.load_ui("exclude_types.ui")
-        self.exclude_a_type.clicked.connect(self.exclude_clicked)
-        self.include_a_type.clicked.connect(self.include_clicked)
+
+        # populate the attribute combo box:
+        self.attr_model = SEToolsListModel(self)
+        self.attr_model.item_list = [""] + sorted(self.policy.typeattributes())
+        self.attr.setModel(self.attr_model)
 
         # populate the models:
         self.included_model = SEToolsListModel(self)
         self.included_model.item_list = [t for t in self.policy.types()
                                          if t not in self.initial_excluded_list]
-        self.included_sort = QSortFilterProxyModel(self)
+        self.included_sort = FilterByAttributeProxy(self)
         self.included_sort.setSourceModel(self.included_model)
         self.included_sort.sort(0, Qt.AscendingOrder)
         self.included_types.setModel(self.included_sort)
 
         self.excluded_model = SEToolsListModel(self)
         self.excluded_model.item_list = self.initial_excluded_list
-        self.excluded_sort = QSortFilterProxyModel(self)
+        self.excluded_sort = FilterByAttributeProxy(self)
         self.excluded_sort.setSourceModel(self.excluded_model)
         self.excluded_sort.sort(0, Qt.AscendingOrder)
         self.excluded_types.setModel(self.excluded_sort)
+
+        # connect signals
+        self.exclude_a_type.clicked.connect(self.exclude_clicked)
+        self.include_a_type.clicked.connect(self.include_clicked)
+        self.attr.currentIndexChanged.connect(self.set_attr_filter)
 
     def include_clicked(self):
         selected_types = []
@@ -86,8 +94,41 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         for item in selected_types:
             self.included_model.remove(item)
 
+    def set_attr_filter(self, row):
+        index = self.attr_model.index(row)
+        attr = self.attr_model.data(index, Qt.UserRole)
+        self.log.debug("Attribute set to {0!r}".format(attr))
+        self.included_sort.attr = attr
+        self.excluded_sort.attr = attr
+
     def accept(self):
         self.log.debug("Chosen for exclusion: {0!r}".format(self.excluded_model.item_list))
 
         self.parent.query.exclude = self.excluded_model.item_list
         super(ExcludeTypes, self).accept()
+
+
+class FilterByAttributeProxy(QSortFilterProxyModel):
+
+    """Filter a list of types by attribute membership."""
+
+    _attr = None
+
+    @property
+    def attr(self):
+        return self._attr
+
+    @attr.setter
+    def attr(self, value):
+        self._attr = value
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, row, parent):
+        if self.attr:
+            source = self.sourceModel()
+            index = source.index(row)
+            item = source.data(index, Qt.UserRole)
+            if item not in self.attr:
+                return False
+
+        return True
