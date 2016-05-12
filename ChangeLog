@@ -1,0 +1,18 @@
+  Library:
+  * Fixed a compile error on 32bit systems.
+  * Changed domain transition analysis output to use lists instead
+    of generators.  This fixes a display problem in apol's DTA browser.
+
+  Apol:
+  * Replaced icons with stock Qt icons to remove license issues
+    with some distributions.
+
+  Sesearch:
+  * Changed xperm options to bring in line with sediff, e.g. --allowx
+    changed to --allowxperm.  Python's argument parser will still detect
+    --allowx as an abbreviation of --allowxperm, so compatibility is preserved.
+
+
+*setools-4.0.0 (04 May 2016)
+
+  First 4.0 release.  SETools is reimplemented in Python.
