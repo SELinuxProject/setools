@@ -37,25 +37,25 @@ rtypes.add_argument("-A", action="store_true", help="Search allow and allowxperm
 rtypes.add_argument("--allow", action="append_const",
                     const="allow", dest="tertypes",
                     help="Search allow rules.")
-rtypes.add_argument("--allowx", action="append_const",
+rtypes.add_argument("--allowxperm", action="append_const",
                     const="allowxperm", dest="tertypes",
                     help="Search allowxperm rules.")
 rtypes.add_argument("--auditallow", action="append_const",
                     const="auditallow", dest="tertypes",
                     help="Search auditallow rules.")
-rtypes.add_argument("--auditallowx", action="append_const",
+rtypes.add_argument("--auditallowxperm", action="append_const",
                     const="auditallowxperm", dest="tertypes",
                     help="Search auditallowxperm rules.")
 rtypes.add_argument("--dontaudit", action="append_const",
                     const="dontaudit", dest="tertypes",
                     help="Search dontaudit rules.")
-rtypes.add_argument("--dontauditx", action="append_const",
+rtypes.add_argument("--dontauditxperm", action="append_const",
                     const="dontauditxperm", dest="tertypes",
                     help="Search dontauditxperm rules.")
 rtypes.add_argument("--neverallow", action="append_const",
                     const="neverallow", dest="tertypes",
                     help="Search neverallow rules.")
-rtypes.add_argument("--neverallowx", action="append_const",
+rtypes.add_argument("--neverallowxperm", action="append_const",
                     const="neverallowxperm", dest="tertypes",
                     help="Search neverallowxperm rules.")
 rtypes.add_argument("-T", "--type_trans", action="append_const",
