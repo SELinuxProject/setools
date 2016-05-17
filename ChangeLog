@@ -1,3 +1,5 @@
+*setools-4.0.1 (17 May 2016)
+
   Library:
   * Fixed a compile error on 32bit systems.
   * Changed domain transition analysis output to use lists instead
