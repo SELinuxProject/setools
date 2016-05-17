@@ -69,6 +69,9 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         self.attr.currentIndexChanged.connect(self.set_attr_filter)
 
     def include_clicked(self):
+        included_scroll_pos = self.included_types.verticalScrollBar().value()
+        excluded_scroll_pos = self.excluded_types.verticalScrollBar().value()
+
         selected_types = []
         for index in self.excluded_types.selectionModel().selectedIndexes():
             source_index = self.excluded_sort.mapToSource(index)
@@ -81,7 +84,13 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         for item in selected_types:
             self.excluded_model.remove(item)
 
+        self.included_types.verticalScrollBar().setValue(included_scroll_pos)
+        self.excluded_types.verticalScrollBar().setValue(excluded_scroll_pos)
+
     def exclude_clicked(self):
+        included_scroll_pos = self.included_types.verticalScrollBar().value()
+        excluded_scroll_pos = self.excluded_types.verticalScrollBar().value()
+
         selected_types = []
         for index in self.included_types.selectionModel().selectedIndexes():
             source_index = self.included_sort.mapToSource(index)
@@ -93,6 +102,9 @@ class ExcludeTypes(SEToolsWidget, QDialog):
 
         for item in selected_types:
             self.included_model.remove(item)
+
+        self.included_types.verticalScrollBar().setValue(included_scroll_pos)
+        self.excluded_types.verticalScrollBar().setValue(excluded_scroll_pos)
 
     def set_attr_filter(self, row):
         index = self.attr_model.index(row)
