@@ -48,7 +48,6 @@
 #include "include/qpol/portcon_query.h"
 #include "include/qpol/rbacrule_query.h"
 #include "include/qpol/role_query.h"
-#include "include/qpol/syn_rule_query.h"
 #include "include/qpol/terule_query.h"
 #include "include/qpol/type_query.h"
 #include "include/qpol/user_query.h"
@@ -2789,15 +2788,6 @@ typedef struct qpol_avrule {} qpol_avrule_t;
         }
         return (int) which;
     };
-    %newobject syn_avrule_iter(qpol_policy_t*);
-    qpol_iterator_t *syn_avrule_iter(qpol_policy_t *p) {
-        qpol_iterator_t *iter;
-        if (qpol_avrule_get_syn_avrule_iter(p, self, &iter)) {
-            SWIG_exception(SWIG_MemoryError, "Out of memory");
-        }
-    fail:
-        return iter;
-    };
 };
 %inline %{
     qpol_avrule_t *qpol_avrule_from_void(void *x) {
@@ -2904,16 +2894,6 @@ typedef struct qpol_terule {} qpol_terule_t;
             return -1;
         }
         return (int) which;
-    };
-
-    %newobject syn_terule_iter(qpol_policy_t*);
-    qpol_iterator_t *syn_terule_iter(qpol_policy_t *p) {
-        qpol_iterator_t *iter;
-        if (qpol_terule_get_syn_terule_iter(p, self, &iter)) {
-            SWIG_exception(SWIG_MemoryError, "Out of memory");
-        }
-    fail:
-        return iter;
     };
 };
 %inline %{

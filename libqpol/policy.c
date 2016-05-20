@@ -646,10 +646,6 @@ err:
 	return 1;
 }
 
-/* forward declarations see policy_extend.c */
-struct qpol_extended_image;
-extern void qpol_extended_image_destroy(struct qpol_extended_image **ext);
-
 /**
  * @brief Internal version of qpol_policy_rebuild() version 1.3
  *
@@ -682,8 +678,6 @@ int qpol_policy_rebuild(qpol_policy_t * policy, const int options)
 	/* cache old policy in case of failure */
 	old_p = policy->p;
 	policy->p = NULL;
-	struct qpol_extended_image *ext = policy->ext;
-	policy->ext = NULL;
 	old_options = policy->options;
 	policy->options = options;
 
@@ -774,7 +768,6 @@ int qpol_policy_rebuild(qpol_policy_t * policy, const int options)
 		error = errno;
 		goto err;
 	}
-	qpol_extended_image_destroy(&ext);
 
 	sepol_policydb_free(old_p);
 
@@ -784,7 +777,6 @@ int qpol_policy_rebuild(qpol_policy_t * policy, const int options)
 	free(modules);
 
 	policy->p = old_p;
-	policy->ext = ext;
 	policy->options = old_options;
 	errno = error;
 	return STATUS_ERR;
@@ -1080,7 +1072,6 @@ void qpol_policy_destroy(qpol_policy_t ** policy)
 	if (policy != NULL && *policy != NULL) {
 		sepol_policydb_free((*policy)->p);
 		sepol_handle_destroy((*policy)->sh);
-		qpol_extended_image_destroy(&((*policy)->ext));
 		if ((*policy)->modules) {
 			size_t i = 0;
 			for (i = 0; i < (*policy)->num_modules; i++) {

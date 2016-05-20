@@ -42,7 +42,6 @@ extern "C"
 #define QPOL_MSG_WARN 2
 #define QPOL_MSG_INFO 3
 
-	struct qpol_extended_image;
 	struct qpol_policy;
 
 	struct qpol_module
@@ -65,7 +64,6 @@ extern "C"
 		int options;
 		int type;
 		int modified;
-		struct qpol_extended_image *ext;
 		struct qpol_module **modules;
 		size_t num_modules;
 		char *file_data;
