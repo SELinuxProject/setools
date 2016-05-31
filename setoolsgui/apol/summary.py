@@ -29,6 +29,7 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..mlsrulemodel import MLSRuleTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_textedits, save_checkboxes, save_textedits
 
 
 class SummaryTab(SEToolsWidget, QScrollArea):
@@ -114,3 +115,18 @@ class SummaryTab(SEToolsWidget, QScrollArea):
 
         # Fill policy capabilities list
         self.polcaps.addItems([str(c) for c in p.polcaps()])
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["notes_expander"])
+        save_textedits(self, settings, ["notes"])
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["notes_expander"])
+        load_textedits(self, settings, ["notes"])
