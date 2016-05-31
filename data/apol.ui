@@ -96,7 +96,21 @@
     <addaction name="edit_permmap_action"/>
     <addaction name="save_permmap_action"/>
    </widget>
+   <widget class="QMenu" name="menuWorkspace">
+    <property name="title">
+     <string>Workspace</string>
+    </property>
+    <addaction name="new_analysis"/>
+    <addaction name="new_from_settings_action"/>
+    <addaction name="separator"/>
+    <addaction name="load_settings_action"/>
+    <addaction name="save_settings_action"/>
+    <addaction name="separator"/>
+    <addaction name="load_workspace_action"/>
+    <addaction name="save_workspace_action"/>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menuWorkspace"/>
    <addaction name="menu_Edit"/>
    <addaction name="menuPerm_Map"/>
    <addaction name="menu_Help"/>
@@ -228,6 +242,61 @@
   <action name="apol_help_action">
    <property name="text">
     <string>Apol Help</string>
+   </property>
+  </action>
+  <action name="save_settings_action">
+   <property name="text">
+    <string>Save Tab Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Save the current tab's settings to file.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="load_settings_action">
+   <property name="text">
+    <string>Load Tab Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Load settings for the current tab.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="load_workspace_action">
+   <property name="text">
+    <string>Load Workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Load workspace from file.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+L</string>
+   </property>
+  </action>
+  <action name="save_workspace_action">
+   <property name="text">
+    <string>Save Workspace</string>
+   </property>
+   <property name="toolTip">
+    <string>Save workspace to file.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="new_from_settings_action">
+   <property name="text">
+    <string>New Analysis From Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Start a new analysis using settings from a file.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+N</string>
    </property>
   </action>
  </widget>

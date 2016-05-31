@@ -20,6 +20,7 @@ import os
 import sys
 import stat
 import logging
+import json
 from errno import ENOENT
 
 from PyQt5.QtCore import pyqtSlot, Qt, QProcess
@@ -28,7 +29,7 @@ from setools import __version__, PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
-from .chooseanalysis import ChooseAnalysis
+from .chooseanalysis import ChooseAnalysis, tab_map
 from .permmapedit import PermissionMapEditor
 from .summary import SummaryTab
 
@@ -51,6 +52,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.create_new_analysis("Summary", SummaryTab)
 
         self.update_window_title()
+        self.toggle_workspace_actions()
 
     def setupUi(self):
         self.load_ui("apol.ui")
@@ -91,11 +93,17 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.close_policy_action.triggered.connect(self.close_policy)
         self.open_permmap.triggered.connect(self.select_permmap)
         self.new_analysis.triggered.connect(self.choose_analysis)
+        self.AnalysisTabs.currentChanged.connect(self.toggle_workspace_actions)
         self.AnalysisTabs.tabCloseRequested.connect(self.close_tab)
         self.AnalysisTabs.tabBarDoubleClicked.connect(self.tab_name_editor)
         self.tab_editor.editingFinished.connect(self.rename_tab)
         self.rename_tab_action.triggered.connect(self.rename_active_tab)
         self.close_tab_action.triggered.connect(self.close_active_tab)
+        self.new_from_settings_action.triggered.connect(self.new_analysis_from_config)
+        self.load_settings_action.triggered.connect(self.load_settings)
+        self.save_settings_action.triggered.connect(self.save_settings)
+        self.load_workspace_action.triggered.connect(self.load_workspace)
+        self.save_workspace_action.triggered.connect(self.save_workspace)
         self.copy_action.triggered.connect(self.copy)
         self.cut_action.triggered.connect(self.cut)
         self.paste_action.triggered.connect(self.paste)
@@ -147,6 +155,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.error_msg.critical(self, "Policy loading error", str(ex))
         else:
             self.update_window_title()
+            self.toggle_workspace_actions()
 
             if self._permmap:
                 self._permmap.map_policy(self._policy)
@@ -165,6 +174,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.AnalysisTabs.clear()
         self._policy = None
         self.update_window_title()
+        self.toggle_workspace_actions()
 
     #
     # Permission map handling
@@ -244,6 +254,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         index = self.AnalysisTabs.addTab(newanalysis, counted_name)
         self.AnalysisTabs.setTabToolTip(index, tabtitle)
         self.AnalysisTabs.setCurrentIndex(index)
+        return index
 
     def tab_name_editor(self, index):
         if index >= 0:
@@ -275,9 +286,300 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
     def rename_tab(self):
         # this should never be negative since the editor is modal
         index = self.AnalysisTabs.currentIndex()
+        tab = self.AnalysisTabs.widget(index)
+        title = self.tab_editor.text()
 
         self.tab_editor.hide()
-        self.AnalysisTabs.setTabText(index, self.tab_editor.text())
+
+        self.AnalysisTabs.setTabText(index, title)
+        tab.setObjectName(title)
+
+    #
+    # Workspace actions
+    #
+    def toggle_workspace_actions(self, index=-1):
+        """
+        Enable or disable workspace actions depending on
+        how many tabs are open and if a policy is open.
+
+        This is a slot for the QTabWidget.currentChanged()
+        signal, though index is ignored.
+        """
+        open_tabs = self.AnalysisTabs.count() > 0
+        open_policy = self._policy is not None
+
+        self.log.debug("{0} actions requiring an open policy.".
+                       format("Enabling" if open_policy else "Disabling"))
+        self.log.debug("{0} actions requiring open tabs.".
+                       format("Enabling" if open_tabs else "Disabling"))
+        self.save_settings_action.setEnabled(open_tabs)
+        self.save_workspace_action.setEnabled(open_tabs)
+        self.new_analysis.setEnabled(open_policy)
+        self.new_from_settings_action.setEnabled(open_policy)
+        self.load_settings_action.setEnabled(open_tabs)
+
+    def _get_settings(self, index=None):
+        """Return a dictionary with the settings of the tab at the specified index."""
+        if index is None:
+            index = self.AnalysisTabs.currentIndex()
+
+        assert index >= 0, "Tab index is negative in _get_settings.  This is an SETools bug."
+        tab = self.AnalysisTabs.widget(index)
+
+        settings = tab.save()
+
+        # add the tab info to the settings.
+        settings["__title__"] = self.AnalysisTabs.tabText(index)
+        settings["__tab__"] = type(tab).__name__
+
+        return settings
+
+    def _put_settings(self, settings, index=None):
+        """Load the settings into the specified tab."""
+
+        if index is None:
+            index = self.AnalysisTabs.currentIndex()
+
+        assert index >= 0, "Tab index is negative in _put_settings.  This is an SETools bug."
+        tab = self.AnalysisTabs.widget(index)
+
+        if settings["__tab__"] != type(tab).__name__:
+            raise TypeError("The current tab ({0}) does not match the tab in the settings file "
+                            "({1}).".format(type(tab).__name__, settings["__tab__"]))
+
+        try:
+            self.AnalysisTabs.setTabText(index, settings["__title__"])
+        except KeyError:
+            self.log.warning("Settings file does not have a title setting.")
+
+        tab.load(settings)
+
+    def load_settings(self, new=False):
+        filename = QFileDialog.getOpenFileName(self, "Open settings file", ".",
+                                               "Apol Tab Settings File (*.apolt);;"
+                                               "All Files (*)")[0]
+        if not filename:
+            return
+
+        try:
+            with open(filename, "r") as fd:
+                settings = json.load(fd)
+        except ValueError as ex:
+            self.log.critical("Invalid settings file \"{0}\"".format(filename))
+            self.error_msg.critical(self, "Failed to load settings",
+                                    "Invalid settings file: \"{0}\"".format(filename))
+            return
+        except (IOError, OSError) as ex:
+            self.log.critical("Unable to load settings file \"{0.filename}\": {0.strerror}".
+                              format(ex))
+            self.error_msg.critical(self, "Failed to load settings",
+                                    "Failed to load \"{0.filename}\": {0.strerror}".format(ex))
+            return
+        except Exception as ex:
+            self.log.critical("Unable to load settings file \"{0}\": {1}".format(filename, ex))
+            self.error_msg.critical(self, "Failed to load settings", str(ex))
+            return
+
+        self.log.info("Loading analysis settings from \"{0}\"".format(filename))
+
+        if new:
+            try:
+                tabclass = tab_map[settings["__tab__"]]
+            except KeyError:
+                self.log.critical("Missing analysis type in \"{0}\"".format(filename))
+                self.error_msg.critical(self, "Failed to load settings",
+                                        "The type of analysis is missing in the settings file.")
+                return
+
+            # The tab title will be set by _put_settings.
+            index = self.create_new_analysis("Tab", tabclass)
+        else:
+            index = None
+
+        try:
+            self._put_settings(settings, index)
+        except Exception as ex:
+            self.log.critical("Error loading settings file \"{0}\": {1}".format(filename, ex))
+            self.error_msg.critical(self, "Failed to load settings",
+                                    "Error loading settings file \"{0}\": {1}".format(filename, ex))
+        else:
+            self.log.info("Successfully loaded analysis settings from \"{0}\"".format(filename))
+
+    def new_analysis_from_config(self):
+        self.load_settings(new=True)
+
+    def save_settings(self):
+        filename = QFileDialog.getSaveFileName(self, "Save analysis tab settings", "analysis.apolt",
+                                               "Apol Tab Settings File (*.apolt);;"
+                                               "All Files (*)")[0]
+
+        if not filename:
+            return
+
+        settings = self._get_settings()
+
+        try:
+            with open(filename, "w") as fd:
+                json.dump(settings, fd, indent=1)
+        except (IOError, OSError) as ex:
+            self.log.critical("Unable to save settings file \"{0.filename}\": {0.strerror}".
+                              format(ex))
+            self.error_msg.critical(self, "Failed to save settings",
+                                    "Failed to save \"{0.filename}\": {0.strerror}".format(ex))
+        except Exception as ex:
+            self.log.critical("Unable to save settings file \"{0}\": {1}".format(filename, ex))
+            self.error_msg.critical(self, "Failed to save settings", str(ex))
+        else:
+            self.log.info("Successfully saved settings file \"{0}\"".format(filename))
+
+    def load_workspace(self):
+        # 1. if number of tabs > 0, check if we really want to do this
+        if self.AnalysisTabs.count() > 0:
+            reply = QMessageBox.question(
+                self, "Continue?",
+                "Loading a workspace will close all existing analyses.  Continue?",
+                QMessageBox.Yes | QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                return
+
+        # 2. try to load the workspace file, if we fail, bail
+        filename = QFileDialog.getOpenFileName(self, "Open workspace file", ".",
+                                               "Apol Workspace Files (*.apolw);;"
+                                               "All Files (*)")[0]
+
+        if not filename:
+            return
+
+        try:
+            with open(filename, "r") as fd:
+                workspace = json.load(fd)
+        except ValueError as ex:
+            self.log.critical("Invalid workspace file \"{0}\"".format(filename))
+            self.error_msg.critical(self, "Failed to load workspace",
+                                    "Invalid workspace file: \"{0}\"".format(filename))
+            return
+        except (IOError, OSError) as ex:
+            self.log.critical("Unable to load workspace file \"{0.filename}\": {0.strerror}".
+                              format(ex))
+            self.error_msg.critical(self, "Failed to load workspace",
+                                    "Failed to load \"{0.filename}\": {0.strerror}".format(ex))
+            return
+        except Exception as ex:
+            self.log.critical("Unable to load workspace file \"{0}\": {1}".format(filename, ex))
+            self.error_msg.critical(self, "Failed to load workspace", str(ex))
+            return
+
+        # 3. close all tabs.  Explicitly do this to avoid the question
+        #    about closing the policy with tabs open.
+        self.AnalysisTabs.clear()
+
+        # 4. close policy
+        self.close_policy()
+
+        # 5. try to open the specified policy, if we fail, bail.  Note:
+        #    handling exceptions from the policy load is done inside
+        #    the load_policy function, so only the KeyError needs to be caught here
+        try:
+            self.load_policy(workspace["__policy__"])
+        except KeyError:
+            self.log.critical("Missing policy in workspace file \"{0}\"".format(filename))
+            self.error_msg.critical(self, "Missing policy in workspace file \"{0}\"".
+                                    format(filename))
+
+        if self._policy is None:
+            self.log.critical("The policy could not be loaded in workspace file \"{0}\"".
+                              format(filename))
+            self.error_msg.critical(self, "The policy could not be loaded in workspace file \"{0}\""
+                                    ". Aborting workspace load.".format(filename))
+            return
+
+        # 6. try to open the specified perm map, if we fail,
+        #    tell the user we will continue with the default map; load the default map
+        #    Note: handling exceptions from the map load is done inside
+        #    the load_permmap function, so only the KeyError needs to be caught here
+        try:
+            self.load_permmap(workspace["__permmap__"])
+        except KeyError:
+            self.log.warning("Missing permission map in workspace file \"{0}\"".format(filename))
+            self.error_msg.warning(self, "Missing permission map setting.",
+                                   "Missing permission map in workspace file \"{0}\"".
+                                   format(filename))
+
+        if self._permmap is None:
+            self.error_msg.information(self, "Loading default permission map.",
+                                       "The default permisison map will be loaded.")
+            self.load_permmap()
+
+        # 7. try to open all tabs and apply settings.  Record any errors
+        try:
+            tab_list = list(workspace["__tabs__"])
+        except KeyError:
+            self.log.critical("Missing tab list in workspace file \"{0}\"".format(filename))
+            self.error_msg.critical(self, "Failed to load workspace",
+                                    "The workspace file is missing the tab list.  Aborting.")
+            return
+        except TypeError:
+            self.log.critical("Invalid tab list in workspace file.")
+            self.error_msg.critical(self, "Failed to load workspace",
+                                    "The tab count is invalid.  Aborting.")
+            return
+
+        loading_errors = []
+        for i, settings in enumerate(tab_list):
+            try:
+                tabclass = tab_map[settings["__tab__"]]
+            except KeyError:
+                error_str = "Missing analysis type for tab {0}. Skipping this tab.".format(i)
+                self.log.error(error_str)
+                loading_errors.append(error_str)
+                continue
+
+            # The tab title will be set by _put_settings.
+            index = self.create_new_analysis("Tab", tabclass)
+
+            try:
+                self._put_settings(settings, index)
+            except Exception as ex:
+                error_str = "Error loading settings for tab {0}: {1}".format(i, ex)
+                self.log.error(error_str)
+                loading_errors.append(error_str)
+
+        self.log.info("Completed loading workspace from \"{0}\"".format(filename))
+
+        # 8. if there are any errors, open a dialog with the
+        #    complete list of tab errors
+        if loading_errors:
+            self.error_msg.warning(self, "Errors while loading workspace:",
+                                   "There were errors while loading the workspace:\n\n{0}".
+                                   format("\n\n".join(loading_errors)))
+
+    def save_workspace(self):
+        filename = QFileDialog.getSaveFileName(self, "Save analysis workspace", "workspace.apolw",
+                                               "Apol Workspace Files (*.apolw);;"
+                                               "All Files (*)")[0]
+
+        if not filename:
+            return
+
+        workspace = {}
+        workspace["__policy__"] = os.path.abspath(str(self._policy))
+        workspace["__permmap__"] = os.path.abspath(str(self._permmap))
+        workspace["__tabs__"] = []
+
+        for index in range(self.AnalysisTabs.count()):
+            tab = self.AnalysisTabs.widget(index)
+
+            settings = tab.save()
+
+            # add the tab info to the settings.
+            settings["__title__"] = self.AnalysisTabs.tabText(index)
+            settings["__tab__"] = type(tab).__name__
+
+            workspace["__tabs__"].append(settings)
+
+        with open(filename, "w") as fd:
+            json.dump(workspace, fd, indent=1)
 
     #
     # Edit actions

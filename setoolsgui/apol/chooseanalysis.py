@@ -49,6 +49,33 @@ from .typequery import TypeQueryTab
 from .userquery import UserQueryTab
 
 
+# TODO: is there a better way than hardcoding this while still being safe?
+tab_map = {"BoolQueryTab": BoolQueryTab,
+           "BoundsQueryTab": BoundsQueryTab,
+           "CategoryQueryTab": CategoryQueryTab,
+           "CommonQueryTab": CommonQueryTab,
+           "ConstraintQueryTab": ConstraintQueryTab,
+           "DefaultQueryTab": DefaultQueryTab,
+           "DomainTransitionAnalysisTab": DomainTransitionAnalysisTab,
+           "FSUseQueryTab": FSUseQueryTab,
+           "GenfsconQueryTab": GenfsconQueryTab,
+           "InfoFlowAnalysisTab": InfoFlowAnalysisTab,
+           "InitialSIDQueryTab": InitialSIDQueryTab,
+           "MLSRuleQueryTab": MLSRuleQueryTab,
+           "NetifconQueryTab": NetifconQueryTab,
+           "NodeconQueryTab": NodeconQueryTab,
+           "ObjClassQueryTab": ObjClassQueryTab,
+           "PortconQueryTab": PortconQueryTab,
+           "RBACRuleQueryTab": RBACRuleQueryTab,
+           "RoleQueryTab": RoleQueryTab,
+           "SensitivityQueryTab": SensitivityQueryTab,
+           "SummaryTab": SummaryTab,
+           "TERuleQueryTab": TERuleQueryTab,
+           "TypeAttributeQueryTab": TypeAttributeQueryTab,
+           "TypeQueryTab": TypeQueryTab,
+           "UserQueryTab": UserQueryTab}
+
+
 class ChooseAnalysis(SEToolsWidget, QDialog):
 
     """
