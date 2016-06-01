@@ -1,4 +1,4 @@
-# Copyright 2015, Tresys Technology, LLC
+# Copyright 2015-2016, Tresys Technology, LLC
 #
 # This file is part of SETools.
 #
@@ -29,6 +29,8 @@ from ..models import PermListModel, SEToolsListModel, invert_list_selection
 from ..terulemodel import TERuleTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
+                       save_checkboxes, save_lineedits, save_listviews, save_textedits
 
 
 class TERuleQueryTab(SEToolsWidget, QScrollArea):
@@ -325,6 +327,53 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
             selected_bools.append(self.bool_model.data(index, Qt.UserRole))
 
         self.query.boolean = selected_bools
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "allow", "allowxperm",
+                                         "auditallow", "auditallowxperm",
+                                         "neverallow", "neverallowxperm",
+                                         "dontaudit", "dontauditxperm",
+                                         "type_transition", "type_change", "type_member",
+                                         "source_indirect", "source_regex",
+                                         "target_indirect", "target_regex",
+                                         "perms_subset",
+                                         "xperms_equal",
+                                         "default_regex",
+                                         "bools_equal"])
+
+        save_lineedits(self, settings, ["source", "target", "xperms", "default_type"])
+
+        save_listviews(self, settings, ["tclass", "perms", "bool_criteria"])
+
+        save_textedits(self, settings, ["notes"])
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["allow", "allowxperm",
+                                         "auditallow", "auditallowxperm",
+                                         "neverallow", "neverallowxperm",
+                                         "dontaudit", "dontauditxperm",
+                                         "type_transition", "type_change", "type_member",
+                                         "criteria_expander", "notes_expander",
+                                         "source_indirect", "source_regex",
+                                         "target_indirect", "target_regex",
+                                         "perms_subset",
+                                         "xperms_equal",
+                                         "default_regex",
+                                         "bools_equal"])
+
+        load_lineedits(self, settings, ["source", "target", "xperms", "default_type"])
+
+        load_listviews(self, settings, ["tclass", "perms", "bool_criteria"])
+
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
