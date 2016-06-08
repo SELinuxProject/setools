@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
@@ -27,7 +25,7 @@ class NodeconTableModel(SEToolsTableModel):
 
     """Table-based model for nodecons."""
 
-    headers = defaultdict(str, {0: "Network", 1: "Context"})
+    headers = ["Network", "Context"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():

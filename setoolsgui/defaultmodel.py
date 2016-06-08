@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
@@ -27,7 +25,7 @@ class DefaultTableModel(SEToolsTableModel):
 
     """Table-based model for default_*."""
 
-    headers = defaultdict(str, {0: "Rule Type", 1: "Class", 2: "Default", 3: "Default Range"})
+    headers = ["Rule Type", "Class", "Default", "Default Range"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():

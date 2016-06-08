@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette, QTextCursor
 
@@ -57,7 +55,7 @@ class TypeTableModel(SEToolsTableModel):
 
     """Table-based model for types."""
 
-    headers = defaultdict(str, {0: "Name", 1: "Attributes", 2: "Aliases", 3: "Permissive"})
+    headers = ["Name", "Attributes", "Aliases", "Permissive"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():

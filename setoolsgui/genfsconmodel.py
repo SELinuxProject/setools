@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 import stat
-from collections import defaultdict
 
 from PyQt5.QtCore import Qt
 
@@ -28,8 +27,7 @@ class GenfsconTableModel(SEToolsTableModel):
 
     """Table-based model for genfscons."""
 
-    headers = defaultdict(str, {0: "FS Type", 1: "Path",
-                                2: "File Type", 3: "Context"})
+    headers = ["FS Type", "Path", "File Type", "Context"]
 
     _filetype_to_text = {
         0: "Any",

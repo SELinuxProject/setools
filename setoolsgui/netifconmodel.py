@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
@@ -27,7 +25,7 @@ class NetifconTableModel(SEToolsTableModel):
 
     """Table-based model for netifcons."""
 
-    headers = defaultdict(str, {0: "Device", 1: "Device Context", 2: "Packet Context"})
+    headers = ["Device", "Device Context", "Packet Context"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():

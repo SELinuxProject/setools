@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt, QModelIndex
 from setools.policyrep.exception import MLSDisabled
 
@@ -60,7 +58,7 @@ class UserTableModel(SEToolsTableModel):
 
     """Table-based model for users."""
 
-    headers = defaultdict(str, {0: "Name", 1: "Roles", 2: "Default Level", 3: "Range"})
+    headers = ["Name", "Roles", "Default Level", "Range"]
 
     def __init__(self, parent, mls):
         super(UserTableModel, self).__init__(parent)

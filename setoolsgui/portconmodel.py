@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
@@ -27,7 +25,7 @@ class PortconTableModel(SEToolsTableModel):
 
     """Table-based model for portcons."""
 
-    headers = defaultdict(str, {0: "Port/Port Range", 1: "Protocol", 2: "Context"})
+    headers = ["Port/Port Range", "Protocol", "Context"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():

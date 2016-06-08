@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 from setools.policyrep.exception import RuleNotConditional, RuleUseError
 
@@ -28,9 +26,8 @@ class TERuleTableModel(SEToolsTableModel):
 
     """A table-based model for TE rules."""
 
-    headers = defaultdict(str, {0: "Rule Type", 1: "Source", 2: "Target",
-                                3: "Object Class", 4: "Permissions/Default Type",
-                                5: "Conditional Expression", 6: "Conditional Block"})
+    headers = ["Rule Type", "Source", "Target", "Object Class", "Permissions/Default Type",
+               "Conditional Expression", "Conditional Block"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():

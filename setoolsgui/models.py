@@ -17,7 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
-from collections import defaultdict
 
 from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QAbstractTableModel, \
                          QModelIndex, QStringListModel, Qt
@@ -142,7 +141,7 @@ class SEToolsTableModel(QAbstractTableModel):
 
     """Base class for SETools table models."""
 
-    headers = defaultdict(str)
+    headers = []
 
     def __init__(self, parent):
         super(SEToolsTableModel, self).__init__(parent)

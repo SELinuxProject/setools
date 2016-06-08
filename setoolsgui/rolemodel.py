@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette, QTextCursor
 
@@ -51,7 +49,7 @@ class RoleTableModel(SEToolsTableModel):
 
     """Table-based model for roles."""
 
-    headers = defaultdict(str, {0: "Name", 1: "Types"})
+    headers = ["Name", "Types"]
 
     def data(self, index, role):
         # There are two roles here.

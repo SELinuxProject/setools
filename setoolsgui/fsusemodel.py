@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
@@ -27,7 +25,7 @@ class FSUseTableModel(SEToolsTableModel):
 
     """Table-based model for fs_use_*."""
 
-    headers = defaultdict(str, {0: "Ruletype", 1: "FS Type", 2: "Context"})
+    headers = ["Ruletype", "FS Type", "Context"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():

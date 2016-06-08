@@ -16,8 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict
-
 from PyQt5.QtCore import Qt
 from setools.policyrep.exception import ConstraintUseError
 
@@ -28,7 +26,7 @@ class ConstraintTableModel(SEToolsTableModel):
 
     """A table-based model for constraints."""
 
-    headers = defaultdict(str, {0: "Rule Type", 1: "Class", 2: "Permissions", 3: "Expression"})
+    headers = ["Rule Type", "Class", "Permissions", "Expression"]
 
     def data(self, index, role):
         if self.resultlist and index.isValid():
