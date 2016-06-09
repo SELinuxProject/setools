@@ -29,6 +29,8 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..rbacrulemodel import RBACRuleTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
+                       save_checkboxes, save_lineedits, save_listviews, save_textedits
 
 
 class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
@@ -230,6 +232,39 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
         self.query.default_regex = state
         self.clear_default_error()
         self.set_default_role()
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "allow", "role_transition",
+                                         "source_indirect", "source_regex",
+                                         "target_indirect", "target_regex",
+                                         "default_regex"])
+
+        save_lineedits(self, settings, ["source", "target", "default_role"])
+
+        save_listviews(self, settings, ["tclass"])
+
+        save_textedits(self, settings, ["notes"])
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "allow", "role_transition",
+                                         "source_indirect", "source_regex",
+                                         "target_indirect", "target_regex",
+                                         "default_regex"])
+
+        load_lineedits(self, settings, ["source", "target", "default_role"])
+
+        load_listviews(self, settings, ["tclass"])
+
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner

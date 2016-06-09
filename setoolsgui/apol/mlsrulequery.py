@@ -29,6 +29,8 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..mlsrulemodel import MLSRuleTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
+                       save_checkboxes, save_lineedits, save_listviews, save_textedits
 
 
 class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
@@ -209,6 +211,37 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
             self.log.error("Default range error: {0}".format(ex))
             self.default_range.setToolTip("Error: {0}".format(ex))
             self.default_range.setPalette(self.error_palette)
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "range_transition",
+                                         "source_indirect", "source_regex",
+                                         "target_indirect", "target_regex"])
+
+        save_lineedits(self, settings, ["source", "target", "default_range"])
+
+        save_listviews(self, settings, ["tclass"])
+
+        save_textedits(self, settings, ["notes"])
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "range_transition",
+                                         "source_indirect", "source_regex",
+                                         "target_indirect", "target_regex"])
+
+        load_lineedits(self, settings, ["source", "target", "default_range"])
+
+        load_listviews(self, settings, ["tclass"])
+
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
