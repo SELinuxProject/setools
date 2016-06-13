@@ -29,6 +29,8 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..mlsmodel import MLSComponentTableModel, category_detail
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_textedits, \
+                       save_checkboxes, save_lineedits, save_textedits
 
 
 class CategoryQueryTab(SEToolsWidget, QScrollArea):
@@ -132,6 +134,27 @@ class CategoryQueryTab(SEToolsWidget, QScrollArea):
         self.query.name_regex = state
         self.clear_name_error()
         self.set_name()
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex"])
+
+        save_lineedits(self, settings, ["name"])
+
+        save_textedits(self, settings, ["notes"])
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex"])
+
+        load_lineedits(self, settings, ["name"])
+
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner

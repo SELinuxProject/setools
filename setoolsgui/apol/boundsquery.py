@@ -29,6 +29,8 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..boundsmodel import BoundsTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_textedits, \
+                       save_checkboxes, save_lineedits, save_textedits
 
 
 class BoundsQueryTab(SEToolsWidget, QScrollArea):
@@ -139,6 +141,31 @@ class BoundsQueryTab(SEToolsWidget, QScrollArea):
         self.query.child_regex = state
         self.clear_child_error()
         self.set_child()
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "typebounds",
+                                         "parent_regex", "child_regex"])
+
+        save_lineedits(self, settings, ["parent", "child"])
+
+        save_textedits(self, settings, ["notes"])
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "typebounds",
+                                         "parent_regex", "child_regex"])
+
+        load_lineedits(self, settings, ["parent", "child"])
+
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
