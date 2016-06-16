@@ -29,6 +29,8 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..commonmodel import CommonTableModel, common_detail
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
+                       save_checkboxes, save_lineedits, save_listviews, save_textedits
 
 
 class CommonQueryTab(SEToolsWidget, QScrollArea):
@@ -156,6 +158,33 @@ class CommonQueryTab(SEToolsWidget, QScrollArea):
 
     def invert_perms_selection(self):
         invert_list_selection(self.perms.selectionModel())
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex",
+                                         "perms_equal"])
+
+        save_lineedits(self, settings, ["name"])
+
+        save_listviews(self, settings, ["perms"])
+
+        save_textedits(self, settings, ["notes"])
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex",
+                                         "perms_equal"])
+
+        load_lineedits(self, settings, ["name"])
+
+        load_listviews(self, settings, ["perms"])
+
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
