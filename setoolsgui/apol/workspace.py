@@ -232,3 +232,41 @@ def load_comboboxes(tab, settings, comboboxes):
 
         combobox = getattr(tab, entry)
         combobox.setCurrentText(selection)
+
+
+def save_spinboxes(tab, settings, spinboxes):
+    """
+    Save settings from the QSpinBox value in the tab.
+
+    Parameters:
+    tab         The tab object.
+    settings    The dictionary of settings.  This will be mutated.
+    spinboxes   A list of attribute names (str) of QListViews in the tab.
+    """
+
+    for entry in spinboxes:
+        spinbox = getattr(tab, entry)
+        settings[entry] = spinbox.value()
+
+
+def load_spinboxes(tab, settings, spinboxes):
+    """
+    Load settings into the QSpinBox value in the tab.
+
+    Parameters:
+    tab         The tab object.
+    settings    The dictionary of settings.
+    spinboxes   A list of attribute names (str) of QListViews in the tab.
+    """
+
+    log = logging.getLogger(__name__)
+
+    for entry in spinboxes:
+        try:
+            value = settings[entry]
+        except KeyError:
+            log.warning("{0} criteria missing from settings file.".format(entry))
+            continue
+
+        spinbox = getattr(tab, entry)
+        spinbox.setValue(value)
