@@ -194,3 +194,41 @@ def load_listviews(tab, settings, listviews):
 
             if item in selections:
                 selectionmodel.select(index, QItemSelectionModel.Select)
+
+
+def save_comboboxes(tab, settings, comboboxes):
+    """
+    Save settings from the QComboBox selection in the tab.
+
+    Parameters:
+    tab         The tab object.
+    settings    The dictionary of settings.  This will be mutated.
+    comboboxes  A list of attribute names (str) of QListViews in the tab.
+    """
+
+    for entry in comboboxes:
+        combobox = getattr(tab, entry)
+        settings[entry] = combobox.currentData(Qt.DisplayRole)
+
+
+def load_comboboxes(tab, settings, comboboxes):
+    """
+    Load settings into the QComboBox selection in the tab.
+
+    Parameters:
+    tab         The tab object.
+    settings    The dictionary of settings.
+    comboboxes  A list of attribute names (str) of QListViews in the tab.
+    """
+
+    log = logging.getLogger(__name__)
+
+    for entry in comboboxes:
+        try:
+            selection = settings[entry]
+        except KeyError:
+            log.warning("{0} criteria missing from settings file.".format(entry))
+            continue
+
+        combobox = getattr(tab, entry)
+        combobox.setCurrentText(selection)
