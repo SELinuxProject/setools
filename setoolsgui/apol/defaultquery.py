@@ -29,6 +29,8 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..defaultmodel import DefaultTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_comboboxes, load_listviews, load_textedits, \
+                       save_checkboxes, save_comboboxes, save_listviews, save_textedits
 
 
 class DefaultQueryTab(SEToolsWidget, QScrollArea):
@@ -123,6 +125,26 @@ class DefaultQueryTab(SEToolsWidget, QScrollArea):
 
     def invert_tclass_selection(self):
         invert_list_selection(self.tclass.selectionModel())
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "default_user",
+                                         "default_role", "default_type", "default_range"])
+        save_comboboxes(self, settings, ["default_2", "default_range_2"])
+        save_listviews(self, settings, ["tclass"])
+        save_textedits(self, settings, ["notes"])
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "default_user",
+                                         "default_role", "default_type", "default_range"])
+        load_comboboxes(self, settings, ["default_2", "default_range_2"])
+        load_listviews(self, settings, ["tclass"])
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
