@@ -29,6 +29,8 @@ from ..models import PermListModel, SEToolsListModel, invert_list_selection
 from ..constraintmodel import ConstraintTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
+                       save_checkboxes, save_lineedits, save_listviews, save_textedits
 
 
 class ConstraintQueryTab(SEToolsWidget, QScrollArea):
@@ -258,6 +260,28 @@ class ConstraintQueryTab(SEToolsWidget, QScrollArea):
         self.query.type_regex = state
         self.clear_type_error()
         self.set_type()
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "constrain",
+                                         "mlsconstrain", "validatetrans", "mlsvalidatetrans",
+                                         "user_regex", "role_regex", "type_regex", "perms_subset"])
+        save_lineedits(self, settings, ["user", "role", "type_"])
+        save_listviews(self, settings, ["tclass", "perms"])
+        save_textedits(self, settings, ["notes"])
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "constrain",
+                                         "mlsconstrain", "validatetrans", "mlsvalidatetrans",
+                                         "user_regex", "role_regex", "type_regex", "perms_subset"])
+        load_lineedits(self, settings, ["user", "role", "type_"])
+        load_listviews(self, settings, ["tclass", "perms"])
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
