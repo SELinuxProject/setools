@@ -28,6 +28,8 @@ from setools import DomainTransitionAnalysis
 from ..logtosignal import LogHandlerToSignal
 from .excludetypes import ExcludeTypes
 from ..widget import SEToolsWidget
+from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_textedits, \
+                       save_checkboxes, save_spinboxes, save_lineedits, save_textedits
 
 
 class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
@@ -203,6 +205,26 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
 
     def reverse_toggled(self, value):
         self.query.reverse = value
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "all_paths",
+                                         "all_shortest_paths", "flows_in", "flows_out", "reverse"])
+        save_lineedits(self, settings, ["source", "target"])
+        save_spinboxes(self, settings, ["max_path_length", "limit_paths"])
+        save_textedits(self, settings, ["notes"])
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "all_paths",
+                                         "all_shortest_paths", "flows_in", "flows_out", "reverse"])
+        load_lineedits(self, settings, ["source", "target"])
+        load_spinboxes(self, settings, ["max_path_length", "limit_paths"])
+        load_textedits(self, settings, ["notes"])
 
     #
     # Infoflow browser
