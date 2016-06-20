@@ -217,6 +217,7 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         save_lineedits(self, settings, ["source", "target"])
         save_spinboxes(self, settings, ["max_path_length", "limit_paths"])
         save_textedits(self, settings, ["notes"])
+        settings["exclude"] = [str(t) for t in self.query.exclude]
         return settings
 
     def load(self, settings):
@@ -225,6 +226,11 @@ class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
         load_lineedits(self, settings, ["source", "target"])
         load_spinboxes(self, settings, ["max_path_length", "limit_paths"])
         load_textedits(self, settings, ["notes"])
+
+        try:
+            self.query.exclude = settings["exclude"]
+        except KeyError:
+            self.log.warning("Excluded types criteria missing from settings file.")
 
     #
     # Infoflow browser
