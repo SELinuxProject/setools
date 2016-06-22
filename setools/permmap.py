@@ -68,6 +68,11 @@ class PermissionMap(object):
         memo[id(self)] = newobj
         return newobj
 
+    def __iter__(self):
+        for cls in self.classes():
+            for mapping in self.perms(cls):
+                yield mapping
+
     def load(self, permmapfile):
         """
         Parameter:
