@@ -346,13 +346,9 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
                                          "xperms_equal",
                                          "default_regex",
                                          "bools_equal"])
-
         save_lineedits(self, settings, ["source", "target", "xperms", "default_type"])
-
         save_listviews(self, settings, ["tclass", "perms", "bool_criteria"])
-
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):
@@ -368,11 +364,8 @@ class TERuleQueryTab(SEToolsWidget, QScrollArea):
                                          "xperms_equal",
                                          "default_regex",
                                          "bools_equal"])
-
         load_lineedits(self, settings, ["source", "target", "xperms", "default_type"])
-
         load_listviews(self, settings, ["tclass", "perms", "bool_criteria"])
-
         load_textedits(self, settings, ["notes"])
 
     #

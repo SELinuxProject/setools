@@ -167,23 +167,16 @@ class CommonQueryTab(SEToolsWidget, QScrollArea):
         settings = {}
         save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex",
                                          "perms_equal"])
-
         save_lineedits(self, settings, ["name"])
-
         save_listviews(self, settings, ["perms"])
-
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):
         load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex",
                                          "perms_equal"])
-
         load_lineedits(self, settings, ["name"])
-
         load_listviews(self, settings, ["perms"])
-
         load_textedits(self, settings, ["notes"])
 
     #

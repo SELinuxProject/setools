@@ -124,7 +124,6 @@ class SummaryTab(SEToolsWidget, QScrollArea):
         settings = {}
         save_checkboxes(self, settings, ["notes_expander"])
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):

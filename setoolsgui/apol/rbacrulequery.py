@@ -244,13 +244,9 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
                                          "source_indirect", "source_regex",
                                          "target_indirect", "target_regex",
                                          "default_regex"])
-
         save_lineedits(self, settings, ["source", "target", "default_role"])
-
         save_listviews(self, settings, ["tclass"])
-
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):
@@ -259,11 +255,8 @@ class RBACRuleQueryTab(SEToolsWidget, QScrollArea):
                                          "source_indirect", "source_regex",
                                          "target_indirect", "target_regex",
                                          "default_regex"])
-
         load_lineedits(self, settings, ["source", "target", "default_role"])
-
         load_listviews(self, settings, ["tclass"])
-
         load_textedits(self, settings, ["notes"])
 
     #

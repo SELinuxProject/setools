@@ -222,13 +222,9 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
                                          "range_transition",
                                          "source_indirect", "source_regex",
                                          "target_indirect", "target_regex"])
-
         save_lineedits(self, settings, ["source", "target", "default_range"])
-
         save_listviews(self, settings, ["tclass"])
-
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):
@@ -236,11 +232,8 @@ class MLSRuleQueryTab(SEToolsWidget, QScrollArea):
                                          "range_transition",
                                          "source_indirect", "source_regex",
                                          "target_indirect", "target_regex"])
-
         load_lineedits(self, settings, ["source", "target", "default_range"])
-
         load_listviews(self, settings, ["tclass"])
-
         load_textedits(self, settings, ["notes"])
 
     #

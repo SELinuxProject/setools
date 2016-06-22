@@ -144,20 +144,15 @@ class BoolQueryTab(SEToolsWidget, QScrollArea):
         save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
                                          "default_any", "default_true", "default_false",
                                          "name_regex"])
-
         save_lineedits(self, settings, ["name"])
-
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):
         load_checkboxes(self, settings, ["criteria_expander", "notes_expander",
                                          "default_any", "default_true", "default_false",
                                          "name_regex"])
-
         load_lineedits(self, settings, ["name"])
-
         load_textedits(self, settings, ["notes"])
 
     #

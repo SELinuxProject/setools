@@ -142,18 +142,13 @@ class CategoryQueryTab(SEToolsWidget, QScrollArea):
         """Return a dictionary of settings."""
         settings = {}
         save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex"])
-
         save_lineedits(self, settings, ["name"])
-
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):
         load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex"])
-
         load_lineedits(self, settings, ["name"])
-
         load_textedits(self, settings, ["notes"])
 
     #

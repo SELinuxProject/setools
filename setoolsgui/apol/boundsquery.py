@@ -151,20 +151,15 @@ class BoundsQueryTab(SEToolsWidget, QScrollArea):
         save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
                                          "typebounds",
                                          "parent_regex", "child_regex"])
-
         save_lineedits(self, settings, ["parent", "child"])
-
         save_textedits(self, settings, ["notes"])
-
         return settings
 
     def load(self, settings):
         load_checkboxes(self, settings, ["criteria_expander", "notes_expander",
                                          "typebounds",
                                          "parent_regex", "child_regex"])
-
         load_lineedits(self, settings, ["parent", "child"])
-
         load_textedits(self, settings, ["notes"])
 
     #
