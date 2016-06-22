@@ -19,6 +19,7 @@
 
 import logging
 import copy
+from collections import defaultdict
 
 from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
@@ -31,6 +32,8 @@ from ..logtosignal import LogHandlerToSignal
 from ..widget import SEToolsWidget
 from .excludetypes import ExcludeTypes
 from .permmapedit import PermissionMapEditor
+from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_textedits, \
+                       save_checkboxes, save_spinboxes, save_lineedits, save_textedits
 
 
 class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
@@ -229,6 +232,50 @@ class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
     def apply_permmap(self, pmap):
         # used only by permission map editor
         self.query.perm_map = pmap
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "all_paths",
+                                         "all_shortest_paths", "flows_in", "flows_out"])
+        save_lineedits(self, settings, ["source", "target"])
+        save_spinboxes(self, settings, ["max_path_length", "limit_paths", "min_perm_weight"])
+        save_textedits(self, settings, ["notes"])
+
+        settings["exclude"] = [str(t) for t in self.query.exclude]
+
+        settings["exclude_perms"] = defaultdict(list)
+        for mapping in self.perm_map:
+            if not mapping.enabled:
+                settings["exclude_perms"][mapping.class_].append(mapping.perm)
+
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "all_paths",
+                                         "all_shortest_paths", "flows_in", "flows_out"])
+        load_lineedits(self, settings, ["source", "target"])
+        load_spinboxes(self, settings, ["max_path_length", "limit_paths", "min_perm_weight"])
+        load_textedits(self, settings, ["notes"])
+
+        try:
+            self.query.exclude = settings["exclude"]
+        except KeyError:
+            self.log.warning("Excluded types criteria missing from settings file.")
+
+        if "exclude_perms" not in settings:
+            self.log.warning("Excluded permissions missing from settings file.")
+        else:
+            for mapping in self.perm_map:
+                # iterate over the map so that any permission
+                # not in the setting file's exclude list is enabled.
+                try:
+                    mapping.enabled = mapping.perm not in settings["exclude_perms"][mapping.class_]
+                except KeyError:
+                    mapping.enabled = True
 
     #
     # Infoflow browser
