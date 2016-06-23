@@ -29,6 +29,8 @@ from ..logtosignal import LogHandlerToSignal
 from ..nodeconmodel import NodeconTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_textedits, load_comboboxes, \
+                       save_checkboxes, save_lineedits, save_textedits, save_comboboxes
 
 
 class NodeconQueryTab(SEToolsWidget, QScrollArea):
@@ -245,6 +247,30 @@ class NodeconQueryTab(SEToolsWidget, QScrollArea):
             self.log.info("Context range error: " + str(ex))
             self.range_.setToolTip("Error: " + str(ex))
             self.range_.setPalette(self.error_palette)
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "network_exact", "network_overlap",
+                                         "user_regex", "role_regex", "type_regex", "range_exact",
+                                         "range_overlap", "range_subset", "range_superset"])
+        save_lineedits(self, settings, ["network", "user", "role", "type_", "range_"])
+        save_comboboxes(self, settings, ["ip_version"])
+        save_textedits(self, settings, ["notes"])
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "network_exact", "network_overlap",
+                                         "user_regex", "role_regex", "type_regex", "range_exact",
+                                         "range_overlap", "range_subset", "range_superset"])
+        load_lineedits(self, settings, ["network", "user", "role", "type_", "range_"])
+        load_comboboxes(self, settings, ["ip_version"])
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner

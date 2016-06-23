@@ -28,6 +28,8 @@ from ..logtosignal import LogHandlerToSignal
 from ..fsusemodel import FSUseTableModel
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_textedits, \
+                       save_checkboxes, save_lineedits, save_textedits
 
 
 class FSUseQueryTab(SEToolsWidget, QScrollArea):
@@ -258,6 +260,28 @@ class FSUseQueryTab(SEToolsWidget, QScrollArea):
             self.log.info("Context range error: " + str(ex))
             self.range_.setToolTip("Error: " + str(ex))
             self.range_.setPalette(self.error_palette)
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "fs_regex", "fs_use_xattr", "fs_use_trans", "fs_use_task",
+                                         "user_regex", "role_regex", "type_regex", "range_exact",
+                                         "range_overlap", "range_subset", "range_superset"])
+        save_lineedits(self, settings, ["user", "role", "type_", "range_"])
+        save_textedits(self, settings, ["notes"])
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander",
+                                         "fs_regex", "fs_use_xattr", "fs_use_trans", "fs_use_task",
+                                         "user_regex", "role_regex", "type_regex", "range_exact",
+                                         "range_overlap", "range_subset", "range_superset"])
+        load_lineedits(self, settings, ["user", "role", "type_", "range_"])
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
