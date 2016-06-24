@@ -29,6 +29,8 @@ from ..models import SEToolsListModel, invert_list_selection
 from ..typemodel import TypeTableModel, type_detail
 from ..widget import SEToolsWidget
 from .queryupdater import QueryResultsUpdater
+from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
+                       save_checkboxes, save_lineedits, save_listviews, save_textedits
 
 
 class TypeQueryTab(SEToolsWidget, QScrollArea):
@@ -152,6 +154,26 @@ class TypeQueryTab(SEToolsWidget, QScrollArea):
 
     def invert_attr_selection(self):
         invert_list_selection(self.attrs.selectionModel())
+
+    #
+    # Save/Load tab
+    #
+    def save(self):
+        """Return a dictionary of settings."""
+        settings = {}
+        save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex",
+                                         "attrs_any", "attrs_equal", "permissive"])
+        save_lineedits(self, settings, ["name"])
+        save_listviews(self, settings, ["attrs"])
+        save_textedits(self, settings, ["notes"])
+        return settings
+
+    def load(self, settings):
+        load_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex",
+                                         "attrs_any", "attrs_equal", "permissive"])
+        load_lineedits(self, settings, ["name"])
+        load_listviews(self, settings, ["attrs"])
+        load_textedits(self, settings, ["notes"])
 
     #
     # Results runner
