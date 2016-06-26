@@ -95,7 +95,7 @@ def load_lineedits(tab, settings, lines):
         lineedit = getattr(tab, entry)
 
         try:
-            lineedit.setText(settings[entry])
+            lineedit.setText(str(settings[entry]))
         except KeyError:
             log.warning("{0} criteria missing from settings file.".format(entry))
 
@@ -133,7 +133,7 @@ def load_textedits(tab, settings, edits):
         textedit = getattr(tab, entry)
 
         try:
-            textedit.setPlainText(settings[entry])
+            textedit.setPlainText(str(settings[entry]))
         except KeyError:
             log.warning("{0} criteria missing from settings file.".format(entry))
 
@@ -175,10 +175,14 @@ def load_listviews(tab, settings, listviews):
     # set list selections
     for entry in listviews:
         try:
-            selections = settings[entry]
+            selections = list(settings[entry])
         except KeyError:
             log.warning("{0} criteria missing from settings file.".format(entry))
             continue
+        except TypeError:
+            msg = "Invalid list for {0} criteria: {1!r}".format(entry, settings[entry])
+            log.critical(msg)
+            raise TypeError(msg)
 
         if not selections:
             continue
@@ -225,7 +229,7 @@ def load_comboboxes(tab, settings, comboboxes):
 
     for entry in comboboxes:
         try:
-            selection = settings[entry]
+            selection = str(settings[entry])
         except KeyError:
             log.warning("{0} criteria missing from settings file.".format(entry))
             continue
@@ -263,10 +267,14 @@ def load_spinboxes(tab, settings, spinboxes):
 
     for entry in spinboxes:
         try:
-            value = settings[entry]
+            value = int(settings[entry])
         except KeyError:
             log.warning("{0} criteria missing from settings file.".format(entry))
             continue
+        except (ValueError, TypeError) as ex:
+            msg = "Invalid value for {0} criteria: {1!r}.".format(entry, settings[entry])
+            log.critical(msg)
+            raise ex.__class__(msg)
 
         spinbox = getattr(tab, entry)
         spinbox.setValue(value)

@@ -348,7 +348,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                             "({1}).".format(type(tab).__name__, settings["__tab__"]))
 
         try:
-            self.AnalysisTabs.setTabText(index, settings["__title__"])
+            self.AnalysisTabs.setTabText(index, str(settings["__title__"]))
         except KeyError:
             self.log.warning("Settings file does not have a title setting.")
 
@@ -401,7 +401,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         except Exception as ex:
             self.log.critical("Error loading settings file \"{0}\": {1}".format(filename, ex))
             self.error_msg.critical(self, "Failed to load settings",
-                                    "Error loading settings file \"{0}\": {1}".format(filename, ex))
+                                    "Error loading settings file \"{0}\":\n\n{1}".
+                                    format(filename, ex))
         else:
             self.log.info("Successfully loaded analysis settings from \"{0}\"".format(filename))
 
