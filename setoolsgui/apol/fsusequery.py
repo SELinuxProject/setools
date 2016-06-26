@@ -271,7 +271,7 @@ class FSUseQueryTab(SEToolsWidget, QScrollArea):
                                          "fs_regex", "fs_use_xattr", "fs_use_trans", "fs_use_task",
                                          "user_regex", "role_regex", "type_regex", "range_exact",
                                          "range_overlap", "range_subset", "range_superset"])
-        save_lineedits(self, settings, ["user", "role", "type_", "range_"])
+        save_lineedits(self, settings, ["fs", "user", "role", "type_", "range_"])
         save_textedits(self, settings, ["notes"])
         return settings
 
@@ -280,7 +280,7 @@ class FSUseQueryTab(SEToolsWidget, QScrollArea):
                                          "fs_regex", "fs_use_xattr", "fs_use_trans", "fs_use_task",
                                          "user_regex", "role_regex", "type_regex", "range_exact",
                                          "range_overlap", "range_subset", "range_superset"])
-        load_lineedits(self, settings, ["user", "role", "type_", "range_"])
+        load_lineedits(self, settings, ["fs", "user", "role", "type_", "range_"])
         load_textedits(self, settings, ["notes"])
 
     #
