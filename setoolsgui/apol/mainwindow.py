@@ -410,14 +410,22 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.load_settings(new=True)
 
     def save_settings(self):
+        try:
+            settings = self._get_settings()
+
+        except RuntimeError:
+            self.log.critical("Errors in the query prevent saving the settings.")
+            self.error_msg.critical(self, "Unable to save settings",
+                                    "Please resolve errors in the query before saving the settings."
+                                    )
+            return
+
         filename = QFileDialog.getSaveFileName(self, "Save analysis tab settings", "analysis.apolt",
                                                "Apol Tab Settings File (*.apolt);;"
                                                "All Files (*)")[0]
 
         if not filename:
             return
-
-        settings = self._get_settings()
 
         try:
             with open(filename, "w") as fd:
@@ -556,28 +564,36 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                                    format("\n\n".join(loading_errors)))
 
     def save_workspace(self):
+        workspace = {}
+        try:
+            workspace["__policy__"] = os.path.abspath(str(self._policy))
+            workspace["__permmap__"] = os.path.abspath(str(self._permmap))
+            workspace["__tabs__"] = []
+
+            for index in range(self.AnalysisTabs.count()):
+                tab = self.AnalysisTabs.widget(index)
+
+                settings = tab.save()
+
+                # add the tab info to the settings.
+                settings["__title__"] = self.AnalysisTabs.tabText(index)
+                settings["__tab__"] = type(tab).__name__
+
+                workspace["__tabs__"].append(settings)
+
+        except RuntimeError:
+            self.log.critical("Errors in the query prevent saving the workspace.")
+            self.error_msg.critical(self, "Unable to save workspace",
+                                    "Please resolve errors in tab \"{0}\" before saving the"
+                                    " settings.".format(self.AnalysisTabs.tabText(index)))
+            return
+
         filename = QFileDialog.getSaveFileName(self, "Save analysis workspace", "workspace.apolw",
                                                "Apol Workspace Files (*.apolw);;"
                                                "All Files (*)")[0]
 
         if not filename:
             return
-
-        workspace = {}
-        workspace["__policy__"] = os.path.abspath(str(self._policy))
-        workspace["__permmap__"] = os.path.abspath(str(self._permmap))
-        workspace["__tabs__"] = []
-
-        for index in range(self.AnalysisTabs.count()):
-            tab = self.AnalysisTabs.widget(index)
-
-            settings = tab.save()
-
-            # add the tab info to the settings.
-            settings["__title__"] = self.AnalysisTabs.tabText(index)
-            settings["__tab__"] = type(tab).__name__
-
-            workspace["__tabs__"].append(settings)
 
         with open(filename, "w") as fd:
             json.dump(workspace, fd, indent=1)
