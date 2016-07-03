@@ -414,10 +414,10 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         try:
             settings = self._get_settings()
 
-        except TabError:
-            self.log.critical("Errors in the query prevent saving the settings.")
+        except TabError as ex:
+            self.log.critical("Errors in the query prevent saving the settings. {0}".format(ex))
             self.error_msg.critical(self, "Unable to save settings",
-                                    "Please resolve errors in the query before saving the settings."
+                                    "Please resolve errors in the tab before saving the settings."
                                     )
             return
 
