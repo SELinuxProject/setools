@@ -30,6 +30,7 @@ from setools import __version__, PermissionMap, SELinuxPolicy
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 from .chooseanalysis import ChooseAnalysis, tab_map
+from .exception import TabError
 from .permmapedit import PermissionMapEditor
 from .summary import SummaryTab
 
@@ -413,7 +414,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         try:
             settings = self._get_settings()
 
-        except RuntimeError:
+        except TabError:
             self.log.critical("Errors in the query prevent saving the settings.")
             self.error_msg.critical(self, "Unable to save settings",
                                     "Please resolve errors in the query before saving the settings."
@@ -581,11 +582,11 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
                 workspace["__tabs__"].append(settings)
 
-        except RuntimeError:
+        except TabError:
             self.log.critical("Errors in the query prevent saving the workspace.")
             self.error_msg.critical(self, "Unable to save workspace",
                                     "Please resolve errors in tab \"{0}\" before saving the"
-                                    " settings.".format(self.AnalysisTabs.tabText(index)))
+                                    " workspace.".format(self.AnalysisTabs.tabText(index)))
             return
 
         filename = QFileDialog.getSaveFileName(self, "Save analysis workspace", "workspace.apolw",
