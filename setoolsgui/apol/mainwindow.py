@@ -1,4 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -566,27 +567,33 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
     def save_workspace(self):
         workspace = {}
-        try:
-            workspace["__policy__"] = os.path.abspath(str(self._policy))
-            workspace["__permmap__"] = os.path.abspath(str(self._permmap))
-            workspace["__tabs__"] = []
+        save_errors = []
 
-            for index in range(self.AnalysisTabs.count()):
-                tab = self.AnalysisTabs.widget(index)
+        workspace["__policy__"] = os.path.abspath(str(self._policy))
+        workspace["__permmap__"] = os.path.abspath(str(self._permmap))
+        workspace["__tabs__"] = []
 
+        for index in range(self.AnalysisTabs.count()):
+            tab = self.AnalysisTabs.widget(index)
+
+            try:
                 settings = tab.save()
-
+            except TabError as ex:
+                tab_name = self.AnalysisTabs.tabText(index)
+                save_errors.append(tab_name)
+                self.log.error("Error: tab \"{0}\": {1}".format(tab_name, str(ex)))
+            else:
                 # add the tab info to the settings.
                 settings["__title__"] = self.AnalysisTabs.tabText(index)
                 settings["__tab__"] = type(tab).__name__
 
                 workspace["__tabs__"].append(settings)
 
-        except TabError:
-            self.log.critical("Errors in the query prevent saving the workspace.")
+        if save_errors:
+            self.log.critical("Errors in tabs prevent saving the workspace.")
             self.error_msg.critical(self, "Unable to save workspace",
-                                    "Please resolve errors in tab \"{0}\" before saving the"
-                                    " workspace.".format(self.AnalysisTabs.tabText(index)))
+                                    "Please resolve errors in the following tabs before saving the"
+                                    " workspace:\n\n{0}".format("\n".join(save_errors)))
             return
 
         filename = QFileDialog.getSaveFileName(self, "Save analysis workspace", "workspace.apolw",
