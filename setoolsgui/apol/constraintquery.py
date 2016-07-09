@@ -86,6 +86,7 @@ class ConstraintQueryTab(AnalysisTab):
         self.perms.setModel(self.perms_model)
 
         # setup indications of errors
+        self.errors = set()
         self.orig_palette = self.type_.palette()
         self.error_palette = self.type_.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -202,16 +203,15 @@ class ConstraintQueryTab(AnalysisTab):
     # User criteria
     #
     def clear_user_error(self):
-        self.user.setToolTip("Match constraints that have a user in the expression.")
-        self.user.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.user,
+                                  "Match constraints that have a user in the expression.")
 
     def set_user(self):
         try:
             self.query.user = self.user.text()
         except Exception as ex:
             self.log.error("User error: {0}".format(ex))
-            self.user.setToolTip("Error: " + str(ex))
-            self.user.setPalette(self.error_palette)
+            self.set_criteria_error(self.user, ex)
 
     def set_user_regex(self, state):
         self.log.debug("Setting user_regex {0}".format(state))
@@ -223,16 +223,15 @@ class ConstraintQueryTab(AnalysisTab):
     # Role criteria
     #
     def clear_role_error(self):
-        self.role.setToolTip("Match constraints that have a role in the expression.")
-        self.role.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.role,
+                                  "Match constraints that have a role in the expression.")
 
     def set_role(self):
         try:
             self.query.role = self.role.text()
         except Exception as ex:
             self.log.error("Role error: {0}".format(ex))
-            self.role.setToolTip("Error: " + str(ex))
-            self.role.setPalette(self.error_palette)
+            self.set_criteria_error(self.role, ex)
 
     def set_role_regex(self, state):
         self.log.debug("Setting role_regex {0}".format(state))
@@ -244,16 +243,15 @@ class ConstraintQueryTab(AnalysisTab):
     # Type criteria
     #
     def clear_type_error(self):
-        self.type_.setToolTip("Match constraints that have a type in the expression.")
-        self.type_.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.type_,
+                                  "Match constraints that have a type in the expression.")
 
     def set_type(self):
         try:
             self.query.type_ = self.type_.text()
         except Exception as ex:
             self.log.error("Type error: {0}".format(ex))
-            self.type_.setToolTip("Error: " + str(ex))
-            self.type_.setPalette(self.error_palette)
+            self.set_criteria_error(self.type_, ex)
 
     def set_type_regex(self, state):
         self.log.debug("Setting type_regex {0}".format(state))

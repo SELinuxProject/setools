@@ -73,6 +73,7 @@ class RBACRuleQueryTab(AnalysisTab):
         self.target.setCompleter(self.roletype_completion)
 
         # setup indications of errors on source/target/default
+        self.errors = set()
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -156,16 +157,14 @@ class RBACRuleQueryTab(AnalysisTab):
     #
 
     def clear_source_error(self):
-        self.source.setToolTip("Match the source role of the rule.")
-        self.source.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.source, "Match the source role of the rule.")
 
     def set_source(self):
         try:
             self.query.source = self.source.text()
         except Exception as ex:
             self.log.error("Source role error: {0}".format(ex))
-            self.source.setToolTip("Error: " + str(ex))
-            self.source.setPalette(self.error_palette)
+            self.set_criteria_error(self.source, ex)
 
     def set_source_regex(self, state):
         self.log.debug("Setting source_regex {0}".format(state))
@@ -178,16 +177,14 @@ class RBACRuleQueryTab(AnalysisTab):
     #
 
     def clear_target_error(self):
-        self.target.setToolTip("Match the target role/type of the rule.")
-        self.target.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.target, "Match the target role/type of the rule.")
 
     def set_target(self):
         try:
             self.query.target = self.target.text()
         except Exception as ex:
             self.log.error("Target type/role error: {0}".format(ex))
-            self.target.setToolTip("Error: " + str(ex))
-            self.target.setPalette(self.error_palette)
+            self.set_criteria_error(self.target, ex)
 
     def set_target_regex(self, state):
         self.log.debug("Setting target_regex {0}".format(state))
@@ -214,8 +211,7 @@ class RBACRuleQueryTab(AnalysisTab):
     #
 
     def clear_default_error(self):
-        self.default_role.setToolTip("Match the default role the rule.")
-        self.default_role.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.default_role, "Match the default role the rule.")
 
     def set_default_role(self):
         self.query.default_regex = self.default_regex.isChecked()
@@ -224,8 +220,7 @@ class RBACRuleQueryTab(AnalysisTab):
             self.query.default = self.default_role.text()
         except Exception as ex:
             self.log.error("Default role error: {0}".format(ex))
-            self.default_role.setToolTip("Error: " + str(ex))
-            self.default_role.setPalette(self.error_palette)
+            self.set_criteria_error(self.default_role, ex)
 
     def set_default_regex(self, state):
         self.log.debug("Setting default_regex {0}".format(state))

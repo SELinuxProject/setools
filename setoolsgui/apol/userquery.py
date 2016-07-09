@@ -70,6 +70,7 @@ class UserQueryTab(AnalysisTab):
         self.table_results.sortByColumn(0, Qt.AscendingOrder)
 
         # setup indications of errors on level/range
+        self.errors = set()
         self.orig_palette = self.name.palette()
         self.error_palette = self.name.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -148,16 +149,14 @@ class UserQueryTab(AnalysisTab):
     # Name criteria
     #
     def clear_name_error(self):
-        self.name.setToolTip("Match the user name.")
-        self.name.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.name, "Match the user name.")
 
     def set_name(self):
         try:
             self.query.name = self.name.text()
         except Exception as ex:
             self.log.error("User name error: {0}".format(ex))
-            self.name.setToolTip("Error: " + str(ex))
-            self.name.setPalette(self.error_palette)
+            self.set_criteria_error(self.name, ex)
 
     def set_name_regex(self, state):
         self.log.debug("Setting name_regex {0}".format(state))
@@ -182,31 +181,27 @@ class UserQueryTab(AnalysisTab):
     # Default level criteria
     #
     def clear_level_error(self):
-        self.level.setToolTip("Match the default level of the user.")
-        self.level.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.level, "Match the default level of the user.")
 
     def set_level(self):
         try:
             self.query.level = self.level.text()
         except Exception as ex:
             self.log.info("Level criterion error: " + str(ex))
-            self.level.setToolTip("Error: " + str(ex))
-            self.level.setPalette(self.error_palette)
+            self.set_criteria_error(self.level, ex)
 
     #
     # Range criteria
     #
     def clear_range_error(self):
-        self.range_.setToolTip("Match the default range of the user.")
-        self.range_.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.range_, "Match the default range of the user.")
 
     def set_range(self):
         try:
             self.query.range_ = self.range_.text()
         except Exception as ex:
             self.log.info("Range criterion error: " + str(ex))
-            self.range_.setToolTip("Error: " + str(ex))
-            self.range_.setPalette(self.error_palette)
+            self.set_criteria_error(self.range_, ex)
 
     #
     # Save/Load tab

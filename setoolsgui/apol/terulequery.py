@@ -71,6 +71,7 @@ class TERuleQueryTab(AnalysisTab):
         self.default_type.setCompleter(self.type_completion)
 
         # setup indications of errors on source/target/default
+        self.errors = set()
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -183,16 +184,14 @@ class TERuleQueryTab(AnalysisTab):
     #
 
     def clear_source_error(self):
-        self.source.setToolTip("Match the source type/attribute of the rule.")
-        self.source.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.source, "Match the source type/attribute of the rule.")
 
     def set_source(self):
         try:
             self.query.source = self.source.text()
         except Exception as ex:
             self.log.error("Source type/attribute error: {0}".format(ex))
-            self.source.setToolTip("Error: " + str(ex))
-            self.source.setPalette(self.error_palette)
+            self.set_criteria_error(self.source, ex)
 
     def set_source_regex(self, state):
         self.log.debug("Setting source_regex {0}".format(state))
@@ -205,16 +204,14 @@ class TERuleQueryTab(AnalysisTab):
     #
 
     def clear_target_error(self):
-        self.target.setToolTip("Match the target type/attribute of the rule.")
-        self.target.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.target, "Match the target type/attribute of the rule.")
 
     def set_target(self):
         try:
             self.query.target = self.target.text()
         except Exception as ex:
             self.log.error("Target type/attribute error: {0}".format(ex))
-            self.target.setToolTip("Error: " + str(ex))
-            self.target.setPalette(self.error_palette)
+            self.set_criteria_error(self.target, ex)
 
     def set_target_regex(self, state):
         self.log.debug("Setting target_regex {0}".format(state))
@@ -264,9 +261,9 @@ class TERuleQueryTab(AnalysisTab):
         self.xperms_equal.setEnabled(mode)
 
     def clear_xperm_error(self):
-        self.xperms.setToolTip("Match the extended permissions of the rule. Comma-separated "
-                               "permissions or ranges of permissions.")
-        self.xperms.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.xperms,
+                                  "Match the extended permissions of the rule. "
+                                  "Comma-separated permissions or ranges of permissions.")
 
     def set_xperm(self):
         xperms = []
@@ -290,16 +287,14 @@ class TERuleQueryTab(AnalysisTab):
 
         except Exception as ex:
             self.log.error("Extended permissions error: {0}".format(ex))
-            self.xperms.setToolTip("Error: " + str(ex))
-            self.xperms.setPalette(self.error_palette)
+            self.set_criteria_error(self.xperms, ex)
 
     #
     # Default criteria
     #
 
     def clear_default_error(self):
-        self.default_type.setToolTip("Match the default type the rule.")
-        self.default_type.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.default_type, "Match the default type the rule.")
 
     def set_default_type(self):
         self.query.default_regex = self.default_regex.isChecked()
@@ -308,8 +303,7 @@ class TERuleQueryTab(AnalysisTab):
             self.query.default = self.default_type.text()
         except Exception as ex:
             self.log.error("Default type error: {0}".format(ex))
-            self.default_type.setToolTip("Error: " + str(ex))
-            self.default_type.setPalette(self.error_palette)
+            self.set_criteria_error(self.default_type, ex)
 
     def set_default_regex(self, state):
         self.log.debug("Setting default_regex {0}".format(state))

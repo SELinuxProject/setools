@@ -70,6 +70,7 @@ class RoleQueryTab(AnalysisTab):
         self.table_results.sortByColumn(0, Qt.AscendingOrder)
 
         # setup indications of errors on level/range
+        self.errors = set()
         self.orig_palette = self.name.palette()
         self.error_palette = self.name.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -125,16 +126,14 @@ class RoleQueryTab(AnalysisTab):
     # Name criteria
     #
     def clear_name_error(self):
-        self.name.setToolTip("Match the role name.")
-        self.name.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.name, "Match the role name.")
 
     def set_name(self):
         try:
             self.query.name = self.name.text()
         except Exception as ex:
             self.log.error("Role name error: {0}".format(ex))
-            self.name.setToolTip("Error: " + str(ex))
-            self.name.setPalette(self.error_palette)
+            self.set_criteria_error(self.name, ex)
 
     def set_name_regex(self, state):
         self.log.debug("Setting name_regex {0}".format(state))

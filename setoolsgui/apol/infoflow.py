@@ -97,6 +97,7 @@ class InfoFlowAnalysisTab(AnalysisTab):
         self.target.setCompleter(self.type_completion)
 
         # setup indications of errors on source/target/default
+        self.errors = set()
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -173,14 +174,8 @@ class InfoFlowAnalysisTab(AnalysisTab):
     #
     # Source criteria
     #
-    def set_source_error(self, error_text):
-        self.log.error("Source type error: {0}".format(error_text))
-        self.source.setToolTip("Error: {0}".format(error_text))
-        self.source.setPalette(self.error_palette)
-
     def clear_source_error(self):
-        self.source.setToolTip("The source type of the analysis.")
-        self.source.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.source, "The source type of the analysis.")
 
     def set_source(self):
         try:
@@ -191,19 +186,14 @@ class InfoFlowAnalysisTab(AnalysisTab):
             else:
                 self.query.source = None
         except Exception as ex:
-            self.set_source_error(ex)
+            self.log.error("Source type error: {0}".format(str(ex)))
+            self.set_criteria_error(self.source, ex)
 
     #
     # Target criteria
     #
-    def set_target_error(self, error_text):
-        self.log.error("Target type error: {0}".format(error_text))
-        self.target.setToolTip("Error: {0}".format(error_text))
-        self.target.setPalette(self.error_palette)
-
     def clear_target_error(self):
-        self.target.setToolTip("The target type of the analysis.")
-        self.target.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.target, "The target type of the analysis.")
 
     def set_target(self):
         try:
@@ -214,7 +204,8 @@ class InfoFlowAnalysisTab(AnalysisTab):
             else:
                 self.query.target = None
         except Exception as ex:
-            self.set_target_error(ex)
+            self.log.error("Target type error: {0}".format(str(ex)))
+            self.set_criteria_error(self.target, ex)
 
     #
     # Options
@@ -367,11 +358,11 @@ class InfoFlowAnalysisTab(AnalysisTab):
         # right now there is only one button.
         fail = False
         if self.source.isEnabled() and not self.query.source:
-            self.set_source_error("A source type is required")
+            self.set_criteria_error(self.source, "A source type is required")
             fail = True
 
         if self.target.isEnabled() and not self.query.target:
-            self.set_target_error("A target type is required.")
+            self.set_criteria_error(self.target, "A target type is required.")
             fail = True
 
         if not self.perm_map:

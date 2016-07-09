@@ -60,6 +60,7 @@ class BoundsQueryTab(AnalysisTab):
         self.table_results.sortByColumn(1, Qt.AscendingOrder)
 
         # setup indications of errors on level/range
+        self.errors = set()
         self.orig_palette = self.parent.palette()
         self.error_palette = self.parent.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -104,16 +105,14 @@ class BoundsQueryTab(AnalysisTab):
     # Parent criteria
     #
     def clear_parent_error(self):
-        self.parent.setToolTip("Match the parent type.")
-        self.parent.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.parent, "Match the parent type.")
 
     def set_parent(self):
         try:
             self.query.parent = self.parent.text()
         except Exception as ex:
             self.log.error("Type parent error: {0}".format(ex))
-            self.parent.setToolTip("Error: " + str(ex))
-            self.parent.setPalette(self.error_palette)
+            self.set_criteria_error(self.parent, ex)
 
     def set_parent_regex(self, state):
         self.log.debug("Setting parent_regex {0}".format(state))
@@ -125,16 +124,14 @@ class BoundsQueryTab(AnalysisTab):
     # Child criteria
     #
     def clear_child_error(self):
-        self.child.setToolTip("Match the child type.")
-        self.child.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.child, "Match the child type.")
 
     def set_child(self):
         try:
             self.query.child = self.child.text()
         except Exception as ex:
             self.log.error("Type child error: {0}".format(ex))
-            self.child.setToolTip("Error: " + str(ex))
-            self.child.setPalette(self.error_palette)
+            self.set_criteria_error(self.child, ex)
 
     def set_child_regex(self, state):
         self.log.debug("Setting child_regex {0}".format(state))

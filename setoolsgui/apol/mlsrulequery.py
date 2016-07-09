@@ -63,6 +63,7 @@ class MLSRuleQueryTab(AnalysisTab):
         self.target.setCompleter(self.typeattr_completion)
 
         # setup indications of errors on source/target/default
+        self.errors = set()
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -143,16 +144,14 @@ class MLSRuleQueryTab(AnalysisTab):
     #
 
     def clear_source_error(self):
-        self.source.setToolTip("Match the source type/attribute of the rule.")
-        self.source.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.source, "Match the source type/attribute of the rule.")
 
     def set_source(self):
         try:
             self.query.source = self.source.text()
         except Exception as ex:
             self.log.error("Source type/attribute error: {0}".format(ex))
-            self.source.setToolTip("Error: {0}".format(ex))
-            self.source.setPalette(self.error_palette)
+            self.set_criteria_error(self.source, ex)
 
     def set_source_regex(self, state):
         self.log.debug("Setting source_regex {0}".format(state))
@@ -165,16 +164,14 @@ class MLSRuleQueryTab(AnalysisTab):
     #
 
     def clear_target_error(self):
-        self.target.setToolTip("Match the target type/attribute of the rule.")
-        self.target.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.target, "Match the target type/attribute of the rule.")
 
     def set_target(self):
         try:
             self.query.target = self.target.text()
         except Exception as ex:
             self.log.error("Target type/attribute error: {0}".format(ex))
-            self.target.setToolTip("Error: {0}".format(ex))
-            self.target.setPalette(self.error_palette)
+            self.set_criteria_error(self.target, ex)
 
     def set_target_regex(self, state):
         self.log.debug("Setting target_regex {0}".format(state))
@@ -201,16 +198,14 @@ class MLSRuleQueryTab(AnalysisTab):
     #
 
     def clear_default_error(self):
-        self.default_range.setToolTip("Match the default type the rule.")
-        self.default_range.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.default_range, "Match the default type the rule.")
 
     def set_default_range(self):
         try:
             self.query.default = self.default_range.text()
         except Exception as ex:
             self.log.error("Default range error: {0}".format(ex))
-            self.default_range.setToolTip("Error: {0}".format(ex))
-            self.default_range.setPalette(self.error_palette)
+            self.set_criteria_error(self.default_range, ex)
 
     #
     # Save/Load tab

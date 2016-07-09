@@ -76,6 +76,7 @@ class GenfsconQueryTab(AnalysisTab):
         self.type_.setCompleter(self.type_completion)
 
         # setup indications of errors on source/target/default
+        self.errors = set()
         self.orig_palette = self.type_.palette()
         self.error_palette = self.type_.palette()
         self.error_palette.setColor(QPalette.Base, Qt.red)
@@ -154,16 +155,14 @@ class GenfsconQueryTab(AnalysisTab):
     # FS criteria
     #
     def clear_fs_error(self):
-        self.fs.setToolTip("Match the filesystem type.")
-        self.fs.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.fs, "Match the filesystem type.")
 
     def set_fs(self):
         try:
             self.query.fs = self.fs.text()
         except Exception as ex:
             self.log.error("Filesystem type error: {0}".format(ex))
-            self.fs.setToolTip("Error: " + str(ex))
-            self.fs.setPalette(self.error_palette)
+            self.set_criteria_error(self.fs, ex)
 
     def set_fs_regex(self, state):
         self.log.debug("Setting fs_regex {0}".format(state))
@@ -175,16 +174,14 @@ class GenfsconQueryTab(AnalysisTab):
     # Path criteria
     #
     def clear_path_error(self):
-        self.path.setToolTip("Match the path.")
-        self.path.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.path, "Match the path.")
 
     def set_path(self):
         try:
             self.query.path = self.path.text()
         except Exception as ex:
             self.log.error("Path error: {0}".format(ex))
-            self.path.setToolTip("Error: " + str(ex))
-            self.path.setPalette(self.error_palette)
+            self.set_criteria_error(self.path, ex)
 
     def set_path_regex(self, state):
         self.log.debug("Setting path_regex {0}".format(state))
@@ -196,16 +193,14 @@ class GenfsconQueryTab(AnalysisTab):
     # User criteria
     #
     def clear_user_error(self):
-        self.user.setToolTip("Match the user of the context.")
-        self.user.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.user, "Match the user of the context.")
 
     def set_user(self):
         try:
             self.query.user = self.user.text()
         except Exception as ex:
             self.log.error("Context user error: {0}".format(ex))
-            self.user.setToolTip("Error: " + str(ex))
-            self.user.setPalette(self.error_palette)
+            self.set_criteria_error(self.user, ex)
 
     def set_user_regex(self, state):
         self.log.debug("Setting user_regex {0}".format(state))
@@ -217,16 +212,14 @@ class GenfsconQueryTab(AnalysisTab):
     # Role criteria
     #
     def clear_role_error(self):
-        self.role.setToolTip("Match the role of the context.")
-        self.role.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.role, "Match the role of the context.")
 
     def set_role(self):
         try:
             self.query.role = self.role.text()
         except Exception as ex:
             self.log.error("Context role error: {0}".format(ex))
-            self.role.setToolTip("Error: " + str(ex))
-            self.role.setPalette(self.error_palette)
+            self.set_criteria_error(self.role, ex)
 
     def set_role_regex(self, state):
         self.log.debug("Setting role_regex {0}".format(state))
@@ -238,16 +231,14 @@ class GenfsconQueryTab(AnalysisTab):
     # Type criteria
     #
     def clear_type_error(self):
-        self.type_.setToolTip("Match the type of the context.")
-        self.type_.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.type_, "Match the type of the context.")
 
     def set_type(self):
         try:
             self.query.type_ = self.type_.text()
         except Exception as ex:
             self.log.error("Context type error: {0}".format(ex))
-            self.type_.setToolTip("Error: " + str(ex))
-            self.type_.setPalette(self.error_palette)
+            self.set_criteria_error(self.type_, ex)
 
     def set_type_regex(self, state):
         self.log.debug("Setting type_regex {0}".format(state))
@@ -259,16 +250,14 @@ class GenfsconQueryTab(AnalysisTab):
     # Range criteria
     #
     def clear_range_error(self):
-        self.range_.setToolTip("Match the range of the context.")
-        self.range_.setPalette(self.orig_palette)
+        self.clear_criteria_error(self.range_, "Match the range of the context.")
 
     def set_range(self):
         try:
             self.query.range_ = self.range_.text()
         except Exception as ex:
             self.log.info("Context range error: " + str(ex))
-            self.range_.setToolTip("Error: " + str(ex))
-            self.range_.setPalette(self.error_palette)
+            self.set_criteria_error(self.range_, ex)
 
     #
     # Save/Load tab
