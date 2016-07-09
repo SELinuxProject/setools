@@ -31,7 +31,7 @@ from setools import __version__, PermissionMap, SELinuxPolicy
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 from .chooseanalysis import ChooseAnalysis, tab_map
-from .exception import TabError
+from .exception import TabFieldError
 from .permmapedit import PermissionMapEditor
 from .summary import SummaryTab
 
@@ -415,7 +415,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         try:
             settings = self._get_settings()
 
-        except TabError as ex:
+        except TabFieldError as ex:
             self.log.critical("Errors in the query prevent saving the settings. {0}".format(ex))
             self.error_msg.critical(self, "Unable to save settings",
                                     "Please resolve errors in the tab before saving the settings."
@@ -578,7 +578,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
             try:
                 settings = tab.save()
-            except TabError as ex:
+            except TabFieldError as ex:
                 tab_name = self.AnalysisTabs.tabText(index)
                 save_errors.append(tab_name)
                 self.log.error("Error: tab \"{0}\": {1}".format(tab_name, str(ex)))

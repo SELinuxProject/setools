@@ -18,7 +18,7 @@
 #
 
 
-class TabError(RuntimeError):
+class TabFieldError(RuntimeError):
 
     """Exception when trying to save a tab that has errors."""
     pass
