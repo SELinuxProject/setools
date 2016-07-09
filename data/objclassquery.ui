@@ -257,6 +257,13 @@
                 </property>
                </widget>
               </item>
+              <item row="0" column="1">
+               <widget class="QPushButton" name="clear_common">
+                <property name="text">
+                 <string>Clear</string>
+                </property>
+               </widget>
+              </item>
              </layout>
             </widget>
            </item>
@@ -496,6 +503,7 @@
   <tabstop>name</tabstop>
   <tabstop>name_regex</tabstop>
   <tabstop>common</tabstop>
+  <tabstop>clear_common</tabstop>
   <tabstop>perms</tabstop>
   <tabstop>clear_perms</tabstop>
   <tabstop>invert_perms</tabstop>
@@ -552,6 +560,22 @@
     <hint type="destinationlabel">
      <x>442</x>
      <y>276</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>clear_common</sender>
+   <signal>clicked()</signal>
+   <receiver>common</receiver>
+   <slot>clearSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>701</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>595</x>
+     <y>127</y>
     </hint>
    </hints>
   </connection>
