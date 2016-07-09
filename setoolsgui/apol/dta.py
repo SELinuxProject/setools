@@ -21,18 +21,18 @@ import logging
 
 from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea, \
+from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, \
                             QTreeWidgetItem
 from setools import DomainTransitionAnalysis
 
 from ..logtosignal import LogHandlerToSignal
+from .analysistab import AnalysisTab
 from .excludetypes import ExcludeTypes
-from ..widget import SEToolsWidget
 from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_textedits, \
                        save_checkboxes, save_spinboxes, save_lineedits, save_textedits
 
 
-class DomainTransitionAnalysisTab(SEToolsWidget, QScrollArea):
+class DomainTransitionAnalysisTab(AnalysisTab):
 
     """A domain transition analysis tab."""
 

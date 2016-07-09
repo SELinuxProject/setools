@@ -21,19 +21,19 @@ import logging
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea
+from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
 from setools import CategoryQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..mlsmodel import MLSComponentTableModel, category_detail
-from ..widget import SEToolsWidget
+from .analysistab import AnalysisTab
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
                        save_checkboxes, save_lineedits, save_textedits
 
 
-class CategoryQueryTab(SEToolsWidget, QScrollArea):
+class CategoryQueryTab(AnalysisTab):
 
     """Category browser and query tab."""
 

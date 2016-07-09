@@ -23,20 +23,20 @@ from collections import defaultdict
 
 from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, QScrollArea, \
+from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, \
                             QTreeWidgetItem
 from setools import InfoFlowAnalysis
 from setools.exception import UnmappedClass, UnmappedPermission
 
 from ..logtosignal import LogHandlerToSignal
-from ..widget import SEToolsWidget
+from .analysistab import AnalysisTab
 from .excludetypes import ExcludeTypes
 from .permmapedit import PermissionMapEditor
 from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_textedits, \
                        save_checkboxes, save_spinboxes, save_lineedits, save_textedits
 
 
-class InfoFlowAnalysisTab(SEToolsWidget, QScrollArea):
+class InfoFlowAnalysisTab(AnalysisTab):
 
     """An information flow analysis tab."""
 
