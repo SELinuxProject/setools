@@ -28,6 +28,7 @@ from setools import DomainTransitionAnalysis
 from ..logtosignal import LogHandlerToSignal
 from .analysistab import AnalysisTab
 from .excludetypes import ExcludeTypes
+from .exception import TabFieldError
 from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_textedits, \
                        save_checkboxes, save_spinboxes, save_lineedits, save_textedits
 
@@ -202,6 +203,10 @@ class DomainTransitionAnalysisTab(AnalysisTab):
     #
     def save(self):
         """Return a dictionary of settings."""
+        if self.errors:
+            raise TabFieldError("Field(s) are in error: {0}".
+                                format(" ".join(o.objectName() for o in self.errors)))
+
         settings = {}
         save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "all_paths",
                                          "all_shortest_paths", "flows_in", "flows_out", "reverse"])

@@ -28,6 +28,7 @@ from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..typeattrmodel import TypeAttributeTableModel, typeattr_detail
 from .analysistab import AnalysisTab
+from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
                        save_checkboxes, save_lineedits, save_listviews, save_textedits
@@ -159,6 +160,10 @@ class TypeAttributeQueryTab(AnalysisTab):
     #
     def save(self):
         """Return a dictionary of settings."""
+        if self.errors:
+            raise TabFieldError("Field(s) are in error: {0}".
+                                format(" ".join(o.objectName() for o in self.errors)))
+
         settings = {}
         save_checkboxes(self, settings, ["criteria_expander", "notes_expander", "name_regex",
                                          "types_any", "types_equal"])
