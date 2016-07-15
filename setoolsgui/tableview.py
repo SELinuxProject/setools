@@ -45,7 +45,7 @@ class SEToolsTableView(QTableView):
         if e == QKeySequence.Copy or e == QKeySequence.Cut:
             datamodel = self.model()
 
-            selected_text = ""
+            selected_text = []
             current_row = None
             current_col = None
             prev_row = None
@@ -55,16 +55,16 @@ class SEToolsTableView(QTableView):
                 current_col = index.column()
 
                 if prev_row is not None and current_row != prev_row:
-                    selected_text += '\n'
+                    selected_text.append('\n')
                 elif prev_col is not None and current_col != prev_col:
-                    selected_text += '\t'
+                    selected_text.append('\t')
 
-                selected_text += datamodel.data(index, Qt.DisplayRole)
+                selected_text.append(datamodel.data(index, Qt.DisplayRole))
 
                 prev_row = current_row
                 prev_col = current_col
 
-            QApplication.clipboard().setText(selected_text)
+            QApplication.clipboard().setText("".join(selected_text))
             return True
 
         else:
