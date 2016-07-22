@@ -123,7 +123,7 @@ try:
 
 except Exception as err:
     if args.debug:
-        logging.exception(str(err))
+        raise
     else:
         print(err)
 
