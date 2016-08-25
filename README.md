@@ -17,6 +17,7 @@ To run SETools command line tools, the following packages are required:
 * Python 2.7 or 3.3+
 * NetworkX 1.8+
 * setuptools
+* enum34 (on Python 2.7 and 3.3 only)
 * libselinux Python bindings (optional but recommended)
 
 To run SETools graphical tools, the following packages are also required:
