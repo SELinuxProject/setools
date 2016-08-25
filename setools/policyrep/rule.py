@@ -44,7 +44,7 @@ class PolicyRule(symbol.PolicySymbol):
     @property
     def ruletype(self):
         """The rule type for the rule."""
-        return self.qpol_symbol.rule_type(self.policy)
+        raise NotImplementedError
 
     @property
     def source(self):
