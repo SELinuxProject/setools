@@ -20,6 +20,7 @@ import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
+from setools import MLSRuletype as MRT
 from setools import RBACRuletype as RRT
 from setools import TERuletype as TRT
 
@@ -749,11 +750,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "range_transition", "added_type", "system", "infoflow4",
+        self.validate_rule(rules[0], MRT.range_transition, "added_type", "system", "infoflow4",
                            "s3")
 
         # added rule with existing types
-        self.validate_rule(rules[1], "range_transition", "rt_added_rule_source",
+        self.validate_rule(rules[1], MRT.range_transition, "rt_added_rule_source",
                            "rt_added_rule_target", "infoflow", "s3")
 
     def test_removed_range_transition_rules(self):
@@ -762,11 +763,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with new type
-        self.validate_rule(rules[0], "range_transition", "removed_type", "system", "infoflow4",
+        self.validate_rule(rules[0], MRT.range_transition, "removed_type", "system", "infoflow4",
                            "s1")
 
         # removed rule with existing types
-        self.validate_rule(rules[1], "range_transition", "rt_removed_rule_source",
+        self.validate_rule(rules[1], MRT.range_transition, "rt_removed_rule_source",
                            "rt_removed_rule_target", "infoflow", "s1")
 
     def test_modified_range_transition_rules(self):
@@ -775,7 +776,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
-        self.assertEqual("range_transition", rule.ruletype)
+        self.assertEqual(MRT.range_transition, rule.ruletype)
         self.assertEqual("rt_matched_source", rule.source)
         self.assertEqual("system", rule.target)
         self.assertEqual("infoflow", rule.tclass)

@@ -77,7 +77,7 @@ rbacrtypes.add_argument("--role_trans", action="append_const",
 
 mlsrtypes = parser.add_argument_group("MLS Rule Types")
 mlsrtypes.add_argument("--range_trans", action="append_const",
-                       const="range_transition", dest="mlsrtypes",
+                       const=setools.MLSRuletype.range_transition, dest="mlsrtypes",
                        help="Search range_transition rules.")
 
 expr = parser.add_argument_group("Expressions")

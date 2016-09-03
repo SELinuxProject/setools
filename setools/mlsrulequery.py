@@ -20,6 +20,7 @@ import logging
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchObjClass
+from .policyrep import MLSRuletype
 from .query import PolicyQuery
 from .util import match_indirect_regex, match_range
 
@@ -45,7 +46,7 @@ class MLSRuleQuery(MatchObjClass, PolicyQuery):
                      matching the rule's object class.
     """
 
-    ruletype = CriteriaSetDescriptor(lookup_function="validate_mls_ruletype")
+    ruletype = CriteriaSetDescriptor(enum_class=MLSRuletype)
     source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
     source_regex = False
     source_indirect = True

@@ -23,6 +23,7 @@
 
 from . import exception
 from .netcontext import PortconProtocol, PortconRange
+from .mlsrule import MLSRuletype
 from .rbacrule import RBACRuletype
 from .selinuxpolicy import SELinuxPolicy
 from .terule import IoctlSet, TERuletype

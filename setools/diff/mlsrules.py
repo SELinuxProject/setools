@@ -18,6 +18,7 @@
 #
 from collections import defaultdict, namedtuple
 
+from ..policyrep import MLSRuletype
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 from .mls import RangeWrapper
@@ -51,8 +52,10 @@ class MLSRulesDifference(Difference):
             self._create_mls_rule_lists()
 
         added, removed, matched = self._set_diff(
-                self._expand_generator(self._left_mls_rules["range_transition"], MLSRuleWrapper),
-                self._expand_generator(self._right_mls_rules["range_transition"], MLSRuleWrapper))
+                self._expand_generator(self._left_mls_rules[MLSRuletype.range_transition],
+                                       MLSRuleWrapper),
+                self._expand_generator(self._right_mls_rules[MLSRuletype.range_transition],
+                                       MLSRuleWrapper))
 
         modified = []
 

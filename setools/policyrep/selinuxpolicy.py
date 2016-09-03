@@ -603,6 +603,8 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_mls_ruletype(types):
         """Validate MLS rule types."""
+        warnings.warn("MLS ruletypes have changed to an enumeration.",
+                      DeprecationWarning)
         return mlsrule.validate_ruletype(types)
 
     @staticmethod

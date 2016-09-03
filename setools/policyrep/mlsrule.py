@@ -1,4 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -23,6 +24,7 @@ from . import qpol
 from . import rule
 from . import typeattr
 from . import mls
+from .util import PolicyEnum
 
 
 def mls_rule_factory(policy, symbol):
@@ -57,10 +59,17 @@ def expanded_mls_rule_factory(original, source, target):
 
 def validate_ruletype(t):
     """Validate MLS rule types."""
-    if t not in ["range_transition"]:
+    try:
+        return MLSRuletype.lookup(t)
+    except KeyError:
         raise exception.InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t))
 
-    return t
+
+class MLSRuletype(PolicyEnum):
+
+    """An enumeration of MLS rule types."""
+
+    range_transition = 1
 
 
 class MLSRule(rule.PolicyRule):
@@ -70,7 +79,7 @@ class MLSRule(rule.PolicyRule):
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
 
-    ruletype = "range_transition"
+    ruletype = MLSRuletype.range_transition
 
     @property
     def source(self):
