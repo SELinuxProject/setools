@@ -41,7 +41,7 @@ class PortconTableModel(SEToolsTableModel):
                     else:
                         return "{0}-{1}".format(low, high)
                 elif col == 1:
-                    return str(rule.protocol)
+                    return rule.protocol.name
                 elif col == 2:
                     return str(rule.context)
 

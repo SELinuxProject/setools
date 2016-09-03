@@ -1,4 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -24,6 +25,7 @@ import socket
 from . import qpol
 from . import symbol
 from . import context
+from .util import PolicyEnum
 
 PortconRange = namedtuple("PortconRange", ["low", "high"])
 
@@ -144,37 +146,13 @@ class Nodecon(NetContext):
         return self.qpol_symbol.mask(self.policy)
 
 
-class PortconProtocol(int):
+class PortconProtocol(int, PolicyEnum):
 
-    """
-    A portcon protocol type.
+    """A portcon protocol type."""
 
-    The possible values are equivalent to protocol
-    values in the socket module, e.g. IPPROTO_TCP, but
-    overrides the string representation with the
-    corresponding protocol string (udp, tcp).
-    """
-
-    _proto_to_text = {IPPROTO_DCCP: 'dccp',
-                      IPPROTO_TCP: 'tcp',
-                      IPPROTO_UDP: 'udp'}
-
-    def __new__(cls, value):
-        try:
-            # convert string representation
-            num = getprotobyname(value)
-        except TypeError:
-            num = value
-
-        if num not in cls._proto_to_text:
-            raise ValueError("{0} is not a supported IP protocol. "
-                             "Values such as {1} (TCP) or {2} (UDP) should be used.".
-                             format(value, IPPROTO_TCP, IPPROTO_UDP))
-
-        return super(PortconProtocol, cls).__new__(cls, num)
-
-    def __str__(self):
-        return self._proto_to_text[self]
+    tcp = IPPROTO_TCP
+    udp = IPPROTO_UDP
+    dccp = IPPROTO_DCCP
 
 
 class Portcon(NetContext):
@@ -195,8 +173,7 @@ class Portcon(NetContext):
     @property
     def protocol(self):
         """
-        The protocol number for the portcon (socket.IPPROTO_TCP
-        or socket.IPPROTO_UDP).
+        The protocol type for the portcon.
         """
         return PortconProtocol(self.qpol_symbol.protocol(self.policy))
 

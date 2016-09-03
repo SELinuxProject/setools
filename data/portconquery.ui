@@ -21,8 +21,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>772</width>
-     <height>844</height>
+     <width>770</width>
+     <height>842</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -692,21 +692,6 @@
             <item>
              <property name="text">
               <string/>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>DCCP</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>TCP</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>UDP</string>
              </property>
             </item>
            </widget>

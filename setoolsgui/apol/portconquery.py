@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -22,7 +23,7 @@ import logging
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
-from setools import PortconQuery
+from setools import PortconQuery, PortconProtocol
 
 from ..logtosignal import LogHandlerToSignal
 from ..portconmodel import PortconTableModel
@@ -86,6 +87,11 @@ class PortconQueryTab(AnalysisTab):
         self.clear_type_error()
         self.clear_role_error()
         self.clear_range_error()
+
+        # populate protocol list. This has empty string as
+        # the first item in the .ui file:
+        for i, e in enumerate(PortconProtocol, start=1):
+            self.protocol.insertItem(i, e.name.upper(), e)
 
         # set up results
         self.table_results_model = PortconTableModel(self)
@@ -280,7 +286,7 @@ class PortconQueryTab(AnalysisTab):
         self.query.ports_overlap = self.ports_overlap.isChecked()
         self.query.ports_subset = self.ports_subset.isChecked()
         self.query.ports_superset = self.ports_superset.isChecked()
-        self.query.protocol = self.protocol.currentData(Qt.DisplayRole)
+        self.query.protocol = self.protocol.currentData(Qt.UserRole)
         self.query.range_overlap = self.range_overlap.isChecked()
         self.query.range_subset = self.range_subset.isChecked()
         self.query.range_superset = self.range_superset.isChecked()

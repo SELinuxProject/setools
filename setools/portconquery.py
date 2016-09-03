@@ -107,7 +107,7 @@ class PortconQuery(MatchContext, PolicyQuery):
     @protocol.setter
     def protocol(self, value):
         if value:
-            self._protocol = PortconProtocol(value)
+            self._protocol = PortconProtocol.lookup(value)
         else:
             self._protocol = None
 
