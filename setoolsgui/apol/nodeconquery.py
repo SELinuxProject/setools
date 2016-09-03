@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,12 +19,11 @@
 #
 import sys
 import logging
-from socket import AF_INET, AF_INET6
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
-from setools import NodeconQuery
+from setools import NodeconQuery, NodeconIPVersion
 
 from ..logtosignal import LogHandlerToSignal
 from ..nodeconmodel import NodeconTableModel
@@ -53,8 +53,6 @@ class NodeconQueryTab(AnalysisTab):
     def setupUi(self):
         self.load_ui("nodeconquery.ui")
 
-        self.proto_map = {"": None, "IPv4": AF_INET, "IPv6": AF_INET6}
-
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]
         user_completer_model = QStringListModel(self)
@@ -78,6 +76,11 @@ class NodeconQueryTab(AnalysisTab):
         self.type_completion = QCompleter()
         self.type_completion.setModel(type_completer_model)
         self.type_.setCompleter(self.type_completion)
+
+        # setup IP version
+        # item 0 is empty string (in the .ui file)
+        self.ip_version.insertItem(1, "IPv4", NodeconIPVersion.ipv4)
+        self.ip_version.insertItem(2, "IPv6", NodeconIPVersion.ipv6)
 
         # setup indications of errors on source/target/default
         self.errors = set()
@@ -274,7 +277,7 @@ class NodeconQueryTab(AnalysisTab):
     def run(self, button):
         # right now there is only one button.
         self.query.network_overlap = self.network_overlap.isChecked()
-        self.query.ip_version = self.proto_map[self.ip_version.currentData(Qt.DisplayRole)]
+        self.query.ip_version = self.ip_version.currentData(Qt.UserRole)
         self.query.range_overlap = self.range_overlap.isChecked()
         self.query.range_subset = self.range_subset.isChecked()
         self.query.range_superset = self.range_superset.isChecked()

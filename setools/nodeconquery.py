@@ -25,6 +25,7 @@ import logging
 from socket import AF_INET, AF_INET6
 
 from .mixins import MatchContext
+from .policyrep import NodeconIPVersion
 from .query import PolicyQuery
 
 
@@ -75,12 +76,7 @@ class NodeconQuery(MatchContext, PolicyQuery):
     @ip_version.setter
     def ip_version(self, value):
         if value:
-            if not (value == AF_INET or value == AF_INET6):
-                raise ValueError(
-                    "The address family must be {0} for IPv4 or {1} for IPv6.".
-                    format(AF_INET, AF_INET6))
-
-            self._ip_version = value
+            self._ip_version = NodeconIPVersion.lookup(value)
         else:
             self._ip_version = None
 
@@ -106,7 +102,7 @@ class NodeconQuery(MatchContext, PolicyQuery):
         """Generator which yields all matching nodecons."""
         self.log.info("Generating nodecon results from {0.policy}".format(self))
         self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
-        self.log.debug("IP Version: {0.ip_version}".format(self))
+        self.log.debug("IP Version: {0.ip_version!r}".format(self))
         self._match_context_debug(self.log)
 
         for nodecon in self.policy.nodecons():

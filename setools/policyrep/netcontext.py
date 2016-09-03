@@ -17,7 +17,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from socket import IPPROTO_TCP, IPPROTO_UDP, getprotobyname
+from socket import AF_INET, AF_INET6, IPPROTO_TCP, IPPROTO_UDP, getprotobyname
 from collections import namedtuple
 
 import socket
@@ -106,6 +106,14 @@ class Netifcon(NetContext):
         return context.context_factory(self.policy, self.qpol_symbol.msg_con(self.policy))
 
 
+class NodeconIPVersion(int, PolicyEnum):
+
+    """Nodecon IP Version"""
+
+    ipv4 = AF_INET
+    ipv6 = AF_INET6
+
+
 class Nodecon(NetContext):
 
     """A nodecon statement."""
@@ -133,7 +141,7 @@ class Nodecon(NetContext):
         The IP version for the nodecon (socket.AF_INET or
         socket.AF_INET6).
         """
-        return self.qpol_symbol.protocol(self.policy)
+        return NodeconIPVersion(self.qpol_symbol.protocol(self.policy))
 
     @property
     def address(self):
