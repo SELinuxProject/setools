@@ -20,6 +20,9 @@ import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
+from setools import DefaultRuletype as DRT
+from setools import DefaultRangeValue as DRV
+from setools import DefaultValue as DV
 from setools import FSUseRuletype as FSURT
 from setools import MLSRuletype as MRT
 from setools import RBACRuletype as RRT
@@ -1297,11 +1300,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         default = l[0]
-        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow2", default.tclass)
 
         default = l[1]
-        self.assertEqual("default_user", default.ruletype)
+        self.assertEqual(DRT.default_user, default.ruletype)
         self.assertEqual("infoflow2", default.tclass)
 
     def test_removed_defaults(self):
@@ -1310,11 +1313,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         default = l[0]
-        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow3", default.tclass)
 
         default = l[1]
-        self.assertEqual("default_role", default.ruletype)
+        self.assertEqual(DRT.default_role, default.ruletype)
         self.assertEqual("infoflow3", default.tclass)
 
     def test_modified_defaults(self):
@@ -1323,34 +1326,34 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(4, len(l))
 
         default, added_default, removed_default, added_range, removed_range = l[0]
-        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow4", default.tclass)
-        self.assertEqual("target", added_default)
-        self.assertEqual("source", removed_default)
+        self.assertEqual(DV.target, added_default)
+        self.assertEqual(DV.source, removed_default)
         self.assertIsNone(added_range)
         self.assertIsNone(removed_range)
 
         default, added_default, removed_default, added_range, removed_range = l[1]
-        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow5", default.tclass)
         self.assertIsNone(added_default)
         self.assertIsNone(removed_default)
-        self.assertEqual("high", added_range)
-        self.assertEqual("low", removed_range)
+        self.assertEqual(DRV.high, added_range)
+        self.assertEqual(DRV.low, removed_range)
 
         default, added_default, removed_default, added_range, removed_range = l[2]
-        self.assertEqual("default_range", default.ruletype)
+        self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow6", default.tclass)
-        self.assertEqual("target", added_default)
-        self.assertEqual("source", removed_default)
-        self.assertEqual("low", added_range)
-        self.assertEqual("high", removed_range)
+        self.assertEqual(DV.target, added_default)
+        self.assertEqual(DV.source, removed_default)
+        self.assertEqual(DRV.low, added_range)
+        self.assertEqual(DRV.high, removed_range)
 
         default, added_default, removed_default, added_range, removed_range = l[3]
-        self.assertEqual("default_type", default.ruletype)
+        self.assertEqual(DRT.default_type, default.ruletype)
         self.assertEqual("infoflow4", default.tclass)
-        self.assertEqual("target", added_default)
-        self.assertEqual("source", removed_default)
+        self.assertEqual(DV.target, added_default)
+        self.assertEqual(DV.source, removed_default)
         self.assertIsNone(added_range)
         self.assertIsNone(removed_range)
 
@@ -2607,7 +2610,7 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     def test_removed_defaults(self):
         """MLSvsStandardDiff: all default_range removed."""
         self.assertEqual(
-            sum(1 for d in self.diff.left_policy.defaults() if d.ruletype == "default_range"),
+            sum(1 for d in self.diff.left_policy.defaults() if d.ruletype == DRT.default_range),
             len(self.diff.removed_defaults))
 
     def test_modified_defaults(self):

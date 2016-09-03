@@ -35,14 +35,14 @@ class DefaultTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return item.ruletype
+                    return item.ruletype.name
                 elif col == 1:
                     return str(item.tclass)
                 elif col == 2:
-                    return str(item.default)
+                    return item.default.name
                 elif col == 3:
                     try:
-                        return str(item.default_range)
+                        return item.default_range.name
                     except AttributeError:
                         pass
 

@@ -583,16 +583,22 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_default_ruletype(types):
         """Validate default_* types."""
+        warnings.warn("Default ruletypes have changed to an enumeration.",
+                      DeprecationWarning)
         return default.validate_ruletype(types)
 
     @staticmethod
     def validate_default_value(value):
         """Validate default_* values."""
+        warnings.warn("Default values have changed to an enumeration.",
+                      DeprecationWarning)
         return default.validate_default_value(value)
 
     @staticmethod
     def validate_default_range(value):
         """Validate default_range range."""
+        warnings.warn("Default range values have changed to an enumeration.",
+                      DeprecationWarning)
         return default.validate_default_range(value)
 
     @staticmethod

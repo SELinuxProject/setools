@@ -22,6 +22,7 @@ import re
 from .query import PolicyQuery
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchObjClass
+from .policyrep import DefaultRuletype, DefaultValue, DefaultRangeValue
 
 
 class DefaultQuery(MatchObjClass, PolicyQuery):
@@ -42,9 +43,9 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
                     ("low", "high", "low_high")
     """
 
-    ruletype = CriteriaSetDescriptor(lookup_function="validate_default_ruletype")
-    default = CriteriaDescriptor(lookup_function="validate_default_value")
-    default_range = CriteriaDescriptor(lookup_function="validate_default_range")
+    ruletype = CriteriaSetDescriptor(enum_class=DefaultRuletype)
+    default = CriteriaDescriptor(enum_class=DefaultValue)
+    default_range = CriteriaDescriptor(enum_class=DefaultRangeValue)
 
     def __init__(self, policy, **kwargs):
         super(DefaultQuery, self).__init__(policy, **kwargs)
@@ -53,10 +54,10 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
     def results(self):
         """Generator which yields all matching default_* statements."""
         self.log.info("Generating default_* results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.debug("Ruletypes: {0.ruletype!r}".format(self))
         self._match_object_class_debug(self.log)
-        self.log.debug("Default: {0.default}".format(self))
-        self.log.debug("Range: {0.default_range}".format(self))
+        self.log.debug("Default: {0.default!r}".format(self))
+        self.log.debug("Range: {0.default_range!r}".format(self))
 
         for d in self.policy.defaults():
             if self.ruletype and d.ruletype not in self.ruletype:

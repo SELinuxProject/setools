@@ -17,9 +17,8 @@
 #
 import unittest
 
-from setools import SELinuxPolicy, DefaultQuery
-from setools.policyrep.exception import InvalidDefaultType, InvalidClass, \
-                                        InvalidDefaultValue, InvalidDefaultRange
+from setools import SELinuxPolicy, DefaultQuery, DefaultRuletype, DefaultValue
+from setools.policyrep.exception import InvalidClass
 
 
 class DefaultQueryTest(unittest.TestCase):
@@ -45,9 +44,9 @@ class DefaultQueryTest(unittest.TestCase):
         self.assertEqual(1, len(defaults))
 
         d = defaults[0]
-        self.assertEqual("default_user", d.ruletype)
+        self.assertEqual(DefaultRuletype.default_user, d.ruletype)
         self.assertEqual("infoflow", d.tclass)
-        self.assertEqual("target", d.default)
+        self.assertEqual(DefaultValue.target, d.default)
 
     def test_010_class_list(self):
         """Default query: object class list match."""
@@ -79,7 +78,7 @@ class DefaultQueryTest(unittest.TestCase):
 
     def test_900_invalid_ruletype(self):
         """Default query: invalid ruletype"""
-        with self.assertRaises(InvalidDefaultType):
+        with self.assertRaises(KeyError):
             q = DefaultQuery(self.p, ruletype=["INVALID"])
 
     def test_901_invalid_class(self):
@@ -89,10 +88,10 @@ class DefaultQueryTest(unittest.TestCase):
 
     def test_902_invalid_default_value(self):
         """Default query: invalid default value"""
-        with self.assertRaises(InvalidDefaultValue):
+        with self.assertRaises(KeyError):
             q = DefaultQuery(self.p, default="INVALID")
 
     def test_903_invalid_default_range(self):
         """Default query: invalid default range"""
-        with self.assertRaises(InvalidDefaultRange):
+        with self.assertRaises(KeyError):
             q = DefaultQuery(self.p, default_range="INVALID")

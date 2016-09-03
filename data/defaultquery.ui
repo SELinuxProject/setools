@@ -21,8 +21,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>772</width>
-     <height>844</height>
+     <width>770</width>
+     <height>842</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -507,7 +507,7 @@
            <number>3</number>
           </property>
           <item row="0" column="1">
-           <widget class="QComboBox" name="default_range_2">
+           <widget class="QComboBox" name="default_range_value">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -517,27 +517,12 @@
             <item>
              <property name="text">
               <string/>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>low</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>high</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>low_high</string>
              </property>
             </item>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QComboBox" name="default_2">
+           <widget class="QComboBox" name="default_value">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -547,16 +532,6 @@
             <item>
              <property name="text">
               <string/>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>source</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>target</string>
              </property>
             </item>
            </widget>
@@ -589,8 +564,8 @@
   <tabstop>tclass</tabstop>
   <tabstop>clear_class</tabstop>
   <tabstop>invert_class</tabstop>
-  <tabstop>default_2</tabstop>
-  <tabstop>default_range_2</tabstop>
+  <tabstop>default_value</tabstop>
+  <tabstop>default_range_value</tabstop>
   <tabstop>results_frame</tabstop>
   <tabstop>table_results</tabstop>
   <tabstop>raw_results</tabstop>
