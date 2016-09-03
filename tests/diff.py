@@ -1,4 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -19,6 +20,7 @@ import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
+from setools import TERuletype as TRT
 
 from .mixins import ValidateRule
 
@@ -220,23 +222,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # added rule with existing types
-        self.validate_rule(rules[0], "allow", "added_rule_source", "added_rule_target", "infoflow",
-                           set(["med_w"]))
+        self.validate_rule(rules[0], TRT.allow, "added_rule_source", "added_rule_target",
+                           "infoflow", set(["med_w"]))
 
         # added rule with new type
-        self.validate_rule(rules[1], "allow", "added_type", "added_type", "infoflow2",
+        self.validate_rule(rules[1], TRT.allow, "added_type", "added_type", "infoflow2",
                            set(["med_w"]))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], "allow", "move_from_bool", "move_from_bool", "infoflow4",
+        self.validate_rule(rules[2], TRT.allow, "move_from_bool", "move_from_bool", "infoflow4",
                            set(["hi_r"]))
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], "allow", "move_to_bool", "move_to_bool", "infoflow4",
+        self.validate_rule(rules[3], TRT.allow, "move_to_bool", "move_to_bool", "infoflow4",
                            set(["hi_w"]), cond="move_to_bool_b", cond_block=True)
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], "allow", "system", "switch_block", "infoflow6",
+        self.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
                            set(["hi_r"]), cond="switch_block_b", cond_block=False)
 
     def test_removed_allow_rules(self):
@@ -245,23 +247,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[0], "allow", "move_from_bool", "move_from_bool", "infoflow4",
+        self.validate_rule(rules[0], TRT.allow, "move_from_bool", "move_from_bool", "infoflow4",
                            set(["hi_r"]), cond="move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[1], "allow", "move_to_bool", "move_to_bool", "infoflow4",
+        self.validate_rule(rules[1], TRT.allow, "move_to_bool", "move_to_bool", "infoflow4",
                            set(["hi_w"]))
 
         # removed rule with existing types
-        self.validate_rule(rules[2], "allow", "removed_rule_source", "removed_rule_target",
+        self.validate_rule(rules[2], TRT.allow, "removed_rule_source", "removed_rule_target",
                            "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[3], "allow", "removed_type", "removed_type", "infoflow3",
+        self.validate_rule(rules[3], TRT.allow, "removed_type", "removed_type", "infoflow3",
                            set(["null"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], "allow", "system", "switch_block", "infoflow6",
+        self.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
                            set(["hi_r"]), cond="switch_block_b", cond_block=True)
 
     def test_modified_allow_rules(self):
@@ -271,7 +273,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("allow", rule.ruletype)
+        self.assertEqual(TRT.allow, rule.ruletype)
         self.assertEqual("modified_rule_add_perms", rule.source)
         self.assertEqual("modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -281,7 +283,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("allow", rule.ruletype)
+        self.assertEqual(TRT.allow, rule.ruletype)
         self.assertEqual("modified_rule_add_remove_perms", rule.source)
         self.assertEqual("modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -291,7 +293,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("allow", rule.ruletype)
+        self.assertEqual(TRT.allow, rule.ruletype)
         self.assertEqual("modified_rule_remove_perms", rule.source)
         self.assertEqual("modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -308,23 +310,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # added rule with existing types
-        self.validate_rule(rules[0], "auditallow", "aa_added_rule_source", "aa_added_rule_target",
+        self.validate_rule(rules[0], TRT.auditallow, "aa_added_rule_source", "aa_added_rule_target",
                            "infoflow", set(["med_w"]))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[1], "auditallow", "aa_move_from_bool", "aa_move_from_bool",
+        self.validate_rule(rules[1], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
                            "infoflow4", set(["hi_r"]))
 
         # rule moved into a conditional
-        self.validate_rule(rules[2], "auditallow", "aa_move_to_bool", "aa_move_to_bool",
+        self.validate_rule(rules[2], TRT.auditallow, "aa_move_to_bool", "aa_move_to_bool",
                            "infoflow4", set(["hi_w"]), cond="aa_move_to_bool_b", cond_block=True)
 
         # added rule with new type
-        self.validate_rule(rules[3], "auditallow", "added_type", "added_type", "infoflow7",
+        self.validate_rule(rules[3], TRT.auditallow, "added_type", "added_type", "infoflow7",
                            set(["super_none"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], "auditallow", "system", "aa_switch_block", "infoflow6",
+        self.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
                            set(["hi_r"]), cond="aa_switch_block_b", cond_block=False)
 
     def test_removed_auditallow_rules(self):
@@ -333,23 +335,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[0], "auditallow", "aa_move_from_bool", "aa_move_from_bool",
+        self.validate_rule(rules[0], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
                            "infoflow4", set(["hi_r"]), cond="aa_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[1], "auditallow", "aa_move_to_bool", "aa_move_to_bool",
+        self.validate_rule(rules[1], TRT.auditallow, "aa_move_to_bool", "aa_move_to_bool",
                            "infoflow4", set(["hi_w"]))
 
         # removed rule with existing types
-        self.validate_rule(rules[2], "auditallow", "aa_removed_rule_source",
+        self.validate_rule(rules[2], TRT.auditallow, "aa_removed_rule_source",
                            "aa_removed_rule_target", "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[3], "auditallow", "removed_type", "removed_type", "infoflow7",
+        self.validate_rule(rules[3], TRT.auditallow, "removed_type", "removed_type", "infoflow7",
                            set(["super_unmapped"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], "auditallow", "system", "aa_switch_block", "infoflow6",
+        self.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
                            set(["hi_r"]), cond="aa_switch_block_b", cond_block=True)
 
     def test_modified_auditallow_rules(self):
@@ -359,7 +361,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("auditallow", rule.ruletype)
+        self.assertEqual(TRT.auditallow, rule.ruletype)
         self.assertEqual("aa_modified_rule_add_perms", rule.source)
         self.assertEqual("aa_modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -369,7 +371,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("auditallow", rule.ruletype)
+        self.assertEqual(TRT.auditallow, rule.ruletype)
         self.assertEqual("aa_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("aa_modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -379,7 +381,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("auditallow", rule.ruletype)
+        self.assertEqual(TRT.auditallow, rule.ruletype)
         self.assertEqual("aa_modified_rule_remove_perms", rule.source)
         self.assertEqual("aa_modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -396,23 +398,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "dontaudit", "added_type", "added_type", "infoflow7",
+        self.validate_rule(rules[0], TRT.dontaudit, "added_type", "added_type", "infoflow7",
                            set(["super_none"]))
 
         # added rule with existing types
-        self.validate_rule(rules[1], "dontaudit", "da_added_rule_source", "da_added_rule_target",
+        self.validate_rule(rules[1], TRT.dontaudit, "da_added_rule_source", "da_added_rule_target",
                            "infoflow", set(["med_w"]))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], "dontaudit", "da_move_from_bool", "da_move_from_bool",
+        self.validate_rule(rules[2], TRT.dontaudit, "da_move_from_bool", "da_move_from_bool",
                            "infoflow4", set(["hi_r"]))
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], "dontaudit", "da_move_to_bool", "da_move_to_bool",
+        self.validate_rule(rules[3], TRT.dontaudit, "da_move_to_bool", "da_move_to_bool",
                            "infoflow4", set(["hi_w"]), cond="da_move_to_bool_b", cond_block=True)
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], "dontaudit", "system", "da_switch_block", "infoflow6",
+        self.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
                            set(["hi_r"]), cond="da_switch_block_b", cond_block=False)
 
     def test_removed_dontaudit_rules(self):
@@ -421,23 +423,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[0], "dontaudit", "da_move_from_bool", "da_move_from_bool",
+        self.validate_rule(rules[0], TRT.dontaudit, "da_move_from_bool", "da_move_from_bool",
                            "infoflow4", set(["hi_r"]), cond="da_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[1], "dontaudit", "da_move_to_bool", "da_move_to_bool",
+        self.validate_rule(rules[1], TRT.dontaudit, "da_move_to_bool", "da_move_to_bool",
                            "infoflow4", set(["hi_w"]))
 
         # removed rule with existing types
-        self.validate_rule(rules[2], "dontaudit", "da_removed_rule_source",
+        self.validate_rule(rules[2], TRT.dontaudit, "da_removed_rule_source",
                            "da_removed_rule_target", "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[3], "dontaudit", "removed_type", "removed_type", "infoflow7",
+        self.validate_rule(rules[3], TRT.dontaudit, "removed_type", "removed_type", "infoflow7",
                            set(["super_both"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], "dontaudit", "system", "da_switch_block", "infoflow6",
+        self.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
                            set(["hi_r"]), cond="da_switch_block_b", cond_block=True)
 
     def test_modified_dontaudit_rules(self):
@@ -447,7 +449,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("dontaudit", rule.ruletype)
+        self.assertEqual(TRT.dontaudit, rule.ruletype)
         self.assertEqual("da_modified_rule_add_perms", rule.source)
         self.assertEqual("da_modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -457,7 +459,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("dontaudit", rule.ruletype)
+        self.assertEqual(TRT.dontaudit, rule.ruletype)
         self.assertEqual("da_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("da_modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -467,7 +469,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("dontaudit", rule.ruletype)
+        self.assertEqual(TRT.dontaudit, rule.ruletype)
         self.assertEqual("da_modified_rule_remove_perms", rule.source)
         self.assertEqual("da_modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -484,11 +486,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "neverallow", "added_type", "added_type", "added_class",
+        self.validate_rule(rules[0], TRT.neverallow, "added_type", "added_type", "added_class",
                            set(["new_class_perm"]))
 
         # added rule with existing types
-        self.validate_rule(rules[1], "neverallow", "na_added_rule_source", "na_added_rule_target",
+        self.validate_rule(rules[1], TRT.neverallow, "na_added_rule_source", "na_added_rule_target",
                            "infoflow", set(["med_w"]))
 
     def test_removed_neverallow_rules(self):
@@ -497,12 +499,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with existing types
-        self.validate_rule(rules[0], "neverallow", "na_removed_rule_source",
+        self.validate_rule(rules[0], TRT.neverallow, "na_removed_rule_source",
                            "na_removed_rule_target", "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[1], "neverallow", "removed_type", "removed_type", "removed_class",
-                           set(["null_perm"]))
+        self.validate_rule(rules[1], TRT.neverallow, "removed_type", "removed_type",
+                           "removed_class", set(["null_perm"]))
 
     def test_modified_neverallow_rules(self):
         """Diff: modified neverallow rules."""
@@ -511,7 +513,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("neverallow", rule.ruletype)
+        self.assertEqual(TRT.neverallow, rule.ruletype)
         self.assertEqual("na_modified_rule_add_perms", rule.source)
         self.assertEqual("na_modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -521,7 +523,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("neverallow", rule.ruletype)
+        self.assertEqual(TRT.neverallow, rule.ruletype)
         self.assertEqual("na_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("na_modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -531,7 +533,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("neverallow", rule.ruletype)
+        self.assertEqual(TRT.neverallow, rule.ruletype)
         self.assertEqual("na_modified_rule_remove_perms", rule.source)
         self.assertEqual("na_modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -548,23 +550,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "type_transition", "added_type", "system", "infoflow4",
+        self.validate_rule(rules[0], TRT.type_transition, "added_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], "type_transition", "system", "tt_switch_block", "infoflow6",
+        self.validate_rule(rules[1], TRT.type_transition, "system", "tt_switch_block", "infoflow6",
                            "system", cond="tt_switch_block_b", cond_block=False)
 
         # added rule with existing types
-        self.validate_rule(rules[2], "type_transition", "tt_added_rule_source",
+        self.validate_rule(rules[2], TRT.type_transition, "tt_added_rule_source",
                            "tt_added_rule_target", "infoflow", "system")
 
         # rule moved out of a conditional
-        self.validate_rule(rules[3], "type_transition", "tt_move_from_bool", "system",
+        self.validate_rule(rules[3], TRT.type_transition, "tt_move_from_bool", "system",
                            "infoflow4", "system")
 
         # rule moved into a conditional
-        self.validate_rule(rules[4], "type_transition", "tt_move_to_bool", "system",
+        self.validate_rule(rules[4], TRT.type_transition, "tt_move_to_bool", "system",
                            "infoflow3", "system", cond="tt_move_to_bool_b", cond_block=True)
 
     def test_removed_type_transition_rules(self):
@@ -573,23 +575,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # removed rule with new type
-        self.validate_rule(rules[0], "type_transition", "removed_type", "system", "infoflow4",
+        self.validate_rule(rules[0], TRT.type_transition, "removed_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], "type_transition", "system", "tt_switch_block", "infoflow6",
+        self.validate_rule(rules[1], TRT.type_transition, "system", "tt_switch_block", "infoflow6",
                            "system", cond="tt_switch_block_b", cond_block=True)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], "type_transition", "tt_move_from_bool", "system",
+        self.validate_rule(rules[2], TRT.type_transition, "tt_move_from_bool", "system",
                            "infoflow4", "system", cond="tt_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], "type_transition", "tt_move_to_bool", "system",
+        self.validate_rule(rules[3], TRT.type_transition, "tt_move_to_bool", "system",
                            "infoflow3", "system")
 
         # removed rule with existing types
-        self.validate_rule(rules[4], "type_transition", "tt_removed_rule_source",
+        self.validate_rule(rules[4], TRT.type_transition, "tt_removed_rule_source",
                            "tt_removed_rule_target", "infoflow", "system")
 
     def test_modified_type_transition_rules(self):
@@ -598,7 +600,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
-        self.assertEqual("type_transition", rule.ruletype)
+        self.assertEqual(TRT.type_transition, rule.ruletype)
         self.assertEqual("tt_matched_source", rule.source)
         self.assertEqual("system", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -614,23 +616,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "type_change", "added_type", "system", "infoflow4",
+        self.validate_rule(rules[0], TRT.type_change, "added_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], "type_change", "system", "tc_switch_block", "infoflow6",
+        self.validate_rule(rules[1], TRT.type_change, "system", "tc_switch_block", "infoflow6",
                            "system", cond="tc_switch_block_b", cond_block=False)
 
         # added rule with existing types
-        self.validate_rule(rules[2], "type_change", "tc_added_rule_source",
+        self.validate_rule(rules[2], TRT.type_change, "tc_added_rule_source",
                            "tc_added_rule_target", "infoflow", "system")
 
         # rule moved out of a conditional
-        self.validate_rule(rules[3], "type_change", "tc_move_from_bool", "system",
+        self.validate_rule(rules[3], TRT.type_change, "tc_move_from_bool", "system",
                            "infoflow4", "system")
 
         # rule moved into a conditional
-        self.validate_rule(rules[4], "type_change", "tc_move_to_bool", "system",
+        self.validate_rule(rules[4], TRT.type_change, "tc_move_to_bool", "system",
                            "infoflow3", "system", cond="tc_move_to_bool_b", cond_block=True)
 
     def test_removed_type_change_rules(self):
@@ -639,23 +641,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # removed rule with new type
-        self.validate_rule(rules[0], "type_change", "removed_type", "system", "infoflow4",
+        self.validate_rule(rules[0], TRT.type_change, "removed_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], "type_change", "system", "tc_switch_block", "infoflow6",
+        self.validate_rule(rules[1], TRT.type_change, "system", "tc_switch_block", "infoflow6",
                            "system", cond="tc_switch_block_b", cond_block=True)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], "type_change", "tc_move_from_bool", "system",
+        self.validate_rule(rules[2], TRT.type_change, "tc_move_from_bool", "system",
                            "infoflow4", "system", cond="tc_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], "type_change", "tc_move_to_bool", "system",
+        self.validate_rule(rules[3], TRT.type_change, "tc_move_to_bool", "system",
                            "infoflow3", "system")
 
         # removed rule with existing types
-        self.validate_rule(rules[4], "type_change", "tc_removed_rule_source",
+        self.validate_rule(rules[4], TRT.type_change, "tc_removed_rule_source",
                            "tc_removed_rule_target", "infoflow", "system")
 
     def test_modified_type_change_rules(self):
@@ -664,7 +666,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
-        self.assertEqual("type_change", rule.ruletype)
+        self.assertEqual(TRT.type_change, rule.ruletype)
         self.assertEqual("tc_matched_source", rule.source)
         self.assertEqual("system", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -680,23 +682,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "type_member", "added_type", "system", "infoflow4",
+        self.validate_rule(rules[0], TRT.type_member, "added_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], "type_member", "system", "tm_switch_block", "infoflow6",
+        self.validate_rule(rules[1], TRT.type_member, "system", "tm_switch_block", "infoflow6",
                            "system", cond="tm_switch_block_b", cond_block=False)
 
         # added rule with existing types
-        self.validate_rule(rules[2], "type_member", "tm_added_rule_source",
+        self.validate_rule(rules[2], TRT.type_member, "tm_added_rule_source",
                            "tm_added_rule_target", "infoflow", "system")
 
         # rule moved out of a conditional
-        self.validate_rule(rules[3], "type_member", "tm_move_from_bool", "system",
+        self.validate_rule(rules[3], TRT.type_member, "tm_move_from_bool", "system",
                            "infoflow4", "system")
 
         # rule moved into a conditional
-        self.validate_rule(rules[4], "type_member", "tm_move_to_bool", "system",
+        self.validate_rule(rules[4], TRT.type_member, "tm_move_to_bool", "system",
                            "infoflow3", "system", cond="tm_move_to_bool_b", cond_block=True)
 
     def test_removed_type_member_rules(self):
@@ -705,23 +707,23 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(5, len(rules))
 
         # removed rule with new type
-        self.validate_rule(rules[0], "type_member", "removed_type", "system", "infoflow4",
+        self.validate_rule(rules[0], TRT.type_member, "removed_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], "type_member", "system", "tm_switch_block", "infoflow6",
+        self.validate_rule(rules[1], TRT.type_member, "system", "tm_switch_block", "infoflow6",
                            "system", cond="tm_switch_block_b", cond_block=True)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], "type_member", "tm_move_from_bool", "system",
+        self.validate_rule(rules[2], TRT.type_member, "tm_move_from_bool", "system",
                            "infoflow4", "system", cond="tm_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], "type_member", "tm_move_to_bool", "system",
+        self.validate_rule(rules[3], TRT.type_member, "tm_move_to_bool", "system",
                            "infoflow3", "system")
 
         # removed rule with existing types
-        self.validate_rule(rules[4], "type_member", "tm_removed_rule_source",
+        self.validate_rule(rules[4], TRT.type_member, "tm_removed_rule_source",
                            "tm_removed_rule_target", "infoflow", "system")
 
     def test_modified_type_member_rules(self):
@@ -730,7 +732,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
-        self.assertEqual("type_member", rule.ruletype)
+        self.assertEqual(TRT.type_member, rule.ruletype)
         self.assertEqual("tm_matched_source", rule.source)
         self.assertEqual("system", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1564,11 +1566,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "allowxperm", "added_type", "added_type", "infoflow7",
+        self.validate_rule(rules[0], TRT.allowxperm, "added_type", "added_type", "infoflow7",
                            set([0x0009]), xperm="ioctl")
 
         # added rule with existing types
-        self.validate_rule(rules[1], "allowxperm", "ax_added_rule_source", "ax_added_rule_target",
+        self.validate_rule(rules[1], TRT.allowxperm, "ax_added_rule_source", "ax_added_rule_target",
                            "infoflow", set([0x0002]), xperm="ioctl")
 
     def test_removed_allowxperm_rules(self):
@@ -1577,11 +1579,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with existing types
-        self.validate_rule(rules[0], "allowxperm", "ax_removed_rule_source",
+        self.validate_rule(rules[0], TRT.allowxperm, "ax_removed_rule_source",
                            "ax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
         # removed rule with new type
-        self.validate_rule(rules[1], "allowxperm", "removed_type", "removed_type", "infoflow7",
+        self.validate_rule(rules[1], TRT.allowxperm, "removed_type", "removed_type", "infoflow7",
                            set([0x0009]), xperm="ioctl")
 
     def test_modified_allowxperm_rules(self):
@@ -1591,7 +1593,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("allowxperm", rule.ruletype)
+        self.assertEqual(TRT.allowxperm, rule.ruletype)
         self.assertEqual("ax_modified_rule_add_perms", rule.source)
         self.assertEqual("ax_modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1601,7 +1603,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("allowxperm", rule.ruletype)
+        self.assertEqual(TRT.allowxperm, rule.ruletype)
         self.assertEqual("ax_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("ax_modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -1611,7 +1613,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("allowxperm", rule.ruletype)
+        self.assertEqual(TRT.allowxperm, rule.ruletype)
         self.assertEqual("ax_modified_rule_remove_perms", rule.source)
         self.assertEqual("ax_modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1628,11 +1630,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with existing types
-        self.validate_rule(rules[0], "auditallowxperm", "aax_added_rule_source",
+        self.validate_rule(rules[0], TRT.auditallowxperm, "aax_added_rule_source",
                            "aax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
         # added rule with new type
-        self.validate_rule(rules[1], "auditallowxperm", "added_type", "added_type", "infoflow7",
+        self.validate_rule(rules[1], TRT.auditallowxperm, "added_type", "added_type", "infoflow7",
                            set([0x0009]), xperm="ioctl")
 
     def test_removed_auditallowxperm_rules(self):
@@ -1641,12 +1643,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with existing types
-        self.validate_rule(rules[0], "auditallowxperm", "aax_removed_rule_source",
+        self.validate_rule(rules[0], TRT.auditallowxperm, "aax_removed_rule_source",
                            "aax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
         # removed rule with new type
-        self.validate_rule(rules[1], "auditallowxperm", "removed_type", "removed_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
+        self.validate_rule(rules[1], TRT.auditallowxperm, "removed_type", "removed_type",
+                           "infoflow7", set([0x0009]), xperm="ioctl")
 
     def test_modified_auditallowxperm_rules(self):
         """Diff: modified auditallowxperm rules."""
@@ -1655,7 +1657,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("auditallowxperm", rule.ruletype)
+        self.assertEqual(TRT.auditallowxperm, rule.ruletype)
         self.assertEqual("aax_modified_rule_add_perms", rule.source)
         self.assertEqual("aax_modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1665,7 +1667,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("auditallowxperm", rule.ruletype)
+        self.assertEqual(TRT.auditallowxperm, rule.ruletype)
         self.assertEqual("aax_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("aax_modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -1675,7 +1677,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("auditallowxperm", rule.ruletype)
+        self.assertEqual(TRT.auditallowxperm, rule.ruletype)
         self.assertEqual("aax_modified_rule_remove_perms", rule.source)
         self.assertEqual("aax_modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1692,11 +1694,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "neverallowxperm", "added_type", "added_type", "infoflow7",
+        self.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type", "infoflow7",
                            set([0x0009]), xperm="ioctl")
 
         # added rule with existing types
-        self.validate_rule(rules[1], "neverallowxperm", "nax_added_rule_source",
+        self.validate_rule(rules[1], TRT.neverallowxperm, "nax_added_rule_source",
                            "nax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
     def test_removed_neverallowxperm_rules(self):
@@ -1705,12 +1707,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with existing types
-        self.validate_rule(rules[0], "neverallowxperm", "nax_removed_rule_source",
+        self.validate_rule(rules[0], TRT.neverallowxperm, "nax_removed_rule_source",
                            "nax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
         # removed rule with new type
-        self.validate_rule(rules[1], "neverallowxperm", "removed_type", "removed_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
+        self.validate_rule(rules[1], TRT.neverallowxperm, "removed_type", "removed_type",
+                           "infoflow7", set([0x0009]), xperm="ioctl")
 
     def test_modified_neverallowxperm_rules(self):
         """Diff: modified neverallowxperm rules."""
@@ -1719,7 +1721,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("neverallowxperm", rule.ruletype)
+        self.assertEqual(TRT.neverallowxperm, rule.ruletype)
         self.assertEqual("nax_modified_rule_add_perms", rule.source)
         self.assertEqual("nax_modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1729,7 +1731,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("neverallowxperm", rule.ruletype)
+        self.assertEqual(TRT.neverallowxperm, rule.ruletype)
         self.assertEqual("nax_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("nax_modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -1739,7 +1741,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("neverallowxperm", rule.ruletype)
+        self.assertEqual(TRT.neverallowxperm, rule.ruletype)
         self.assertEqual("nax_modified_rule_remove_perms", rule.source)
         self.assertEqual("nax_modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1756,11 +1758,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], "dontauditxperm", "added_type", "added_type", "infoflow7",
+        self.validate_rule(rules[0], TRT.dontauditxperm, "added_type", "added_type", "infoflow7",
                            set([0x0009]), xperm="ioctl")
 
         # added rule with existing types
-        self.validate_rule(rules[1], "dontauditxperm", "dax_added_rule_source",
+        self.validate_rule(rules[1], TRT.dontauditxperm, "dax_added_rule_source",
                            "dax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
     def test_removed_dontauditxperm_rules(self):
@@ -1769,12 +1771,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with existing types
-        self.validate_rule(rules[0], "dontauditxperm", "dax_removed_rule_source",
+        self.validate_rule(rules[0], TRT.dontauditxperm, "dax_removed_rule_source",
                            "dax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
         # removed rule with new type
-        self.validate_rule(rules[1], "dontauditxperm", "removed_type", "removed_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
+        self.validate_rule(rules[1], TRT.dontauditxperm, "removed_type", "removed_type",
+                           "infoflow7", set([0x0009]), xperm="ioctl")
 
     def test_modified_dontauditxperm_rules(self):
         """Diff: modified dontauditxperm rules."""
@@ -1783,7 +1785,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual("dontauditxperm", rule.ruletype)
+        self.assertEqual(TRT.dontauditxperm, rule.ruletype)
         self.assertEqual("dax_modified_rule_add_perms", rule.source)
         self.assertEqual("dax_modified_rule_add_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)
@@ -1793,7 +1795,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual("dontauditxperm", rule.ruletype)
+        self.assertEqual(TRT.dontauditxperm, rule.ruletype)
         self.assertEqual("dax_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("dax_modified_rule_add_remove_perms", rule.target)
         self.assertEqual("infoflow2", rule.tclass)
@@ -1803,7 +1805,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual("dontauditxperm", rule.ruletype)
+        self.assertEqual(TRT.dontauditxperm, rule.ruletype)
         self.assertEqual("dax_modified_rule_remove_perms", rule.source)
         self.assertEqual("dax_modified_rule_remove_perms", rule.target)
         self.assertEqual("infoflow", rule.tclass)

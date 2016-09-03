@@ -20,6 +20,7 @@
 import unittest
 
 from setools import SELinuxPolicy, TERuleQuery
+from setools import TERuletype as TRT
 
 from . import mixins
 
@@ -49,7 +50,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test1a", "test1t", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[0], TRT.allow, "test1a", "test1t", "infoflow", set(["hi_w"]))
 
     def test_002_source_indirect(self):
         """TE rule query with exact, indirect, source match."""
@@ -58,7 +59,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test2a", "test2t", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[0], TRT.allow, "test2a", "test2t", "infoflow", set(["hi_w"]))
 
     def test_003_source_direct_regex(self):
         """TE rule query with regex, direct, source match."""
@@ -67,7 +68,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test3aS", "test3t", "infoflow", set(["low_r"]))
+        self.validate_rule(r[0], TRT.allow, "test3aS", "test3t", "infoflow", set(["low_r"]))
 
     def test_004_source_indirect_regex(self):
         """TE rule query with regex, indirect, source match."""
@@ -76,8 +77,8 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test4a1", "test4a1", "infoflow", set(["hi_w"]))
-        self.validate_rule(r[1], "allow", "test4a2", "test4a2", "infoflow", set(["low_r"]))
+        self.validate_rule(r[0], TRT.allow, "test4a1", "test4a1", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[1], TRT.allow, "test4a2", "test4a2", "infoflow", set(["low_r"]))
 
     def test_005_target_direct(self):
         """TE rule query with exact, direct, target match."""
@@ -86,7 +87,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test5s", "test5a", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[0], TRT.allow, "test5s", "test5a", "infoflow", set(["hi_w"]))
 
     def test_006_target_indirect(self):
         """TE rule query with exact, indirect, target match."""
@@ -95,8 +96,8 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test6s", "test6a", "infoflow", set(["hi_w"]))
-        self.validate_rule(r[1], "allow", "test6s", "test6t", "infoflow", set(["low_r"]))
+        self.validate_rule(r[0], TRT.allow, "test6s", "test6a", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[1], TRT.allow, "test6s", "test6t", "infoflow", set(["low_r"]))
 
     def test_007_target_direct_regex(self):
         """TE rule query with regex, direct, target match."""
@@ -105,7 +106,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test7s", "test7aPASS", "infoflow", set(["low_r"]))
+        self.validate_rule(r[0], TRT.allow, "test7s", "test7aPASS", "infoflow", set(["low_r"]))
 
     def test_008_target_indirect_regex(self):
         """TE rule query with regex, indirect, target match."""
@@ -114,8 +115,8 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test8a1", "test8a1", "infoflow", set(["hi_w"]))
-        self.validate_rule(r[1], "allow", "test8a2", "test8a2", "infoflow", set(["low_r"]))
+        self.validate_rule(r[0], TRT.allow, "test8a1", "test8a1", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[1], TRT.allow, "test8a2", "test8a2", "infoflow", set(["low_r"]))
 
     @unittest.skip("Setting tclass to a string is no longer supported.")
     def test_009_class(self):
@@ -124,7 +125,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test9", "test9", "infoflow2", set(["super_w"]))
+        self.validate_rule(r[0], TRT.allow, "test9", "test9", "infoflow2", set(["super_w"]))
 
     def test_010_class_list(self):
         """TE rule query with object class list match."""
@@ -133,8 +134,8 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test10", "test10", "infoflow3", set(["null"]))
-        self.validate_rule(r[1], "allow", "test10", "test10", "infoflow4", set(["hi_w"]))
+        self.validate_rule(r[0], TRT.allow, "test10", "test10", "infoflow3", set(["null"]))
+        self.validate_rule(r[1], TRT.allow, "test10", "test10", "infoflow4", set(["hi_w"]))
 
     def test_011_class_regex(self):
         """TE rule query with object class regex match."""
@@ -142,8 +143,8 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test11", "test11", "infoflow5", set(["low_w"]))
-        self.validate_rule(r[1], "allow", "test11", "test11", "infoflow6", set(["med_r"]))
+        self.validate_rule(r[0], TRT.allow, "test11", "test11", "infoflow5", set(["low_w"]))
+        self.validate_rule(r[1], TRT.allow, "test11", "test11", "infoflow6", set(["med_r"]))
 
     def test_012_perms_any(self):
         """TE rule query with permission set intersection."""
@@ -151,8 +152,8 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test12a", "test12a", "infoflow7", set(["super_r"]))
-        self.validate_rule(r[1], "allow", "test12b", "test12b", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test12a", "test12a", "infoflow7", set(["super_r"]))
+        self.validate_rule(r[1], TRT.allow, "test12b", "test12b", "infoflow7",
                            set(["super_r", "super_none"]))
 
     def test_013_perms_equal(self):
@@ -162,7 +163,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test13c", "test13c", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test13c", "test13c", "infoflow7",
                            set(["super_w", "super_none", "super_both"]))
 
     def test_014_ruletype(self):
@@ -171,9 +172,9 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "auditallow", "test14", "test14", "infoflow7",
+        self.validate_rule(r[0], TRT.auditallow, "test14", "test14", "infoflow7",
                            set(["super_both"]))
-        self.validate_rule(r[1], "dontaudit", "test14", "test14", "infoflow7",
+        self.validate_rule(r[1], TRT.dontaudit, "test14", "test14", "infoflow7",
                            set(["super_unmapped"]))
 
     def test_052_perms_subset1(self):
@@ -182,9 +183,9 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test13c", "test13c", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test13c", "test13c", "infoflow7",
                            set(["super_w", "super_none", "super_both"]))
-        self.validate_rule(r[1], "allow", "test13d", "test13d", "infoflow7",
+        self.validate_rule(r[1], TRT.allow, "test13d", "test13d", "infoflow7",
                            set(["super_w", "super_none", "super_both", "super_unmapped"]))
 
     def test_052_perms_subset2(self):
@@ -194,7 +195,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test13d", "test13d", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test13d", "test13d", "infoflow7",
                            set(["super_w", "super_none", "super_both", "super_unmapped"]))
 
     def test_100_default(self):
@@ -203,7 +204,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "type_transition", "test100", "test100", "infoflow7", "test100d")
+        self.validate_rule(r[0], TRT.type_transition, "test100", "test100", "infoflow7", "test100d")
 
     def test_101_default_regex(self):
         """TE rule query with default type regex match."""
@@ -211,8 +212,10 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "type_transition", "test101", "test101d", "infoflow7", "test101e")
-        self.validate_rule(r[1], "type_transition", "test101", "test101e", "infoflow7", "test101d")
+        self.validate_rule(r[0], TRT.type_transition, "test101", "test101d", "infoflow7",
+                           "test101e")
+        self.validate_rule(r[1], TRT.type_transition, "test101", "test101e", "infoflow7",
+                           "test101d")
 
     def test_200_boolean_intersection(self):
         """TE rule query with intersection Boolean set match."""
@@ -220,9 +223,9 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test200t1", "test200t1", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test200t1", "test200t1", "infoflow7",
                            set(["super_w"]), cond="test200")
-        self.validate_rule(r[1], "allow", "test200t2", "test200t2", "infoflow7",
+        self.validate_rule(r[1], TRT.allow, "test200t2", "test200t2", "infoflow7",
                            set(["super_w"]), cond="test200a && test200")
 
     def test_201_boolean_equal(self):
@@ -231,7 +234,7 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allow", "test201t1", "test201t1", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test201t1", "test201t1", "infoflow7",
                            set(["super_unmapped"]), cond="test201b && test201a")
 
     def test_202_boolean_regex(self):
@@ -240,9 +243,9 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allow", "test202t1", "test202t1", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test202t1", "test202t1", "infoflow7",
                            set(["super_none"]), cond="test202a")
-        self.validate_rule(r[1], "allow", "test202t2", "test202t2", "infoflow7",
+        self.validate_rule(r[1], TRT.allow, "test202t2", "test202t2", "infoflow7",
                            set(["super_unmapped"]), cond="test202b || test202c")
 
     def test_300_issue111(self):
@@ -252,11 +255,11 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 4)
-        self.validate_rule(r[0], "allow", "test300a", "test300target", "infoflow7", set(["hi_w"]))
-        self.validate_rule(r[1], "allow", "test300b", "test300target", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test300a", "test300target", "infoflow7", set(["hi_w"]))
+        self.validate_rule(r[1], TRT.allow, "test300b", "test300target", "infoflow7",
                            set(["super_w"]))
-        self.validate_rule(r[2], "allow", "test300t1", "test300t1", "infoflow7", set(["hi_r"]))
-        self.validate_rule(r[3], "allow", "test300t2", "test300t2", "infoflow7", set(["med_w"]))
+        self.validate_rule(r[2], TRT.allow, "test300t1", "test300t1", "infoflow7", set(["hi_r"]))
+        self.validate_rule(r[3], TRT.allow, "test300t2", "test300t2", "infoflow7", set(["med_w"]))
 
     def test_301_issue111(self):
         """TE rule query with attribute target criteria, indirect match."""
@@ -265,11 +268,11 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 4)
-        self.validate_rule(r[0], "allow", "test301source", "test301a", "infoflow7", set(["hi_w"]))
-        self.validate_rule(r[1], "allow", "test301source", "test301b", "infoflow7",
+        self.validate_rule(r[0], TRT.allow, "test301source", "test301a", "infoflow7", set(["hi_w"]))
+        self.validate_rule(r[1], TRT.allow, "test301source", "test301b", "infoflow7",
                            set(["super_w"]))
-        self.validate_rule(r[2], "allow", "test301t1", "test301t1", "infoflow7", set(["hi_r"]))
-        self.validate_rule(r[3], "allow", "test301t2", "test301t2", "infoflow7", set(["med_w"]))
+        self.validate_rule(r[2], TRT.allow, "test301t1", "test301t1", "infoflow7", set(["hi_r"]))
+        self.validate_rule(r[3], TRT.allow, "test301t2", "test301t2", "infoflow7", set(["med_w"]))
 
     def test_302_issue111(self):
         """TE rule query with attribute default type criteria."""
@@ -278,9 +281,9 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "type_transition", "test302source", "test302t1", "infoflow7",
+        self.validate_rule(r[0], TRT.type_transition, "test302source", "test302t1", "infoflow7",
                            "test302t1")
-        self.validate_rule(r[1], "type_transition", "test302source", "test302t2", "infoflow7",
+        self.validate_rule(r[1], TRT.type_transition, "test302source", "test302t2", "infoflow7",
                            "test302t2")
 
 
@@ -299,7 +302,7 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allowxperm", "test1a", "test1t", "infoflow",
+        self.validate_rule(r[0], TRT.allowxperm, "test1a", "test1t", "infoflow",
                            set(range(0xebe0, 0xebff+1)), xperm="ioctl")
 
     def test_002_source_indirect(self):
@@ -309,7 +312,7 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allowxperm", "test2a", "test2t", "infoflow",
+        self.validate_rule(r[0], TRT.allowxperm, "test2a", "test2t", "infoflow",
                            set([0x5411, 0x5451]), xperm="ioctl")
 
     def test_003_source_direct_regex(self):
@@ -319,7 +322,7 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allowxperm", "test3aS", "test3t", "infoflow",
+        self.validate_rule(r[0], TRT.allowxperm, "test3aS", "test3t", "infoflow",
                            set([0x1111]), xperm="ioctl")
 
     def test_004_source_indirect_regex(self):
@@ -329,9 +332,9 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allowxperm", "test4a1", "test4a1", "infoflow",
+        self.validate_rule(r[0], TRT.allowxperm, "test4a1", "test4a1", "infoflow",
                            set([0x9999]), xperm="ioctl")
-        self.validate_rule(r[1], "allowxperm", "test4a2", "test4a2", "infoflow",
+        self.validate_rule(r[1], TRT.allowxperm, "test4a2", "test4a2", "infoflow",
                            set([0x1111]), xperm="ioctl")
 
     def test_005_target_direct(self):
@@ -341,7 +344,7 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allowxperm", "test5s", "test5a", "infoflow", set([0x9999]),
+        self.validate_rule(r[0], TRT.allowxperm, "test5s", "test5a", "infoflow", set([0x9999]),
                            xperm="ioctl")
 
     def test_006_target_indirect(self):
@@ -351,9 +354,9 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allowxperm", "test6s", "test6a", "infoflow", set([0x9999]),
+        self.validate_rule(r[0], TRT.allowxperm, "test6s", "test6a", "infoflow", set([0x9999]),
                            xperm="ioctl")
-        self.validate_rule(r[1], "allowxperm", "test6s", "test6t", "infoflow", set([0x1111]),
+        self.validate_rule(r[1], TRT.allowxperm, "test6s", "test6t", "infoflow", set([0x1111]),
                            xperm="ioctl")
 
     def test_007_target_direct_regex(self):
@@ -363,7 +366,7 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allowxperm", "test7s", "test7aPASS", "infoflow", set([0x1111]),
+        self.validate_rule(r[0], TRT.allowxperm, "test7s", "test7aPASS", "infoflow", set([0x1111]),
                            xperm="ioctl")
 
     def test_008_target_indirect_regex(self):
@@ -373,9 +376,9 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allowxperm", "test8a1", "test8a1", "infoflow", set([0x9999]),
+        self.validate_rule(r[0], TRT.allowxperm, "test8a1", "test8a1", "infoflow", set([0x9999]),
                            xperm="ioctl")
-        self.validate_rule(r[1], "allowxperm", "test8a2", "test8a2", "infoflow", set([0x1111]),
+        self.validate_rule(r[1], TRT.allowxperm, "test8a2", "test8a2", "infoflow", set([0x1111]),
                            xperm="ioctl")
 
     def test_010_class_list(self):
@@ -385,9 +388,9 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allowxperm", "test10", "test10", "infoflow3", set([0]),
+        self.validate_rule(r[0], TRT.allowxperm, "test10", "test10", "infoflow3", set([0]),
                            xperm="ioctl")
-        self.validate_rule(r[1], "allowxperm", "test10", "test10", "infoflow4", set([0x9999]),
+        self.validate_rule(r[1], TRT.allowxperm, "test10", "test10", "infoflow4", set([0x9999]),
                            xperm="ioctl")
 
     def test_011_class_regex(self):
@@ -396,9 +399,9 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "allowxperm", "test11", "test11", "infoflow5", set([0x1111]),
+        self.validate_rule(r[0], TRT.allowxperm, "test11", "test11", "infoflow5", set([0x1111]),
                            xperm="ioctl")
-        self.validate_rule(r[1], "allowxperm", "test11", "test11", "infoflow6", set([0x5555]),
+        self.validate_rule(r[1], TRT.allowxperm, "test11", "test11", "infoflow6", set([0x5555]),
                            xperm="ioctl")
 
     def test_014_ruletype(self):
@@ -407,10 +410,10 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "auditallowxperm", "test14", "test14", "infoflow7", set([0x1234]),
-                           xperm="ioctl")
-        self.validate_rule(r[1], "dontauditxperm", "test14", "test14", "infoflow7", set([0x4321]),
-                           xperm="ioctl")
+        self.validate_rule(r[0], TRT.auditallowxperm, "test14", "test14", "infoflow7",
+                           set([0x1234]), xperm="ioctl")
+        self.validate_rule(r[1], TRT.dontauditxperm, "test14", "test14", "infoflow7",
+                           set([0x4321]), xperm="ioctl")
 
     def test_100_std_perm_any(self):
         """Xperm rule query match by standard permission."""
@@ -419,9 +422,9 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "neverallow", "test100", "system", "infoflow2",
+        self.validate_rule(r[0], TRT.neverallow, "test100", "system", "infoflow2",
                            set(["ioctl", "hi_w"]))
-        self.validate_rule(r[1], "neverallowxperm", "test100", "test100", "infoflow2",
+        self.validate_rule(r[1], TRT.neverallowxperm, "test100", "test100", "infoflow2",
                            set([0x1234]), xperm="ioctl")
 
     def test_100_std_perm_equal(self):
@@ -431,7 +434,7 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "neverallow", "test100", "system", "infoflow2",
+        self.validate_rule(r[0], TRT.neverallow, "test100", "system", "infoflow2",
                            set(["ioctl", "hi_w"]))
 
     def test_101_xperm_any(self):
@@ -440,13 +443,13 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 4)
-        self.validate_rule(r[0], "allowxperm", "test101a", "test101a", "infoflow7",
+        self.validate_rule(r[0], TRT.allowxperm, "test101a", "test101a", "infoflow7",
                            set([0x9011]), xperm="ioctl")
-        self.validate_rule(r[1], "allowxperm", "test101b", "test101b", "infoflow7",
+        self.validate_rule(r[1], TRT.allowxperm, "test101b", "test101b", "infoflow7",
                            set([0x9011, 0x9012]), xperm="ioctl")
-        self.validate_rule(r[2], "allowxperm", "test101c", "test101c", "infoflow7",
+        self.validate_rule(r[2], TRT.allowxperm, "test101c", "test101c", "infoflow7",
                            set([0x9011, 0x9012, 0x9013]), xperm="ioctl")
-        self.validate_rule(r[3], "allowxperm", "test101d", "test101d", "infoflow7",
+        self.validate_rule(r[3], TRT.allowxperm, "test101d", "test101d", "infoflow7",
                            set([0x9011, 0x9012, 0x9013, 0x9014]), xperm="ioctl")
 
     def test_101_xperm_equal(self):
@@ -455,5 +458,5 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "allowxperm", "test101c", "test101c", "infoflow7",
+        self.validate_rule(r[0], TRT.allowxperm, "test101c", "test101c", "infoflow7",
                            set([0x9011, 0x9012, 0x9013]), xperm="ioctl")

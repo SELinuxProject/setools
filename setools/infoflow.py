@@ -23,6 +23,7 @@ import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
 from .descriptors import EdgeAttrIntMax, EdgeAttrList
+from .policyrep import TERuletype
 
 __all__ = ['InfoFlowAnalysis']
 
@@ -301,7 +302,7 @@ class InfoFlowAnalysis(object):
         self.log.info("Building information flow graph from {0}...".format(self.policy))
 
         for rule in self.policy.terules():
-            if rule.ruletype != "allow":
+            if rule.ruletype != TERuletype.allow:
                 continue
 
             (rweight, wweight) = self.perm_map.rule_weight(rule)

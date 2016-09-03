@@ -1,4 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -23,6 +24,7 @@ from . import qpol
 from . import rule
 from . import typeattr
 from . import boolcond
+from .util import PolicyEnum
 
 
 def te_rule_factory(policy, symbol):
@@ -67,17 +69,37 @@ def expanded_te_rule_factory(original, source, target):
 
 def validate_ruletype(t):
     """Validate TE Rule types."""
-    if t not in ["allow", "auditallow", "dontaudit", "neverallow",
-                 "type_transition", "type_member", "type_change",
-                 "allowxperm", "auditallowxperm", "dontauditxperm", "neverallowxperm"]:
+    try:
+        return TERuletype.lookup(t)
+    except KeyError:
         raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
 
-    return t
+
+class TERuletype(PolicyEnum):
+
+    """Enumeration of types of TE rules."""
+
+    allow = qpol.QPOL_RULE_ALLOW
+    neverallow = qpol.QPOL_RULE_NEVERALLOW
+    auditallow = qpol.QPOL_RULE_AUDITALLOW
+    dontaudit = qpol.QPOL_RULE_DONTAUDIT
+    allowxperm = qpol.QPOL_RULE_XPERMS_ALLOW
+    neverallowxperm = qpol.QPOL_RULE_XPERMS_NEVERALLOW
+    auditallowxperm = qpol.QPOL_RULE_XPERMS_AUDITALLOW
+    dontauditxperm = qpol.QPOL_RULE_XPERMS_DONTAUDIT
+    type_transition = qpol.QPOL_RULE_TYPE_TRANS
+    type_change = qpol.QPOL_RULE_TYPE_CHANGE
+    type_member = qpol.QPOL_RULE_TYPE_MEMBER
 
 
 class BaseTERule(rule.PolicyRule):
 
     """A type enforcement rule."""
+
+    @property
+    def ruletype(self):
+        """The rule type."""
+        return TERuletype(self.qpol_symbol.rule_type(self.policy))
 
     @property
     def source(self):
@@ -302,7 +324,7 @@ class TERule(BaseTERule):
         try:
             return self.qpol_symbol.filename(self.policy)
         except AttributeError:
-            if self.ruletype == "type_transition":
+            if self.ruletype == TERuletype.type_transition:
                 raise exception.TERuleNoFilename
             else:
                 raise exception.RuleUseError("{0} rules do not have file names".

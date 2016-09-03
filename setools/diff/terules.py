@@ -18,7 +18,7 @@
 #
 from collections import defaultdict, namedtuple
 
-from ..policyrep import IoctlSet
+from ..policyrep import IoctlSet, TERuletype
 from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 
 from .conditional import ConditionalExprWrapper
@@ -42,6 +42,7 @@ def av_diff_template(ruletype):
     Parameters:
     ruletype    The rule type, e.g. "allow".
     """
+    ruletype = TERuletype.lookup(ruletype)
 
     def diff(self):
         """Generate the difference in rules between the policies."""
@@ -88,6 +89,7 @@ def avx_diff_template(ruletype):
     Parameters:
     ruletype    The rule type, e.g. "allowxperm".
     """
+    ruletype = TERuletype.lookup(ruletype)
 
     def diff(self):
         """Generate the difference in rules between the policies."""
@@ -134,6 +136,7 @@ def te_diff_template(ruletype):
     Parameters:
     ruletype    The rule type, e.g. "type_transition".
     """
+    ruletype = TERuletype.lookup(ruletype)
 
     def diff(self):
         """Generate the difference in rules between the policies."""

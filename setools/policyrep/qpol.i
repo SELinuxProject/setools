@@ -2667,23 +2667,14 @@ typedef struct qpol_avrule {} qpol_avrule_t;
         /* no op */
         return;
     };
-    const char * rule_type(qpol_policy_t *p) {
+    uint32_t rule_type(qpol_policy_t *p) {
         uint32_t rt;
         if (qpol_avrule_get_rule_type(p, self, &rt)) {
             SWIG_exception(SWIG_ValueError, "Could not get rule type for av rule");
         }
-        switch (rt) {
-            case QPOL_RULE_ALLOW: return "allow";
-            case QPOL_RULE_NEVERALLOW: return "neverallow";
-            case QPOL_RULE_AUDITALLOW: return "auditallow";
-            case QPOL_RULE_DONTAUDIT: return "dontaudit";
-            case QPOL_RULE_XPERMS_ALLOW: return "allowxperm";
-            case QPOL_RULE_XPERMS_NEVERALLOW: return "neverallowxperm";
-            case QPOL_RULE_XPERMS_AUDITALLOW: return "auditallowxperm";
-            case QPOL_RULE_XPERMS_DONTAUDIT: return "dontauditxperm";
-        }
+        return rt;
     fail:
-        return NULL;
+        return 0;
     };
     const qpol_type_t *source_type(qpol_policy_t *p) {
         const qpol_type_t *t;
@@ -2810,18 +2801,14 @@ typedef struct qpol_terule {} qpol_terule_t;
         /* no op */
         return;
     };
-    const char * rule_type(qpol_policy_t *p) {
+    uint32_t rule_type(qpol_policy_t *p) {
         uint32_t rt;
         if (qpol_terule_get_rule_type(p, self, &rt)) {
             SWIG_exception(SWIG_ValueError, "Could not get rule type for te rule");
         }
-        switch (rt) {
-            case QPOL_RULE_TYPE_TRANS: return "type_transition";
-            case QPOL_RULE_TYPE_CHANGE: return "type_change";
-            case QPOL_RULE_TYPE_MEMBER: return "type_member";
-        }
+        return rt;
     fail:
-        return NULL;
+        return 0;
     };
     const qpol_type_t *source_type(qpol_policy_t *p) {
         const qpol_type_t *t;
@@ -3037,7 +3024,7 @@ typedef struct qpol_filename_trans {} qpol_filename_trans_t;
     };
     %pythoncode %{
     def rule_type(self,policy):
-        return "type_transition"
+        return QPOL_RULE_TYPE_TRANS
     %}
 
     const qpol_type_t *source_type (qpol_policy_t *p) {

@@ -1,4 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -19,6 +20,7 @@
 # pylint: disable=too-many-public-methods
 
 import logging
+import warnings
 from itertools import chain
 from errno import ENOENT
 
@@ -611,6 +613,8 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_te_ruletype(types):
         """Validate type enforcement rule types."""
+        warnings.warn("TE ruletypes have changed to an enumeration.",
+                      DeprecationWarning)
         return terule.validate_ruletype(types)
 
     #

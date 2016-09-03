@@ -22,7 +22,7 @@ try:
 except ImportError:
     from mock import Mock
 
-from setools import SELinuxPolicy, PermissionMap
+from setools import SELinuxPolicy, PermissionMap, TERuletype
 from setools.exception import PermissionMapParseError, RuleTypeError, \
                               UnmappedClass, UnmappedPermission
 
@@ -286,7 +286,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_140_weight_read_only(self):
         """PermMap get weight of read-only rule."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "infoflow"
         rule.perms = set(["med_r", "hi_r"])
 
@@ -298,7 +298,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_141_weight_write_only(self):
         """PermMap get weight of write-only rule."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "infoflow"
         rule.perms = set(["low_w", "med_w"])
 
@@ -310,7 +310,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_142_weight_both(self):
         """PermMap get weight of both rule."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "infoflow"
         rule.perms = set(["low_r", "hi_w"])
 
@@ -322,7 +322,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_143_weight_none(self):
         """PermMap get weight of none rule."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "infoflow3"
         rule.perms = set(["null"])
 
@@ -334,7 +334,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_144_weight_unmapped_class(self):
         """PermMap get weight of rule with unmapped class."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "unmapped"
         rule.perms = set(["null"])
 
@@ -344,7 +344,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_145_weight_unmapped_permission(self):
         """PermMap get weight of rule with unmapped permission."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "infoflow"
         rule.perms = set(["low_r", "unmapped"])
 
@@ -354,7 +354,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_146_weight_wrong_rule_type(self):
         """PermMap get weight of rule with wrong rule type."""
         rule = Mock()
-        rule.ruletype = "type_transition"
+        rule.ruletype = TERuletype.type_transition
         rule.tclass = "infoflow"
 
         permmap = PermissionMap("tests/perm_map")
@@ -363,7 +363,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_147_weight_excluded_permission(self):
         """PermMap get weight of a rule with excluded permission."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "infoflow"
         rule.perms = set(["med_r", "hi_r"])
 
@@ -376,7 +376,7 @@ class PermissionMapTest(unittest.TestCase):
     def test_148_weight_excluded_class(self):
         """PermMap get weight of a rule with excluded class."""
         rule = Mock()
-        rule.ruletype = "allow"
+        rule.ruletype = TERuletype.allow
         rule.tclass = "infoflow"
         rule.perms = set(["low_r", "med_r", "hi_r", "low_w", "med_w", "hi_w"])
 

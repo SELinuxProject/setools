@@ -25,6 +25,7 @@ from errno import ENOENT
 from . import exception
 from . import policyrep
 from .descriptors import PermissionMapDescriptor
+from .policyrep import TERuletype
 
 infoflow_directions = ["r", "w", "b", "n", "u"]
 min_weight = 1
@@ -347,7 +348,7 @@ class PermissionMap(object):
         read_weight = 0
         class_name = str(rule.tclass)
 
-        if rule.ruletype != 'allow':
+        if rule.ruletype != TERuletype.allow:
             raise exception.RuleTypeError("{0} rules cannot be used for calculating a weight".
                                           format(rule.ruletype))
 

@@ -26,6 +26,7 @@ import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
 
 from .descriptors import EdgeAttrDict, EdgeAttrList
+from .policyrep import TERuletype
 
 __all__ = ['DomainTransitionAnalysis']
 
@@ -379,7 +380,7 @@ class DomainTransitionAnalysis(object):
         type_trans = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         for rule in self.policy.terules():
-            if rule.ruletype == "allow":
+            if rule.ruletype == TERuletype.allow:
                 if rule.tclass not in ["process", "file"]:
                     continue
 
@@ -421,7 +422,7 @@ class DomainTransitionAnalysis(object):
                         for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             entrypoint[s][t].append(rule)
 
-            elif rule.ruletype == "type_transition":
+            elif rule.ruletype == TERuletype.type_transition:
                 if rule.tclass != "process":
                     continue
 
