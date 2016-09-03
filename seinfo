@@ -144,7 +144,8 @@ try:
         components.append(("Commons", q, lambda x: x.statement()))
 
     if args.constraintquery or args.all:
-        q = setools.ConstraintQuery(p, ruletype=["constrain", "mlsconstrain"])
+        q = setools.ConstraintQuery(p, ruletype=[setools.ConstraintRuletype.constrain,
+                                                 setools.ConstraintRuletype.mlsconstrain])
         if isinstance(args.constraintquery, str):
             q.tclass = [args.constraintquery]
 
@@ -266,7 +267,8 @@ try:
         components.append(("Users", q, lambda x: x.statement()))
 
     if args.validatetransquery or args.all:
-        q = setools.ConstraintQuery(p, ruletype=["validatetrans", "mlsvalidatetrans"])
+        q = setools.ConstraintQuery(p, ruletype=[setools.ConstraintRuletype.validatetrans,
+                                                 setools.ConstraintRuletype.mlsvalidatetrans])
         if isinstance(args.validatetransquery, str):
             q.tclass = [args.validatetransquery]
 

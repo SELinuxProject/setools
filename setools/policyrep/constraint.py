@@ -1,4 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -23,6 +24,7 @@ from .symbol import PolicySymbol
 from .objclass import class_factory
 from .typeattr import type_or_attr_factory
 from .user import user_factory
+from .util import PolicyEnum
 
 
 def _is_mls(policy, sym):
@@ -40,10 +42,10 @@ def _is_mls(policy, sym):
 
 def validate_ruletype(t):
     """Validate constraint rule types."""
-    if t not in ["constrain", "mlsconstrain", "validatetrans", "mlsvalidatetrans"]:
+    try:
+        return ConstraintRuletype.lookup(t)
+    except KeyError:
         raise InvalidConstraintType("{0} is not a valid constraint type.".format(t))
-
-    return t
 
 
 def constraint_factory(policy, sym):
@@ -52,17 +54,27 @@ def constraint_factory(policy, sym):
     try:
         if _is_mls(policy, sym):
             if isinstance(sym, qpol.qpol_constraint_t):
-                return Constraint(policy, sym, "mlsconstrain")
+                return Constraint(policy, sym, ConstraintRuletype.mlsconstrain)
             else:
-                return Validatetrans(policy, sym, "mlsvalidatetrans")
+                return Validatetrans(policy, sym, ConstraintRuletype.mlsvalidatetrans)
         else:
             if isinstance(sym, qpol.qpol_constraint_t):
-                return Constraint(policy, sym, "constrain")
+                return Constraint(policy, sym, ConstraintRuletype.constrain)
             else:
-                return Validatetrans(policy, sym, "validatetrans")
+                return Validatetrans(policy, sym, ConstraintRuletype.validatetrans)
 
     except AttributeError:
         raise TypeError("Constraints cannot be looked-up.")
+
+
+class ConstraintRuletype(PolicyEnum):
+
+    """Enumeration of constraint types."""
+
+    constrain = 1
+    mlsconstrain = 2
+    validatetrans = 3
+    mlsvalidatetrans = 4
 
 
 class BaseConstraint(PolicySymbol):

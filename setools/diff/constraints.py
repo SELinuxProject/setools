@@ -18,6 +18,7 @@
 #
 from collections import namedtuple
 
+from ..policyrep import ConstraintRuletype
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 
@@ -129,13 +130,13 @@ class ConstraintsDifference(Difference):
         self._left_validatetrans = []
         self._left_mlsvalidatetrans = []
         for rule in self.left_policy.constraints():
-            if rule.ruletype == "constrain":
+            if rule.ruletype == ConstraintRuletype.constrain:
                 self._left_constrains.append(rule)
-            elif rule.ruletype == "mlsconstrain":
+            elif rule.ruletype == ConstraintRuletype.mlsconstrain:
                 self._left_mlsconstrains.append(rule)
-            elif rule.ruletype == "validatetrans":
+            elif rule.ruletype == ConstraintRuletype.validatetrans:
                 self._left_validatetrans.append(rule)
-            elif rule.ruletype == "mlsvalidatetrans":
+            elif rule.ruletype == ConstraintRuletype.mlsvalidatetrans:
                 self._left_mlsvalidatetrans.append(rule)
             else:
                 self.log.error("Unknown rule type: {0} (This is an SETools bug)".
@@ -146,13 +147,13 @@ class ConstraintsDifference(Difference):
         self._right_validatetrans = []
         self._right_mlsvalidatetrans = []
         for rule in self.right_policy.constraints():
-            if rule.ruletype == "constrain":
+            if rule.ruletype == ConstraintRuletype.constrain:
                 self._right_constrains.append(rule)
-            elif rule.ruletype == "mlsconstrain":
+            elif rule.ruletype == ConstraintRuletype.mlsconstrain:
                 self._right_mlsconstrains.append(rule)
-            elif rule.ruletype == "validatetrans":
+            elif rule.ruletype == ConstraintRuletype.validatetrans:
                 self._right_validatetrans.append(rule)
-            elif rule.ruletype == "mlsvalidatetrans":
+            elif rule.ruletype == ConstraintRuletype.mlsvalidatetrans:
                 self._right_mlsvalidatetrans.append(rule)
             else:
                 self.log.error("Unknown rule type: {0} (This is an SETools bug)".

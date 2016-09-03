@@ -23,6 +23,7 @@
 
 from . import exception
 from .netcontext import PortconProtocol, PortconRange
+from .constraint import ConstraintRuletype
 from .default import DefaultRuletype, DefaultValue, DefaultRangeValue
 from .fscontext import FSUseRuletype
 from .mlsrule import MLSRuletype

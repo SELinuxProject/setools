@@ -21,6 +21,7 @@ import re
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchObjClass, MatchPermission
+from .policyrep import ConstraintRuletype
 from .policyrep.exception import ConstraintUseError
 from .query import PolicyQuery
 from .util import match_in_set
@@ -64,7 +65,7 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
                       be used on the user.
     """
 
-    ruletype = CriteriaSetDescriptor(lookup_function="validate_constraint_ruletype")
+    ruletype = CriteriaSetDescriptor(enum_class=ConstraintRuletype)
     user = CriteriaDescriptor("user_regex", "lookup_user")
     user_regex = False
     role = CriteriaDescriptor("role_regex", "lookup_role")

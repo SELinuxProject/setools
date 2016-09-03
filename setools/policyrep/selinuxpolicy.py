@@ -225,7 +225,8 @@ class SELinuxPolicy(object):
     @property
     def constraint_count(self):
         """The number of standard constraints."""
-        return sum(1 for c in self.constraints() if c.ruletype == "constrain")
+        return sum(1 for c in self.constraints()
+                   if c.ruletype == constraint.ConstraintRuletype.constrain)
 
     @property
     def default_count(self):
@@ -280,12 +281,14 @@ class SELinuxPolicy(object):
     @property
     def mlsconstraint_count(self):
         """The number of MLS constraints."""
-        return sum(1 for c in self.constraints() if c.ruletype == "mlsconstrain")
+        return sum(1 for c in self.constraints()
+                   if c.ruletype == constraint.ConstraintRuletype.mlsconstrain)
 
     @property
     def mlsvalidatetrans_count(self):
         """The number of MLS validatetrans."""
-        return sum(1 for v in self.constraints() if v.ruletype == "mlsvalidatetrans")
+        return sum(1 for v in self.constraints()
+                   if v.ruletype == constraint.ConstraintRuletype.mlsvalidatetrans)
 
     @property
     def netifcon_count(self):
@@ -395,7 +398,8 @@ class SELinuxPolicy(object):
     @property
     def validatetrans_count(self):
         """The number of validatetrans."""
-        return sum(1 for v in self.constraints() if v.ruletype == "validatetrans")
+        return sum(1 for v in self.constraints()
+                   if v.ruletype == constraint.ConstraintRuletype.validatetrans)
 
     #
     # Policy components lookup functions
@@ -578,6 +582,8 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_constraint_ruletype(types):
         """Validate constraint types."""
+        warnings.warn("Constraint ruletypes have changed to an enumeration.",
+                      DeprecationWarning)
         return constraint.validate_ruletype(types)
 
     @staticmethod

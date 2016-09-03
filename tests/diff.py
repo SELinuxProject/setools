@@ -20,6 +20,7 @@ import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
+from setools import ConstraintRuletype as CRT
 from setools import DefaultRuletype as DRT
 from setools import DefaultRangeValue as DRV
 from setools import DefaultValue as DV
@@ -1366,13 +1367,13 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         constrain = l[0]
-        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow3", constrain.tclass)
         self.assertSetEqual(set(["null"]), constrain.perms)
         self.assertListEqual(["u1", "u2", "!="], constrain.postfix_expression())
 
         constrain = l[1]
-        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow5", constrain.tclass)
         self.assertSetEqual(set(["hi_r"]), constrain.perms)
         self.assertListEqual(
@@ -1385,13 +1386,13 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         constrain = l[0]
-        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow4", constrain.tclass)
         self.assertSetEqual(set(["hi_w"]), constrain.perms)
         self.assertListEqual(["u1", "u2", "!="], constrain.postfix_expression())
 
         constrain = l[1]
-        self.assertEqual("constrain", constrain.ruletype)
+        self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow5", constrain.tclass)
         self.assertSetEqual(set(["hi_r"]), constrain.perms)
         self.assertListEqual(
@@ -1407,7 +1408,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         mlsconstrain = l[0]
-        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow3", mlsconstrain.tclass)
         self.assertSetEqual(set(["null"]), mlsconstrain.perms)
         self.assertListEqual(
@@ -1416,7 +1417,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
             mlsconstrain.postfix_expression())
 
         mlsconstrain = l[1]
-        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow5", mlsconstrain.tclass)
         self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
         self.assertListEqual(
@@ -1430,7 +1431,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         mlsconstrain = l[0]
-        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow4", mlsconstrain.tclass)
         self.assertSetEqual(set(["hi_w"]), mlsconstrain.perms)
         self.assertListEqual(
@@ -1439,7 +1440,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
             mlsconstrain.postfix_expression())
 
         mlsconstrain = l[1]
-        self.assertEqual("mlsconstrain", mlsconstrain.ruletype)
+        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow5", mlsconstrain.tclass)
         self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
         self.assertListEqual(
@@ -1455,14 +1456,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         validatetrans = l[0]
-        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow3", validatetrans.tclass)
         self.assertListEqual(
             ['t1', 't2', '==', 't3', set(["system"]), '==', 'or'],
             validatetrans.postfix_expression())
 
         validatetrans = l[1]
-        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow5", validatetrans.tclass)
         self.assertListEqual(
             ['u1', 'u2', '!=', 'r1', 'r2', '==', 'and', 't3', set(["system"]), '==', 'or'],
@@ -1474,14 +1475,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         validatetrans = l[0]
-        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow4", validatetrans.tclass)
         self.assertListEqual(
             ['u1', 'u2', '==', 't3', set(["system"]), '==', 'or'],
             validatetrans.postfix_expression())
 
         validatetrans = l[1]
-        self.assertEqual("validatetrans", validatetrans.ruletype)
+        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow5", validatetrans.tclass)
         self.assertListEqual(
             ['u1', 'u2', '==', 'r1', 'r2', '!=', 'and', 't3', set(["system"]), '==', 'or'],
@@ -1496,14 +1497,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         mlsvalidatetrans = l[0]
-        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow3", mlsvalidatetrans.tclass)
         self.assertListEqual(
             ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
             mlsvalidatetrans.postfix_expression())
 
         mlsvalidatetrans = l[1]
-        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
         self.assertListEqual(
             ['l1', 'l2', 'incomp', 'h1', 'h2', 'domby',
@@ -1516,14 +1517,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(l))
 
         mlsvalidatetrans = l[0]
-        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow4", mlsvalidatetrans.tclass)
         self.assertListEqual(
             ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
             mlsvalidatetrans.postfix_expression())
 
         mlsvalidatetrans = l[1]
-        self.assertEqual("mlsvalidatetrans", mlsvalidatetrans.ruletype)
+        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
         self.assertListEqual(
             ['l1', 'l2', 'dom', 'h1', 'h2', 'dom', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
@@ -2640,7 +2641,7 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     def test_removed_mlsconstraints(self):
         """MLSvsStandardDiff: all mlsconstraints removed."""
         self.assertEqual(
-            sum(1 for m in self.diff.left_policy.constraints() if m.ruletype == "mlsconstrain"),
+            sum(1 for m in self.diff.left_policy.constraints() if m.ruletype == CRT.mlsconstrain),
             len(self.diff.removed_mlsconstrains))
 
     def test_added_mlsvalidatetrans(self):
@@ -2650,7 +2651,8 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     def test_removed_mlsvalidatetrans(self):
         """MLSvsStandardDiff: all mlsvalidatetrans removed."""
         self.assertEqual(
-            sum(1 for m in self.diff.left_policy.constraints() if m.ruletype == "mlsvalidatetrans"),
+            sum(1 for m in self.diff.left_policy.constraints()
+                if m.ruletype == CRT.mlsvalidatetrans),
             len(self.diff.removed_mlsvalidatetrans))
 
     def test_added_typebounds(self):
