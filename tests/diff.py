@@ -20,6 +20,7 @@ import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
+from setools import BoundsRuletype as BRT
 from setools import ConstraintRuletype as CRT
 from setools import DefaultRuletype as DRT
 from setools import DefaultRangeValue as DRV
@@ -1539,7 +1540,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         bounds = l[0]
-        self.assertEqual("typebounds", bounds.ruletype)
+        self.assertEqual(BRT.typebounds, bounds.ruletype)
         self.assertEqual("added_parent", bounds.parent)
         self.assertEqual("added_child", bounds.child)
 
@@ -1549,7 +1550,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         bounds = l[0]
-        self.assertEqual("typebounds", bounds.ruletype)
+        self.assertEqual(BRT.typebounds, bounds.ruletype)
         self.assertEqual("removed_parent", bounds.parent)
         self.assertEqual("removed_child", bounds.child)
 
@@ -1559,7 +1560,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         bounds, added_bound, removed_bound = l[0]
-        self.assertEqual("typebounds", bounds.ruletype)
+        self.assertEqual(BRT.typebounds, bounds.ruletype)
         self.assertEqual("mod_child", bounds.child)
         self.assertEqual("mod_parent_added", added_bound)
         self.assertEqual("mod_parent_removed", removed_bound)

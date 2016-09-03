@@ -17,7 +17,7 @@
 #
 import unittest
 
-from setools import SELinuxPolicy, BoundsQuery
+from setools import SELinuxPolicy, BoundsQuery, BoundsRuletype
 
 
 class BoundsQueryTest(unittest.TestCase):
@@ -42,7 +42,7 @@ class BoundsQueryTest(unittest.TestCase):
         self.assertEqual(1, len(qbounds))
 
         b = qbounds[0]
-        self.assertEqual("typebounds", b.ruletype)
+        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
         self.assertEqual("test1_parent", b.parent)
         self.assertEqual("test1_child", b.child)
 
@@ -53,12 +53,12 @@ class BoundsQueryTest(unittest.TestCase):
         self.assertEqual(2, len(qbounds))
 
         b = qbounds[0]
-        self.assertEqual("typebounds", b.ruletype)
+        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
         self.assertEqual("test2_parent1", b.parent)
         self.assertEqual("test2_child2", b.child)
 
         b = qbounds[1]
-        self.assertEqual("typebounds", b.ruletype)
+        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
         self.assertEqual("test2_parent2", b.parent)
         self.assertEqual("test2_child1", b.child)
 
@@ -69,7 +69,7 @@ class BoundsQueryTest(unittest.TestCase):
         self.assertEqual(1, len(qbounds))
 
         b = qbounds[0]
-        self.assertEqual("typebounds", b.ruletype)
+        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
         self.assertEqual("test10_parent", b.parent)
         self.assertEqual("test10_child", b.child)
 
@@ -80,11 +80,11 @@ class BoundsQueryTest(unittest.TestCase):
         self.assertEqual(2, len(qbounds))
 
         b = qbounds[0]
-        self.assertEqual("typebounds", b.ruletype)
+        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
         self.assertEqual("test11_parent1", b.parent)
         self.assertEqual("test11_child2", b.child)
 
         b = qbounds[1]
-        self.assertEqual("typebounds", b.ruletype)
+        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
         self.assertEqual("test11_parent2", b.parent)
         self.assertEqual("test11_child1", b.child)

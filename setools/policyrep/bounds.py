@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -20,6 +21,7 @@ from . import exception
 from .symbol import PolicySymbol
 from .qpol import qpol_typebounds_t
 from .typeattr import type_factory
+from .util import PolicyEnum
 
 
 def bounds_factory(policy, sym):
@@ -33,10 +35,17 @@ def bounds_factory(policy, sym):
 
 def validate_ruletype(t):
     """Validate *bounds rule types."""
-    if t not in ["typebounds"]:
-        raise exception.InvalidBoundsType("{0} is not a valid *bounds  rule type.".format(t))
+    try:
+        return BoundsRuletype.lookup(t)
+    except KeyError:
+        raise exception.InvalidBoundsType("{0} is not a valid *bounds rule type.".format(t))
 
-    return t
+
+class BoundsRuletype(PolicyEnum):
+
+    """Enumeration of *bounds rule types."""
+
+    typebounds = 1
 
 
 class Bounds(PolicySymbol):
@@ -49,7 +58,7 @@ class Bounds(PolicySymbol):
     def __hash__(self):
         return hash("{0.ruletype}|{0.child};".format(self))
 
-    ruletype = "typebounds"
+    ruletype = BoundsRuletype.typebounds
 
     @property
     def parent(self):

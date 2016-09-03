@@ -18,6 +18,7 @@
 #
 from collections import namedtuple
 
+from ..policyrep import BoundsRuletype
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 
@@ -65,7 +66,7 @@ class BoundsDifference(Difference):
         """Create rule lists for both policies."""
         self._left_typebounds = []
         for rule in self.left_policy.bounds():
-            if rule.ruletype == "typebounds":
+            if rule.ruletype == BoundsRuletype.typebounds:
                 self._left_typebounds.append(rule)
             else:
                 self.log.error("Unknown rule type: {0} (This is an SETools bug)".
@@ -73,7 +74,7 @@ class BoundsDifference(Difference):
 
         self._right_typebounds = []
         for rule in self.right_policy.bounds():
-            if rule.ruletype == "typebounds":
+            if rule.ruletype == BoundsRuletype.typebounds:
                 self._right_typebounds.append(rule)
             else:
                 self.log.error("Unknown rule type: {0} (This is an SETools bug)".

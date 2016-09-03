@@ -388,7 +388,8 @@ class SELinuxPolicy(object):
     @property
     def typebounds_count(self):
         """The number of typebounds rules."""
-        return sum(1 for b in self.bounds() if b.ruletype == "typebounds")
+        return sum(1 for b in self.bounds()
+                   if b.ruletype == bounds.BoundsRuletype.typebounds)
 
     @property
     def user_count(self):
@@ -577,6 +578,8 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_bounds_ruletype(types):
         """Validate constraint types."""
+        warnings.warn("Bounds ruletypes have changed to an enumeration.",
+                      DeprecationWarning)
         return bounds.validate_ruletype(types)
 
     @staticmethod

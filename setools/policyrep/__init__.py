@@ -1,4 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -22,6 +23,7 @@
 # structures.
 
 from . import exception
+from .bounds import BoundsRuletype
 from .netcontext import PortconProtocol, PortconRange
 from .constraint import ConstraintRuletype
 from .default import DefaultRuletype, DefaultValue, DefaultRangeValue

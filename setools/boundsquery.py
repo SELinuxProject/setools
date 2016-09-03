@@ -20,6 +20,7 @@ import logging
 import re
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .policyrep import BoundsRuletype
 from .query import PolicyQuery
 from .util import match_regex
 
@@ -36,7 +37,7 @@ class BoundsQuery(PolicyQuery):
     ruletype        The rule type(s) to match.
     """
 
-    ruletype = CriteriaSetDescriptor(lookup_function="validate_bounds_ruletype")
+    ruletype = CriteriaSetDescriptor(enum_class=BoundsRuletype)
     parent = CriteriaDescriptor("parent_regex")
     parent_regex = False
     child = CriteriaDescriptor("child_regex")

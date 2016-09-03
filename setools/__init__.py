@@ -1,5 +1,6 @@
 """The SETools SELinux policy analysis library."""
 # Copyright 2014-2015, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -28,7 +29,9 @@ import logging
 
 # Python classes for policy representation
 from . import policyrep
-from .policyrep import SELinuxPolicy
+from .policyrep import SELinuxPolicy, BoundsRuletype, ConstraintRuletype, DefaultRuletype, \
+                       DefaultRangeValue, DefaultValue, FSUseRuletype, MLSRuletype, \
+                       NodeconIPVersion, PortconProtocol, RBACRuletype, TERuletype
 
 # Exceptions
 from . import exception

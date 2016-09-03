@@ -35,7 +35,7 @@ class BoundsTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return item.ruletype
+                    return item.ruletype.name
                 elif col == 1:
                     return str(item.parent)
                 elif col == 2:

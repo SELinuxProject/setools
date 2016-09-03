@@ -239,7 +239,7 @@ try:
         components.append(("Sensitivities", q, lambda x: x.statement()))
 
     if args.typeboundsquery or args.all:
-        q = setools.BoundsQuery(p, ruletype=["typebounds"])
+        q = setools.BoundsQuery(p, ruletype=[setools.BoundsRuletype.typebounds])
         if isinstance(args.typeboundsquery, str):
             q.child = args.typeboundsquery
 
