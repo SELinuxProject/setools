@@ -1,4 +1,5 @@
 # Copyright 2015, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -43,7 +44,7 @@ class CriteriaDescriptor(object):
     """
     Single item criteria descriptor.
 
-    Parameters:
+    Keyword Parameters:
     name_regex      The name of instance's regex setting attribute;
                     used as name_regex below.  If unset,
                     regular expressions will never be used.
@@ -51,6 +52,8 @@ class CriteriaDescriptor(object):
                     e.g. lookup_type or lookup_boolean.
     default_value   The default value of the criteria.  The default
                     is None.
+    enum_class      The class of enumeration which supports a
+                    lookup class method.
 
     Read-only instance attribute use (obj parameter):
     policy          The instance of SELinuxPolicy
@@ -60,12 +63,15 @@ class CriteriaDescriptor(object):
                     does not exist, False is assumed.
     """
 
-    def __init__(self, name_regex=None, lookup_function=None, default_value=None):
-        assert name_regex or lookup_function, "A simple attribute should be used if there is " \
-            "no regex nor lookup function."
+    def __init__(self, name_regex=None, lookup_function=None, default_value=None, enum_class=None):
+        assert name_regex or lookup_function or enum_class, \
+            "A simple attribute should be used if there is no regex, lookup function, or enum."
+        assert not (lookup_function and enum_class), \
+            "Lookup functions and enum classes are mutually exclusive."
         self.regex = name_regex
         self.default_value = default_value
         self.lookup_function = lookup_function
+        self.enum_class = enum_class
 
         # use weak references so instances can be
         # garbage collected, rather than unnecessarily
@@ -86,6 +92,8 @@ class CriteriaDescriptor(object):
         elif self.lookup_function:
             lookup = getattr(obj.policy, self.lookup_function)
             self.instances[obj] = lookup(value)
+        elif self.enum_class:
+            self.instances[obj] = self.enum_class.lookup(value)
         else:
             self.instances[obj] = value
 
@@ -102,6 +110,8 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
         elif self.lookup_function:
             lookup = getattr(obj.policy, self.lookup_function)
             self.instances[obj] = set(lookup(v) for v in value)
+        elif self.enum_class:
+            self.instances[obj] = set(self.enum_class.lookup(v) for v in value)
         else:
             self.instances[obj] = set(value)
 
