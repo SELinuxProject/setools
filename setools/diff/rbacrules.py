@@ -18,6 +18,7 @@
 #
 from collections import defaultdict, namedtuple
 
+from ..policyrep import RBACRuletype
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 
@@ -54,8 +55,8 @@ class RBACRulesDifference(Difference):
             self._create_rbac_rule_lists()
 
         self.added_role_allows, self.removed_role_allows, _ = self._set_diff(
-            self._expand_generator(self._left_rbac_rules["allow"], RoleAllowWrapper),
-            self._expand_generator(self._right_rbac_rules["allow"], RoleAllowWrapper))
+            self._expand_generator(self._left_rbac_rules[RBACRuletype.allow], RoleAllowWrapper),
+            self._expand_generator(self._right_rbac_rules[RBACRuletype.allow], RoleAllowWrapper))
 
     def diff_role_transitions(self):
         """Generate the difference in role_transition rules between the policies."""
@@ -68,8 +69,9 @@ class RBACRulesDifference(Difference):
             self._create_rbac_rule_lists()
 
         added, removed, matched = self._set_diff(
-            self._expand_generator(self._left_rbac_rules["role_transition"], RoleTransitionWrapper),
-            self._expand_generator(self._right_rbac_rules["role_transition"],
+            self._expand_generator(self._left_rbac_rules[RBACRuletype.role_transition],
+                                   RoleTransitionWrapper),
+            self._expand_generator(self._right_rbac_rules[RBACRuletype.role_transition],
                                    RoleTransitionWrapper))
 
         modified = []

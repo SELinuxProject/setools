@@ -20,6 +20,7 @@
 import unittest
 
 from setools import SELinuxPolicy, RBACRuleQuery
+from setools import RBACRuletype as RRT
 from setools.policyrep.exception import RuleUseError, RuleNotConditional
 
 from . import mixins
@@ -35,7 +36,7 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
     def validate_allow(self, rule, source, target):
         """Validate a role allow rule."""
-        self.assertEqual("allow", rule.ruletype)
+        self.assertEqual(RRT.allow, rule.ruletype)
         self.assertEqual(source, rule.source)
         self.assertEqual(target, rule.target)
         self.assertRaises(RuleUseError, getattr, rule, "tclass")
@@ -61,7 +62,7 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.assertEqual(len(r), 2)
 
         self.validate_allow(r[0], "test1s", "test1t")
-        self.validate_rule(r[1], "role_transition", "test1s", "system", "infoflow", "test1t")
+        self.validate_rule(r[1], RRT.role_transition, "test1s", "system", "infoflow", "test1t")
 
     def test_002_source_direct_regex(self):
         """RBAC rule query with regex, direct, source match."""
@@ -96,7 +97,7 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "role_transition", "test12s", "test12t", "infoflow", "test12d")
+        self.validate_rule(r[0], RRT.role_transition, "test12s", "test12t", "infoflow", "test12d")
 
     @unittest.skip("Setting tclass to a string is no longer supported.")
     def test_020_class(self):
@@ -105,7 +106,7 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "role_transition", "test20", "system", "infoflow2", "test20d2")
+        self.validate_rule(r[0], RRT.role_transition, "test20", "system", "infoflow2", "test20d2")
 
     def test_021_class_list(self):
         """RBAC rule query with object class list match."""
@@ -114,8 +115,8 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "role_transition", "test21", "system", "infoflow3", "test21d3")
-        self.validate_rule(r[1], "role_transition", "test21", "system", "infoflow4", "test21d2")
+        self.validate_rule(r[0], RRT.role_transition, "test21", "system", "infoflow3", "test21d3")
+        self.validate_rule(r[1], RRT.role_transition, "test21", "system", "infoflow4", "test21d2")
 
     def test_022_class_regex(self):
         """RBAC rule query with object class regex match."""
@@ -123,8 +124,8 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "role_transition", "test22", "system", "infoflow5", "test22d2")
-        self.validate_rule(r[1], "role_transition", "test22", "system", "infoflow6", "test22d3")
+        self.validate_rule(r[0], RRT.role_transition, "test22", "system", "infoflow5", "test22d2")
+        self.validate_rule(r[1], RRT.role_transition, "test22", "system", "infoflow6", "test22d3")
 
     def test_030_default(self):
         """RBAC rule query with exact default match."""
@@ -133,7 +134,7 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], "role_transition", "test30s", "system", "infoflow", "test30d")
+        self.validate_rule(r[0], RRT.role_transition, "test30s", "system", "infoflow", "test30d")
 
     def test_031_default_regex(self):
         """RBAC rule query with regex default match."""
@@ -142,16 +143,16 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
         r = sorted(q.results())
         self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], "role_transition", "test31s", "system", "infoflow7", "test31d3")
-        self.validate_rule(r[1], "role_transition", "test31s", "system", "process", "test31d2")
+        self.validate_rule(r[0], RRT.role_transition, "test31s", "system", "infoflow7", "test31d3")
+        self.validate_rule(r[1], RRT.role_transition, "test31s", "system", "process", "test31d2")
 
     def test_040_ruletype(self):
         """RBAC rule query with rule type."""
-        q = RBACRuleQuery(self.p, ruletype=["allow"])
+        q = RBACRuleQuery(self.p, ruletype=[RRT.allow])
 
         num = 0
         for num, r in enumerate(sorted(q.results()), start=1):
-            self.assertEqual(r.ruletype, "allow")
+            self.assertEqual(r.ruletype, RRT.allow)
 
         # this will have to be updated as number of
         # role allows change in the test policy

@@ -36,7 +36,7 @@ class RBACRuleTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return rule.ruletype
+                    return rule.ruletype.name
                 elif col == 1:
                     return str(rule.source)
                 elif col == 2:

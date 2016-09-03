@@ -20,6 +20,7 @@ import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
+from setools import RBACRuletype as RRT
 from setools import TERuletype as TRT
 
 from .mixins import ValidateRule
@@ -790,12 +791,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with existing roles
-        self.assertEqual("allow", rules[0].ruletype)
+        self.assertEqual(RRT.allow, rules[0].ruletype)
         self.assertEqual("added_role", rules[0].source)
         self.assertEqual("system", rules[0].target)
 
         # added rule with new roles
-        self.assertEqual("allow", rules[1].ruletype)
+        self.assertEqual(RRT.allow, rules[1].ruletype)
         self.assertEqual("added_rule_source_r", rules[1].source)
         self.assertEqual("added_rule_target_r", rules[1].target)
 
@@ -805,12 +806,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with removed role
-        self.assertEqual("allow", rules[0].ruletype)
+        self.assertEqual(RRT.allow, rules[0].ruletype)
         self.assertEqual("removed_role", rules[0].source)
         self.assertEqual("system", rules[0].target)
 
         # removed rule with existing roles
-        self.assertEqual("allow", rules[1].ruletype)
+        self.assertEqual(RRT.allow, rules[1].ruletype)
         self.assertEqual("removed_rule_source_r", rules[1].source)
         self.assertEqual("removed_rule_target_r", rules[1].target)
 
@@ -823,11 +824,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # added rule with new role
-        self.validate_rule(rules[0], "role_transition", "added_role", "system", "infoflow4",
+        self.validate_rule(rules[0], RRT.role_transition, "added_role", "system", "infoflow4",
                            "system")
 
         # added rule with existing roles
-        self.validate_rule(rules[1], "role_transition", "role_tr_added_rule_source",
+        self.validate_rule(rules[1], RRT.role_transition, "role_tr_added_rule_source",
                            "role_tr_added_rule_target", "infoflow6", "system")
 
     def test_removed_role_transition_rules(self):
@@ -836,11 +837,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(rules))
 
         # removed rule with new role
-        self.validate_rule(rules[0], "role_transition", "removed_role", "system", "infoflow4",
+        self.validate_rule(rules[0], RRT.role_transition, "removed_role", "system", "infoflow4",
                            "system")
 
         # removed rule with existing roles
-        self.validate_rule(rules[1], "role_transition", "role_tr_removed_rule_source",
+        self.validate_rule(rules[1], RRT.role_transition, "role_tr_removed_rule_source",
                            "role_tr_removed_rule_target", "infoflow5", "system")
 
     def test_modified_role_transition_rules(self):
@@ -849,7 +850,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule, added_default, removed_default = l[0]
-        self.assertEqual("role_transition", rule.ruletype)
+        self.assertEqual(RRT.role_transition, rule.ruletype)
         self.assertEqual("role_tr_matched_source", rule.source)
         self.assertEqual("role_tr_matched_target", rule.target)
         self.assertEqual("infoflow3", rule.tclass)

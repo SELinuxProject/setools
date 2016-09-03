@@ -1,4 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -23,6 +24,7 @@ from . import qpol
 from . import rule
 from . import role
 from . import typeattr
+from .util import PolicyEnum
 
 
 def rbac_rule_factory(policy, name):
@@ -62,10 +64,18 @@ def expanded_rbac_rule_factory(original, source, target):
 
 def validate_ruletype(t):
     """Validate RBAC rule types."""
-    if t not in ["allow", "role_transition"]:
+    try:
+        return RBACRuletype.lookup(t)
+    except KeyError:
         raise exception.InvalidRBACRuleType("{0} is not a valid RBAC rule type.".format(t))
 
-    return t
+
+class RBACRuletype(PolicyEnum):
+
+    """An enumeration of RBAC rule types."""
+
+    allow = 1
+    role_transition = 2
 
 
 class RoleAllow(rule.PolicyRule):
@@ -78,7 +88,7 @@ class RoleAllow(rule.PolicyRule):
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}".format(self))
 
-    ruletype = "allow"
+    ruletype = RBACRuletype.allow
 
     @property
     def source(self):
@@ -113,7 +123,7 @@ class RoleTransition(rule.PolicyRule):
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
 
-    ruletype = "role_transition"
+    ruletype = RBACRuletype.role_transition
 
     @property
     def source(self):

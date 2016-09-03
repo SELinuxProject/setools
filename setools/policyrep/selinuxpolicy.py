@@ -608,6 +608,8 @@ class SELinuxPolicy(object):
     @staticmethod
     def validate_rbac_ruletype(types):
         """Validate RBAC rule types."""
+        warnings.warn("RBAC ruletypes have changed to an enumeration.",
+                      DeprecationWarning)
         return rbacrule.validate_ruletype(types)
 
     @staticmethod
