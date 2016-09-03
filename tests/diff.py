@@ -20,6 +20,7 @@ import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
 
 from setools import SELinuxPolicy, PolicyDifference
+from setools import FSUseRuletype as FSURT
 from setools import MLSRuletype as MRT
 from setools import RBACRuletype as RRT
 from setools import TERuletype as TRT
@@ -1007,7 +1008,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule = l[0]
-        self.assertEqual("fs_use_xattr", rule.ruletype)
+        self.assertEqual(FSURT.fs_use_xattr, rule.ruletype)
         self.assertEqual("added_fsuse", rule.fs)
         self.assertEqual("system:object_r:system:s0", rule.context)
 
@@ -1017,7 +1018,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule = l[0]
-        self.assertEqual("fs_use_task", rule.ruletype)
+        self.assertEqual(FSURT.fs_use_task, rule.ruletype)
         self.assertEqual("removed_fsuse", rule.fs)
         self.assertEqual("system:object_r:system:s0", rule.context)
 
@@ -1027,7 +1028,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(1, len(l))
 
         rule, added_context, removed_context = l[0]
-        self.assertEqual("fs_use_trans", rule.ruletype)
+        self.assertEqual(FSURT.fs_use_trans, rule.ruletype)
         self.assertEqual("modified_fsuse", rule.fs)
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)

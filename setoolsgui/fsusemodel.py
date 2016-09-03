@@ -35,7 +35,7 @@ class FSUseTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return rule.ruletype
+                    return rule.ruletype.name
                 elif col == 1:
                     return rule.fs
                 elif col == 2:

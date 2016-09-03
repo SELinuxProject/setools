@@ -1,4 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -22,14 +23,15 @@ from . import exception
 from . import qpol
 from . import symbol
 from . import context
+from .util import PolicyEnum
 
 
 def validate_ruletype(t):
     """Validate fs_use_* rule types."""
-    if t not in ["fs_use_xattr", "fs_use_trans", "fs_use_task"]:
+    try:
+        return FSUseRuletype.lookup(t)
+    except KeyError:
         raise exception.InvalidFSUseType("{0} is not a valid fs_use_* type.".format(t))
-
-    return t
 
 
 def fs_use_factory(policy, name):
@@ -131,16 +133,20 @@ class Genfscon(FSContext):
         return self.qpol_symbol.path(self.policy)
 
 
-class FSUse(FSContext):
+class FSUseRuletype(PolicyEnum):
 
-    """A fs_use_* statement."""
-
+    """Enumeration of fs_use_* rule types."""
     # there are more rule types, but modern SELinux
     # only supports these three.
-    _ruletype_to_text = {
-        qpol.QPOL_FS_USE_XATTR: 'fs_use_xattr',
-        qpol.QPOL_FS_USE_TRANS: 'fs_use_trans',
-        qpol.QPOL_FS_USE_TASK: 'fs_use_task'}
+
+    fs_use_xattr = qpol.QPOL_FS_USE_XATTR
+    fs_use_trans = qpol.QPOL_FS_USE_TRANS
+    fs_use_task = qpol.QPOL_FS_USE_TASK
+
+
+class FSUse(FSContext):
+
+    """An fs_use_* statement."""
 
     def __str__(self):
         return "{0.ruletype} {0.fs} {0.context};".format(self)
@@ -151,4 +157,4 @@ class FSUse(FSContext):
     @property
     def ruletype(self):
         """The rule type for this fs_use_* statement."""
-        return self._ruletype_to_text[self.qpol_symbol.behavior(self.policy)]
+        return FSUseRuletype(self.qpol_symbol.behavior(self.policy))

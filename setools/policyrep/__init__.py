@@ -23,6 +23,7 @@
 
 from . import exception
 from .netcontext import PortconProtocol, PortconRange
+from .fscontext import FSUseRuletype
 from .mlsrule import MLSRuletype
 from .netcontext import NodeconIPVersion, PortconProtocol, PortconRange
 from .rbacrule import RBACRuletype

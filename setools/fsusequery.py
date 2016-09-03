@@ -21,6 +21,7 @@ import re
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchContext
+from .policyrep import FSUseRuletype
 from .query import PolicyQuery
 from .util import match_regex
 
@@ -58,7 +59,7 @@ class FSUseQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    ruletype = CriteriaSetDescriptor(lookup_function="validate_fs_use_ruletype")
+    ruletype = CriteriaSetDescriptor(enum_class=FSUseRuletype)
     fs = CriteriaDescriptor("fs_regex")
     fs_regex = False
 
