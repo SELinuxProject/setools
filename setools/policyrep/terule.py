@@ -125,7 +125,17 @@ class BaseTERule(rule.PolicyRule):
 
     @property
     def conditional_block(self):
-        """The conditional block of the rule (T/F)"""
+        """
+        The conditional block of the rule (T/F)
+
+        For example, if the policy looks like this:
+
+        if ( the_conditional_expression ) {
+            If the rule is here, this property is True
+        } else {
+            If the rule is here, this property is False
+        }
+        """
         try:
             return bool(self.qpol_symbol.which_list(self.policy))
         except AttributeError:
