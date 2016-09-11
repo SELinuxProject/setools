@@ -1422,7 +1422,7 @@ try:
                     if removed_default:
                         line += "+{0} -{1}".format(added_default, removed_default)
                     else:
-                        line += default.default
+                        line += default.default.name
 
                     if removed_range:
                         line += " +{0} -{1};".format(added_range, removed_range)
