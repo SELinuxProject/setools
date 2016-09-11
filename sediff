@@ -139,6 +139,7 @@ try:
                 print("      * {0} +{1} -{2}".format(name, added, removed))
 
         print()
+        del diff.modified_properties
 
     if all_differences or args.common:
         if diff.added_commons or diff.removed_commons or diff.modified_commons or args.common:
@@ -167,6 +168,9 @@ try:
                     for p in sorted(mod.removed_perms):
                         print("          - {0}".format(p))
             print()
+            del diff.added_commons
+            del diff.removed_commons
+            del diff.modified_commons
 
     if all_differences or args.class_:
         if diff.added_classes or diff.removed_classes or diff.modified_classes or args.class_:
@@ -195,6 +199,9 @@ try:
                     for p in sorted(mod.removed_perms):
                         print("          - {0}".format(p))
             print()
+            del diff.added_classes
+            del diff.removed_classes
+            del diff.modified_classes
 
     if all_differences or args.bool_:
         if diff.added_booleans or diff.removed_booleans or \
@@ -218,6 +225,9 @@ try:
                     print("          - {0}".format(mod.removed_state))
 
             print()
+            del diff.added_booleans
+            del diff.removed_booleans
+            del diff.modified_booleans
 
     if all_differences or args.role:
         if diff.added_roles or diff.removed_roles or diff.modified_roles or args.role:
@@ -247,6 +257,9 @@ try:
                     for t in sorted(mod.removed_types):
                         print("          - {0}".format(t))
             print()
+            del diff.added_roles
+            del diff.removed_roles
+            del diff.modified_roles
 
     if all_differences or args.type_:
         if diff.added_types or diff.removed_types or diff.modified_types or args.type_:
@@ -295,6 +308,9 @@ try:
                         print("          - {0}".format(t))
 
             print()
+            del diff.added_types
+            del diff.removed_types
+            del diff.modified_types
 
     if all_differences or args.attribute:
         if diff.added_type_attributes or diff.removed_type_attributes or \
@@ -325,6 +341,9 @@ try:
                     for t in sorted(mod.removed_types):
                         print("          - {0}".format(t))
             print()
+            del diff.added_type_attributes
+            del diff.removed_type_attributes
+            del diff.modified_type_attributes
 
     if all_differences or args.user:
         if diff.added_users or diff.removed_users or diff.modified_users or args.user:
@@ -370,6 +389,9 @@ try:
                         print("          + {0}".format(mod.added_range))
                         print("          - {0}".format(mod.removed_range))
             print()
+            del diff.added_users
+            del diff.removed_users
+            del diff.modified_users
 
     if all_differences or args.category:
         if diff.added_categories or diff.removed_categories or diff.modified_categories \
@@ -402,6 +424,9 @@ try:
                         print("          - {0}".format(a))
 
             print()
+            del diff.added_categories
+            del diff.removed_categories
+            del diff.modified_categories
 
     if all_differences or args.sensitivity:
         if diff.added_sensitivities or diff.removed_sensitivities or diff.modified_sensitivities \
@@ -434,6 +459,9 @@ try:
                         print("          - {0}".format(a))
 
             print()
+            del diff.added_sensitivities
+            del diff.removed_sensitivities
+            del diff.modified_sensitivities
 
     if all_differences or args.level:
         if diff.added_levels or diff.removed_levels or \
@@ -465,6 +493,9 @@ try:
                     for c in sorted(removed_categories):
                         print("          - {0}".format(c))
             print()
+            del diff.added_levels
+            del diff.removed_levels
+            del diff.modified_levels
 
     if all_differences or args.allow:
         if diff.added_allows or diff.removed_allows or diff.modified_allows or args.allow:
@@ -499,6 +530,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_allows
+            del diff.removed_allows
+            del diff.modified_allows
 
     if all_differences or args.allowxperm:
         if diff.added_allowxperms or diff.removed_allowxperms or diff.modified_allowxperms \
@@ -555,6 +589,9 @@ try:
                           "{{ {1} }};".format(rule, " ".join(perms)))
 
             print()
+            del diff.added_allowxperms
+            del diff.removed_allowxperms
+            del diff.modified_allowxperms
 
     if all_differences or args.neverallow:
         if diff.added_neverallows or diff.removed_neverallows or diff.modified_neverallows or \
@@ -591,6 +628,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_neverallows
+            del diff.removed_neverallows
+            del diff.modified_neverallows
 
     if all_differences or args.neverallowxperm:
         if diff.added_neverallowxperms or diff.removed_neverallowxperms or \
@@ -650,6 +690,9 @@ try:
                           "{{ {1} }};".format(rule, " ".join(perms)))
 
             print()
+            del diff.added_neverallowxperms
+            del diff.removed_neverallowxperms
+            del diff.modified_neverallowxperms
 
     if all_differences or args.auditallow:
         if diff.added_auditallows or diff.removed_auditallows or diff.modified_auditallows or \
@@ -686,6 +729,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_auditallows
+            del diff.removed_auditallows
+            del diff.modified_auditallows
 
     if all_differences or args.auditallowxperm:
         if diff.added_auditallowxperms or diff.removed_auditallowxperms or \
@@ -745,6 +791,9 @@ try:
                           "{{ {1} }};".format(rule, " ".join(perms)))
 
             print()
+            del diff.added_auditallowxperms
+            del diff.removed_auditallowxperms
+            del diff.modified_auditallowxperms
 
     if all_differences or args.dontaudit:
         if diff.added_dontaudits or diff.removed_dontaudits or diff.modified_dontaudits or \
@@ -781,6 +830,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_dontaudits
+            del diff.removed_dontaudits
+            del diff.modified_dontaudits
 
     if all_differences or args.dontauditxperm:
         if diff.added_dontauditxperms or diff.removed_dontauditxperms or \
@@ -840,6 +892,9 @@ try:
                           "{{ {1} }};".format(rule, " ".join(perms)))
 
             print()
+            del diff.added_dontauditxperms
+            del diff.removed_dontauditxperms
+            del diff.modified_dontauditxperms
 
     if all_differences or args.type_trans:
         if diff.added_type_transitions or diff.removed_type_transitions or \
@@ -884,6 +939,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_type_transitions
+            del diff.removed_type_transitions
+            del diff.modified_type_transitions
 
     if all_differences or args.type_change:
         if diff.added_type_changes or diff.removed_type_changes or \
@@ -925,6 +983,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_type_changes
+            del diff.removed_type_changes
+            del diff.modified_type_changes
 
     if all_differences or args.type_member:
         if diff.added_type_members or diff.removed_type_members or \
@@ -966,6 +1027,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_type_members
+            del diff.removed_type_members
+            del diff.modified_type_members
 
     if all_differences or args.role_allow:
         if diff.added_role_allows or diff.removed_role_allows or args.role_allow:
@@ -985,6 +1049,8 @@ try:
                     print("      - {0}".format(r))
 
             print()
+            del diff.added_role_allows
+            del diff.removed_role_allows
 
     if all_differences or args.role_trans:
         if diff.added_role_transitions or diff.removed_role_transitions or \
@@ -1018,6 +1084,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_role_transitions
+            del diff.removed_role_transitions
+            del diff.modified_role_transitions
 
     if all_differences or args.range_trans:
         if diff.added_range_transitions or diff.removed_range_transitions or \
@@ -1053,6 +1122,9 @@ try:
                     print("      * {0}".format(rule_string))
 
             print()
+            del diff.added_range_transitions
+            del diff.removed_range_transitions
+            del diff.modified_range_transitions
 
     if all_differences or args.constrain:
         if diff.added_constrains or diff.removed_constrains or args.constrain:
@@ -1072,6 +1144,8 @@ try:
                     print("      - {0}".format(r))
 
             print()
+            del diff.added_constrains
+            del diff.removed_constrains
 
     if all_differences or args.mlsconstrain:
         if diff.added_mlsconstrains or diff.removed_mlsconstrains or args.mlsconstrain:
@@ -1091,6 +1165,8 @@ try:
                     print("      - {0}".format(r))
 
             print()
+            del diff.added_mlsconstrains
+            del diff.removed_mlsconstrains
 
     if all_differences or args.validatetrans:
         if diff.added_validatetrans or diff.removed_validatetrans or args.validatetrans:
@@ -1110,6 +1186,8 @@ try:
                     print("      - {0}".format(r))
 
             print()
+            del diff.added_validatetrans
+            del diff.removed_validatetrans
 
     if all_differences or args.mlsvalidatetrans:
         if diff.added_mlsvalidatetrans or diff.removed_mlsvalidatetrans or args.mlsvalidatetrans:
@@ -1129,6 +1207,8 @@ try:
                     print("      - {0}".format(r))
 
             print()
+            del diff.added_mlsvalidatetrans
+            del diff.removed_mlsvalidatetrans
 
     if all_differences or args.initialsid:
         if diff.added_initialsids or diff.removed_initialsids or diff.modified_initialsids \
@@ -1151,6 +1231,9 @@ try:
                           name, mod))
 
             print()
+            del diff.added_initialsids
+            del diff.removed_initialsids
+            del diff.modified_initialsids
 
     if all_differences or args.fs_use:
         if diff.added_fs_uses or diff.removed_fs_uses or diff.modified_fs_uses \
@@ -1173,6 +1256,9 @@ try:
                           entry.rule, entry.added_context, entry.removed_context))
 
             print()
+            del diff.added_fs_uses
+            del diff.removed_fs_uses
+            del diff.modified_fs_uses
 
     if all_differences or args.genfscon:
         if diff.added_genfscons or diff.removed_genfscons or diff.modified_genfscons \
@@ -1195,6 +1281,9 @@ try:
                           entry.rule, entry.added_context, entry.removed_context))
 
             print()
+            del diff.added_genfscons
+            del diff.removed_genfscons
+            del diff.modified_genfscons
 
     if all_differences or args.netifcon:
         if diff.added_netifcons or diff.removed_netifcons or \
@@ -1235,6 +1324,9 @@ try:
                         print("             - {0}".format(entry.removed_packet))
 
             print()
+            del diff.added_netifcons
+            del diff.removed_netifcons
+            del diff.modified_netifcons
 
     if all_differences or args.nodecon:
         if diff.added_nodecons or diff.removed_nodecons or diff.modified_nodecons \
@@ -1258,6 +1350,9 @@ try:
                           con, added_context, removed_context))
 
             print()
+            del diff.added_nodecons
+            del diff.removed_nodecons
+            del diff.modified_nodecons
 
     if all_differences or args.portcon:
         if diff.added_portcons or diff.removed_portcons or diff.modified_portcons \
@@ -1286,6 +1381,9 @@ try:
                               con, low, high, added_context, removed_context))
 
             print()
+            del diff.added_portcons
+            del diff.removed_portcons
+            del diff.modified_portcons
 
     if all_differences or args.polcap:
         if diff.added_polcaps or diff.removed_polcaps or args.polcap:
@@ -1301,6 +1399,8 @@ try:
                     print("      - {0}".format(n))
 
             print()
+            del diff.added_polcaps
+            del diff.removed_polcaps
 
     if all_differences or args.default:
         if diff.added_defaults or diff.removed_defaults or args.default:
@@ -1334,6 +1434,9 @@ try:
                     print(line)
 
             print()
+            del diff.added_defaults
+            del diff.removed_defaults
+            del diff.modified_defaults
 
     if all_differences or args.typebounds:
         if diff.added_typebounds or diff.removed_typebounds or args.typebounds:
@@ -1356,6 +1459,8 @@ try:
                           bound, added_bound, removed_bound))
 
             print()
+            del diff.added_typebounds
+            del diff.removed_typebounds
 
 except Exception as err:
     if args.debug:
