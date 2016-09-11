@@ -22,6 +22,8 @@ class PolicySymbol(object):
 
     """This is a base class for all policy objects."""
 
+    __slots__ = ("policy", "qpol_symbol")
+
     def __init__(self, policy, qpol_symbol):
         """
         Parameters:

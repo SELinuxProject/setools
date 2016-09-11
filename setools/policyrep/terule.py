@@ -96,6 +96,8 @@ class BaseTERule(rule.PolicyRule):
 
     """A type enforcement rule."""
 
+    __slots__ = ()
+
     @property
     def ruletype(self):
         """The rule type."""
@@ -150,6 +152,8 @@ class BaseTERule(rule.PolicyRule):
 class AVRule(BaseTERule):
 
     """An access vector type enforcement rule."""
+
+    __slots__ = ("_rule_string")
 
     def __str__(self):
         try:
@@ -245,6 +249,8 @@ class AVRuleXperm(AVRule):
 
     """An extended permission access vector type enforcement rule."""
 
+    __slots__ = ("_rule_string")
+
     extended = True
 
     def __hash__(self):
@@ -280,6 +286,8 @@ class AVRuleXperm(AVRule):
 class TERule(BaseTERule):
 
     """A type_* type enforcement rule."""
+
+    __slots__ = ("_rule_string")
 
     def __str__(self):
         try:
@@ -345,24 +353,18 @@ class ExpandedAVRule(AVRule):
 
     """An expanded access vector type enforcement rule."""
 
-    source = None
-    target = None
-    origin = None
+    __slots__ = ("source", "target", "origin")
 
 
 class ExpandedAVRuleXperm(AVRuleXperm):
 
     """An expanded extended permission access vector type enforcement rule."""
 
-    source = None
-    target = None
-    origin = None
+    __slots__ = ("source", "target", "origin")
 
 
 class ExpandedTERule(TERule):
 
     """An expanded type_* type enforcement rule."""
 
-    source = None
-    target = None
-    origin = None
+    __slots__ = ("source", "target", "origin")

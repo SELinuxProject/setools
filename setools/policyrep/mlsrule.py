@@ -76,6 +76,8 @@ class MLSRule(rule.PolicyRule):
 
     """An MLS rule."""
 
+    __slots__ = ()
+
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
 
@@ -106,6 +108,4 @@ class ExpandedMLSRule(MLSRule):
 
     """An expanded MLS rule."""
 
-    source = None
-    target = None
-    origin = None
+    __slots__ = ("source", "target", "origin")
