@@ -1403,7 +1403,7 @@ try:
             del diff.removed_polcaps
 
     if all_differences or args.default:
-        if diff.added_defaults or diff.removed_defaults or args.default:
+        if diff.added_defaults or diff.removed_defaults or diff.modified_defaults or args.default:
             print("Defaults ({0} Added, {1} Removed, {2} Modified)".format(
                 len(diff.added_defaults), len(diff.removed_defaults), len(diff.modified_defaults)))
             if diff.added_defaults and not args.stats:
