@@ -104,6 +104,8 @@ class MLSRuleWrapper(Wrapper):
 
     """Wrap MLS rules to allow set operations."""
 
+    __slots__ = ("ruletype", "source", "target", "tclass")
+
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype

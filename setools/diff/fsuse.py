@@ -72,6 +72,8 @@ class FSUseWrapper(Wrapper):
 
     """Wrap fs_use_* rules to allow set operations."""
 
+    __slots__ = ("ruletype", "fs", "context")
+
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype

@@ -71,6 +71,8 @@ class NodeconWrapper(Wrapper):
 
     """Wrap nodecon statements for diff purposes."""
 
+    __slots__ = ("ip_version", "address", "netmask")
+
     def __init__(self, ocon):
         self.origin = ocon
         self.ip_version = ocon.ip_version

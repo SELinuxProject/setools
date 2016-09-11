@@ -123,6 +123,8 @@ class RoleAllowWrapper(Wrapper):
 
     """Wrap role allow rules to allow set operations."""
 
+    __slots__ = ("ruletype", "source", "target")
+
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype
@@ -145,6 +147,8 @@ class RoleAllowWrapper(Wrapper):
 class RoleTransitionWrapper(Wrapper):
 
     """Wrap role_transition rules to allow set operations."""
+
+    __slots__ = ("ruletype", "source", "target", "tclass")
 
     def __init__(self, rule):
         self.origin = rule

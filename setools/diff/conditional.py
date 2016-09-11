@@ -23,6 +23,8 @@ class ConditionalExprWrapper(Wrapper):
 
     """Wrap conditional policy expressions to allow comparisons by truth table."""
 
+    __slots__ = ("truth_table")
+
     def __init__(self, cond):
         self.origin = cond
         self.truth_table = cond.truth_table()

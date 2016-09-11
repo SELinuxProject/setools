@@ -169,6 +169,8 @@ class LevelDeclWrapper(Wrapper):
 
     """Wrap level declarations to allow comparisons."""
 
+    __slots__ = ("sensitivity")
+
     def __init__(self, level):
         self.origin = level
         self.sensitivity = SymbolWrapper(level.sensitivity)
@@ -189,6 +191,8 @@ class LevelDeclWrapper(Wrapper):
 class LevelWrapper(Wrapper):
 
     """Wrap levels to allow comparisons."""
+
+    __slots__ = ("sensitivity", "categories")
 
     def __init__(self, level):
         self.origin = level
@@ -214,6 +218,8 @@ class RangeWrapper(Wrapper):
     It does not detect additions/removals/modifications
     to levels between the low and high levels of the range.
     """
+
+    __slots__ = ("low", "high")
 
     def __init__(self, range_):
         self.origin = range_

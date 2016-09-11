@@ -71,6 +71,8 @@ class PortconWrapper(Wrapper):
 
     """Wrap portcon statements for diff purposes."""
 
+    __slots__ = ("protocol", "low", "high")
+
     def __init__(self, ocon):
         self.origin = ocon
         self.protocol = ocon.protocol

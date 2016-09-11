@@ -297,6 +297,8 @@ class AVRuleWrapper(Wrapper):
 
     """Wrap access vector rules to allow set operations."""
 
+    __slots__ = ("ruletype", "source", "target", "tclass", "conditional", "conditional_block")
+
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype
@@ -332,6 +334,8 @@ class AVRuleXpermWrapper(Wrapper):
 
     """Wrap extended permission access vector rules to allow set operations."""
 
+    __slots__ = ("ruletype", "source", "target", "tclass", "xperm_type")
+
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype
@@ -359,6 +363,9 @@ class AVRuleXpermWrapper(Wrapper):
 class TERuleWrapper(Wrapper):
 
     """Wrap type_* rules to allow set operations."""
+
+    __slots__ = ("ruletype", "source", "target", "tclass", "conditional", "conditional_block",
+                 "filename")
 
     def __init__(self, rule):
         self.origin = rule

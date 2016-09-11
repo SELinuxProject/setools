@@ -186,6 +186,8 @@ class ConstraintWrapper(Wrapper):
 
     """Wrap constraints for diff purposes."""
 
+    __slots__ = ("ruletype", "tclass", "perms", "expr")
+
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype

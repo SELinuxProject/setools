@@ -95,6 +95,8 @@ class BoundsWrapper(Wrapper):
 
     """Wrap *bounds for diff purposes."""
 
+    __slots__ = ("ruletype", "parent", "child")
+
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype

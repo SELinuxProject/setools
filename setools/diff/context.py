@@ -26,6 +26,8 @@ class ContextWrapper(Wrapper):
 
     """Wrap contexts to allow comparisons."""
 
+    __slots__ = ("user", "role", "type_", "range_")
+
     def __init__(self, ctx):
         self.origin = ctx
         self.user = SymbolWrapper(ctx.user)

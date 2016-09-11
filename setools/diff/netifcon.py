@@ -87,6 +87,8 @@ class NetifconWrapper(Wrapper):
 
     """Wrap netifcon statements for diff purposes."""
 
+    __slots__ = ("netif")
+
     def __init__(self, ocon):
         self.origin = ocon
         self.netif = ocon.netif
