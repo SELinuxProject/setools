@@ -30,8 +30,8 @@ import logging
 # Python classes for policy representation
 from . import policyrep
 from .policyrep import SELinuxPolicy, BoundsRuletype, ConstraintRuletype, DefaultRuletype, \
-                       DefaultRangeValue, DefaultValue, FSUseRuletype, MLSRuletype, \
-                       NodeconIPVersion, PortconProtocol, RBACRuletype, TERuletype
+                       DefaultRangeValue, DefaultValue, FSUseRuletype, HandleUnknown, MLSRuletype, \
+                       NodeconIPVersion, PolicyTarget, PortconProtocol, RBACRuletype, TERuletype
 
 # Exceptions
 from . import exception

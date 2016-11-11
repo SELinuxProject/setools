@@ -23,7 +23,7 @@ import subprocess
 import tempfile
 import unittest
 
-from setools import SELinuxPolicy
+from setools import SELinuxPolicy, HandleUnknown
 from setools.policyrep.exception import InvalidPolicy
 
 
@@ -81,7 +81,7 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_010_handle_unknown(self):
         """SELinuxPolicy: handle unknown setting."""
-        self.assertEqual(self.p_binary.handle_unknown, "reject")
+        self.assertEqual(self.p_binary.handle_unknown, HandleUnknown.reject)
 
     def test_011_mls(self):
         """SELinuxPolicy: MLS status."""

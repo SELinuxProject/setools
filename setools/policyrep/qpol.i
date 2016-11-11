@@ -196,6 +196,11 @@ typedef enum qpol_capability
     return NULL;
   }
 }
+%constant int QPOL_TARGET_SELINUX = SEPOL_TARGET_SELINUX;
+%constant int QPOL_TARGET_XEN = SEPOL_TARGET_XEN;
+%constant int QPOL_DENY_UNKNOWN = SEPOL_DENY_UNKNOWN;
+%constant int QPOL_REJECT_UNKNOWN = SEPOL_REJECT_UNKNOWN;
+%constant int QPOL_ALLOW_UNKNOWN = SEPOL_ALLOW_UNKNOWN;
 %extend qpol_policy {
     qpol_policy(const char *path, const int options, PyObject *py_callback) {
         qpol_policy_t *p;
@@ -218,27 +223,17 @@ typedef enum qpol_capability
         return (int) v;
     };
 
-    const char *handle_unknown () {
+    int handle_unknown () {
         unsigned int h;
         qpol_policy_get_policy_handle_unknown(self, &h);
-
-        switch (h) {
-            case SEPOL_DENY_UNKNOWN: return "deny";
-            case SEPOL_REJECT_UNKNOWN: return "reject";
-            case SEPOL_ALLOW_UNKNOWN: return "allow";
-            default: return "unknown";
-        }
+        return h;
     };
 
     /* This is whether SELinux or XEN policy */
-    const char *target_platform () {
+    int target_platform () {
         int t;
         (void)qpol_policy_get_target_platform(self, &t);
-        switch (t) {
-            case SEPOL_TARGET_SELINUX: return "selinux";
-            case SEPOL_TARGET_XEN: return "xen";
-            default: return "unknown";
-        }
+        return t;
     };
 
     int capability (qpol_capability_e cap) {

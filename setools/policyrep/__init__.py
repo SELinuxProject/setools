@@ -31,6 +31,6 @@ from .fscontext import FSUseRuletype
 from .mlsrule import MLSRuletype
 from .netcontext import NodeconIPVersion, PortconProtocol, PortconRange
 from .rbacrule import RBACRuletype
-from .selinuxpolicy import SELinuxPolicy
+from .selinuxpolicy import SELinuxPolicy, HandleUnknown, PolicyTarget
 from .terule import IoctlSet, TERuletype
 from .xencontext import IomemconRange, IoportconRange

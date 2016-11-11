@@ -69,6 +69,25 @@ from . import netcontext
 # Xen
 from . import xencontext
 
+from .util import PolicyEnum
+
+
+class PolicyTarget(PolicyEnum):
+
+    """Enumeration of policy targets."""
+
+    selinux = qpol.QPOL_TARGET_SELINUX
+    xen = qpol.QPOL_TARGET_XEN
+
+
+class HandleUnknown(PolicyEnum):
+
+    """Enumeration of handle unknown settings."""
+
+    deny = qpol.QPOL_DENY_UNKNOWN
+    allow = qpol.QPOL_ALLOW_UNKNOWN
+    reject = qpol.QPOL_REJECT_UNKNOWN
+
 
 class SELinuxPolicy(object):
 
@@ -156,7 +175,7 @@ class SELinuxPolicy(object):
     @property
     def handle_unknown(self):
         """The handle unknown permissions setting (allow,deny,reject)"""
-        return self.policy.handle_unknown()
+        return HandleUnknown(self.policy.handle_unknown())
 
     @property
     def mls(self):
@@ -171,7 +190,7 @@ class SELinuxPolicy(object):
     @property
     def target_platform(self):
         """The policy platform (selinux or xen)"""
-        return self.policy.target_platform()
+        return PolicyTarget(self.policy.target_platform())
 
     #
     # Policy statistics
