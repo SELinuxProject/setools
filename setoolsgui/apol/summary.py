@@ -52,7 +52,7 @@ class SummaryTab(AnalysisTab):
 
         self.policy_version.setText(str(p.version))
         self.mls.setText(mls)
-        self.handle_unknown.setText(p.handle_unknown)
+        self.handle_unknown.setText(p.handle_unknown.name)
         self.class_count.setText(str(p.class_count))
         self.perms_count.setText(str(p.permission_count))
         self.type_count.setText(str(p.type_count))
