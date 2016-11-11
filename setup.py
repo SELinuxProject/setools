@@ -77,6 +77,15 @@ class BuildExtCommand(build_ext):
         build_ext.run(self)
 
 
+base_lib_dirs = ['.', '/usr/lib64', '/usr/lib']
+include_dirs = ['libqpol', 'libqpol/include']
+
+try:
+    base_lib_dirs.insert(0, os.environ["SEPOL_SRC"] + "/src")
+    include_dirs.append(os.environ["SEPOL_SRC"] + "/include")
+except KeyError:
+    pass
+
 try:
     static_sepol = os.environ['SEPOL']
 except KeyError:
@@ -84,7 +93,7 @@ except KeyError:
     # chooses dynamic libraries over static ones, so
     # this assumes that the static lib is in the same directory
     # as the dynamic lib.
-    dynamic_sepol = UnixCCompiler().find_library_file(['.', '/usr/lib64', '/usr/lib'], 'sepol')
+    dynamic_sepol = UnixCCompiler().find_library_file(base_lib_dirs, 'sepol')
 
     if dynamic_sepol is None:
         print('Unable to find a libsepol.so on your system!')
@@ -135,7 +144,7 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                           'libqpol/policy_parse.c',
                           'libqpol/policy_scan.c',
                           'libqpol/xen_query.c'],
-                         include_dirs=['libqpol', 'libqpol/include'],
+                         include_dirs=include_dirs,
                          extra_compile_args=['-Werror', '-Wextra',
                                              '-Waggregate-return',
                                              '-Wcast-align',
