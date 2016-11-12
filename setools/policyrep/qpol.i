@@ -1138,7 +1138,7 @@ typedef struct qpol_iterator {} qpol_iterator_t;
 %extend qpol_iterator {
     /* user never directly creates, but SWIG expects a constructor */
     qpol_iterator() {
-        SWIG_exception(SWIG_TypeError, "User may not create iterators difectly");
+        SWIG_exception(SWIG_TypeError, "User may not create iterators directly");
     fail:
         return NULL;
     };
