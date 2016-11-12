@@ -51,7 +51,7 @@ class NodeconQueryTab(AnalysisTab):
         logging.getLogger("setools.nodeconquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("nodeconquery.ui")
+        self.load_ui("apol/nodeconquery.ui")
 
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]

@@ -22,6 +22,8 @@ import copy
 from collections import OrderedDict
 from errno import ENOENT
 
+import pkg_resources
+
 from . import exception
 from . import policyrep
 from .descriptors import PermissionMapDescriptor
@@ -48,15 +50,10 @@ class PermissionMap(object):
         if permmapfile:
             self.load(permmapfile)
         else:
-            for path in ["data/", sys.prefix + "/share/setools/"]:
-                try:
-                    self.load(path + "perm_map")
-                    break
-                except (IOError, OSError) as err:
-                    if err.errno != ENOENT:
-                        raise
-            else:
-                raise RuntimeError("Unable to load default permission map.")
+            distro = pkg_resources.get_distribution("setools")
+            # pylint: disable=no-member
+            path = "{0}/setools/perm_map".format(distro.location)
+            self.load(path)
 
     def __str__(self):
         return self.permmapfile

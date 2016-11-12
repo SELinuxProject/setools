@@ -51,7 +51,7 @@ class CategoryQueryTab(AnalysisTab):
         logging.getLogger("setools.categoryquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("categoryquery.ui")
+        self.load_ui("apol/categoryquery.ui")
 
         # populate category list
         self.category_model = SEToolsListModel(self)

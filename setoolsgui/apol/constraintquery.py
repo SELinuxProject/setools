@@ -51,7 +51,7 @@ class ConstraintQueryTab(AnalysisTab):
         logging.getLogger("setools.constraintquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("constraintquery.ui")
+        self.load_ui("apol/constraintquery.ui")
 
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]

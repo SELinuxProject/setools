@@ -51,7 +51,7 @@ class UserQueryTab(AnalysisTab):
         logging.getLogger("setools.userquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("userquery.ui")
+        self.load_ui("apol/userquery.ui")
 
         # populate user list
         self.user_model = SEToolsListModel(self)

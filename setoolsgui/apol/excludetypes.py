@@ -40,7 +40,7 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         self.setupUi()
 
     def setupUi(self):
-        self.load_ui("exclude_types.ui")
+        self.load_ui("apol/exclude_types.ui")
 
         # populate the attribute combo box:
         self.attr_model = SEToolsListModel(self)

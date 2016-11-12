@@ -51,7 +51,7 @@ class BoolQueryTab(AnalysisTab):
         logging.getLogger("setools.boolquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("boolquery.ui")
+        self.load_ui("apol/boolquery.ui")
 
         # populate bool list
         self.bool_model = SEToolsListModel(self)

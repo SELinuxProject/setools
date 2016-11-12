@@ -19,6 +19,7 @@
 import sys
 from errno import ENOENT
 
+import pkg_resources
 from PyQt5.uic import loadUi
 
 
@@ -39,16 +40,8 @@ QGroupBox::title {\
 
 class SEToolsWidget(object):
     def load_ui(self, filename):
-        # If we are in the git repo, look at the local
-        # UI file, otherwise look at the installed file.
-        for path in ["data/", sys.prefix + "/share/setools/"]:
-            try:
-                loadUi(path + filename, self)
-                break
-            except (IOError, OSError) as err:
-                if err.errno != ENOENT:
-                    raise
-        else:
-            raise RuntimeError("Unable to load Qt UI file \"{0}\"".format(filename))
+        distro = pkg_resources.get_distribution("setools")
+        path = "{0}/setoolsgui/{1}".format(distro.location, filename)
+        loadUi(path, self)
 
         self.setStyleSheet(stylesheet)

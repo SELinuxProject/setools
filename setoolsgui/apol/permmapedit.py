@@ -52,7 +52,7 @@ class PermissionMapEditor(SEToolsWidget, QDialog):
         self.setupUi()
 
     def setupUi(self):
-        self.load_ui("permmap_editor.ui")
+        self.load_ui("apol/permmap_editor.ui")
 
         # set up class list
         self.class_model = SEToolsListModel(self)
@@ -172,7 +172,7 @@ class PermissionMapping(SEToolsWidget, QWidget):
         self.setupUi()
 
     def setupUi(self):
-        self.load_ui("permmapping.ui")
+        self.load_ui("apol/permmapping.ui")
 
         self.permission.setText(str(self.mapping.perm))
         self.weight.setValue(self.mapping.weight)

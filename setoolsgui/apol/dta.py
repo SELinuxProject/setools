@@ -53,7 +53,7 @@ class DomainTransitionAnalysisTab(AnalysisTab):
 
     def setupUi(self):
         self.log.debug("Initializing UI.")
-        self.load_ui("dta.ui")
+        self.load_ui("apol/dta.ui")
 
         # set up source/target autocompletion
         type_completion_list = [str(t) for t in self.policy.types()]

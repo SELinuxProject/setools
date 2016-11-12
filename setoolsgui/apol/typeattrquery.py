@@ -51,7 +51,7 @@ class TypeAttributeQueryTab(AnalysisTab):
         logging.getLogger("setools.typeattrquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("typeattrquery.ui")
+        self.load_ui("apol/typeattrquery.ui")
 
         # populate attr list
         self.attr_model = SEToolsListModel(self)

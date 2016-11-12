@@ -79,7 +79,7 @@ class InfoFlowAnalysisTab(AnalysisTab):
 
     def setupUi(self):
         self.log.debug("Initializing UI.")
-        self.load_ui("infoflow.ui")
+        self.load_ui("apol/infoflow.ui")
 
         # set up error message for missing perm map
         self.error_msg = QMessageBox(self)

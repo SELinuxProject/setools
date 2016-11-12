@@ -51,7 +51,7 @@ class SensitivityQueryTab(AnalysisTab):
         logging.getLogger("setools.sensitivityquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("sensitivityquery.ui")
+        self.load_ui("apol/sensitivityquery.ui")
 
         # populate sensitivity list
         self.sensitivity_model = SEToolsListModel(self)

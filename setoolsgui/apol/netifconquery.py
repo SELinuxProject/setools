@@ -50,7 +50,7 @@ class NetifconQueryTab(AnalysisTab):
         logging.getLogger("setools.netifconquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("netifconquery.ui")
+        self.load_ui("apol/netifconquery.ui")
 
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]

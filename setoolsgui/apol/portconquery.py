@@ -51,7 +51,7 @@ class PortconQueryTab(AnalysisTab):
         logging.getLogger("setools.portconquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("portconquery.ui")
+        self.load_ui("apol/portconquery.ui")
 
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]

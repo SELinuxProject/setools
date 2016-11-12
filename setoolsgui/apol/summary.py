@@ -42,7 +42,7 @@ class SummaryTab(AnalysisTab):
         self.setupUi(policy)
 
     def setupUi(self, p):
-        self.load_ui("summary.ui")
+        self.load_ui("apol/summary.ui")
 
         # Ensure settings are consistent with the initial .ui state
         self.notes.setHidden(not self.notes_expander.isChecked())

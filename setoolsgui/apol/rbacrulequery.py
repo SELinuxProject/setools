@@ -51,7 +51,7 @@ class RBACRuleQueryTab(AnalysisTab):
         logging.getLogger("setools.rbacrulequery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("rbacrulequery.ui")
+        self.load_ui("apol/rbacrulequery.ui")
 
         # set up role autocompletion (source, default)
         role_completion_list = [str(r) for r in self.policy.roles()]

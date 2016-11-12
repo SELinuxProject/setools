@@ -51,7 +51,7 @@ class TypeQueryTab(AnalysisTab):
         logging.getLogger("setools.typequery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("typequery.ui")
+        self.load_ui("apol/typequery.ui")
 
         # populate type list
         self.type_model = SEToolsListModel(self)

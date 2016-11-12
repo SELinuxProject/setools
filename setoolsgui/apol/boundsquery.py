@@ -51,7 +51,7 @@ class BoundsQueryTab(AnalysisTab):
         logging.getLogger("setools.boundsquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("boundsquery.ui")
+        self.load_ui("apol/boundsquery.ui")
 
         # set up results
         self.table_results_model = BoundsTableModel(self)

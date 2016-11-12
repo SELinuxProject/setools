@@ -50,7 +50,7 @@ class FSUseQueryTab(AnalysisTab):
         logging.getLogger("setools.fsusequery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("fsusequery.ui")
+        self.load_ui("apol/fsusequery.ui")
 
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]

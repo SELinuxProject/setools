@@ -51,7 +51,7 @@ class TERuleQueryTab(AnalysisTab):
         logging.getLogger("setools.terulequery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("terulequery.ui")
+        self.load_ui("apol/terulequery.ui")
 
         # set up source/target autocompletion
         typeattr_completion_list = [str(t) for t in self.policy.types()]

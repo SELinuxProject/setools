@@ -24,7 +24,7 @@ class QtHelpCommand(Command):
         pass
 
     def run(self):
-        command = ['qcollectiongenerator', 'apol.qhcp', '-o', 'apol.qhc']
+        command = ['qcollectiongenerator', 'apol.qhcp', '-o', '../setoolsgui/apol/apol.qhc']
         self.announce("Building Qt help files", level=log.INFO)
         self.announce(' '.join(command), level=log.INFO)
         pwd = os.getcwd()
@@ -182,9 +182,8 @@ setup(name='setools',
                 'build_qhc': QtHelpCommand},
       packages=['setools', 'setools.diff', 'setools.policyrep', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
-      data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1") ),
-                  (join(sys.prefix, 'share/setools'), glob.glob("data/*.ui") +
-                                                      ["data/perm_map", "qhc/apol.qhc"] )],
+      data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],
+      package_data={'': ['*.ui', '*.qhc'], 'setools': ['perm_map']},
       ext_modules=ext_py_mods,
       test_suite='tests',
       license='GPLv2+, LGPLv2.1+',

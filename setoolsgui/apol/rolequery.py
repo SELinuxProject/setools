@@ -51,7 +51,7 @@ class RoleQueryTab(AnalysisTab):
         logging.getLogger("setools.rolequery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("rolequery.ui")
+        self.load_ui("apol/rolequery.ui")
 
         # populate role list
         self.role_model = SEToolsListModel(self)

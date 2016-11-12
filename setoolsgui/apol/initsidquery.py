@@ -50,7 +50,7 @@ class InitialSIDQueryTab(AnalysisTab):
         logging.getLogger("setools.initsidquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("initsidquery.ui")
+        self.load_ui("apol/initsidquery.ui")
 
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]

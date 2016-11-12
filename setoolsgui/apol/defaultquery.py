@@ -51,7 +51,7 @@ class DefaultQueryTab(AnalysisTab):
         logging.getLogger("setools.defaultquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("defaultquery.ui")
+        self.load_ui("apol/defaultquery.ui")
 
         # set up results
         self.table_results_model = DefaultTableModel(self)

@@ -51,7 +51,7 @@ class CommonQueryTab(AnalysisTab):
         logging.getLogger("setools.commonquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("commonquery.ui")
+        self.load_ui("apol/commonquery.ui")
 
         # populate commons list
         self.common_model = SEToolsListModel(self)

@@ -24,6 +24,7 @@ import logging
 import json
 from errno import ENOENT
 
+import pkg_resources
 from PyQt5.QtCore import pyqtSlot, Qt, QProcess
 from PyQt5.QtWidgets import QApplication, QFileDialog, QLineEdit, QMainWindow, QMessageBox
 from setools import __version__, PermissionMap, SELinuxPolicy
@@ -57,7 +58,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.toggle_workspace_actions()
 
     def setupUi(self):
-        self.load_ui("apol.ui")
+        self.load_ui("apol/apol.ui")
 
         self.tab_counter = 0
 
@@ -645,17 +646,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         if self.help_process.state() != QProcess.NotRunning:
             return
 
-        for path in ["qhc", sys.prefix + "/share/setools"]:
-            helpfile = "{0}/apol.qhc".format(path)
-
-            try:
-                if stat.S_ISREG(os.stat(helpfile).st_mode):
-                    break
-            except (IOError, OSError) as err:
-                if err.errno != ENOENT:
-                    raise
-        else:
-            self.log.critical("Unable to find apol help data (apol.qhc).")
+        distro = pkg_resources.get_distribution("setools")
+        helpfile = "{0}/setoolsgui/apol/apol.qhc".format(distro.location)
 
         self.log.debug("Starting assistant with help file {0}".format(helpfile))
         self.help_process.start("assistant",

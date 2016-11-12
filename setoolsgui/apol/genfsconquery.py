@@ -50,7 +50,7 @@ class GenfsconQueryTab(AnalysisTab):
         logging.getLogger("setools.genfsconquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("genfsconquery.ui")
+        self.load_ui("apol/genfsconquery.ui")
 
         # set up user autocompletion
         user_completion_list = [str(u) for u in self.policy.users()]

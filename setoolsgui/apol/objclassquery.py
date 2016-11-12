@@ -51,7 +51,7 @@ class ObjClassQueryTab(AnalysisTab):
         logging.getLogger("setools.objclassquery").removeHandler(self.handler)
 
     def setupUi(self):
-        self.load_ui("objclassquery.ui")
+        self.load_ui("apol/objclassquery.ui")
 
         # populate class list
         self.class_model = SEToolsListModel(self)

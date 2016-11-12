@@ -92,7 +92,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
         self.setupUi()
 
     def setupUi(self):
-        self.load_ui("choose_analysis.ui")
+        self.load_ui("apol/choose_analysis.ui")
 
     def show(self, mls):
         analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
