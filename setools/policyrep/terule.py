@@ -164,7 +164,7 @@ class AVRule(BaseTERule):
             # allow/dontaudit/auditallow/neverallow rules
             perms = self.perms
             if len(perms) > 1:
-                self._rule_string += "{{ {0} }};".format(' '.join(perms))
+                self._rule_string += "{{ {0} }};".format(' '.join(sorted(perms)))
             else:
                 # convert to list since sets cannot be indexed
                 self._rule_string += "{0};".format(list(perms)[0])
