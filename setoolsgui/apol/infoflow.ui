@@ -516,7 +516,7 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QTreeWidget" name="browser">
+          <widget class="SEToolsTreeWidget" name="browser">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>1</horstretch>
@@ -596,6 +596,13 @@
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SEToolsTreeWidget</class>
+   <extends>QTreeWidget</extends>
+   <header>setoolsgui/treeview.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>criteria_expander</tabstop>
   <tabstop>notes_expander</tabstop>
