@@ -89,6 +89,7 @@ of the SETools soures, perform the following:
 Unpack the official distribution or check out the git repository,
 and perform the following at the root:
 ```
+  $ python setup.py build
   $ python setup.py install
 ```
 This will put the applications in /usr/bin, data files in /usr/share/setools,
