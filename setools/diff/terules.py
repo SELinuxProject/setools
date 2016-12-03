@@ -1,4 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
+# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -34,6 +35,35 @@ modified_avrule_record = namedtuple("modified_avrule", ["rule",
 modified_terule_record = namedtuple("modified_terule", ["rule", "added_default", "removed_default"])
 
 
+def _avrule_expand_generator(rule_list, Wrapper, perms_container):
+    """
+    Generator that yields wrapped, expanded, av(x) rules with
+    unioned permission sets.
+    """
+    items = dict()
+
+    # create a hash table (dict) with the rule hash
+    # as the keys.  Rules where permission sets should
+    # be unioned together have the same hash.
+    for unexpanded_rule in rule_list:
+        for expanded_rule in unexpanded_rule.expand():
+            rule = Wrapper(expanded_rule)
+
+            try:
+                items[rule].append(rule)
+            except KeyError:
+                items[rule] = [rule]
+
+    # Go over rule lists and union permissions
+    for wrapped_unioned_rule, origins in items.items():
+        perms = perms_container()
+        for r in origins:
+            perms |= r.origin.perms
+
+        wrapped_unioned_rule.origin.perms = perms
+        yield wrapped_unioned_rule
+
+
 def av_diff_template(ruletype):
 
     """
@@ -55,8 +85,8 @@ def av_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-                self._expand_generator(self._left_te_rules[ruletype], AVRuleWrapper),
-                self._expand_generator(self._right_te_rules[ruletype], AVRuleWrapper))
+                _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleWrapper, set),
+                _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper, set))
 
         modified = []
         for left_rule, right_rule in matched:
@@ -102,8 +132,10 @@ def avx_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-                self._expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
-                self._expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper))
+                _avrule_expand_generator(self._left_te_rules[ruletype],
+                                         AVRuleXpermWrapper, IoctlSet),
+                _avrule_expand_generator(self._right_te_rules[ruletype],
+                                         AVRuleXpermWrapper, IoctlSet))
 
         modified = []
         for left_rule, right_rule in matched:

@@ -50,12 +50,17 @@ def expanded_te_rule_factory(original, source, target):
     target      The target type of the expanded rule.
     """
 
+    # for AV and AVXperm rules, copy the perms into the
+    # expanded rule, so PolicyDifference can build single expanded
+    # rules with unioned permission sets
     if isinstance(original, (ExpandedAVRule, ExpandedAVRuleXperm, ExpandedTERule)):
         return original
     elif isinstance(original, AVRuleXperm):
         rule = ExpandedAVRuleXperm(original.policy, original.qpol_symbol)
+        rule.perms = original.perms
     elif isinstance(original, AVRule):
         rule = ExpandedAVRule(original.policy, original.qpol_symbol)
+        rule.perms = original.perms
     elif isinstance(original, TERule):
         rule = ExpandedTERule(original.policy, original.qpol_symbol)
     else:
@@ -353,14 +358,14 @@ class ExpandedAVRule(AVRule):
 
     """An expanded access vector type enforcement rule."""
 
-    __slots__ = ("source", "target", "origin")
+    __slots__ = ("source", "target", "perms", "origin")
 
 
 class ExpandedAVRuleXperm(AVRuleXperm):
 
     """An expanded extended permission access vector type enforcement rule."""
 
-    __slots__ = ("source", "target", "origin")
+    __slots__ = ("source", "target", "perms", "origin")
 
 
 class ExpandedTERule(TERule):
