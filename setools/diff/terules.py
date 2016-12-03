@@ -35,33 +35,27 @@ modified_avrule_record = namedtuple("modified_avrule", ["rule",
 modified_terule_record = namedtuple("modified_terule", ["rule", "added_default", "removed_default"])
 
 
-def _avrule_expand_generator(rule_list, Wrapper, perms_container):
+def _avrule_expand_generator(rule_list, Wrapper):
     """
     Generator that yields wrapped, expanded, av(x) rules with
     unioned permission sets.
     """
     items = dict()
 
-    # create a hash table (dict) with the rule hash
-    # as the keys.  Rules where permission sets should
-    # be unioned together have the same hash.
     for unexpanded_rule in rule_list:
         for expanded_rule in unexpanded_rule.expand():
-            rule = Wrapper(expanded_rule)
+            expanded_wrapped_rule = Wrapper(expanded_rule)
 
+            # create a hash table (dict) with the first rule
+            # as the key and value.  Rules where permission sets should
+            # be unioned together have the same hash, so this will union
+            # the permissions together.
             try:
-                items[rule].append(rule)
+                items[expanded_wrapped_rule].origin.perms |= expanded_wrapped_rule.origin.perms
             except KeyError:
-                items[rule] = [rule]
+                items[expanded_wrapped_rule] = expanded_wrapped_rule
 
-    # Go over rule lists and union permissions
-    for wrapped_unioned_rule, origins in items.items():
-        perms = perms_container()
-        for r in origins:
-            perms |= r.origin.perms
-
-        wrapped_unioned_rule.origin.perms = perms
-        yield wrapped_unioned_rule
+    return items.keys()
 
 
 def av_diff_template(ruletype):
@@ -85,8 +79,8 @@ def av_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-                _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleWrapper, set),
-                _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper, set))
+                _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleWrapper),
+                _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper))
 
         modified = []
         for left_rule, right_rule in matched:
@@ -132,10 +126,8 @@ def avx_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-                _avrule_expand_generator(self._left_te_rules[ruletype],
-                                         AVRuleXpermWrapper, IoctlSet),
-                _avrule_expand_generator(self._right_te_rules[ruletype],
-                                         AVRuleXpermWrapper, IoctlSet))
+                _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
+                _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper))
 
         modified = []
         for left_rule, right_rule in matched:
