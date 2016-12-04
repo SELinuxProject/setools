@@ -95,6 +95,20 @@ and perform the following at the root:
 This will put the applications in /usr/bin, data files in /usr/share/setools,
 and libraries in /usr/lib/pythonX.Y/site-packages/setools.
 
+### Building SETools with a Local Libsepol
+
+At times, SETools requires a newer libsepol than is available from
+distributions.  To use a locally-built libsepol instead of the libsepol
+provided by the Linux distribution, build the libsepol sources and then
+set the SEPOL_SRC environmental variable to the path to the root of
+libsepol source tree:
+```
+  $ export SEPOL_SRC=/home/user/src/selinux/libsepol
+  $ python setup.py build
+  $ python setup.py install
+```
+SEPOL_SRC also applies for building SETools for local use.
+
 ### Installation Options
 
 Please see `python setup.py --help` or `python setup.py install --help`
