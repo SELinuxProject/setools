@@ -1,3 +1,30 @@
+*setools-4.1.0-rc (11 Dec 2016)
+
+  Library:
+  * Implemented support for alternate install prefixes.
+  * Implemented support for building setools with a locally-built libsepol.
+  * Fixed an sediff bug with unioning rules after expansion.
+  * Improved sediff memory usage.
+  * Patch from Nicolas Iooss to make more stable output in TE rule permission lists.
+  * Replaced string representations (e.g. rule types) with enumerations.
+    Requires the enum34 (not enum) Python package if using Python < 3.4.
+
+  Apol:
+  * Implemented context menu option for exporting the information flow
+    and domain transition analysis tree browser views.
+  * Implemented CSV export of table results.
+  * Implemented (clipboard) copy from table results.
+  * Added missing "clear" button in object class query.
+  * Implemented save/load settings for tabs.
+  * Implemented save/load workspace (save all tabs settings).
+  * Fixed include/exclude type dialog to keep its place when
+    adding or removing types from an analysis.
+  * Implemented filter on include/exclude type dialog to filter
+    the lists by attribute.
+
+
+*setools-4.0.1 (17 May 2016)
+
   Library:
   * Fixed a compile error on 32bit systems.
   * Changed domain transition analysis output to use lists instead
