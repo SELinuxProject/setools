@@ -35,18 +35,15 @@ before_install:
   - cd ..
 
   # Download current SELinux userspace tools and libraries
-  - curl -sS -L https://github.com/SELinuxProject/selinux/archive/20160223.tar.gz | tar xz
-  - mv selinux-20160223 selinux-src
+  #- git clone https://github.com/SELinuxProject/selinux.git selinux-src -b libsepol-2.7
+  - git clone https://github.com/SELinuxProject/selinux.git selinux-src
 
   # Ubuntu 12.04 coreutils is too old to provide "ln --relative" :(
-  - sed 's/ln -sf --relative /ln -sf /' -i selinux-src/libsepol/src/Makefile
-  - sed 's/ln -sf --relative /ln -sf /' -i selinux-src/libselinux/src/Makefile
+  - sed -i -e '/$(LN) -sf/s/--relative//' selinux-src/libsepol/src/Makefile
+  - sed -i -e '/ln -sf/s/--relative//' selinux-src/libselinux/src/Makefile
 
-  # Drop secilc to break xmlto dependence (secilc isn't used here anyway)
-  - sed -i -e 's/secilc//' selinux-src/Makefile
-
-  # Drop sepolicy to break setools3 dependence (sepolicy isn't used here anyway)
-  - sed -i -e 's/sepolicy//' selinux-src/policycoreutils/Makefile
+  # Only portions of the toolchain are necessary
+  - sed -i -e 's/^SUBDIRS=.*/SUBDIRS=libsepol libselinux checkpolicy/' selinux-src/Makefile
 
   # Compile and install SELinux toolchain
   # On Ubuntu 12.04, default CFLAGS make the build fail in libsepol/cil with:
