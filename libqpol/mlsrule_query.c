@@ -36,7 +36,8 @@
 
 typedef struct range_trans_state
 {
-	range_trans_t *head;
+    unsigned int bucket;
+    hashtab_ptr_t cur_item;
 	range_trans_t *cur;
 } range_trans_state_t;
 
@@ -55,8 +56,9 @@ static int range_trans_state_end(const qpol_iterator_t * iter)
 static void *range_trans_state_get_cur(const qpol_iterator_t * iter)
 {
 	range_trans_state_t *rs = NULL;
+    const policydb_t *db = NULL;
 
-	if (!iter || !(rs = qpol_iterator_state(iter))) {
+	if (!iter || !(rs = qpol_iterator_state(iter)) || !(db = qpol_iterator_policy(iter))) {
 		errno = EINVAL;
 		return NULL;
 	}
@@ -67,8 +69,9 @@ static void *range_trans_state_get_cur(const qpol_iterator_t * iter)
 static int range_trans_state_next(qpol_iterator_t * iter)
 {
 	range_trans_state_t *rs = NULL;
+    const policydb_t *db = NULL;
 
-	if (!iter || !(rs = qpol_iterator_state(iter))) {
+	if (!iter || !(rs = qpol_iterator_state(iter))  || !(db = qpol_iterator_policy(iter))) {
 		errno = EINVAL;
 		return STATUS_ERR;
 	}
@@ -78,7 +81,21 @@ static int range_trans_state_next(qpol_iterator_t * iter)
 		return STATUS_ERR;
 	}
 
-	rs->cur = rs->cur->next;
+    rs->cur_item = rs->cur_item->next;
+    while (rs->cur_item == NULL) {
+        rs->bucket++;
+        if (rs->bucket >= db->range_tr->size) {
+            break;
+        }
+
+        rs->cur_item = db->range_tr->htable[rs->bucket];
+    }
+
+    if (rs->cur_item == NULL) {
+        rs->cur = NULL;
+    } else {
+        rs->cur = (range_trans_t*)rs->cur_item->key;
+    }
 
 	return STATUS_SUCCESS;
 }
@@ -86,16 +103,23 @@ static int range_trans_state_next(qpol_iterator_t * iter)
 static size_t range_trans_state_size(const qpol_iterator_t * iter)
 {
 	range_trans_state_t *rs = NULL;
+    const policydb_t *db = NULL;
 	size_t count = 0;
-	range_trans_t *tmp = NULL;
+    unsigned int i = 0;
 
-	if (!iter || !(rs = qpol_iterator_state(iter))) {
+	if (!iter || !(rs = qpol_iterator_state(iter)) || !(db = qpol_iterator_policy(iter))) {
 		errno = EINVAL;
 		return 0;
 	}
 
-	for (tmp = rs->head; tmp; tmp = tmp->next)
-		count++;
+    hashtab_ptr_t cur = NULL;
+    for (i = 0; i < db->range_tr->size; i++) {
+        cur = db->range_tr->htable[i];
+        while (cur != NULL) {
+            count++;
+            cur = cur->next;
+        }
+    }
 
 	return count;
 }
@@ -133,7 +157,24 @@ int qpol_policy_get_range_trans_iter(const qpol_policy_t * policy, qpol_iterator
 		return STATUS_ERR;
 	}
 
-	rs->head = rs->cur = db->range_tr;
+    rs->bucket = 0;
+    rs->cur_item = db->range_tr->htable[0];
+    rs->cur = NULL;
+
+    rs->cur_item = db->range_tr->htable[rs->bucket];
+    while (rs->cur_item == NULL) {
+        rs->bucket++;
+        if (rs->bucket >= db->range_tr->size) {
+            break;
+        }
+
+        rs->cur_item = db->range_tr->htable[rs->bucket];
+    }
+
+    if (rs->cur_item != NULL) {
+        rs->cur = (range_trans_t*)rs->cur_item->key;
+    }
+    
 	return STATUS_SUCCESS;
 }
 
@@ -220,9 +261,16 @@ int qpol_range_trans_get_range(const qpol_policy_t * policy, const qpol_range_tr
 		return STATUS_ERR;
 	}
 
+    policydb_t *db = &policy->p->p;
 	rt = (range_trans_t *) rule;
+    mls_range_t *target_range = NULL;
 
-	*range = (qpol_mls_range_t *) & rt->target_range;
+    target_range = hashtab_search(db->range_tr, (hashtab_key_t)rt);
+    if (target_range == NULL) {
+        return STATUS_ERR;
+    }
+
+	*range = (qpol_mls_range_t *)target_range;
 
 	return STATUS_SUCCESS;
 }

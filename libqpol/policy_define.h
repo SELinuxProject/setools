@@ -14,7 +14,6 @@
  * for NULL (ie 0) because that is a potentially valid return.
  */
 #define COND_ERR ((avrule_t *)-1)
-
 #define TRUE 1
 #define FALSE 0
 
@@ -55,12 +54,7 @@ int define_permissive(void);
 int define_polcap(void);
 int define_port_context(unsigned int low, unsigned int high);
 int define_pirq_context(unsigned int pirq);
-/* Support SETools */
-#ifdef HAVE_SEPOL_XEN_DEVICETREE
 int define_iomem_context(uint64_t low, uint64_t high);
-#else
-int define_iomem_context(unsigned long low, unsigned long high);
-#endif
 int define_ioport_context(unsigned long low, unsigned long high);
 int define_pcidevice_context(unsigned long device);
 int define_devicetree_context(void);

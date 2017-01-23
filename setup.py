@@ -77,7 +77,7 @@ class BuildExtCommand(build_ext):
         build_ext.run(self)
 
 
-base_lib_dirs = ['.', '/usr/lib64', '/usr/lib']
+base_lib_dirs = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
 include_dirs = ['libqpol', 'libqpol/include']
 
 try:
@@ -147,7 +147,6 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                          include_dirs=include_dirs,
                          extra_compile_args=['-Werror', '-Wextra',
                                              '-Waggregate-return',
-                                             '-Wcast-align',
                                              '-Wfloat-equal',
                                              '-Wformat', '-Wformat=2',
                                              '-Winit-self', '-Winline',

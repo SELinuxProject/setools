@@ -29,10 +29,12 @@
 #include "iterator_internal.h"
 #include "qpol_internal.h"
 #include <sepol/policydb/policydb.h>
+#include <sepol/policydb/hashtab.h>
 
 typedef struct filename_trans_state
 {
-	filename_trans_t *head;
+	unsigned int bucket;
+	hashtab_ptr_t cur_item;
 	filename_trans_t *cur;
 } filename_trans_state_t;
 
@@ -76,7 +78,21 @@ static int filename_trans_state_next(qpol_iterator_t * iter)
 		return STATUS_ERR;
 	}
 
-	fts->cur = fts->cur->next;
+	fts->cur_item = fts->cur_item->next;
+	while (fts->cur_item == NULL) {
+		fts->bucket++;
+		if (fts->bucket >= db->filename_trans->size) {
+            break;
+		}
+
+		fts->cur_item = db->filename_trans->htable[fts->bucket];
+	}
+
+    if (fts->cur_item == NULL) {
+        fts->cur = NULL;
+    } else {
+        fts->cur = (filename_trans_t*)fts->cur_item->key;
+    }
 
 	return STATUS_SUCCESS;
 }
@@ -85,16 +101,22 @@ static size_t filename_trans_state_size(const qpol_iterator_t * iter)
 {
 	filename_trans_state_t *fts = NULL;
 	const policydb_t *db = NULL;
-	filename_trans_t *tmp = NULL;
 	size_t count = 0;
+    unsigned int i = 0;
 
 	if (!iter || !(fts = qpol_iterator_state(iter)) || !(db = qpol_iterator_policy(iter))) {
 		errno = EINVAL;
-		return STATUS_ERR;
+		return 0;
 	}
 
-	for (tmp = fts->head; tmp; tmp = tmp->next)
-		count++;
+	hashtab_ptr_t cur = NULL;
+	for (i = 0; i < db->filename_trans->size; i++) {
+		cur = db->filename_trans->htable[i];
+		while (cur != NULL) {
+			count++;
+			cur = cur->next;
+		}
+	}
 
 	return count;
 }
@@ -122,8 +144,25 @@ int qpol_policy_get_filename_trans_iter(const qpol_policy_t * policy, qpol_itera
 		ERR(policy, "%s", strerror(errno));
 		return STATUS_ERR;
 	}
-	fts->head = fts->cur = db->filename_trans;
 
+	fts->bucket = 0;
+	fts->cur_item = db->filename_trans->htable[0];
+	fts->cur = NULL;
+
+	fts->cur_item = db->filename_trans->htable[fts->bucket];
+	while (fts->cur_item == NULL) {
+		fts->bucket++;
+		if (fts->bucket >= db->filename_trans->size) {
+			break;
+		}
+
+		fts->cur_item = db->filename_trans->htable[fts->bucket];
+	}
+
+	if (fts->cur_item != NULL) {
+		fts->cur = (filename_trans_t*)fts->cur_item->key;
+	}
+	
 	if (qpol_iterator_create
 	    (policy, (void *)fts, filename_trans_state_get_cur, filename_trans_state_next, filename_trans_state_end, filename_trans_state_size,
 	     free, iter)) {
@@ -224,7 +263,16 @@ int qpol_filename_trans_get_default_type(const qpol_policy_t * policy, const qpo
 	db = &policy->p->p;
 	ft = (filename_trans_t *) rule;
 
-	*dflt = (qpol_type_t *) db->type_val_to_struct[ft->otype - 1];
+	/* Since the filename_trans rules were converted to being stored in a hashtab, otype was moved to the datum of the hashtab.
+	 * So we just look it up here.
+	 */
+	filename_trans_datum_t *datum = hashtab_search(db->filename_trans, (hashtab_key_t)ft);
+
+	if (datum == NULL) {
+		return STATUS_ERR;
+	}
+
+	*dflt = (qpol_type_t *) db->type_val_to_struct[datum->otype - 1];
 
 	return STATUS_SUCCESS;
 }
