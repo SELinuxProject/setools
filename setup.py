@@ -24,13 +24,13 @@ class QtHelpCommand(Command):
         pass
 
     def run(self):
-        command = ['qcollectiongenerator', 'apol.qhcp', '-o', '../setoolsgui/apol/apol.qhc']
+        command = ['qcollectiongenerator', 'qhc/apol.qhcp']
         self.announce("Building Qt help files", level=log.INFO)
         self.announce(' '.join(command), level=log.INFO)
-        pwd = os.getcwd()
-        os.chdir("./qhc")
         subprocess.check_call(command)
-        os.chdir(pwd)
+        self.announce("Moving Qt help files to setoolsgui/apol")
+        os.rename('qhc/apol.qhc', 'setoolsgui/apol/apol.qhc')
+        os.rename('qhc/apol.qch', 'setoolsgui/apol/apol.qch')
 
 
 class YaccCommand(Command):
@@ -182,7 +182,7 @@ setup(name='setools',
       packages=['setools', 'setools.diff', 'setools.policyrep', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],
-      package_data={'': ['*.ui', '*.qhc'], 'setools': ['perm_map']},
+      package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map']},
       ext_modules=ext_py_mods,
       test_suite='tests',
       license='GPLv2+, LGPLv2.1+',
