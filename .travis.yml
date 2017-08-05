@@ -14,17 +14,33 @@ env:
   - TOX_ENV=lint
 
 matrix:
+  fast_finish: true
   allow_failures:
     - env: TOX_ENV=coverage
+
+sudo: required
+dist: trusty
+
+addons:
+  apt:
+    packages:
+    # Install SELinux userspace utilities dependencies
+    - bison
+    - flex
+    - gettext
+    - libaudit-dev
+    - libbz2-dev
+    - libustr-dev
+    - libpcre3-dev
 
 before_install:
   - lsb_release -a
   - bison -V
   - flex -V
-  - sudo apt-get update -qq
+  - python -V
 
-  # Install SELinux userspace utilities dependencies
-  - sudo apt-get install -qq libaudit-dev libcap-ng-dev libustr-dev libpcre3-dev
+install:
+  - SELINUX_USERSPACE_VERSION=libsepol-2.7
 
   # Install newer swig
   - curl -sS -L http://prdownloads.sourceforge.net/swig/swig-3.0.8.tar.gz | tar xz
@@ -35,12 +51,7 @@ before_install:
   - cd ..
 
   # Download current SELinux userspace tools and libraries
-  #- git clone https://github.com/SELinuxProject/selinux.git selinux-src -b libsepol-2.7
-  - git clone https://github.com/SELinuxProject/selinux.git selinux-src
-
-  # Ubuntu 12.04 coreutils is too old to provide "ln --relative" :(
-  - sed -i -e '/$(LN) -sf/s/--relative//' selinux-src/libsepol/src/Makefile
-  - sed -i -e '/ln -sf/s/--relative//' selinux-src/libselinux/src/Makefile
+  - git clone https://github.com/SELinuxProject/selinux.git selinux-src -b ${SELINUX_USERSPACE_VERSION}
 
   # Only portions of the toolchain are necessary
   - sed -i -e 's/^SUBDIRS=.*/SUBDIRS=libsepol libselinux checkpolicy/' selinux-src/Makefile
@@ -53,9 +64,11 @@ before_install:
   # Ubuntu 12.04's flex generates a redundant decl in libqpol
   - sed -i -e "/Wwrite-strings/s/,/, '-Wno-redundant-decls',/" setup.py
 
-install:
   - pip install tox
 
 script:
   - tox --version
   - tox -e $TOX_ENV
+
+after_failure:
+  - cat "${TRAVIS_BUILD_DIR}/.tox/tox-0.log"
