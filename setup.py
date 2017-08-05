@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import glob
 from setuptools import setup
 import distutils.log as log
@@ -97,7 +97,8 @@ except KeyError:
 
     if dynamic_sepol is None:
         print('Unable to find a libsepol.so on your system!')
-        print('Please set the SEPOL environment variable. Exiting.')
+        print("Looked in the following directories:\n{}".format("\n".join(base_lib_dirs)))
+        print('Please set the SEPOL or SEPOL_SRC environment variables. Exiting.')
         exit(1)
 
     static_sepol = dynamic_sepol.replace(".so", ".a")
@@ -149,7 +150,7 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                                              '-Waggregate-return',
                                              '-Wfloat-equal',
                                              '-Wformat', '-Wformat=2',
-                                             '-Winit-self', '-Winline',
+                                             '-Winit-self',
                                              '-Wmissing-format-attribute',
                                              '-Wmissing-include-dirs',
                                              '-Wnested-externs',
