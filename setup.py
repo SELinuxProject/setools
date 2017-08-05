@@ -171,7 +171,7 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                          extra_objects=[static_sepol])]
 
 setup(name='setools',
-      version='4.1.0',
+      version='4.1.1',
       description='SELinux Policy tools.',
       author='Tresys Technology, LLC',
       author_email='setools@tresys.com',
