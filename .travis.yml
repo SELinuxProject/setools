@@ -4,17 +4,20 @@
 
 language: python
 
-env:
-  - TOX_ENV=py27
-  - TOX_ENV=py33
-  - TOX_ENV=py34
-  - TOX_ENV=py35
-  - TOX_ENV=pep8
-  - TOX_ENV=coverage
-  - TOX_ENV=lint
+python:
+  - "3.3"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "2.7"
 
 matrix:
   fast_finish: true
+  include:
+    - env: TOX_ENV=pep8
+    - env: TOX_ENV=coverage
+    - env: TOX_ENV=lint
+
   allow_failures:
     - env: TOX_ENV=coverage
 
@@ -38,6 +41,7 @@ before_install:
   - bison -V
   - flex -V
   - python -V
+  - sudo apt-get update -qq
 
 install:
   - SELINUX_USERSPACE_VERSION=libsepol-2.7
@@ -64,11 +68,12 @@ install:
   # Ubuntu 12.04's flex generates a redundant decl in libqpol
   - sed -i -e "/Wwrite-strings/s/,/, '-Wno-redundant-decls',/" setup.py
 
-  - pip install tox
+  - pip install tox-travis
 
 script:
   - tox --version
-  - tox -e $TOX_ENV
+  - |
+      [ -z "$TOX_ENV" ] && tox || tox -e $TOX_ENV
 
 after_failure:
   - cat "${TRAVIS_BUILD_DIR}/.tox/tox-0.log"
