@@ -452,6 +452,7 @@ class DomainTransitionAnalysis(object):
                     # TODO try to improve the
                     # efficiency in this loop
                     for m in match:
+                        # pylint: disable=unsupported-assignment-operation
                         if s in setexec or type_trans[s][m]:
                             # add key for each entrypoint
                             edge.entrypoint[m] += entrypoint[t][m]
@@ -523,6 +524,7 @@ class DomainTransitionAnalysis(object):
 
             for e in entrypoints:
                 # clear the entrypoint data
+                # pylint: disable=unsupported-delete-operation
                 del edge.entrypoint[e]
                 del edge.execute[e]
 
