@@ -28,6 +28,7 @@
 
 #include "qpol_internal.h"
 #include <assert.h>
+#include <byteswap.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
