@@ -89,6 +89,7 @@ of the SETools soures, perform the following:
 Unpack the official distribution or check out the git repository,
 and perform the following at the root:
 ```
+  $ python setup.py build_ext
   $ python setup.py build
   $ python setup.py install
 ```
@@ -104,6 +105,7 @@ set the SEPOL_SRC environmental variable to the path to the root of
 libsepol source tree:
 ```
   $ export SEPOL_SRC=/home/user/src/selinux/libsepol
+  $ python setup.py build_ext
   $ python setup.py build
   $ python setup.py install
 ```
