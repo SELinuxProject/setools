@@ -126,14 +126,6 @@ class NodeconQueryTab(AnalysisTab):
         self.criteria_frame.setHidden(not self.criteria_expander.isChecked())
         self.notes.setHidden(not self.notes_expander.isChecked())
 
-        # Network criteria is available only on Python 3.3+
-        if sys.version_info < (3, 3):
-            self.network_criteria.setEnabled(False)
-            self.network_criteria.setToolTip("This feature requires Python 3.3 or newer.")
-            self.network.setToolTip("This feature requires Python 3.3 or newer.")
-            self.network_exact.setToolTip("This feature requires Python 3.3 or newer.")
-            self.network_overlap.setToolTip("This feature requires Python 3.3 or newer.")
-
         # Range criteria is available only if policy is MLS
         if not self.policy.mls:
             self.range_criteria.setEnabled(False)

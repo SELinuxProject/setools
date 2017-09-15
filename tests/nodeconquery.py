@@ -213,7 +213,6 @@ class NodeconQueryTest(unittest.TestCase):
         nodecons = sorted(n.address for n in q.results())
         self.assertListEqual(["10.1.55.1"], nodecons)
 
-    @unittest.skipIf(sys.version_info < (3, 3), "Requires Python 3.3+.")
     def test_100_v4network_equal(self):
         """Nodecon query with IPv4 equal network"""
         q = NodeconQuery(self.p, network="10.1.100.0/24", network_overlap=False)
@@ -221,7 +220,6 @@ class NodeconQueryTest(unittest.TestCase):
         nodecons = sorted(n.address for n in q.results())
         self.assertListEqual(["10.1.100.0"], nodecons)
 
-    @unittest.skipIf(sys.version_info < (3, 3), "Requires Python 3.3+.")
     def test_101_v4network_overlap(self):
         """Nodecon query with IPv4 network overlap"""
         q = NodeconQuery(self.p, network="10.1.101.128/25", network_overlap=True)
@@ -229,7 +227,6 @@ class NodeconQueryTest(unittest.TestCase):
         nodecons = sorted(n.address for n in q.results())
         self.assertListEqual(["10.1.101.0"], nodecons)
 
-    @unittest.skipIf(sys.version_info < (3, 3), "Requires Python 3.3+.")
     def test_110_v6network_equal(self):
         """Nodecon query with IPv6 equal network"""
         q = NodeconQuery(self.p, network="1100::/16", network_overlap=False)
@@ -237,7 +234,6 @@ class NodeconQueryTest(unittest.TestCase):
         nodecons = sorted(n.address for n in q.results())
         self.assertListEqual(["1100::"], nodecons)
 
-    @unittest.skipIf(sys.version_info < (3, 3), "Requires Python 3.3+.")
     def test_111_v6network_overlap(self):
         """Nodecon query with IPv6 network overlap"""
         q = NodeconQuery(self.p, network="1110:8000::/17", network_overlap=True)

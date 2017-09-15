@@ -16,10 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-try:
-    import ipaddress
-except ImportError:  # pragma: no cover
-    pass
+import ipaddress
 
 import logging
 from socket import AF_INET, AF_INET6
@@ -87,10 +84,7 @@ class NodeconQuery(MatchContext, PolicyQuery):
     @network.setter
     def network(self, value):
         if value:
-            try:
-                self._network = ipaddress.ip_network(value)
-            except NameError:  # pragma: no cover
-                raise RuntimeError("Nodecon IP address/network functions require Python 3.3+.")
+            self._network = ipaddress.ip_network(value)
         else:
             self._network = None
 
@@ -108,14 +102,9 @@ class NodeconQuery(MatchContext, PolicyQuery):
         for nodecon in self.policy.nodecons():
 
             if self.network:
-                try:
-                    netmask = ipaddress.ip_address(nodecon.netmask)
-                except NameError:  # pragma: no cover
-                    # Should never actually hit this since the self.network
-                    # setter raises the same exception.
-                    raise RuntimeError("Nodecon IP address/network functions require Python 3.3+.")
+                netmask = ipaddress.ip_address(nodecon.netmask)
 
-                # Python 3.3's IPv6Network constructor does not support
+                # Python 3.4's IPv6Network constructor does not support
                 # expanded netmasks, only CIDR numbers. Convert netmask
                 # into CIDR.
                 # This is Brian Kernighan's method for counting set bits.
