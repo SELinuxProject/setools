@@ -63,8 +63,8 @@ def category_factory(policy, sym):
 
     try:
         return Category(policy, qpol.qpol_cat_t(policy, str(sym)))
-    except ValueError:
-        raise exception.InvalidCategory("{0} is not a valid category".format(sym))
+    except ValueError as ex:
+        raise exception.InvalidCategory("{0} is not a valid category".format(sym)) from ex
 
 
 def sensitivity_factory(policy, sym):
@@ -84,8 +84,8 @@ def sensitivity_factory(policy, sym):
 
     try:
         return Sensitivity(policy, qpol.qpol_level_t(policy, str(sym)))
-    except ValueError:
-        raise exception.InvalidSensitivity("{0} is not a valid sensitivity".format(sym))
+    except ValueError as ex:
+        raise exception.InvalidSensitivity("{0} is not a valid sensitivity".format(sym)) from ex
 
 
 def level_factory(policy, sym):
@@ -108,9 +108,9 @@ def level_factory(policy, sym):
     sens = sens_split[0]
     try:
         semantic_level = qpol.qpol_semantic_level_t(policy, sens)
-    except ValueError:
+    except ValueError as ex:
         raise exception.InvalidLevel("{0} is not a valid level ({1} is not a valid sensitivity)".
-                                     format(sym, sens))
+                                     format(sym, sens)) from ex
 
     try:
         cats = sens_split[1]
@@ -123,16 +123,17 @@ def level_factory(policy, sym):
             if len(catrange) == 2:
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[1])
-                except ValueError:
+                except ValueError as ex:
                     raise exception.InvalidLevel(
                         "{0} is not a valid level ({1} is not a valid category range)".
-                        format(sym, group))
+                        format(sym, group)) from ex
             elif len(catrange) == 1:
                 try:
                     semantic_level.add_cats(policy, catrange[0], catrange[0])
-                except ValueError:
+                except ValueError as ex:
                     raise exception.InvalidLevel(
-                        "{0} is not a valid level ({1} is not a valid category)".format(sym, group))
+                        "{0} is not a valid level ({1} is not a valid category)".
+                        format(sym, group)) from ex
             else:
                 raise exception.InvalidLevel(
                     "{0} is not a valid level (level parsing error)".format(sym))
@@ -140,10 +141,10 @@ def level_factory(policy, sym):
     # convert to level object
     try:
         policy_level = qpol.qpol_mls_level_t(policy, semantic_level)
-    except ValueError:
+    except ValueError as ex:
         raise exception.InvalidLevel(
             "{0} is not a valid level (one or more categories are not associated with the "
-            "sensitivity)".format(sym))
+            "sensitivity)".format(sym)) from ex
 
     return Level(policy, policy_level)
 
@@ -168,8 +169,8 @@ def level_decl_factory(policy, sym):
 
     try:
         return LevelDecl(policy, qpol.qpol_level_t(policy, str(sym)))
-    except ValueError:
-        raise exception.InvalidLevelDecl("{0} is not a valid sensitivity".format(sym))
+    except ValueError as ex:
+        raise exception.InvalidLevelDecl("{0} is not a valid sensitivity".format(sym)) from ex
 
 
 def range_factory(policy, sym):
@@ -192,21 +193,21 @@ def range_factory(policy, sym):
     try:
         low = level_factory(policy, levels[0].strip())
     except exception.InvalidLevel as ex:
-        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, ex))
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, ex)) from ex
 
     try:
         high = level_factory(policy, levels[1].strip())
     except exception.InvalidLevel as ex:
-        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, ex))
+        raise exception.InvalidRange("{0} is not a valid range ({1}).".format(sym, ex)) from ex
     except IndexError:
         high = low
 
     # convert to range object
     try:
         policy_range = qpol.qpol_mls_range_t(policy, low.qpol_symbol, high.qpol_symbol)
-    except ValueError:
+    except ValueError as ex:
         raise exception.InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
-                                     format(sym, low, high))
+                                     format(sym, low, high)) from ex
 
     return Range(policy, policy_range)
 

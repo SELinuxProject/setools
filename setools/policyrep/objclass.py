@@ -32,8 +32,8 @@ def common_factory(policy, name):
 
     try:
         return Common(policy, qpol.qpol_common_t(policy, str(name)))
-    except ValueError:
-        raise exception.InvalidCommon("{0} is not a valid common".format(name))
+    except ValueError as ex:
+        raise exception.InvalidCommon("{0} is not a valid common".format(name)) from ex
 
 
 def class_factory(policy, name):
@@ -47,8 +47,8 @@ def class_factory(policy, name):
 
     try:
         return ObjClass(policy, qpol.qpol_class_t(policy, str(name)))
-    except ValueError:
-        raise exception.InvalidClass("{0} is not a valid object class".format(name))
+    except ValueError as ex:
+        raise exception.InvalidClass("{0} is not a valid object class".format(name)) from ex
 
 
 class Common(symbol.PolicySymbol):
@@ -91,8 +91,8 @@ class ObjClass(Common):
 
         try:
             return common_factory(self.policy, self.qpol_symbol.common(self.policy))
-        except ValueError:
-            raise exception.NoCommon("{0} does not inherit a common.".format(self))
+        except ValueError as ex:
+            raise exception.NoCommon("{0} does not inherit a common.".format(self)) from ex
 
     def statement(self):
         stmt = "class {0}\n".format(self)

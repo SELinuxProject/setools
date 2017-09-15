@@ -33,8 +33,8 @@ def initialsid_factory(policy, name):
 
     try:
         return InitialSID(policy, qpol.qpol_isid_t(policy, name))
-    except ValueError:
-        raise exception.InvalidInitialSid("{0} is not a valid initial sid".format(name))
+    except ValueError as ex:
+        raise exception.InvalidInitialSid("{0} is not a valid initial sid".format(name)) from ex
 
 
 class InitialSID(symbol.PolicySymbol):

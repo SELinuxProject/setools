@@ -28,22 +28,25 @@ def validate_ruletype(t):
     """Validate default_* rule types."""
     try:
         return DefaultRuletype.lookup(t)
-    except KeyError:
-        raise exception.InvalidDefaultType("{0} is not a valid default_*  rule type.".format(t))
+    except KeyError as ex:
+        raise exception.InvalidDefaultType("{0} is not a valid default_*  rule type.".format(
+                                           t)) from ex
 
 
 def validate_default_value(default):
     try:
         return DefaultValue.lookup(default)
-    except KeyError:
-        raise exception.InvalidDefaultValue("{0} is not a valid default_* value.".format(default))
+    except KeyError as ex:
+        raise exception.InvalidDefaultValue("{0} is not a valid default_* value.".format(
+                                            default)) from ex
 
 
 def validate_default_range(default):
     try:
         return DefaultRangeValue.lookup(default)
-    except KeyError:
-        raise exception.InvalidDefaultRange("{0} is not a valid default_* range.".format(default))
+    except KeyError as ex:
+        raise exception.InvalidDefaultRange("{0} is not a valid default_* range.".format(
+                                            default)) from ex
 
 
 class DefaultRuletype(PolicyEnum):

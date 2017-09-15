@@ -164,8 +164,8 @@ class PortconQueryTab(AnalysisTab):
             if pending_ports:
                 try:
                     ports = [int(i) for i in pending_ports.split("-")]
-                except ValueError:
-                    raise ValueError("Enter a port number or range, e.g. 22 or 6000-6020")
+                except ValueError as ex:
+                    raise ValueError("Enter a port number or range, e.g. 22 or 6000-6020") from ex
 
                 if len(ports) == 2:
                     self.query.ports = ports

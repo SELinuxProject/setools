@@ -30,8 +30,8 @@ def validate_ruletype(t):
     """Validate fs_use_* rule types."""
     try:
         return FSUseRuletype.lookup(t)
-    except KeyError:
-        raise exception.InvalidFSUseType("{0} is not a valid fs_use_* type.".format(t))
+    except KeyError as ex:
+        raise exception.InvalidFSUseType("{0} is not a valid fs_use_* type.".format(t)) from ex
 
 
 def fs_use_factory(policy, name):

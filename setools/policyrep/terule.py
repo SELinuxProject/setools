@@ -76,8 +76,8 @@ def validate_ruletype(t):
     """Validate TE Rule types."""
     try:
         return TERuletype.lookup(t)
-    except KeyError:
-        raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t))
+    except KeyError as ex:
+        raise exception.InvalidTERuleType("{0} is not a valid TE rule type.".format(t)) from ex
 
 
 class TERuletype(PolicyEnum):
@@ -346,12 +346,12 @@ class TERule(BaseTERule):
         """The type_transition rule's file name."""
         try:
             return self.qpol_symbol.filename(self.policy)
-        except AttributeError:
+        except AttributeError as ex:
             if self.ruletype == TERuletype.type_transition:
-                raise exception.TERuleNoFilename
+                raise exception.TERuleNoFilename from ex
             else:
                 raise exception.RuleUseError("{0} rules do not have file names".
-                                             format(self.ruletype))
+                                             format(self.ruletype)) from ex
 
 
 class ExpandedAVRule(AVRule):

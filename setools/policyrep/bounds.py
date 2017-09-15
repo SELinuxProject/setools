@@ -37,8 +37,8 @@ def validate_ruletype(t):
     """Validate *bounds rule types."""
     try:
         return BoundsRuletype.lookup(t)
-    except KeyError:
-        raise exception.InvalidBoundsType("{0} is not a valid *bounds rule type.".format(t))
+    except KeyError as ex:
+        raise exception.InvalidBoundsType("{0} is not a valid *bounds rule type.".format(t)) from ex
 
 
 class BoundsRuletype(PolicyEnum):

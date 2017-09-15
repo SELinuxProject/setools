@@ -66,8 +66,8 @@ def validate_ruletype(t):
     """Validate RBAC rule types."""
     try:
         return RBACRuletype.lookup(t)
-    except KeyError:
-        raise exception.InvalidRBACRuleType("{0} is not a valid RBAC rule type.".format(t))
+    except KeyError as ex:
+        raise exception.InvalidRBACRuleType("{0} is not a valid RBAC rule type.".format(t)) from ex
 
 
 class RBACRuletype(PolicyEnum):

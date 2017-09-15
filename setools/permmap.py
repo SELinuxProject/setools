@@ -99,10 +99,10 @@ class PermissionMap(object):
                 if state == 1:
                     try:
                         num_classes = int(entry[0])
-                    except ValueError:
+                    except ValueError as ex:
                         raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid number of classes: {2}".
-                            format(permmapfile, line_num, entry[0]))
+                            format(permmapfile, line_num, entry[0])) from ex
 
                     if num_classes < 1:
                         raise exception.PermissionMapParseError(
@@ -121,10 +121,10 @@ class PermissionMap(object):
 
                     try:
                         num_perms = int(entry[2])
-                    except ValueError:
+                    except ValueError as ex:
                         raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid number of permissions: {2}".
-                            format(permmapfile, line_num, entry[2]))
+                            format(permmapfile, line_num, entry[2])) from ex
 
                     if num_perms < 1:
                         raise exception.PermissionMapParseError(
@@ -152,10 +152,10 @@ class PermissionMap(object):
 
                     try:
                         weight = int(entry[2])
-                    except ValueError:
+                    except ValueError as ex:
                         raise exception.PermissionMapParseError(
                             "{0}:{1}:Invalid permission weight: {2}".
-                            format(permmapfile, line_num, entry[2]))
+                            format(permmapfile, line_num, entry[2])) from ex
 
                     if not min_weight <= weight <= max_weight:
                         raise exception.PermissionMapParseError(
@@ -244,8 +244,8 @@ class PermissionMap(object):
         try:
             for perm in self.permmap[class_].keys():
                 yield Mapping(self.permmap, class_, perm)
-        except KeyError:
-            raise exception.UnmappedClass("{0} is not mapped.".format(class_))
+        except KeyError as ex:
+            raise exception.UnmappedClass("{0} is not mapped.".format(class_)) from ex
 
     def mapping(self, class_, perm):
         """Retrieve a specific permission's mapping."""

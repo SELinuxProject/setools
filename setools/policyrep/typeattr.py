@@ -28,8 +28,8 @@ def _symbol_lookup(qpol_policy, name):
 
     try:
         return qpol.qpol_type_t(qpol_policy, str(name))
-    except ValueError:
-        raise exception.InvalidType("{0} is not a valid type/attribute".format(name))
+    except ValueError as ex:
+        raise exception.InvalidType("{0} is not a valid type/attribute".format(name)) from ex
 
 
 def attribute_factory(qpol_policy, name):

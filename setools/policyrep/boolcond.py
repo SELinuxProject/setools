@@ -37,8 +37,8 @@ def boolean_factory(policy, name):
 
     try:
         return Boolean(policy, qpol.qpol_bool_t(policy, str(name)))
-    except ValueError:
-        raise exception.InvalidBoolean("{0} is not a valid Boolean".format(name))
+    except ValueError as ex:
+        raise exception.InvalidBoolean("{0} is not a valid Boolean".format(name)) from ex
 
 
 def condexpr_factory(policy, name):

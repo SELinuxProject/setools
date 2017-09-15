@@ -61,8 +61,8 @@ def validate_ruletype(t):
     """Validate MLS rule types."""
     try:
         return MLSRuletype.lookup(t)
-    except KeyError:
-        raise exception.InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t))
+    except KeyError as ex:
+        raise exception.InvalidMLSRuleType("{0} is not a valid MLS rule type.".format(t)) from ex
 
 
 class MLSRuletype(PolicyEnum):

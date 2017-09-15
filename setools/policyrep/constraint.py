@@ -44,8 +44,8 @@ def validate_ruletype(t):
     """Validate constraint rule types."""
     try:
         return ConstraintRuletype.lookup(t)
-    except KeyError:
-        raise InvalidConstraintType("{0} is not a valid constraint type.".format(t))
+    except KeyError as ex:
+        raise InvalidConstraintType("{0} is not a valid constraint type.".format(t)) from ex
 
 
 def constraint_factory(policy, sym):
@@ -63,8 +63,8 @@ def constraint_factory(policy, sym):
             else:
                 return Validatetrans(policy, sym, ConstraintRuletype.validatetrans)
 
-    except AttributeError:
-        raise TypeError("Constraints cannot be looked-up.")
+    except AttributeError as ex:
+        raise TypeError("Constraints cannot be looked-up.") from ex
 
 
 class ConstraintRuletype(PolicyEnum):

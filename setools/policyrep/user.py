@@ -34,8 +34,8 @@ def user_factory(qpol_policy, name):
 
     try:
         return User(qpol_policy, qpol.qpol_user_t(qpol_policy, str(name)))
-    except ValueError:
-        raise exception.InvalidUser("{0} is not a valid user".format(name))
+    except ValueError as ex:
+        raise exception.InvalidUser("{0} is not a valid user".format(name)) from ex
 
 
 class User(symbol.PolicySymbol):
