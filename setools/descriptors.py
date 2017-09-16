@@ -197,9 +197,7 @@ class EdgeAttrList(NetworkXGraphEdgeDescriptor):
             raise ValueError("{0} lists should not be assigned directly".format(self.name))
 
     def __delete__(self, obj):
-        # in Python3 a .clear() function was added for lists
-        # keep this implementation for Python 2 compat
-        del obj.G[obj.source][obj.target][self.name][:]
+        obj.G[obj.source][obj.target][self.name].clear()
 
 
 #
