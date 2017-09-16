@@ -18,6 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 import itertools
+from contextlib import suppress
 
 from . import exception
 from . import qpol
@@ -174,10 +175,8 @@ class AVRule(BaseTERule):
                 # convert to list since sets cannot be indexed
                 self._rule_string += "{0};".format(list(perms)[0])
 
-            try:
+            with suppress(exception.RuleNotConditional):
                 self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-            except exception.RuleNotConditional:
-                pass
 
         return self._rule_string
 
@@ -307,10 +306,8 @@ class TERule(BaseTERule):
                 # invalid use for type_change/member
                 self._rule_string += ";"
 
-            try:
+            with suppress(exception.RuleNotConditional):
                 self._rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-            except exception.RuleNotConditional:
-                pass
 
             return self._rule_string
 

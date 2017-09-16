@@ -20,6 +20,7 @@
 import logging
 import copy
 from collections import defaultdict
+from contextlib import suppress
 
 from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
@@ -55,10 +56,8 @@ class InfoFlowAnalysisTab(AnalysisTab):
         # current permission map, to the new map
         for classname in self.query.perm_map.classes():
             for mapping in self.query.perm_map.perms(classname):
-                try:
+                with suppress(UnmappedClass, UnmappedPermission):
                     perm_map.mapping(classname, mapping.perm).enabled = mapping.enabled
-                except (UnmappedClass, UnmappedPermission):
-                    pass
 
         # apply updated permission map
         self.query.perm_map = perm_map

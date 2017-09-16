@@ -23,6 +23,7 @@ import argparse
 import sys
 import logging
 from itertools import chain
+from contextlib import suppress
 
 parser = argparse.ArgumentParser(
     description="SELinux policy semantic difference tool.",
@@ -523,10 +524,9 @@ try:
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
                         rule, perms)
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except AttributeError:
-                        pass
+
                     print("      * {0}".format(rule_string))
 
             print()
@@ -621,10 +621,9 @@ try:
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
                         rule, perms)
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except AttributeError:
-                        pass
+
                     print("      * {0}".format(rule_string))
 
             print()
@@ -722,10 +721,9 @@ try:
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
                         rule, perms)
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except AttributeError:
-                        pass
+
                     print("      * {0}".format(rule_string))
 
             print()
@@ -823,10 +821,9 @@ try:
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
                         rule, perms)
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except AttributeError:
-                        pass
+
                     print("      * {0}".format(rule_string))
 
             print()
@@ -924,17 +921,13 @@ try:
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                         rule, added_default, removed_default)
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " {0}".format(rule.filename)
-                    except AttributeError:
-                        pass
 
                     rule_string += ";"
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except AttributeError:
-                        pass
 
                     print("      * {0}".format(rule_string))
 
@@ -968,17 +961,13 @@ try:
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                         rule, added_default, removed_default)
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " {0}".format(rule.filename)
-                    except AttributeError:
-                        pass
 
                     rule_string += ";"
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except AttributeError:
-                        pass
 
                     print("      * {0}".format(rule_string))
 
@@ -1012,17 +1001,13 @@ try:
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                         rule, added_default, removed_default)
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " {0}".format(rule.filename)
-                    except AttributeError:
-                        pass
 
                     rule_string += ";"
 
-                    try:
+                    with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
-                    except AttributeError:
-                        pass
 
                     print("      * {0}".format(rule_string))
 

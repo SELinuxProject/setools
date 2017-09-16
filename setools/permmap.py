@@ -21,6 +21,7 @@ import logging
 import copy
 from collections import OrderedDict
 from errno import ENOENT
+from contextlib import suppress
 
 import pkg_resources
 
@@ -318,10 +319,8 @@ class PermissionMap:
 
             perms = class_.perms
 
-            try:
+            with suppress(policyrep.exception.NoCommon):
                 perms |= class_.common.perms
-            except policyrep.exception.NoCommon:
-                pass
 
             for perm_name in perms:
                 if perm_name not in self.permmap[class_name]:

@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from contextlib import suppress
+
 from . import exception
 from . import symbol
 from . import qpol
@@ -72,11 +74,9 @@ class ObjClass(Common):
     """An object class."""
 
     def __contains__(self, other):
-        try:
+        with suppress(exception.NoCommon):
             if other in self.common.perms:
                 return True
-        except exception.NoCommon:
-            pass
 
         return other in self.perms
 
@@ -97,10 +97,8 @@ class ObjClass(Common):
     def statement(self):
         stmt = "class {0}\n".format(self)
 
-        try:
+        with suppress(exception.NoCommon):
             stmt += "inherits {0}\n".format(self.common)
-        except exception.NoCommon:
-            pass
 
         # a class that inherits may not have additional permissions
         perms = self.perms

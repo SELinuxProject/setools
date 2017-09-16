@@ -23,6 +23,7 @@ import stat
 import logging
 import json
 from errno import ENOENT
+from contextlib import suppress
 
 import pkg_resources
 from PyQt5.QtCore import pyqtSlot, Qt, QProcess
@@ -612,24 +613,18 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
     #
     def copy(self):
         """Copy text from the currently-focused widget."""
-        try:
+        with suppress(AttributeError):
             QApplication.instance().focusWidget().copy()
-        except AttributeError:
-            pass
 
     def cut(self):
         """Cut text from the currently-focused widget."""
-        try:
+        with suppress(AttributeError):
             QApplication.instance().focusWidget().cut()
-        except AttributeError:
-            pass
 
     def paste(self):
         """Paste text into the currently-focused widget."""
-        try:
+        with suppress(AttributeError):
             QApplication.instance().focusWidget().paste()
-        except AttributeError:
-            pass
 
     #
     # Help actions

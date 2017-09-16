@@ -11,6 +11,7 @@ import subprocess
 import sys
 import os
 from os.path import join
+from contextlib import suppress
 
 
 class QtHelpCommand(Command):
@@ -80,11 +81,9 @@ class BuildExtCommand(build_ext):
 base_lib_dirs = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
 include_dirs = ['libqpol', 'libqpol/include']
 
-try:
+with suppress(KeyError):
     base_lib_dirs.insert(0, os.environ["SEPOL_SRC"] + "/src")
     include_dirs.append(os.environ["SEPOL_SRC"] + "/include")
-except KeyError:
-    pass
 
 try:
     static_sepol = os.environ['SEPOL']

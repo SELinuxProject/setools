@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 from collections import namedtuple
+from contextlib import suppress
 
 from ..policyrep.exception import NoCommon
 
@@ -57,16 +58,12 @@ class ObjClassDifference(Difference):
             # 1. change to permissions (inherited common is expanded)
 
             left_perms = left_class.perms
-            try:
+            with suppress(NoCommon):
                 left_perms |= left_class.common.perms
-            except NoCommon:
-                pass
 
             right_perms = right_class.perms
-            try:
+            with suppress(NoCommon):
                 right_perms |= right_class.common.perms
-            except NoCommon:
-                pass
 
             added_perms, removed_perms, matched_perms = self._set_diff(left_perms, right_perms)
 

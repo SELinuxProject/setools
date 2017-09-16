@@ -21,6 +21,7 @@
 import itertools
 import logging
 from collections import defaultdict, namedtuple
+from contextlib import suppress
 
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
@@ -110,13 +111,11 @@ class DomainTransitionAnalysis:
 
         self.log.info("Generating one domain transition path from {0} to {1}...".format(s, t))
 
-        try:
-            yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
-        except (NetworkXNoPath, NetworkXError):
+        with suppress(NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
-            pass
+            yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
 
     def all_paths(self, source, target, maxlen=2):
         """
@@ -147,14 +146,12 @@ class DomainTransitionAnalysis:
         self.log.info("Generating all domain transition paths from {0} to {1}, max length {2}...".
                       format(s, t, maxlen))
 
-        try:
-            for path in nx.all_simple_paths(self.subG, s, t, maxlen):
-                yield self.__generate_steps(path)
-        except (NetworkXNoPath, NetworkXError):
+        with suppress(NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
-            pass
+            for path in nx.all_simple_paths(self.subG, s, t, maxlen):
+                yield self.__generate_steps(path)
 
     def all_shortest_paths(self, source, target):
         """
@@ -180,16 +177,14 @@ class DomainTransitionAnalysis:
         self.log.info("Generating all shortest domain transition paths from {0} to {1}...".
                       format(s, t))
 
-        try:
-            for path in nx.all_shortest_paths(self.subG, s, t):
-                yield self.__generate_steps(path)
-        except (NetworkXNoPath, NetworkXError, KeyError):
+        with suppress(NetworkXNoPath, NetworkXError, KeyError):
             # NetworkXError: the type is valid but not in graph, e.g. excluded
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
             # KeyError: work around NetworkX bug
             # when the source node is not in the graph
-            pass
+            for path in nx.all_shortest_paths(self.subG, s, t):
+                yield self.__generate_steps(path)
 
     def transitions(self, type_):
         """
@@ -213,7 +208,8 @@ class DomainTransitionAnalysis:
         self.log.info("Generating all domain transitions {1} {0}".
                       format(s, "in to" if self.reverse else "out from"))
 
-        try:
+        with suppress(NetworkXError):
+            # NetworkXError: the type is valid but not in graph, e.g. excluded
             for source, target in self.subG.out_edges_iter(s):
                 edge = Edge(self.subG, source, target)
 
@@ -228,10 +224,6 @@ class DomainTransitionAnalysis:
                                   edge.setexec,
                                   edge.dyntransition,
                                   edge.setcurrent)
-
-        except NetworkXError:
-            # NetworkXError: the type is valid but not in graph, e.g. excluded
-            pass
 
     def get_stats(self):  # pragma: no cover
         """
@@ -528,10 +520,8 @@ class DomainTransitionAnalysis:
                 del edge.entrypoint[e]
                 del edge.execute[e]
 
-                try:
+                with suppress(KeyError):  # setexec
                     del edge.type_transition[e]
-                except KeyError:  # setexec
-                    pass
 
             # cannot delete the edges while iterating over them
             if not edge.entrypoint and not edge.dyntransition:

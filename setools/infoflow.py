@@ -18,6 +18,7 @@
 #
 import itertools
 import logging
+from contextlib import suppress
 
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath
@@ -117,14 +118,12 @@ class InfoFlowAnalysis:
         self.log.info("Generating one shortest information flow path from {0} to {1}...".
                       format(s, t))
 
-        try:
-            yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
-        except (NetworkXNoPath, NetworkXError):
+        with suppress(NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
-            pass
+            yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
 
     def all_paths(self, source, target, maxlen=2):
         """
@@ -158,15 +157,13 @@ class InfoFlowAnalysis:
         self.log.info("Generating all information flow paths from {0} to {1}, max length {2}...".
                       format(s, t, maxlen))
 
-        try:
-            for path in nx.all_simple_paths(self.subG, s, t, maxlen):
-                yield self.__generate_steps(path)
-        except (NetworkXNoPath, NetworkXError):
+        with suppress(NetworkXNoPath, NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
-            pass
+            for path in nx.all_simple_paths(self.subG, s, t, maxlen):
+                yield self.__generate_steps(path)
 
     def all_shortest_paths(self, source, target):
         """
@@ -194,17 +191,15 @@ class InfoFlowAnalysis:
         self.log.info("Generating all shortest information flow paths from {0} to {1}...".
                       format(s, t))
 
-        try:
-            for path in nx.all_shortest_paths(self.subG, s, t):
-                yield self.__generate_steps(path)
-        except (NetworkXNoPath, NetworkXError, KeyError):
+        with suppress(NetworkXNoPath, NetworkXError, KeyError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
             # KeyError: work around NetworkX bug
             # when the source node is not in the graph
-            pass
+            for path in nx.all_shortest_paths(self.subG, s, t):
+                yield self.__generate_steps(path)
 
     def infoflows(self, type_, out=True):
         """
@@ -238,13 +233,11 @@ class InfoFlowAnalysis:
         else:
             flows = self.subG.in_edges_iter(s)
 
-        try:
-            for source, target in flows:
-                yield Edge(self.subG, source, target)
-        except NetworkXError:
+        with suppress(NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
-            pass
+            for source, target in flows:
+                yield Edge(self.subG, source, target)
 
     def get_stats(self):  # pragma: no cover
         """

@@ -16,6 +16,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from contextlib import suppress
+
 from PyQt5.QtCore import Qt
 
 from .models import SEToolsTableModel
@@ -41,10 +43,8 @@ class DefaultTableModel(SEToolsTableModel):
                 elif col == 2:
                     return item.default.name
                 elif col == 3:
-                    try:
+                    with suppress(AttributeError):
                         return item.default_range.name
-                    except AttributeError:
-                        pass
 
             elif role == Qt.UserRole:
                 return item

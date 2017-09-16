@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from contextlib import suppress
 
 from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QAbstractTableModel, \
                          QModelIndex, QStringListModel, Qt
@@ -118,19 +119,15 @@ class PermListModel(SEToolsListModel):
         for cls in self.policy.classes():
             permlist.update(cls.perms)
 
-            try:
+            with suppress(NoCommon):
                 permlist.update(cls.common.perms)
-            except NoCommon:
-                pass
 
         # create intersection
         for cls in classes:
             cls_perms = cls.perms
 
-            try:
+            with suppress(NoCommon):
                 cls_perms.update(cls.common.perms)
-            except NoCommon:
-                pass
 
             permlist.intersection_update(cls_perms)
 

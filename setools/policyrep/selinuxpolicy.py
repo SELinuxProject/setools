@@ -23,6 +23,7 @@ import logging
 import warnings
 from itertools import chain
 from errno import ENOENT
+from contextlib import suppress
 
 try:
     import selinux
@@ -489,11 +490,9 @@ class SELinuxPolicy:
     def categories(self):
         """Generator which yields all MLS categories."""
         for cat in self.policy.cat_iter():
-            try:
-                yield mls.category_factory(self.policy, cat)
-            except TypeError:
+            with suppress(TypeError):
                 # libqpol unfortunately iterates over aliases too
-                pass
+                yield mls.category_factory(self.policy, cat)
 
     def classes(self):
         """Generator which yields all object classes."""
@@ -508,23 +507,18 @@ class SELinuxPolicy:
     def defaults(self):
         """Generator which yields all default_* statements."""
         for default_ in self.policy.default_iter():
-            try:
-                for default_obj in default.default_factory(self.policy, default_):
-                    yield default_obj
-            except exception.NoDefaults:
+            with suppress(exception.NoDefaults):
                 # qpol iterates over all classes. Handle case
                 # where a class has no default_* settings.
-                pass
+                for default_obj in default.default_factory(self.policy, default_):
+                    yield default_obj
 
     def levels(self):
         """Generator which yields all level declarations."""
         for level in self.policy.level_iter():
-
-            try:
-                yield mls.level_decl_factory(self.policy, level)
-            except TypeError:
+            with suppress(TypeError):
                 # libqpol unfortunately iterates over levels and sens aliases
-                pass
+                yield mls.level_decl_factory(self.policy, level)
 
     def polcaps(self):
         """Generator which yields all policy capabilities."""
@@ -540,29 +534,23 @@ class SELinuxPolicy:
         """Generator which yields all sensitivities."""
         # see mls.py for more info on why level_iter is used here.
         for sens in self.policy.level_iter():
-            try:
+            with suppress(TypeError):
+                # libqpol unfortunately iterates over attributes and aliases
                 yield mls.sensitivity_factory(self.policy, sens)
-            except TypeError:
-                # libqpol unfortunately iterates over sens and aliases
-                pass
 
     def types(self):
         """Generator which yields all types."""
         for type_ in self.policy.type_iter():
-            try:
-                yield typeattr.type_factory(self.policy, type_)
-            except TypeError:
+            with suppress(TypeError):
                 # libqpol unfortunately iterates over attributes and aliases
-                pass
+                yield typeattr.type_factory(self.policy, type_)
 
     def typeattributes(self):
         """Generator which yields all (type) attributes."""
         for type_ in self.policy.type_iter():
-            try:
-                yield typeattr.attribute_factory(self.policy, type_)
-            except TypeError:
+            with suppress(TypeError):
                 # libqpol unfortunately iterates over attributes and aliases
-                pass
+                yield typeattr.attribute_factory(self.policy, type_)
 
     def users(self):
         """Generator which yields all users."""
