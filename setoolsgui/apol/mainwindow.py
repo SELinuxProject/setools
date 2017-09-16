@@ -372,7 +372,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.error_msg.critical(self, "Failed to load settings",
                                     "Invalid settings file: \"{0}\"".format(filename))
             return
-        except (IOError, OSError) as ex:
+        except OSError as ex:
             self.log.critical("Unable to load settings file \"{0.filename}\": {0.strerror}".
                               format(ex))
             self.error_msg.critical(self, "Failed to load settings",
@@ -433,7 +433,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         try:
             with open(filename, "w") as fd:
                 json.dump(settings, fd, indent=1)
-        except (IOError, OSError) as ex:
+        except OSError as ex:
             self.log.critical("Unable to save settings file \"{0.filename}\": {0.strerror}".
                               format(ex))
             self.error_msg.critical(self, "Failed to save settings",
@@ -471,7 +471,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.error_msg.critical(self, "Failed to load workspace",
                                     "Invalid workspace file: \"{0}\"".format(filename))
             return
-        except (IOError, OSError) as ex:
+        except OSError as ex:
             self.log.critical("Unable to load workspace file \"{0.filename}\": {0.strerror}".
                               format(ex))
             self.error_msg.critical(self, "Failed to load workspace",
