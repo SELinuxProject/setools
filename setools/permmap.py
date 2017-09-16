@@ -34,7 +34,7 @@ min_weight = 1
 max_weight = 10
 
 
-class PermissionMap(object):
+class PermissionMap:
 
     """Permission Map for information flow analysis."""
 
@@ -420,7 +420,7 @@ def validate_enabled(enabled):
     return bool(enabled)
 
 
-class Mapping(object):
+class Mapping:
 
     """A mapping for a permission in the permission map."""
 

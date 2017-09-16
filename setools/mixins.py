@@ -23,7 +23,7 @@ from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .util import match_in_set, match_regex, match_range, match_regex_or_set
 
 
-class MatchAlias(object):
+class MatchAlias:
 
     """Mixin for matching an object's aliases."""
 
@@ -49,7 +49,7 @@ class MatchAlias(object):
         return match_in_set(obj.aliases(), self.alias, self.alias_regex)
 
 
-class MatchContext(object):
+class MatchContext:
 
     """
     Mixin for matching contexts.
@@ -135,7 +135,7 @@ class MatchContext(object):
         return True
 
 
-class MatchName(object):
+class MatchName:
 
     """Mixin for matching an object's name."""
 
@@ -155,7 +155,7 @@ class MatchName(object):
         return match_regex(obj, self.name, self.name_regex)
 
 
-class MatchObjClass(object):
+class MatchObjClass:
 
     """Mixin for matching an object's class."""
 
@@ -183,7 +183,7 @@ class MatchObjClass(object):
             return obj.tclass in self.tclass
 
 
-class MatchPermission(object):
+class MatchPermission:
 
     """Mixin for matching an object's permissions."""
 

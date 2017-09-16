@@ -46,7 +46,7 @@ entrypoint_output = namedtuple("entrypoints", ["name",
                                                "type_transition"])
 
 
-class DomainTransitionAnalysis(object):
+class DomainTransitionAnalysis:
 
     """Domain transition analysis."""
 
@@ -567,7 +567,7 @@ class DomainTransitionAnalysis(object):
             nx.number_of_edges(self.subG)))
 
 
-class Edge(object):
+class Edge:
 
     """
     A graph edge.  Also used for returning domain transition steps.

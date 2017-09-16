@@ -39,7 +39,7 @@ from weakref import WeakKeyDictionary
 #
 
 
-class CriteriaDescriptor(object):
+class CriteriaDescriptor:
 
     """
     Single item criteria descriptor.
@@ -124,7 +124,7 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
 #
 
 
-class NetworkXGraphEdgeDescriptor(object):
+class NetworkXGraphEdgeDescriptor:
 
     """
     Descriptor base class for NetworkX graph edge attributes.
@@ -205,7 +205,7 @@ class EdgeAttrList(NetworkXGraphEdgeDescriptor):
 #
 # Permission map descriptors
 #
-class PermissionMapDescriptor(object):
+class PermissionMapDescriptor:
 
     """
     Descriptor for Permission Map mappings.

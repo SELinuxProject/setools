@@ -89,7 +89,7 @@ class HandleUnknown(PolicyEnum):
     reject = qpol.QPOL_REJECT_UNKNOWN
 
 
-class SELinuxPolicy(object):
+class SELinuxPolicy:
 
     """The complete SELinux policy."""
 

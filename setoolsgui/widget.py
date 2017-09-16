@@ -38,7 +38,7 @@ QGroupBox::title {\
 "
 
 
-class SEToolsWidget(object):
+class SEToolsWidget:
     def load_ui(self, filename):
         distro = pkg_resources.get_distribution("setools")
         path = "{0}/setoolsgui/{1}".format(distro.location, filename)

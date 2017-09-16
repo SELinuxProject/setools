@@ -28,7 +28,7 @@ from .policyrep import TERuletype
 __all__ = ['InfoFlowAnalysis']
 
 
-class InfoFlowAnalysis(object):
+class InfoFlowAnalysis:
 
     """Information flow analysis."""
 
@@ -359,7 +359,7 @@ class InfoFlowAnalysis(object):
             nx.number_of_edges(self.subG)))
 
 
-class Edge(object):
+class Edge:
 
     """
     A graph edge.  Also used for returning information flow steps.

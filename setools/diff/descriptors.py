@@ -19,7 +19,7 @@
 from weakref import WeakKeyDictionary
 
 
-class DiffResultDescriptor(object):
+class DiffResultDescriptor:
 
     """Descriptor for managing diff results."""
 

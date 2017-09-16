@@ -22,7 +22,7 @@ from collections import namedtuple
 modified_item_record = namedtuple("modified_item", ["left", "right"])
 
 
-class Difference(object):
+class Difference:
 
     """Base class for all policy differences."""
 
@@ -129,7 +129,7 @@ class Difference(object):
             return added_items, removed_items, matched_items
 
 
-class Wrapper(object):
+class Wrapper:
 
     """Base class for policy object wrappers."""
 

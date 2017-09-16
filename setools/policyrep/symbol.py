@@ -18,7 +18,7 @@
 #
 
 
-class PolicySymbol(object):
+class PolicySymbol:
 
     """This is a base class for all policy objects."""
 

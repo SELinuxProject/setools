@@ -19,7 +19,7 @@
 import logging
 
 
-class PolicyQuery(object):
+class PolicyQuery:
 
     """Base class for SELinux policy queries."""
 
