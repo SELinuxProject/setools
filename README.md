@@ -14,10 +14,9 @@ SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
 To run SETools command line tools, the following packages are required:
-* Python 2.7 or 3.3+
+* Python 3.4+
 * NetworkX 1.8+
 * setuptools
-* enum34 (on Python 2.7 and 3.3 only)
 * libselinux Python bindings (optional but recommended)
 
 To run SETools graphical tools, the following packages are also required:
@@ -35,7 +34,6 @@ addition to the development packages from the above list:
 
 To run SETools unit tests, the following packages are required, in
 addition to the above dependencies:
-* mock (on Python 2.7 only)
 * tox (optional)
 
 ### Obtaining SETools
