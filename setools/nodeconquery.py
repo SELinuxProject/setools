@@ -1,4 +1,5 @@
 # Copyright 2014-2015, Tresys Technology, LLC
+# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -102,27 +103,11 @@ class NodeconQuery(MatchContext, PolicyQuery):
         for nodecon in self.policy.nodecons():
 
             if self.network:
-                netmask = ipaddress.ip_address(nodecon.netmask)
-
-                # Python 3.4's IPv6Network constructor does not support
-                # expanded netmasks, only CIDR numbers. Convert netmask
-                # into CIDR.
-                # This is Brian Kernighan's method for counting set bits.
-                # If the netmask happens to be invalid, this will
-                # not detect it.
-                CIDR = 0
-                int_netmask = int(netmask)
-                while int_netmask:
-                    int_netmask &= int_netmask - 1
-                    CIDR += 1
-
-                net = ipaddress.ip_network('{0}/{1}'.format(nodecon.address, CIDR))
-
                 if self.network_overlap:
-                    if not self.network.overlaps(net):
+                    if not self.network.overlaps(nodecon.network):
                         continue
                 else:
-                    if not net == self.network:
+                    if not nodecon.network == self.network:
                         continue
 
             if self.ip_version and self.ip_version != nodecon.ip_version:

@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -71,13 +72,12 @@ class NodeconWrapper(Wrapper):
 
     """Wrap nodecon statements for diff purposes."""
 
-    __slots__ = ("ip_version", "address", "netmask")
+    __slots__ = ("ip_version", "network")
 
     def __init__(self, ocon):
         self.origin = ocon
         self.ip_version = ocon.ip_version
-        self.address = ocon.address
-        self.netmask = ocon.netmask
+        self.network = ocon.network
         self.key = hash(ocon)
 
     def __hash__(self):
@@ -88,5 +88,4 @@ class NodeconWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.ip_version == other.ip_version and \
-               self.address == other.address and \
-               self.netmask == other.netmask
+               self.network == other.network

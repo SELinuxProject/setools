@@ -35,7 +35,7 @@ class NodeconTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return "{0.address}/{0.netmask}".format(rule)
+                    return str(rule.network.with_netmask)
                 elif col == 1:
                     return str(rule.context)
 

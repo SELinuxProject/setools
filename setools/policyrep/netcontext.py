@@ -1,5 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
-# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016, 2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -19,8 +19,11 @@
 #
 from socket import AF_INET, AF_INET6, IPPROTO_TCP, IPPROTO_UDP, getprotobyname
 from collections import namedtuple
+from ipaddress import ip_address, ip_network
 
 import socket
+import warnings
+import logging
 
 from . import qpol
 from . import symbol
@@ -119,18 +122,17 @@ class Nodecon(NetContext):
     """A nodecon statement."""
 
     def __str__(self):
-        return "nodecon {0.address} {0.netmask} {0.context}".format(self)
+        return "nodecon {1} {0.context}".format(self, self.network.with_netmask.replace("/", " "))
 
     def __hash__(self):
-        return hash("nodecon|{0.address}|{0.netmask}".format(self))
+        return hash("nodecon|{}".format(self.network.with_netmask))
 
     def __eq__(self, other):
         # Libqpol allocates new C objects in the
         # nodecons iterator, so pointer comparison
         # in the PolicySymbol object doesn't work.
         try:
-            return (self.address == other.address and
-                    self.netmask == other.netmask and
+            return (self.network == other.network and
                     self.context == other.context)
         except AttributeError:
             return (str(self) == str(other))
@@ -146,12 +148,45 @@ class Nodecon(NetContext):
     @property
     def address(self):
         """The network address for the nodecon."""
+        warnings.warn("Nodecon.address will be removed in SETools 2.3, please use nodecon.network",
+                      DeprecationWarning)
         return self.qpol_symbol.addr(self.policy)
 
     @property
     def netmask(self):
         """The network mask for the nodecon."""
+        warnings.warn("Nodecon.netmask will be removed in SETools 2.3, please use nodecon.network",
+                      DeprecationWarning)
         return self.qpol_symbol.mask(self.policy)
+
+    @property
+    def network(self):
+        """The network for the nodecon."""
+        CIDR = 0
+        addr = self.qpol_symbol.addr(self.policy)
+        mask = self.qpol_symbol.mask(self.policy)
+
+        # Python 3.4's IPv6Network constructor does not support
+        # expanded netmasks, only CIDR numbers. Convert netmask
+        # into CIDR.
+        # This is Brian Kernighan's method for counting set bits.
+        # If the netmask happens to be invalid, this will
+        # not detect it.
+        int_mask = int(ip_address(mask))
+        while int_mask:
+            int_mask &= int_mask - 1
+            CIDR += 1
+
+        net_with_mask = "{0}/{1}".format(addr, CIDR)
+        try:
+            # checkpolicy does not verify that no host bits are set,
+            # so strict will raise an exception if host bits are set.
+            return ip_network(net_with_mask)
+        except ValueError as ex:
+            log = logging.getLogger(__name__)
+            log.warning("Nodecon with network {} {} has host bits set. Analyses may have "
+                        "unexpected results.".format(addr, mask))
+            return ip_network(net_with_mask, strict=False)
 
 
 class PortconProtocol(int, PolicyEnum):

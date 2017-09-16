@@ -1,5 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
-# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016, 2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,6 +18,7 @@
 #
 import unittest
 from socket import IPPROTO_TCP, IPPROTO_UDP
+from ipaddress import IPv4Network, IPv6Network
 
 from setools import SELinuxPolicy, PolicyDifference
 from setools import BoundsRuletype as BRT
@@ -1174,23 +1175,19 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # new IPv4
         nodecon = l[0]
-        self.assertEqual("127.0.0.4", nodecon.address)
-        self.assertEqual("255.255.255.255", nodecon.netmask)
+        self.assertEqual(IPv4Network("124.0.0.0/8"), nodecon.network)
 
         # changed IPv4 netmask
         nodecon = l[1]
-        self.assertEqual("127.0.0.5", nodecon.address)
-        self.assertEqual("255.255.255.0", nodecon.netmask)
+        self.assertEqual(IPv4Network("125.0.0.0/16"), nodecon.network)
 
         # new IPv6
         nodecon = l[2]
-        self.assertEqual("::4", nodecon.address)
-        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+        self.assertEqual(IPv6Network("ff04::/62"), nodecon.network)
 
         # changed IPv6 netmask
         nodecon = l[3]
-        self.assertEqual("::5", nodecon.address)
-        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:0", nodecon.netmask)
+        self.assertEqual(IPv6Network("ff05::/60"), nodecon.network)
 
     def test_removed_nodecons(self):
         """Diff: removed nodecons."""
@@ -1199,23 +1196,19 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # new IPv4
         nodecon = l[0]
-        self.assertEqual("127.0.0.2", nodecon.address)
-        self.assertEqual("255.255.255.255", nodecon.netmask)
+        self.assertEqual(IPv4Network("122.0.0.0/8"), nodecon.network)
 
         # changed IPv4 netmask
         nodecon = l[1]
-        self.assertEqual("127.0.0.5", nodecon.address)
-        self.assertEqual("255.255.255.255", nodecon.netmask)
+        self.assertEqual(IPv4Network("125.0.0.0/8"), nodecon.network)
 
         # new IPv6
         nodecon = l[2]
-        self.assertEqual("::2", nodecon.address)
-        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+        self.assertEqual(IPv6Network("ff02::/62"), nodecon.network)
 
         # changed IPv6 netmask
         nodecon = l[3]
-        self.assertEqual("::5", nodecon.address)
-        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+        self.assertEqual(IPv6Network("ff05::/62"), nodecon.network)
 
     def test_modified_nodecons(self):
         """Diff: modified nodecons."""
@@ -1224,15 +1217,13 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         # changed IPv4
         nodecon, added_context, removed_context = l[0]
-        self.assertEqual("127.0.0.3", nodecon.address)
-        self.assertEqual("255.255.255.255", nodecon.netmask)
+        self.assertEqual(IPv4Network("123.0.0.0/8"), nodecon.network)
         self.assertEqual("modified_change_level:object_r:system:s2:c0", added_context)
         self.assertEqual("modified_change_level:object_r:system:s2:c1", removed_context)
 
         # changed IPv6
         nodecon, added_context, removed_context = l[1]
-        self.assertEqual("::3", nodecon.address)
-        self.assertEqual("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", nodecon.netmask)
+        self.assertEqual(IPv6Network("ff03::/62"), nodecon.network)
         self.assertEqual("modified_change_level:object_r:system:s2:c1", added_context)
         self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed_context)
 
