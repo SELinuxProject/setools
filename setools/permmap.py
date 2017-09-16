@@ -229,8 +229,7 @@ class PermissionMap:
         Yield:
         class       An object class name.
         """
-        for cls in self.permmap.keys():
-            yield cls
+        yield from self.permmap.keys()
 
     def perms(self, class_):
         """

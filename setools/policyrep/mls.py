@@ -227,9 +227,7 @@ class BaseMLSComponent(symbol.PolicySymbol):
 
     def aliases(self):
         """Generator that yields all aliases for this category."""
-
-        for alias in self.qpol_symbol.alias_iter(self.policy):
-            yield alias
+        yield from self.qpol_symbol.alias_iter(self.policy)
 
 
 class Category(BaseMLSComponent):

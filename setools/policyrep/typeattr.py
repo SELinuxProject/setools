@@ -123,8 +123,7 @@ class Type(BaseType):
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        for alias in self.qpol_symbol.alias_iter(self.policy):
-            yield alias
+        yield from self.qpol_symbol.alias_iter(self.policy)
 
     def statement(self):
         attrs = list(self.attributes())
