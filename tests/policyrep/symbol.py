@@ -17,11 +17,7 @@
 #
 import copy
 import unittest
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
 from setools.policyrep import qpol

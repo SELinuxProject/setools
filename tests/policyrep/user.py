@@ -16,11 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
 from setools.policyrep import qpol
@@ -82,11 +78,11 @@ class UserTest(unittest.TestCase):
         with patch('setools.policyrep.mls.enabled', return_value=False):
             user = self.mock_user_factory("username", ['role20_r', 'role21a_r'])
             # roles are stored in a set, so the role order may vary
-            self.assertRegexpMatches(user.statement(), "("
-                                     "user username roles { role20_r role21a_r };"
-                                     "|"
-                                     "user username roles { role21a_r role20_r };"
-                                     ")")
+            self.assertRegex(user.statement(), "("
+                             "user username roles { role20_r role21a_r };"
+                             "|"
+                             "user username roles { role21a_r role20_r };"
+                             ")")
 
     def test_022_statement_one_role_mls(self):
         """User statement, one role, MLS."""
@@ -98,7 +94,7 @@ class UserTest(unittest.TestCase):
         user = self.mock_user_factory("username", ['role20_r', 'role21a_r'],
                                       level="s0", range_="s0 - s2")
         # roles are stored in a set, so the role order may vary
-        self.assertRegexpMatches(
+        self.assertRegex(
             user.statement(), "("
             "user username roles { role20_r role21a_r } level s0 range s0 - s2;"
             "|"

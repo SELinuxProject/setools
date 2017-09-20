@@ -16,11 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
 from setools.policyrep.qpol import qpol_policy_t, qpol_avrule_t, qpol_terule_t, \
@@ -130,11 +126,11 @@ class AVRuleTest(unittest.TestCase):
         rule = self.mock_avrule_factory("allow", "a", "b", "c", ['d1', 'd2'])
 
         # permissions are stored in a set, so the order may vary
-        self.assertRegexpMatches(rule.statement(), "("
-                                 "allow a b:c { d1 d2 };"
-                                 "|"
-                                 "allow a b:c { d2 d1 };"
-                                 ")")
+        self.assertRegex(rule.statement(), "("
+                         "allow a b:c { d1 d2 };"
+                         "|"
+                         "allow a b:c { d2 d1 };"
+                         ")")
 
     def test_102_statement_one_perm_cond(self):
         """AVRule statement, one permission, conditional."""
@@ -146,11 +142,11 @@ class AVRuleTest(unittest.TestCase):
         rule = self.mock_avrule_factory("allow", "a", "b", "c", ['d1', 'd2'], cond="cond103")
 
         # permissions are stored in a set, so the order may vary
-        self.assertRegexpMatches(rule.statement(), "("
-                                 "allow a b:c { d1 d2 }; \[ cond103 ]"
-                                 "|"
-                                 "allow a b:c { d2 d1 }; \[ cond103 ]"
-                                 ")")
+        self.assertRegex(rule.statement(), "("
+                         "allow a b:c { d1 d2 }; \[ cond103 ]"
+                         "|"
+                         "allow a b:c { d2 d1 }; \[ cond103 ]"
+                         ")")
 
 
 @patch('setools.policyrep.boolcond.condexpr_factory', lambda x, y: y)

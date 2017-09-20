@@ -16,11 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from setools.policyrep.default import default_factory, validate_ruletype, validate_default_value, \
                                       validate_default_range, DefaultRuletype, DefaultValue, \

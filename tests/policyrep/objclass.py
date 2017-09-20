@@ -16,11 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
+from unittest.mock import Mock
 
 from setools import SELinuxPolicy
 from setools.policyrep import qpol
@@ -71,11 +67,11 @@ class CommonTest(unittest.TestCase):
     def test_030_statment(self):
         """Common: statement."""
         com = self.mock_common("test30", ["perm1", "perm2"])
-        self.assertRegexpMatches(com.statement(), "("
-                                 "common test30\n{\n\tperm1\n\tperm2\n}"
-                                 "|"
-                                 "common test30\n{\n\tperm2\n\tperm1\n}"
-                                 ")")
+        self.assertRegex(com.statement(), "("
+                         "common test30\n{\n\tperm1\n\tperm2\n}"
+                         "|"
+                         "common test30\n{\n\tperm2\n\tperm1\n}"
+                         ")")
 
     def test_040_contains(self):
         """Common: contains"""
@@ -137,29 +133,29 @@ class ObjClassTest(unittest.TestCase):
     def test_030_statment(self):
         """ObjClass: statement, no common."""
         cls = self.mock_class("test30", ["perm1", "perm2"])
-        self.assertRegexpMatches(cls.statement(), "("
-                                 "class test30\n{\n\tperm1\n\tperm2\n}"
-                                 "|"
-                                 "class test30\n{\n\tperm2\n\tperm1\n}"
-                                 ")")
+        self.assertRegex(cls.statement(), "("
+                         "class test30\n{\n\tperm1\n\tperm2\n}"
+                         "|"
+                         "class test30\n{\n\tperm2\n\tperm1\n}"
+                         ")")
 
     def test_031_statment(self):
         """ObjClass: statement, with common."""
         cls = self.mock_class("test31", ["perm1", "perm2"], com_perms=["perm3", "perm4"])
-        self.assertRegexpMatches(cls.statement(), "("
-                                 "class test31\ninherits test31_common\n{\n\tperm1\n\tperm2\n}"
-                                 "|"
-                                 "class test31\ninherits test31_common\n{\n\tperm2\n\tperm1\n}"
-                                 ")")
+        self.assertRegex(cls.statement(), "("
+                         "class test31\ninherits test31_common\n{\n\tperm1\n\tperm2\n}"
+                         "|"
+                         "class test31\ninherits test31_common\n{\n\tperm2\n\tperm1\n}"
+                         ")")
 
     def test_032_statment(self):
         """ObjClass: statement, with common, no class perms."""
         cls = self.mock_class("test32", [], com_perms=["perm3", "perm4"])
-        self.assertRegexpMatches(cls.statement(), "("
-                                 "class test32\ninherits test32_common"
-                                 "|"
-                                 "class test32\ninherits test32_common"
-                                 ")")
+        self.assertRegex(cls.statement(), "("
+                         "class test32\ninherits test32_common"
+                         "|"
+                         "class test32\ninherits test32_common"
+                         ")")
 
     def test_040_contains(self):
         """ObjClass: contains"""

@@ -16,11 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
-
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from setools.policyrep.qpol import qpol_policy_t, qpol_role_allow_t, qpol_role_trans_t
 from setools.policyrep.rbacrule import rbac_rule_factory, validate_ruletype, RBACRuletype

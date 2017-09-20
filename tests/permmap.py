@@ -16,11 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
-
-try:
-    from unittest.mock import Mock
-except ImportError:
-    from mock import Mock
+from unittest.mock import Mock
 
 from setools import SELinuxPolicy, PermissionMap, TERuletype
 from setools.exception import PermissionMapParseError, RuleTypeError, \
