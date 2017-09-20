@@ -148,14 +148,14 @@ class Nodecon(NetContext):
     @property
     def address(self):
         """The network address for the nodecon."""
-        warnings.warn("Nodecon.address will be removed in SETools 2.3, please use nodecon.network",
+        warnings.warn("Nodecon.address will be removed in SETools 4.3, please use nodecon.network",
                       DeprecationWarning)
         return self.qpol_symbol.addr(self.policy)
 
     @property
     def netmask(self):
         """The network mask for the nodecon."""
-        warnings.warn("Nodecon.netmask will be removed in SETools 2.3, please use nodecon.network",
+        warnings.warn("Nodecon.netmask will be removed in SETools 4.3, please use nodecon.network",
                       DeprecationWarning)
         return self.qpol_symbol.mask(self.policy)
 
