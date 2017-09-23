@@ -57,12 +57,12 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         node8 = self.p.lookup_type("node8")
         node9 = self.p.lookup_type("node9")
 
-        nodes = set(self.a.G.nodes_iter())
+        nodes = set(self.a.G.nodes())
         self.assertSetEqual(set([disconnected1, disconnected2, node1,
                                  node2, node3, node4, node5,
                                  node6, node7, node8, node9]), nodes)
 
-        edges = set(self.a.G.out_edges_iter())
+        edges = set(self.a.G.out_edges())
         self.assertSetEqual(set([(disconnected1, disconnected2),
                                  (disconnected2, disconnected1),
                                  (node1, node2),
@@ -76,54 +76,54 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
                                  (node8, node9),
                                  (node9, node8)]), edges)
 
-        r = self.a.G.edge[disconnected1][disconnected2]["rules"]
+        r = self.a.G.edges[disconnected1, disconnected2]["rules"]
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "disconnected1", "disconnected2", "infoflow2",
                            set(["super"]))
 
-        r = self.a.G.edge[disconnected2][disconnected1]["rules"]
+        r = self.a.G.edges[disconnected2, disconnected1]["rules"]
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "disconnected1", "disconnected2", "infoflow2",
                            set(["super"]))
 
-        r = sorted(self.a.G.edge[node1][node2]["rules"])
+        r = sorted(self.a.G.edges[node1, node2]["rules"])
         self.assertEqual(len(r), 2)
         self.validate_rule(r[0], TERT.allow, "node1", "node2", "infoflow", set(["med_w"]))
         self.validate_rule(r[1], TERT.allow, "node2", "node1", "infoflow", set(["hi_r"]))
 
-        r = sorted(self.a.G.edge[node1][node3]["rules"])
+        r = sorted(self.a.G.edges[node1, node3]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node3", "node1", "infoflow", set(["low_r", "med_r"]))
 
-        r = sorted(self.a.G.edge[node2][node4]["rules"])
+        r = sorted(self.a.G.edges[node2, node4]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node2", "node4", "infoflow", set(["hi_w"]))
 
-        r = sorted(self.a.G.edge[node3][node5]["rules"])
+        r = sorted(self.a.G.edges[node3, node5]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node5", "node3", "infoflow", set(["low_r"]))
 
-        r = sorted(self.a.G.edge[node4][node6]["rules"])
+        r = sorted(self.a.G.edges[node4, node6]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node4", "node6", "infoflow2", set(["hi_w"]))
 
-        r = sorted(self.a.G.edge[node5][node8]["rules"])
+        r = sorted(self.a.G.edges[node5, node8]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node5", "node8", "infoflow2", set(["hi_w"]))
 
-        r = sorted(self.a.G.edge[node6][node5]["rules"])
+        r = sorted(self.a.G.edges[node6, node5]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node5", "node6", "infoflow", set(["med_r"]))
 
-        r = sorted(self.a.G.edge[node6][node7]["rules"])
+        r = sorted(self.a.G.edges[node6, node7]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node6", "node7", "infoflow", set(["hi_w"]))
 
-        r = sorted(self.a.G.edge[node8][node9]["rules"])
+        r = sorted(self.a.G.edges[node8, node9]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node8", "node9", "infoflow2", set(["super"]))
 
-        r = sorted(self.a.G.edge[node9][node8]["rules"])
+        r = sorted(self.a.G.edges[node9, node8]["rules"])
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TERT.allow, "node8", "node9", "infoflow2", set(["super"]))
 
@@ -151,7 +151,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # assume NetworkX copies into the subgraph
         # correctly.
 
-        edges = set(self.a.subG.out_edges_iter())
+        edges = set(self.a.subG.out_edges())
         self.assertSetEqual(set([(disconnected1, disconnected2),
                                  (disconnected2, disconnected1),
                                  (node1, node2),
@@ -187,7 +187,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         # assume NetworkX copies into the subgraph
         # correctly.
 
-        edges = set(self.a.subG.out_edges_iter())
+        edges = set(self.a.subG.out_edges())
         self.assertSetEqual(set([(disconnected1, disconnected2),
                                  (disconnected2, disconnected1),
                                  (node1, node2),

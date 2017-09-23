@@ -21,7 +21,7 @@ import logging
 from contextlib import suppress
 
 import networkx as nx
-from networkx.exception import NetworkXError, NetworkXNoPath
+from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
 
 from .descriptors import EdgeAttrIntMax, EdgeAttrList
 from .policyrep import TERuletype
@@ -118,8 +118,8 @@ class InfoFlowAnalysis:
         self.log.info("Generating one shortest information flow path from {0} to {1}...".
                       format(s, t))
 
-        with suppress(NetworkXNoPath, NetworkXError):
-            # NetworkXError: the type is valid but not in graph, e.g.
+        with suppress(NetworkXNoPath, NodeNotFound):
+            # NodeNotFound: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
@@ -157,8 +157,8 @@ class InfoFlowAnalysis:
         self.log.info("Generating all information flow paths from {0} to {1}, max length {2}...".
                       format(s, t, maxlen))
 
-        with suppress(NetworkXNoPath, NetworkXError):
-            # NetworkXError: the type is valid but not in graph, e.g.
+        with suppress(NetworkXNoPath, NodeNotFound):
+            # NodeNotFound: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
@@ -191,13 +191,11 @@ class InfoFlowAnalysis:
         self.log.info("Generating all shortest information flow paths from {0} to {1}...".
                       format(s, t))
 
-        with suppress(NetworkXNoPath, NetworkXError, KeyError):
-            # NetworkXError: the type is valid but not in graph, e.g.
+        with suppress(NetworkXNoPath, NodeNotFound):
+            # NodeNotFound: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
-            # KeyError: work around NetworkX bug
-            # when the source node is not in the graph
             for path in nx.all_shortest_paths(self.subG, s, t):
                 yield self.__generate_steps(path)
 
@@ -228,14 +226,15 @@ class InfoFlowAnalysis:
         self.log.info("Generating all information flows {0} {1}".
                       format("out of" if out else "into", s))
 
-        if out:
-            flows = self.subG.out_edges_iter(s)
-        else:
-            flows = self.subG.in_edges_iter(s)
-
         with suppress(NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
             # excluded or disconnected due to min weight
+
+            if out:
+                flows = self.subG.out_edges(s)
+            else:
+                flows = self.subG.in_edges(s)
+
             for source, target in flows:
                 yield Edge(self.subG, source, target)
 
@@ -331,14 +330,14 @@ class InfoFlowAnalysis:
 
         # delete excluded types from subgraph
         nodes = [n for n in self.G.nodes() if n not in self.exclude]
-        self.subG = self.G.subgraph(nodes)
+        self.subG = self.G.subgraph(nodes).copy()
 
         # delete edges below minimum weight.
         # no need if weight is 1, since that
         # does not exclude any edges.
         if self.min_weight > 1:
             delete_list = []
-            for s, t in self.subG.edges_iter():
+            for s, t in self.subG.edges():
                 edge = Edge(self.subG, s, t)
                 if edge.weight < self.min_weight:
                     delete_list.append(edge)
