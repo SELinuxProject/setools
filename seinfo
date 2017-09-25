@@ -17,7 +17,6 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import print_function
 import setools
 import argparse
 import sys

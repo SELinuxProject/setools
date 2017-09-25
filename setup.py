@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from __future__ import print_function
+
 import glob
 from setuptools import setup
 import distutils.log as log
