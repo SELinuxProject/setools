@@ -207,7 +207,7 @@ try:
         components.append(("Polcap", q, lambda x: x.statement()))
 
     if args.portconquery or args.all:
-        q = setools.PortconQuery(p)
+        q = setools.PortconQuery(p, ports_subset=True)
         if isinstance(args.portconquery, str):
             try:
                 ports = [int(i) for i in args.portconquery.split("-")]
