@@ -110,7 +110,7 @@ static int qpol_policy_remove_bogus_aliases(qpol_policy_t * policy)
  *  Builds data for the attributes and inserts them into the policydb.
  *  This function modifies the policydb. Names created for attributes
  *  are of the form @ttr<value> where value is the value of the attribute
- *  as a four digit number (prepended with 0's as needed).
+ *  as a ten digit number (prepended with 0's as needed).
  *  @param policy The policy from which to read the attribute map and
  *  create the type data for the attributes. This policy will be altered
  *  by this function.
@@ -125,7 +125,7 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
 	uint32_t bit = 0, count = 0;
 	ebitmap_node_t *node = NULL;
 	type_datum_t *tmp_type = NULL, *orig_type;
-	char *tmp_name = NULL, buff[10];
+	char *tmp_name = NULL, buff[16];
 	int error = 0, retv;
 
 	INFO(policy, "%s", "Generating attributes for policy. (Step 4 of 5)");
@@ -137,7 +137,7 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
 
 	db = &policy->p->p;
 
-	memset(&buff, 0, 10 * sizeof(char));
+	memset(&buff, 0, 16 * sizeof(char));
 
 	for (i = 0; i < db->p_types.nprim; i++) {
 		/* skip types */
@@ -158,7 +158,7 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
 		 * with this attribute */
 		/* Does not exist */
 		if (db->p_type_val_to_name[i] == NULL){
-			snprintf(buff, 9, "@ttr%04zd", i + 1);
+			snprintf(buff, 15, "@ttr%010zd", i + 1);
 			tmp_name = strdup(buff);
 			if (!tmp_name) {
 				error = errno;
@@ -240,7 +240,7 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
  *  Builds data for empty attributes and inserts them into the policydb.
  *  This function modifies the policydb. Names created for the attributes
  *  are of the form @ttr<value> where value is the value of the attribute
- *  as a four digit number (prepended with 0's as needed).
+ *  as a ten digit number (prepended with 0's as needed).
  *  @param policy The policy to which to add type data for attributes.
  *  This policy will be altered by this function.
  *  @return Returns 0 on success and < 0 on failure; if the call fails,
@@ -251,7 +251,7 @@ static int qpol_policy_build_attrs_from_map(qpol_policy_t * policy)
 static int qpol_policy_fill_attr_holes(qpol_policy_t * policy)
 {
 	policydb_t *db = NULL;
-	char *tmp_name = NULL, buff[10];
+	char *tmp_name = NULL, buff[16];
 	int error = 0, retv = 0;
 	ebitmap_t tmp_bmap = { NULL, 0 };
 	type_datum_t *tmp_type = NULL;
@@ -265,12 +265,12 @@ static int qpol_policy_fill_attr_holes(qpol_policy_t * policy)
 
 	db = &policy->p->p;
 
-	memset(&buff, 0, 10 * sizeof(char));
+	memset(&buff, 0, 16 * sizeof(char));
 
 	for (i = 0; i < db->p_types.nprim; i++) {
 		if (db->type_val_to_struct[i])
 			continue;
-		snprintf(buff, 9, "@ttr%04zd", i + 1);
+		snprintf(buff, 15, "@ttr%010zd", i + 1);
 		tmp_name = strdup(buff);
 		if (!tmp_name) {
 			error = errno;
