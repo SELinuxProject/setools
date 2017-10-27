@@ -45,7 +45,7 @@ install:
   - SELINUX_USERSPACE_VERSION=libsepol-2.7
 
   # Install newer swig
-  - curl -sS -L http://prdownloads.sourceforge.net/swig/swig-3.0.8.tar.gz | tar xz
+  - curl --retry 10 --retry-delay 60 -sS -L http://prdownloads.sourceforge.net/swig/swig-3.0.8.tar.gz | tar xz
   - cd swig-3.0.8
   - ./configure
   - make
