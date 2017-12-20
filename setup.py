@@ -12,6 +12,7 @@ import sys
 import os
 from os.path import join
 from contextlib import suppress
+from Cython.Build import cythonize
 
 
 class QtHelpCommand(Command):
@@ -107,8 +108,8 @@ if sys.platform.startswith('darwin'):
 else:
     macros=[]
 
-ext_py_mods = [Extension('setools.policyrep._qpol',
-                         ['setools/policyrep/qpol.i',
+ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
+                         ['setools/policyrep/libpolicyrep.pyx',
                           'libqpol/avrule_query.c',
                           'libqpol/bool_query.c',
                           'libqpol/bounds_query.c',
@@ -155,14 +156,11 @@ ext_py_mods = [Extension('setools.policyrep._qpol',
                                              '-Wnested-externs',
                                              '-Wold-style-definition',
                                              '-Wpointer-arith',
-                                             '-Wredundant-decls',
                                              '-Wstrict-prototypes',
                                              '-Wunknown-pragmas',
                                              '-Wwrite-strings',
-                                             '-Wno-missing-field-initializers', # SWIG 3.0.2 generates partially-initialized structs
-                                             '-Wno-unused-parameter', # SWIG generates functions with unused parameters
+                                             '-Wno-sign-compare', # Bison
                                              '-Wno-cast-qual', # libsepol uses const-to-nonconst casts
-                                             '-Wno-shadow', # SWIG generates shadow variables
                                              '-Wno-unreachable-code', # Bison generates unreachable code
                                              '-fno-exceptions'],
                          swig_opts=['-Ilibqpol/include'],
@@ -183,7 +181,7 @@ setup(name='setools',
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],
       package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map']},
-      ext_modules=ext_py_mods,
+      ext_modules=cythonize(ext_py_mods),
       test_suite='tests',
       license='GPLv2+, LGPLv2.1+',
       classifiers=[
