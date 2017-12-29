@@ -19,7 +19,7 @@
 import logging
 
 from .mixins import MatchContext
-from .policyrep.xencontext import IomemconRange
+from .policyrep import IomemconRange
 from .query import PolicyQuery
 from .util import match_range
 
