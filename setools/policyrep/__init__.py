@@ -1,5 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
-# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -23,14 +23,9 @@
 # structures.
 
 from . import exception
-from .bounds import BoundsRuletype
-from .netcontext import PortconProtocol, PortconRange
-from .constraint import ConstraintRuletype
-from .default import DefaultRuletype, DefaultValue, DefaultRangeValue
-from .fscontext import FSUseRuletype
-from .mlsrule import MLSRuletype
-from .netcontext import NodeconIPVersion, PortconProtocol, PortconRange
-from .rbacrule import RBACRuletype
-from .selinuxpolicy import SELinuxPolicy, HandleUnknown, PolicyTarget
-from .terule import IoctlSet, TERuletype
-from .xencontext import IomemconRange, IoportconRange
+
+from .libpolicyrep import BoundsRuletype, ConstraintRuletype, DefaultRuletype, DefaultValue, \
+                          DefaultRangeValue, FSUseRuletype, HandleUnknown, IoctlSet, \
+                          IomemconRange, IoportconRange, MLSRuletype, NodeconIPVersion, \
+                          PolicyTarget, PortconProtocol, PortconRange, RBACRuletype, \
+                          SELinuxPolicy, TERuletype

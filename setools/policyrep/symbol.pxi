@@ -1,4 +1,5 @@
 # Copyright 2014, Tresys Technology, LLC
+# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -17,56 +18,41 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-
-class PolicySymbol:
+cdef class PolicySymbol:
 
     """This is a base class for all policy objects."""
 
-    __slots__ = ("policy", "qpol_symbol")
-
-    def __init__(self, policy, qpol_symbol):
-        """
-        Parameters:
-        policy        The low-level policy object.
-        qpol_symbol   The low-level policy symbol object.
-        """
-
-        assert qpol_symbol
-
-        self.policy = policy
-        self.qpol_symbol = qpol_symbol
-
-    def __str__(self):
-        return self.qpol_symbol.name(self.policy)
+    cdef:
+        readonly SELinuxPolicy policy
 
     def __hash__(self):
         return hash(str(self))
 
     def __eq__(self, other):
         try:
-            return self.qpol_symbol.this == other.qpol_symbol.this
-        except AttributeError:
+            # This is a regular Python function, so it cannot
+            # access the handle (C) attribute since it is not
+            # a Python object.  Call the low-level _eq method
+            # for doing the pointer comparison.  If other is
+            # not the same class as this, TypeError will be
+            # raised as the _eq method must specify the type
+            # so that handle is accessible.
+            return self._eq(other)
+        except TypeError:
             return str(self) == str(other)
 
     def __ne__(self, other):
         return not self == other
 
     def __lt__(self, other):
-        """Comparison used by Python sorting functions."""
+        # this is used by Python sorting functions
         return str(self) < str(other)
 
     def __repr__(self):
-        return "<{0.__class__.__name__}(<qpol_policy_t id={1}>,\"{0}\")>".format(
-            self, id(self.policy))
+        return "<{0.__class__.__name__}({1}, \"{0}\")>".format(self, repr(self.policy))
 
-    def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        cls = self.__class__
-        newobj = cls.__new__(cls)
-        newobj.policy = self.policy
-        newobj.qpol_symbol = self.qpol_symbol
-        memo[id(self)] = newobj
-        return newobj
+    def _eq(self, other):
+        raise NotImplementedError
 
     def statement(self):
         """

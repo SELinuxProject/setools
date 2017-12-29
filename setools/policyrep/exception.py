@@ -1,4 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
+# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -32,9 +33,16 @@ class PolicyrepException(SEToolsException):
 #
 # General Policyrep exceptions
 #
+class LowLevelPolicyError(ValueError, PolicyrepException):
+
+    """
+    Exception for low-level policy errors.  This is typically due to
+    errors accessing policy data structures.  The policy may be
+    malformed or there may be an SETools bug."""
+    pass
 
 
-class InvalidPolicy(SyntaxError, PolicyrepException):
+class InvalidPolicy(ValueError, PolicyrepException):
 
     """Exception for invalid policy."""
     pass

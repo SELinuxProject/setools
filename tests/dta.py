@@ -20,7 +20,7 @@ import unittest
 from setools import SELinuxPolicy, DomainTransitionAnalysis
 from setools import TERuletype as TERT
 from setools.policyrep.exception import InvalidType
-from setools.policyrep.typeattr import Type
+from setools.policyrep.libpolicyrep import Type
 
 from . import mixins
 

@@ -1,4 +1,4 @@
-# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #

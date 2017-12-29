@@ -19,13 +19,14 @@ import unittest
 from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
-from setools.policyrep.qpol import qpol_policy_t, qpol_avrule_t, qpol_terule_t, \
-                                   qpol_filename_trans_t
-from setools.policyrep.terule import te_rule_factory, validate_ruletype, TERuletype
+#from setools.policyrep.qpol import qpol_policy_t, qpol_avrule_t, qpol_terule_t, \
+#                                   qpol_filename_trans_t
+#from setools.policyrep.terule import te_rule_factory, validate_ruletype, TERuletype
 from setools.policyrep.exception import InvalidTERuleType, RuleNotConditional, RuleUseError, \
                                         TERuleNoFilename
 
 
+@unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.boolcond.condexpr_factory', lambda x, y: y)
 @patch('setools.policyrep.typeattr.type_or_attr_factory', lambda x, y: y)
 @patch('setools.policyrep.objclass.class_factory', lambda x, y: y)
@@ -149,6 +150,7 @@ class AVRuleTest(unittest.TestCase):
                          ")")
 
 
+@unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.boolcond.condexpr_factory', lambda x, y: y)
 @patch('setools.policyrep.typeattr.type_or_attr_factory', lambda x, y: y)
 @patch('setools.policyrep.objclass.class_factory', lambda x, y: y)
@@ -261,6 +263,7 @@ class AVRuleXpermTest(unittest.TestCase):
         self.assertEqual(rule.statement(), "allowxperm a b:c d { 0x0003-0x0005 0x0007-0x0009 };")
 
 
+@unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.boolcond.condexpr_factory', lambda x, y: y)
 @patch('setools.policyrep.typeattr.type_factory', lambda x, y: y)
 @patch('setools.policyrep.typeattr.type_or_attr_factory', lambda x, y: y)

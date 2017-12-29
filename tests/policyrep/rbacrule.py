@@ -18,11 +18,12 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from setools.policyrep.qpol import qpol_policy_t, qpol_role_allow_t, qpol_role_trans_t
-from setools.policyrep.rbacrule import rbac_rule_factory, validate_ruletype, RBACRuletype
+#from setools.policyrep.qpol import qpol_policy_t, qpol_role_allow_t, qpol_role_trans_t
+#from setools.policyrep.rbacrule import rbac_rule_factory, validate_ruletype, RBACRuletype
 from setools.policyrep.exception import InvalidRBACRuleType, RuleNotConditional, RuleUseError
 
 
+@unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.role.role_factory', lambda x, y: y)
 class RoleAllowTest(unittest.TestCase):
 
@@ -92,6 +93,7 @@ class RoleAllowTest(unittest.TestCase):
         self.assertEqual("allow a b;", rule.statement())
 
 
+@unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.role.role_factory', lambda x, y: y)
 @patch('setools.policyrep.typeattr.type_or_attr_factory', lambda x, y: y)
 @patch('setools.policyrep.objclass.class_factory', lambda x, y: y)

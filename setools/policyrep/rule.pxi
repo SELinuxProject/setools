@@ -1,4 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
+# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -16,32 +17,21 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from . import exception
-from . import symbol
-from . import objclass
 
-
-class PolicyRule(symbol.PolicySymbol):
+cdef class PolicyRule(PolicySymbol):
 
     """This is base class for policy rules."""
 
-    __slots__ = ()
+    cdef readonly bint extended
 
-    extended = False
+    def __init__(self):
+        self.extended = False
 
     def __str__(self):
         raise NotImplementedError
 
-    def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except exception.RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".format(
-            self, cond, cond_block))
+    def __lt__(self, other):
+        return str(self) < str(other)
 
     @property
     def ruletype(self):
@@ -67,7 +57,7 @@ class PolicyRule(symbol.PolicySymbol):
     @property
     def tclass(self):
         """The object class for the rule."""
-        return objclass.class_factory(self.policy, self.qpol_symbol.object_class(self.policy))
+        raise NotImplementedError
 
     @property
     def default(self):
@@ -81,13 +71,13 @@ class PolicyRule(symbol.PolicySymbol):
     def conditional(self):
         """The conditional expression for this rule."""
         # Most rules cannot be conditional.
-        raise exception.RuleNotConditional
+        raise RuleNotConditional
 
     @property
     def conditional_block(self):
         """The conditional block of the rule (T/F)"""
         # Most rules cannot be conditional.
-        raise exception.RuleNotConditional
+        raise RuleNotConditional
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""

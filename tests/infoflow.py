@@ -21,7 +21,7 @@ from setools import SELinuxPolicy, InfoFlowAnalysis
 from setools import TERuletype as TERT
 from setools.permmap import PermissionMap
 from setools.policyrep.exception import InvalidType
-from setools.policyrep.typeattr import Type
+from setools.policyrep.libpolicyrep import Type
 
 from . import mixins
 

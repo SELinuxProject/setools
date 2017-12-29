@@ -19,11 +19,12 @@ import unittest
 from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
-from setools.policyrep import qpol
+#from setools.policyrep import qpol
 from setools.policyrep.exception import InvalidInitialSid
-from setools.policyrep.initsid import initialsid_factory
+#from setools.policyrep.initsid import initialsid_factory
 
 
+@unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.context.context_factory', lambda x, y: y)
 class InitialSIDTest(unittest.TestCase):
 
