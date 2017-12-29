@@ -724,7 +724,7 @@ int qpol_mls_level_from_semantic_level(const qpol_policy_t * policy, const qpol_
 }
 
 /* semantic level */
-int qpol_policy_get_semantic_level_by_name(const qpol_policy_t * policy, const char *name, const qpol_semantic_level_t ** datum)
+int qpol_policy_get_semantic_level_by_name(const qpol_policy_t * policy, const char *name, qpol_semantic_level_t ** datum)
 {
 	policydb_t *db = NULL;
 	hashtab_datum_t internal_datum = NULL;
