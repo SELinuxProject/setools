@@ -111,13 +111,18 @@ static void qpol_handle_route_to_callback(void *varg
 					  __attribute__ ((unused)), const qpol_policy_t * p, int level, const char *fmt,
 					  va_list va_args)
 {
+    char *msg;
+
+    if (vasprintf(&msg, fmt, va_args) < 0)
+        return;
+
 	if (!p || !(p->fn)) {
-		vfprintf(stderr, fmt, va_args);
-		fprintf(stderr, "\n");
-		return;
+		fprintf(stderr, "%s\n", msg);
+	} else {
+	    p->fn(p->varg, p, level, msg);
 	}
 
-	p->fn(p->varg, p, level, fmt, va_args);
+	free(msg);
 }
 
 __attribute__ ((format(printf, 3, 4)))
@@ -156,33 +161,6 @@ void qpol_handle_msg(const qpol_policy_t * p, int level, const char *fmt, ...)
 	/* explicit cast here to remove const for sepol handle */
 	qpol_handle_route_to_callback((void *)p->varg, p, level, fmt, ap);
 	va_end(ap);
-}
-
-__attribute__ ((format(printf, 4, 0)))
-static void qpol_handle_default_callback(void *varg __attribute__ ((unused)), const qpol_policy_t * p
-					 __attribute__ ((unused)), int level, const char *fmt, va_list va_args)
-{
-	switch (level) {
-	case QPOL_MSG_INFO:
-	{
-		/* by default ignore info messages */
-		return;
-	}
-	case QPOL_MSG_WARN:
-	{
-		fprintf(stderr, "WARNING: ");
-		break;
-	}
-	case QPOL_MSG_ERR:
-	default:
-	{
-		fprintf(stderr, "ERROR: ");
-		break;
-	}
-	}
-
-	vfprintf(stderr, fmt, va_args);
-	fprintf(stderr, "\n");
 }
 
 static int read_source_policy(qpol_policy_t * qpolicy, const char *progname, int options)
@@ -802,7 +780,7 @@ int qpol_policy_open_from_file(const char *path, qpol_policy_t ** policy, qpol_c
 	if (policy != NULL)
 		*policy = NULL;
 
-	if (path == NULL || policy == NULL) {
+	if (path == NULL || policy == NULL || fn == NULL) {
 		/* handle passed as NULL here as it has yet to be created */
 		ERR(NULL, "%s", strerror(EINVAL));
 		errno = EINVAL;
@@ -829,12 +807,9 @@ int qpol_policy_open_from_file(const char *path, qpol_policy_t ** policy, qpol_c
 		return -1;
 	}
 
-	if (fn) {
-		(*policy)->fn = fn;
-		(*policy)->varg = varg;
-	} else {
-		(*policy)->fn = qpol_handle_default_callback;
-	}
+	(*policy)->fn = fn;
+	(*policy)->varg = varg;
+
 	sepol_msg_set_callback((*policy)->sh, sepol_handle_route_to_callback, (*policy));
 
 	if (sepol_policydb_create(&((*policy)->p))) {
@@ -979,7 +954,7 @@ int qpol_policy_open_from_memory(qpol_policy_t ** policy, const char *filedata, 
 				     const int options)
 {
 	int error = 0;
-	if (policy == NULL || filedata == NULL)
+	if (policy == NULL || filedata == NULL || fn == NULL)
 		return -1;
 	*policy = NULL;
 
@@ -1002,12 +977,8 @@ int qpol_policy_open_from_memory(qpol_policy_t ** policy, const char *filedata, 
 	}
 
 	sepol_msg_set_callback((*policy)->sh, sepol_handle_route_to_callback, (*policy));
-	if (fn) {
-		(*policy)->fn = fn;
-		(*policy)->varg = varg;
-	} else {
-		(*policy)->fn = qpol_handle_default_callback;
-	}
+	(*policy)->fn = fn;
+	(*policy)->varg = varg;
 
 	if (sepol_policydb_create(&((*policy)->p))) {
 		error = errno;
