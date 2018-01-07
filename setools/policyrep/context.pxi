@@ -72,7 +72,6 @@ cdef class Context(PolicySymbol):
     @property
     def range_(self):
         """The MLS range of the context."""
-        pass
         cdef const qpol_mls_range_t *r
         if qpol_context_get_range(self.policy.handle, self.handle, &r):
             raise RuntimeError("Could not get range from context")
