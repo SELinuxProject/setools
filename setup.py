@@ -159,6 +159,7 @@ ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
                                              '-Wstrict-prototypes',
                                              '-Wunknown-pragmas',
                                              '-Wwrite-strings',
+                                             '-Wno-unused-parameter',
                                              '-Wno-sign-compare', # Bison
                                              '-Wno-cast-qual', # libsepol uses const-to-nonconst casts
                                              '-Wno-unreachable-code', # Bison generates unreachable code
