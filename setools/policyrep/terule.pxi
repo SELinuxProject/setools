@@ -449,7 +449,7 @@ cdef class AVRuleXperm(AVRule):
         if qpol_avrule_get_xperm_type(self.policy.handle, self.handle, &xt):
             raise ValueError("Could not get xperm type for av rule")
 
-        return xt
+        return intern(xt)
 
 
 cdef class TERule(PolicyRule):
@@ -762,7 +762,7 @@ cdef class FileNameTERule(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""

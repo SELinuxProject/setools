@@ -119,7 +119,7 @@ cdef class Netifcon(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     @property
     def packet(self):

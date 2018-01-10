@@ -51,7 +51,7 @@ cdef class PolicyCapability(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def _eq(self, PolicyCapability other):
         """Low-level equality check (C pointers)."""

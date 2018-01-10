@@ -175,7 +175,7 @@ cdef class BaseType(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def _eq(self, BaseType other):
         """Low-level equality check (C pointers)."""

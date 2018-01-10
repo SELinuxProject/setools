@@ -144,7 +144,7 @@ cdef class Devicetreecon(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return path
+        return intern(path)
 
     def statement(self):
         return str(self)

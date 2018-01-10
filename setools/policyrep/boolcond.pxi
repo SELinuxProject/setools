@@ -118,7 +118,7 @@ cdef class Boolean(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def _eq(self, Boolean other):
         """Low-level equality check (C pointers)."""

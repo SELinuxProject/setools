@@ -86,7 +86,7 @@ cdef class Common(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def _eq(self, Common other):
         """Low-level equality check (C pointers)."""
@@ -122,7 +122,7 @@ cdef class ObjClass(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def __contains__(self, other):
         try:

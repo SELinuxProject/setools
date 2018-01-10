@@ -294,7 +294,7 @@ cdef class Category(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def __hash__(self):
         return hash(str(self))
@@ -356,7 +356,7 @@ cdef class Sensitivity(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def __hash__(self):
         return hash(str(self))
@@ -581,7 +581,6 @@ cdef class Level(BaseMLSLevel):
             raise MemoryError
 
         return qpol_iterator_factory(self.policy, iter, category_factory_iter)
-
 
     @property
     def sensitivity(self):

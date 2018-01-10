@@ -49,7 +49,7 @@ cdef class User(PolicySymbol):
         if qpol_user_get_name(self.policy.handle, self.handle, &name):
             raise ValueError("Error reading user name")
 
-        return name
+        return intern(name)
 
     def _eq(self, User other):
         """Low-level equality check (C pointers)."""

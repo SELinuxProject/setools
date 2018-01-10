@@ -61,7 +61,7 @@ cdef class InitialSID(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     def _eq(self, InitialSID other):
         """Low-level equality check (C pointers)."""

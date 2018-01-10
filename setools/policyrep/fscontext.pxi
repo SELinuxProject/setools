@@ -103,7 +103,7 @@ cdef class FSUse(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     @property
     def ruletype(self):
@@ -218,7 +218,7 @@ cdef class Genfscon(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return name
+        return intern(name)
 
     @property
     def path(self):
@@ -230,7 +230,7 @@ cdef class Genfscon(PolicySymbol):
             ex.errno = errno
             raise ex
 
-        return path
+        return intern(path)
 
     def statement(self):
         return str(self)

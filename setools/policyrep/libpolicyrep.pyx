@@ -581,4 +581,4 @@ cdef str string_factory_iter(SELinuxPolicy _, QpolIteratorItem item):
 
     """Factory function for returning strings from qpol iterators."""
 
-    return <const char *> item.obj
+    return intern(<const char *> item.obj)
