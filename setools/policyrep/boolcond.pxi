@@ -199,6 +199,15 @@ cdef class Conditional(PolicySymbol):
 
         return self._unwind_subexpression(stack)
 
+    def __hash__(self):
+        return hash(<uintptr_t>self.handle)
+
+    def __eq__(self, other):
+        try:
+            return self._eq(other)
+        except TypeError:
+            return str(self) == str(other)
+
     def _eq(self, Conditional other):
         """Low-level equality check (C pointers)."""
         return self.handle == other.handle

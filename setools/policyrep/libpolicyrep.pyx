@@ -20,7 +20,7 @@
 
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
 from libc.errno cimport errno, EPERM, ENOENT, ENOMEM, EINVAL
-from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t, uintptr_t
 from libc.stdlib cimport free
 from libc.string cimport memcpy, strerror
 from posix.stat cimport S_IFBLK, S_IFCHR, S_IFDIR, S_IFIFO, S_IFREG, S_IFLNK, S_IFSOCK
