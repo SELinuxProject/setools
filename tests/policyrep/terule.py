@@ -15,13 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Until this is fixed for cython:
+# pylint: disable=undefined-variable
 import unittest
 from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
-#from setools.policyrep.qpol import qpol_policy_t, qpol_avrule_t, qpol_terule_t, \
-#                                   qpol_filename_trans_t
-#from setools.policyrep.terule import te_rule_factory, validate_ruletype, TERuletype
 from setools.policyrep.exception import InvalidTERuleType, RuleNotConditional, RuleUseError, \
                                         TERuleNoFilename
 

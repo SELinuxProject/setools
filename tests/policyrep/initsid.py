@@ -15,13 +15,13 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Until this is fixed for cython:
+# pylint: disable=undefined-variable
 import unittest
 from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
-#from setools.policyrep import qpol
 from setools.policyrep.exception import InvalidInitialSid
-#from setools.policyrep.initsid import initialsid_factory
 
 
 @unittest.skip("Needs to be reworked for cython")

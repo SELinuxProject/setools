@@ -15,16 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+# Until this is fixed for cython:
+# pylint: disable=undefined-variable
 import unittest
 from unittest.mock import Mock, patch
 
-#from setools.policyrep.default import default_factory, validate_ruletype, validate_default_value, \
-#                                      validate_default_range, DefaultRuletype, DefaultValue, \
-#                                      DefaultRangeValue
-#from setools.policyrep.exception import InvalidDefaultType, InvalidDefaultValue, \
-#                                        InvalidDefaultRange, NoDefaults
-#
-#from setools.policyrep.qpol import qpol_default_object_t, qpol_policy_t
+from setools.policyrep.exception import InvalidDefaultType, InvalidDefaultValue, \
+                                        InvalidDefaultRange, NoDefaults
+
 
 @unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.objclass.class_factory', lambda x, y: y)
