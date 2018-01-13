@@ -1,5 +1,5 @@
 # Copyright 2014-2015, Tresys Technology, LLC
-# Copyright Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018 Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
