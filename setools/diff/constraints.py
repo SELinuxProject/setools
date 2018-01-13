@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -21,6 +22,8 @@ from collections import namedtuple
 from ..policyrep import ConstraintRuletype
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
+from .objclass import class_wrapper_factory
+from .types import type_wrapper_factory
 
 
 class ConstraintsDifference(Difference):
@@ -191,7 +194,7 @@ class ConstraintWrapper(Wrapper):
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype
-        self.tclass = SymbolWrapper(rule.tclass)
+        self.tclass = class_wrapper_factory(rule.tclass)
 
         try:
             self.perms = rule.perms

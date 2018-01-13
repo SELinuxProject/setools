@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -20,7 +21,8 @@ from collections import namedtuple
 
 from ..policyrep import BoundsRuletype
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper, Wrapper
+from .difference import Difference, Wrapper
+from .types import type_wrapper_factory
 
 
 modified_bounds_record = namedtuple("modified_bound", ["rule", "added_bound", "removed_bound"])
@@ -55,7 +57,7 @@ class BoundsDifference(Difference):
         self.modified_typebounds = []
 
         for left_bound, right_bound in matched_typebounds:
-            if SymbolWrapper(left_bound.parent) != SymbolWrapper(right_bound.parent):
+            if type_wrapper_factory(left_bound.parent) != type_wrapper_factory(right_bound.parent):
                 self.modified_typebounds.append(modified_bounds_record(
                     left_bound, right_bound.parent, left_bound.parent))
 
@@ -100,8 +102,8 @@ class BoundsWrapper(Wrapper):
     def __init__(self, rule):
         self.origin = rule
         self.ruletype = rule.ruletype
-        self.parent = SymbolWrapper(rule.parent)
-        self.child = SymbolWrapper(rule.child)
+        self.parent = type_wrapper_factory(rule.parent)
+        self.child = type_wrapper_factory(rule.child)
         self.key = hash(rule)
 
     def __hash__(self):

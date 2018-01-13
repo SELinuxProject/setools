@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -16,7 +17,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
@@ -35,6 +36,40 @@ modified_level_record = namedtuple("modified_level", ["level",
                                                       "matched_categories"])
 
 
+_cats_cache = defaultdict(dict)
+_sens_cache = defaultdict(dict)
+
+
+def category_wrapper_factory(category):
+    """
+    Wrap category from the specified policy.
+
+    This caches results to prevent duplicate wrapper
+    objects in memory.
+    """
+    try:
+        return _cats_cache[category.policy][category]
+    except KeyError:
+        c = SymbolWrapper(category)
+        _cats_cache[category.policy][category] = c
+        return c
+
+
+def sensitivity_wrapper_factory(sensitivity):
+    """
+    Wrap sensitivity from the specified policy.
+
+    This caches results to prevent duplicate wrapper
+    objects in memory.
+    """
+    try:
+        return _sens_cache[sensitivity.policy][sensitivity]
+    except KeyError:
+        c = SymbolWrapper(sensitivity)
+        _sens_cache[sensitivity.policy][sensitivity] = c
+        return c
+
+
 class CategoriesDifference(Difference):
 
     """Determine the difference in categories between two policies."""
@@ -50,8 +85,8 @@ class CategoriesDifference(Difference):
             "Generating category differences from {0.left_policy} to {0.right_policy}".format(self))
 
         self.added_categories, self.removed_categories, matched_categories = self._set_diff(
-            (SymbolWrapper(c) for c in self.left_policy.categories()),
-            (SymbolWrapper(c) for c in self.right_policy.categories()))
+            (category_wrapper_factory(c) for c in self.left_policy.categories()),
+            (category_wrapper_factory(c) for c in self.right_policy.categories()))
 
         self.modified_categories = dict()
 
@@ -94,8 +129,8 @@ class SensitivitiesDifference(Difference):
 
         self.added_sensitivities, self.removed_sensitivities, matched_sensitivities = \
             self._set_diff(
-                (SymbolWrapper(s) for s in self.left_policy.sensitivities()),
-                (SymbolWrapper(s) for s in self.right_policy.sensitivities()))
+                (sensitivity_wrapper_factory(s) for s in self.left_policy.sensitivities()),
+                (sensitivity_wrapper_factory(s) for s in self.right_policy.sensitivities()))
 
         self.modified_sensitivities = dict()
 
@@ -147,8 +182,8 @@ class LevelDeclsDifference(Difference):
             # Criteria for modified levels
             # 1. change to allowed categories
             added_categories, removed_categories, matched_categories = self._set_diff(
-                (SymbolWrapper(c) for c in left_level.categories()),
-                (SymbolWrapper(c) for c in right_level.categories()))
+                (category_wrapper_factory(c) for c in left_level.categories()),
+                (category_wrapper_factory(c) for c in right_level.categories()))
 
             if added_categories or removed_categories:
                 self.modified_levels.append(modified_level_record(
@@ -173,7 +208,7 @@ class LevelDeclWrapper(Wrapper):
 
     def __init__(self, level):
         self.origin = level
-        self.sensitivity = SymbolWrapper(level.sensitivity)
+        self.sensitivity = sensitivity_wrapper_factory(level.sensitivity)
         self.key = hash(level)
 
     def __hash__(self):
@@ -196,8 +231,8 @@ class LevelWrapper(Wrapper):
 
     def __init__(self, level):
         self.origin = level
-        self.sensitivity = SymbolWrapper(level.sensitivity)
-        self.categories = set(SymbolWrapper(c) for c in level.categories())
+        self.sensitivity = sensitivity_wrapper_factory(level.sensitivity)
+        self.categories = set(category_wrapper_factory(c) for c in level.categories())
 
     def __eq__(self, other):
         try:

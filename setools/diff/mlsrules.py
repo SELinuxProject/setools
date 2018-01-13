@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -20,8 +21,10 @@ from collections import defaultdict, namedtuple
 
 from ..policyrep import MLSRuletype
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper, Wrapper
+from .difference import Difference, Wrapper
 from .mls import RangeWrapper
+from .objclass import class_wrapper_factory
+from .types import type_or_attr_wrapper_factory
 
 
 modified_mlsrule_record = namedtuple("modified_mlsrule", ["rule",
@@ -108,10 +111,9 @@ class MLSRuleWrapper(Wrapper):
 
     def __init__(self, rule):
         self.origin = rule
-        self.ruletype = rule.ruletype
-        self.source = SymbolWrapper(rule.source)
-        self.target = SymbolWrapper(rule.target)
-        self.tclass = SymbolWrapper(rule.tclass)
+        self.source = type_or_attr_wrapper_factory(rule.source)
+        self.target = type_or_attr_wrapper_factory(rule.target)
+        self.tclass = class_wrapper_factory(rule.tclass)
         self.key = hash(rule)
 
     def __hash__(self):

@@ -1,4 +1,5 @@
 # Copyright 2015, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -16,7 +17,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from contextlib import suppress
 
 from ..policyrep.exception import NoCommon
@@ -28,6 +29,24 @@ from .difference import Difference, SymbolWrapper
 modified_classes_record = namedtuple("modified_class", ["added_perms",
                                                         "removed_perms",
                                                         "matched_perms"])
+
+_class_cache = defaultdict(dict)
+
+
+def class_wrapper_factory(class_):
+    """
+    Wrap class from the specified policy.
+
+    This caches results to prevent duplicate wrapper
+    objects in memory.
+    """
+
+    try:
+        return _class_cache[class_.policy][class_]
+    except KeyError:
+        c = SymbolWrapper(class_)
+        _class_cache[class_.policy][class_] = c
+        return c
 
 
 class ObjClassDifference(Difference):

@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -16,13 +17,30 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
 
 
 modified_bool_record = namedtuple("modified_boolean", ["added_state", "removed_state"])
+
+_bool_cache = defaultdict(dict)
+
+
+def boolean_wrapper(policy, boolean):
+    """
+    Wrap booleans from the specified policy.
+
+    This caches results to prevent duplicate wrapper
+    objects in memory.
+    """
+    try:
+        return _bool_cache[policy][boolean]
+    except KeyError:
+        b = SymbolWrapper(boolean)
+        _bool_cache[policy][boolean] = b
+        return b
 
 
 class BooleansDifference(Difference):

@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -16,7 +17,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
@@ -25,6 +26,23 @@ from .difference import Difference, SymbolWrapper
 modified_typeattr_record = namedtuple("modified_typeattr", ["added_types",
                                                             "removed_types",
                                                             "matched_types"])
+
+_typeattr_cache = defaultdict(dict)
+
+
+def typeattr_wrapper_factory(attr):
+    """
+    Wrap type attributes from the specified policy.
+
+    This caches results to prevent duplicate wrapper
+    objects in memory.
+    """
+    try:
+        return _typeattr_cache[attr.policy][attr]
+    except KeyError:
+        a = SymbolWrapper(attr)
+        _typeattr_cache[attr.policy][attr] = a
+        return a
 
 
 class TypeAttributesDifference(Difference):

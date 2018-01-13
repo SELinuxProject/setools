@@ -1,5 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
-# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016, 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -22,9 +22,11 @@ from collections import defaultdict, namedtuple
 from ..policyrep import IoctlSet, TERuletype
 from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 
-from .conditional import ConditionalExprWrapper
+from .conditional import conditional_wrapper_factory
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper, Wrapper
+from .difference import Difference, Wrapper
+from .types import type_wrapper_factory, type_or_attr_wrapper_factory
+from .objclass import class_wrapper_factory
 
 
 modified_avrule_record = namedtuple("modified_avrule", ["rule",
@@ -35,7 +37,7 @@ modified_avrule_record = namedtuple("modified_avrule", ["rule",
 modified_terule_record = namedtuple("modified_terule", ["rule", "added_default", "removed_default"])
 
 
-def _avrule_expand_generator(rule_list, Wrapper):
+def _avrule_expand_generator(rule_list, WrapperClass):
     """
     Generator that yields wrapped, expanded, av(x) rules with
     unioned permission sets.
@@ -44,7 +46,7 @@ def _avrule_expand_generator(rule_list, Wrapper):
 
     for unexpanded_rule in rule_list:
         for expanded_rule in unexpanded_rule.expand():
-            expanded_wrapped_rule = Wrapper(expanded_rule)
+            expanded_wrapped_rule = WrapperClass(expanded_rule)
 
             # create a hash table (dict) with the first rule
             # as the key and value.  Rules where permission sets should
@@ -180,7 +182,7 @@ def te_diff_template(ruletype):
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to default type
-            if SymbolWrapper(left_rule.default) != SymbolWrapper(right_rule.default):
+            if type_wrapper_factory(left_rule.default) != type_wrapper_factory(right_rule.default):
                 modified.append(modified_terule_record(left_rule,
                                                        right_rule.default,
                                                        left_rule.default))
@@ -321,18 +323,17 @@ class AVRuleWrapper(Wrapper):
 
     """Wrap access vector rules to allow set operations."""
 
-    __slots__ = ("ruletype", "source", "target", "tclass", "conditional", "conditional_block")
+    __slots__ = ("source", "target", "tclass", "conditional", "conditional_block")
 
     def __init__(self, rule):
         self.origin = rule
-        self.ruletype = rule.ruletype
-        self.source = SymbolWrapper(rule.source)
-        self.target = SymbolWrapper(rule.target)
-        self.tclass = SymbolWrapper(rule.tclass)
+        self.source = type_or_attr_wrapper_factory(rule.source)
+        self.target = type_or_attr_wrapper_factory(rule.target)
+        self.tclass = class_wrapper_factory(rule.tclass)
         self.key = hash(rule)
 
         try:
-            self.conditional = ConditionalExprWrapper(rule.conditional)
+            self.conditional = conditional_wrapper_factory(rule.conditional)
             self.conditional_block = rule.conditional_block
         except RuleNotConditional:
             self.conditional = None
@@ -358,14 +359,13 @@ class AVRuleXpermWrapper(Wrapper):
 
     """Wrap extended permission access vector rules to allow set operations."""
 
-    __slots__ = ("ruletype", "source", "target", "tclass", "xperm_type")
+    __slots__ = ("source", "target", "tclass", "xperm_type")
 
     def __init__(self, rule):
         self.origin = rule
-        self.ruletype = rule.ruletype
-        self.source = SymbolWrapper(rule.source)
-        self.target = SymbolWrapper(rule.target)
-        self.tclass = SymbolWrapper(rule.tclass)
+        self.source = type_or_attr_wrapper_factory(rule.source)
+        self.target = type_or_attr_wrapper_factory(rule.target)
+        self.tclass = class_wrapper_factory(rule.tclass)
         self.xperm_type = rule.xperm_type
         self.key = hash(rule)
 
@@ -388,19 +388,17 @@ class TERuleWrapper(Wrapper):
 
     """Wrap type_* rules to allow set operations."""
 
-    __slots__ = ("ruletype", "source", "target", "tclass", "conditional", "conditional_block",
-                 "filename")
+    __slots__ = ("source", "target", "tclass", "conditional", "conditional_block", "filename")
 
     def __init__(self, rule):
         self.origin = rule
-        self.ruletype = rule.ruletype
-        self.source = SymbolWrapper(rule.source)
-        self.target = SymbolWrapper(rule.target)
-        self.tclass = SymbolWrapper(rule.tclass)
+        self.source = type_or_attr_wrapper_factory(rule.source)
+        self.target = type_or_attr_wrapper_factory(rule.target)
+        self.tclass = class_wrapper_factory(rule.tclass)
         self.key = hash(rule)
 
         try:
-            self.conditional = ConditionalExprWrapper(rule.conditional)
+            self.conditional = conditional_wrapper_factory(rule.conditional)
             self.conditional_block = rule.conditional_block
         except RuleNotConditional:
             self.conditional = None

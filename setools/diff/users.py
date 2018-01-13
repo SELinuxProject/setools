@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -16,13 +17,14 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 
 from ..policyrep.exception import MLSDisabled
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
 from .mls import LevelWrapper, RangeWrapper
+from .roles import role_wrapper_factory
 
 
 modified_users_record = namedtuple("modified_user", ["added_roles",
@@ -32,6 +34,23 @@ modified_users_record = namedtuple("modified_user", ["added_roles",
                                                      "removed_level",
                                                      "added_range",
                                                      "removed_range"])
+
+_users_cache = defaultdict(dict)
+
+
+def user_wrapper_factory(user):
+    """
+    Wrap users from the specified policy.
+
+    This caches results to prevent duplicate wrapper
+    objects in memory.
+    """
+    try:
+        return _users_cache[user.policy][user]
+    except KeyError:
+        r = SymbolWrapper(user)
+        _users_cache[user.policy][user] = r
+        return r
 
 
 class UsersDifference(Difference):
@@ -49,8 +68,8 @@ class UsersDifference(Difference):
             "Generating user differences from {0.left_policy} to {0.right_policy}".format(self))
 
         self.added_users, self.removed_users, matched_users = self._set_diff(
-            (SymbolWrapper(r) for r in self.left_policy.users()),
-            (SymbolWrapper(r) for r in self.right_policy.users()))
+            (user_wrapper_factory(r) for r in self.left_policy.users()),
+            (user_wrapper_factory(r) for r in self.right_policy.users()))
 
         self.modified_users = dict()
 
@@ -60,8 +79,8 @@ class UsersDifference(Difference):
             # 2. change to default level, or
             # 3. change to range
             added_roles, removed_roles, matched_roles = self._set_diff(
-                (SymbolWrapper(r) for r in left_user.roles),
-                (SymbolWrapper(r) for r in right_user.roles))
+                (role_wrapper_factory(r) for r in left_user.roles),
+                (role_wrapper_factory(r) for r in right_user.roles))
 
             # keep wrapped and unwrapped MLS objects here so there
             # are not several nested try blocks
