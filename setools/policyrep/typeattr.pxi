@@ -21,6 +21,8 @@
 #
 # Type factory functions
 #
+cdef dict _type_cache = {}
+
 cdef inline Type type_factory_lookup(SELinuxPolicy policy, str name, deref):
     """Factory function variant for constructing Type objects by name."""
 
@@ -67,14 +69,20 @@ cdef inline Type type_factory(SELinuxPolicy policy, const qpol_type_t *symbol, d
 
         raise ValueError("{0} is an alias".format(name))
 
-    t = Type()
-    t.policy = policy
-    t.handle = symbol
-    return t
+    try:
+        return _type_cache[<uintptr_t>symbol]
+    except KeyError:
+        t = Type()
+        t.policy = policy
+        t.handle = symbol
+        _type_cache[<uintptr_t>symbol] = t
+        return t
 
 #
 # Attribute factory functions
 #
+cdef dict _typeattr_cache = {}
+
 cdef inline TypeAttribute attribute_factory_lookup(SELinuxPolicy policy, str name):
     """Factory function variant for constructing TypeAttribute objects by name."""
 
@@ -108,10 +116,14 @@ cdef inline TypeAttribute attribute_factory(SELinuxPolicy policy, const qpol_typ
 
         raise ValueError("{0} is a type".format(name))
 
-    r = TypeAttribute()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    try:
+        return _typeattr_cache[<uintptr_t>symbol]
+    except KeyError:
+        a = TypeAttribute()
+        a.policy = policy
+        a.handle = symbol
+        _typeattr_cache[<uintptr_t>symbol] = a
+        return a
 
 #
 # Type or Attribute factory functions

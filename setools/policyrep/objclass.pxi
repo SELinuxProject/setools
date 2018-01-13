@@ -47,6 +47,8 @@ cdef inline Common common_factory(SELinuxPolicy policy, const qpol_common_t *sym
 #
 # Object class factory functions
 #
+cdef dict _objclass_cache = {}
+
 cdef inline ObjClass class_factory_lookup(SELinuxPolicy policy, str name):
     """Factory function variant for constructing ObjClass objects by name."""
 
@@ -64,10 +66,14 @@ cdef inline ObjClass class_factory_iter(SELinuxPolicy policy, QpolIteratorItem s
 
 cdef inline ObjClass class_factory(SELinuxPolicy policy, const qpol_class_t *symbol):
     """Factory function for creating ObjClass objects."""
-    r = ObjClass()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    try:
+        return _objclass_cache[<uintptr_t>symbol]
+    except KeyError:
+        c = ObjClass()
+        c.policy = policy
+        c.handle = symbol
+        _objclass_cache[<uintptr_t>symbol] = c
+        return c
 
 #
 # Classes

@@ -52,6 +52,8 @@ cdef inline Boolean boolean_factory(SELinuxPolicy policy, const qpol_bool_t *sym
 #
 # Conditional expression factory functions
 #
+cdef dict _cond_cache = {}
+
 cdef inline Conditional conditional_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
     """Factory function variant for iterating over Conditional objects."""
     return conditional_factory(policy, <const qpol_cond_t *> symbol.obj)
@@ -59,10 +61,14 @@ cdef inline Conditional conditional_factory_iter(SELinuxPolicy policy, QpolItera
 
 cdef inline Conditional conditional_factory(SELinuxPolicy policy, const qpol_cond_t *symbol):
     """Factory function for creating Conditional objects."""
-    r = Conditional()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    try:
+        return _cond_cache[<uintptr_t>symbol]
+    except KeyError:
+        c = Conditional()
+        c.policy = policy
+        c.handle = symbol
+        _cond_cache[<uintptr_t>symbol] = c
+        return c
 
 #
 # Conditional node factory functions
