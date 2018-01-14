@@ -134,43 +134,6 @@ int qpol_bool_get_state(const qpol_policy_t * policy, const qpol_bool_t * datum,
 	return STATUS_SUCCESS;
 }
 
-int qpol_bool_set_state(qpol_policy_t * policy, qpol_bool_t * datum, int state)
-{
-	cond_bool_datum_t *internal_datum;
-
-	if (policy == NULL || datum == NULL) {
-		ERR(policy, "%s", strerror(EINVAL));
-		errno = EINVAL;
-		return STATUS_ERR;
-	}
-
-	internal_datum = (cond_bool_datum_t *) datum;
-	internal_datum->state = state;
-
-	/* re-evaluate conditionals to update the state of their rules */
-	if (qpol_policy_reevaluate_conds(policy)) {
-		return STATUS_ERR;     /* errno already set */
-	}
-
-	return STATUS_SUCCESS;
-}
-
-int qpol_bool_set_state_no_eval(qpol_policy_t * policy, qpol_bool_t * datum, int state)
-{
-	cond_bool_datum_t *internal_datum;
-
-	if (policy == NULL || datum == NULL) {
-		ERR(policy, "%s", strerror(EINVAL));
-		errno = EINVAL;
-		return STATUS_ERR;
-	}
-
-	internal_datum = (cond_bool_datum_t *) datum;
-	internal_datum->state = state;
-
-	return STATUS_SUCCESS;
-}
-
 int qpol_bool_get_name(const qpol_policy_t * policy, const qpol_bool_t * datum, const char **name)
 {
 	cond_bool_datum_t *internal_datum = NULL;

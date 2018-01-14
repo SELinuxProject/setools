@@ -35,50 +35,6 @@ class QtHelpCommand(Command):
         os.rename('qhc/apol.qch', 'setoolsgui/apol/apol.qch')
 
 
-class YaccCommand(Command):
-    description = "Build yacc parsers."
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        command = ['bison', '-y', '-d', 'libqpol/policy_parse.y',
-                   '-o', 'libqpol/policy_parse.c']
-        self.announce("Generating parser", level=log.INFO)
-        self.announce(' '.join(command), level=log.INFO)
-        subprocess.check_call(command)
-
-
-class LexCommand(Command):
-    description = "Build lex scanners."
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        command = [
-            'flex', '-o', 'libqpol/policy_scan.c', 'libqpol/policy_scan.l']
-        self.announce("Generating scanner", level=log.INFO)
-        self.announce(' '.join(command), level=log.INFO)
-        subprocess.check_call(command)
-
-
-class BuildExtCommand(build_ext):
-
-    def run(self):
-        self.run_command('build_yacc')
-        self.run_command('build_lex')
-        build_ext.run(self)
-
-
 base_lib_dirs = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
 include_dirs = ['libqpol', 'libqpol/include']
 
@@ -118,7 +74,6 @@ ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
                           'libqpol/constraint_query.c',
                           'libqpol/context_query.c',
                           'libqpol/default_object_query.c',
-                          'libqpol/expand.c',
                           'libqpol/fs_use_query.c',
                           'libqpol/ftrule_query.c',
                           'libqpol/genfscon_query.c',
@@ -126,24 +81,18 @@ ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
                           'libqpol/iterator.c',
                           'libqpol/mls_query.c',
                           'libqpol/mlsrule_query.c',
-                          'libqpol/module.c',
-                          'libqpol/module_compiler.c',
                           'libqpol/netifcon_query.c',
                           'libqpol/nodecon_query.c',
                           'libqpol/permissive_query.c',
                           'libqpol/polcap_query.c',
                           'libqpol/policy.c',
-                          'libqpol/policy_define.c',
                           'libqpol/policy_extend.c',
                           'libqpol/portcon_query.c',
-                          'libqpol/queue.c',
                           'libqpol/rbacrule_query.c',
                           'libqpol/role_query.c',
                           'libqpol/terule_query.c',
                           'libqpol/type_query.c',
                           'libqpol/user_query.c',
-                          'libqpol/policy_parse.c',
-                          'libqpol/policy_scan.c',
                           'libqpol/xen_query.c'],
                          include_dirs=include_dirs,
                          extra_compile_args=['-Werror', '-Wextra',
@@ -164,7 +113,6 @@ ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
                                              '-Wno-cast-qual', # libsepol uses const-to-nonconst casts
                                              '-Wno-unreachable-code', # Bison generates unreachable code
                                              '-fno-exceptions'],
-                         swig_opts=['-Ilibqpol/include'],
                          define_macros=macros,
                          extra_objects=[static_sepol])]
 
@@ -174,10 +122,7 @@ setup(name='setools',
       author='Tresys Technology, LLC',
       author_email='setools@tresys.com',
       url='https://github.com/TresysTechnology/setools',
-      cmdclass={'build_yacc': YaccCommand,
-                'build_lex': LexCommand,
-                'build_ext': BuildExtCommand,
-                'build_qhc': QtHelpCommand},
+      cmdclass={'build_qhc': QtHelpCommand},
       packages=['setools', 'setools.diff', 'setools.policyrep', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],

@@ -117,9 +117,11 @@ cdef class SELinuxPolicy:
         """Load the specified policy."""
         self.log.info("Opening SELinux policy \"{0}\"".format(filename))
 
-        if qpol_policy_open_from_file(filename.encode(), &self.handle, qpol_log_callback, NULL, 0) < 0:
+        if qpol_policy_open_from_file(filename, &self.handle, qpol_log_callback, NULL, 0) < 0:
             if (errno == EINVAL):
-                raise InvalidPolicy("Invalid policy: {}".format(filename))
+                raise InvalidPolicy("Invalid policy: {}. Source policies are not supported. "
+                                    "(use e.g. policy.{} or sepolicy)".format(filename,
+                                                                              POLICYDB_VERSION_MAX))
             else:
                 raise OSError("Unable to open policy: {}: {}".format(filename, strerror(errno)))
 
