@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, MLSRuleQuery
+from setools import MLSRuleQuery
 from setools import MLSRuletype as RT
 
 from . import mixins
+from .policyrep.util import compile_policy
 
 # Note: the test policy has been written assuming range_transition
 # statements could have attributes.  However, range_transition
@@ -33,7 +35,11 @@ class MLSRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/mlsrulequery.conf")
+        cls.p = compile_policy("tests/mlsrulequery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """MLS rule query with no criteria."""

@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, IomemconQuery
+from setools import IomemconQuery
+
+from .policyrep.util import compile_policy
 
 
 class IomemconQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/iomemconquery.conf")
+        cls.p = compile_policy("tests/iomemconquery.conf", xen=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Iomemcon query with no criteria"""

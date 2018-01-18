@@ -15,15 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, BoundsQuery, BoundsRuletype
+from setools import BoundsQuery, BoundsRuletype
+
+from .policyrep.util import compile_policy
 
 
 class BoundsQueryTest(unittest.TestCase):
 
-    def setUp(self):
-        self.p = SELinuxPolicy("tests/boundsquery.conf")
+    @classmethod
+    def setUpClass(cls):
+        cls.p = compile_policy("tests/boundsquery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Bounds query with no criteria."""

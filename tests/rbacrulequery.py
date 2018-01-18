@@ -17,13 +17,15 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 # pylint: disable=invalid-name,too-many-public-methods
+import os
 import unittest
 
-from setools import SELinuxPolicy, RBACRuleQuery
+from setools import RBACRuleQuery
 from setools import RBACRuletype as RRT
 from setools.policyrep.exception import RuleUseError, RuleNotConditional
 
 from . import mixins
+from .policyrep.util import compile_policy
 
 
 class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
@@ -32,7 +34,11 @@ class RBACRuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/rbacrulequery.conf")
+        cls.p = compile_policy("tests/rbacrulequery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def validate_allow(self, rule, source, target):
         """Validate a role allow rule."""

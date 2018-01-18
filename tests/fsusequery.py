@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, FSUseQuery
+from setools import FSUseQuery
+
+from .policyrep.util import compile_policy
 
 
 class FSUseQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/fsusequery.conf")
+        cls.p = compile_policy("tests/fsusequery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """fs_use_* query with no criteria"""

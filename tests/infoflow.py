@@ -15,15 +15,17 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, InfoFlowAnalysis
+from setools import InfoFlowAnalysis
 from setools import TERuletype as TERT
 from setools.permmap import PermissionMap
 from setools.policyrep.exception import InvalidType
 from setools.policyrep.libpolicyrep import Type
 
 from . import mixins
+from .policyrep.util import compile_policy
 
 
 # Note: the testing for having correct rules on every edge is only
@@ -36,9 +38,13 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/infoflow.conf")
+        cls.p = compile_policy("tests/infoflow.conf")
         cls.m = PermissionMap("tests/perm_map")
         cls.a = InfoFlowAnalysis(cls.p, cls.m)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_001_full_graph(self):
         """Information flow analysis full graph."""

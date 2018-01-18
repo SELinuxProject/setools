@@ -16,16 +16,27 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 import unittest
+import os
 from unittest.mock import Mock
 
-from setools import SELinuxPolicy, PermissionMap, TERuletype
+from setools import PermissionMap, TERuletype
 from setools.exception import PermissionMapParseError, RuleTypeError, \
                               UnmappedClass, UnmappedPermission
+
+from .policyrep.util import compile_policy
 
 
 class PermissionMapTest(unittest.TestCase):
 
     """Permission map unit tests."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.p = compile_policy("tests/permmap.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def validate_permmap_entry(self, permmap, cls, perm, direction, weight, enabled):
         """Validate a permission map entry and settings."""
@@ -384,9 +395,8 @@ class PermissionMapTest(unittest.TestCase):
 
     def test_150_map_policy(self):
         """PermMap create mappings for classes/perms in a policy."""
-        policy = SELinuxPolicy("tests/permmap.conf")
         permmap = PermissionMap("tests/perm_map")
-        permmap.map_policy(policy)
+        permmap.map_policy(self.p)
 
         self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'new_perm', 'u', 1, True)
 

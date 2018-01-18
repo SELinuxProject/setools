@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, IoportconQuery
+from setools import IoportconQuery
+
+from .policyrep.util import compile_policy
 
 
 class IoportconQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/ioportconquery.conf")
+        cls.p = compile_policy("tests/ioportconquery.conf", xen=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Ioportcon query with no criteria"""

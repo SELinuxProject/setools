@@ -17,12 +17,14 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 # pylint: disable=invalid-name,too-many-public-methods
+import os
 import unittest
 
-from setools import SELinuxPolicy, TERuleQuery
+from setools import TERuleQuery
 from setools import TERuletype as TRT
 
 from . import mixins
+from .policyrep.util import compile_policy
 
 
 class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
@@ -31,7 +33,11 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/terulequery.conf")
+        cls.p = compile_policy("tests/terulequery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """TE rule query with no criteria."""
@@ -293,7 +299,11 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/terulequery2.conf")
+        cls.p = compile_policy("tests/terulequery2.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_001_source_direct(self):
         """Xperm rule query with exact, direct, source match."""
@@ -421,11 +431,13 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
                         perms=set(["ioctl", "hi_w"]), perms_equal=False)
 
         r = sorted(q.results())
-        self.assertEqual(len(r), 2)
-        self.validate_rule(r[0], TRT.neverallow, "test100", "system", "infoflow2",
-                           set(["ioctl", "hi_w"]))
-        self.validate_rule(r[1], TRT.neverallowxperm, "test100", "test100", "infoflow2",
-                           set([0x1234]), xperm="ioctl")
+        self.assertEqual(len(r), 0)
+        # changed after dropping source policy support
+        # self.assertEqual(len(r), 2)
+        # self.validate_rule(r[0], TRT.neverallow, "test100", "system", "infoflow2",
+        #                   set(["ioctl", "hi_w"]))
+        # self.validate_rule(r[1], TRT.neverallowxperm, "test100", "test100", "infoflow2",
+        #                   set([0x1234]), xperm="ioctl")
 
     def test_100_std_perm_equal(self):
         """Xperm rule query match by standard permission, equal perm set."""
@@ -433,9 +445,11 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
                         perms=set(["ioctl", "hi_w"]), perms_equal=True)
 
         r = sorted(q.results())
-        self.assertEqual(len(r), 1)
-        self.validate_rule(r[0], TRT.neverallow, "test100", "system", "infoflow2",
-                           set(["ioctl", "hi_w"]))
+        self.assertEqual(len(r), 0)
+        # changed after dropping source policy support
+        # self.assertEqual(len(r), 1)
+        # self.validate_rule(r[0], TRT.neverallow, "test100", "system", "infoflow2",
+        #                   set(["ioctl", "hi_w"]))
 
     def test_101_xperm_any(self):
         """Xperm rule query match any perm set."""

@@ -19,55 +19,29 @@
 import copy
 import os
 import sys
-import subprocess
-import tempfile
 import unittest
 
 from setools import SELinuxPolicy, HandleUnknown
 from setools.policyrep.exception import InvalidPolicy
+
+from .util import compile_policy
 
 
 class SELinuxPolicyTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        # create a temp file for the binary policy
-        # and then have checkpolicy overwrite it.
-        fd, cls.policy_path = tempfile.mkstemp()
-        os.close(fd)
-
-        try:
-            command = [os.environ['CHECKPOLICY']]
-        except KeyError:
-            command = ["/usr/bin/checkpolicy"]
-
-        command.extend(["-M", "-o", cls.policy_path, "-U", "reject",
-                        "tests/policyrep/selinuxpolicy.conf"])
-
-        with open(os.devnull, "w") as null:
-            subprocess.check_call(command, stdout=null, shell=False, close_fds=True)
-
-        try:
-            cls.p = SELinuxPolicy("tests/policyrep/selinuxpolicy.conf")
-            cls.p_binary = SELinuxPolicy(cls.policy_path)
-        except:
-            # This should never be hit, since this policy
-            # successfully compiled with checkpolicy above.
-            # If we do, clean up the binary policy since
-            # tearDownClass() does not run.
-            os.unlink(cls.policy_path)
-            raise
+        cls.p = compile_policy("tests/policyrep/selinuxpolicy.conf")
 
     @classmethod
     def tearDownClass(cls):
-        os.unlink(cls.policy_path)
+        os.unlink(cls.p.path)
 
     @unittest.skip("Retired for the SELinuxPolicyLoadError test suite.")
     def test_001_open_policy_error(self):
         """SELinuxPolicy: Invalid policy on open."""
+        # source policies not supported
         self.assertRaises(InvalidPolicy, SELinuxPolicy, "tests/policyrep/selinuxpolicy-bad.conf")
-        sys.stderr.write(
-            "The \"category can not be associated\" error above is expected.")
 
     def test_002_open_policy_non_existant(self):
         """SELinuxPolicy: Non existant policy on open."""
@@ -82,7 +56,7 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_010_handle_unknown(self):
         """SELinuxPolicy: handle unknown setting."""
-        self.assertEqual(self.p_binary.handle_unknown, HandleUnknown.reject)
+        self.assertEqual(self.p.handle_unknown, HandleUnknown.reject)
 
     def test_011_mls(self):
         """SELinuxPolicy: MLS status."""
@@ -162,8 +136,9 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_118_neverallow_count(self):
         """SELinuxPolicy: neverallow rule count"""
-        self.assertEqual(self.p.neverallow_count, 103)
-        self.assertEqual(self.p_binary.neverallow_count, 0)
+        # changed after dropping source policy support
+        # self.assertEqual(self.p.neverallow_count, 103)
+        self.assertEqual(self.p.neverallow_count, 0)
 
     def test_119_nodecon_count(self):
         """SELinuxPolicy: nodecon count"""
@@ -241,13 +216,16 @@ class SELinuxPolicyTest(unittest.TestCase):
 
     def test_138_neverallowxperm_count(self):
         """SELinuxPolicy: neverallowxperm rount"""
-        self.assertEqual(self.p.neverallowxperm_count, 191)
+        # changed after dropping source policy support
+        # self.assertEqual(self.p.neverallowxperm_count, 191)
+        self.assertEqual(self.p.neverallowxperm_count, 0)
 
     def test_139_allowxperm_count(self):
         """SELinuxPolicy: dontauditxperm rount"""
         self.assertEqual(self.p.dontauditxperm_count, 193)
 
 
+@unittest.skip("No longer necessary since source policy support was dropped.")
 class SELinuxPolicyLoadError(unittest.TestCase):
 
     """Test attempted loading of non-compiling policies."""

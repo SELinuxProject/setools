@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, RoleQuery
+from setools import RoleQuery
+
+from .policyrep.util import compile_policy
 
 
 class RoleQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/rolequery.conf")
+        cls.p = compile_policy("tests/rolequery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Role query with no criteria."""

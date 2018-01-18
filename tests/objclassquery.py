@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, ObjClassQuery
+from setools import ObjClassQuery
+
+from .policyrep.util import compile_policy
 
 
 class ObjClassQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/objclassquery.conf")
+        cls.p = compile_policy("tests/objclassquery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Class query with no criteria."""

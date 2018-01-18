@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, ConstraintQuery
+from setools import ConstraintQuery
+
+from .policyrep.util import compile_policy
 
 
 class ConstraintQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/constraintquery.conf")
+        cls.p = compile_policy("tests/constraintquery.conf")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Constraint query with no criteria."""

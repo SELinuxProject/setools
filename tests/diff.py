@@ -16,6 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 from ipaddress import IPv4Network, IPv6Network
 
@@ -31,6 +32,7 @@ from setools import RBACRuletype as RRT
 from setools import TERuletype as TRT
 
 from .mixins import ValidateRule
+from .policyrep.util import compile_policy
 
 
 class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
@@ -39,8 +41,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
-                                    SELinuxPolicy("tests/diff_right.conf"))
+        cls.p_left = compile_policy("tests/diff_left.conf")
+        cls.p_right = compile_policy("tests/diff_right.conf")
+        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p_left.path)
+        os.unlink(cls.p_right.path)
 
     #
     # Types
@@ -490,64 +498,71 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
     #
     def test_added_neverallow_rules(self):
         """Diff: added neverallow rules."""
-        rules = sorted(self.diff.added_neverallows)
-        self.assertEqual(2, len(rules))
+        self.assertFalse(self.diff.added_neverallows)
+        # changed after dropping source policy support
+
+        # rules = sorted(self.diff.added_neverallows)
+        # self.assertEqual(2, len(rules))
 
         # added rule with new type
-        self.validate_rule(rules[0], TRT.neverallow, "added_type", "added_type", "added_class",
-                           set(["new_class_perm"]))
+        # self.validate_rule(rules[0], TRT.neverallow, "added_type", "added_type", "added_class",
+        #                   set(["new_class_perm"]))
 
         # added rule with existing types
-        self.validate_rule(rules[1], TRT.neverallow, "na_added_rule_source", "na_added_rule_target",
-                           "infoflow", set(["med_w"]))
+        # self.validate_rule(rules[1], TRT.neverallow, "na_added_rule_source",
+        #                   "na_added_rule_target", "infoflow", set(["med_w"]))
 
     def test_removed_neverallow_rules(self):
         """Diff: removed neverallow rules."""
-        rules = sorted(self.diff.removed_neverallows)
-        self.assertEqual(2, len(rules))
+        self.assertFalse(self.diff.removed_neverallows)
+        # changed after dropping source policy support
+        # rules = sorted(self.diff.removed_neverallows)
+        # self.assertEqual(2, len(rules))
 
         # removed rule with existing types
-        self.validate_rule(rules[0], TRT.neverallow, "na_removed_rule_source",
-                           "na_removed_rule_target", "infoflow", set(["hi_r"]))
+        # self.validate_rule(rules[0], TRT.neverallow, "na_removed_rule_source",
+        #                   "na_removed_rule_target", "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[1], TRT.neverallow, "removed_type", "removed_type",
-                           "removed_class", set(["null_perm"]))
+        # self.validate_rule(rules[1], TRT.neverallow, "removed_type", "removed_type",
+        #                   "removed_class", set(["null_perm"]))
 
     def test_modified_neverallow_rules(self):
         """Diff: modified neverallow rules."""
-        l = sorted(self.diff.modified_neverallows, key=lambda x: x.rule)
-        self.assertEqual(3, len(l))
-
-        # add permissions
-        rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual(TRT.neverallow, rule.ruletype)
-        self.assertEqual("na_modified_rule_add_perms", rule.source)
-        self.assertEqual("na_modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set(["hi_w"]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set(["hi_r"]), matched_perms)
-
-        # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual(TRT.neverallow, rule.ruletype)
-        self.assertEqual("na_modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("na_modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set(["super_r"]), added_perms)
-        self.assertSetEqual(set(["super_w"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
-
-        # remove permissions
-        rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual(TRT.neverallow, rule.ruletype)
-        self.assertEqual("na_modified_rule_remove_perms", rule.source)
-        self.assertEqual("na_modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set(["low_r"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
+        # changed after dropping source policy support
+        self.assertFalse(self.diff.modified_neverallows)
+        # l = sorted(self.diff.modified_neverallows, key=lambda x: x.rule)
+        # self.assertEqual(3, len(l))
+        #
+        # # add permissions
+        # rule, added_perms, removed_perms, matched_perms = l[0]
+        # self.assertEqual(TRT.neverallow, rule.ruletype)
+        # self.assertEqual("na_modified_rule_add_perms", rule.source)
+        # self.assertEqual("na_modified_rule_add_perms", rule.target)
+        # self.assertEqual("infoflow", rule.tclass)
+        # self.assertSetEqual(set(["hi_w"]), added_perms)
+        # self.assertFalse(removed_perms)
+        # self.assertSetEqual(set(["hi_r"]), matched_perms)
+        #
+        # # add and remove permissions
+        # rule, added_perms, removed_perms, matched_perms = l[1]
+        # self.assertEqual(TRT.neverallow, rule.ruletype)
+        # self.assertEqual("na_modified_rule_add_remove_perms", rule.source)
+        # self.assertEqual("na_modified_rule_add_remove_perms", rule.target)
+        # self.assertEqual("infoflow2", rule.tclass)
+        # self.assertSetEqual(set(["super_r"]), added_perms)
+        # self.assertSetEqual(set(["super_w"]), removed_perms)
+        # self.assertSetEqual(set(["low_w"]), matched_perms)
+        #
+        # # remove permissions
+        # rule, added_perms, removed_perms, matched_perms = l[2]
+        # self.assertEqual(TRT.neverallow, rule.ruletype)
+        # self.assertEqual("na_modified_rule_remove_perms", rule.source)
+        # self.assertEqual("na_modified_rule_remove_perms", rule.target)
+        # self.assertEqual("infoflow", rule.tclass)
+        # self.assertFalse(added_perms)
+        # self.assertSetEqual(set(["low_r"]), removed_perms)
+        # self.assertSetEqual(set(["low_w"]), matched_perms)
 
     #
     # Type_transition rules
@@ -990,8 +1005,9 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
     #
     def test_added_initialsids(self):
         """Diff: added initialsids."""
-        self.assertSetEqual(set(["added_sid"]), self.diff.added_initialsids)
+        self.assertSetEqual(set(["file_labels"]), self.diff.added_initialsids)
 
+    @unittest.skip("Moved to PolicyDifferenceRmIsidTest.")
     def test_removed_initialsids(self):
         """Diff: removed initialsids."""
         self.assertSetEqual(set(["removed_sid"]), self.diff.removed_initialsids)
@@ -999,10 +1015,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
     def test_modified_initialsids(self):
         """Diff: modified initialsids."""
         self.assertEqual(1, len(self.diff.modified_initialsids))
-        self.assertEqual("modified_add_role:system:system:s2",
-                         self.diff.modified_initialsids["modified_sid"].added_context)
         self.assertEqual("system:system:system:s0",
-                         self.diff.modified_initialsids["modified_sid"].removed_context)
+                         self.diff.modified_initialsids["fs"].added_context)
+        self.assertEqual("removed_user:system:system:s0",
+                         self.diff.modified_initialsids["fs"].removed_context)
 
     #
     # fs_use_*
@@ -1688,64 +1704,70 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
     #
     def test_added_neverallowxperm_rules(self):
         """Diff: added neverallowxperm rules."""
-        rules = sorted(self.diff.added_neverallowxperms)
-        self.assertEqual(2, len(rules))
-
-        # added rule with new type
-        self.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
-
-        # added rule with existing types
-        self.validate_rule(rules[1], TRT.neverallowxperm, "nax_added_rule_source",
-                           "nax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+        self.assertFalse(self.diff.added_neverallowxperms)
+        # changed after dropping source policy support
+        # rules = sorted(self.diff.added_neverallowxperms)
+        # self.assertEqual(2, len(rules))
+        #
+        # # added rule with new type
+        # self.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type", "infoflow7",
+        #                    set([0x0009]), xperm="ioctl")
+        #
+        # # added rule with existing types
+        # self.validate_rule(rules[1], TRT.neverallowxperm, "nax_added_rule_source",
+        #                    "nax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
 
     def test_removed_neverallowxperm_rules(self):
         """Diff: removed neverallowxperm rules."""
-        rules = sorted(self.diff.removed_neverallowxperms)
-        self.assertEqual(2, len(rules))
-
-        # removed rule with existing types
-        self.validate_rule(rules[0], TRT.neverallowxperm, "nax_removed_rule_source",
-                           "nax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
-
-        # removed rule with new type
-        self.validate_rule(rules[1], TRT.neverallowxperm, "removed_type", "removed_type",
-                           "infoflow7", set([0x0009]), xperm="ioctl")
+        self.assertFalse(self.diff.removed_neverallowxperms)
+        # changed after dropping source policy support
+        # rules = sorted(self.diff.removed_neverallowxperms)
+        # self.assertEqual(2, len(rules))
+        #
+        # # removed rule with existing types
+        # self.validate_rule(rules[0], TRT.neverallowxperm, "nax_removed_rule_source",
+        #                    "nax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+        #
+        # # removed rule with new type
+        # self.validate_rule(rules[1], TRT.neverallowxperm, "removed_type", "removed_type",
+        #                    "infoflow7", set([0x0009]), xperm="ioctl")
 
     def test_modified_neverallowxperm_rules(self):
         """Diff: modified neverallowxperm rules."""
-        l = sorted(self.diff.modified_neverallowxperms, key=lambda x: x.rule)
-        self.assertEqual(3, len(l))
-
-        # add permissions
-        rule, added_perms, removed_perms, matched_perms = l[0]
-        self.assertEqual(TRT.neverallowxperm, rule.ruletype)
-        self.assertEqual("nax_modified_rule_add_perms", rule.source)
-        self.assertEqual("nax_modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set([0x000f]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set([0x0004]), matched_perms)
-
-        # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = l[1]
-        self.assertEqual(TRT.neverallowxperm, rule.ruletype)
-        self.assertEqual("nax_modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("nax_modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set([0x0006]), added_perms)
-        self.assertSetEqual(set([0x0007]), removed_perms)
-        self.assertSetEqual(set([0x0008]), matched_perms)
-
-        # remove permissions
-        rule, added_perms, removed_perms, matched_perms = l[2]
-        self.assertEqual(TRT.neverallowxperm, rule.ruletype)
-        self.assertEqual("nax_modified_rule_remove_perms", rule.source)
-        self.assertEqual("nax_modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set([0x0006]), removed_perms)
-        self.assertSetEqual(set([0x0005]), matched_perms)
+        self.assertFalse(self.diff.modified_neverallowxperms)
+        # changed after dropping source policy support
+        # l = sorted(self.diff.modified_neverallowxperms, key=lambda x: x.rule)
+        # self.assertEqual(3, len(l))
+        #
+        # # add permissions
+        # rule, added_perms, removed_perms, matched_perms = l[0]
+        # self.assertEqual(TRT.neverallowxperm, rule.ruletype)
+        # self.assertEqual("nax_modified_rule_add_perms", rule.source)
+        # self.assertEqual("nax_modified_rule_add_perms", rule.target)
+        # self.assertEqual("infoflow", rule.tclass)
+        # self.assertSetEqual(set([0x000f]), added_perms)
+        # self.assertFalse(removed_perms)
+        # self.assertSetEqual(set([0x0004]), matched_perms)
+        #
+        # # add and remove permissions
+        # rule, added_perms, removed_perms, matched_perms = l[1]
+        # self.assertEqual(TRT.neverallowxperm, rule.ruletype)
+        # self.assertEqual("nax_modified_rule_add_remove_perms", rule.source)
+        # self.assertEqual("nax_modified_rule_add_remove_perms", rule.target)
+        # self.assertEqual("infoflow2", rule.tclass)
+        # self.assertSetEqual(set([0x0006]), added_perms)
+        # self.assertSetEqual(set([0x0007]), removed_perms)
+        # self.assertSetEqual(set([0x0008]), matched_perms)
+        #
+        # # remove permissions
+        # rule, added_perms, removed_perms, matched_perms = l[2]
+        # self.assertEqual(TRT.neverallowxperm, rule.ruletype)
+        # self.assertEqual("nax_modified_rule_remove_perms", rule.source)
+        # self.assertEqual("nax_modified_rule_remove_perms", rule.target)
+        # self.assertEqual("infoflow", rule.tclass)
+        # self.assertFalse(added_perms)
+        # self.assertSetEqual(set([0x0006]), removed_perms)
+        # self.assertSetEqual(set([0x0005]), matched_perms)
 
     #
     # Dontauditxperm rules
@@ -1812,14 +1834,45 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0005]), matched_perms)
 
 
+class PolicyDifferenceRmIsidTest(unittest.TestCase):
+
+    """
+    Policy difference test for removed initial SID.
+
+    Since initial SID names are fixed (they don't exist in the binary policy)
+    this cannot be in the above test suite.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.p_left = compile_policy("tests/diff_left.conf")
+        cls.p_right = compile_policy("tests/diff_right_rmisid.conf")
+        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p_left.path)
+        os.unlink(cls.p_right.path)
+
+    def test_removed_initialsids(self):
+        """Diff: removed initialsids."""
+        self.assertSetEqual(set(["file"]), self.diff.removed_initialsids)
+
+
 class PolicyDifferenceTestNoDiff(unittest.TestCase):
 
     """Policy difference test with no policy differences."""
 
     @classmethod
     def setUpClass(cls):
-        cls.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
-                                    SELinuxPolicy("tests/diff_left.conf"))
+        cls.p_left = compile_policy("tests/diff_left.conf")
+        cls.p_right = compile_policy("tests/diff_left.conf")
+        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p_left.path)
+        os.unlink(cls.p_right.path)
 
     def test_added_types(self):
         """NoDiff: no added types"""
@@ -2261,8 +2314,14 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.diff = PolicyDifference(SELinuxPolicy("tests/diff_left.conf"),
-                                    SELinuxPolicy("tests/diff_left_standard.conf"))
+        cls.p_left = compile_policy("tests/diff_left.conf")
+        cls.p_right = compile_policy("tests/diff_left_standard.conf", mls=False)
+        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p_left.path)
+        os.unlink(cls.p_right.path)
 
     def test_added_types(self):
         """MLSvsStandardDiff: no added types"""

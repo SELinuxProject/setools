@@ -15,23 +15,29 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, DomainTransitionAnalysis
+from setools import DomainTransitionAnalysis
 from setools import TERuletype as TERT
 from setools.policyrep.exception import InvalidType
 from setools.policyrep.libpolicyrep import Type
 
 from . import mixins
+from .policyrep.util import compile_policy
 
 
 class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/dta.conf")
+        cls.p = compile_policy("tests/dta.conf")
         cls.a = DomainTransitionAnalysis(cls.p)
         cls.a._build_graph()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_graph_structure(self):
         """DTA: verify graph structure."""

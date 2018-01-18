@@ -15,16 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, NetifconQuery
+from setools import NetifconQuery
+
+from .policyrep.util import compile_policy
 
 
 class NetifconQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/netifconquery.conf")
+        cls.p = compile_policy("tests/netifconquery.conf")
 
     def test_000_unset(self):
         """Netifcon query with no criteria"""

@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, PcideviceconQuery
+from setools import PcideviceconQuery
+
+from .policyrep.util import compile_policy
 
 
 class PcideviceconQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/pcideviceconquery.conf")
+        cls.p = compile_policy("tests/pcideviceconquery.conf", xen=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Pcidevicecon query with no criteria"""

@@ -15,16 +15,23 @@
 # You should have received a copy of the GNU General Public License
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
+import os
 import unittest
 
-from setools import SELinuxPolicy, DevicetreeconQuery
+from setools import DevicetreeconQuery
+
+from .policyrep.util import compile_policy
 
 
 class DevicetreeconQueryTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/devicetreeconquery.conf")
+        cls.p = compile_policy("tests/devicetreeconquery.conf", xen=True)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p.path)
 
     def test_000_unset(self):
         """Devicetreecon query with no criteria"""
