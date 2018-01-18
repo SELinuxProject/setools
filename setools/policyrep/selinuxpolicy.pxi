@@ -54,7 +54,7 @@ cdef void qpol_log_callback(void *varg, const qpol_policy_t *p, int level, const
 cdef class SELinuxPolicy:
     cdef:
         qpol_policy_t *handle
-        str path
+        readonly str path
         object log
 
     def __init__(self, policyfile=None):
@@ -119,9 +119,9 @@ cdef class SELinuxPolicy:
 
         if qpol_policy_open_from_file(filename, &self.handle, qpol_log_callback, NULL, 0) < 0:
             if (errno == EINVAL):
-                raise InvalidPolicy("Invalid policy: {}. Source policies are not supported. "
-                                    "(use e.g. policy.{} or sepolicy)".format(filename,
-                                                                              POLICYDB_VERSION_MAX))
+                raise InvalidPolicy("Invalid policy: {}. A binary policy must be specified. "
+                                    "(use e.g. policy.{} or sepolicy) Source policies are not "
+                                    "supported.".format(filename, POLICYDB_VERSION_MAX))
             else:
                 raise OSError("Unable to open policy: {}: {}".format(filename, strerror(errno)))
 

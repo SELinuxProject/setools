@@ -341,7 +341,7 @@ int qpol_policy_open_from_file(const char *path, qpol_policy_t ** policy, qpol_c
 		(*policy)->type = retv = QPOL_POLICY_KERNEL_BINARY;
 		sepol_policy_file_set_fp(pfile, infile);
 		if (sepol_policydb_read((*policy)->p, pfile)) {
-//			error = EIO;
+			error = errno;
 			goto err;
 		}
 		/* By definition, binary policy cannot have neverallow rules and all other rules are always loaded. */
@@ -365,7 +365,14 @@ int qpol_policy_open_from_file(const char *path, qpol_policy_t ** policy, qpol_c
 	sepol_policy_file_free(pfile);
 	if (infile)
 		fclose(infile);
-	errno = error;
+
+	if (error == 0) {
+		/* ensure something reasonable if error is not set. */
+		errno = EINVAL;
+	} else {
+		errno = error;
+	}
+
 	return -1;
 }
 
