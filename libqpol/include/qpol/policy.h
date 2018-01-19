@@ -48,7 +48,6 @@ extern "C"
 #include <qpol/genfscon_query.h>
 #include <qpol/mls_query.h>
 #include <qpol/mlsrule_query.h>
-#include <qpol/module.h>
 #include <qpol/netifcon_query.h>
 #include <qpol/nodecon_query.h>
 #include <qpol/permissive_query.h>
@@ -59,7 +58,6 @@ extern "C"
 #include <qpol/rbacrule_query.h>
 #include <qpol/ftrule_query.h>
 #include <qpol/role_query.h>
-#include <qpol/syn_rule_query.h>
 #include <qpol/terule_query.h>
 #include <qpol/type_query.h>
 #include <qpol/user_query.h>
@@ -145,37 +143,6 @@ extern "C"
  */
 	extern int qpol_policy_open_from_file(const char *filename, qpol_policy_t ** policy, qpol_callback_fn_t fn, void *varg,
 					      const int options);
-
-/**
- *  Open a policy from a passed in file path but do not load any rules.
- *  @param filename The name of the file to open.
- *  @param policy The policy to populate.  The caller should not free
- *  this pointer.
- *  @param fn (Optional) If non-NULL, the callback to be used by the handle.
- *  @param varg (Optional) The argument needed by the handle callback.
- *  @return Returns one of QPOL_POLICY_* above on success and < 0 on failure;
- *  if the call fails, errno will be set and *policy will be NULL.
- *  @deprecated use qpol_policy_open_from_file() with the option QPOL_POLICY_OPTION_NO_RULES instead.
- */
-	extern int qpol_policy_open_from_file_no_rules(const char *filename, qpol_policy_t ** policy, qpol_callback_fn_t fn,
-						       void *varg) __attribute__ ((deprecated));
-
-/**
- *  Open a policy from a passed in buffer.
- *  @param policy The policy to populate.  The caller should not free
- *  this pointer.
- *  @param filedata The policy file stored in memory .
- *  @param size The size of filedata
- *  @param fn (Optional) If non-NULL, the callback to be used by the handle.
- *  @param varg (Optional) The argument needed by the handle callback.
- *  @param options Options to control loading only portions of a policy;
- *  must be a bitwise-or'd set of QPOL_POLICY_OPTION_* from above.
- *  @return Returns 0 on success and < 0 on failure; if the call fails,
- *  errno will be set and *policy will be NULL.
- */
-	extern int qpol_policy_open_from_memory(qpol_policy_t ** policy, const char *filedata, size_t size, qpol_callback_fn_t fn,
-						void *varg, const int options);
-
 /**
  *  Close a policy and deallocate its memory.  Does nothing if it is
  *  already NULL.
@@ -194,47 +161,6 @@ extern "C"
  *  errno will be set. On failure, the policy state may be inconsistent.
  */
 	extern int qpol_policy_reevaluate_conds(qpol_policy_t * policy);
-
-/**
- *  Append a module to a policy. The policy now owns the module.
- *  Note that the caller must still invoke qpol_policy_rebuild()
- *  to update the policy.
- *  @param policy The policy to which to add the module.
- *  @param module The module to append. <b>The caller should not
- *  destroy this module if this function succeeds.</b>
- *  @return 0 on success and < 0 on failure; if the call fails,
- *  errno will be set and both the policy and the module will
- *  remain unchanged. If the call fails, the caller is still
- *  responsible for calling qpol_module_destroy().
- */
-	extern int qpol_policy_append_module(qpol_policy_t * policy, qpol_module_t * module);
-
-/**
- *  Rebuild the policy. If the options provided are the same as those
- *  provied to the last call to rebuild or open and the modules were not
- *  changed, this function does nothing; otherwise, re-link all enabled
- *  modules with the base and then call expand. If the syntactic rule
- *  table was previously built, the caller should call
- *  qpol_policy_build_syn_rule_table() after calling this function.
- *  @param policy The policy to rebuild.
- *  This policy will be altered by this function.
- *  @param options Options to control loading only portions of a policy;
- *  must be a bitwise-or'd set of QPOL_POLICY_OPTION_* from above.
- *  @return 0 on success and < 0 on failure; if the call fails,
- *  errno will be set and the policy will be reverted to its previous state.
- */
-	extern int qpol_policy_rebuild(qpol_policy_t * policy, const int options);
-
-/**
- *  Get an iterator of all modules in a policy.
- *  @param policy The policy from which to get the iterator.
- *  @param iter Iteraror of modules (of type qpol_module_t) returned.
- *  The caller should not destroy the modules returned by
- *  qpol_iterator_get_item().
- *  @return 0 on success and < 0 on failure; if the call fails,
- *  errno will be set and *iter will be NULL.
- */
-	extern int qpol_policy_get_module_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter);
 
 /**
  *  Get the version number of the policy.

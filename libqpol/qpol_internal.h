@@ -42,19 +42,6 @@ extern "C"
 #define QPOL_MSG_WARN 2
 #define QPOL_MSG_INFO 3
 
-	struct qpol_policy;
-
-	struct qpol_module
-	{
-		char *name;
-		char *path;
-		char *version;
-		int type;
-		struct sepol_policydb *p;
-		int enabled;
-		struct qpol_policy *parent;
-	};
-
 	struct qpol_policy
 	{
 		struct sepol_policydb *p;

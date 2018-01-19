@@ -280,8 +280,6 @@ int qpol_policy_open_from_file(const char *path, qpol_policy_t ** policy, qpol_c
 	int error = 0, retv = -1;
 	FILE *infile = NULL;
 	sepol_policy_file_t *pfile = NULL;
-	int fd = 0;
-	struct stat sb;
 
 	if (policy != NULL)
 		*policy = NULL;
