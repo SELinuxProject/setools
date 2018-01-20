@@ -25,6 +25,8 @@ from libc.stdlib cimport free
 from libc.string cimport memcpy, strerror
 from posix.stat cimport S_IFBLK, S_IFCHR, S_IFDIR, S_IFIFO, S_IFREG, S_IFLNK, S_IFSOCK
 
+cimport sepol
+
 from .exception import InvalidPolicy, MLSDisabled, InvalidBoolean, InvalidCategory, InvalidClass, \
     InvalidCommon, InvalidInitialSid, InvalidLevel, InvalidLevelDecl, InvalidRange, InvalidRole, \
     InvalidSensitivity, InvalidType, InvalidUser, InvalidRuleType, InvalidBoundsType, \
@@ -50,17 +52,6 @@ cdef extern from "<netinet/in.h>":
 
 cdef extern from "<arpa/inet.h>":
     cdef const char *inet_ntop(int af, const void *src, char *dst, socklen_t size)
-
-cdef extern from "sepol/policydb.h":
-    cdef int SEPOL_DENY_UNKNOWN
-    cdef int SEPOL_REJECT_UNKNOWN
-    cdef int SEPOL_ALLOW_UNKNOWN
-    cdef int SEPOL_TARGET_SELINUX
-    cdef int SEPOL_TARGET_XEN
-
-cdef extern from "sepol/policydb/policydb.h":
-    cdef int POLICYDB_VERSION_MAX
-    cdef int POLICYDB_VERSION_MIN
 
 cdef extern from "include/qpol/avrule_query.h":
     ctypedef struct qpol_avrule_t:
@@ -346,9 +337,11 @@ cdef extern from "include/qpol/polcap_query.h":
     int qpol_policy_get_polcap_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
     int qpol_polcap_get_name(const qpol_policy_t *policy, const qpol_polcap_t *datum, const char **name)
 
-cdef extern from "include/qpol/policy.h":
+cdef extern from "qpol_internal.h":
     ctypedef struct qpol_policy_t:
-        pass
+        sepol.sepol_policydb *p
+
+cdef extern from "include/qpol/policy.h":
     ctypedef void (*qpol_callback_fn_t)(void *varg, const qpol_policy_t * policy, int level, const char *msg)
     cdef enum qpol_capability_e:
         QPOL_CAP_ATTRIB_NAMES,

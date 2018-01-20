@@ -7,8 +7,9 @@ include libqpol/include/qpol/*.h
 include man/*
 include qhc/*
 include setools/perm_map
+include setools/policyrep/*.pxd
 include setools/policyrep/*.pxi
-include setools/policyrep/libpolicyrep.pyx
+include setools/policyrep/*.pyx
 include setoolsui/*.ui
 include setoolsui/apol/*.ui
 include setoolsui/apol/apol.qhc

@@ -127,7 +127,7 @@ setup(name='setools',
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],
       package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map']},
-      ext_modules=cythonize(ext_py_mods),
+      ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep']),
       test_suite='tests',
       license='GPLv2+, LGPLv2.1+',
       classifiers=[
