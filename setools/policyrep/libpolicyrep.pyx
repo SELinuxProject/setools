@@ -449,37 +449,6 @@ cdef extern from "include/qpol/user_query.h":
     int qpol_user_get_dfltlevel(const qpol_policy_t * policy, const qpol_user_t * datum, const qpol_mls_level_t ** level)
     int qpol_user_get_name(const qpol_policy_t * policy, const qpol_user_t * datum, const char **name)
 
-cdef extern from "include/qpol/xen_query.h":
-    ctypedef struct qpol_iomemcon_t:
-        pass
-    ctypedef struct qpol_ioportcon_t:
-        pass
-    ctypedef struct qpol_pcidevicecon_t:
-        pass
-    ctypedef struct qpol_pirqcon_t:
-        pass
-    ctypedef struct qpol_devicetreecon_t:
-        pass
-    int qpol_policy_get_iomemcon_by_addr(const qpol_policy_t *policy, uint64_t low, uint64_t high, const qpol_iomemcon_t **ocon)
-    int qpol_policy_get_iomemcon_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
-    int qpol_iomemcon_get_low_addr(const qpol_policy_t *policy, const qpol_iomemcon_t *ocon, uint64_t *addr)
-    int qpol_iomemcon_get_high_addr(const qpol_policy_t *policy, const qpol_iomemcon_t *ocon, uint64_t *addr)
-    int qpol_iomemcon_get_context(const qpol_policy_t *policy, const qpol_iomemcon_t *ocon, const qpol_context_t **context)
-    int qpol_policy_get_ioportcon_by_port(const qpol_policy_t *policy, uint32_t low, uint32_t high, const qpol_ioportcon_t **ocon)
-    int qpol_policy_get_ioportcon_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
-    int qpol_ioportcon_get_low_port(const qpol_policy_t *policy, const qpol_ioportcon_t *ocon, uint32_t *port)
-    int qpol_ioportcon_get_high_port(const qpol_policy_t *policy, const qpol_ioportcon_t *ocon, uint32_t *port)
-    int qpol_ioportcon_get_context(const qpol_policy_t *policy, const qpol_ioportcon_t *ocon, const qpol_context_t **context)
-    int qpol_policy_get_pcidevicecon_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
-    int qpol_pcidevicecon_get_device(const qpol_policy_t *policy, const qpol_pcidevicecon_t *ocon, uint32_t *device)
-    int qpol_pcidevicecon_get_context(const qpol_policy_t *policy, const qpol_pcidevicecon_t *ocon, const qpol_context_t **context)
-    int qpol_policy_get_pirqcon_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
-    int qpol_pirqcon_get_irq(const qpol_policy_t *policy, const qpol_pirqcon_t *ocon, uint16_t *irq)
-    int qpol_pirqcon_get_context(const qpol_policy_t *policy, const qpol_pirqcon_t *ocon, const qpol_context_t **context)
-    int qpol_policy_get_devicetreecon_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
-    int qpol_devicetreecon_get_path(const qpol_policy_t *policy, const qpol_devicetreecon_t *ocon, char **path)
-    int qpol_devicetreecon_get_context(const qpol_policy_t *policy, const qpol_devicetreecon_t *ocon, const qpol_context_t **context)
-
 
 # this must be here so that the PolicyEnum subclasses are created correctly.
 # otherwise you get an error during runtime

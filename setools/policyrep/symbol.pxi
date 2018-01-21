@@ -1,5 +1,5 @@
 # Copyright 2014, Tresys Technology, LLC
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -60,3 +60,68 @@ cdef class PolicySymbol:
         overridden by subclasses.
         """
         raise NotImplementedError
+
+
+cdef class Ocontext(PolicySymbol):
+
+    """Base class for most in-policy labeling statements, (portcon, nodecon, etc.)"""
+
+    cdef sepol.ocontext_t *handle
+
+    def _eq(self, Ocontext other):
+        """Low-level equality check (C pointers)."""
+        return self.handle == other.handle
+
+    @property
+    def context(self):
+        """The context for this statement."""
+        return context_factory(self.policy, <qpol_context_t *> self.handle.context)
+
+    def statement(self):
+        return str(self)
+
+
+cdef class OcontextIterator:
+
+    """
+    Base class for iterators for most in-policy labeling statements, (portcon, nodecon, etc.)
+
+    Sublcasses must provide their own __next__, which calls this class's __next__
+    and then uses a factory function to build and return an object from self.ocon.
+
+    For example:
+
+    def __next__(self):
+        super().__next__()
+        return iomemcon_factory(self.policy, self.ocon)
+    """
+
+    cdef:
+        sepol.ocontext_t *head
+        sepol.ocontext_t *ocon
+        sepol.ocontext_t *curr
+        SELinuxPolicy policy
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.curr == NULL:
+            raise StopIteration
+
+        # Returning the object is delegated
+        # to subclasses which should returning
+        # the ocon based off of self.ocon
+        self.ocon = self.curr
+        self.curr = self.curr.next
+
+    def size(self):
+        cdef:
+            size_t count = 0
+            sepol.ocontext_t *ocon = self.head
+
+        while ocon:
+            count += 1
+            ocon = ocon.next
+
+        return count

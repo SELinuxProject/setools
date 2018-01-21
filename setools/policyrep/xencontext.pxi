@@ -1,4 +1,4 @@
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 # Derived from netcontext.py
 #
 # This file is part of SETools.
@@ -26,109 +26,107 @@ IoportconRange = namedtuple("IoportconRange", ["low", "high"])
 #
 # Devicetreecon factory functions
 #
-cdef inline Devicetreecon devicetreecon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Devicetreecon objects."""
-    return devicetreecon_factory(policy, <const qpol_devicetreecon_t *> symbol.obj)
-
-
-cdef inline Devicetreecon devicetreecon_factory(SELinuxPolicy policy, const qpol_devicetreecon_t *symbol):
+cdef inline Devicetreecon devicetreecon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating Devicetreecon objects."""
-    r = Devicetreecon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    d = Devicetreecon()
+    d.policy = policy
+    d.handle = symbol
+    return d
+
+
+cdef inline devicetreecon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating Devicetreecon iterators."""
+    i = DevicetreeconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
 #
 # Iomemcon factory functions
 #
-cdef inline Iomemcon iomemcon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Iomemcon objects."""
-    return iomemcon_factory(policy, <const qpol_iomemcon_t *> symbol.obj)
-
-
-cdef inline Iomemcon iomemcon_factory(SELinuxPolicy policy, const qpol_iomemcon_t *symbol):
+cdef inline Iomemcon iomemcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating Iomemcon objects."""
-    r = Iomemcon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    i = Iomemcon()
+    i.policy = policy
+    i.handle = symbol
+    return i
+
+
+cdef inline iomemcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating Iomemcon iterators."""
+    i = IomemconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
 #
 # Ioportcon factory functions
 #
-cdef inline Ioportcon ioportcon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Ioportcon objects."""
-    return ioportcon_factory(policy, <const qpol_ioportcon_t *> symbol.obj)
-
-
-cdef inline Ioportcon ioportcon_factory(SELinuxPolicy policy, const qpol_ioportcon_t *symbol):
+cdef inline Ioportcon ioportcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating Ioportcon objects."""
-    r = Ioportcon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    i = Ioportcon()
+    i.policy = policy
+    i.handle = symbol
+    return i
+
+
+cdef inline ioportcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating Ioportcon iterators."""
+    i = IoportconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
 #
 # Pcidevicecon factory functions
 #
-cdef inline Pcidevicecon pcidevicecon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Pcidevicecon objects."""
-    return pcidevicecon_factory(policy, <const qpol_pcidevicecon_t *> symbol.obj)
-
-
-cdef inline Pcidevicecon pcidevicecon_factory(SELinuxPolicy policy, const qpol_pcidevicecon_t *symbol):
+cdef inline Pcidevicecon pcidevicecon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating Pcidevicecon objects."""
-    r = Pcidevicecon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    p = Pcidevicecon()
+    p.policy = policy
+    p.handle = symbol
+    return p
+
+
+cdef inline pcidevicecon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating Pcidevicecon iterators."""
+    i = PcideviceconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
 #
 # Pirqcon factory functions
 #
-cdef inline Pirqcon pirqcon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Pirqcon objects."""
-    return pirqcon_factory(policy, <const qpol_pirqcon_t *> symbol.obj)
-
-
-cdef inline Pirqcon pirqcon_factory(SELinuxPolicy policy, const qpol_pirqcon_t *symbol):
+cdef inline Pirqcon pirqcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating Pirqcon objects."""
-    r = Pirqcon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    p = Pirqcon()
+    p.policy = policy
+    p.handle = symbol
+    return p
+
+
+cdef inline pirqcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating Pirqcon iterators."""
+    i = PirqconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
+
 
 #
 # Classes
 #
-cdef class Devicetreecon(PolicySymbol):
+cdef class Devicetreecon(Ocontext):
 
     """A devicetreecon statement."""
 
-    cdef const qpol_devicetreecon_t *handle
-
     def __str__(self):
         return "devicetreecon {0.path} {0.context}".format(self)
-
-    def _eq(self, Devicetreecon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_devicetreecon_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading context for devicetreecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
 
     @property
     def path(self):
@@ -137,24 +135,21 @@ cdef class Devicetreecon(PolicySymbol):
 
         Return: The device path name.
         """
-        cdef char *path
-        if qpol_devicetreecon_get_path(self.policy.handle, self.handle, &path):
-            ex = LowLevelPolicyError("Error reading path for devicetreecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(path)
-
-    def statement(self):
-        return str(self)
+        return intern(self.handle.u.name)
 
 
-cdef class Iomemcon(PolicySymbol):
+cdef class DevicetreeconIterator(OcontextIterator):
+
+    """Iterator for devicetreecon statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return devicetreecon_factory(self.policy, self.ocon)
+
+
+cdef class Iomemcon(Ocontext):
 
     """A iomemcon statement."""
-
-    cdef const qpol_iomemcon_t *handle
 
     def __str__(self):
         low, high = self.addr
@@ -163,10 +158,6 @@ cdef class Iomemcon(PolicySymbol):
             return "iomemcon {0} {1}".format(low, self.context)
         else:
             return "iomemcon {0}-{1} {2}".format(low, high, self.context)
-
-    def _eq(self, Iomemcon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
 
     @property
     def addr(self):
@@ -177,43 +168,22 @@ cdef class Iomemcon(PolicySymbol):
         low     The low memory of the range.
         high    The high memory of the range.
         """
-        cdef uint64_t low = 0
-        if qpol_iomemcon_get_low_addr(self.policy.handle, self.handle, &low):
-            ex = LowLevelPolicyError("Error reading low addr for iomemcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        cdef uint64_t high = 0
-        if qpol_iomemcon_get_high_addr(self.policy.handle, self.handle, &high):
-            ex = LowLevelPolicyError("Error reading high addr for iomemcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return IomemconRange(low, high)
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_iomemcon_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading context for iomemcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
-
-    def statement(self):
-        return str(self)
+        return IomemconRange(self.handle.u.iomem.low_iomem,
+                             self.handle.u.iomem.high_iomem)
 
 
-cdef class Ioportcon(PolicySymbol):
+cdef class IomemconIterator(OcontextIterator):
+
+    """Iterator for iomemcon statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return iomemcon_factory(self.policy, self.ocon)
+
+
+cdef class Ioportcon(Ocontext):
 
     """A ioportcon statement."""
-
-    cdef const qpol_ioportcon_t *handle
 
     def __str__(self):
         low, high = self.ports
@@ -222,22 +192,6 @@ cdef class Ioportcon(PolicySymbol):
             return "ioportcon {0} {1}".format(low, self.context)
         else:
             return "ioportcon {0}-{1} {2}".format(low, high, self.context)
-
-    def _eq(self, Ioportcon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_ioportcon_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading context for ioportcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
 
     @property
     def ports(self):
@@ -248,50 +202,25 @@ cdef class Ioportcon(PolicySymbol):
         low     The low port of the range.
         high    The high port of the range.
         """
-        cdef uint32_t low
-        if qpol_ioportcon_get_low_port(self.policy.handle, self.handle, &low):
-            ex = LowLevelPolicyError("Error reading low port for ioportcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        cdef uint32_t high
-        if qpol_ioportcon_get_high_port(self.policy.handle, self.handle, &high):
-            ex = LowLevelPolicyError("Error reading high port for ioportcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return IoportconRange(low, high)
-
-    def statement(self):
-        return str(self)
+        return IoportconRange(self.handle.u.ioport.low_ioport,
+                              self.handle.u.ioport.high_ioport)
 
 
-cdef class Pcidevicecon(PolicySymbol):
+cdef class IoportconIterator(OcontextIterator):
+
+    """Iterator for ioportcon statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return ioportcon_factory(self.policy, self.ocon)
+
+
+cdef class Pcidevicecon(Ocontext):
 
     """A pcidevicecon statement."""
 
-    cdef const qpol_pcidevicecon_t *handle
-
     def __str__(self):
         return "pcidevicecon {0.device} {0.context}".format(self)
-
-    def _eq(self, Pcidevicecon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_pcidevicecon_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading context for pcidevicecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
 
     @property
     def device(self):
@@ -300,43 +229,24 @@ cdef class Pcidevicecon(PolicySymbol):
 
         Return: The PCI device ID.
         """
-        cdef uint32_t device
-        if qpol_pcidevicecon_get_device(self.policy.handle, self.handle, &device):
-            ex = LowLevelPolicyError("Error reading device for pcidevicecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return device
-
-    def statement(self):
-        return str(self)
+        return self.handle.u.device
 
 
-cdef class Pirqcon(PolicySymbol):
+cdef class PcideviceconIterator(OcontextIterator):
+
+    """Iterator for pcidevicecon statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return pcidevicecon_factory(self.policy, self.ocon)
+
+
+cdef class Pirqcon(Ocontext):
 
     """A pirqcon statement."""
 
-    cdef const qpol_pirqcon_t *handle
-
     def __str__(self):
         return "pirqcon {0.irq} {0.context}".format(self)
-
-    def _eq(self, Pirqcon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_pirqcon_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading context for pirqcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
 
     @property
     def irq(self):
@@ -345,14 +255,13 @@ cdef class Pirqcon(PolicySymbol):
 
         Return: The irq.
         """
-        cdef uint16_t irq
-        if qpol_pirqcon_get_irq(self.policy.handle, self.handle, &irq):
-            ex = LowLevelPolicyError("Error reading irq for pirqcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
+        return self.handle.u.pirq
 
-        return irq
 
-    def statement(self):
-        return str(self)
+cdef class PirqconIterator(OcontextIterator):
+
+    """Iterator for pirqcon statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return pirqcon_factory(self.policy, self.ocon)

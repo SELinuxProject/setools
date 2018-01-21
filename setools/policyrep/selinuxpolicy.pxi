@@ -1,5 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -714,40 +714,22 @@ cdef class SELinuxPolicy:
     #
     def devicetreecons(self):
         """Iterator over all devicetreecon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_devicetreecon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, devicetreecon_factory_iter)
+        return devicetreecon_iterator_factory(self,
+                                              self.handle.p.p.ocontexts[sepol.OCON_XEN_DEVICETREE])
 
     def iomemcons(self):
         """Iterator over all iomemcon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_iomemcon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, iomemcon_factory_iter)
+        return iomemcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOMEM])
 
     def ioportcons(self):
         """Iterator over all ioportcon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_ioportcon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, ioportcon_factory_iter)
+        return ioportcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOPORT])
 
     def pcidevicecons(self):
         """Iterator over all pcidevicecon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_pcidevicecon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, pcidevicecon_factory_iter)
+        return pcidevicecon_iterator_factory(self,
+                                             self.handle.p.p.ocontexts[sepol.OCON_XEN_PCIDEVICE])
 
     def pirqcons(self):
         """Iterator over all pirqcon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_pirqcon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, pirqcon_factory_iter)
+        return pirqcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_PIRQ])
