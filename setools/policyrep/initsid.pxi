@@ -1,5 +1,5 @@
 # Copyright 2014, Tresys Technology, LLC
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -21,63 +21,37 @@
 #
 # Factory functions
 #
-cdef inline InitialSID initialsid_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing InitialSID objects by name."""
-
-    cdef const qpol_isid_t *symbol
-    if qpol_policy_get_isid_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidInitialSid("{0} is not a valid initial SID".format(name))
-
-    return initialsid_factory(policy, symbol)
+cdef inline initialsid_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating initial SID iterators."""
+    i = InitialSIDIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
-cdef inline InitialSID initialsid_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over InitialSID objects."""
-    return initialsid_factory(policy, <const qpol_isid_t *> symbol.obj)
-
-
-cdef inline InitialSID initialsid_factory(SELinuxPolicy policy, const qpol_isid_t *symbol):
+cdef inline InitialSID initialsid_factory(SELinuxPolicy policy, sepol.ocontext *symbol):
     """Factory function for creating InitialSID objects."""
-    r = InitialSID()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    i = InitialSID()
+    i.policy = policy
+    i.handle = symbol
+    return i
 
 
 #
-# Class
+# Classes
 #
-cdef class InitialSID(PolicySymbol):
+cdef class InitialSID(Ocontext):
 
     """An initial SID statement."""
 
-    cdef const qpol_isid_t *handle
-
     def __str__(self):
-        cdef const char *name
+        return intern(self.handle.u.name)
 
-        if qpol_isid_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading initial SID name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
 
-        return intern(name)
+cdef class InitialSIDIterator(OcontextIterator):
 
-    def _eq(self, InitialSID other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+    """Iterator for initial SID statements in the policy."""
 
-    @property
-    def context(self):
-        """The context for this initial SID."""
-        cdef const qpol_context_t *ctx
-        if qpol_isid_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading initial sid context: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
-
-    def statement(self):
-        return "sid {0} {0.context}".format(self)
+    def __next__(self):
+        super().__next__()
+        return initialsid_factory(self.policy, self.ocon)

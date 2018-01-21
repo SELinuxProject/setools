@@ -441,7 +441,11 @@ cdef class SELinuxPolicy:
 
     def lookup_initialsid(self, name):
         """Look up an initial sid."""
-        return initialsid_factory_lookup(self, name)
+        for sid in self.initialsids():
+            if str(sid) == name:
+                return sid
+
+        raise InvalidInitialSid("{0} is not a valid initial SID".format(name))
 
     def lookup_level(self, level):
         """Look up a MLS level."""
@@ -679,11 +683,7 @@ cdef class SELinuxPolicy:
 
     def initialsids(self):
         """Iterator over all initial SID statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_isid_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, initialsid_factory_iter)
+        return initialsid_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_ISID])
 
     def netifcons(self):
         """Iterator over all netifcon statements."""

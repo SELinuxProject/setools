@@ -244,14 +244,6 @@ cdef extern from "include/qpol/genfscon_query.h":
     extern int qpol_genfscon_get_class(const qpol_policy_t * policy, const qpol_genfscon_t * genfs, uint32_t * obj_class)
     extern int qpol_genfscon_get_context(const qpol_policy_t * policy, const qpol_genfscon_t * genfscon, const qpol_context_t ** context)
 
-cdef extern from "include/qpol/isid_query.h":
-    ctypedef struct qpol_isid_t:
-        pass
-    extern int qpol_policy_get_isid_by_name(const qpol_policy_t * policy, const char *name, const qpol_isid_t ** ocon)
-    extern int qpol_policy_get_isid_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    extern int qpol_isid_get_name(const qpol_policy_t * policy, const qpol_isid_t * ocon, const char **name)
-    extern int qpol_isid_get_context(const qpol_policy_t * policy, const qpol_isid_t * ocon, const qpol_context_t ** context)
-
 cdef extern from "include/qpol/iterator.h":
     ctypedef struct qpol_iterator_t:
         pass
