@@ -567,6 +567,7 @@ cdef extern from "<sepol/policydb/policydb.h>":
         char *name
         ocontext_port port
         ocontext_node node
+        ocontext_node6 node6
         uint32_t device
         uint16_t pirq
         ocontext_iomem iomem

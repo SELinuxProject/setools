@@ -310,27 +310,6 @@ cdef extern from "include/qpol/mlsrule_query.h":
     int qpol_range_trans_get_target_class(const qpol_policy_t * policy, const qpol_range_trans_t * rule,  const qpol_class_t ** target)
     int qpol_range_trans_get_range(const qpol_policy_t * policy, const qpol_range_trans_t * rule, const qpol_mls_range_t ** range)
 
-cdef extern from "include/qpol/netifcon_query.h":
-    ctypedef struct qpol_netifcon_t:
-        pass
-    int qpol_policy_get_netifcon_by_name(const qpol_policy_t * policy, const char *name, const qpol_netifcon_t ** ocon)
-    int qpol_policy_get_netifcon_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_netifcon_get_name(const qpol_policy_t * policy, const qpol_netifcon_t * ocon, const char **name)
-    int qpol_netifcon_get_msg_con(const qpol_policy_t * policy, const qpol_netifcon_t * ocon, const qpol_context_t ** context)
-    int qpol_netifcon_get_if_con(const qpol_policy_t * policy, const qpol_netifcon_t * ocon, const qpol_context_t ** context)
-
-cdef extern from "include/qpol/nodecon_query.h":
-    cdef unsigned char QPOL_IPV4
-    cdef unsigned char QPOL_IPV6
-    ctypedef struct qpol_nodecon_t:
-        pass
-    int qpol_policy_get_nodecon_by_node(const qpol_policy_t * policy, uint32_t addr[4], uint32_t mask[4],  unsigned char protocol, qpol_nodecon_t ** ocon)
-    int qpol_policy_get_nodecon_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_nodecon_get_addr(const qpol_policy_t * policy, const qpol_nodecon_t * ocon, uint32_t ** addr, unsigned char *protocol)
-    int qpol_nodecon_get_mask(const qpol_policy_t * policy, const qpol_nodecon_t * ocon, uint32_t ** mask, unsigned char *protocol)
-    int qpol_nodecon_get_protocol(const qpol_policy_t * policy, const qpol_nodecon_t * ocon, unsigned char *protocol)
-    int qpol_nodecon_get_context(const qpol_policy_t * policy, const qpol_nodecon_t * ocon, const qpol_context_t ** context)
-
 cdef extern from "include/qpol/polcap_query.h":
     ctypedef struct qpol_polcap_t:
         pass
@@ -373,16 +352,6 @@ cdef extern from "include/qpol/policy.h":
     int qpol_policy_has_capability(const qpol_policy_t * policy, qpol_capability_e cap)
     int qpol_policy_get_policy_handle_unknown(const qpol_policy_t * policy, unsigned int *handle_unknown)
     int qpol_policy_get_target_platform(const qpol_policy_t *policy, int *target_platform)
-
-cdef extern from "include/qpol/portcon_query.h":
-    ctypedef struct qpol_portcon_t:
-        pass
-    int qpol_policy_get_portcon_by_port(const qpol_policy_t * policy, uint16_t low, uint16_t high, uint8_t protocol, const qpol_portcon_t ** ocon)
-    int qpol_policy_get_portcon_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_portcon_get_protocol(const qpol_policy_t * policy, const qpol_portcon_t * ocon, uint8_t * protocol)
-    int qpol_portcon_get_low_port(const qpol_policy_t * policy, const qpol_portcon_t * ocon, uint16_t * port)
-    int qpol_portcon_get_high_port(const qpol_policy_t * policy, const qpol_portcon_t * ocon, uint16_t * port)
-    int qpol_portcon_get_context(const qpol_policy_t * policy, const qpol_portcon_t * ocon, const qpol_context_t ** context)
 
 cdef extern from "include/qpol/rbacrule_query.h":
     ctypedef struct qpol_role_allow_t:

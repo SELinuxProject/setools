@@ -326,7 +326,7 @@ cdef class SELinuxPolicy:
     @property
     def nodecon_count(self):
         """The number of nodecon statements."""
-        return self.nodecons().size()
+        return sum(1 for n in self.nodecons())
 
     @property
     def pcidevicecon_count(self):
@@ -687,27 +687,18 @@ cdef class SELinuxPolicy:
 
     def netifcons(self):
         """Iterator over all netifcon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_netifcon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, netifcon_factory_iter)
+        return netifcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_NETIF])
 
     def nodecons(self):
         """Iterator over all nodecon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_nodecon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, nodecon_factory_iter)
+        return chain(nodecon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE],
+                                              NodeconIPVersion.ipv4),
+                     nodecon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE6],
+                                              NodeconIPVersion.ipv6))
 
     def portcons(self):
         """Iterator over all portcon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_portcon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, portcon_factory_iter)
+        return portcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_PORT])
 
     #
     # Xen labeling iterators

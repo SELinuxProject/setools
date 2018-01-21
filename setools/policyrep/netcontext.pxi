@@ -1,5 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -29,59 +29,68 @@ PortconRange = namedtuple("PortconRange", ["low", "high"])
 #
 # Netifcon factory functions
 #
-cdef inline Netifcon netifcon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Netifcon objects."""
-    return netifcon_factory(policy, <const qpol_netifcon_t *> symbol.obj)
+cdef inline netifcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating Netifcon iterators."""
+    i = NetifconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
-cdef inline Netifcon netifcon_factory(SELinuxPolicy policy, const qpol_netifcon_t *symbol):
+cdef inline Netifcon netifcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating Netifcon objects."""
-    r = Netifcon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    n = Netifcon()
+    n.policy = policy
+    n.handle = symbol
+    return n
 
 
 #
 # Nodecon factory functions
 #
-cdef inline Nodecon nodecon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Nodecon objects."""
-    return nodecon_factory(policy, <const qpol_nodecon_t *> symbol.obj)
+cdef inline nodecon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head, ip_version):
+    """Factory function for creating Nodecon iterators."""
+    i = NodeconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    i.ip_version = ip_version
+    return i
 
 
-cdef inline Nodecon nodecon_factory(SELinuxPolicy policy, const qpol_nodecon_t *symbol):
+cdef inline Nodecon nodecon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, ip_version):
     """Factory function for creating Nodecon objects."""
-    r = Nodecon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    n = Nodecon()
+    n.policy = policy
+    n.handle = symbol
+    n.ip_version = ip_version
+    return n
 
 
 #
 # Portcon factory functions
 #
-cdef inline Portcon portcon_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Portcon objects."""
-    return portcon_factory(policy, <const qpol_portcon_t *> symbol.obj)
+cdef inline portcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating Portcon iterators."""
+    i = PortconIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
-cdef inline Portcon portcon_factory(SELinuxPolicy policy, const qpol_portcon_t *symbol):
+cdef inline Portcon portcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating Portcon objects."""
-    r = Portcon()
-    r.policy = policy
-    r.handle = symbol
-    return r
+    p = Portcon()
+    p.policy = policy
+    p.handle = symbol
+    return p
 
 
 #
 # Classes
 #
-cdef class Netifcon(PolicySymbol):
+cdef class Netifcon(Ocontext):
 
     """A netifcon statement."""
-
-    cdef const qpol_netifcon_t *handle
 
     def __str__(self):
         return "netifcon {0.netif} {0.context} {0.packet}".format(self)
@@ -93,48 +102,24 @@ cdef class Netifcon(PolicySymbol):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
-    def _eq(self, Netifcon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for the interface."""
-        cdef const qpol_context_t *ctx
-        if qpol_netifcon_get_if_con(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading interface context for netifcon statement: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
-
     @property
     def netif(self):
         """The network interface name."""
-        cdef const char *name
-        if qpol_netifcon_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading interface name for netifcon statement: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.handle.u.name)
 
     @property
     def packet(self):
         """The context for the packets."""
-        cdef const qpol_context_t *ctx
-        if qpol_netifcon_get_msg_con(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading packet context for netifcon statement: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
+        return context_factory(self.policy, <const qpol_context_t *> &self.handle.context[1])
 
-        return context_factory(self.policy, ctx)
 
-    def statement(self):
-        return str(self)
+cdef class NetifconIterator(OcontextIterator):
+
+    """Iterator for netifcon statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return netifcon_factory(self.policy, self.ocon)
 
 
 class NodeconIPVersion(PolicyEnum):
@@ -145,11 +130,11 @@ class NodeconIPVersion(PolicyEnum):
     ipv6 = AF_INET6
 
 
-cdef class Nodecon(PolicySymbol):
+cdef class Nodecon(Ocontext):
 
     """A nodecon statement."""
 
-    cdef const qpol_nodecon_t *handle
+    cdef readonly object ip_version
 
     def __str__(self):
         return "nodecon {1} {0.context}".format(self, self.network.with_netmask.replace("/", " "))
@@ -157,15 +142,9 @@ cdef class Nodecon(PolicySymbol):
     def __hash__(self):
         return hash("nodecon|{}".format(self.network.with_netmask))
 
-    def __eq__(self, other):
-        # Libqpol allocates new C objects in the
-        # nodecons iterator, so pointer comparison
-        # in the PolicySymbol object doesn't work.
-        try:
-            return (self.network == other.network and
-                    self.context == other.context)
-        except AttributeError:
-            return (str(self) == str(other))
+    def __lt__(self, other):
+        # this is used by Python sorting functions
+        return str(self) < str(other)
 
     def _addr(self):
         """Temporary internal function only for as long as addr property exists."""
@@ -177,26 +156,16 @@ cdef class Nodecon(PolicySymbol):
         if not addr:
             raise MemoryError
 
-        if qpol_nodecon_get_addr(self.policy.handle, self.handle, &a, &proto):
-            ex = LowLevelPolicyError("Error reading address of nodecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
         # convert network order to string
-        if proto == QPOL_IPV4:
-            inet_ntop(AF_INET, a, addr, INET6_ADDRSTRLEN)
+        if self.ip_version == NodeconIPVersion.ipv4:
+            inet_ntop(AF_INET, &self.handle.u.node.addr, addr, INET6_ADDRSTRLEN)
         else:
-            inet_ntop(AF_INET6, a, addr, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET6, &self.handle.u.node6.addr, addr, INET6_ADDRSTRLEN)
 
         straddress = str(addr)
         PyMem_Free(addr)
 
         return straddress
-
-    def _eq(self, Nodecon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
 
     def _mask(self):
         """Temporary internal function only for as long as mask property exists."""
@@ -207,17 +176,11 @@ cdef class Nodecon(PolicySymbol):
         if not mask:
             raise MemoryError
 
-        if qpol_nodecon_get_mask(self.policy.handle, self.handle, &m, &proto):
-            ex = LowLevelPolicyError("Error reading mask of nodecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
         # convert network order to string
-        if proto == QPOL_IPV4:
-            inet_ntop(AF_INET, m, mask, INET6_ADDRSTRLEN)
+        if self.ip_version == NodeconIPVersion.ipv4:
+            inet_ntop(AF_INET, &self.handle.u.node.mask, mask, INET6_ADDRSTRLEN)
         else:
-            inet_ntop(AF_INET6, m, mask, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET6, &self.handle.u.node6.mask, mask, INET6_ADDRSTRLEN)
 
         strmask = str(mask)
         PyMem_Free(mask)
@@ -230,36 +193,6 @@ cdef class Nodecon(PolicySymbol):
         warnings.warn("Nodecon.address will be removed in SETools 4.3, please use nodecon.network",
                       DeprecationWarning)
         return self._addr()
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_nodecon_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading context for nodecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
-
-    @property
-    def ip_version(self):
-        """
-        The IP version for the nodecon (socket.AF_INET or
-        socket.AF_INET6).
-        """
-        cdef unsigned char proto
-        if qpol_nodecon_get_protocol(self.policy.handle, self.handle, &proto):
-            ex = LowLevelPolicyError("Error reading IP version for nodecon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        if proto == QPOL_IPV4:
-            return NodeconIPVersion.ipv4
-        else:
-            return NodeconIPVersion.ipv6
 
     @property
     def netmask(self):
@@ -297,8 +230,16 @@ cdef class Nodecon(PolicySymbol):
                         "unexpected results.".format(addr, mask))
             return ip_network(net_with_mask, strict=False)
 
-    def statement(self):
-        return str(self)
+
+cdef class NodeconIterator(OcontextIterator):
+
+    """Iterator for nodecon statements in the policy."""
+
+    cdef object ip_version
+
+    def __next__(self):
+        super().__next__()
+        return nodecon_factory(self.policy, self.ocon, self.ip_version)
 
 
 class PortconProtocol(PolicyEnum):
@@ -310,11 +251,9 @@ class PortconProtocol(PolicyEnum):
     dccp = IPPROTO_DCCP
 
 
-cdef class Portcon(PolicySymbol):
+cdef class Portcon(Ocontext):
 
     """A portcon statement."""
-
-    cdef const qpol_portcon_t *handle
 
     def __str__(self):
         low, high = self.ports
@@ -331,22 +270,6 @@ cdef class Portcon(PolicySymbol):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
-    def _eq(self, Portcon other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_portcon_get_context(self.policy.handle, self.handle, &ctx):
-            ex = LowLevelPolicyError("Error reading context for portcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return context_factory(self.policy, ctx)
-
     @property
     def ports(self):
         """
@@ -356,35 +279,20 @@ cdef class Portcon(PolicySymbol):
         low     The low port of the range.
         high    The high port of the range.
         """
-        cdef uint16_t low
-        if qpol_portcon_get_low_port(self.policy.handle, self.handle, &low):
-            ex = LowLevelPolicyError("Error reading low port for portcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        cdef uint16_t high
-        if qpol_portcon_get_high_port(self.policy.handle, self.handle, &high):
-            ex = LowLevelPolicyError("Error reading high port for portcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return PortconRange(low, high)
+        return PortconRange(self.handle.u.port.low_port, self.handle.u.port.high_port)
 
     @property
     def protocol(self):
         """
         The protocol type for the portcon.
         """
-        cdef uint8_t proto
-        if qpol_portcon_get_protocol(self.policy.handle, self.handle, &proto):
-            ex = LowLevelPolicyError("Error reading protocol for portcon statement: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
+        return PortconProtocol(self.handle.u.port.protocol)
 
-        return PortconProtocol(proto)
 
-    def statement(self):
-        return str(self)
+cdef class PortconIterator(OcontextIterator):
+
+    """Iterator for portcon statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return portcon_factory(self.policy, self.ocon)
