@@ -1,5 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -21,12 +21,15 @@
 #
 # FSUse factory functions
 #
-cdef inline FSUse fs_use_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over FSUse objects."""
-    return fs_use_factory(policy, <const qpol_fs_use_t *> symbol.obj)
+cdef inline fs_use_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+    """Factory function for creating FSUse iterators."""
+    i = FSUseIterator()
+    i.policy = policy
+    i.head = i.curr = head
+    return i
 
 
-cdef inline FSUse fs_use_factory(SELinuxPolicy policy, const qpol_fs_use_t *symbol):
+cdef inline FSUse fs_use_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
     """Factory function for creating FSUse objects."""
     r = FSUse()
     r.policy = policy
@@ -59,16 +62,14 @@ class FSUseRuletype(PolicyEnum):
     # there are more rule types, but modern SELinux
     # only supports these three.
 
-    fs_use_xattr = QPOL_FS_USE_XATTR
-    fs_use_trans = QPOL_FS_USE_TRANS
-    fs_use_task = QPOL_FS_USE_TASK
+    fs_use_xattr = sepol.SECURITY_FS_USE_XATTR
+    fs_use_trans = sepol.SECURITY_FS_USE_TRANS
+    fs_use_task = sepol.SECURITY_FS_USE_TASK
 
 
-cdef class FSUse(PolicySymbol):
+cdef class FSUse(Ocontext):
 
     """An fs_use_* statement."""
-
-    cdef const qpol_fs_use_t *handle
 
     def __str__(self):
         return "{0.ruletype} {0.fs} {0.context};".format(self)
@@ -80,44 +81,24 @@ cdef class FSUse(PolicySymbol):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
-    def _eq(self, FSUse other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        cdef const qpol_context_t *ctx
-        if qpol_fs_use_get_context(self.policy.handle, self.handle, &ctx):
-            raise RuntimeError("Could not get file system context")
-
-        return context_factory(self.policy, ctx)
-
     @property
     def fs(self):
         """The filesystem type for this statement."""
-        cdef const char *name
-        if qpol_fs_use_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading fs_use file system name: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.handle.u.name)
 
     @property
     def ruletype(self):
         """The rule type for this fs_use_* statement."""
-        cdef uint32_t behavior
-        if qpol_fs_use_get_behavior(self.policy.handle, self.handle, &behavior):
-            ex = LowLevelPolicyError("Error reading fs_use ruletype: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
+        return FSUseRuletype(self.handle.v.behavior)
 
-        return FSUseRuletype(behavior)
 
-    def statement(self):
-        return str(self)
+cdef class FSUseIterator(OcontextIterator):
+
+    """Iterator for fs_use_* statements in the policy."""
+
+    def __next__(self):
+        super().__next__()
+        return fs_use_factory(self.policy, self.ocon)
 
 
 class GenfsFiletype(int):

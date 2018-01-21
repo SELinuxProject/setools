@@ -201,21 +201,6 @@ cdef extern from "include/qpol/default_object_query.h":
     int qpol_default_object_get_type_default(const qpol_policy_t *policy, const qpol_default_object_t *datum, const char **value)
     int qpol_default_object_get_range_default(const qpol_policy_t *policy, const qpol_default_object_t *datum, const char **value)
 
-cdef extern from "include/qpol/fs_use_query.h":
-    ctypedef struct qpol_fs_use_t:
-        pass
-    int qpol_policy_get_fs_use_by_name(const qpol_policy_t * policy, const char *name, const qpol_fs_use_t ** ocon)
-    int qpol_policy_get_fs_use_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_fs_use_get_name(const qpol_policy_t * policy, const qpol_fs_use_t * ocon, const char **name)
-    cdef int QPOL_FS_USE_XATTR
-    cdef int QPOL_FS_USE_TRANS
-    cdef int QPOL_FS_USE_TASK
-    cdef int QPOL_FS_USE_GENFS
-    cdef int QPOL_FS_USE_NONE
-    cdef int QPOL_FS_USE_PSID
-    int qpol_fs_use_get_behavior(const qpol_policy_t * policy, const qpol_fs_use_t * ocon, uint32_t * behavior)
-    int qpol_fs_use_get_context(const qpol_policy_t * policy, const qpol_fs_use_t * ocon, const qpol_context_t ** context)
-
 cdef extern from "include/qpol/ftrule_query.h":
     ctypedef struct qpol_filename_trans_t:
         pass

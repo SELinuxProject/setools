@@ -667,11 +667,7 @@ cdef class SELinuxPolicy:
     #
     def fs_uses(self):
         """Iterator over all fs_use_* statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_fs_use_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, fs_use_factory_iter)
+        return fs_use_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_FSUSE])
 
     def genfscons(self):
         """Iterator over all genfscon statements."""

@@ -9,6 +9,12 @@ cdef extern from "<sepol/policydb.h>":
     cdef int SEPOL_TARGET_SELINUX
     cdef int SEPOL_TARGET_XEN
 
+cdef extern from "<sepol/policydb/services.h>":
+    cdef int SECURITY_FS_USE_XATTR
+    cdef int SECURITY_FS_USE_TRANS
+    cdef int SECURITY_FS_USE_TASK
+    cdef int SECURITY_FS_USE_GENFS
+    cdef int SECURITY_FS_USE_NONE
 
 cdef extern from "<sepol/policydb/flask_types.h>":
     cdef int SELINUX_MAGIC
@@ -579,7 +585,7 @@ cdef extern from "<sepol/policydb/policydb.h>":
     #
     cdef union ocontext_v_union:
         uint32_t sclass
-        uint32_t behavio
+        uint32_t behavior
 
     #
     # ocontext_t
