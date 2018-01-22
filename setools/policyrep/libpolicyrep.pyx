@@ -211,24 +211,6 @@ cdef extern from "include/qpol/ftrule_query.h":
     int qpol_filename_trans_get_object_class(const qpol_policy_t * policy, const qpol_filename_trans_t * rule, const qpol_class_t ** obj_class)
     int qpol_filename_trans_get_filename(const qpol_policy_t * policy, const qpol_filename_trans_t * rule, const char ** name)
 
-cdef extern from "include/qpol/genfscon_query.h":
-    ctypedef struct qpol_genfscon_t:
-        pass
-    extern int qpol_policy_get_genfscon_by_name(const qpol_policy_t * policy, const char *name, const char *path, qpol_genfscon_t ** genfscon)
-    extern int qpol_policy_get_genfscon_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    extern int qpol_genfscon_get_name(const qpol_policy_t * policy, const qpol_genfscon_t * genfs, const char **name)
-    extern int qpol_genfscon_get_path(const qpol_policy_t * policy, const qpol_genfscon_t * genfs, const char **path)
-    cdef int QPOL_CLASS_ALL
-    cdef int QPOL_CLASS_BLK_FILE
-    cdef int QPOL_CLASS_CHR_FILE
-    cdef int QPOL_CLASS_DIR
-    cdef int QPOL_CLASS_FIFO_FILE
-    cdef int QPOL_CLASS_FILE
-    cdef int QPOL_CLASS_LNK_FILE
-    cdef int QPOL_CLASS_SOCK_FILE
-    extern int qpol_genfscon_get_class(const qpol_policy_t * policy, const qpol_genfscon_t * genfs, uint32_t * obj_class)
-    extern int qpol_genfscon_get_context(const qpol_policy_t * policy, const qpol_genfscon_t * genfscon, const qpol_context_t ** context)
-
 cdef extern from "include/qpol/iterator.h":
     ctypedef struct qpol_iterator_t:
         pass

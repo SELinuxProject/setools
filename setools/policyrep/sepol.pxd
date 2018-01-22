@@ -16,6 +16,15 @@ cdef extern from "<sepol/policydb/services.h>":
     cdef int SECURITY_FS_USE_GENFS
     cdef int SECURITY_FS_USE_NONE
 
+cdef extern from "<sepol/policydb/flask.h>":
+    cdef int SECCLASS_DIR
+    cdef int SECCLASS_FILE
+    cdef int SECCLASS_LNK_FILE
+    cdef int SECCLASS_FIFO_FILE
+    cdef int SECCLASS_SOCK_FILE
+    cdef int SECCLASS_CHR_FILE
+    cdef int SECCLASS_BLK_FILE
+
 cdef extern from "<sepol/policydb/flask_types.h>":
     cdef int SELINUX_MAGIC
 

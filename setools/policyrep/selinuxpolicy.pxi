@@ -671,11 +671,7 @@ cdef class SELinuxPolicy:
 
     def genfscons(self):
         """Iterator over all genfscon statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_genfscon_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, genfscon_factory_iter)
+        return genfscon_iterator_factory(self, self.handle.p.p.genfs)
 
     def initialsids(self):
         """Iterator over all initial SID statements."""
