@@ -208,13 +208,13 @@ cdef class GenfsconIterator:
         self.curr = self.curr.next
         return self.ocon_iter.__next__()
 
-    def size(self):
+    def __len__(self):
         cdef:
             size_t count = 0
             sepol.genfs_t *genfs = self.head
 
         while genfs:
-            count += genfscon_subiterator_factory(self.policy, genfs.head, genfs.fstype).size()
+            count += len(genfscon_subiterator_factory(self.policy, genfs.head, genfs.fstype))
             genfs = genfs.next
 
         return count

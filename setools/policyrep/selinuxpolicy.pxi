@@ -214,7 +214,7 @@ cdef class SELinuxPolicy:
     @property
     def boolean_count(self):
         """The number of Booleans."""
-        return self.bools().size()
+        return len(self.bools())
 
     @property
     def category_count(self):
@@ -224,17 +224,17 @@ cdef class SELinuxPolicy:
     @property
     def class_count(self):
         """The number of object classes."""
-        return self.classes().size()
+        return len(self.classes())
 
     @property
     def common_count(self):
         """The number of common permission sets."""
-        return self.commons().size()
+        return len(self.commons())
 
     @property
     def conditional_count(self):
         """The number of conditionals."""
-        return self.conditionals().size()
+        return len(self.conditionals())
 
     @property
     def constraint_count(self):
@@ -250,7 +250,7 @@ cdef class SELinuxPolicy:
     @property
     def devicetreecon_count(self):
         """The number of Xen devicetreecon statements."""
-        return self.devicetreecons().size()
+        return len(self.devicetreecons())
 
     @property
     def dontaudit_count(self):
@@ -267,27 +267,27 @@ cdef class SELinuxPolicy:
     @property
     def fs_use_count(self):
         """The number of fs_use_* statements."""
-        return self.fs_uses().size()
+        return len(self.fs_uses())
 
     @property
     def genfscon_count(self):
         """The number of genfscon statements."""
-        return self.genfscons().size()
+        return len(self.genfscons())
 
     @property
     def initialsids_count(self):
         """The number of initial sid statements."""
-        return self.initialsids().size()
+        return len(self.initialsids())
 
     @property
     def iomemcon_count(self):
         """The number of Xen iomemcon statements."""
-        return self.iomemcons().size()
+        return len(self.iomemcons())
 
     @property
     def ioportcon_count(self):
         """The number of Xen ioportcon statements."""
-        return self.ioportcons().size()
+        return len(self.ioportcons())
 
     @property
     def level_count(self):
@@ -309,7 +309,7 @@ cdef class SELinuxPolicy:
     @property
     def netifcon_count(self):
         """The number of netifcon statements."""
-        return self.netifcons().size()
+        return len(self.netifcons())
 
     @property
     def neverallow_count(self):
@@ -331,7 +331,7 @@ cdef class SELinuxPolicy:
     @property
     def pcidevicecon_count(self):
         """The number of Xen pcidevicecon statements."""
-        return self.pcidevicecons().size()
+        return len(self.pcidevicecons())
 
     @property
     def permission_count(self):
@@ -346,17 +346,17 @@ cdef class SELinuxPolicy:
     @property
     def pirqcon_count(self):
         """The number of Xen pirqcon statements."""
-        return self.pirqcons().size()
+        return len(self.pirqcons())
 
     @property
     def polcap_count(self):
         """The number of policy capabilities."""
-        return self.polcaps().size()
+        return len(self.polcaps())
 
     @property
     def portcon_count(self):
         """The number of portcon statements."""
-        return self.portcons().size()
+        return len(self.portcons())
 
     @property
     def role_allow_count(self):
@@ -378,7 +378,7 @@ cdef class SELinuxPolicy:
     @property
     def role_count(self):
         """The number of roles."""
-        return self.roles().size()
+        return len(self.roles())
 
     @property
     def type_attribute_count(self):
@@ -416,7 +416,7 @@ cdef class SELinuxPolicy:
 
     @property
     def user_count(self):
-        return self.users().size()
+        return len(self.users())
 
     @property
     def validatetrans_count(self):

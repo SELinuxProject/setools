@@ -453,7 +453,7 @@ cdef class QpolIterator:
 
         raise StopIteration
 
-    def size(self):
+    def __len__(self):
         cdef size_t s
 
         qpol_iterator_get_size(self.iter, &s)

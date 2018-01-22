@@ -115,7 +115,7 @@ cdef class OcontextIterator:
         self.ocon = self.curr
         self.curr = self.curr.next
 
-    def size(self):
+    def __len__(self):
         cdef:
             size_t count = 0
             sepol.ocontext_t *ocon = self.head
