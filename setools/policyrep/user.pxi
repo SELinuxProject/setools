@@ -57,22 +57,12 @@ cdef class User(PolicySymbol):
 
     @property
     def roles(self):
-        cdef qpol_iterator_t *iter
-
-        if qpol_user_get_role_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        roleset = set()
-
-        for role in qpol_iterator_factory(self.policy, iter, role_factory_iter):
-            # object_r is implicitly added to all roles by the compiler.
-            # technically it is incorrect to skip it, but policy writers
-            # and analysts don't expect to see it in results, and it
-            # will confuse, especially for role set equality user queries.
-            if role != "object_r":
-                roleset.add(role)
-
-        return roleset
+        # object_r is implicitly added to all roles by the compiler.
+        # technically it is incorrect to skip it, but policy writers
+        # and analysts don't expect to see it in results, and it
+        # will confuse, especially for role set equality user queries.
+        return set(r for r in RoleEbitmapIterator.factory(self.policy, &self.handle.roles.roles)
+                   if r != "object_r")
 
     @property
     def mls_level(self):

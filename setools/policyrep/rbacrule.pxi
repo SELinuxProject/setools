@@ -113,7 +113,7 @@ cdef class RoleAllow(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return role_factory(self.policy, r)
+        return Role.factory(self.policy, <sepol.role_datum_t *>r)
 
     @property
     def target(self):
@@ -125,7 +125,7 @@ cdef class RoleAllow(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return role_factory(self.policy, r)
+        return Role.factory(self.policy, <sepol.role_datum_t *>r)
 
     @property
     def tclass(self):
@@ -171,7 +171,7 @@ cdef class RoleTransition(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return role_factory(self.policy, r)
+        return Role.factory(self.policy, <sepol.role_datum_t *>r)
 
     @property
     def target(self):
@@ -207,7 +207,7 @@ cdef class RoleTransition(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return role_factory(self.policy, r)
+        return Role.factory(self.policy, <sepol.role_datum_t *>r)
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""

@@ -288,12 +288,6 @@ cdef extern from "include/qpol/rbacrule_query.h":
 cdef extern from "include/qpol/role_query.h":
     ctypedef struct qpol_role_t:
         pass
-    int qpol_policy_get_role_by_name(const qpol_policy_t * policy, const char *name, const qpol_role_t ** datum)
-    int qpol_policy_get_role_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_role_get_value(const qpol_policy_t * policy, const qpol_role_t * datum, uint32_t * value)
-    int qpol_role_get_dominate_iter(const qpol_policy_t * policy, const qpol_role_t * datum, qpol_iterator_t ** dominates)
-    int qpol_role_get_type_iter(const qpol_policy_t * policy, const qpol_role_t * datum, qpol_iterator_t ** types)
-    int qpol_role_get_name(const qpol_policy_t * policy, const qpol_role_t * datum, const char **name)
 
 cdef extern from "include/qpol/terule_query.h":
     ctypedef struct qpol_terule_t:

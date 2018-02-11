@@ -448,7 +448,7 @@ cdef class ConstraintExprNode(PolicySymbol):
 
         name_iterator = qpol_iterator_factory(self.policy, iter, string_factory_iter)
         if self.symbol_type in self._role_syms:
-            names = frozenset(role_factory_lookup(self.policy, r) for r in name_iterator)
+            names = frozenset(self.policy.lookup_role(r) for r in name_iterator)
         elif self.symbol_type in self._type_syms:
             names = frozenset(self.policy.lookup_type_or_attr(t)
                               for t in name_iterator)

@@ -497,7 +497,11 @@ cdef class SELinuxPolicy:
 
     def lookup_role(self, name):
         """Look up a role by name."""
-        return role_factory_lookup(self, name)
+        for r in self.roles():
+            if r == name:
+                return r
+
+        raise InvalidRole("{0} is not a valid role".format(name))
 
     def lookup_type(self, name):
         """Look up a type by name."""
@@ -572,11 +576,7 @@ cdef class SELinuxPolicy:
 
     def roles(self):
         """Iterator which yields all roles."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_role_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, role_factory_iter)
+        return RoleHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_ROLES].table)
 
     def sensitivities(self):
         """Iterator over all sensitivities."""

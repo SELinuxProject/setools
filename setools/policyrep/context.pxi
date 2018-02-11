@@ -54,11 +54,8 @@ cdef class Context(PolicySymbol):
     @property
     def role(self):
         """The role portion of the context."""
-        cdef const qpol_role_t *r
-        if qpol_context_get_role(self.policy.handle, self.handle, &r):
-            raise RuntimeError("Could not get role from context")
-
-        return role_factory(self.policy, r)
+        cdef sepol.role_datum_t *r = self.policy.handle.p.p.role_val_to_struct[self.handle.role - 1]
+        return Role.factory(self.policy, r)
 
     @property
     def type_(self):
