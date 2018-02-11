@@ -24,106 +24,19 @@ IoportconRange = namedtuple("IoportconRange", ["low", "high"])
 
 
 #
-# Devicetreecon factory functions
-#
-cdef inline Devicetreecon devicetreecon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating Devicetreecon objects."""
-    d = Devicetreecon()
-    d.policy = policy
-    d.handle = symbol
-    return d
-
-
-cdef inline devicetreecon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating Devicetreecon iterators."""
-    i = DevicetreeconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-#
-# Iomemcon factory functions
-#
-cdef inline Iomemcon iomemcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating Iomemcon objects."""
-    i = Iomemcon()
-    i.policy = policy
-    i.handle = symbol
-    return i
-
-
-cdef inline iomemcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating Iomemcon iterators."""
-    i = IomemconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-#
-# Ioportcon factory functions
-#
-cdef inline Ioportcon ioportcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating Ioportcon objects."""
-    i = Ioportcon()
-    i.policy = policy
-    i.handle = symbol
-    return i
-
-
-cdef inline ioportcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating Ioportcon iterators."""
-    i = IoportconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-#
-# Pcidevicecon factory functions
-#
-cdef inline Pcidevicecon pcidevicecon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating Pcidevicecon objects."""
-    p = Pcidevicecon()
-    p.policy = policy
-    p.handle = symbol
-    return p
-
-
-cdef inline pcidevicecon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating Pcidevicecon iterators."""
-    i = PcideviceconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-#
-# Pirqcon factory functions
-#
-cdef inline Pirqcon pirqcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating Pirqcon objects."""
-    p = Pirqcon()
-    p.policy = policy
-    p.handle = symbol
-    return p
-
-
-cdef inline pirqcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating Pirqcon iterators."""
-    i = PirqconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-#
 # Classes
 #
 cdef class Devicetreecon(Ocontext):
 
     """A devicetreecon statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Devicetreecon objects."""
+        d = Devicetreecon()
+        d.policy = policy
+        d.handle = symbol
+        return d
 
     def __str__(self):
         return "devicetreecon {0.path} {0.context}".format(self)
@@ -138,18 +51,17 @@ cdef class Devicetreecon(Ocontext):
         return intern(self.handle.u.name)
 
 
-cdef class DevicetreeconIterator(OcontextIterator):
-
-    """Iterator for devicetreecon statements in the policy."""
-
-    def __next__(self):
-        super().__next__()
-        return devicetreecon_factory(self.policy, self.ocon)
-
-
 cdef class Iomemcon(Ocontext):
 
     """A iomemcon statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Iomemcon objects."""
+        i = Iomemcon()
+        i.policy = policy
+        i.handle = symbol
+        return i
 
     def __str__(self):
         low, high = self.addr
@@ -172,18 +84,17 @@ cdef class Iomemcon(Ocontext):
                              self.handle.u.iomem.high_iomem)
 
 
-cdef class IomemconIterator(OcontextIterator):
-
-    """Iterator for iomemcon statements in the policy."""
-
-    def __next__(self):
-        super().__next__()
-        return iomemcon_factory(self.policy, self.ocon)
-
-
 cdef class Ioportcon(Ocontext):
 
     """A ioportcon statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Ioportcon objects."""
+        i = Ioportcon()
+        i.policy = policy
+        i.handle = symbol
+        return i
 
     def __str__(self):
         low, high = self.ports
@@ -206,18 +117,17 @@ cdef class Ioportcon(Ocontext):
                               self.handle.u.ioport.high_ioport)
 
 
-cdef class IoportconIterator(OcontextIterator):
-
-    """Iterator for ioportcon statements in the policy."""
-
-    def __next__(self):
-        super().__next__()
-        return ioportcon_factory(self.policy, self.ocon)
-
-
 cdef class Pcidevicecon(Ocontext):
 
     """A pcidevicecon statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Pcidevicecon objects."""
+        p = Pcidevicecon()
+        p.policy = policy
+        p.handle = symbol
+        return p
 
     def __str__(self):
         return "pcidevicecon {0.device} {0.context}".format(self)
@@ -232,18 +142,17 @@ cdef class Pcidevicecon(Ocontext):
         return self.handle.u.device
 
 
-cdef class PcideviceconIterator(OcontextIterator):
-
-    """Iterator for pcidevicecon statements in the policy."""
-
-    def __next__(self):
-        super().__next__()
-        return pcidevicecon_factory(self.policy, self.ocon)
-
-
 cdef class Pirqcon(Ocontext):
 
     """A pirqcon statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Pirqcon objects."""
+        p = Pirqcon()
+        p.policy = policy
+        p.handle = symbol
+        return p
 
     def __str__(self):
         return "pirqcon {0.irq} {0.context}".format(self)
@@ -258,10 +167,89 @@ cdef class Pirqcon(Ocontext):
         return self.handle.u.pirq
 
 
+#
+# Iterators
+#
+cdef class DevicetreeconIterator(OcontextIterator):
+
+    """Iterator for devicetreecon statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Devicetreecon iterators."""
+        i = DevicetreeconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Devicetreecon.factory(self.policy, self.ocon)
+
+
+cdef class IomemconIterator(OcontextIterator):
+
+    """Iterator for iomemcon statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Iomemcon iterators."""
+        i = IomemconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Iomemcon.factory(self.policy, self.ocon)
+
+
+cdef class IoportconIterator(OcontextIterator):
+
+    """Iterator for ioportcon statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Ioportcon iterators."""
+        i = IoportconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Ioportcon.factory(self.policy, self.ocon)
+
+
+cdef class PcideviceconIterator(OcontextIterator):
+
+    """Iterator for pcidevicecon statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Pcidevicecon iterators."""
+        i = PcideviceconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Pcidevicecon.factory(self.policy, self.ocon)
+
+
 cdef class PirqconIterator(OcontextIterator):
 
     """Iterator for pirqcon statements in the policy."""
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Pirqcon iterators."""
+        i = PirqconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
     def __next__(self):
         super().__next__()
-        return pirqcon_factory(self.policy, self.ocon)
+        return Pirqcon.factory(self.policy, self.ocon)

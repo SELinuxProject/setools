@@ -697,22 +697,22 @@ cdef class SELinuxPolicy:
     #
     def devicetreecons(self):
         """Iterator over all devicetreecon statements."""
-        return devicetreecon_iterator_factory(self,
-                                              self.handle.p.p.ocontexts[sepol.OCON_XEN_DEVICETREE])
+        return DevicetreeconIterator.factory(self,
+                                             self.handle.p.p.ocontexts[sepol.OCON_XEN_DEVICETREE])
 
     def iomemcons(self):
         """Iterator over all iomemcon statements."""
-        return iomemcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOMEM])
+        return IomemconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOMEM])
 
     def ioportcons(self):
         """Iterator over all ioportcon statements."""
-        return ioportcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOPORT])
+        return IoportconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOPORT])
 
     def pcidevicecons(self):
         """Iterator over all pcidevicecon statements."""
-        return pcidevicecon_iterator_factory(self,
-                                             self.handle.p.p.ocontexts[sepol.OCON_XEN_PCIDEVICE])
+        return PcideviceconIterator.factory(self,
+                                            self.handle.p.p.ocontexts[sepol.OCON_XEN_PCIDEVICE])
 
     def pirqcons(self):
         """Iterator over all pirqcon statements."""
-        return pirqcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_PIRQ])
+        return PirqconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_PIRQ])
