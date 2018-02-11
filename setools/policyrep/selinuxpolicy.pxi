@@ -667,11 +667,11 @@ cdef class SELinuxPolicy:
     #
     def fs_uses(self):
         """Iterator over all fs_use_* statements."""
-        return fs_use_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_FSUSE])
+        return FSUseIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_FSUSE])
 
     def genfscons(self):
         """Iterator over all genfscon statements."""
-        return genfscon_iterator_factory(self, self.handle.p.p.genfs)
+        return GenfsconIterator.factory(self, self.handle.p.p.genfs)
 
     def initialsids(self):
         """Iterator over all initial SID statements."""

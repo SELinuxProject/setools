@@ -19,54 +19,6 @@
 #
 
 #
-# FSUse factory functions
-#
-cdef inline fs_use_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating FSUse iterators."""
-    i = FSUseIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-cdef inline FSUse fs_use_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating FSUse objects."""
-    r = FSUse()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Genfscon factory functions
-#
-cdef inline genfscon_iterator_factory(SELinuxPolicy policy, sepol.genfs_t *head):
-    """Factory function for creating genfscon iterators."""
-    i = GenfsconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-cdef inline genfscon_subiterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head, fstype):
-    """Factory function for creating genfscon sub-iterators."""
-    i = GenfsconOcontextIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    i.fs = fstype
-    return i
-
-
-cdef inline Genfscon genfscon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, fstype):
-    """Factory function for creating Genfscon objects."""
-    r = Genfscon()
-    r.policy = policy
-    r.handle = symbol
-    r.fs = fstype
-    return r
-
-
-#
 # Classes
 #
 class FSUseRuletype(PolicyEnum):
@@ -83,6 +35,14 @@ class FSUseRuletype(PolicyEnum):
 cdef class FSUse(Ocontext):
 
     """An fs_use_* statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating FSUse objects."""
+        r = FSUse()
+        r.policy = policy
+        r.handle = symbol
+        return r
 
     def __str__(self):
         return "{0.ruletype} {0.fs} {0.context};".format(self)
@@ -103,15 +63,6 @@ cdef class FSUse(Ocontext):
     def ruletype(self):
         """The rule type for this fs_use_* statement."""
         return FSUseRuletype(self.handle.v.behavior)
-
-
-cdef class FSUseIterator(OcontextIterator):
-
-    """Iterator for fs_use_* statements in the policy."""
-
-    def __next__(self):
-        super().__next__()
-        return fs_use_factory(self.policy, self.ocon)
 
 
 class GenfsFiletype(int):
@@ -155,6 +106,15 @@ cdef class Genfscon(Ocontext):
                        sepol.SECCLASS_LNK_FILE: S_IFLNK,
                        sepol.SECCLASS_SOCK_FILE: S_IFSOCK}
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, fstype):
+        """Factory function for creating Genfscon objects."""
+        r = Genfscon()
+        r.policy = policy
+        r.handle = symbol
+        r.fs = fstype
+        return r
+
     def __str__(self):
         return "genfscon {0.fs} {0.path} {0.filetype} {0.context}".format(self)
 
@@ -176,6 +136,25 @@ cdef class Genfscon(Ocontext):
         return intern(self.handle.u.name)
 
 
+#
+# Iterators
+#
+cdef class FSUseIterator(OcontextIterator):
+
+    """Iterator for fs_use_* statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating FSUse iterators."""
+        i = FSUseIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return FSUse.factory(self.policy, self.ocon)
+
 cdef class GenfsconIterator:
 
     """Iterator for genfscon statements in the policy."""
@@ -185,6 +164,14 @@ cdef class GenfsconIterator:
         sepol.genfs_t *curr
         object ocon_iter
         SELinuxPolicy policy
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.genfs_t *head):
+        """Factory function for creating genfscon iterators."""
+        i = GenfsconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
 
     def __iter__(self):
         return self
@@ -202,8 +189,8 @@ cdef class GenfsconIterator:
             raise StopIteration
 
         # create a sub-iterator for this fs entry
-        self.ocon_iter = genfscon_subiterator_factory(self.policy, self.curr.head,
-                                                      intern(self.curr.fstype))
+        self.ocon_iter = GenfsconOcontextIterator.factory(self.policy, self.curr.head,
+                                                          intern(self.curr.fstype))
 
         self.curr = self.curr.next
         return self.ocon_iter.__next__()
@@ -214,7 +201,7 @@ cdef class GenfsconIterator:
             sepol.genfs_t *genfs = self.head
 
         while genfs:
-            count += len(genfscon_subiterator_factory(self.policy, genfs.head, genfs.fstype))
+            count += len(GenfsconOcontextIterator.factory(self.policy, genfs.head, genfs.fstype))
             genfs = genfs.next
 
         return count
@@ -226,6 +213,15 @@ cdef class GenfsconOcontextIterator(OcontextIterator):
 
     cdef str fs
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head, fstype):
+        """Factory function for creating genfscon sub-iterators."""
+        i = GenfsconOcontextIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        i.fs = fstype
+        return i
+
     def __next__(self):
         super().__next__()
-        return genfscon_factory(self.policy, self.ocon, self.fs)
+        return Genfscon.factory(self.policy, self.ocon, self.fs)
