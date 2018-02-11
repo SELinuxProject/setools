@@ -1,5 +1,5 @@
 # Copyright 2014-2015, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,19 +18,19 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-cdef inline Context context_factory(SELinuxPolicy policy, const qpol_context_t *symbol):
-    """Factory function for creating Context objects."""
-    r = Context()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
 cdef class Context(PolicySymbol):
 
     """A SELinux security context/security attribute."""
 
-    cdef const qpol_context_t *handle
+    cdef sepol.context_struct_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.context_struct_t *symbol):
+        """Factory function for creating Context objects."""
+        r = Context()
+        r.policy = policy
+        r.handle = symbol
+        return r
 
     def __str__(self):
         try:

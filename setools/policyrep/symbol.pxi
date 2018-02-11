@@ -78,7 +78,7 @@ cdef class Ocontext(PolicySymbol):
     @property
     def context(self):
         """The context for this statement."""
-        return context_factory(self.policy, <qpol_context_t *> self.handle.context)
+        return Context.factory(self.policy, self.handle.context)
 
     def statement(self):
         return str(self)

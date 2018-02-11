@@ -58,7 +58,7 @@ cdef class Netifcon(Ocontext):
     @property
     def packet(self):
         """The context for the packets."""
-        return context_factory(self.policy, <const qpol_context_t *> &self.handle.context[1])
+        return Context.factory(self.policy, &self.handle.context[1])
 
 
 class NodeconIPVersion(PolicyEnum):
