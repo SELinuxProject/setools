@@ -1,5 +1,5 @@
 # Copyright 2014-2015, Tresys Technology, LLC
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,44 +18,45 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-#
-# Factory functions
-#
-cdef inline PolicyCapability polcap_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over PolicyCapability objects."""
-    return polcap_factory(policy, <const qpol_polcap_t *> symbol.obj)
-
-
-cdef inline PolicyCapability polcap_factory(SELinuxPolicy policy, const qpol_polcap_t *symbol):
-    """Factory function for creating PolicyCapability objects."""
-    r = PolicyCapability()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Class
-#
 cdef class PolicyCapability(PolicySymbol):
 
     """A policy capability."""
 
-    cdef const qpol_polcap_t *handle
+    cdef str name
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, size_t bit):
+        """Factory function for creating PolicyCapability objects."""
+        r = PolicyCapability()
+        r.policy = policy
+        r.name = intern(sepol.sepol_polcap_getname(bit))
+        return r
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_polcap_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading polcap name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return self.name
 
     def _eq(self, PolicyCapability other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+        """Low-level equality check."""
+        return self.policy == other.policy \
+            and self.name == other.name
 
     def statement(self):
-        return "policycap {0};".format(self)
+        return "policycap {0};".format(self.name)
+
+
+cdef class PolicyCapabilityIterator(EbitmapIterator):
+
+    """Iterator for policy capability statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ebitmap_t *bmap):
+        """Factory function for creating PolicyCapability iterators."""
+        i = PolicyCapabilityIterator()
+        i.policy = policy
+        i.bmap = bmap
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return PolicyCapability.factory(self.policy, self.bit)

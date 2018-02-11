@@ -540,11 +540,7 @@ cdef class SELinuxPolicy:
 
     def polcaps(self):
         """Iterator which yields all policy capabilities."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_polcap_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, polcap_factory_iter)
+        return PolicyCapabilityIterator.factory(self, &self.handle.p.p.policycaps)
 
     def roles(self):
         """Iterator which yields all roles."""

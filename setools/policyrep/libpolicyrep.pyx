@@ -269,12 +269,6 @@ cdef extern from "include/qpol/mlsrule_query.h":
     int qpol_range_trans_get_target_class(const qpol_policy_t * policy, const qpol_range_trans_t * rule,  const qpol_class_t ** target)
     int qpol_range_trans_get_range(const qpol_policy_t * policy, const qpol_range_trans_t * rule, const qpol_mls_range_t ** range)
 
-cdef extern from "include/qpol/polcap_query.h":
-    ctypedef struct qpol_polcap_t:
-        pass
-    int qpol_policy_get_polcap_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
-    int qpol_polcap_get_name(const qpol_policy_t *policy, const qpol_polcap_t *datum, const char **name)
-
 cdef extern from "qpol_internal.h":
     ctypedef struct qpol_policy_t:
         sepol.sepol_policydb *p

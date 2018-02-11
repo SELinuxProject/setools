@@ -376,6 +376,10 @@ cdef extern from "<sepol/policydb/constraint.h>":
     ctypedef constraint_node constraint_node_t
 
 
+cdef extern from "<sepol/policydb/polcaps.h>":
+    const char *sepol_polcap_getname(unsigned int capnum)
+
+
 cdef extern from "<sepol/policydb/policydb.h>":
     #
     # class_perm_node_t
