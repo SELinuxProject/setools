@@ -195,7 +195,7 @@ cdef class RoleTransition(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return class_factory(self.policy, c)
+        return ObjClass.factory(self.policy, <sepol.class_datum_t *>c)
 
     @property
     def default(self):

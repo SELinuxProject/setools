@@ -1,5 +1,5 @@
 # Copyright 2014-2015, Tresys Technology, LLC
-# Copyright 2017-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,62 +18,8 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-
-#
-# Commons factory functions
-#
-cdef inline Common common_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing Common objects by name."""
-
-    cdef const qpol_common_t *symbol
-    if qpol_policy_get_common_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidCommon("{0} is not a valid common".format(name))
-
-    return common_factory(policy, symbol)
-
-
-cdef inline Common common_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Common objects."""
-    return common_factory(policy, <const qpol_common_t *> symbol.obj)
-
-
-cdef inline Common common_factory(SELinuxPolicy policy, const qpol_common_t *symbol):
-    """Factory function for creating Common objects."""
-    r = Common()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-#
-# Object class factory functions
-#
 cdef dict _objclass_cache = {}
 
-cdef inline ObjClass class_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing ObjClass objects by name."""
-
-    cdef const qpol_class_t *symbol
-    if qpol_policy_get_class_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidClass("{0} is not a valid class".format(name))
-
-    return class_factory(policy, symbol)
-
-
-cdef inline ObjClass class_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over ObjClass objects."""
-    return class_factory(policy, <const qpol_class_t *> symbol.obj)
-
-
-cdef inline ObjClass class_factory(SELinuxPolicy policy, const qpol_class_t *symbol):
-    """Factory function for creating ObjClass objects."""
-    try:
-        return _objclass_cache[<uintptr_t>symbol]
-    except KeyError:
-        c = ObjClass()
-        c.policy = policy
-        c.handle = symbol
-        _objclass_cache[<uintptr_t>symbol] = c
-        return c
 
 #
 # Classes
@@ -82,17 +28,18 @@ cdef class Common(PolicySymbol):
 
     """A common permission set."""
 
-    cdef const qpol_common_t *handle
+    cdef sepol.common_datum_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.common_datum_t *symbol):
+        """Factory function for creating Common objects."""
+        r = Common()
+        r.policy = policy
+        r.handle = symbol
+        return r
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_common_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading common name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_COMMONS][self.handle.s.value - 1])
 
     def _eq(self, Common other):
         """Low-level equality check (C pointers)."""
@@ -104,11 +51,7 @@ cdef class Common(PolicySymbol):
     @property
     def perms(self):
         """The set of the common's permissions."""
-        cdef qpol_iterator_t *iter
-        if qpol_common_get_perm_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return set(qpol_iterator_factory(self.policy, iter, string_factory_iter))
+        return set(PermissionIterator.factory(self.policy, &self.handle.permissions.table))
 
     def statement(self):
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
@@ -118,17 +61,22 @@ cdef class ObjClass(PolicySymbol):
 
     """An object class."""
 
-    cdef const qpol_class_t *handle
+    cdef sepol.class_datum_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.class_datum_t *symbol):
+        """Factory function for creating ObjClass objects."""
+        try:
+            return _objclass_cache[<uintptr_t>symbol]
+        except KeyError:
+            c = ObjClass()
+            c.policy = policy
+            c.handle = symbol
+            _objclass_cache[<uintptr_t>symbol] = c
+            return c
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_class_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading object class name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_CLASSES][self.handle.s.value - 1])
 
     def __contains__(self, other):
         try:
@@ -151,14 +99,8 @@ cdef class ObjClass(PolicySymbol):
         Exceptions:
         NoCommon    The object class does not inherit a common.
         """
-        cdef const qpol_common_t *c
-        if qpol_class_get_common(self.policy.handle, self.handle, &c):
-            ex = LowLevelPolicyError("Error reading common for class: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        if c:
-            return common_factory(self.policy, c)
+        if self.handle.comdatum:
+            return Common.factory(self.policy, self.handle.comdatum)
         else:
             raise NoCommon("{0} does not inherit a common.".format(self))
 
@@ -166,7 +108,7 @@ cdef class ObjClass(PolicySymbol):
     def constraints(self):
         """The constraints that apply to this class."""
         cdef qpol_iterator_t *iter
-        if qpol_class_get_constraint_iter(self.policy.handle, self.handle, &iter):
+        if qpol_class_get_constraint_iter(self.policy.handle, <const qpol_class_t *>self.handle, &iter):
             ex = LowLevelPolicyError("Error reading class constraints: {}".format(strerror(errno)))
             ex.errno = errno
             raise ex
@@ -176,12 +118,7 @@ cdef class ObjClass(PolicySymbol):
     @property
     def perms(self):
         """The set of the object class's permissions."""
-
-        cdef qpol_iterator_t *iter
-        if qpol_class_get_perm_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return set(qpol_iterator_factory(self.policy, iter, string_factory_iter))
+        return set(PermissionIterator.factory(self.policy, &self.handle.permissions.table))
 
     def statement(self):
         stmt = "class {0}\n".format(self)
@@ -202,10 +139,67 @@ cdef class ObjClass(PolicySymbol):
     def validatetrans(self):
         """The validatetrans that apply to this class."""
         cdef qpol_iterator_t *iter
-        if qpol_class_get_validatetrans_iter(self.policy.handle, self.handle, &iter):
+        if qpol_class_get_validatetrans_iter(self.policy.handle, <const qpol_class_t *>self.handle, &iter):
             ex = LowLevelPolicyError("Error reading class validatetranses: {}".format(
                                      strerror(errno)))
             ex.errno = errno
             raise ex
 
         return qpol_iterator_factory(self.policy, iter, validatetrans_factory_iter)
+
+
+#
+# Iterators
+#
+cdef class CommonHashtabIterator(HashtabIterator):
+
+    """Iterate over commons in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating Role iterators."""
+        i = CommonHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Common.factory(self.policy, <sepol.common_datum_t *>self.curr.datum)
+
+
+cdef class ObjClassHashtabIterator(HashtabIterator):
+
+    """Iterate over roles in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating Role iterators."""
+        i = ObjClassHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return ObjClass.factory(self.policy, <sepol.class_datum_t *>self.curr.datum)
+
+
+cdef class PermissionIterator(HashtabIterator):
+
+    """Iterate over permissions."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating Permission iterators."""
+        i = PermissionIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return intern(self.curr.key)

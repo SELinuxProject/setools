@@ -303,7 +303,7 @@ cdef class Constraint(BaseConstraint):
         if qpol_constraint_get_class(self.policy.handle, self.handle, &cls):
             raise RuntimeError("Could not get class for constraint")
 
-        return class_factory(self.policy, cls)
+        return ObjClass.factory(self.policy, <sepol.class_datum_t *>cls)
 
 
 cdef class Validatetrans(BaseConstraint):
@@ -339,7 +339,7 @@ cdef class Validatetrans(BaseConstraint):
         if qpol_validatetrans_get_class(self.policy.handle, self.handle, &cls):
             raise RuntimeError("Could not get class for validatetrans rule")
 
-        return class_factory(self.policy, cls)
+        return ObjClass.factory(self.policy, <sepol.class_datum_t *>cls)
 
 
 cdef class ConstraintExprNode(PolicySymbol):

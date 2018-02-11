@@ -257,13 +257,7 @@ cdef class AVRule(PolicyRule):
     @property
     def tclass(self):
         """The rule's object class."""
-        cdef const qpol_class_t *cls
-        if qpol_avrule_get_object_class(self.policy.handle, self.handle, &cls):
-            ex = LowLevelPolicyError("Error reading class for AV rule: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return class_factory(self.policy, cls)
+        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[(<sepol.avtab_ptr_t>self.handle).key.target_class - 1])
 
     @property
     def perms(self):
@@ -549,13 +543,7 @@ cdef class TERule(PolicyRule):
     @property
     def tclass(self):
         """The rule's object set."""
-        cdef const qpol_class_t *cls
-        if qpol_terule_get_object_class(self.policy.handle, self.handle, &cls):
-            ex = LowLevelPolicyError("Error reading class for TE rule: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return class_factory(self.policy, cls)
+        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[(<sepol.avtab_ptr_t>self.handle).key.target_class - 1])
 
     @property
     def perms(self):
@@ -726,14 +714,8 @@ cdef class FileNameTERule(PolicyRule):
 
     @property
     def tclass(self):
-        """The rule's object set."""
-        cdef const qpol_class_t *cls
-        if qpol_filename_trans_get_object_class(self.policy.handle, self.handle, &cls):
-            ex = LowLevelPolicyError("Error reading class for TE rule: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return class_factory(self.policy, cls)
+        """The rule's object class."""
+        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[self.handle.ttype - 1])
 
     @property
     def perms(self):

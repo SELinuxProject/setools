@@ -107,14 +107,7 @@ cdef class MLSRule(PolicyRule):
     @property
     def tclass(self):
         """The rule's object class."""
-        cdef const qpol_class_t *cls
-        if qpol_range_trans_get_target_class(self.policy.handle, self.handle, &cls):
-            ex = LowLevelPolicyError("Error reading class for range_transition rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return class_factory(self.policy, cls)
+        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[self.handle.target_class - 1])
 
     @property
     def default(self):

@@ -457,11 +457,19 @@ cdef class SELinuxPolicy:
 
     def lookup_class(self, name):
         """Look up an object class."""
-        return class_factory_lookup(self, name)
+        for cls in self.classes():
+            if cls == name:
+                return cls
+
+        raise InvalidClass("{0} is not a valid class".format(name))
 
     def lookup_common(self, name):
         """Look up a common permission set."""
-        return common_factory_lookup(self, name)
+        for common in self.commons():
+            if common == name:
+                return common
+
+        raise InvalidCommon("{0} is not a valid common".format(name))
 
     def lookup_initialsid(self, name):
         """Look up an initial sid."""
@@ -528,19 +536,11 @@ cdef class SELinuxPolicy:
 
     def classes(self):
         """Iterator which yields all object classes."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_class_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, class_factory_iter)
+        return ObjClassHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_CLASSES].table)
 
     def commons(self):
         """Iterator which yields all commons."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_common_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, common_factory_iter)
+        return CommonHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_COMMONS].table)
 
     def defaults(self):
         """Iterator over all default_* statements."""
