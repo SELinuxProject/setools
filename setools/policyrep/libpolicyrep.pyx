@@ -224,34 +224,6 @@ cdef extern from "include/qpol/mls_query.h":
         pass
     ctypedef struct qpol_semantic_level_t:
         pass
-    # level
-    int qpol_policy_get_level_by_name(const qpol_policy_t * policy, const char *name, const qpol_level_t ** datum)
-    int qpol_policy_get_level_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_level_get_isalias(const qpol_policy_t * policy, const qpol_level_t * datum, unsigned char *isalias)
-    int qpol_level_get_value(const qpol_policy_t * policy, const qpol_level_t * datum, uint32_t * value)
-    int qpol_level_get_cat_iter(const qpol_policy_t * policy, const qpol_level_t * datum, qpol_iterator_t ** cats)
-    int qpol_level_get_name(const qpol_policy_t * policy, const qpol_level_t * datum, const char **name)
-    int qpol_level_get_alias_iter(const qpol_policy_t * policy, const qpol_level_t * datum, qpol_iterator_t ** aliases)
-    # category
-    int qpol_policy_get_cat_by_name(const qpol_policy_t * policy, const char *name, const qpol_cat_t ** datum)
-    int qpol_policy_get_cat_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_cat_get_value(const qpol_policy_t * policy, const qpol_cat_t * datum, uint32_t * value)
-    int qpol_cat_get_isalias(const qpol_policy_t * policy, const qpol_cat_t * datum, unsigned char *isalias)
-    int qpol_cat_get_name(const qpol_policy_t * policy, const qpol_cat_t * datum, const char **name)
-    int qpol_cat_get_alias_iter(const qpol_policy_t * policy, const qpol_cat_t * datum, qpol_iterator_t ** aliases)
-    # MLS range
-    int qpol_mls_range_get_low_level(const qpol_policy_t * policy, const qpol_mls_range_t * range, const qpol_mls_level_t ** level)
-    int qpol_mls_range_get_high_level(const qpol_policy_t * policy, const qpol_mls_range_t * range, const qpol_mls_level_t ** level)
-    # MLS level
-    int qpol_mls_level_get_sens_name(const qpol_policy_t * policy, const qpol_mls_level_t * level, const char **name)
-    int qpol_mls_level_get_cat_iter(const qpol_policy_t * policy, const qpol_mls_level_t * level, qpol_iterator_t ** cats)
-    # Semantic levels
-    int qpol_policy_get_semantic_level_by_name(const qpol_policy_t * policy, const char *name, qpol_semantic_level_t ** datum)
-    int qpol_semantic_level_add_cats_by_name(const qpol_policy_t * policy, const qpol_semantic_level_t * level, const char *low, const char *high)
-    int qpol_mls_level_from_semantic_level(const qpol_policy_t * policy, qpol_semantic_level_t * src, qpol_mls_level_t **dest)
-    void qpol_semantic_level_destroy(qpol_semantic_level_t * level)
-    # Semantic ranges
-    int qpol_policy_get_mls_range_from_mls_levels(const qpol_policy_t * policy, const qpol_mls_level_t * low, const qpol_mls_level_t *high, qpol_mls_range_t **dest)
 
 cdef extern from "include/qpol/mlsrule_query.h":
     ctypedef struct qpol_range_trans_t:

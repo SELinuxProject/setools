@@ -1,5 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -20,281 +20,52 @@
 # pylint: disable=protected-access
 import itertools
 
-# qpol does not expose an equivalent of a sensitivity declaration.
-# qpol_level_t is equivalent to the level declaration:
-#   level s0:c0.c1023;
-
-# qpol_mls_level_t represents a level as used in contexts,
-# such as range_transitions or labeling statements such as
-# portcon and nodecon.
-
-# Here qpol_level_t is also used for MLSSensitivity
-# since it has the sensitivity name, dominance, and there
-# is a 1:1 correspondence between the sensitivity declarations
-# and level declarations.
-
-# Hashing has to be handled below because the qpol references,
-# normally used for a hash key, are not the same for multiple
-# instances of the same object (except for level decl).
-
-
-#
-# Category factory functions
-#
-cdef inline Category category_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing Category objects by name."""
-    if not policy.mls:
-        raise MLSDisabled
-
-    cdef const qpol_cat_t *symbol
-    if qpol_policy_get_cat_by_name(policy.handle, name, &symbol):
-        raise InvalidCategory("{0} is not a valid category".format(name))
-
-    return category_factory(policy, symbol)
-
-
-cdef inline Category category_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Category objects."""
-    return category_factory(policy, <const qpol_cat_t *> symbol.obj)
-
-
-cdef inline Category category_factory(SELinuxPolicy policy, const qpol_cat_t *symbol):
-    """Factory function for creating Category objects."""
-    cdef unsigned char isalias
-    cdef const char *name
-
-    if not policy.mls:
-        raise MLSDisabled
-
-    if qpol_cat_get_isalias(policy.handle, symbol, &isalias):
-        ex = LowLevelPolicyError("Error determining category alias status: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if isalias:
-        if qpol_cat_get_name(policy.handle, symbol, &name):
-            raise ValueError("The category is an alias")
-
-        raise ValueError("{0} is an alias".format(name))
-
-    r = Category()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Sensitivity factory functions
-#
-cdef inline Sensitivity sensitivity_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing Sensitivity objects by name."""
-    cdef const qpol_level_t *symbol
-
-    if not policy.mls:
-        raise MLSDisabled
-
-    if qpol_policy_get_level_by_name(policy.handle, name, &symbol):
-        raise InvalidSensitivity("{0} is not a valid sensitivity".format(name))
-
-    return sensitivity_factory(policy, symbol)
-
-
-cdef inline Sensitivity sensitivity_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Sensitivity objects."""
-    return sensitivity_factory(policy, <const qpol_level_t *> symbol.obj)
-
-
-cdef inline Sensitivity sensitivity_factory(SELinuxPolicy policy, const qpol_level_t *symbol):
-    """Factory function for creating Sensitivity objects."""
-    cdef unsigned char isalias
-    cdef const char *name
-
-    if not policy.mls:
-        raise MLSDisabled
-
-    if qpol_level_get_isalias(policy.handle, symbol, &isalias):
-        ex = LowLevelPolicyError("Error determining sensitivity alias status: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if isalias:
-        if qpol_level_get_name(policy.handle, symbol, &name):
-            raise ValueError("The sensitivity is an alias")
-
-        raise ValueError("{0} is an alias".format(name))
-
-    r = Sensitivity()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Level declaration factory functions
-#
-cdef inline LevelDecl level_decl_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over LevelDecl objects."""
-    return level_decl_factory(policy, <const qpol_level_t *> symbol.obj)
-
-
-cdef inline LevelDecl level_decl_factory(SELinuxPolicy policy, const qpol_level_t *symbol):
-    """Factory function for creating LevelDecl objects."""
-    cdef unsigned char isalias
-    cdef const char *name
-
-    if not policy.mls:
-        raise MLSDisabled
-
-    if qpol_level_get_isalias(policy.handle, symbol, &isalias):
-        ex = LowLevelPolicyError("Error determining level alias status: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if isalias:
-        if qpol_level_get_name(policy.handle, symbol, &name):
-            raise ValueError("The level decl is an alias")
-
-        raise ValueError("{0} is an alias".format(name))
-
-    r = LevelDecl()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Level factory functions
-#
-cdef inline Level level_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing Level objects by name."""
-    cdef qpol_semantic_level_t *l
-    cdef qpol_mls_level_t *level
-
-    if not policy.mls:
-        raise MLSDisabled
-
-    sens_split = name.split(":")
-    sens = sens_split[0]
-
-    if qpol_policy_get_semantic_level_by_name(policy.handle, sens, &l):
-        raise InvalidLevel("{0} is not a valid level ({1} is not a valid sensitivity)". \
-                           format(name, sens))
-
-    try:
-        cats = sens_split[1]
-    except IndexError:
-        pass
-    else:
-        for group in cats.split(","):
-            catrange = group.split(".")
-
-            if len(catrange) == 2:
-                if qpol_semantic_level_add_cats_by_name(policy.handle, l, catrange[0], catrange[1]):
-
-                    raise InvalidLevel(
-                        "{0} is not a valid level ({1} is not a valid category range)".
-                        format(name, group))
-
-            elif len(catrange) == 1:
-                if qpol_semantic_level_add_cats_by_name(policy.handle, l, catrange[0], catrange[0]):
-
-                    raise InvalidLevel("{0} is not a valid level ({1} is not a valid category)".
-                                       format(name, group))
-
-            else:
-                raise InvalidLevel("{0} is not a valid level (level parsing error)".format(name))
-
-    # convert to level symbol
-    if qpol_mls_level_from_semantic_level(policy.handle, l, &level):
-        raise InvalidLevel(
-            "{0} is not a valid level (one or more categories are not associated with the "
-            "sensitivity)".format(name))
-
-    qpol_semantic_level_destroy(l)
-
-    # TODO: since this is user-generated, the level will need a destructor
-    return level_factory(policy, level)
-
-
-cdef inline Level level_factory(SELinuxPolicy policy, const qpol_mls_level_t *symbol):
-    """Factory function for creating Level objects."""
-    if not policy.mls:
-        raise MLSDisabled
-
-    r = Level()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Range factory functions
-#
-cdef inline Range range_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing Range objects by name."""
-    cdef qpol_mls_range_t *range
-
-    if not policy.mls:
-        raise MLSDisabled
-
-    # build range:
-    levels = name.split("-")
-
-    # strip() levels to handle ranges with spaces in them,
-    # e.g. s0:c1 - s0:c0.c255
-    try:
-        low = level_factory_lookup(policy, levels[0].strip())
-    except InvalidLevel as ex:
-        raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
-
-    try:
-        high = level_factory_lookup(policy, levels[1].strip())
-    except InvalidLevel as ex:
-        raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
-    except IndexError:
-        high = low
-
-    # convert to range object
-    if qpol_policy_get_mls_range_from_mls_levels(policy.handle, low.handle, high.handle, &range):
-        raise InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
-                           format(name, low, high))
-
-    # TODO: since this is user-generated, the range will need a destructor
-    return range_factory(policy, range)
-
-
-cdef inline Range range_factory(SELinuxPolicy policy, const qpol_mls_range_t *symbol):
-    """Factory function for creating Range objects."""
-    if not policy.mls:
-        raise MLSDisabled
-
-    r = Range()
-    r.policy = policy
-    r.handle = symbol
-    return r
+cdef dict _cat_cache = {}
+cdef dict _sens_cache = {}
+cdef dict _leveldecl_cache = {}
 
 
 #
 # Classes
 #
+cdef list expand_cat_range(SELinuxPolicy policy, Category low, Category high):
+    """
+    Helper function to expand a category range, e.g. c0.c1023
+    into the full set of categories by using the low and high
+    categories of the set.
+    """
+
+    cdef list expanded
+    expanded = [low, high]
+    for value in range(low._value, high._value):
+        expanded.append(Category.factory(policy, policy.cat_val_to_struct[value]))
+
+    return expanded
+
+
 cdef class Category(PolicySymbol):
 
     """An MLS category."""
 
-    cdef const qpol_cat_t *handle
+    cdef sepol.cat_datum_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.cat_datum_t *symbol):
+        """Factory function for creating Category objects."""
+        if not policy.mls:
+            raise MLSDisabled
+
+        try:
+            return _cat_cache[<uintptr_t>symbol]
+        except KeyError:
+            c = Category()
+            c.policy = policy
+            c.handle = symbol
+            _cat_cache[<uintptr_t>symbol] = c
+            return c
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_cat_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading category name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_CATS][self.handle.s.value - 1])
 
     def __hash__(self):
         return hash(str(self))
@@ -310,25 +81,15 @@ cdef class Category(PolicySymbol):
     @property
     def _value(self):
         """
-        The value of the component.
+        The value of the category.
 
         This is a low-level policy detail exposed for internal use only.
         """
-        cdef uint32_t v
-        if qpol_cat_get_value(self.policy.handle, self.handle, &v):
-            ex = LowLevelPolicyError("Error reading category value: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return v
+        return self.handle.s.value
 
     def aliases(self):
         """Generator that yields all aliases for this category."""
-        cdef qpol_iterator_t *iter
-        if qpol_cat_get_alias_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self.policy, iter, string_factory_iter)
+        return CategoryAliasHashtabIterator.factory(self.policy, &self.policy.handle.p.p.symtab[sepol.SYM_CATS].table, self)
 
     def statement(self):
         aliases = list(self.aliases())
@@ -346,17 +107,25 @@ cdef class Sensitivity(PolicySymbol):
 
     """An MLS sensitivity"""
 
-    cdef const qpol_level_t *handle
+    cdef sepol.level_datum_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.level_datum_t *symbol):
+        """Factory function for creating Sensitivity objects."""
+        if not policy.mls:
+            raise MLSDisabled
+
+        try:
+            return _sens_cache[<uintptr_t>symbol]
+        except KeyError:
+            s = Sensitivity()
+            s.policy = policy
+            s.handle = symbol
+            _sens_cache[<uintptr_t>symbol] = s
+            return s
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_level_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading sensitivity name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_LEVELS][self.handle.level.sens - 1])
 
     def __hash__(self):
         return hash(str(self))
@@ -384,21 +153,15 @@ cdef class Sensitivity(PolicySymbol):
 
         This is a low-level policy detail exposed for internal use only.
         """
-        cdef uint32_t v
-        if qpol_level_get_value(self.policy.handle, self.handle, &v):
-            ex = LowLevelPolicyError("Error reading sensitivity value: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return v
+        return self.handle.level.sens
 
     def aliases(self):
         """Generator that yields all aliases for this sensitivity."""
-        cdef qpol_iterator_t *iter
-        if qpol_level_get_alias_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
+        return SensitivityAliasHashtabIterator.factory(self.policy, &self.policy.handle.p.p.symtab[sepol.SYM_LEVELS].table, self)
 
-        return qpol_iterator_factory(self.policy, iter, string_factory_iter)
+    def level_decl(self):
+        """Get the level declaration corresponding to this sensitivity."""
+        return LevelDecl.factory(self.policy, self.handle)
 
     def statement(self):
         aliases = list(self.aliases())
@@ -458,7 +221,22 @@ cdef class LevelDecl(BaseMLSLevel):
     level s7:c0.c1023;
     """
 
-    cdef const qpol_level_t *handle
+    cdef sepol.level_datum_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.level_datum_t *symbol):
+        """Factory function for creating LevelDecl objects."""
+        if not policy.mls:
+            raise MLSDisabled
+
+        try:
+            return _leveldecl_cache[<uintptr_t>symbol]
+        except KeyError:
+            l = LevelDecl()
+            l.policy = policy
+            l.handle = symbol
+            _leveldecl_cache[<uintptr_t>symbol] = l
+            return l
 
     def __hash__(self):
         return hash(self.sensitivity)
@@ -503,18 +281,14 @@ cdef class LevelDecl(BaseMLSLevel):
         All categories are yielded, not a compact notation such as
         c0.c255
         """
-        cdef qpol_iterator_t *iter
-        if qpol_level_get_cat_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self.policy, iter, category_factory_iter)
+        return CategoryEbitmapIterator.factory(self.policy, &self.handle.level.cat)
 
     @property
     def sensitivity(self):
         """The sensitivity of the level."""
-        # since the qpol symbol for levels is also used for
-        # MLSSensitivity objects, use self's qpol symbol
-        return sensitivity_factory(self.policy, self.handle)
+        # since the datum for levels is also used for
+        # Sensitivity objects, use self's datum
+        return Sensitivity.factory(self.policy, self.handle)
 
     def statement(self):
         return "level {0};".format(self)
@@ -522,9 +296,88 @@ cdef class LevelDecl(BaseMLSLevel):
 
 cdef class Level(BaseMLSLevel):
 
-    """An MLS level used in contexts."""
+    """
+    An MLS level used in contexts.
 
-    cdef const qpol_mls_level_t *handle
+    The _sensitivity and _categories attributes are only populated
+    if the level is user-generated.
+    """
+
+    cdef:
+        sepol.mls_level_t *handle
+        list _categories
+        Sensitivity _sensitivity
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.mls_level_t *symbol):
+        """Factory function for creating Level objects."""
+        if not policy.mls:
+            raise MLSDisabled
+
+        l = Level()
+        l.policy = policy
+        l.handle = symbol
+        return l
+
+    @staticmethod
+    cdef factory_from_string(SELinuxPolicy policy, str name):
+        """Factory function variant for constructing Level objects by a string."""
+
+        if not policy.mls:
+            raise MLSDisabled
+
+        sens_split = name.split(":")
+        sens = sens_split[0]
+
+        try:
+            s = policy.lookup_sensitivity(sens)
+        except InvalidSensitivity as ex:
+            raise InvalidLevel("{0} is not a valid level ({1} is not a valid sensitivity)". \
+                               format(name, sens)) from ex
+
+        c = []
+
+        try:
+            cats = sens_split[1]
+        except IndexError:
+            pass
+        else:
+            for group in cats.split(","):
+                catrange = group.split(".")
+                if len(catrange) == 2:
+                    try:
+                        c.extend(expand_cat_range(policy,
+                                                  policy.lookup_category(catrange[0]),
+                                                  policy.lookup_category(catrange[1])))
+                    except InvalidCategory as ex:
+                        raise InvalidLevel(
+                            "{0} is not a valid level ({1} is not a valid category range)".
+                            format(name, group)) from ex
+
+                elif len(catrange) == 1:
+                    try:
+                        c.append(policy.lookup_category(catrange[0]))
+                    except InvalidCategory as ex:
+                        raise InvalidLevel("{0} is not a valid level ({1} is not a valid category)".
+                                           format(name, group)) from ex
+
+                else:
+                    raise InvalidLevel("{0} is not a valid level (level parsing error)".format(name))
+
+        # build object
+        l = Level()
+        l.policy = policy
+        l.handle = NULL
+        l._sensitivity = s
+        l._categories = c
+
+        # verify level is valid
+        if not l <= s.level_decl():
+            raise InvalidLevel(
+                "{0} is not a valid level (one or more categories are not associated with the "
+                "sensitivity)".format(name))
+
+        return l
 
     def __hash__(self):
         return hash(str(self))
@@ -576,23 +429,18 @@ cdef class Level(BaseMLSLevel):
         All categories are yielded, not a compact notation such as
         c0.c255
         """
-        cdef qpol_iterator_t *iter
-        if qpol_mls_level_get_cat_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self.policy, iter, category_factory_iter)
+        if self.handle == NULL:
+            return iter(self._categories)
+        else:
+            return CategoryEbitmapIterator.factory(self.policy, &self.handle.cat)
 
     @property
     def sensitivity(self):
         """The sensitivity of the level."""
-        cdef const char *name
-        if qpol_mls_level_get_sens_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading level sensitivity name: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return sensitivity_factory_lookup(self.policy, name)
+        if self.handle == NULL:
+            return self._sensitivity
+        else:
+            return Sensitivity.factory(self.policy, self.policy.level_val_to_struct[self.handle.sens - 1])
 
     def statement(self):
         raise NoStatement
@@ -602,7 +450,56 @@ cdef class Range(PolicySymbol):
 
     """An MLS range"""
 
-    cdef const qpol_mls_range_t *handle
+    cdef:
+        sepol.mls_range_t *handle
+        Level _low
+        Level _high
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.mls_range_t *symbol):
+        """Factory function for creating Range objects."""
+        if not policy.mls:
+            raise MLSDisabled
+
+        r = Range()
+        r.policy = policy
+        r.handle = symbol
+        return r
+
+    @staticmethod
+    cdef factory_from_string(SELinuxPolicy policy, str name):
+        """Factory function variant for constructing Range objects by name."""
+        if not policy.mls:
+            raise MLSDisabled
+
+        # build range:
+        levels = name.split("-")
+
+        # strip() levels to handle ranges with spaces in them,
+        # e.g. s0:c1 - s0:c0.c255
+        try:
+            low = Level.factory_from_string(policy, levels[0].strip())
+        except InvalidLevel as ex:
+            raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
+
+        try:
+            high = Level.factory_from_string(policy, levels[1].strip())
+        except InvalidLevel as ex:
+            raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
+        except IndexError:
+            high = low
+
+        # verify high level dominates low range
+        if not high >= low:
+            raise InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
+                               format(name, low, high))
+
+        r = Range()
+        r.policy = policy
+        r.handle = NULL
+        r._low = low
+        r._high = high
+        return r
 
     def __str__(self):
         high = self.high
@@ -636,24 +533,333 @@ cdef class Range(PolicySymbol):
     @property
     def high(self):
         """The high end/clearance level of this range."""
-        cdef const qpol_mls_level_t *l
-        if qpol_mls_range_get_high_level(self.policy.handle, self.handle, &l):
-            ex = LowLevelPolicyError("Error reading range high level: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return level_factory(self.policy, l)
+        if self.handle == NULL:
+            return self._high
+        else:
+            return Level.factory(self.policy, &self.handle.level[1])
 
     @property
     def low(self):
         """The low end/current level of this range."""
-        cdef const qpol_mls_level_t *l
-        if qpol_mls_range_get_low_level(self.policy.handle, self.handle, &l):
-            ex = LowLevelPolicyError("Error reading range low level: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return level_factory(self.policy, l)
+        if self.handle == NULL:
+            return self._low
+        else:
+            return Level.factory(self.policy, &self.handle.level[0])
 
     def statement(self):
         raise NoStatement
+
+
+#
+# Hash Table Iterators
+#
+cdef class CategoryHashtabIterator(HashtabIterator):
+
+    """Iterate over categories in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating category iterators."""
+        i = CategoryHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        datum = <sepol.cat_datum_t *> self.curr.datum if self.curr else NULL
+
+        while datum != NULL and datum.isalias:
+            super().__next__()
+            datum = <sepol.cat_datum_t *> self.curr.datum if self.curr else NULL
+
+        return Category.factory(self.policy, datum)
+
+    def __len__(self):
+        cdef sepol.cat_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.cat_datum_t *>node.datum if node else NULL
+                if datum != NULL and not datum.isalias:
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        cdef sepol.cat_datum_t *datum = <sepol.cat_datum_t *> self.node.datum if self.node else NULL
+
+        # advance over any attributes or aliases
+        while datum != NULL and datum.isalias:
+            self._next_node()
+
+            if self.node == NULL or self.bucket >= self.table[0].size:
+                break
+
+            datum = <sepol.cat_datum_t *> self.node.datum if self.node else NULL
+
+
+cdef class CategoryAliasHashtabIterator(HashtabIterator):
+
+    """Iterate over category aliases in the policy."""
+
+    cdef uint32_t primary
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table, Category primary):
+        """Factory function for creating category alias iterators."""
+        i = CategoryAliasHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.primary = primary._value
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        datum = <sepol.cat_datum_t *> self.curr.datum if self.curr else NULL
+
+        while datum != NULL and (not datum.isalias or datum.s.value != self.primary):
+            super().__next__()
+            datum = <sepol.cat_datum_t *> self.curr.datum if self.curr else NULL
+
+        return intern(self.curr.key)
+
+    def __len__(self):
+        cdef sepol.cat_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.cat_datum_t *>node.datum if node else NULL
+                if datum != NULL and self.primary == datum.s.value and datum.isalias:
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        cdef sepol.cat_datum_t *datum = <sepol.cat_datum_t *> self.node.datum if self.node else NULL
+
+        # advance over any attributes or aliases
+        while datum != NULL and (not datum.isalias and self.primary != datum.s.value):
+            self._next_node()
+
+            if self.node == NULL or self.bucket >= self.table[0].size:
+                break
+
+            datum = <sepol.cat_datum_t *> self.node.datum if self.node else NULL
+
+
+cdef class SensitivityHashtabIterator(HashtabIterator):
+
+    """Iterate over sensitivity in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating category iterators."""
+        i = SensitivityHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
+
+        while datum != NULL and datum.isalias:
+            super().__next__()
+            datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
+
+        return Sensitivity.factory(self.policy, datum)
+
+    def __len__(self):
+        cdef sepol.level_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.level_datum_t *>node.datum if node else NULL
+                if datum != NULL and not datum.isalias:
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        cdef sepol.level_datum_t *datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
+
+        # advance over any attributes or aliases
+        while datum != NULL and datum.isalias:
+            self._next_node()
+
+            if self.node == NULL or self.bucket >= self.table[0].size:
+                break
+
+            datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
+
+
+cdef class SensitivityAliasHashtabIterator(HashtabIterator):
+
+    """Iterate over sensitivity aliases in the policy."""
+
+    cdef uint32_t primary
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table, Sensitivity primary):
+        """Factory function for creating Sensitivity alias iterators."""
+        i = SensitivityAliasHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.primary = primary._value
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
+
+        while datum != NULL and (not datum.isalias or datum.level.sens != self.primary):
+            super().__next__()
+            datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
+
+        return intern(self.curr.key)
+
+    def __len__(self):
+        cdef sepol.level_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.level_datum_t *>node.datum if node else NULL
+                if datum != NULL and self.primary == datum.level.sens and datum.isalias:
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        cdef sepol.level_datum_t *datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
+
+        # advance over any attributes or aliases
+        while datum != NULL and (not datum.isalias and self.primary != datum.level.sens):
+            self._next_node()
+
+            if self.node == NULL or self.bucket >= self.table[0].size:
+                break
+
+            datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
+
+
+cdef class LevelDeclHashtabIterator(HashtabIterator):
+
+    """Iterate over level declarations in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating level declarations iterators."""
+        i = LevelDeclHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
+
+        while datum != NULL and datum.isalias:
+            super().__next__()
+            datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
+
+        return LevelDecl.factory(self.policy, datum)
+
+    def __len__(self):
+        cdef sepol.level_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.level_datum_t *>node.datum if node else NULL
+                if datum != NULL and not datum.isalias:
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        cdef sepol.level_datum_t *datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
+
+        # advance over any attributes or aliases
+        while datum != NULL and datum.isalias:
+            self._next_node()
+
+            if self.node == NULL or self.bucket >= self.table[0].size:
+                break
+
+            datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
+
+
+#
+# Ebitmap Iterators
+#
+cdef class CategoryEbitmapIterator(EbitmapIterator):
+
+    """Iterate over a category ebitmap."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ebitmap_t *symbol):
+        """Factory function for creating CategoryEbitmapIterator."""
+        i = CategoryEbitmapIterator()
+        i.policy = policy
+        i.bmap = symbol
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Category.factory(self.policy, self.policy.cat_val_to_struct[self.bit])

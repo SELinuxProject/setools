@@ -77,24 +77,18 @@ cdef class User(PolicySymbol):
     @property
     def mls_level(self):
         """The user's default MLS level."""
-        cdef const qpol_mls_level_t *l
-        if qpol_user_get_dfltlevel(self.policy.handle, self.handle, &l):
-            ex = LowLevelPolicyError("Error reading user default level: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
+        if not self.policy.mls:
+            raise MLSDisabled
 
-        return level_factory(self.policy, l)
+        return Level.factory(self.policy, &self.handle.exp_dfltlevel)
 
     @property
     def mls_range(self):
         """The user's MLS range."""
-        cdef const qpol_mls_range_t *r
-        if qpol_user_get_range(self.policy.handle, self.handle, &r):
-            ex = LowLevelPolicyError("Error reading user range: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
+        if not self.policy.mls:
+            raise MLSDisabled
 
-        return range_factory(self.policy, r)
+        return Range.factory(self.policy, &self.handle.exp_range)
 
     def statement(self):
         roles = list(str(r) for r in self.roles)

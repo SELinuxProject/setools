@@ -571,42 +571,6 @@ void *ebitmap_state_get_cur_role(const qpol_iterator_t * iter)
 	return db->role_val_to_struct[es->cur];
 }
 
-void *ebitmap_state_get_cur_cat(const qpol_iterator_t * iter)
-{
-	ebitmap_state_t *es = NULL;
-	const policydb_t *db = NULL;
-	const qpol_cat_t *cat = NULL;
-	sepol_policydb_t sp;
-	qpol_policy_t qp;
-
-	if (iter == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-	es = qpol_iterator_state(iter);
-	if (es == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-	db = qpol_iterator_policy(iter);
-	if (db == NULL) {
-		errno = EINVAL;
-		return NULL;
-	}
-
-	/* shallow copy is safe here */
-	sp.p = *db;
-	qp.p = &sp;
-	qp.fn = NULL;
-
-	qpol_policy_get_cat_by_name(&qp, db->p_cat_val_to_name[es->cur], &cat);
-
-	/* There is no val_to_struct for categories; this requires that qpol
-	 * search for the struct, but it can't be returned as const here so
-	 * cast it to void* explicitly. */
-	return (void *)cat;
-}
-
 void *ebitmap_state_get_cur_permissive(const qpol_iterator_t * iter)
 {
 	ebitmap_state_t *es = NULL;

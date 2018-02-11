@@ -53,6 +53,8 @@ cdef void qpol_log_callback(void *varg, const qpol_policy_t *p, int level, const
 cdef class SELinuxPolicy:
     cdef:
         qpol_policy_t *handle
+        sepol.cat_datum_t **cat_val_to_struct
+        sepol.level_datum_t **level_val_to_struct
         readonly str path
         object log
 
@@ -72,7 +74,17 @@ cdef class SELinuxPolicy:
             except NameError:
                 raise RuntimeError("Loading the running policy requires libselinux Python bindings")
 
+        self._policy_extend()
+
+    def __cinit__(self):
+        self.handle = NULL
+        self.cat_val_to_struct = NULL
+        self.level_val_to_struct = NULL
+
     def __dealloc__(self):
+        PyMem_Free(self.cat_val_to_struct)
+        PyMem_Free(self.level_val_to_struct)
+
         if self.handle:
             qpol_policy_destroy(&self.handle)
 
@@ -435,6 +447,14 @@ cdef class SELinuxPolicy:
 
         raise InvalidBoolean("{0} is not a valid Boolean".format(name))
 
+    def lookup_category(self, name):
+        """Look up a category."""
+        for c in self.categories():
+            if c == name:
+                return c
+
+        raise InvalidCategory("{0} is not a valid category".format(name))
+
     def lookup_class(self, name):
         """Look up an object class."""
         return class_factory_lookup(self, name)
@@ -453,15 +473,19 @@ cdef class SELinuxPolicy:
 
     def lookup_level(self, level):
         """Look up a MLS level."""
-        return level_factory_lookup(self, level)
+        return Level.factory_from_string(self, level)
 
     def lookup_sensitivity(self, name):
         """Look up a MLS sensitivity by name."""
-        return sensitivity_factory_lookup(self, name)
+        for s in self.sensitivities():
+            if s == name:
+                return s
+
+        raise InvalidSensitivity("{0} is not a valid sensitivity".format(name))
 
     def lookup_range(self, range_):
         """Look up a MLS range."""
-        return range_factory_lookup(self, range_)
+        return Range.factory_from_string(self, range_)
 
     def lookup_role(self, name):
         """Look up a role by name."""
@@ -500,11 +524,7 @@ cdef class SELinuxPolicy:
 
     def categories(self):
         """Iterator which yields all MLS categories."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_cat_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, category_factory_iter, ValueError)
+        return CategoryHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_CATS].table)
 
     def classes(self):
         """Iterator which yields all object classes."""
@@ -532,11 +552,7 @@ cdef class SELinuxPolicy:
 
     def levels(self):
         """Iterator which yields all level declarations."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_level_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, level_decl_factory_iter, ValueError)
+        return LevelDeclHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_LEVELS].table)
 
     def polcaps(self):
         """Iterator which yields all policy capabilities."""
@@ -552,12 +568,7 @@ cdef class SELinuxPolicy:
 
     def sensitivities(self):
         """Iterator over all sensitivities."""
-        # see mls.pxi for more info on why level_iter is used here.
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_level_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, sensitivity_factory_iter, ValueError)
+        return SensitivityHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_LEVELS].table)
 
     def types(self):
         """Iterator over all types."""
@@ -712,3 +723,63 @@ cdef class SELinuxPolicy:
     def pirqcons(self):
         """Iterator over all pirqcon statements."""
         return PirqconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_PIRQ])
+
+    #
+    # Internal methods
+    #
+    cdef _policy_extend(self):
+        """Create supplementary data structures (linkages) from the policydb."""
+        cdef sepol.cat_datum_t *cat_datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+
+        cdef size_t bucket_len
+        cdef size_t map_len
+
+        if self.mls:
+            #
+            # Create cat_val_to_struct  (indexed by value -1)
+            #
+            map_len = self.handle.p.p.symtab[sepol.SYM_CATS].table.nel
+            bucket_len = self.handle.p.p.symtab[sepol.SYM_CATS].table[0].size
+
+            self.cat_val_to_struct = <sepol.cat_datum_t**>PyMem_Malloc(
+                map_len * sizeof(sepol.cat_datum_t*))
+
+            if self.cat_val_to_struct == NULL:
+                raise MemoryError
+
+            while bucket < bucket_len:
+                node = self.handle.p.p.symtab[sepol.SYM_CATS].table[0].htable[bucket]
+                while node != NULL:
+                    cat_datum = <sepol.cat_datum_t *>node.datum
+                    if cat_datum != NULL:
+                        self.cat_val_to_struct[cat_datum.s.value - 1] = cat_datum
+
+                    node = node.next
+
+                bucket += 1
+
+            #
+            # Create level_val_to_struct  (indexed by value -1)
+            #
+            map_len = self.handle.p.p.symtab[sepol.SYM_LEVELS].table.nel
+            bucket_len = self.handle.p.p.symtab[sepol.SYM_LEVELS].table[0].size
+            bucket = 0
+
+            self.level_val_to_struct = <sepol.level_datum_t**>PyMem_Malloc(
+                map_len * sizeof(sepol.level_datum_t*))
+
+            if self.level_val_to_struct == NULL:
+                raise MemoryError
+
+            while bucket < bucket_len:
+                node = self.handle.p.p.symtab[sepol.SYM_LEVELS].table[0].htable[bucket]
+                while node != NULL:
+                    level_datum = <sepol.level_datum_t *>node.datum
+                    if level_datum != NULL:
+                        self.level_val_to_struct[level_datum.level.sens - 1] = level_datum
+
+                    node = node.next
+
+                bucket += 1

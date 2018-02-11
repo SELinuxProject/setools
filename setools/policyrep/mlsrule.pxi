@@ -67,7 +67,7 @@ cdef class MLSRule(PolicyRule):
     """An MLS rule."""
 
     cdef:
-        const qpol_range_trans_t *handle
+        sepol.range_trans_t *handle
         readonly object ruletype
 
     def __init__(self):
@@ -119,14 +119,10 @@ cdef class MLSRule(PolicyRule):
     @property
     def default(self):
         """The rule's default range."""
-        cdef const qpol_mls_range_t *r
-        if qpol_range_trans_get_range(self.policy.handle, self.handle, &r):
-            ex = LowLevelPolicyError("Error reading range for range_transition rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return range_factory(self.policy, r)
+        cdef sepol.mls_range_t *default_range
+        default_range = <sepol.mls_range_t *> hashtab_search(self.policy.handle.p.p.range_tr,
+                                                             <sepol.hashtab_key_t> self.handle)
+        return Range.factory(self.policy, default_range)
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
