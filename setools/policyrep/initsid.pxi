@@ -18,31 +18,17 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-#
-# Factory functions
-#
-cdef inline initialsid_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating initial SID iterators."""
-    i = InitialSIDIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-cdef inline InitialSID initialsid_factory(SELinuxPolicy policy, sepol.ocontext *symbol):
-    """Factory function for creating InitialSID objects."""
-    i = InitialSID()
-    i.policy = policy
-    i.handle = symbol
-    return i
-
-
-#
-# Classes
-#
 cdef class InitialSID(Ocontext):
 
     """An initial SID statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext *symbol):
+        """Factory function for creating InitialSID objects."""
+        i = InitialSID()
+        i.policy = policy
+        i.handle = symbol
+        return i
 
     def __str__(self):
         return intern(self.handle.u.name)
@@ -52,6 +38,14 @@ cdef class InitialSIDIterator(OcontextIterator):
 
     """Iterator for initial SID statements in the policy."""
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating initial SID iterators."""
+        i = InitialSIDIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
     def __next__(self):
         super().__next__()
-        return initialsid_factory(self.policy, self.ocon)
+        return InitialSID.factory(self.policy, self.ocon)

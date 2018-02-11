@@ -442,7 +442,7 @@ cdef class SELinuxPolicy:
     def lookup_initialsid(self, name):
         """Look up an initial sid."""
         for sid in self.initialsids():
-            if str(sid) == name:
+            if sid == name:
                 return sid
 
         raise InvalidInitialSid("{0} is not a valid initial SID".format(name))
@@ -675,7 +675,7 @@ cdef class SELinuxPolicy:
 
     def initialsids(self):
         """Iterator over all initial SID statements."""
-        return initialsid_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_ISID])
+        return InitialSIDIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_ISID])
 
     def netifcons(self):
         """Iterator over all netifcon statements."""
