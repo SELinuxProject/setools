@@ -1,4 +1,4 @@
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -472,3 +472,50 @@ cdef str string_factory_iter(SELinuxPolicy _, QpolIteratorItem item):
     """Factory function for returning strings from qpol iterators."""
 
     return intern(<const char *> item.obj)
+
+
+cdef sepol.hashtab_datum_t hashtab_search(sepol.hashtab_t h, sepol.const_hashtab_key_t key):
+    """
+    Search a hash table by key.
+
+    This is derived from the libsepol function of the same name.
+    """
+
+    cdef:
+        int hvalue
+        sepol.hashtab_ptr_t cur
+
+    hvalue = h.hash_value(h, key)
+    cur = h.htable[hvalue]
+    while cur != NULL and h.keycmp(h, key, cur.key) > 0:
+        cur = cur.next
+
+    if cur == NULL or h.keycmp(h, key, cur.key) != 0:
+        return NULL
+
+    return cur.datum
+
+
+cdef int ebitmap_get_bit(sepol.ebitmap_t *e, unsigned int bit):
+    """
+    Get a specific bit value.
+
+    This is derived from the libsepol function of the same name.
+    """
+
+    cdef sepol.ebitmap_node_t *n
+
+    if e.highbit < bit:
+        return 0
+
+    n = e.node
+    while n and n.startbit <= bit:
+        if (n.startbit + sepol.MAPSIZE) > bit:
+            if n.map & (sepol.MAPBIT << (bit - n.startbit)):
+                return 1
+            else:
+                return 0
+
+        n = n.next
+
+    return 0

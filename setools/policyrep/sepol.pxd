@@ -48,11 +48,21 @@ cdef extern from "<sepol/policydb/ebitmap.h>":
     #
     # ebitmap_t
     #
+    cdef int MAPBIT
+    cdef int MAPSIZE
+
     cdef struct ebitmap:
         ebitmap_node_t *node
         uint32_t highbit
 
     ctypedef ebitmap ebitmap_t
+
+    #
+    # ebitmap functions
+    #
+    unsigned int ebitmap_start(const ebitmap_t * e, ebitmap_node_t ** n)
+    unsigned int ebitmap_next(ebitmap_node_t ** n, unsigned int bit)
+    int ebitmap_node_get_bit(ebitmap_node_t * n, unsigned int bit)
 
 
 cdef extern from "<sepol/policydb/hashtab.h>":
