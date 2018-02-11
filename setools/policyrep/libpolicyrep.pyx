@@ -314,16 +314,6 @@ cdef extern from "include/qpol/terule_query.h":
 cdef extern from "include/qpol/type_query.h":
     ctypedef struct qpol_type_t:
         pass
-    int qpol_policy_get_type_by_name(const qpol_policy_t * policy, const char *name, const qpol_type_t ** datum)
-    int qpol_policy_get_type_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_type_get_value(const qpol_policy_t * policy, const qpol_type_t * datum, uint32_t * value)
-    int qpol_type_get_isalias(const qpol_policy_t * policy, const qpol_type_t * datum, unsigned char *isalias)
-    int qpol_type_get_isattr(const qpol_policy_t * policy, const qpol_type_t * datum, unsigned char *isattr)
-    int qpol_type_get_ispermissive(const qpol_policy_t * policy, const qpol_type_t * datum, unsigned char *ispermissive)
-    int qpol_type_get_type_iter(const qpol_policy_t * policy, const qpol_type_t * datum, qpol_iterator_t ** types)
-    int qpol_type_get_attr_iter(const qpol_policy_t * policy, const qpol_type_t * datum, qpol_iterator_t ** attrs)
-    int qpol_type_get_name(const qpol_policy_t * policy, const qpol_type_t * datum, const char **name)
-    int qpol_type_get_alias_iter(const qpol_policy_t * policy, const qpol_type_t * datum, qpol_iterator_t ** aliases)
 
 cdef extern from "include/qpol/user_query.h":
     ctypedef struct qpol_user_t:

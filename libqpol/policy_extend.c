@@ -55,11 +55,12 @@ struct extend_bogus_alias_struct
 static int extend_find_bogus_alias(hashtab_key_t key __attribute__ ((unused)), hashtab_datum_t datum, void *args)
 {
 	struct extend_bogus_alias_struct *e = (struct extend_bogus_alias_struct *)args;
-	/* within libqpol, qpol_type_t is the same a libsepol's type_datum_t */
-	qpol_type_t *qtype = (qpol_type_t *) datum;
 	type_datum_t *type = (type_datum_t *) datum;
-	unsigned char isalias;
-	qpol_type_get_isalias(e->q, qtype, &isalias);
+
+	unsigned char isalias = 0;
+	if ((type->primary == 0 && type->flavor == TYPE_TYPE) || type->flavor == TYPE_ALIAS)
+		isalias = 1;
+
 	return isalias && type->s.value == 0;
 }
 
@@ -97,11 +98,9 @@ static int qpol_policy_remove_bogus_aliases(qpol_policy_t * policy)
 	struct extend_bogus_alias_struct e = { policy, 0 };
 	hashtab_map_remove_on_error(db->p_types.table, extend_find_bogus_alias, extend_remove_bogus_alias, &e);
 
-#ifdef SETOOLS_DEBUG
 	if (e.num_bogus_aliases > 0) {
 		WARN(policy, "%s", "This policy contained disabled aliases; they have been removed.");
 	}
-#endif
 
 	return 0;
 }
@@ -517,9 +516,6 @@ int policy_extend(qpol_policy_t * policy)
 		error = errno;
 		goto err;
 	}
-
-	if (policy->options & QPOL_POLICY_OPTION_NO_RULES)
-		return STATUS_SUCCESS;
 
 	retv = qpol_policy_add_cond_rule_traceback(policy);
 	if (retv) {

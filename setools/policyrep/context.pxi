@@ -63,11 +63,8 @@ cdef class Context(PolicySymbol):
     @property
     def type_(self):
         """The type portion of the context."""
-        cdef const qpol_type_t *t
-        if qpol_context_get_type(self.policy.handle, self.handle, &t):
-            raise RuntimeError("Could not get type from context")
-
-        return type_factory(self.policy, t, False)
+        cdef sepol.type_datum_t *t = self.policy.handle.p.p.type_val_to_struct[self.handle.type - 1]
+        return Type.factory(self.policy, t)
 
     @property
     def range_(self):

@@ -450,7 +450,7 @@ cdef class ConstraintExprNode(PolicySymbol):
         if self.symbol_type in self._role_syms:
             names = frozenset(role_factory_lookup(self.policy, r) for r in name_iterator)
         elif self.symbol_type in self._type_syms:
-            names = frozenset(type_or_attr_factory_lookup(self.policy, t, False)
+            names = frozenset(self.policy.lookup_type_or_attr(t)
                               for t in name_iterator)
         else:
             names = frozenset(user_factory_lookup(self.policy, u) for u in name_iterator)

@@ -395,7 +395,7 @@ cdef class SELinuxPolicy:
     @property
     def type_attribute_count(self):
         """The number of (type) attributes."""
-        return sum(1 for _ in self.typeattributes())
+        return len(self.typeattributes())
 
     @property
     def type_change_count(self):
@@ -406,7 +406,7 @@ cdef class SELinuxPolicy:
     @property
     def type_count(self):
         """The number of types."""
-        return sum(1 for _ in self.types())
+        return len(self.types())
 
     @property
     def type_member_count(self):
@@ -501,15 +501,27 @@ cdef class SELinuxPolicy:
 
     def lookup_type(self, name):
         """Look up a type by name."""
-        return type_factory_lookup(self, name, True)
+        for t in self.types():
+            if t == name:
+                return t
+
+        raise InvalidType("{0} is not a valid type".format(name))
 
     def lookup_type_or_attr(self, name):
         """Look up a type or type attribute by name."""
-        return type_or_attr_factory_lookup(self, name, True)
+        for t in chain(self.types(), self.typeattributes()):
+            if t == name:
+                return t
+
+        raise InvalidType("{0} is not a valid type attribute".format(name))
 
     def lookup_typeattr(self, name):
         """Look up a type attribute by name."""
-        return attribute_factory_lookup(self, name)
+        for t in self.typeattributes():
+            if t == name:
+                return t
+
+        raise InvalidType("{0} is not a valid type attribute".format(name))
 
     def lookup_user(self, name):
         """Look up a user by name."""
@@ -572,19 +584,11 @@ cdef class SELinuxPolicy:
 
     def types(self):
         """Iterator over all types."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_type_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, type_factory_iter, ValueError)
+        return TypeHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table)
 
     def typeattributes(self):
         """Iterator over all (type) attributes."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_type_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, attribute_factory_iter, ValueError)
+        return TypeAttributeHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table)
 
     def users(self):
         """Iterator which yields all roles."""

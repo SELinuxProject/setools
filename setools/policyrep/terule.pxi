@@ -240,7 +240,7 @@ cdef class AVRule(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, <sepol.type_datum_t *> t)
 
     @property
     def target(self):
@@ -252,7 +252,7 @@ cdef class AVRule(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, <sepol.type_datum_t *> t)
 
     @property
     def tclass(self):
@@ -526,7 +526,7 @@ cdef class TERule(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, <sepol.type_datum_t *>t)
 
     @property
     def target(self):
@@ -538,7 +538,7 @@ cdef class TERule(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, <sepol.type_datum_t *>t)
 
     @property
     def tclass(self):
@@ -560,7 +560,7 @@ cdef class TERule(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return type_factory(self.policy, t, False)
+        return Type.factory(self.policy, <sepol.type_datum_t *>t)
 
     @property
     def filename(self):
@@ -691,26 +691,12 @@ cdef class FileNameTERule(PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_filename_trans_get_source_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading source type/attr for TE rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.stype - 1])
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_filename_trans_get_target_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading target type/attr for TE rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.ttype - 1])
 
     @property
     def tclass(self):
@@ -725,14 +711,15 @@ cdef class FileNameTERule(PolicyRule):
     @property
     def default(self):
         """The rule's default type."""
-        cdef const qpol_type_t *t
-        if qpol_filename_trans_get_default_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading default type for TE rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
+        cdef sepol.filename_trans_datum_t *datum
+        datum = <sepol.filename_trans_datum_t *> hashtab_search(
+            self.policy.handle.p.p.filename_trans, <sepol.hashtab_key_t> self.handle)
 
-        return type_factory(self.policy, t, False)
+        if datum == NULL:
+            raise LowLevelPolicyError("Error reading default type for TE rule.")
+
+        return Type.factory(self.policy,
+            <sepol.type_datum_t *> self.policy.handle.p.p.type_val_to_struct[datum.otype - 1])
 
     @property
     def filename(self):

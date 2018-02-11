@@ -84,7 +84,7 @@ cdef class Bounds(PolicySymbol):
         if qpol_typebounds_get_parent_name(self.policy.handle, self.handle, &name):
             raise RuntimeError("Could not get parent name")
 
-        return type_factory_lookup(self.policy, name, False)
+        return self.policy.lookup_type(name)
 
     @property
     def child(self):
@@ -93,4 +93,4 @@ cdef class Bounds(PolicySymbol):
         if qpol_typebounds_get_child_name(self.policy.handle, self.handle, &name):
             raise RuntimeError("Could not get child name")
 
-        return type_factory_lookup(self.policy, name, False)
+        return self.policy.lookup_type(name)

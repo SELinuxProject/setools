@@ -17,157 +17,26 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import warnings
 
 #
-# Type factory functions
+# Cache objects
 #
 cdef dict _type_cache = {}
-
-cdef inline Type type_factory_lookup(SELinuxPolicy policy, str name, deref):
-    """Factory function variant for constructing Type objects by name."""
-
-    cdef const qpol_type_t *symbol
-
-    if qpol_policy_get_type_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidType("{0} is not a valid type".format(name))
-
-    return type_factory(policy, symbol, deref)
-
-
-cdef inline Type type_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Type objects."""
-    return type_factory(policy, <const qpol_type_t *> symbol.obj, False)
-
-
-cdef inline Type type_factory(SELinuxPolicy policy, const qpol_type_t *symbol, deref):
-    """Factory function for creating Type objects."""
-    cdef unsigned char isattr
-    cdef unsigned char isalias
-    cdef const char *name
-
-    if qpol_type_get_isattr(policy.handle, symbol, &isattr):
-        ex = LowLevelPolicyError("Error determining if type is an attribute: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if isattr:
-        if qpol_type_get_name(policy.handle, symbol, &name):
-            raise ValueError("The specified type is an attribute.")
-
-        raise ValueError("{0} is an attribute".format(name))
-
-    if qpol_type_get_isalias(policy.handle, symbol, &isalias):
-        ex = LowLevelPolicyError("Error determining if type is an alias: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if isalias and not deref:
-        if qpol_type_get_name(policy.handle, symbol, &name):
-            raise ValueError("The specified type is an alias.")
-
-        raise ValueError("{0} is an alias".format(name))
-
-    try:
-        return _type_cache[<uintptr_t>symbol]
-    except KeyError:
-        t = Type()
-        t.policy = policy
-        t.handle = symbol
-        _type_cache[<uintptr_t>symbol] = t
-        return t
-
-#
-# Attribute factory functions
-#
 cdef dict _typeattr_cache = {}
 
-cdef inline TypeAttribute attribute_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing TypeAttribute objects by name."""
-
-    cdef const qpol_type_t *symbol
-    if qpol_policy_get_type_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidType("{0} is not a valid attribute".format(name))
-
-    return attribute_factory(policy, symbol)
-
-
-cdef inline TypeAttribute attribute_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over TypeAttribute objects."""
-    return attribute_factory(policy, <const qpol_type_t *> symbol.obj)
-
-
-cdef inline TypeAttribute attribute_factory(SELinuxPolicy policy, const qpol_type_t *symbol):
-    """Factory function for creating TypeAttribute objects."""
-
-    cdef unsigned char isattr
-    cdef const char *name
-
-    if qpol_type_get_isattr(policy.handle, symbol, &isattr):
-        ex = LowLevelPolicyError("Error determining if type is an attribute: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if not isattr:
-        if qpol_type_get_name(policy.handle, symbol, &name):
-            raise ValueError("The symbol is a type.")
-
-        raise ValueError("{0} is a type".format(name))
-
-    try:
-        return _typeattr_cache[<uintptr_t>symbol]
-    except KeyError:
-        a = TypeAttribute()
-        a.policy = policy
-        a.handle = symbol
-        _typeattr_cache[<uintptr_t>symbol] = a
-        return a
 
 #
-# Type or Attribute factory functions
+# Type or attribute factory function
 #
-cdef inline BaseType type_or_attr_factory_lookup(SELinuxPolicy policy, str name, deref):
-    """Factory function variant for constructing Type objects by name."""
-
-    cdef const qpol_type_t *symbol
-    cdef unsigned char isalias
-
-    if qpol_policy_get_type_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidType("{0} is not a valid type or type attribute".format(name))
-
-    if qpol_type_get_isalias(policy.handle, symbol, &isalias):
-        ex = LowLevelPolicyError("Error determining if type is an alias: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if isalias and not deref:
-        raise ValueError("{0} is an alias.".format(name))
-
-    return type_or_attr_factory(policy, symbol)
-
-
-cdef inline BaseType type_or_attr_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Type or TypeAttribute objects."""
-    return type_or_attr_factory(policy, <const qpol_type_t *> symbol.obj)
-
-
-cdef inline BaseType type_or_attr_factory(SELinuxPolicy policy, const qpol_type_t *symbol):
+cdef type_or_attr_factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
     """Factory function for creating type or attribute objects."""
+    cdef sepol.type_datum_t *handle
 
-    cdef unsigned char i
-    if qpol_type_get_isattr(policy.handle, symbol, &i):
-        ex = LowLevelPolicyError("Error determining if type is an attribute: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if i:
-        return attribute_factory(policy, symbol)
+    if symbol.flavor == sepol.TYPE_ATTRIB:
+        return TypeAttribute.factory(policy, symbol)
     else:
-        return type_factory(policy, symbol, False)
+        return Type.factory(policy, symbol)
 
 
 #
@@ -177,17 +46,10 @@ cdef class BaseType(PolicySymbol):
 
     """Type/attribute base class."""
 
-    cdef const qpol_type_t *handle
+    cdef sepol.type_datum_t *handle
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_type_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading type name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_TYPES][self.handle.s.value - 1])
 
     def _eq(self, BaseType other):
         """Low-level equality check (C pointers)."""
@@ -214,9 +76,25 @@ cdef class Type(BaseType):
 
     """A type."""
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
+        """Factory function for creating Type objects."""
+        if symbol.flavor != sepol.TYPE_TYPE:
+            raise ValueError("{0} is not a type".format(
+                policy.handle.p.p.sym_val_to_name[sepol.SYM_TYPES][symbol.s.value - 1]))
+
+        try:
+            return _type_cache[<uintptr_t>symbol]
+        except KeyError:
+            t = Type()
+            t.policy = policy
+            t.handle = symbol
+            _type_cache[<uintptr_t>symbol] = t
+            return t
+
     def __deepcopy__(self, memo):
         # shallow copy as all of the members are immutable
-        newobj = type_factory(self.policy, self.handle, False)
+        newobj = Type.factory(self.policy, self.handle)
         memo[id(self)] = newobj
         return newobj
 
@@ -231,19 +109,12 @@ cdef class Type(BaseType):
         return <bytes>(<char *>self.handle)
 
     cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(qpol_type_t*))
+        memcpy(&self.handle, <char *>handle, sizeof(sepol.type_datum_t*))
 
     @property
     def ispermissive(self):
         """(T/F) the type is permissive."""
-        cdef unsigned char i
-        if qpol_type_get_ispermissive(self.policy.handle, self.handle, &i):
-            ex = LowLevelPolicyError("Error determining if type is permissive: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return bool(i)
+        return <bint> ebitmap_get_bit(&self.policy.handle.p.p.permissive_map, self.handle.s.value)
 
     def expand(self):
         """Generator that expands this into its member types."""
@@ -251,21 +122,11 @@ cdef class Type(BaseType):
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
-        cdef qpol_iterator_t *iter
-        if qpol_type_get_attr_iter(self.policy.handle, self.handle, &iter) < 0:
-            ex = LowLevelPolicyError("Error reading type attributes: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return qpol_iterator_factory(self.policy, iter, attribute_factory_iter)
+        return TypeAttributeEbitmapIterator.factory(self.policy, &self.handle.types)
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        cdef qpol_iterator_t *iter
-        if qpol_type_get_alias_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self.policy, iter, string_factory_iter)
+        return TypeAliasHashtabIterator.factory(self.policy, &self.policy.handle.p.p.symtab[sepol.SYM_TYPES].table, self)
 
     def statement(self):
         attrs = list(self.attributes())
@@ -286,6 +147,22 @@ cdef class TypeAttribute(BaseType):
 
     """A type attribute."""
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
+        """Factory function for creating TypeAttribute objects."""
+        if symbol.flavor != sepol.TYPE_ATTRIB:
+            raise ValueError("{0} is not an attribute".format(
+                policy.handle.p.p.sym_val_to_name[sepol.SYM_TYPES][symbol.s.value - 1]))
+
+        try:
+            return _typeattr_cache[<uintptr_t>symbol]
+        except KeyError:
+            t = TypeAttribute()
+            t.policy = policy
+            t.handle = symbol
+            _typeattr_cache[<uintptr_t>symbol] = t
+            return t
+
     def __contains__(self, other):
         for type_ in self.expand():
             if other == type_:
@@ -295,11 +172,7 @@ cdef class TypeAttribute(BaseType):
 
     def expand(self):
         """Generator that expands this attribute into its member types."""
-        cdef qpol_iterator_t *iter
-        if qpol_type_get_type_iter(self.policy.handle, self.handle, &iter) < 0:
-            raise MemoryError
-
-        return qpol_iterator_factory(self.policy, iter, type_factory_iter)
+        return TypeEbitmapIterator.factory(self.policy, &self.handle.types)
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
@@ -316,3 +189,230 @@ cdef class TypeAttribute(BaseType):
 
     def statement(self):
         return "attribute {0};".format(self)
+
+
+#
+# Hash Table Iterator Classes
+#
+cdef inline type_is_alias(sepol.type_datum_t *datum):
+    """Determine if the type datum is an alias."""
+    return (datum.primary == 0 and datum.flavor == sepol.TYPE_TYPE) \
+            or datum.flavor == sepol.TYPE_ALIAS
+
+
+cdef class TypeHashtabIterator(HashtabIterator):
+
+    """Iterate over types in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating Role iterators."""
+        i = TypeHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        cdef sepol.type_datum_t *datum
+        super().__next__()
+
+        datum = <sepol.type_datum_t *> self.curr.datum
+        while datum.flavor != sepol.TYPE_TYPE or type_is_alias(datum):
+            super().__next__()
+            datum = <sepol.type_datum_t *> self.curr.datum
+
+        return Type.factory(self.policy, datum)
+
+    def __len__(self):
+        cdef sepol.type_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.type_datum_t *>node.datum if node else NULL
+                if datum != NULL and datum.flavor == sepol.TYPE_TYPE and not type_is_alias(datum):
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        # advance over any attributes or aliases
+        while (<sepol.type_datum_t *> self.node.datum).flavor != sepol.TYPE_TYPE:
+            self._next_node()
+
+
+cdef class TypeAttributeHashtabIterator(HashtabIterator):
+
+    """Iterate over type attributes in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating Role iterators."""
+        i = TypeAttributeHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        while (<sepol.type_datum_t *> self.curr.datum).flavor != sepol.TYPE_ATTRIB:
+            super().__next__()
+
+        return TypeAttribute.factory(self.policy, <sepol.type_datum_t *> self.curr.datum)
+
+    def __len__(self):
+        cdef sepol.type_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.type_datum_t *>node.datum if node else NULL
+                if datum != NULL and datum.flavor == sepol.TYPE_ATTRIB:
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        # advance over any attributes or aliases
+        while (<sepol.type_datum_t *> self.node.datum).flavor != sepol.TYPE_ATTRIB:
+            self._next_node()
+
+
+cdef class TypeAliasHashtabIterator(HashtabIterator):
+
+    """Iterate over type aliases in the policy."""
+
+    cdef uint32_t primary
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table, Type primary):
+        """Factory function for creating type alias iterators."""
+        i = TypeAliasHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.primary = primary.handle.s.value
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        datum = <sepol.type_datum_t *> self.curr.datum if self.curr else NULL
+
+        while datum != NULL and (not type_is_alias(datum) or datum.s.value != self.primary):
+            super().__next__()
+            datum = <sepol.type_datum_t *> self.curr.datum if self.curr else NULL
+
+        return intern(self.curr.key)
+
+    def __len__(self):
+        cdef sepol.type_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.type_datum_t *>node.datum if node else NULL
+                if datum != NULL and self.primary == datum.s.value and type_is_alias(datum):
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        super().reset()
+
+        cdef sepol.type_datum_t *datum = <sepol.type_datum_t *> self.node.datum if self.node else NULL
+
+        # advance over any attributes or aliases
+        while datum != NULL and (not type_is_alias(datum) and self.primary != datum.s.value):
+            self._next_node()
+
+            if self.node == NULL or self.bucket >= self.table[0].size:
+                break
+
+            datum = <sepol.type_datum_t *> self.node.datum if self.node else NULL
+
+
+#
+# Ebitmap Iterator Classes
+#
+cdef class TypeEbitmapIterator(EbitmapIterator):
+
+    """Iterate over a type ebitmap."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ebitmap_t *symbol):
+        """Factory function for creating TypeEbitmapIterator."""
+        i = TypeEbitmapIterator()
+        i.policy = policy
+        i.bmap = symbol
+        i.reset()
+        return i
+
+    @staticmethod
+    cdef factory_from_set(SELinuxPolicy policy, sepol.type_set_t *symbol):
+        """Factory function for creating TypeEbitmapIterator from a type set."""
+        if symbol.flags:
+            warnings.warn("* or ~ in the type set; this is not implemented in SETools.")
+        if symbol.negset.node != NULL:
+            warnings.warn("Negations in the type set; this is not implemented in SETools.")
+
+        return TypeEbitmapIterator.factory(policy, &symbol.types)
+
+    def __next__(self):
+        super().__next__()
+        return Type.factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.bit])
+
+
+cdef class TypeAttributeEbitmapIterator(EbitmapIterator):
+
+    """Iterate over a type attribute ebitmap."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ebitmap_t *bmap):
+        """Factory function for creating TypeAttributeEbitmapIterator."""
+        i = TypeAttributeEbitmapIterator()
+        i.policy = policy
+        i.bmap = bmap
+        i.reset()
+        return i
+
+    @staticmethod
+    cdef factory_from_set(SELinuxPolicy policy, sepol.type_set_t *symbol):
+        """Factory function for creating TypeAttributeEbitmapIterator from a type set."""
+        if symbol.flags:
+            warnings.warn("* or ~ in the type set; this is not implemented in SETools.")
+        if symbol.negset.node != NULL:
+            warnings.warn("Negations in the type set; this is not implemented in SETools.")
+
+        return TypeAttributeEbitmapIterator.factory(policy, &symbol.types)
+
+    def __next__(self):
+        super().__next__()
+        return TypeAttribute.factory(self.policy,
+                                     self.policy.handle.p.p.type_val_to_struct[self.bit])

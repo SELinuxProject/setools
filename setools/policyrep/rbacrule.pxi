@@ -183,7 +183,7 @@ cdef class RoleTransition(PolicyRule):
             ex.errno = errno
             raise ex
 
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, <sepol.type_datum_t *>t)
 
     @property
     def tclass(self):

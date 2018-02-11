@@ -83,26 +83,12 @@ cdef class MLSRule(PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_range_trans_get_source_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading source type/attr for range_transition rule: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.source_type - 1])
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_range_trans_get_target_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading target type/attr for range_transition rule: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, t)
+        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.target_type - 1])
 
     @property
     def tclass(self):
