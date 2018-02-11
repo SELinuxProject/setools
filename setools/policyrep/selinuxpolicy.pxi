@@ -529,7 +529,11 @@ cdef class SELinuxPolicy:
 
     def lookup_user(self, name):
         """Look up a user by name."""
-        return user_factory_lookup(self, name)
+        for u in self.users():
+            if u == name:
+                return u
+
+        raise InvalidUser("{0} is not a valid user".format(name))
 
     #
     # Policy components iterators
@@ -592,11 +596,7 @@ cdef class SELinuxPolicy:
 
     def users(self):
         """Iterator which yields all roles."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_user_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, user_factory_iter)
+        return UserIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_USERS].table)
 
     #
     # Policy rules iterators

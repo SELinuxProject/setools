@@ -45,11 +45,8 @@ cdef class Context(PolicySymbol):
     @property
     def user(self):
         """The user portion of the context."""
-        cdef const qpol_user_t *u
-        if qpol_context_get_user(self.policy.handle, self.handle, &u):
-            raise RuntimeError("Could not get user from context")
-
-        return user_factory(self.policy, u)
+        cdef sepol.user_datum_t *u = self.policy.handle.p.p.user_val_to_struct[self.handle.user - 1]
+        return User.factory(self.policy, u)
 
     @property
     def role(self):

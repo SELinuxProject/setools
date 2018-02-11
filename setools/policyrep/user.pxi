@@ -1,5 +1,5 @@
 # Copyright 2014, Tresys Technology, LLC
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,38 +18,22 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-cdef inline User user_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing User objects by name."""
-    cdef const qpol_user_t *symbol
-    if qpol_policy_get_user_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidUser("{0} is not a valid user".format(name))
-
-    return user_factory(policy, symbol)
-
-
-cdef inline User user_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over User objects."""
-    return user_factory(policy, <const qpol_user_t *> symbol.obj)
-
-
-cdef inline User user_factory(SELinuxPolicy policy, const qpol_user_t * symbol):
-    """Factory function for constructing User objects."""
-    u = User()
-    u.policy = policy
-    u.handle = symbol
-    return u
-
-
 cdef class User(PolicySymbol):
-    cdef const qpol_user_t *handle
+
+    """A user."""
+
+    cdef sepol.user_datum_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.user_datum_t *symbol):
+        """Factory function for constructing User objects."""
+        u = User()
+        u.policy = policy
+        u.handle = symbol
+        return u
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_user_get_name(self.policy.handle, self.handle, &name):
-            raise ValueError("Error reading user name")
-
-        return intern(name)
+        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_USERS][self.handle.s.value - 1])
 
     def _eq(self, User other):
         """Low-level equality check (C pointers)."""
@@ -94,3 +78,24 @@ cdef class User(PolicySymbol):
             stmt += ";"
 
         return stmt
+
+
+#
+# Iterator Classes
+#
+cdef class UserIterator(HashtabIterator):
+
+    """Iterate over users in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating User iterators."""
+        i = UserIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return User.factory(self.policy, <sepol.user_datum_t *>self.curr.datum)

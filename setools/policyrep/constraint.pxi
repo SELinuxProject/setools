@@ -453,7 +453,7 @@ cdef class ConstraintExprNode(PolicySymbol):
             names = frozenset(self.policy.lookup_type_or_attr(t)
                               for t in name_iterator)
         else:
-            names = frozenset(user_factory_lookup(self.policy, u) for u in name_iterator)
+            names = frozenset(self.policy.lookup_user(u) for u in name_iterator)
 
         return names
 

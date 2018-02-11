@@ -312,13 +312,6 @@ cdef extern from "include/qpol/type_query.h":
 cdef extern from "include/qpol/user_query.h":
     ctypedef struct qpol_user_t:
         pass
-    int qpol_policy_get_user_by_name(const qpol_policy_t * policy, const char *name, const qpol_user_t ** datum)
-    int qpol_policy_get_user_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_user_get_value(const qpol_policy_t * policy, const qpol_user_t * datum, uint32_t * value)
-    int qpol_user_get_role_iter(const qpol_policy_t * policy, const qpol_user_t * datum, qpol_iterator_t ** roles)
-    int qpol_user_get_range(const qpol_policy_t * policy, const qpol_user_t * datum, const qpol_mls_range_t ** range)
-    int qpol_user_get_dfltlevel(const qpol_policy_t * policy, const qpol_user_t * datum, const qpol_mls_level_t ** level)
-    int qpol_user_get_name(const qpol_policy_t * policy, const qpol_user_t * datum, const char **name)
 
 
 # this must be here so that the PolicyEnum subclasses are created correctly.
