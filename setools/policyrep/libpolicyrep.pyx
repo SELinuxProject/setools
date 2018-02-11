@@ -80,13 +80,6 @@ cdef extern from "include/qpol/avrule_query.h":
 cdef extern from "include/qpol/bool_query.h":
     ctypedef struct qpol_bool_t:
         pass
-    int qpol_policy_get_bool_by_name(const qpol_policy_t * policy, const char *name, qpol_bool_t ** datum)
-    int qpol_policy_get_bool_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_bool_get_value(const qpol_policy_t * policy, const qpol_bool_t * datum, uint32_t * value)
-    int qpol_bool_get_state(const qpol_policy_t * policy, const qpol_bool_t * datum, int *state)
-    int qpol_bool_set_state(qpol_policy_t * policy, qpol_bool_t * datum, int state)
-    int qpol_bool_set_state_no_eval(qpol_policy_t * policy, qpol_bool_t * datum, int state)
-    int qpol_bool_get_name(const qpol_policy_t * policy, const qpol_bool_t * datum, const char **name)
 
 cdef extern from "include/qpol/bounds_query.h":
     ctypedef struct qpol_typebounds_t:

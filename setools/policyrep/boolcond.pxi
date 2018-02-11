@@ -25,31 +25,6 @@ truth_table_row = namedtuple("truth_table_row", ["values", "result"])
 
 
 #
-# Boolean factory functions
-#
-cdef inline Boolean boolean_factory_lookup(SELinuxPolicy policy, str name):
-    """Factory function variant for constructing Boolean objects by name."""
-
-    cdef qpol_bool_t *symbol;
-    if qpol_policy_get_bool_by_name(policy.handle, name.encode(), &symbol):
-        raise InvalidBoolean("{0} is not a valid Boolean".format(name))
-
-    return boolean_factory(policy, symbol)
-
-
-cdef inline Boolean boolean_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Boolean objects."""
-    return boolean_factory(policy, <const qpol_bool_t *> symbol.obj)
-
-
-cdef inline Boolean boolean_factory(SELinuxPolicy policy, const qpol_bool_t *symbol):
-    """Factory function for creating Boolean objects."""
-    r = Boolean()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-#
 # Conditional expression factory functions
 #
 cdef dict _cond_cache = {}
@@ -93,7 +68,7 @@ cdef inline object conditional_node_factory_iter(SELinuxPolicy policy, QpolItera
             ex.errno = errno
             raise ex
 
-        return boolean_factory(policy, b)
+        return Boolean.factory(policy, <sepol.cond_bool_datum_t *>b)
 
     else:
         return conditional_op_factory(policy, symbol)
@@ -114,17 +89,18 @@ cdef class Boolean(PolicySymbol):
 
     """A Boolean."""
 
-    cdef const qpol_bool_t *handle
+    cdef sepol.cond_bool_datum_t *handle
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.cond_bool_datum_t *symbol):
+        """Factory function for creating Boolean objects."""
+        r = Boolean()
+        r.policy = policy
+        r.handle = symbol
+        return r
 
     def __str__(self):
-        cdef const char *name
-
-        if qpol_bool_get_name(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading Boolean name: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_BOOLS][self.handle.s.value - 1])
 
     def _eq(self, Boolean other):
         """Low-level equality check (C pointers)."""
@@ -133,13 +109,7 @@ cdef class Boolean(PolicySymbol):
     @property
     def state(self):
         """The default state of the Boolean."""
-        cdef int s
-        if qpol_bool_get_state(self.policy.handle, self.handle, &s):
-            ex = LowLevelPolicyError("Error reading boolean state: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return bool(s)
+        return <bint> self.handle.state
 
     def statement(self):
         """The policy statement."""
@@ -403,3 +373,24 @@ cdef class ConditionalOperator(PolicySymbol):
     def unary(self):
         """T/F the operator is unary"""
         return self._type == QPOL_COND_EXPR_NOT
+
+
+#
+# Iterators
+#
+cdef class BooleanHashtabIterator(HashtabIterator):
+
+    """Iterate over Booleans in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating Boolean iterators."""
+        i = BooleanHashtabIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Boolean.factory(self.policy, <sepol.cond_bool_datum_t *>self.curr.datum)

@@ -429,7 +429,11 @@ cdef class SELinuxPolicy:
     #
     def lookup_boolean(self, name):
         """Look up a Boolean."""
-        return boolean_factory_lookup(self, name)
+        for b in self.bools():
+            if b == name:
+                return b
+
+        raise InvalidBoolean("{0} is not a valid Boolean".format(name))
 
     def lookup_class(self, name):
         """Look up an object class."""
@@ -484,11 +488,7 @@ cdef class SELinuxPolicy:
     #
     def bools(self):
         """Iterator which yields all Booleans."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_bool_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, boolean_factory_iter)
+        return BooleanHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_BOOLS].table)
 
     def bounds(self):
         """Iterator which yields all *bounds statements (typebounds, etc.)"""

@@ -67,7 +67,6 @@ else:
 ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
                          ['setools/policyrep/libpolicyrep.pyx',
                           'libqpol/avrule_query.c',
-                          'libqpol/bool_query.c',
                           'libqpol/bounds_query.c',
                           'libqpol/class_perm_query.c',
                           'libqpol/cond_query.c',
