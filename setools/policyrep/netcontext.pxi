@@ -25,72 +25,20 @@ import logging
 
 PortconRange = namedtuple("PortconRange", ["low", "high"])
 
-
-#
-# Netifcon factory functions
-#
-cdef inline netifcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating Netifcon iterators."""
-    i = NetifconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-cdef inline Netifcon netifcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating Netifcon objects."""
-    n = Netifcon()
-    n.policy = policy
-    n.handle = symbol
-    return n
-
-
-#
-# Nodecon factory functions
-#
-cdef inline nodecon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head, ip_version):
-    """Factory function for creating Nodecon iterators."""
-    i = NodeconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    i.ip_version = ip_version
-    return i
-
-
-cdef inline Nodecon nodecon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, ip_version):
-    """Factory function for creating Nodecon objects."""
-    n = Nodecon()
-    n.policy = policy
-    n.handle = symbol
-    n.ip_version = ip_version
-    return n
-
-
-#
-# Portcon factory functions
-#
-cdef inline portcon_iterator_factory(SELinuxPolicy policy, sepol.ocontext_t *head):
-    """Factory function for creating Portcon iterators."""
-    i = PortconIterator()
-    i.policy = policy
-    i.head = i.curr = head
-    return i
-
-
-cdef inline Portcon portcon_factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
-    """Factory function for creating Portcon objects."""
-    p = Portcon()
-    p.policy = policy
-    p.handle = symbol
-    return p
-
-
 #
 # Classes
 #
 cdef class Netifcon(Ocontext):
 
     """A netifcon statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Netifcon objects."""
+        n = Netifcon()
+        n.policy = policy
+        n.handle = symbol
+        return n
 
     def __str__(self):
         return "netifcon {0.netif} {0.context} {0.packet}".format(self)
@@ -113,15 +61,6 @@ cdef class Netifcon(Ocontext):
         return context_factory(self.policy, <const qpol_context_t *> &self.handle.context[1])
 
 
-cdef class NetifconIterator(OcontextIterator):
-
-    """Iterator for netifcon statements in the policy."""
-
-    def __next__(self):
-        super().__next__()
-        return netifcon_factory(self.policy, self.ocon)
-
-
 class NodeconIPVersion(PolicyEnum):
 
     """Nodecon IP Version"""
@@ -135,6 +74,15 @@ cdef class Nodecon(Ocontext):
     """A nodecon statement."""
 
     cdef readonly object ip_version
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, ip_version):
+        """Factory function for creating Nodecon objects."""
+        n = Nodecon()
+        n.policy = policy
+        n.handle = symbol
+        n.ip_version = ip_version
+        return n
 
     def __str__(self):
         return "nodecon {1} {0.context}".format(self, self.network.with_netmask.replace("/", " "))
@@ -231,17 +179,6 @@ cdef class Nodecon(Ocontext):
             return ip_network(net_with_mask, strict=False)
 
 
-cdef class NodeconIterator(OcontextIterator):
-
-    """Iterator for nodecon statements in the policy."""
-
-    cdef object ip_version
-
-    def __next__(self):
-        super().__next__()
-        return nodecon_factory(self.policy, self.ocon, self.ip_version)
-
-
 class PortconProtocol(PolicyEnum):
 
     """A portcon protocol type."""
@@ -254,6 +191,14 @@ class PortconProtocol(PolicyEnum):
 cdef class Portcon(Ocontext):
 
     """A portcon statement."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Portcon objects."""
+        p = Portcon()
+        p.policy = policy
+        p.handle = symbol
+        return p
 
     def __str__(self):
         low, high = self.ports
@@ -289,10 +234,58 @@ cdef class Portcon(Ocontext):
         return PortconProtocol(self.handle.u.port.protocol)
 
 
+#
+# Iterators
+#
+cdef class NetifconIterator(OcontextIterator):
+
+    """Iterator for netifcon statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Netifcon iterators."""
+        i = NetifconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Netifcon.factory(self.policy, self.ocon)
+
+
+cdef class NodeconIterator(OcontextIterator):
+
+    """Iterator for nodecon statements in the policy."""
+
+    cdef object ip_version
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head, ip_version):
+        """Factory function for creating Nodecon iterators."""
+        i = NodeconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        i.ip_version = ip_version
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Nodecon.factory(self.policy, self.ocon, self.ip_version)
+
+
 cdef class PortconIterator(OcontextIterator):
 
     """Iterator for portcon statements in the policy."""
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Portcon iterators."""
+        i = PortconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
     def __next__(self):
         super().__next__()
-        return portcon_factory(self.policy, self.ocon)
+        return Portcon.factory(self.policy, self.ocon)

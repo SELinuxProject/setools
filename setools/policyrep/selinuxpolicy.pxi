@@ -679,18 +679,18 @@ cdef class SELinuxPolicy:
 
     def netifcons(self):
         """Iterator over all netifcon statements."""
-        return netifcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_NETIF])
+        return NetifconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_NETIF])
 
     def nodecons(self):
         """Iterator over all nodecon statements."""
-        return chain(nodecon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE],
-                                              NodeconIPVersion.ipv4),
-                     nodecon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE6],
-                                              NodeconIPVersion.ipv6))
+        return chain(NodeconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE],
+                                             NodeconIPVersion.ipv4),
+                     NodeconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE6],
+                                             NodeconIPVersion.ipv6))
 
     def portcons(self):
         """Iterator over all portcon statements."""
-        return portcon_iterator_factory(self, self.handle.p.p.ocontexts[sepol.OCON_PORT])
+        return PortconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_PORT])
 
     #
     # Xen labeling iterators
