@@ -564,11 +564,8 @@ cdef class SELinuxPolicy:
 
     def defaults(self):
         """Iterator over all default_* statements."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_default_object_iter(self.handle, &iter):
-            raise MemoryError
-
-        return default_iterator_factory(self, iter)
+        for cls in ObjClassHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_CLASSES].table):
+            yield from cls.defaults()
 
     def levels(self):
         """Iterator which yields all level declarations."""

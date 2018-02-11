@@ -1,5 +1,5 @@
 # Copyright 2014, 2016 Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,70 +18,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-#
-# Factory functions
-#
-cdef DefaultIterator default_iterator_factory(SELinuxPolicy policy, qpol_iterator_t *iter):
-    """Factory function for default_* statement iterator."""
-    i = DefaultIterator()
-    i.policy = policy
-    i.iter = iter
-    return i
-
-
-cdef inline Default default_factory(SELinuxPolicy policy, ObjClass tclass,
-                                    const qpol_default_object_t *handle, user, role, type_, range_):
-
-    """Factory function for creating default_* statement objects."""
-
-    if user:
-        obj = Default()
-        obj.policy = policy
-        obj.handle = handle
-        obj.ruletype = DefaultRuletype.default_user
-        obj.tclass = tclass
-        obj._default = DefaultValue[user]
-        return obj
-
-    if role:
-        obj = Default()
-        obj.policy = policy
-        obj.handle = handle
-        obj.ruletype = DefaultRuletype.default_role
-        obj.tclass = tclass
-        obj._default = DefaultValue[role]
-        return obj
-
-    if type_:
-        obj = Default()
-        obj.policy = policy
-        obj.handle = handle
-        obj.ruletype = DefaultRuletype.default_type
-        obj.tclass = tclass
-        obj._default = DefaultValue[type_]
-        return obj
-
-    if range_:
-        # range_ is something like "source low_high"
-        rng = range_.split()
-        obj = RangeDefault()
-        obj.policy = policy
-        obj.handle = handle
-        obj.ruletype = DefaultRuletype.default_range
-        obj.tclass = tclass
-        obj._default = DefaultValue[rng[0]]
-        obj.default_range = DefaultRangeValue[rng[1]]
-        return obj
-
-    raise ValueError("At least one of user, role, type_, or range_ must be specified.")
-
-
-#
-# Classes
-#
 class DefaultRuletype(PolicyEnum):
 
     """Enumeration of default rule types."""
+
     default_user = 1
     default_role = 2
     default_type = 3
@@ -91,16 +31,40 @@ class DefaultRuletype(PolicyEnum):
 class DefaultValue(PolicyEnum):
 
     """Enumeration of default values."""
-    source = 1
-    target = 2
+
+    source = sepol.DEFAULT_SOURCE
+    target = sepol.DEFAULT_TARGET
+
+    @classmethod
+    def from_default_range(cls, range_):
+        default_map = {sepol.DEFAULT_SOURCE_LOW: sepol.DEFAULT_SOURCE,
+                       sepol.DEFAULT_SOURCE_HIGH: sepol.DEFAULT_SOURCE,
+                       sepol.DEFAULT_SOURCE_LOW_HIGH: sepol.DEFAULT_SOURCE,
+                       sepol.DEFAULT_TARGET_LOW: sepol.DEFAULT_TARGET,
+                       sepol.DEFAULT_TARGET_HIGH: sepol.DEFAULT_TARGET,
+                       sepol.DEFAULT_TARGET_LOW_HIGH: sepol.DEFAULT_TARGET}
+
+        return cls(default_map[range_])
 
 
 class DefaultRangeValue(PolicyEnum):
 
     """Enumeration of default range values."""
+
     low = 1
     high = 2
     low_high = 3
+
+    @classmethod
+    def from_default_range(cls, range_):
+        default_map = {sepol.DEFAULT_SOURCE_LOW: 1,
+                       sepol.DEFAULT_SOURCE_HIGH: 2,
+                       sepol.DEFAULT_SOURCE_LOW_HIGH: 3,
+                       sepol.DEFAULT_TARGET_LOW: 1,
+                       sepol.DEFAULT_TARGET_HIGH: 2,
+                       sepol.DEFAULT_TARGET_LOW_HIGH: 3}
+
+        return cls(default_map[range_])
 
 
 cdef class Default(PolicySymbol):
@@ -108,7 +72,6 @@ cdef class Default(PolicySymbol):
     """Base class for default_* statements."""
 
     cdef:
-        const qpol_default_object_t *handle
         public object ruletype
         public object tclass
         object _default
@@ -116,10 +79,49 @@ cdef class Default(PolicySymbol):
     # the default object is not exposed as a Python
     # attribute, as it collides with CPython code
 
-    def _eq(self, Default other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle \
-                and self.ruletype == other.ruletype
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, ObjClass tclass, user, role, type_, range_):
+        """Factory function for Default objects."""
+
+        if user:
+            obj = Default()
+            obj.policy = policy
+            obj.tclass = tclass
+            obj.ruletype = DefaultRuletype.default_user
+            obj._default = DefaultValue(user)
+            return obj
+
+        if role:
+            obj = Default()
+            obj.policy = policy
+            obj.tclass = tclass
+            obj.ruletype = DefaultRuletype.default_role
+            obj._default = DefaultValue(role)
+            return obj
+
+        if type_:
+            obj = Default()
+            obj.policy = policy
+            obj.tclass = tclass
+            obj.ruletype = DefaultRuletype.default_type
+            obj._default = DefaultValue(type_)
+            return obj
+
+        if range_:
+            obj = DefaultRange()
+            obj.policy = policy
+            obj.ruletype = DefaultRuletype.default_range
+            obj.tclass = tclass
+            obj._default = DefaultValue.from_default_range(range_)
+            obj.default_range = DefaultRangeValue.from_default_range(range_)
+            return obj
+
+        raise ValueError("At least one of user, role, type_, or range_ must be specified.")
+
+    def __eq__(self, other):
+        return self.ruletype == other.ruletype \
+                and self.tclass == other.tclass \
+                and self.default == other.default
 
     def __str__(self):
         return "{0.ruletype} {0.tclass} {0.default};".format(self)
@@ -139,7 +141,7 @@ cdef class Default(PolicySymbol):
         return str(self)
 
 
-cdef class RangeDefault(Default):
+cdef class DefaultRange(Default):
 
     """A default_range statement."""
 
@@ -148,103 +150,15 @@ cdef class RangeDefault(Default):
     def __str__(self):
         return "{0.ruletype} {0.tclass} {0.default} {0.default_range};".format(self)
 
+    def __eq__(self, other):
+        return self.ruletype == other.ruletype \
+                and self.tclass == other.tclass \
+                and self.default == other.default \
+                and self.default_range == other.default_range
 
-cdef class DefaultIterator:
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.tclass}".format(self))
 
-    """
-    Iterate over all policy defaults.
-
-    The low level policy groups default_* settings by object class.
-    Since each class can have up to four default_* statements,
-    this has a sub iterator which yields up to
-    four Default objects.
-    """
-
-    cdef:
-        qpol_iterator_t *iter
-        SELinuxPolicy policy
-        object sub_iter
-
-    def __dealloc__(self):
-        if self.iter:
-            qpol_iterator_destroy(&self.iter)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        cdef void *item
-        cdef const qpol_default_object_t *symbol
-        cdef const qpol_class_t *cls
-        cdef const char *user
-        cdef const char *role
-        cdef const char *type_
-        cdef const char *range_
-
-        # drain sub-iterator first, if one exists
-        if self.sub_iter:
-            try:
-                return self.sub_iter.__next__()
-            except StopIteration:
-                # sub_iter completed, clear
-                self.sub_iter = None
-
-        while not qpol_iterator_end(self.iter):
-            qpol_iterator_get_item(self.iter, &item)
-            qpol_iterator_next(self.iter)
-            symbol = <const qpol_default_object_t *>item
-
-            # qpol will essentially iterate over all classes
-            # and emit NULL for classes that don't set a default.
-            if qpol_default_object_get_class(self.policy.handle, symbol, &cls):
-                ex = LowLevelPolicyError("Error reading default's class: {}".format(
-                                         strerror(errno)))
-                ex.errno = errno
-                raise ex
-
-            if cls:
-                tclass = class_factory(self.policy, cls)
-            else:
-                continue
-
-            dfts = []
-            if qpol_default_object_get_user_default(self.policy.handle, symbol, &user):
-                ex = LowLevelPolicyError("Error reading default's user: {}".format(
-                                         strerror(errno)))
-                ex.errno = errno
-                raise ex
-            elif user:
-                dfts.append(default_factory(self.policy, tclass, symbol, user, None, None, None))
-
-            if qpol_default_object_get_role_default(self.policy.handle, symbol, &role):
-                ex = LowLevelPolicyError("Error reading default's role: {}".format(
-                                         strerror(errno)))
-                ex.errno = errno
-                raise ex
-            elif role:
-                dfts.append(default_factory(self.policy, tclass, symbol, None, role, None, None))
-
-            if qpol_default_object_get_type_default(self.policy.handle, symbol, &type_):
-                ex = LowLevelPolicyError("Error reading default's type: {}".format(
-                                         strerror(errno)))
-                ex.errno = errno
-                raise ex
-            elif type_:
-                dfts.append(default_factory(self.policy, tclass, symbol, None, None, type_, None))
-
-            if qpol_default_object_get_range_default(self.policy.handle, symbol, &range_):
-                ex = LowLevelPolicyError("Error reading default's range: {}".format(
-                                         strerror(errno)))
-                ex.errno = errno
-                raise ex
-            elif range_:
-                dfts.append(default_factory(self.policy, tclass, symbol, None, None, None, range_))
-
-            if not dfts:
-                raise LowLevelPolicyError("Policy structure error: {} did not have any defaults.".
-                                          format(strerror(errno)))
-
-            self.sub_iter = iter(dfts)
-            return self.sub_iter.__next__()
-
-        raise StopIteration
+    def __lt__(self, other):
+        # this is used by Python sorting functions
+        return str(self) < str(other)

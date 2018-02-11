@@ -115,6 +115,20 @@ cdef class ObjClass(PolicySymbol):
 
         return qpol_iterator_factory(self.policy, iter, constraint_factory_iter)
 
+    def defaults(self):
+        """Iterator for the defaults for this object class."""
+        if self.handle.default_user:
+            yield Default.factory(self.policy, self, self.handle.default_user, None, None, None)
+
+        if self.handle.default_role:
+            yield Default.factory(self.policy, self, None, self.handle.default_role, None, None)
+
+        if self.handle.default_type:
+            yield Default.factory(self.policy, self, None, None, self.handle.default_type, None)
+
+        if self.handle.default_range:
+            yield Default.factory(self.policy, self, None, None, None, self.handle.default_range)
+
     @property
     def perms(self):
         """The set of the object class's permissions."""

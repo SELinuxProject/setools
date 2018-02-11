@@ -184,16 +184,6 @@ cdef extern from "include/qpol/context_query.h":
     int qpol_context_get_type(const qpol_policy_t * policy, const qpol_context_t * context, const qpol_type_t ** type)
     int qpol_context_get_range(const qpol_policy_t * policy, const qpol_context_t * context, const qpol_mls_range_t ** range)
 
-cdef extern from "include/qpol/default_object_query.h":
-    ctypedef struct qpol_default_object_t:
-        pass
-    int qpol_policy_get_default_object_iter(const qpol_policy_t *policy, qpol_iterator_t **iter)
-    int qpol_default_object_get_class(const qpol_policy_t *policy, const qpol_default_object_t *datum, const qpol_class_t **cls)
-    int qpol_default_object_get_user_default(const qpol_policy_t *policy, const qpol_default_object_t *datum, const char **value)
-    int qpol_default_object_get_role_default(const qpol_policy_t *policy, const qpol_default_object_t *datum, const char **value)
-    int qpol_default_object_get_type_default(const qpol_policy_t *policy, const qpol_default_object_t *datum, const char **value)
-    int qpol_default_object_get_range_default(const qpol_policy_t *policy, const qpol_default_object_t *datum, const char **value)
-
 cdef extern from "include/qpol/ftrule_query.h":
     ctypedef struct qpol_filename_trans_t:
         pass
