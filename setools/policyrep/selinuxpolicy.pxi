@@ -608,11 +608,7 @@ cdef class SELinuxPolicy:
 
     def mlsrules(self):
         """Iterator over all MLS rules."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_range_trans_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, mls_rule_factory_iter)
+        return MLSRuleIterator.factory(self, &self.handle.p.p.range_tr)
 
     def rbacrules(self):
         """Iterator over all RBAC rules."""

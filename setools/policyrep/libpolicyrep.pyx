@@ -176,14 +176,6 @@ cdef extern from "include/qpol/constraint_query.h":
     int qpol_class_get_constraint_iter(const qpol_policy_t * policy, const qpol_class_t * obj_class, qpol_iterator_t ** constr)
     int qpol_class_get_validatetrans_iter(const qpol_policy_t * policy, const qpol_class_t * obj_class,  qpol_iterator_t ** vtrans)
 
-cdef extern from "include/qpol/context_query.h":
-    ctypedef struct qpol_context_t:
-        pass
-    int qpol_context_get_user(const qpol_policy_t * policy, const qpol_context_t * context, const qpol_user_t ** user)
-    int qpol_context_get_role(const qpol_policy_t * policy, const qpol_context_t * context, const qpol_role_t ** role)
-    int qpol_context_get_type(const qpol_policy_t * policy, const qpol_context_t * context, const qpol_type_t ** type)
-    int qpol_context_get_range(const qpol_policy_t * policy, const qpol_context_t * context, const qpol_mls_range_t ** range)
-
 cdef extern from "include/qpol/ftrule_query.h":
     ctypedef struct qpol_filename_trans_t:
         pass
@@ -202,27 +194,6 @@ cdef extern from "include/qpol/iterator.h":
     int qpol_iterator_next(qpol_iterator_t * iter)
     int qpol_iterator_end(const qpol_iterator_t * iter)
     int qpol_iterator_get_size(const qpol_iterator_t * iter, size_t * size)
-
-cdef extern from "include/qpol/mls_query.h":
-    ctypedef struct qpol_level_t:
-        pass
-    ctypedef struct qpol_cat_t:
-        pass
-    ctypedef struct qpol_mls_range_t:
-        pass
-    ctypedef struct qpol_mls_level_t:
-        pass
-    ctypedef struct qpol_semantic_level_t:
-        pass
-
-cdef extern from "include/qpol/mlsrule_query.h":
-    ctypedef struct qpol_range_trans_t:
-        pass
-    int qpol_policy_get_range_trans_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_range_trans_get_source_type(const qpol_policy_t * policy, const qpol_range_trans_t * rule, const qpol_type_t ** source)
-    int qpol_range_trans_get_target_type(const qpol_policy_t * policy, const qpol_range_trans_t * rule, const qpol_type_t ** target)
-    int qpol_range_trans_get_target_class(const qpol_policy_t * policy, const qpol_range_trans_t * rule,  const qpol_class_t ** target)
-    int qpol_range_trans_get_range(const qpol_policy_t * policy, const qpol_range_trans_t * rule, const qpol_mls_range_t ** range)
 
 cdef extern from "qpol_internal.h":
     ctypedef struct qpol_policy_t:

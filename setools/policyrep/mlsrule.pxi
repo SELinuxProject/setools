@@ -1,5 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -19,41 +19,6 @@
 #
 import itertools
 
-#
-# MLS rule factory functions
-#
-cdef inline MLSRule mls_rule_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over MLSRule objects."""
-    return mls_rule_factory(policy, <const qpol_range_trans_t *> symbol.obj)
-
-
-cdef inline MLSRule mls_rule_factory(SELinuxPolicy policy, const qpol_range_trans_t *symbol):
-    """Factory function for creating MLSRule objects."""
-    r = MLSRule()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Expanded MLS rule factory function
-#
-cdef inline ExpandedMLSRule expanded_mls_rule_factory(MLSRule original, source, target):
-    """
-    Factory function for creating expanded MLS rules.
-
-    original    The MLS rule the expanded rule originates from.
-    source      The source type of the expanded rule.
-    target      The target type of the expanded rule.
-    """
-    r = ExpandedMLSRule()
-    r.policy = original.policy
-    r.handle = original.handle
-    r.source = source
-    r.target = target
-    r.origin = original
-    return r
-
 
 class MLSRuletype(PolicyEnum):
 
@@ -68,10 +33,20 @@ cdef class MLSRule(PolicyRule):
 
     cdef:
         sepol.range_trans_t *handle
+        object rng
         readonly object ruletype
 
-    def __init__(self):
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.range_trans_t *symbol, sepol.mls_range_t *rng):
+        """Factory function for creating MLSRule objects."""
+        r = MLSRule(Range.factory(policy, rng))
+        r.policy = policy
+        r.handle = symbol
+        return r
+
+    def __init__(self, rng):
         self.ruletype = MLSRuletype.range_transition
+        self.rng = rng
 
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
@@ -98,15 +73,18 @@ cdef class MLSRule(PolicyRule):
     @property
     def default(self):
         """The rule's default range."""
-        cdef sepol.mls_range_t *default_range
-        default_range = <sepol.mls_range_t *> hashtab_search(self.policy.handle.p.p.range_tr,
-                                                             <sepol.hashtab_key_t> self.handle)
-        return Range.factory(self.policy, default_range)
+        return self.rng
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            yield expanded_mls_rule_factory(self, s, t)
+            r = ExpandedMLSRule(self.rng)
+            r.policy = self.policy
+            r.handle = self.handle
+            r.source = s
+            r.target = t
+            r.origin = self
+            yield r
 
 
 cdef class ExpandedMLSRule(MLSRule):
@@ -131,3 +109,25 @@ cdef class ExpandedMLSRule(MLSRule):
 
     def __lt__(self, other):
         return str(self) < str(other)
+
+
+#
+# Iterators
+#
+cdef class MLSRuleIterator(HashtabIterator):
+
+    """Iterate over MLS rules in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating MLS rule iterators."""
+        i = MLSRuleIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return MLSRule.factory(self.policy, <sepol.range_trans_t *>self.curr.key,
+                               <sepol.mls_range_t *>self.curr.datum)
