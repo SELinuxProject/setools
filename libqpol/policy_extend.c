@@ -54,7 +54,6 @@ struct extend_bogus_alias_struct
 
 static int extend_find_bogus_alias(hashtab_key_t key __attribute__ ((unused)), hashtab_datum_t datum, void *args)
 {
-	struct extend_bogus_alias_struct *e = (struct extend_bogus_alias_struct *)args;
 	type_datum_t *type = (type_datum_t *) datum;
 
 	unsigned char isalias = 0;
