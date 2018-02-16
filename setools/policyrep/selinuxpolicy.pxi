@@ -22,12 +22,6 @@
 import logging
 
 
-try:
-    import selinux
-except ImportError:
-    pass
-
-
 class PolicyTarget(PolicyEnum):
 
     """Enumeration of policy targets."""
@@ -132,7 +126,8 @@ cdef class SELinuxPolicy:
             if (errno == EINVAL):
                 raise InvalidPolicy("Invalid policy: {}. A binary policy must be specified. "
                                     "(use e.g. policy.{} or sepolicy) Source policies are not "
-                                    "supported.".format(filename, sepol.POLICYDB_VERSION_MAX))
+                                    "supported.".format(filename,
+                                                        sepol.sepol_policy_kern_vers_max()))
             else:
                 raise OSError("Unable to open policy: {}: {}".format(filename, strerror(errno)))
 
@@ -147,7 +142,8 @@ cdef class SELinuxPolicy:
 
         # otherwise look through the supported policy versions
         base_policy_path = selinux.selinux_binary_policy_path()
-        for version in range(sepol.POLICYDB_VERSION_MAX, sepol.POLICYDB_VERSION_MIN-1, -1):
+        for version in range(sepol.sepol_policy_kern_vers_max(),
+                             sepol.sepol_policy_kern_vers_min() - 1, -1):
             yield "{0}.{1}".format(base_policy_path, version)
 
     def _load_running_policy(self):

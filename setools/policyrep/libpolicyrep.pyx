@@ -26,6 +26,7 @@ from libc.string cimport memcpy, strerror
 from posix.stat cimport S_IFBLK, S_IFCHR, S_IFDIR, S_IFIFO, S_IFREG, S_IFLNK, S_IFSOCK
 
 cimport sepol
+cimport selinux
 
 from .exception import InvalidPolicy, MLSDisabled, InvalidBoolean, InvalidCategory, InvalidClass, \
     InvalidCommon, InvalidInitialSid, InvalidLevel, InvalidLevelDecl, InvalidRange, InvalidRole, \

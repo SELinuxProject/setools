@@ -8,6 +8,8 @@ cdef extern from "<sepol/policydb.h>":
     cdef int SEPOL_ALLOW_UNKNOWN
     cdef int SEPOL_TARGET_SELINUX
     cdef int SEPOL_TARGET_XEN
+    cdef int sepol_policy_kern_vers_min()
+    cdef int sepol_policy_kern_vers_max()
 
 cdef extern from "<sepol/policydb/services.h>":
     cdef int SECURITY_FS_USE_XATTR

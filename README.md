@@ -17,7 +17,8 @@ To run SETools command line tools, the following packages are required:
 * Python 3.4+
 * NetworkX 2.0+
 * setuptools
-* libselinux Python bindings (optional but recommended)
+* libselinux
+* libsepol 2.7+
 
 To run SETools graphical tools, the following packages are also required:
 * PyQt5
@@ -27,9 +28,6 @@ To run SETools graphical tools, the following packages are also required:
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
 * gcc
-* bison
-* flex
-* libsepol 2.7+
 * cython 0.27+
 
 To run SETools unit tests, the following packages are required, in
