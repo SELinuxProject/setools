@@ -1,5 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -18,29 +18,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-#
-# Factory functions
-#
-cdef inline Bounds bounds_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over Bounds objects."""
-    return bounds_factory(policy, <const qpol_typebounds_t *> symbol.obj)
-
-
-cdef inline Bounds bounds_factory(SELinuxPolicy policy, const qpol_typebounds_t *symbol):
-    """Factory function for creating Bounds objects."""
-    r = Bounds()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#def validate_ruletype(t):
-#    """Validate *bounds rule types."""
-#    try:
-#        return BoundsRuletype.lookup(t)
-#    except KeyError as ex:
-#        raise exception.InvalidBoundsType("{0} is not a valid *bounds rule type.".format(t)) from ex
-
 
 #
 # Classes
@@ -54,13 +31,24 @@ class BoundsRuletype(PolicyEnum):
 
 cdef class Bounds(PolicySymbol):
 
-    """A typebounds statement."""
+    """A bounds statement."""
 
-    cdef const qpol_typebounds_t *handle
-    cdef readonly object ruletype
+    cdef:
+        readonly object ruletype
+        readonly object parent
+        readonly object child
 
-    def __init__(self):
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, parent, child):
+        """Factory function for creating Bounds objects."""
+        b = Bounds(parent, child)
+        b.policy = policy
+        return b
+
+    def __init__(self, parent, child):
         self.ruletype = BoundsRuletype.typebounds
+        self.parent = parent
+        self.child = child
 
     def __str__(self):
         return "{0.ruletype} {0.parent} {0.child};".format(self)
@@ -68,29 +56,72 @@ cdef class Bounds(PolicySymbol):
     def __hash__(self):
         return hash("{0.ruletype}|{0.child};".format(self))
 
+    def __eq__(self, other):
+        return self.policy == other.policy \
+            and self.ruletype == other.ruletype \
+            and self.parent == other.parent \
+            and self.child == other.child
+
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
-    def _eq(self, Bounds other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
 
-    # TODO: look at qpol code to see if these functions
-    # can be converted to return symbols rather than names
-    @property
-    def parent(self):
-        cdef const char *name
-        if qpol_typebounds_get_parent_name(self.policy.handle, self.handle, &name):
-            raise RuntimeError("Could not get parent name")
+#
+# Iterators
+#
+cdef class TypeboundsIterator(HashtabIterator):
 
-        return self.policy.lookup_type(name)
+    """Iterate over typebounds rules in the policy."""
 
-    @property
-    def child(self):
-        pass
-        cdef const char *name
-        if qpol_typebounds_get_child_name(self.policy.handle, self.handle, &name):
-            raise RuntimeError("Could not get child name")
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating typebounds iterators."""
+        i = TypeboundsIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
 
-        return self.policy.lookup_type(name)
+    def __next__(self):
+        cdef sepol.type_datum_t *datum
+        super().__next__()
+
+        datum = <sepol.type_datum_t *> self.curr.datum
+        while datum.flavor != sepol.TYPE_TYPE or datum.bounds == 0:
+            super().__next__()
+            datum = <sepol.type_datum_t *> self.curr.datum
+
+        return Bounds.factory(self.policy,
+            Type.factory(self.policy, self.policy.handle.p.p.type_val_to_struct[datum.bounds - 1]),
+            Type.factory(self.policy, datum))
+
+    def __len__(self):
+        cdef sepol.type_datum_t *datum
+        cdef sepol.hashtab_node_t *node
+        cdef uint32_t bucket = 0
+        cdef size_t count = 0
+
+        while bucket < self.table[0].size:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.type_datum_t *>node.datum if node else NULL
+                if datum != NULL and datum.flavor == sepol.TYPE_TYPE and datum.bounds != 0:
+                    count += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
+    def reset(self):
+        cdef sepol.type_datum_t * datum
+
+        super().reset()
+
+        # advance over any attributes or aliases
+        datum = <sepol.type_datum_t *> self.node.datum
+        while datum != NULL and datum.flavor != sepol.TYPE_TYPE and datum.bounds == 0:
+            self._next_node()
+            datum = <sepol.type_datum_t *> self.node.datum

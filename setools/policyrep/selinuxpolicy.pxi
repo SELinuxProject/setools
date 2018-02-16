@@ -419,8 +419,7 @@ cdef class SELinuxPolicy:
     @property
     def typebounds_count(self):
         """The number of typebounds rules."""
-        return sum(1 for b in self.bounds()
-                   if b.ruletype == BoundsRuletype.typebounds)
+        return len(TypeboundsIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table))
 
     @property
     def user_count(self):
@@ -540,11 +539,7 @@ cdef class SELinuxPolicy:
 
     def bounds(self):
         """Iterator which yields all *bounds statements (typebounds, etc.)"""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_typebounds_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, bounds_factory_iter)
+        return TypeboundsIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table)
 
     def categories(self):
         """Iterator which yields all MLS categories."""
