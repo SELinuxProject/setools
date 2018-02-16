@@ -176,16 +176,6 @@ cdef extern from "include/qpol/constraint_query.h":
     int qpol_class_get_constraint_iter(const qpol_policy_t * policy, const qpol_class_t * obj_class, qpol_iterator_t ** constr)
     int qpol_class_get_validatetrans_iter(const qpol_policy_t * policy, const qpol_class_t * obj_class,  qpol_iterator_t ** vtrans)
 
-cdef extern from "include/qpol/ftrule_query.h":
-    ctypedef struct qpol_filename_trans_t:
-        pass
-    int qpol_policy_get_filename_trans_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_filename_trans_get_source_type(const qpol_policy_t * policy, const qpol_filename_trans_t * rule, const qpol_type_t ** source)
-    int qpol_filename_trans_get_target_type(const qpol_policy_t * policy, const qpol_filename_trans_t * rule, const qpol_type_t ** target)
-    int qpol_filename_trans_get_default_type(const qpol_policy_t * policy, const qpol_filename_trans_t * rule, const qpol_type_t ** dflt)
-    int qpol_filename_trans_get_object_class(const qpol_policy_t * policy, const qpol_filename_trans_t * rule, const qpol_class_t ** obj_class)
-    int qpol_filename_trans_get_filename(const qpol_policy_t * policy, const qpol_filename_trans_t * rule, const char ** name)
-
 cdef extern from "include/qpol/iterator.h":
     ctypedef struct qpol_iterator_t:
         pass

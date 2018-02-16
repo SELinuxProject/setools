@@ -643,12 +643,9 @@ cdef class SELinuxPolicy:
         if qpol_policy_get_terule_iter(self.handle, te_rule_types, &te_iter):
             raise MemoryError
 
-        if qpol_policy_get_filename_trans_iter(self.handle, &ft_iter):
-            raise MemoryError
-
         return chain(qpol_iterator_factory(self, av_iter, avrule_factory_iter),
                      qpol_iterator_factory(self, te_iter, terule_factory_iter),
-                     qpol_iterator_factory(self, ft_iter, filename_terule_factory_iter))
+                     FileNameTERuleIterator.factory(self, &self.handle.p.p.filename_trans))
 
     #
     # Constraints iterators

@@ -1,5 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -65,20 +65,6 @@ cdef inline TERule terule_factory_iter(SELinuxPolicy policy, QpolIteratorItem sy
 cdef inline TERule terule_factory(SELinuxPolicy policy, const qpol_terule_t *symbol):
     """Factory function for creating TERule objects."""
     r = TERule()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-#
-# Filename TE rule factory functions
-#
-cdef inline FileNameTERule filename_terule_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over FileNameTERule objects."""
-    return filename_terule_factory(policy, <const qpol_filename_trans_t *> symbol.obj)
-
-cdef inline FileNameTERule filename_terule_factory(SELinuxPolicy policy, const qpol_filename_trans_t *symbol):
-    """Factory function for creating TERule objects."""
-    r = FileNameTERule()
     r.policy = policy
     r.handle = symbol
     return r
@@ -629,11 +615,21 @@ cdef class FileNameTERule(PolicyRule):
     """A type_transition type enforcement rule with filename."""
 
     cdef:
-        const qpol_filename_trans_t *handle
+        sepol.filename_trans_t *handle
         readonly object ruletype
+        Type dft
 
-    def __init__(self):
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.filename_trans_t *symbol, sepol.type_datum_t *dft):
+        """Factory function for creating TERule objects."""
+        r = FileNameTERule(Type.factory(policy, dft))
+        r.policy = policy
+        r.handle = symbol
+        return r
+
+    def __init__(self, dft):
         self.ruletype = TERuletype.type_transition
+        self.dft = dft
 
     def __str__(self):
         rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
@@ -667,7 +663,7 @@ cdef class FileNameTERule(PolicyRule):
 
     def __deepcopy__(self, memo):
         # shallow copy as all of the members are immutable
-        newobj = filename_terule_factory(self.policy, self.handle)
+        newobj = FileNameTERule.factory(self.policy, self.handle, self.dft.handle)
         memo[id(self)] = newobj
         return newobj
 
@@ -682,7 +678,7 @@ cdef class FileNameTERule(PolicyRule):
         return <bytes>(<char *>self.handle)
 
     cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(qpol_filename_trans_t*))
+        memcpy(&self.handle, <char *>handle, sizeof(sepol.filename_trans_t*))
 
     def _eq(self, FileNameTERule other):
         """Low-level equality check (C pointers)."""
@@ -711,27 +707,12 @@ cdef class FileNameTERule(PolicyRule):
     @property
     def default(self):
         """The rule's default type."""
-        cdef sepol.filename_trans_datum_t *datum
-        datum = <sepol.filename_trans_datum_t *> hashtab_search(
-            self.policy.handle.p.p.filename_trans, <sepol.hashtab_key_t> self.handle)
-
-        if datum == NULL:
-            raise LowLevelPolicyError("Error reading default type for TE rule.")
-
-        return Type.factory(self.policy,
-            <sepol.type_datum_t *> self.policy.handle.p.p.type_val_to_struct[datum.otype - 1])
+        return self.dft
 
     @property
     def filename(self):
         """The type_transition rule's file name."""
-        cdef const char *name
-        if qpol_filename_trans_get_filename(self.policy.handle, self.handle, &name):
-            ex = LowLevelPolicyError("Error reading file name for type_transition rule: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return intern(name)
+        return intern(self.handle.name)
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
@@ -837,3 +818,25 @@ cdef class ExpandedFileNameTERule(FileNameTERule):
 
     def __lt__(self, other):
         return str(self) < str(other)
+
+
+#
+# Iterators
+#
+cdef class FileNameTERuleIterator(HashtabIterator):
+
+    """Iterate over FileNameTERules in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
+        """Factory function for creating FileNameTERule iterators."""
+        i = FileNameTERuleIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return FileNameTERule.factory(self.policy, <sepol.filename_trans_t *>self.curr.key,
+                                      <sepol.type_datum_t *>self.curr.datum)
