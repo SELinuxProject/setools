@@ -369,14 +369,12 @@ cdef class SELinuxPolicy:
     @property
     def role_allow_count(self):
         """The number of role allow rules."""
-        return sum(1 for r in self.rbacrules()
-                   if r.ruletype == RBACRuletype.allow)
+        return len(RoleAllowIterator.factory(self, self.handle.p.p.role_allow))
 
     @property
     def role_transition_count(self):
         """The number of role_transition rules."""
-        return sum(1 for r in self.rbacrules()
-                   if r.ruletype == RBACRuletype.role_transition)
+        return len(RoleTransitionIterator.factory(self, self.handle.p.p.role_tr))
 
     @property
     def range_transition_count(self):
@@ -603,16 +601,8 @@ cdef class SELinuxPolicy:
 
     def rbacrules(self):
         """Iterator over all RBAC rules."""
-        cdef qpol_iterator_t *ra_iter
-        if qpol_policy_get_role_allow_iter(self.handle, &ra_iter):
-            raise MemoryError
-
-        cdef qpol_iterator_t *rt_iter
-        if qpol_policy_get_role_trans_iter(self.handle, &rt_iter):
-            raise MemoryError
-
-        return chain(qpol_iterator_factory(self, ra_iter, role_allow_factory_iter),
-                     qpol_iterator_factory(self, rt_iter, role_trans_factory_iter))
+        return chain(RoleAllowIterator.factory(self, self.handle.p.p.role_allow),
+                     RoleTransitionIterator.factory(self, self.handle.p.p.role_tr))
 
     def terules(self):
         """Iterator over all type enforcement rules."""

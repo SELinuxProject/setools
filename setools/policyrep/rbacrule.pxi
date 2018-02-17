@@ -1,5 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
-# Copyright 2016-2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -19,62 +19,6 @@
 #
 
 #
-# Role allow factory functions
-#
-cdef inline RoleAllow role_allow_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over RoleAllow objects."""
-    return role_allow_factory(policy, <const qpol_role_allow_t *> symbol.obj)
-
-
-cdef inline RoleAllow role_allow_factory(SELinuxPolicy policy, const qpol_role_allow_t *symbol):
-    """Factory function for creating RoleAllow objects."""
-    r = RoleAllow()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-#
-# Role transition factory functions
-#
-cdef inline RoleTransition role_trans_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over RoleTransition objects."""
-    return role_trans_factory(policy, <const qpol_role_trans_t *> symbol.obj)
-
-
-cdef inline RoleTransition role_trans_factory(SELinuxPolicy policy, const qpol_role_trans_t *symbol):
-    """Factory function for creating RoleTransition objects."""
-    r = RoleTransition()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-#
-# Expanded RBAC rule factory functions
-#
-cdef inline ExpandedRoleAllow expanded_role_allow_factory(RoleAllow original, source, target):
-    """Factory function for creating ExpandedRoleAllow objects."""
-    r = ExpandedRoleAllow()
-    r.policy = original.policy
-    r.handle = original.handle
-    r.source = source
-    r.target = target
-    r.origin = original
-    return r
-
-
-cdef inline ExpandedRoleTransition expanded_role_trans_factory(RoleTransition original, source, target):
-    """Factory function for creating ExpandedRoleTransition objects."""
-    r = ExpandedRoleTransition()
-    r.policy = original.policy
-    r.handle = original.handle
-    r.source = source
-    r.target = target
-    r.origin = original
-    return r
-
-
-#
 # Classes
 #
 class RBACRuletype(PolicyEnum):
@@ -90,8 +34,16 @@ cdef class RoleAllow(PolicyRule):
     """A role allow rule."""
 
     cdef:
-        const qpol_role_allow_t *handle
+        sepol.role_allow_t *handle
         readonly object ruletype
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.role_allow_t *symbol):
+        """Factory function for creating RoleAllow objects."""
+        r = RoleAllow()
+        r.policy = policy
+        r.handle = symbol
+        return r
 
     def __init__(self):
         self.ruletype = RBACRuletype.allow
@@ -106,26 +58,14 @@ cdef class RoleAllow(PolicyRule):
     @property
     def source(self):
         """The rule's source role."""
-        cdef const qpol_role_t *r
-        if qpol_role_allow_get_source_role(self.policy.handle, self.handle, &r):
-            ex = LowLevelPolicyError("Error reading source role for role allow rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return Role.factory(self.policy, <sepol.role_datum_t *>r)
+        return Role.factory(self.policy,
+                            self.policy.handle.p.p.role_val_to_struct[self.handle.role - 1])
 
     @property
     def target(self):
         """The rule's target role."""
-        cdef const qpol_role_t *r
-        if qpol_role_allow_get_target_role(self.policy.handle, self.handle, &r):
-            ex = LowLevelPolicyError("Error reading target role for role allow rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return Role.factory(self.policy, <sepol.role_datum_t *>r)
+        return Role.factory(self.policy,
+                            self.policy.handle.p.p.role_val_to_struct[self.handle.new_role - 1])
 
     @property
     def tclass(self):
@@ -140,7 +80,14 @@ cdef class RoleAllow(PolicyRule):
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            yield expanded_role_allow_factory(self, s, t)
+            """Factory function for creating ExpandedRoleAllow objects."""
+            r = ExpandedRoleAllow()
+            r.policy = self.policy
+            r.handle = self.handle
+            r.source = s
+            r.target = t
+            r.origin = self
+            yield r
 
 
 cdef class RoleTransition(PolicyRule):
@@ -148,8 +95,16 @@ cdef class RoleTransition(PolicyRule):
     """A role_transition rule."""
 
     cdef:
-        const qpol_role_trans_t *handle
+        sepol.role_trans_t *handle
         readonly object ruletype
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.role_trans_t *symbol):
+        """Factory function for creating RoleTransition objects."""
+        r = RoleTransition()
+        r.policy = policy
+        r.handle = symbol
+        return r
 
     def __init__(self):
         self.ruletype = RBACRuletype.role_transition
@@ -164,55 +119,37 @@ cdef class RoleTransition(PolicyRule):
     @property
     def source(self):
         """The rule's source role."""
-        cdef const qpol_role_t *r
-        if qpol_role_trans_get_source_role(self.policy.handle, self.handle, &r):
-            ex = LowLevelPolicyError("Error reading source role for role_transition rule: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return Role.factory(self.policy, <sepol.role_datum_t *>r)
+        return Role.factory(self.policy,
+                            self.policy.handle.p.p.role_val_to_struct[self.handle.role - 1])
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_role_trans_get_target_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading target type/attr for role_transition rule: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, <sepol.type_datum_t *>t)
+        return type_or_attr_factory(self.policy,
+                                    self.policy.handle.p.p.type_val_to_struct[self.handle.type - 1])
 
     @property
     def tclass(self):
         """The rule's object class."""
-        cdef const qpol_class_t *c
-        if qpol_role_trans_get_object_class(self.policy.handle, self.handle, &c):
-            ex = LowLevelPolicyError("Error reading class for role_transition rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return ObjClass.factory(self.policy, <sepol.class_datum_t *>c)
+        return ObjClass.factory(self.policy,
+                                self.policy.handle.p.p.class_val_to_struct[self.handle.tclass - 1])
 
     @property
     def default(self):
         """The rule's default role."""
-        cdef const qpol_role_t *r
-        if qpol_role_trans_get_default_role(self.policy.handle, self.handle, &r):
-            ex = LowLevelPolicyError("Error reading default role for role_transition rule: {}".
-                                     format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return Role.factory(self.policy, <sepol.role_datum_t *>r)
+        return Role.factory(self.policy,
+                            self.policy.handle.p.p.role_val_to_struct[self.handle.new_role - 1])
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            yield expanded_role_trans_factory(self, s, t)
+            r = ExpandedRoleTransition()
+            r.policy = self.policy
+            r.handle = self.handle
+            r.source = s
+            r.target = t
+            r.origin = self
+            yield r
 
 
 cdef class ExpandedRoleAllow(RoleAllow):
@@ -253,3 +190,90 @@ cdef class ExpandedRoleTransition(RoleTransition):
 
     def __lt__(self, other):
         return str(self) < str(other)
+
+
+#
+# Iterators
+#
+cdef class RoleAllowIterator(PolicyIterator):
+
+    """Role allow rule iterator."""
+
+    cdef:
+        sepol.role_allow_t *head
+        sepol.role_allow_t *curr
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.role_allow_t *head):
+        """Role allow rule iterator factory."""
+        i = RoleAllowIterator()
+        i.policy = policy
+        i.head = head
+        i.reset()
+        return i
+
+    def __next__(self):
+        if self.curr == NULL:
+            raise StopIteration
+
+        item = RoleAllow.factory(self.policy, self.curr)
+        self.curr = self.curr.next
+        return item
+
+    def __len__(self):
+        cdef:
+            sepol.role_allow_t *curr
+            size_t count = 0
+
+        curr = self.head
+        while curr != NULL:
+             count += 1
+             curr = curr.next
+
+        return count
+
+    def reset(self):
+        """Reset the iterator back to the start."""
+        self.curr = self.head
+
+
+cdef class RoleTransitionIterator(PolicyIterator):
+
+    """Role transition rule iterator."""
+
+    cdef:
+        sepol.role_trans_t *head
+        sepol.role_trans_t *curr
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.role_trans_t *head):
+        """Role transition rule iterator factory."""
+        i = RoleTransitionIterator()
+        i.policy = policy
+        i.head = head
+        i.reset()
+        return i
+
+    def __next__(self):
+        if self.curr == NULL:
+            raise StopIteration
+
+        item = RoleTransition.factory(self.policy, self.curr)
+        self.curr = self.curr.next
+        return item
+
+    def __len__(self):
+        cdef:
+            sepol.role_trans_t *curr
+            size_t count = 0
+
+        curr = self.head
+        while curr != NULL:
+             count += 1
+             curr = curr.next
+
+        return count
+
+    def reset(self):
+        """Reset the iterator back to the start."""
+        self.curr = self.head
