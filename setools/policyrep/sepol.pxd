@@ -192,6 +192,10 @@ cdef extern from "<sepol/policydb/avtab.h>":
     ctypedef avtab avtab_t
 
 
+cdef extern from "<sepol/policydb/util.h>":
+    char *sepol_av_to_string(policydb *policydbp, uint32_t tclass, uint32_t av)
+
+
 cdef extern from "<sepol/policydb/mls_types.h>":
     #
     # mls_level_t

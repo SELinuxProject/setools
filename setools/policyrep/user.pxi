@@ -83,14 +83,14 @@ cdef class User(PolicySymbol):
 #
 # Iterator Classes
 #
-cdef class UserIterator(HashtabIterator):
+cdef class UserHashtabIterator(HashtabIterator):
 
     """Iterate over users in the policy."""
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
         """Factory function for creating User iterators."""
-        i = UserIterator()
+        i = UserHashtabIterator()
         i.policy = policy
         i.table = table
         i.reset()
@@ -99,3 +99,21 @@ cdef class UserIterator(HashtabIterator):
     def __next__(self):
         super().__next__()
         return User.factory(self.policy, <sepol.user_datum_t *>self.curr.datum)
+
+
+cdef class UserEbitmapIterator(EbitmapIterator):
+
+    """Iterate over a user ebitmap."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ebitmap_t *bmap):
+        """Factory function for creating User ebitmap iterators."""
+        i = UserEbitmapIterator()
+        i.policy = policy
+        i.bmap = bmap
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return User.factory(self.policy, self.policy.handle.p.p.user_val_to_struct[self.bit])

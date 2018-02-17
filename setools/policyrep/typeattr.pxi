@@ -416,3 +416,32 @@ cdef class TypeAttributeEbitmapIterator(EbitmapIterator):
         super().__next__()
         return TypeAttribute.factory(self.policy,
                                      self.policy.handle.p.p.type_val_to_struct[self.bit])
+
+
+cdef class TypeOrAttributeEbitmapIterator(EbitmapIterator):
+
+    """Iterate over a type or type attribute ebitmap."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ebitmap_t *bmap):
+        """Factory function for creating TypeAttributeEbitmapIterator."""
+        i = TypeOrAttributeEbitmapIterator()
+        i.policy = policy
+        i.bmap = bmap
+        i.reset()
+        return i
+
+    @staticmethod
+    cdef factory_from_set(SELinuxPolicy policy, sepol.type_set_t *symbol):
+        """Factory function for creating TypeAttributeEbitmapIterator from a type set."""
+        if symbol.flags:
+            warnings.warn("* or ~ in the type set; this is not implemented in SETools.")
+        if symbol.negset.node != NULL:
+            warnings.warn("Negations in the type set; this is not implemented in SETools.")
+
+        return TypeOrAttributeEbitmapIterator.factory(policy, &symbol.types)
+
+    def __next__(self):
+        super().__next__()
+        return type_or_attr_factory(self.policy,
+                                    self.policy.handle.p.p.type_val_to_struct[self.bit])

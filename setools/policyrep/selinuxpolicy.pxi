@@ -584,7 +584,7 @@ cdef class SELinuxPolicy:
 
     def users(self):
         """Iterator which yields all roles."""
-        return UserIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_USERS].table)
+        return UserHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_USERS].table)
 
     #
     # Policy rules iterators
@@ -643,16 +643,9 @@ cdef class SELinuxPolicy:
     #
     def constraints(self):
         """Iterator over all constraints (regular and MLS)."""
-        cdef qpol_iterator_t *c_iter
-        if qpol_policy_get_constraint_iter(self.handle, &c_iter):
-            raise MemoryError
-
-        cdef qpol_iterator_t *v_iter
-        if qpol_policy_get_validatetrans_iter(self.handle, &v_iter):
-            raise MemoryError
-
-        return chain(qpol_iterator_factory(self, c_iter, constraint_factory_iter),
-                     qpol_iterator_factory(self, v_iter, validatetrans_factory_iter))
+        for c in self.classes():
+            yield from c.constraints()
+            yield from c.validatetrans()
 
     #
     # In-policy Labeling statement iterators

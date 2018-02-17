@@ -51,7 +51,7 @@ cdef class Common(PolicySymbol):
     @property
     def perms(self):
         """The set of the common's permissions."""
-        return set(PermissionIterator.factory(self.policy, &self.handle.permissions.table))
+        return set(PermissionHashtabIterator.factory(self.policy, &self.handle.permissions.table))
 
     def statement(self):
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
@@ -104,16 +104,9 @@ cdef class ObjClass(PolicySymbol):
         else:
             raise NoCommon("{0} does not inherit a common.".format(self))
 
-    @property
     def constraints(self):
-        """The constraints that apply to this class."""
-        cdef qpol_iterator_t *iter
-        if qpol_class_get_constraint_iter(self.policy.handle, <const qpol_class_t *>self.handle, &iter):
-            ex = LowLevelPolicyError("Error reading class constraints: {}".format(strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return qpol_iterator_factory(self.policy, iter, constraint_factory_iter)
+        """Iterator for the constraints that apply to this class."""
+        return ConstraintIterator.factory(self.policy, self, self.handle.constraints)
 
     def defaults(self):
         """Iterator for the defaults for this object class."""
@@ -132,7 +125,7 @@ cdef class ObjClass(PolicySymbol):
     @property
     def perms(self):
         """The set of the object class's permissions."""
-        return set(PermissionIterator.factory(self.policy, &self.handle.permissions.table))
+        return set(PermissionHashtabIterator.factory(self.policy, &self.handle.permissions.table))
 
     def statement(self):
         stmt = "class {0}\n".format(self)
@@ -149,17 +142,9 @@ cdef class ObjClass(PolicySymbol):
 
         return stmt
 
-    @property
     def validatetrans(self):
-        """The validatetrans that apply to this class."""
-        cdef qpol_iterator_t *iter
-        if qpol_class_get_validatetrans_iter(self.policy.handle, <const qpol_class_t *>self.handle, &iter):
-            ex = LowLevelPolicyError("Error reading class validatetranses: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return qpol_iterator_factory(self.policy, iter, validatetrans_factory_iter)
+        """Iterator for validatetrans that apply to this class."""
+        return ValidatetransIterator.factory(self.policy, self, self.handle.validatetrans)
 
 
 #
@@ -201,14 +186,14 @@ cdef class ObjClassHashtabIterator(HashtabIterator):
         return ObjClass.factory(self.policy, <sepol.class_datum_t *>self.curr.datum)
 
 
-cdef class PermissionIterator(HashtabIterator):
+cdef class PermissionHashtabIterator(HashtabIterator):
 
     """Iterate over permissions."""
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
         """Factory function for creating Permission iterators."""
-        i = PermissionIterator()
+        i = PermissionHashtabIterator()
         i.policy = policy
         i.table = table
         i.reset()
@@ -217,3 +202,57 @@ cdef class PermissionIterator(HashtabIterator):
     def __next__(self):
         super().__next__()
         return intern(self.curr.key)
+
+
+cdef class PermissionVectorIterator(PolicyIterator):
+
+    """Iterate over an access (permission) vector"""
+
+    cdef:
+        uint32_t vector
+        uint32_t curr
+        uint32_t perm_max
+        ObjClass tclass
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, ObjClass tclass, uint32_t vector):
+        """Factory method for access vectors."""
+        i = PermissionVectorIterator()
+        i.policy = policy
+        i.vector = vector
+        i.perm_max = tclass.handle.permissions.nprim
+        i.tclass = tclass
+        i.reset()
+        return i
+
+    def __next__(self):
+        cdef:
+            const char* cname
+
+        if not self.curr < self.perm_max:
+            raise StopIteration
+
+        cname = sepol.sepol_av_to_string(&self.policy.handle.p.p, self.tclass.handle.s.value,
+                                         1 << self.curr)
+
+        self.curr += 1
+        while self.curr < self.perm_max and not self.vector & (1 << self.curr):
+            self.curr += 1
+
+        # sepol_av_to string prepends a space
+        return intern(cname + 1)
+
+    def __len__(self):
+        cdef:
+            uint32_t count = 0
+            uint32_t curr = 0
+
+        while curr < self.perm_max:
+            if self.vector & (1 << curr):
+                count += 1
+
+    def reset(self):
+        """Reset the iterator back to the start."""
+        self.curr = 0
+        while self.curr < self.perm_max and not self.vector & (1 << self.curr):
+            self.curr += 1
