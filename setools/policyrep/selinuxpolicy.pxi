@@ -589,11 +589,7 @@ cdef class SELinuxPolicy:
     #
     def conditionals(self):
         """Iterator over all conditional rule blocks."""
-        cdef qpol_iterator_t *iter
-        if qpol_policy_get_cond_iter(self.handle, &iter):
-            raise MemoryError
-
-        return qpol_iterator_factory(self, iter, conditional_factory_iter)
+        return ConditionalIterator.factory(self, self.handle.p.p.cond_list)
 
     def mlsrules(self):
         """Iterator over all MLS rules."""

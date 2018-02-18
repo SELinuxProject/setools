@@ -116,24 +116,6 @@ cdef extern from "include/qpol/cond_query.h":
         pass
     ctypedef struct qpol_cond_expr_node_t:
         pass
-    cdef int QPOL_COND_RULE_LIST
-    cdef int QPOL_COND_RULE_ENABLED
-    int qpol_policy_get_cond_iter(const qpol_policy_t * policy, qpol_iterator_t ** iter)
-    int qpol_cond_get_expr_node_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, qpol_iterator_t ** iter)
-    int qpol_cond_get_av_true_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask, qpol_iterator_t ** iter)
-    int qpol_cond_get_te_true_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask, qpol_iterator_t ** iter)
-    int qpol_cond_get_av_false_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask, qpol_iterator_t ** iter)
-    int qpol_cond_get_te_false_iter(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t rule_type_mask, qpol_iterator_t ** iter)
-    int qpol_cond_eval(const qpol_policy_t * policy, const qpol_cond_t * cond, uint32_t * is_true)
-    cdef int QPOL_COND_EXPR_BOOL
-    cdef int QPOL_COND_EXPR_NOT
-    cdef int QPOL_COND_EXPR_OR
-    cdef int QPOL_COND_EXPR_AND
-    cdef int QPOL_COND_EXPR_XOR
-    cdef int QPOL_COND_EXPR_EQ
-    cdef int QPOL_COND_EXPR_NEQ
-    int qpol_cond_expr_node_get_expr_type(const qpol_policy_t * policy, const qpol_cond_expr_node_t * node, uint32_t * expr_type)
-    int qpol_cond_expr_node_get_bool(const qpol_policy_t * policy, const qpol_cond_expr_node_t * node, qpol_bool_t ** cond_bool)
 
 cdef extern from "include/qpol/constraint_query.h":
     ctypedef struct qpol_constraint_t:

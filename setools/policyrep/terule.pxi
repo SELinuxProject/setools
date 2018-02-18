@@ -274,7 +274,7 @@ cdef class AVRule(PolicyRule):
             raise ex
 
         if c:
-            return conditional_factory(self.policy, c)
+            return Conditional.factory(self.policy, <sepol.cond_node_t *>c)
         else:
             raise RuleNotConditional
 
@@ -567,7 +567,7 @@ cdef class TERule(PolicyRule):
             raise ex
 
         if c:
-            return conditional_factory(self.policy, c)
+            return Conditional.factory(self.policy, <sepol.cond_node_t *>c)
         else:
             raise RuleNotConditional
 
