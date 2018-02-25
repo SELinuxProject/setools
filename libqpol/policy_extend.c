@@ -310,78 +310,6 @@ static int qpol_policy_fill_attr_holes(qpol_policy_t * policy)
 	return STATUS_ERR;
 }
 
-static const char *const sidnames[] = {
-	"undefined",
-	"kernel",
-	"security",
-	"unlabeled",
-	"fs",
-	"file",
-	"file_labels",
-	"init",
-	"any_socket",
-	"port",
-	"netif",
-	"netmsg",
-	"node",
-	"igmp_packet",
-	"icmp_socket",
-	"tcp_socket",
-	"sysctl_modprobe",
-	"sysctl",
-	"sysctl_fs",
-	"sysctl_kernel",
-	"sysctl_net",
-	"sysctl_net_unix",
-	"sysctl_vm",
-	"sysctl_dev",
-	"kmod",
-	"policy",
-	"scmp_packet",
-	"devnull"
-};
-
-/**
- *  Uses names from flask to fill in the isid names which are not normally
- *  saved. This function modified the policydb.
- *  @param policy Policy to which to add sid names.
- *  This policy will be altered by this function.
- *  @return 0 on success and < 0 on failure; if the call fails,
- *  errno will be set. On failure, the policy state may be inconsistent.
- */
-static int qpol_policy_add_isid_names(qpol_policy_t * policy)
-{
-	policydb_t *db = NULL;
-	ocontext_t *sid = NULL;
-	uint32_t val = 0;
-	int error = 0;
-
-	if (policy == NULL) {
-		ERR(policy, "%s", strerror(EINVAL));
-		errno = EINVAL;
-		return STATUS_ERR;
-	}
-
-	db = &policy->p->p;
-
-	for (sid = db->ocontexts[OCON_ISID]; sid; sid = sid->next) {
-		val = (uint32_t) sid->sid[0];
-		if (val > SECINITSID_NUM)
-			val = 0;
-
-		if (!sid->u.name) {
-			sid->u.name = strdup(sidnames[val]);
-			if (!sid->u.name) {
-				error = errno;
-				ERR(policy, "%s", strerror(error));
-				errno = error;
-				return STATUS_ERR;
-			}
-		}
-	}
-
-	return 0;
-}
 
 int policy_extend(qpol_policy_t * policy)
 {
@@ -415,11 +343,6 @@ int policy_extend(qpol_policy_t * policy)
 				goto err;
 			}
 		}
-	}
-	retv = qpol_policy_add_isid_names(policy);
-	if (retv) {
-		error = errno;
-		goto err;
 	}
 
 	return STATUS_SUCCESS;

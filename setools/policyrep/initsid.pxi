@@ -18,9 +18,28 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+#
+# Constants
+#
+# Binary policy does not contain the SID names
+SELINUX_SIDNAMES = ("undefined", "kernel", "security", "unlabeled", "fs", "file", "file_labels",
+    "init", "any_socket", "port", "netif", "netmsg", "node", "igmp_packet", "icmp_socket",
+    "tcp_socket", "sysctl_modprobe", "sysctl", "sysctl_fs", "sysctl_kernel", "sysctl_net",
+    "sysctl_net_unix", "sysctl_vm", "sysctl_dev", "kmod", "policy", "scmp_packet", "devnull")
+
+
+XEN_SIDNAMES = ("xen", "dom0", "domxen", "domio", "unlabeled", "security", "irq", "iomem", "ioport",
+    "device", "domU", "domDM")
+
+
+#
+# Classes
+#
 cdef class InitialSID(Ocontext):
 
     """An initial SID statement."""
+
+    cdef str name
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.ocontext *symbol):
@@ -28,10 +47,20 @@ cdef class InitialSID(Ocontext):
         i = InitialSID()
         i.policy = policy
         i.handle = symbol
+
+        if symbol.u.name:
+            i.name = intern(symbol.u.name)
+        elif policy.target_platform == PolicyTarget.selinux:
+            i.name = SELINUX_SIDNAMES[<uint32_t>symbol.sid[0]]
+        elif policy.target_platform == PolicyTarget.xen:
+            i.name = XEN_SIDNAMES[<uint32_t>symbol.sid[0]]
+        else:
+            raise NotImplementedError
+
         return i
 
     def __str__(self):
-        return intern(self.handle.u.name)
+        return self.name
 
 
 cdef class InitialSIDIterator(OcontextIterator):
