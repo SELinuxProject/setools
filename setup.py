@@ -66,11 +66,8 @@ else:
 
 ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
                          ['setools/policyrep/libpolicyrep.pyx',
-                          'libqpol/avrule_query.c',
-                          'libqpol/iterator.c',
                           'libqpol/policy.c',
-                          'libqpol/policy_extend.c',
-                          'libqpol/terule_query.c'],
+                          'libqpol/policy_extend.c'],
                          include_dirs=include_dirs,
                          libraries=['selinux'],
                          extra_compile_args=['-Werror', '-Wextra',

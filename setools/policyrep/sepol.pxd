@@ -440,6 +440,8 @@ cdef extern from "<sepol/policydb/policydb.h>":
 
     ctypedef av_extended_perms av_extended_perms_t
 
+    cdef bint xperm_test(size_t x, uint32_t *perms)
+
     #
     # avrule_t
     #

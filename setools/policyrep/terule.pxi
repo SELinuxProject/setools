@@ -19,109 +19,6 @@
 #
 import itertools
 
-#
-# AV rule factory functions
-#
-cdef inline AVRule avrule_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over AVRule objects."""
-    cdef const qpol_avrule_t *rule = <const qpol_avrule_t *> symbol.obj
-    cdef uint32_t extended
-
-    if qpol_avrule_get_is_extended(policy.handle, rule, &extended):
-        ex = LowLevelPolicyError("Error determining if av rule is extended: {}".format(
-                                 strerror(errno)))
-        ex.errno = errno
-        raise ex
-
-    if extended:
-        return avrulex_factory(policy, rule)
-    else:
-        return avrule_factory(policy, rule)
-
-
-cdef inline AVRule avrule_factory(SELinuxPolicy policy, const qpol_avrule_t *symbol):
-    """Factory function for creating AVRule objects."""
-    r = AVRule()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-
-cdef inline AVRuleXperm avrulex_factory(SELinuxPolicy policy, const qpol_avrule_t *symbol):
-    """Factory function for creating AVRuleXperm objects."""
-    r = AVRuleXperm()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-#
-# TE rule factory functions
-#
-cdef inline TERule terule_factory_iter(SELinuxPolicy policy, QpolIteratorItem symbol):
-    """Factory function variant for iterating over TERule objects."""
-    return terule_factory(policy, <const qpol_terule_t *> symbol.obj)
-
-
-cdef inline TERule terule_factory(SELinuxPolicy policy, const qpol_terule_t *symbol):
-    """Factory function for creating TERule objects."""
-    r = TERule()
-    r.policy = policy
-    r.handle = symbol
-    return r
-
-#
-# Extended permission set iterator factory function
-#
-cdef inline int xperms_factory_iter(SELinuxPolicy _, QpolIteratorItem item):
-        cdef int *obj = <int *>item.obj
-        cdef int i = obj[0]
-
-        # The library allocates integers while reading out the bitmap
-        free(item.obj)
-
-        return i
-
-
-#
-# Expanded TE rule factory functions
-#
-cdef expanded_avrule_factory(AVRule original, source, target):
-    """Factory function for creating ExpandedAVRule objects."""
-    if original.extended:
-        r = ExpandedAVRuleXperm()
-    else:
-        r = ExpandedAVRule()
-
-    r.policy = original.policy
-    r.handle = original.handle
-    r.source = source
-    r.target = target
-    r.origin = original
-    r.perms = original.perms
-    return r
-
-
-cdef expanded_terule_factory(TERule original, source, target):
-    """Factory function for creating ExpandedTERule objects."""
-    r = ExpandedTERule()
-    r.policy = original.policy
-    r.handle = original.handle
-    r.source = source
-    r.target = target
-    r.origin = original
-    return r
-
-
-cdef expanded_filename_terule_factory(FileNameTERule original, source, target):
-    """Factory function for creating ExpandedTERule objects."""
-    r = ExpandedFileNameTERule()
-    r.policy = original.policy
-    r.handle = original.handle
-    r.source = source
-    r.target = target
-    r.origin = original
-    return r
-
 
 #
 # Classes
@@ -130,24 +27,112 @@ class TERuletype(PolicyEnum):
 
     """Enumeration of types of TE rules."""
 
-    allow = QPOL_RULE_ALLOW
-    neverallow = QPOL_RULE_NEVERALLOW
-    auditallow = QPOL_RULE_AUDITALLOW
-    dontaudit = QPOL_RULE_DONTAUDIT
-    allowxperm = QPOL_RULE_XPERMS_ALLOW
-    neverallowxperm = QPOL_RULE_XPERMS_NEVERALLOW
-    auditallowxperm = QPOL_RULE_XPERMS_AUDITALLOW
-    dontauditxperm = QPOL_RULE_XPERMS_DONTAUDIT
-    type_transition = QPOL_RULE_TYPE_TRANS
-    type_change = QPOL_RULE_TYPE_CHANGE
-    type_member = QPOL_RULE_TYPE_MEMBER
+    allow = sepol.AVTAB_ALLOWED
+    neverallow = sepol.AVTAB_NEVERALLOW
+    auditallow = sepol.AVTAB_AUDITALLOW
+    dontaudit = sepol.AVTAB_AUDITDENY
+    allowxperm = sepol.AVTAB_XPERMS_ALLOWED
+    neverallowxperm = sepol.AVTAB_XPERMS_NEVERALLOW
+    auditallowxperm = sepol.AVTAB_XPERMS_AUDITALLOW
+    dontauditxperm = sepol.AVTAB_XPERMS_DONTAUDIT
+    type_transition = sepol.AVTAB_TRANSITION
+    type_change = sepol.AVTAB_CHANGE
+    type_member = sepol.AVTAB_MEMBER
 
 
-cdef class AVRule(PolicyRule):
+cdef class BaseTERule(PolicyRule):
+
+    """Base class for TE rules."""
+
+    cdef:
+        sepol.avtab_key_t *key
+        sepol.avtab_datum_t *datum
+        object _conditional
+        object _conditional_block
+
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".format(
+            self, self._conditional, self._conditional_block))
+
+    def _eq(self, BaseTERule other):
+        return self.key == other.key and self.datum == other.datum
+
+    @property
+    def ruletype(self):
+        """The rule type."""
+        # mask the enabled bit for the ruletype lookup in conditional rules
+        return TERuletype(self.key.specified & ~sepol.AVTAB_ENABLED)
+
+    @property
+    def source(self):
+        """The rule's source type/attribute."""
+        return type_or_attr_factory(
+            self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.source_type - 1])
+
+    @property
+    def target(self):
+        """The rule's target type/attribute."""
+        return type_or_attr_factory(
+            self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.target_type - 1])
+
+    @property
+    def tclass(self):
+        """The rule's object class."""
+        return ObjClass.factory(self.policy,
+            self.policy.handle.p.p.class_val_to_struct[self.key.target_class - 1])
+
+    @property
+    def filename(self):
+        """The type_transition rule's file name."""
+        # Since name type_transitions have a different
+        # class, this is always an error.
+        if self.ruletype == TERuletype.type_transition:
+            raise TERuleNoFilename
+        else:
+            raise RuleUseError("{0} rules do not have file names".format(self.ruletype))
+
+    @property
+    def conditional(self):
+        """The rule's conditional expression."""
+        if self._conditional is None:
+            raise RuleNotConditional
+        else:
+            return self._conditional
+
+    @property
+    def conditional_block(self):
+        """
+        The conditional block of the rule (T/F)
+
+        For example, if the policy looks like this:
+
+        if ( the_conditional_expression ) {
+            If the rule is here, this property is True
+        } else {
+            If the rule is here, this property is False
+        }
+        """
+        if self._conditional_block is None:
+            raise RuleNotConditional
+        else:
+            return self._conditional_block
+
+
+cdef class AVRule(BaseTERule):
 
     """An access vector type enforcement rule."""
 
-    cdef const qpol_avrule_t *handle
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
+                 conditional, conditional_block):
+        """Factory function for creating AVRule objects."""
+        r = AVRule()
+        r.policy = policy
+        r.key = key
+        r.datum = datum
+        r._conditional = conditional
+        r._conditional_block = conditional_block
+        return r
 
     def __str__(self):
         rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
@@ -167,92 +152,38 @@ cdef class AVRule(PolicyRule):
 
         return rule_string
 
-    def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".format(
-            self, cond, cond_block))
-
     def __lt__(self, other):
         return str(self) < str(other)
 
     def __deepcopy__(self, memo):
         # shallow copy as all of the members are immutable
-        newobj = avrule_factory(self.policy, self.handle)
+        newobj = AVRule.factory(self.policy, self.key, self.datum, self._conditional,
+                                self._conditional_block)
         memo[id(self)] = newobj
         return newobj
 
     def __getstate__(self):
-        return (self.policy, self._pickle())
+        return self._pickle()
 
     def __setstate__(self, state):
-        self.policy = state[0]
-        self._unpickle(state[1])
+        self._unpickle(state)
 
-    cdef bytes _pickle(self):
-        return <bytes>(<char *>self.handle)
+    cdef _pickle(self):
+        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
+            self._conditional, self._conditional_block
 
-    cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(qpol_avrule_t*))
-
-    def _eq(self, AVRule other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def ruletype(self):
-        """The rule type."""
-        cdef uint32_t rt
-        if qpol_avrule_get_rule_type(self.policy.handle, self.handle, &rt):
-            ex = LowLevelPolicyError("Error reading rule type for AV rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return TERuletype(rt)
-
-    @property
-    def source(self):
-        """The rule's source type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_avrule_get_source_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading source type/attr for AV rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, <sepol.type_datum_t *> t)
-
-    @property
-    def target(self):
-        """The rule's target type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_avrule_get_target_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading target type/attr for AV rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, <sepol.type_datum_t *> t)
-
-    @property
-    def tclass(self):
-        """The rule's object class."""
-        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[(<sepol.avtab_ptr_t>self.handle).key.target_class - 1])
+    cdef _unpickle(self, objs):
+        self.policy = objs[0]
+        memcpy(&self.key, <char *>objs[1], sizeof(sepol.avtab_key_t*))
+        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.avtab_datum_t*))
+        self._conditional = objs[3]
+        self._conditional_block = objs[4]
 
     @property
     def perms(self):
         """The rule's permission set."""
-        cdef qpol_iterator_t *iter
-        if qpol_avrule_get_perm_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return set(qpol_iterator_factory(self.policy, iter, string_factory_iter))
+        return set(p for p in PermissionVectorIterator.factory(self.policy, self.tclass,
+            ~self.datum.data if self.key.specified & sepol.AVTAB_AUDITDENY else self.datum.data))
 
     @property
     def default(self):
@@ -263,58 +194,20 @@ cdef class AVRule(PolicyRule):
     def filename(self):
         raise RuleUseError("{0} rules do not have file names".format(self.ruletype))
 
-    @property
-    def conditional(self):
-        """The rule's conditional expression."""
-        cdef const qpol_cond_t *c
-        if qpol_avrule_get_cond(self.policy.handle, self.handle, &c):
-            ex = LowLevelPolicyError("Error reading AV rule conditional: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        if c:
-            return Conditional.factory(self.policy, <sepol.cond_node_t *>c)
-        else:
-            raise RuleNotConditional
-
-    @property
-    def conditional_block(self):
-        """
-        The conditional block of the rule (T/F)
-
-        For example, if the policy looks like this:
-
-        if ( the_conditional_expression ) {
-            If the rule is here, this property is True
-        } else {
-            If the rule is here, this property is False
-        }
-        """
-        cdef const qpol_cond_t *c
-        cdef uint32_t which
-
-        if qpol_avrule_get_cond(self.policy.handle, self.handle, &c):
-            ex = LowLevelPolicyError("Error reading AV rule conditional: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        if not c:
-            raise RuleNotConditional
-
-        if qpol_avrule_get_which_list(self.policy.handle, self.handle, &which):
-            ex = LowLevelPolicyError("Error reading AV rule conditional block: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return bool(which)
-
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            yield expanded_avrule_factory(self, s, t)
+            r = ExpandedAVRule()
+            r.policy = self.policy
+            r.key = self.key
+            r.datum = self.datum
+            r.source = s
+            r.target = t
+            r.origin = self
+            r.perms = self.perms
+            r._conditional = self._conditional
+            r._conditional_block = self._conditional_block
+            yield r
 
 
 cdef class IoctlSet(set):
@@ -375,6 +268,18 @@ cdef class AVRuleXperm(AVRule):
 
     """An extended permission access vector type enforcement rule."""
 
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
+                 conditional, conditional_block):
+        """Factory function for creating AVRule objects."""
+        r = AVRuleXperm()
+        r.policy = policy
+        r.key = key
+        r.datum = datum
+        r._conditional = conditional
+        r._conditional_block = conditional_block
+        return r
+
     def __init__(self):
         self.extended = True
 
@@ -391,52 +296,104 @@ cdef class AVRuleXperm(AVRule):
 
         return rule_string
 
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}|{1}|{2}".
+            format(self, self._conditional, self._conditional_block))
+
     def __lt__(self, other):
         return str(self) < str(other)
 
     def __deepcopy__(self, memo):
         # shallow copy as all of the members are immutable
-        newobj = avrulex_factory(self.policy, self.handle)
+        newobj = AVRuleXperm.factory(self.policy, self.key, self.datum, self._conditional,
+                                     self._conditional_block)
         memo[id(self)] = newobj
         return newobj
 
     def __getstate__(self):
-        return (self.policy, self._pickle())
+        return self._pickle()
 
     def __setstate__(self, state):
-        self.policy = state[0]
-        self._unpickle(state[1])
+        self._unpickle(state)
 
-    cdef bytes _pickle(self):
-        return <bytes>(<char *>self.handle)
+    cdef _pickle(self):
+        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
+            self._conditional, self._conditional_block
 
-    cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(qpol_avrule_t*))
-
-    @property
-    def perms(self):
-        """The rule's extended permission set."""
-        cdef qpol_iterator_t *iter
-        if qpol_avrule_get_xperm_iter(self.policy.handle, self.handle, &iter):
-            raise MemoryError
-
-        return IoctlSet(qpol_iterator_factory(self.policy, iter, xperms_factory_iter))
+    cdef _unpickle(self, objs):
+        self.policy = objs[0]
+        memcpy(&self.key, <char *>objs[1], sizeof(sepol.avtab_key_t*))
+        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.avtab_datum_t*))
+        self._conditional = objs[3]
+        self._conditional_block = objs[4]
 
     @property
     def xperm_type(self):
         """The standard permission extended by these permissions (e.g. ioctl)."""
-        cdef char *xt
-        if qpol_avrule_get_xperm_type(self.policy.handle, self.handle, &xt):
-            raise ValueError("Could not get xperm type for av rule")
+        if self.datum.xperms == NULL:
+            raise LowLevelPolicyError("Extended permission information is NULL")
 
-        return intern(xt)
+        if self.datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLFUNCTION \
+            or self.datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLDRIVER:
+            return intern("ioctl")
+        else:
+            raise LowLevelPolicyError("Unknown extended permission: {}".format(
+                                      self.datum.xperms.specified))
+
+    @property
+    def perms(self):
+        """The rule's extended permission set."""
+        cdef:
+            sepol.avtab_extended_perms_t *xperms = self.datum.xperms
+            IoctlSet ret = IoctlSet()
+            size_t curr = 0
+            size_t len = sizeof(xperms.perms) * sepol.EXTENDED_PERMS_LEN
+
+        while curr < len:
+            if sepol.xperm_test(curr, xperms.perms):
+                if xperms.specified & sepol.AVTAB_XPERMS_IOCTLFUNCTION:
+                    ret.add(xperms.driver << 8 | curr)
+                elif xperms.specified & sepol.AVTAB_XPERMS_IOCTLDRIVER:
+                    ret.add(curr << 8)
+                else:
+                    raise LowLevelPolicyError("Unknown extended permission: {}".format(
+                                              xperms.specified))
+
+            curr += 1
+
+        return ret
+
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        for s, t in itertools.product(self.source.expand(), self.target.expand()):
+            r = ExpandedAVRuleXperm()
+            r.policy = self.policy
+            r.key = self.key
+            r.datum = self.datum
+            r.source = s
+            r.target = t
+            r.origin = self
+            r.perms = self.perms
+            r._conditional = self._conditional
+            r._conditional_block = self._conditional_block
+            yield r
 
 
-cdef class TERule(PolicyRule):
+cdef class TERule(BaseTERule):
 
     """A type_* type enforcement rule."""
 
-    cdef const qpol_terule_t *handle
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
+                 conditional, conditional_block):
+        """Factory function for creating TERule objects."""
+        r = TERule()
+        r.policy = policy
+        r.key = key
+        r.datum = datum
+        r._conditional = conditional
+        r._conditional_block = conditional_block
+        return r
 
     def __str__(self):
         rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
@@ -448,88 +405,32 @@ cdef class TERule(PolicyRule):
 
         return rule_string
 
-    def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        try:
-            filename = self.filename
-        except (TERuleNoFilename, RuleUseError):
-            filename = None
-
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
-            self, filename, cond, cond_block))
-
     def __lt__(self, other):
         return str(self) < str(other)
 
     def __deepcopy__(self, memo):
         # shallow copy as all of the members are immutable
-        newobj = terule_factory(self.policy, self.handle)
+        newobj = TERule.factory(self.policy, self.key, self.datum, self._conditional,
+                                self._conditional_block)
         memo[id(self)] = newobj
         return newobj
 
     def __getstate__(self):
-        return (self.policy, self._pickle())
+        return self._pickle()
 
     def __setstate__(self, state):
-        self.policy = state[0]
-        self._unpickle(state[1])
+        self._unpickle(state)
 
-    cdef bytes _pickle(self):
-        return <bytes>(<char *>self.handle)
+    cdef _pickle(self):
+        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
+            self._conditional, self._conditional_block
 
-    cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(qpol_terule_t*))
-
-    def _eq(self, TERule other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def ruletype(self):
-        """The rule type."""
-        cdef uint32_t rt
-        if qpol_terule_get_rule_type(self.policy.handle, self.handle, &rt):
-            ex = LowLevelPolicyError("Error reading rule type for TE rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return TERuletype(rt)
-
-    @property
-    def source(self):
-        """The rule's source type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_terule_get_source_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading source type/attr for TE rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, <sepol.type_datum_t *>t)
-
-    @property
-    def target(self):
-        """The rule's target type/attribute."""
-        cdef const qpol_type_t *t
-        if qpol_terule_get_target_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading target type/attr for TE rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return type_or_attr_factory(self.policy, <sepol.type_datum_t *>t)
-
-    @property
-    def tclass(self):
-        """The rule's object set."""
-        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[(<sepol.avtab_ptr_t>self.handle).key.target_class - 1])
+    cdef _unpickle(self, objs):
+        self.policy = objs[0]
+        memcpy(&self.key, <char *>objs[1], sizeof(sepol.avtab_key_t*))
+        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.avtab_datum_t*))
+        self._conditional = objs[3]
+        self._conditional_block = objs[4]
 
     @property
     def perms(self):
@@ -539,75 +440,22 @@ cdef class TERule(PolicyRule):
     @property
     def default(self):
         """The rule's default type."""
-        cdef const qpol_type_t *t
-        if qpol_terule_get_default_type(self.policy.handle, self.handle, &t):
-            ex = LowLevelPolicyError("Error reading default type for TE rule: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return Type.factory(self.policy, <sepol.type_datum_t *>t)
-
-    @property
-    def filename(self):
-        """The type_transition rule's file name."""
-        if self.ruletype == TERuletype.type_transition:
-            raise TERuleNoFilename
-        else:
-            raise RuleUseError("{0} rules do not have file names".format(self.ruletype))
-
-    @property
-    def conditional(self):
-        """The rule's conditional expression."""
-        cdef const qpol_cond_t *c
-        if qpol_terule_get_cond(self.policy.handle, self.handle, &c):
-            ex = LowLevelPolicyError("Error reading TE rule conditional: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        if c:
-            return Conditional.factory(self.policy, <sepol.cond_node_t *>c)
-        else:
-            raise RuleNotConditional
-
-    @property
-    def conditional_block(self):
-        """
-        The conditional block of the rule (T/F)
-
-        For example, if the policy looks like this:
-
-        if ( the_conditional_expression ) {
-            If the rule is here, this property is True
-        } else {
-            If the rule is here, this property is False
-        }
-        """
-        cdef const qpol_cond_t *c
-        cdef uint32_t which
-
-        if qpol_terule_get_cond(self.policy.handle, self.handle, &c):
-            ex = LowLevelPolicyError("Error reading TE rule conditional: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        if not c:
-            raise RuleNotConditional
-
-        if qpol_terule_get_which_list(self.policy.handle, self.handle, &which):
-            ex = LowLevelPolicyError("Error reading TE rule conditional block: {}".format(
-                                     strerror(errno)))
-            ex.errno = errno
-            raise ex
-
-        return bool(which)
+        return Type.factory(self.policy,
+                            self.policy.handle.p.p.type_val_to_struct[self.datum.data - 1])
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            yield expanded_terule_factory(self, s, t)
+            r = ExpandedTERule()
+            r.policy = self.policy
+            r.key = self.key
+            r.datum = self.datum
+            r.source = s
+            r.target = t
+            r._conditional = self._conditional
+            r._conditional_block = self._conditional_block
+            r.origin = self
+            yield r
 
 
 cdef class FileNameTERule(PolicyRule):
@@ -615,89 +463,74 @@ cdef class FileNameTERule(PolicyRule):
     """A type_transition type enforcement rule with filename."""
 
     cdef:
-        sepol.filename_trans_t *handle
+        sepol.filename_trans_t *key
+        sepol.filename_trans_datum_t *datum
         readonly object ruletype
-        Type dft
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.filename_trans_t *symbol, sepol.type_datum_t *dft):
+    cdef factory(SELinuxPolicy policy, sepol.filename_trans_t *key, sepol.filename_trans_datum_t *datum):
         """Factory function for creating TERule objects."""
-        r = FileNameTERule(Type.factory(policy, dft))
+        r = FileNameTERule()
         r.policy = policy
-        r.handle = symbol
+        r.key = key
+        r.datum = datum
         return r
 
-    def __init__(self, dft):
+    def __init__(self):
         self.ruletype = TERuletype.type_transition
-        self.dft = dft
 
     def __str__(self):
-        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
+        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
             format(self)
 
-        try:
-            rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-        except RuleNotConditional:
-            pass
-
-        return rule_string
-
     def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        try:
-            filename = self.filename
-        except (TERuleNoFilename, RuleUseError):
-            filename = None
-
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
-            self, filename, cond, cond_block))
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.filename}|{1}|{2}".format(
+            self, None, None))
 
     def __lt__(self, other):
         return str(self) < str(other)
 
     def __deepcopy__(self, memo):
         # shallow copy as all of the members are immutable
-        newobj = FileNameTERule.factory(self.policy, self.handle, self.dft.handle)
+        newobj = FileNameTERule.factory(self.policy, self.key, self.datum)
         memo[id(self)] = newobj
         return newobj
 
     def __getstate__(self):
-        return (self.policy, self._pickle())
+        return self._pickle()
 
     def __setstate__(self, state):
-        self.policy = state[0]
-        self._unpickle(state[1])
+        self._unpickle(state)
 
-    cdef bytes _pickle(self):
-        return <bytes>(<char *>self.handle)
+    cdef _pickle(self):
+        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
+            self._conditional, self._conditional_block
 
-    cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(sepol.filename_trans_t*))
+    cdef _unpickle(self, objs):
+        self.policy = objs[0]
+        memcpy(&self.key, <char *>objs[1], sizeof(sepol.filename_trans_t*))
+        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.filename_trans_datum_t*))
+        self._conditional = objs[3]
+        self._conditional_block = objs[4]
 
     def _eq(self, FileNameTERule other):
         """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+        return self.key == other.key and self.datum == other.datum
 
     @property
     def source(self):
         """The rule's source type/attribute."""
-        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.stype - 1])
+        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.stype - 1])
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.ttype - 1])
+        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.ttype - 1])
 
     @property
     def tclass(self):
         """The rule's object class."""
-        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[self.handle.ttype - 1])
+        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[self.key.tclass - 1])
 
     @property
     def perms(self):
@@ -707,17 +540,24 @@ cdef class FileNameTERule(PolicyRule):
     @property
     def default(self):
         """The rule's default type."""
-        return self.dft
+        return Type.factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.datum.otype - 1])
 
     @property
     def filename(self):
         """The type_transition rule's file name."""
-        return intern(self.handle.name)
+        return intern(self.key.name)
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            yield expanded_filename_terule_factory(self, s, t)
+            r = ExpandedFileNameTERule()
+            r.policy = self.policy
+            r.key = self.key
+            r.datum = self.datum
+            r.source = s
+            r.target = t
+            r.origin = self
+            yield r
 
 
 cdef class ExpandedAVRule(AVRule):
@@ -731,15 +571,8 @@ cdef class ExpandedAVRule(AVRule):
         public object origin
 
     def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".format(
-            self, cond, cond_block))
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".
+            format(self, self._conditional, self._conditional_block))
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -756,7 +589,8 @@ cdef class ExpandedAVRuleXperm(AVRuleXperm):
         public object origin
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}".format(self))
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}|{1}|{2}".
+            format(self, self._conditional, self._conditional_block))
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -772,20 +606,8 @@ cdef class ExpandedTERule(TERule):
         public object origin
 
     def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        try:
-            filename = self.filename
-        except (TERuleNoFilename, RuleUseError):
-            filename = None
-
         return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
-            self, filename, cond, cond_block))
+            self, None, self._conditional, self._conditional_block))
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -801,20 +623,8 @@ cdef class ExpandedFileNameTERule(FileNameTERule):
         public object origin
 
     def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        try:
-            filename = self.filename
-        except (TERuleNoFilename, RuleUseError):
-            filename = None
-
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
-            self, filename, cond, cond_block))
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.filename}|{1}|{2}".format(
+            self, None, None))
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -823,6 +633,133 @@ cdef class ExpandedFileNameTERule(FileNameTERule):
 #
 # Iterators
 #
+cdef class TERuleIterator(PolicyIterator):
+
+    """Iterator for access vector tables."""
+
+    cdef:
+        sepol.avtab_t *table
+        sepol.avtab_ptr_t node
+        unsigned int bucket
+        object conditional
+        object cond_block
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.avtab *table):
+        """Factory function for creating TERule iterators."""
+        i = TERuleIterator()
+        i.policy = policy
+        i.table = table
+        i.reset()
+        return i
+
+    def _next_bucket(self):
+        """Internal method for advancing to the next bucket."""
+        self.bucket += 1
+        if self.bucket < self.table.nslot:
+            self.node = self.table.htable[self.bucket]
+        else:
+            self.node = NULL
+
+    def _next_node(self):
+        """Internal method for advancing to the next node."""
+        if self.node != NULL and self.node.next != NULL:
+            self.node = self.node.next
+        else:
+            self._next_bucket()
+            while self.bucket < self.table.nslot and self.node == NULL:
+                self._next_bucket()
+
+    def __next__(self):
+        cdef:
+            sepol.avtab_key_t *key
+            sepol.avtab_datum_t *datum
+
+        if self.table == NULL or self.table.nel == 0 or self.bucket >= self.table.nslot:
+            raise StopIteration
+
+        key = &self.node.key
+        datum = &self.node.datum
+
+        self._next_node()
+
+        if key.specified & sepol.AVRULE_AV:
+            return AVRule.factory(self.policy, key, datum, None, None)
+        elif key.specified & sepol.AVRULE_TYPE:
+            return TERule.factory(self.policy, key, datum, None, None)
+        elif key.specified & sepol.AVRULE_XPERMS:
+            return AVRuleXperm.factory(self.policy, key, datum, None, None)
+        else:
+            raise LowLevelPolicyError("Unknown AV rule type 0x{}".format(key.specified, '04x'))
+
+    def __len__(self):
+        return self.table.nel
+
+    def reset(self):
+        """Reset the iterator to the start."""
+        self.node = self.table.htable[0]
+
+        # advance to first item
+        if self.node == NULL:
+            self._next_node()
+
+
+cdef class ConditionalTERuleIterator(PolicyIterator):
+
+    """Conditional TE rule iterator."""
+
+    cdef:
+        sepol.cond_av_list_t *head
+        sepol.cond_av_list_t *curr
+        object conditional
+        object conditional_block
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.cond_av_list_t *head, conditional, cond_block):
+        """ConditionalTERuleIterator iterator factory."""
+        c = ConditionalTERuleIterator()
+        c.policy = policy
+        c.head = head
+        c.conditional = conditional
+        c.conditional_block = cond_block
+        c.reset()
+        return c
+
+    def __next__(self):
+        if self.curr == NULL:
+            raise StopIteration
+
+        key = &self.curr.node.key
+        datum = &self.curr.node.datum
+
+        self.curr = self.curr.next
+
+        if key.specified & sepol.AVRULE_AV:
+            return AVRule.factory(self.policy, key, datum, self.conditional, self.conditional_block)
+        elif key.specified & sepol.AVRULE_TYPE:
+            return TERule.factory(self.policy, key, datum, self.conditional, self.conditional_block)
+        elif key.specified & sepol.AVRULE_XPERMS:
+            return AVRuleXperm.factory(self.policy, key, datum, self.conditional, self.conditional_block)
+        else:
+            raise LowLevelPolicyError("Unknown AV rule type 0x{}".format(key.specified, '04x'))
+
+    def __len__(self):
+        cdef:
+            sepol.cond_av_list_t *curr
+            size_t count = 0
+
+        curr = self.head
+        while curr != NULL:
+             count += 1
+             curr = curr.next
+
+        return count
+
+    def reset(self):
+        """Reset the iterator back to the start."""
+        self.curr = self.head
+
+
 cdef class FileNameTERuleIterator(HashtabIterator):
 
     """Iterate over FileNameTERules in the policy."""
@@ -839,4 +776,4 @@ cdef class FileNameTERuleIterator(HashtabIterator):
     def __next__(self):
         super().__next__()
         return FileNameTERule.factory(self.policy, <sepol.filename_trans_t *>self.curr.key,
-                                      <sepol.type_datum_t *>self.curr.datum)
+                                      <sepol.filename_trans_datum_t *>self.curr.datum)

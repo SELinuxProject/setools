@@ -383,100 +383,6 @@ static int qpol_policy_add_isid_names(qpol_policy_t * policy)
 	return 0;
 }
 
-/**
- *  Walks the conditional list and adds links for reverse look up from
- *  a te/av rule to the conditional from which it came.
- *  @param policy The policy to which to add conditional trace backs.
- *  This policy will be altered by this function.
- *  @return 0 on success and < 0 on failure; if the call fails,
- *  errno will be set. On failure, the policy state may be inconsistent.
- */
-static int qpol_policy_add_cond_rule_traceback(qpol_policy_t * policy)
-{
-	policydb_t *db = NULL;
-	cond_node_t *cond = NULL;
-	cond_av_list_t *list_ptr = NULL;
-	qpol_iterator_t *iter = NULL;
-	avtab_ptr_t rule = NULL;
-	int error = 0;
-	uint32_t rules = 0;
-
-	INFO(policy, "%s", "Building conditional rules tables. (Step 5 of 5)");
-	if (!policy) {
-		ERR(policy, "%s", strerror(EINVAL));
-		errno = EINVAL;
-		return STATUS_ERR;
-	}
-
-	db = &policy->p->p;
-
-	rules = (QPOL_RULE_ALLOW | QPOL_RULE_AUDITALLOW | QPOL_RULE_DONTAUDIT);
-	if (!(policy->options & QPOL_POLICY_OPTION_NO_NEVERALLOWS))
-		rules |= QPOL_RULE_NEVERALLOW;
-
-	/* mark all unconditional rules as enabled */
-	if (qpol_policy_get_avrule_iter(policy, rules, &iter))
-		return STATUS_ERR;
-	for (; !qpol_iterator_end(iter); qpol_iterator_next(iter)) {
-		if (qpol_iterator_get_item(iter, (void **)&rule)) {
-			error = errno;
-			ERR(policy, "%s", strerror(error));
-			errno = error;
-			return STATUS_ERR;
-		}
-		rule->parse_context = NULL;
-		rule->merged = QPOL_COND_RULE_ENABLED;
-	}
-	qpol_iterator_destroy(&iter);
-	if (qpol_policy_get_terule_iter(policy, (QPOL_RULE_TYPE_TRANS | QPOL_RULE_TYPE_CHANGE | QPOL_RULE_TYPE_MEMBER), &iter))
-		return STATUS_ERR;
-	for (; !qpol_iterator_end(iter); qpol_iterator_next(iter)) {
-		if (qpol_iterator_get_item(iter, (void **)&rule)) {
-			error = errno;
-			ERR(policy, "%s", strerror(error));
-			errno = error;
-			return STATUS_ERR;
-		}
-		rule->parse_context = NULL;
-		rule->merged = QPOL_COND_RULE_ENABLED;
-	}
-	qpol_iterator_destroy(&iter);
-
-	for (cond = db->cond_list; cond; cond = cond->next) {
-		/* evaluate cond */
-		cond->cur_state = cond_evaluate_expr(db, cond->expr);
-		if (cond->cur_state < 0) {
-			ERR(policy, "Error evaluating conditional: %s", strerror(EILSEQ));
-			errno = EILSEQ;
-			return STATUS_ERR;
-		}
-
-		/* walk true list */
-		for (list_ptr = cond->true_list; list_ptr; list_ptr = list_ptr->next) {
-			/* field not used after parse, now stores cond */
-			list_ptr->node->parse_context = (void *)cond;
-			/* field not used (except by write),
-			 * now storing list and enabled flags */
-			list_ptr->node->merged = QPOL_COND_RULE_LIST;
-			if (cond->cur_state)
-				list_ptr->node->merged |= QPOL_COND_RULE_ENABLED;
-		}
-
-		/* walk false list */
-		for (list_ptr = cond->false_list; list_ptr; list_ptr = list_ptr->next) {
-			/* field not used after parse, now stores cond */
-			list_ptr->node->parse_context = (void *)cond;
-			/* field not used (except by write),
-			 * now storing list and enabled flags */
-			list_ptr->node->merged = 0;	/* i.e. !QPOL_COND_RULE_LIST */
-			if (!cond->cur_state)
-				list_ptr->node->merged |= QPOL_COND_RULE_ENABLED;
-		}
-	}
-
-	return 0;
-}
-
 int policy_extend(qpol_policy_t * policy)
 {
 	int retv, error;
@@ -511,12 +417,6 @@ int policy_extend(qpol_policy_t * policy)
 		}
 	}
 	retv = qpol_policy_add_isid_names(policy);
-	if (retv) {
-		error = errno;
-		goto err;
-	}
-
-	retv = qpol_policy_add_cond_rule_traceback(policy);
 	if (retv) {
 		error = errno;
 		goto err;

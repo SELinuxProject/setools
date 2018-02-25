@@ -602,27 +602,12 @@ cdef class SELinuxPolicy:
 
     def terules(self):
         """Iterator over all type enforcement rules."""
-        cdef qpol_iterator_t *av_iter
-        cdef qpol_iterator_t *te_iter
-        cdef qpol_iterator_t *ft_iter
+        yield from TERuleIterator.factory(self, &self.handle.p.p.te_avtab)
+        yield from FileNameTERuleIterator.factory(self, &self.handle.p.p.filename_trans)
 
-        cdef uint32_t av_rule_types = QPOL_RULE_ALLOW | QPOL_RULE_AUDITALLOW | QPOL_RULE_DONTAUDIT \
-            | QPOL_RULE_XPERMS_ALLOW | QPOL_RULE_XPERMS_AUDITALLOW | QPOL_RULE_XPERMS_DONTAUDIT
-
-        cdef uint32_t te_rule_types = QPOL_RULE_TYPE_TRANS | QPOL_RULE_TYPE_CHANGE | QPOL_RULE_TYPE_MEMBER
-
-        if qpol_policy_has_capability(self.handle, QPOL_CAP_NEVERALLOW):
-            av_rule_types |= QPOL_RULE_NEVERALLOW | QPOL_RULE_XPERMS_NEVERALLOW
-
-        if qpol_policy_get_avrule_iter(self.handle, av_rule_types, &av_iter):
-            raise MemoryError
-
-        if qpol_policy_get_terule_iter(self.handle, te_rule_types, &te_iter):
-            raise MemoryError
-
-        return chain(qpol_iterator_factory(self, av_iter, avrule_factory_iter),
-                     qpol_iterator_factory(self, te_iter, terule_factory_iter),
-                     FileNameTERuleIterator.factory(self, &self.handle.p.p.filename_trans))
+        for c in self.conditionals():
+            yield from c.true_rules()
+            yield from c.false_rules()
 
     #
     # Constraints iterators
