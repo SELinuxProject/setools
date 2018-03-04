@@ -58,17 +58,20 @@ cdef class MLSRule(PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.source_type - 1])
+        return type_or_attr_factory(self.policy,
+                                    self.policy.type_value_to_datum(self.handle.source_type - 1))
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.handle.target_type - 1])
+        return type_or_attr_factory(self.policy,
+                                    self.policy.type_value_to_datum(self.handle.target_type - 1))
 
     @property
     def tclass(self):
         """The rule's object class."""
-        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[self.handle.target_class - 1])
+        return ObjClass.factory(self.policy,
+                                self.policy.class_value_to_datum(self.handle.target_class - 1))
 
     @property
     def default(self):

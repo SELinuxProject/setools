@@ -39,14 +39,10 @@ class HandleUnknown(PolicyEnum):
     reject = sepol.SEPOL_REJECT_UNKNOWN
 
 
-cdef void qpol_log_callback(void *varg, const qpol_policy_t *p, int level, const char *msg):
-    """Logging callback for libqpol C functions."""
-    logging.getLogger(__name__).debug(msg)
-
-
 cdef class SELinuxPolicy:
     cdef:
-        qpol_policy_t *handle
+        sepol.sepol_policydb *handle
+        sepol.sepol_handle *sh
         sepol.cat_datum_t **cat_val_to_struct
         sepol.level_datum_t **level_val_to_struct
         readonly str path
@@ -68,8 +64,6 @@ cdef class SELinuxPolicy:
             except NameError:
                 raise RuntimeError("Loading the running policy requires libselinux Python bindings")
 
-        self._policy_extend()
-
     def __cinit__(self):
         self.handle = NULL
         self.cat_val_to_struct = NULL
@@ -80,7 +74,10 @@ cdef class SELinuxPolicy:
         PyMem_Free(self.level_val_to_struct)
 
         if self.handle:
-            qpol_policy_destroy(&self.handle)
+            sepol.sepol_policydb_free(self.handle)
+
+        if self.sh:
+            sepol.sepol_handle_destroy(self.sh)
 
     def __repr__(self):
         return "<SELinuxPolicy(\"{0}\")>".format(self.path)
@@ -111,25 +108,63 @@ cdef class SELinuxPolicy:
         return <bytes>(<char *>self.handle)
 
     cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(qpol_policy_t*))
+        memcpy(&self.handle, <char *>handle, sizeof(sepol.sepol_policydb*))
 
 
     #
     # Policy loading functions
     #
 
-    def _load_policy(self, str filename):
+    cdef _load_policy(self, str filename):
         """Load the specified policy."""
+        cdef:
+            sepol.sepol_policy_file_t *pfile = NULL
+            FILE *infile = NULL
+
         self.log.info("Opening SELinux policy \"{0}\"".format(filename))
 
-        if qpol_policy_open_from_file(filename, &self.handle, qpol_log_callback, NULL, 0) < 0:
-            if (errno == EINVAL):
-                raise InvalidPolicy("Invalid policy: {}. A binary policy must be specified. "
-                                    "(use e.g. policy.{} or sepolicy) Source policies are not "
-                                    "supported.".format(filename,
-                                                        sepol.sepol_policy_kern_vers_max()))
-            else:
-                raise OSError("Unable to open policy: {}: {}".format(filename, strerror(errno)))
+        self.sh = sepol.sepol_handle_create()
+        if self.sh == NULL:
+            raise MemoryError
+
+        sepol.sepol_msg_set_callback(self.sh, sepol_logging_callback, self.handle)
+
+        if sepol.sepol_policydb_create(&self.handle) < 0:
+            raise MemoryError
+
+        if sepol.sepol_policy_file_create(&pfile) < 0:
+            raise MemoryError
+
+        infile = fopen(filename, "rb")
+        if infile == NULL:
+            PyErr_SetFromErrnoWithFilename(OSError, filename)
+
+        sepol.sepol_policy_file_set_handle(pfile, self.sh)
+        sepol.sepol_policy_file_set_fp(pfile, infile)
+
+        if sepol.sepol_policydb_read(self.handle, pfile) < 0:
+            raise InvalidPolicy("Invalid policy: {}. A binary policy must be specified. "
+                                "(use e.g. policy.{} or sepolicy) Source policies are not "
+                                "supported.".format(filename,
+                                                    sepol.sepol_policy_kern_vers_max()))
+
+        fclose(infile)
+        sepol.sepol_policy_file_free(pfile)
+
+        #
+        # (Re)create data structures
+        #
+        if self.handle.p.attr_type_map != NULL:
+            self._rebuild_attrs_from_map()
+            # if source policies are supported in the
+            # future this should only run on the
+            # kernel policy:
+            #self._synthesize_attrs()
+
+        self._set_permissive_flags()
+
+        if self.mls:
+            self._create_mls_val_to_struct()
 
         self.log.info("Successfully opened SELinux policy \"{0}\"".format(filename))
         self.path = filename
@@ -146,7 +181,7 @@ cdef class SELinuxPolicy:
                              sepol.sepol_policy_kern_vers_min() - 1, -1):
             yield "{0}.{1}".format(base_policy_path, version)
 
-    def _load_running_policy(self):
+    cdef _load_running_policy(self):
         """Try to load the current running policy."""
         self.log.info("Attempting to locate current running policy.")
 
@@ -164,32 +199,25 @@ cdef class SELinuxPolicy:
     #
     # Policy properties
     #
-
     @property
     def handle_unknown(self):
         """The handle unknown permissions setting (allow,deny,reject)"""
-        cdef unsigned int h
-        qpol_policy_get_policy_handle_unknown(self.handle, &h)
-        return HandleUnknown(h)
+        return HandleUnknown(self.handle.p.handle_unknown)
 
     @property
     def mls(self):
         """(T/F) The policy has MLS enabled."""
-        return <bint> qpol_policy_has_capability(self.handle, QPOL_CAP_MLS)
+        return <bint>self.handle.p.mls
 
     @property
     def target_platform(self):
         """The policy platform (selinux or xen)"""
-        cdef int t
-        qpol_policy_get_target_platform(self.handle, &t)
-        return PolicyTarget(t)
+        return PolicyTarget(self.handle.p.target_platform)
 
     @property
     def version(self):
         """The policy database version (e.g. 29)"""
-        cdef unsigned int v
-        qpol_policy_get_policy_version(self.handle, &v)
-        return v
+        return self.handle.p.policyvers
 
 
     #
@@ -369,12 +397,12 @@ cdef class SELinuxPolicy:
     @property
     def role_allow_count(self):
         """The number of role allow rules."""
-        return len(RoleAllowIterator.factory(self, self.handle.p.p.role_allow))
+        return len(RoleAllowIterator.factory(self, self.handle.p.role_allow))
 
     @property
     def role_transition_count(self):
         """The number of role_transition rules."""
-        return len(RoleTransitionIterator.factory(self, self.handle.p.p.role_tr))
+        return len(RoleTransitionIterator.factory(self, self.handle.p.role_tr))
 
     @property
     def range_transition_count(self):
@@ -417,7 +445,7 @@ cdef class SELinuxPolicy:
     @property
     def typebounds_count(self):
         """The number of typebounds rules."""
-        return len(TypeboundsIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table))
+        return len(TypeboundsIterator.factory(self, &self.handle.p.symtab[sepol.SYM_TYPES].table))
 
     @property
     def user_count(self):
@@ -533,77 +561,77 @@ cdef class SELinuxPolicy:
     #
     def bools(self):
         """Iterator which yields all Booleans."""
-        return BooleanHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_BOOLS].table)
+        return BooleanHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_BOOLS].table)
 
     def bounds(self):
         """Iterator which yields all *bounds statements (typebounds, etc.)"""
-        return TypeboundsIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table)
+        return TypeboundsIterator.factory(self, &self.handle.p.symtab[sepol.SYM_TYPES].table)
 
     def categories(self):
         """Iterator which yields all MLS categories."""
-        return CategoryHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_CATS].table)
+        return CategoryHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_CATS].table)
 
     def classes(self):
         """Iterator which yields all object classes."""
-        return ObjClassHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_CLASSES].table)
+        return ObjClassHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_CLASSES].table)
 
     def commons(self):
         """Iterator which yields all commons."""
-        return CommonHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_COMMONS].table)
+        return CommonHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_COMMONS].table)
 
     def defaults(self):
         """Iterator over all default_* statements."""
-        for cls in ObjClassHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_CLASSES].table):
+        for cls in ObjClassHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_CLASSES].table):
             yield from cls.defaults()
 
     def levels(self):
         """Iterator which yields all level declarations."""
-        return LevelDeclHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_LEVELS].table)
+        return LevelDeclHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_LEVELS].table)
 
     def polcaps(self):
         """Iterator which yields all policy capabilities."""
-        return PolicyCapabilityIterator.factory(self, &self.handle.p.p.policycaps)
+        return PolicyCapabilityIterator.factory(self, &self.handle.p.policycaps)
 
     def roles(self):
         """Iterator which yields all roles."""
-        return RoleHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_ROLES].table)
+        return RoleHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_ROLES].table)
 
     def sensitivities(self):
         """Iterator over all sensitivities."""
-        return SensitivityHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_LEVELS].table)
+        return SensitivityHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_LEVELS].table)
 
     def types(self):
         """Iterator over all types."""
-        return TypeHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table)
+        return TypeHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_TYPES].table)
 
     def typeattributes(self):
         """Iterator over all (type) attributes."""
-        return TypeAttributeHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_TYPES].table)
+        return TypeAttributeHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_TYPES].table)
 
     def users(self):
         """Iterator which yields all roles."""
-        return UserHashtabIterator.factory(self, &self.handle.p.p.symtab[sepol.SYM_USERS].table)
+        return UserHashtabIterator.factory(self, &self.handle.p.symtab[sepol.SYM_USERS].table)
 
     #
     # Policy rules iterators
     #
     def conditionals(self):
         """Iterator over all conditional rule blocks."""
-        return ConditionalIterator.factory(self, self.handle.p.p.cond_list)
+        return ConditionalIterator.factory(self, self.handle.p.cond_list)
 
     def mlsrules(self):
         """Iterator over all MLS rules."""
-        return MLSRuleIterator.factory(self, &self.handle.p.p.range_tr)
+        return MLSRuleIterator.factory(self, &self.handle.p.range_tr)
 
     def rbacrules(self):
         """Iterator over all RBAC rules."""
-        return chain(RoleAllowIterator.factory(self, self.handle.p.p.role_allow),
-                     RoleTransitionIterator.factory(self, self.handle.p.p.role_tr))
+        return chain(RoleAllowIterator.factory(self, self.handle.p.role_allow),
+                     RoleTransitionIterator.factory(self, self.handle.p.role_tr))
 
     def terules(self):
         """Iterator over all type enforcement rules."""
-        yield from TERuleIterator.factory(self, &self.handle.p.p.te_avtab)
-        yield from FileNameTERuleIterator.factory(self, &self.handle.p.p.filename_trans)
+        yield from TERuleIterator.factory(self, &self.handle.p.te_avtab)
+        yield from FileNameTERuleIterator.factory(self, &self.handle.p.filename_trans)
 
         for c in self.conditionals():
             yield from c.true_rules()
@@ -623,30 +651,30 @@ cdef class SELinuxPolicy:
     #
     def fs_uses(self):
         """Iterator over all fs_use_* statements."""
-        return FSUseIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_FSUSE])
+        return FSUseIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_FSUSE])
 
     def genfscons(self):
         """Iterator over all genfscon statements."""
-        return GenfsconIterator.factory(self, self.handle.p.p.genfs)
+        return GenfsconIterator.factory(self, self.handle.p.genfs)
 
     def initialsids(self):
         """Iterator over all initial SID statements."""
-        return InitialSIDIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_ISID])
+        return InitialSIDIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_ISID])
 
     def netifcons(self):
         """Iterator over all netifcon statements."""
-        return NetifconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_NETIF])
+        return NetifconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_NETIF])
 
     def nodecons(self):
         """Iterator over all nodecon statements."""
-        return chain(NodeconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE],
+        return chain(NodeconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_NODE],
                                              NodeconIPVersion.ipv4),
-                     NodeconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_NODE6],
+                     NodeconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_NODE6],
                                              NodeconIPVersion.ipv6))
 
     def portcons(self):
         """Iterator over all portcon statements."""
-        return PortconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_PORT])
+        return PortconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_PORT])
 
     #
     # Xen labeling iterators
@@ -654,81 +682,318 @@ cdef class SELinuxPolicy:
     def devicetreecons(self):
         """Iterator over all devicetreecon statements."""
         return DevicetreeconIterator.factory(self,
-                                             self.handle.p.p.ocontexts[sepol.OCON_XEN_DEVICETREE])
+                                             self.handle.p.ocontexts[sepol.OCON_XEN_DEVICETREE])
 
     def iomemcons(self):
         """Iterator over all iomemcon statements."""
-        return IomemconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOMEM])
+        return IomemconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_XEN_IOMEM])
 
     def ioportcons(self):
         """Iterator over all ioportcon statements."""
-        return IoportconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_IOPORT])
+        return IoportconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_XEN_IOPORT])
 
     def pcidevicecons(self):
         """Iterator over all pcidevicecon statements."""
         return PcideviceconIterator.factory(self,
-                                            self.handle.p.p.ocontexts[sepol.OCON_XEN_PCIDEVICE])
+                                            self.handle.p.ocontexts[sepol.OCON_XEN_PCIDEVICE])
 
     def pirqcons(self):
         """Iterator over all pirqcon statements."""
-        return PirqconIterator.factory(self, self.handle.p.p.ocontexts[sepol.OCON_XEN_PIRQ])
+        return PirqconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_XEN_PIRQ])
+
+    #
+    # Low-level methods
+    #
+    cdef inline sepol.cond_bool_datum_t* boolean_value_to_datum(self, size_t value):
+        """Return the class datum for the specified class value."""
+        return self.handle.p.bool_val_to_struct[value]
+
+    cdef inline str boolean_value_to_name(self, size_t value):
+        """Return the name of the boolean by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_BOOLS][value])
+
+    cdef inline sepol.cat_datum_t* category_value_to_datum(self, size_t value):
+        """Return the category datum for the specified category value."""
+        return self.cat_val_to_struct[value]
+
+    cdef inline category_aliases(self, Category primary):
+        """Return an interator for the aliases for the specified category."""
+        return CategoryAliasHashtabIterator.factory(self,
+                                                    &self.handle.p.symtab[sepol.SYM_CATS].table,
+                                                    primary)
+
+    cdef inline str category_value_to_name(self, size_t value):
+        """Return the name of the category by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_CATS][value])
+
+    cdef inline sepol.class_datum_t* class_value_to_datum(self, size_t value):
+        """Return the class datum for the specified class value."""
+        return self.handle.p.class_val_to_struct[value]
+
+    cdef inline str class_value_to_name(self, size_t value):
+        """Return the name of the class by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_CLASSES][value])
+
+    cdef inline str common_value_to_name(self, size_t value):
+        """Return the name of the common by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_COMMONS][value])
+
+    cdef inline sepol.level_datum_t* level_value_to_datum(self, size_t value):
+        """Return the level datum for the specified level value."""
+        return self.level_val_to_struct[value]
+
+    cdef inline str level_value_to_name(self, size_t value):
+        """Return the name of the level by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_LEVELS][value])
+
+    cdef inline sepol.role_datum_t* role_value_to_datum(self, size_t value):
+        """Return the role datum for the specified role value."""
+        return self.handle.p.role_val_to_struct[value]
+
+    cdef inline str role_value_to_name(self, size_t value):
+        """Return the name of the role by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_ROLES][value])
+
+    cdef inline sensitivity_aliases(self, Sensitivity primary):
+        """Return an interator for the aliases for the specified sensitivity."""
+        return SensitivityAliasHashtabIterator.factory(self,
+            &self.handle.p.symtab[sepol.SYM_LEVELS].table, primary)
+
+    cdef inline type_aliases(self, Type primary):
+        """Return an iterator for the aliases for the specified type."""
+        return TypeAliasHashtabIterator.factory(self,
+                                                &self.handle.p.symtab[sepol.SYM_TYPES].table,
+                                                primary)
+
+    cdef inline sepol.type_datum_t* type_value_to_datum(self, size_t value):
+        """Return the type datum for the specified type value."""
+        return self.handle.p.type_val_to_struct[value]
+
+    cdef inline str type_value_to_name(self, size_t value):
+        """Return the name of the type/attribute by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_TYPES][value])
+
+    cdef inline sepol.user_datum_t* user_value_to_datum(self, size_t value):
+        """Return the user datum for the specified user value."""
+        return self.handle.p.user_val_to_struct[value]
+
+    cdef inline str user_value_to_name(self, size_t value):
+        """Return the name of the user by its value."""
+        return intern(self.handle.p.sym_val_to_name[sepol.SYM_USERS][value])
 
     #
     # Internal methods
     #
-    cdef _policy_extend(self):
-        """Create supplementary data structures (linkages) from the policydb."""
-        cdef sepol.cat_datum_t *cat_datum
-        cdef sepol.hashtab_node_t *node
-        cdef uint32_t bucket = 0
+    cdef _set_permissive_flags(self):
+        """
+        Set permissive flag in type datums.
 
-        cdef size_t bucket_len
-        cdef size_t map_len
+        This modifies the policydb.
+        """
+        cdef:
+            size_t bit
+            sepol.ebitmap_node_t *node = NULL
 
-        if self.mls:
-            #
-            # Create cat_val_to_struct  (indexed by value -1)
-            #
-            map_len = self.handle.p.p.symtab[sepol.SYM_CATS].table.nel
-            bucket_len = self.handle.p.p.symtab[sepol.SYM_CATS].table[0].size
+        self.log.debug("Setting permissive flags in type datums.")
 
-            self.cat_val_to_struct = <sepol.cat_datum_t**>PyMem_Malloc(
-                map_len * sizeof(sepol.cat_datum_t*))
+        bit = sepol.ebitmap_start(&self.handle.p.permissive_map, &node)
+        while bit < sepol.ebitmap_length(&self.handle.p.permissive_map):
+            if sepol.ebitmap_node_get_bit(node, bit):
+                assert bit == self.handle.p.type_val_to_struct[bit - 1].s.value
+                self.handle.p.type_val_to_struct[bit - 1].flags |= sepol.TYPE_FLAGS_PERMISSIVE
 
-            if self.cat_val_to_struct == NULL:
+            bit = sepol.ebitmap_next(&node, bit)
+
+    cdef _create_mls_val_to_struct(self):
+        """Create *_val_to_struct arrays for categories and levels."""
+        cdef:
+            sepol.cat_datum_t *cat_datum
+            sepol.hashtab_node_t *node
+            uint32_t bucket = 0
+            size_t bucket_len
+            size_t map_len
+
+        #
+        # Create cat_val_to_struct  (indexed by value -1)
+        #
+        self.log.debug("Creating cat_val_to_struct.")
+
+        map_len = self.handle.p.symtab[sepol.SYM_CATS].table.nel
+        bucket_len = self.handle.p.symtab[sepol.SYM_CATS].table[0].size
+
+        self.cat_val_to_struct = <sepol.cat_datum_t**>PyMem_Malloc(
+            map_len * sizeof(sepol.cat_datum_t*))
+
+        if self.cat_val_to_struct == NULL:
+            raise MemoryError
+
+        while bucket < bucket_len:
+            node = self.handle.p.symtab[sepol.SYM_CATS].table[0].htable[bucket]
+            while node != NULL:
+                cat_datum = <sepol.cat_datum_t *>node.datum
+                if cat_datum != NULL:
+                    self.cat_val_to_struct[cat_datum.s.value - 1] = cat_datum
+
+                node = node.next
+
+            bucket += 1
+
+        #
+        # Create level_val_to_struct  (indexed by value -1)
+        #
+        self.log.debug("Creating level_val_to_struct.")
+
+        map_len = self.handle.p.symtab[sepol.SYM_LEVELS].table.nel
+        bucket_len = self.handle.p.symtab[sepol.SYM_LEVELS].table[0].size
+        bucket = 0
+
+        self.level_val_to_struct = <sepol.level_datum_t**>PyMem_Malloc(
+            map_len * sizeof(sepol.level_datum_t*))
+
+        if self.level_val_to_struct == NULL:
+            raise MemoryError
+
+        while bucket < bucket_len:
+            node = self.handle.p.symtab[sepol.SYM_LEVELS].table[0].htable[bucket]
+            while node != NULL:
+                level_datum = <sepol.level_datum_t *>node.datum
+                if level_datum != NULL:
+                    self.level_val_to_struct[level_datum.level.sens - 1] = level_datum
+
+                node = node.next
+
+            bucket += 1
+
+    cdef _rebuild_attrs_from_map(self):
+        """
+        Rebuilds data for the attributes and inserts them into the policydb.
+
+        This function modifies the policydb.
+
+        If names are missing for attributes, they are synthesized in
+        the form @ttr<value> where value is the value of the attribute as
+        a 0-padded four digit number.
+        """
+
+        cdef:
+            size_t i, count
+            int bit
+            sepol.ebitmap_node_t *node = NULL
+            sepol.type_datum_t *tmp_type
+            char *tmp_name
+
+        self.log.debug("Rebuilding attributes.")
+
+        for i in range(self.handle.p.symtab[sepol.SYM_TYPES].nprim):
+            tmp_type = self.handle.p.type_val_to_struct[i]
+
+            # skip types
+            if tmp_type.flavor != sepol.TYPE_ATTRIB:
+                continue
+
+            # Synthesize a name if it is missing
+            if self.handle.p.sym_val_to_name[sepol.SYM_TYPES][i] == NULL:
+                # synthesize name
+                tmp_name = <char*>calloc(10, sizeof(char))
+                if tmp_name == NULL:
+                    raise MemoryError
+
+                memset(tmp_name, 0, 10 * sizeof(char))
+                snprintf(tmp_name, 9, "@ttr%04zd", i + 1)
+
+                self.handle.p.sym_val_to_name[sepol.SYM_TYPES][i] = tmp_name
+
+                # do not free, memory is owned by policydb now.
+                tmp_name = NULL
+
+            # determine if attribute is empty
+            bit = sepol.ebitmap_start(&self.handle.p.attr_type_map[i], &node)
+            while bit < sepol.ebitmap_length(&self.handle.p.attr_type_map[i]):
+                if sepol.ebitmap_node_get_bit(node, bit):
+                    break
+
+                bit = sepol.ebitmap_next(&node, bit)
+
+            else:
+                # skip empty attributes
+                continue
+
+            # relink the attr_type_map ebitmap to the type datum
+            tmp_type.types.node = self.handle.p.attr_type_map[i].node
+            tmp_type.types.highbit = self.handle.p.attr_type_map[i].highbit
+
+            # disconnect ebitmap from attr_type_map to avoid
+            # double free on policy destroy
+            self.handle.p.attr_type_map[i].node = NULL
+            self.handle.p.attr_type_map[i].highbit = 0
+
+            # now go through each of the member types, and set
+            # the reverse mapping
+            bit = sepol.ebitmap_start(&tmp_type.types, &node)
+            while bit < sepol.ebitmap_length(&tmp_type.types):
+                if sepol.ebitmap_node_get_bit(node, bit):
+                    orig_type = self.handle.p.type_val_to_struct[bit]
+                    ebitmap_set_bit(&orig_type.types, tmp_type.s.value - 1, 1)
+
+                bit = sepol.ebitmap_next(&node, bit)
+
+    cdef _synthesize_attrs(self):
+        """
+        Builds data for empty attributes and inserts them into the policydb.
+
+        This function modifies the policydb.
+
+        Names created for attributes are of the form @ttr<value> where value
+        is the value of the attribute as a 0-padded four digit number.
+
+        This was pulled in from libqpol, but it doesn't seem necessary.
+        """
+
+        cdef:
+            size_t i
+            char *tmp_name = NULL
+            char *buff = NULL
+            sepol.type_datum_t *tmp_type = NULL
+            sepol.ebitmap_t tmp_bmap
+
+        self.log.debug("Synthesizing missing attributes.")
+
+        tmp_bmap.node = NULL
+        tmp_bmap.highbit = 0
+
+        for i in range(self.handle.p.symtab[sepol.SYM_TYPES].nprim):
+            if self.handle.p.type_val_to_struct[i] != NULL:
+                continue
+
+            tmp_name = <char*>calloc(10, sizeof(char))
+            if tmp_name == NULL:
                 raise MemoryError
 
-            while bucket < bucket_len:
-                node = self.handle.p.p.symtab[sepol.SYM_CATS].table[0].htable[bucket]
-                while node != NULL:
-                    cat_datum = <sepol.cat_datum_t *>node.datum
-                    if cat_datum != NULL:
-                        self.cat_val_to_struct[cat_datum.s.value - 1] = cat_datum
+            memset(tmp_name, 0, 10 * sizeof(char))
+            snprintf(tmp_name, 9, "@ttr%04zd", i + 1)
 
-                    node = node.next
-
-                bucket += 1
-
-            #
-            # Create level_val_to_struct  (indexed by value -1)
-            #
-            map_len = self.handle.p.p.symtab[sepol.SYM_LEVELS].table.nel
-            bucket_len = self.handle.p.p.symtab[sepol.SYM_LEVELS].table[0].size
-            bucket = 0
-
-            self.level_val_to_struct = <sepol.level_datum_t**>PyMem_Malloc(
-                map_len * sizeof(sepol.level_datum_t*))
-
-            if self.level_val_to_struct == NULL:
+            tmp_type = <sepol.type_datum_t*>calloc(1, sizeof(sepol.type_datum_t))
+            if tmp_type == NULL:
+                free(tmp_name)
                 raise MemoryError
 
-            while bucket < bucket_len:
-                node = self.handle.p.p.symtab[sepol.SYM_LEVELS].table[0].htable[bucket]
-                while node != NULL:
-                    level_datum = <sepol.level_datum_t *>node.datum
-                    if level_datum != NULL:
-                        self.level_val_to_struct[level_datum.level.sens - 1] = level_datum
+            tmp_type.primary = 1
+            tmp_type.flavor = sepol.TYPE_ATTRIB
+            tmp_type.s.value = i + 1
+            tmp_type.types = tmp_bmap
 
-                    node = node.next
+            try:
+                hashtab_insert(self.handle.p.symtab[sepol.SYM_TYPES].table,
+                               <sepol.hashtab_key_t> tmp_name,
+                               <sepol.hashtab_datum_t> tmp_type)
+            except Exception:
+                free(tmp_name)
+                free(tmp_type)
+                raise
 
-                bucket += 1
+            self.handle.p.sym_val_to_name[sepol.SYM_TYPES][i] = tmp_name
+            self.handle.p.type_val_to_struct[i] = tmp_type
+
+            # memory now owned by policydb, do not free
+            tmp_name = NULL
+            tmp_type = NULL

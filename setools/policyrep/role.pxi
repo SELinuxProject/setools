@@ -34,7 +34,7 @@ cdef class Role(PolicySymbol):
         return r
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_ROLES][self.handle.s.value - 1])
+        return self.policy.role_value_to_name(self.handle.s.value - 1)
 
     def _eq(self, Role other):
         """Low-level equality check (C pointers)."""
@@ -101,4 +101,4 @@ cdef class RoleEbitmapIterator(EbitmapIterator):
 
     def __next__(self):
         super().__next__()
-        return Role.factory(self.policy, self.policy.handle.p.p.role_val_to_struct[self.bit])
+        return Role.factory(self.policy, self.policy.role_value_to_datum(self.bit))

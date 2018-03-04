@@ -18,6 +18,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+POLCAP_NAMES = ("network_peer_controls", "open_perms", "extended_socket_class",
+                "always_check_network", "cgroup_seclabel", "nnp_nosuid_transition")
+
+
 cdef class PolicyCapability(PolicySymbol):
 
     """A policy capability."""
@@ -29,7 +33,7 @@ cdef class PolicyCapability(PolicySymbol):
         """Factory function for creating PolicyCapability objects."""
         r = PolicyCapability()
         r.policy = policy
-        r.name = intern(sepol.sepol_polcap_getname(bit))
+        r.name = POLCAP_NAMES[bit]
         return r
 
     def __str__(self):

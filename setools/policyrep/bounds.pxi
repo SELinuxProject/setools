@@ -93,7 +93,7 @@ cdef class TypeboundsIterator(HashtabIterator):
             datum = <sepol.type_datum_t *> self.curr.datum
 
         return Bounds.factory(self.policy,
-            Type.factory(self.policy, self.policy.handle.p.p.type_val_to_struct[datum.bounds - 1]),
+            Type.factory(self.policy, self.policy.type_value_to_datum(datum.bounds - 1)),
             Type.factory(self.policy, datum))
 
     def __len__(self):

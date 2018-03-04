@@ -1,9 +1,5 @@
 include ChangeLog
 include COPYING*
-include libqpol/*.h
-include libqpol/*.l
-include libqpol/*.y
-include libqpol/include/qpol/*.h
 include man/*
 include qhc/*
 include setools/perm_map

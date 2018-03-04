@@ -33,7 +33,7 @@ cdef class User(PolicySymbol):
         return u
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_USERS][self.handle.s.value - 1])
+        return self.policy.user_value_to_name(self.handle.s.value - 1)
 
     def _eq(self, User other):
         """Low-level equality check (C pointers)."""
@@ -116,4 +116,4 @@ cdef class UserEbitmapIterator(EbitmapIterator):
 
     def __next__(self):
         super().__next__()
-        return User.factory(self.policy, self.policy.handle.p.p.user_val_to_struct[self.bit])
+        return User.factory(self.policy, self.policy.user_value_to_datum(self.bit))

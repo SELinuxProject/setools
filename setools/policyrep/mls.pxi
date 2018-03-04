@@ -38,7 +38,7 @@ cdef list expand_cat_range(SELinuxPolicy policy, Category low, Category high):
     cdef list expanded
     expanded = [low, high]
     for value in range(low._value, high._value):
-        expanded.append(Category.factory(policy, policy.cat_val_to_struct[value]))
+        expanded.append(Category.factory(policy, policy.category_value_to_datum(value)))
 
     return expanded
 
@@ -65,7 +65,7 @@ cdef class Category(PolicySymbol):
             return c
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_CATS][self.handle.s.value - 1])
+        return self.policy.category_value_to_name(self.handle.s.value - 1)
 
     def __hash__(self):
         return hash(str(self))
@@ -89,7 +89,7 @@ cdef class Category(PolicySymbol):
 
     def aliases(self):
         """Generator that yields all aliases for this category."""
-        return CategoryAliasHashtabIterator.factory(self.policy, &self.policy.handle.p.p.symtab[sepol.SYM_CATS].table, self)
+        return self.policy.category_aliases(self)
 
     def statement(self):
         aliases = list(self.aliases())
@@ -125,7 +125,7 @@ cdef class Sensitivity(PolicySymbol):
             return s
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_LEVELS][self.handle.level.sens - 1])
+        return self.policy.level_value_to_name(self.handle.level.sens - 1)
 
     def __hash__(self):
         return hash(str(self))
@@ -157,7 +157,7 @@ cdef class Sensitivity(PolicySymbol):
 
     def aliases(self):
         """Generator that yields all aliases for this sensitivity."""
-        return SensitivityAliasHashtabIterator.factory(self.policy, &self.policy.handle.p.p.symtab[sepol.SYM_LEVELS].table, self)
+        return self.policy.sensitivity_aliases(self)
 
     def level_decl(self):
         """Get the level declaration corresponding to this sensitivity."""
@@ -440,7 +440,8 @@ cdef class Level(BaseMLSLevel):
         if self.handle == NULL:
             return self._sensitivity
         else:
-            return Sensitivity.factory(self.policy, self.policy.level_val_to_struct[self.handle.sens - 1])
+            return Sensitivity.factory(self.policy,
+                                       self.policy.level_value_to_datum(self.handle.sens - 1))
 
     def statement(self):
         raise NoStatement
@@ -862,4 +863,4 @@ cdef class CategoryEbitmapIterator(EbitmapIterator):
 
     def __next__(self):
         super().__next__()
-        return Category.factory(self.policy, self.policy.cat_val_to_struct[self.bit])
+        return Category.factory(self.policy, self.policy.category_value_to_datum(self.bit))

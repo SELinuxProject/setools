@@ -45,20 +45,17 @@ cdef class Context(PolicySymbol):
     @property
     def user(self):
         """The user portion of the context."""
-        cdef sepol.user_datum_t *u = self.policy.handle.p.p.user_val_to_struct[self.handle.user - 1]
-        return User.factory(self.policy, u)
+        return User.factory(self.policy, self.policy.user_value_to_datum(self.handle.user - 1))
 
     @property
     def role(self):
         """The role portion of the context."""
-        cdef sepol.role_datum_t *r = self.policy.handle.p.p.role_val_to_struct[self.handle.role - 1]
-        return Role.factory(self.policy, r)
+        return Role.factory(self.policy, self.policy.role_value_to_datum(self.handle.role - 1))
 
     @property
     def type_(self):
         """The type portion of the context."""
-        cdef sepol.type_datum_t *t = self.policy.handle.p.p.type_val_to_struct[self.handle.type - 1]
-        return Type.factory(self.policy, t)
+        return Type.factory(self.policy, self.policy.type_value_to_datum(self.handle.type - 1))
 
     @property
     def range_(self):

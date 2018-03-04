@@ -43,7 +43,7 @@ cdef class Boolean(PolicySymbol):
         return r
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_BOOLS][self.handle.s.value - 1])
+        return self.policy.boolean_value_to_name(self.handle.s.value - 1)
 
     def _eq(self, Boolean other):
         """Low-level equality check (C pointers)."""
@@ -397,7 +397,7 @@ cdef class ConditionalExprIterator(PolicyIterator):
 
         if self.curr.expr_type == sepol.COND_BOOL:
             item = Boolean.factory(self.policy,
-                                   self.policy.handle.p.p.bool_val_to_struct[self.curr.bool - 1])
+                                   self.policy.boolean_value_to_datum(self.curr.bool - 1))
         else:
             item = ConditionalOperator.factory(self.policy, self.curr)
 

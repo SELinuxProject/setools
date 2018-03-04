@@ -18,6 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+cdef dict _common_cache = {}
 cdef dict _objclass_cache = {}
 
 
@@ -28,18 +29,45 @@ cdef class Common(PolicySymbol):
 
     """A common permission set."""
 
-    cdef sepol.common_datum_t *handle
+    cdef:
+        sepol.common_datum_t *handle
+        readonly dict _perm_table
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.common_datum_t *symbol):
         """Factory function for creating Common objects."""
-        r = Common()
-        r.policy = policy
-        r.handle = symbol
-        return r
+        cdef:
+            sepol.hashtab_node_t *node
+            uint32_t bucket = 0
+            str key
+            uint32_t value
+
+        try:
+            return _common_cache[<uintptr_t>symbol]
+        except KeyError:
+            c = Common()
+            c.policy = policy
+            c.handle = symbol
+            c._perm_table = {}
+
+            #
+            # Create value:name permission table (reverse of what is in the policydb)
+            #
+            while bucket < symbol.permissions.table[0].size:
+                node = symbol.permissions.table[0].htable[bucket]
+                while node != NULL:
+                    key = intern(<char *>node.key)
+                    value = (<sepol.perm_datum_t *>node.datum).s.value
+                    c._perm_table[value] = key
+                    node = node.next
+
+                bucket += 1
+
+            _common_cache[<uintptr_t>symbol] = c
+            return c
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_COMMONS][self.handle.s.value - 1])
+        return self.policy.common_value_to_name(self.handle.s.value - 1)
 
     def _eq(self, Common other):
         """Low-level equality check (C pointers)."""
@@ -51,7 +79,7 @@ cdef class Common(PolicySymbol):
     @property
     def perms(self):
         """The set of the common's permissions."""
-        return set(PermissionHashtabIterator.factory(self.policy, &self.handle.permissions.table))
+        return set(self._perm_table.values())
 
     def statement(self):
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
@@ -61,22 +89,45 @@ cdef class ObjClass(PolicySymbol):
 
     """An object class."""
 
-    cdef sepol.class_datum_t *handle
+    cdef:
+        sepol.class_datum_t *handle
+        readonly dict _perm_table
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.class_datum_t *symbol):
         """Factory function for creating ObjClass objects."""
+        cdef:
+            sepol.hashtab_node_t *node
+            uint32_t bucket = 0
+            str key
+            uint32_t value
+
         try:
             return _objclass_cache[<uintptr_t>symbol]
         except KeyError:
             c = ObjClass()
             c.policy = policy
             c.handle = symbol
+            c._perm_table = {}
+
+            #
+            # Create value:name permission table (reverse of what is in the policydb)
+            #
+            while bucket < symbol.permissions.table[0].size:
+                node = symbol.permissions.table[0].htable[bucket]
+                while node != NULL:
+                    key = intern(node.key)
+                    value = (<sepol.perm_datum_t *>node.datum).s.value
+                    c._perm_table[value] = key
+                    node = node.next
+
+                bucket += 1
+
             _objclass_cache[<uintptr_t>symbol] = c
             return c
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_CLASSES][self.handle.s.value - 1])
+        return self.policy.class_value_to_name(self.handle.s.value - 1)
 
     def __contains__(self, other):
         try:
@@ -125,7 +176,7 @@ cdef class ObjClass(PolicySymbol):
     @property
     def perms(self):
         """The set of the object class's permissions."""
-        return set(PermissionHashtabIterator.factory(self.policy, &self.handle.permissions.table))
+        return set(self._perm_table.values())
 
     def statement(self):
         stmt = "class {0}\n".format(self)
@@ -186,24 +237,6 @@ cdef class ObjClassHashtabIterator(HashtabIterator):
         return ObjClass.factory(self.policy, <sepol.class_datum_t *>self.curr.datum)
 
 
-cdef class PermissionHashtabIterator(HashtabIterator):
-
-    """Iterate over permissions."""
-
-    @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
-        """Factory function for creating Permission iterators."""
-        i = PermissionHashtabIterator()
-        i.policy = policy
-        i.table = table
-        i.reset()
-        return i
-
-    def __next__(self):
-        super().__next__()
-        return intern(self.curr.key)
-
-
 cdef class PermissionVectorIterator(PolicyIterator):
 
     """Iterate over an access (permission) vector"""
@@ -212,7 +245,7 @@ cdef class PermissionVectorIterator(PolicyIterator):
         uint32_t vector
         uint32_t curr
         uint32_t perm_max
-        ObjClass tclass
+        dict perm_table
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, ObjClass tclass, uint32_t vector):
@@ -221,26 +254,29 @@ cdef class PermissionVectorIterator(PolicyIterator):
         i.policy = policy
         i.vector = vector
         i.perm_max = tclass.handle.permissions.nprim
-        i.tclass = tclass
+
+        i.perm_table = tclass._perm_table
+        try:
+            i.perm_table.update(tclass.common._perm_table)
+        except NoCommon:
+            pass
+
         i.reset()
         return i
 
     def __next__(self):
-        cdef:
-            const char* cname
+        cdef str name
 
         if not self.curr < self.perm_max:
             raise StopIteration
 
-        cname = sepol.sepol_av_to_string(&self.policy.handle.p.p, self.tclass.handle.s.value,
-                                         1 << self.curr)
+        name = self.perm_table[self.curr + 1]
 
         self.curr += 1
         while self.curr < self.perm_max and not self.vector & (1 << self.curr):
             self.curr += 1
 
-        # sepol_av_to string prepends a space
-        return intern(cname + 1)
+        return name
 
     def __len__(self):
         cdef:

@@ -49,7 +49,7 @@ cdef class BaseType(PolicySymbol):
     cdef sepol.type_datum_t *handle
 
     def __str__(self):
-        return intern(self.policy.handle.p.p.sym_val_to_name[sepol.SYM_TYPES][self.handle.s.value - 1])
+        return self.policy.type_value_to_name(self.handle.s.value - 1)
 
     def _eq(self, BaseType other):
         """Low-level equality check (C pointers)."""
@@ -81,7 +81,7 @@ cdef class Type(BaseType):
         """Factory function for creating Type objects."""
         if symbol.flavor != sepol.TYPE_TYPE:
             raise ValueError("{0} is not a type".format(
-                policy.handle.p.p.sym_val_to_name[sepol.SYM_TYPES][symbol.s.value - 1]))
+                policy.type_value_to_name(symbol.s.value - 1)))
 
         try:
             return _type_cache[<uintptr_t>symbol]
@@ -114,7 +114,7 @@ cdef class Type(BaseType):
     @property
     def ispermissive(self):
         """(T/F) the type is permissive."""
-        return <bint> ebitmap_get_bit(&self.policy.handle.p.p.permissive_map, self.handle.s.value)
+        return <bint>self.handle.flags & sepol.TYPE_FLAGS_PERMISSIVE
 
     def expand(self):
         """Generator that expands this into its member types."""
@@ -126,7 +126,7 @@ cdef class Type(BaseType):
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        return TypeAliasHashtabIterator.factory(self.policy, &self.policy.handle.p.p.symtab[sepol.SYM_TYPES].table, self)
+        return self.policy.type_aliases(self)
 
     def statement(self):
         attrs = list(self.attributes())
@@ -152,7 +152,7 @@ cdef class TypeAttribute(BaseType):
         """Factory function for creating TypeAttribute objects."""
         if symbol.flavor != sepol.TYPE_ATTRIB:
             raise ValueError("{0} is not an attribute".format(
-                policy.handle.p.p.sym_val_to_name[sepol.SYM_TYPES][symbol.s.value - 1]))
+                policy.type_value_to_name(symbol.s.value - 1)))
 
         try:
             return _typeattr_cache[<uintptr_t>symbol]
@@ -386,7 +386,7 @@ cdef class TypeEbitmapIterator(EbitmapIterator):
 
     def __next__(self):
         super().__next__()
-        return Type.factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.bit])
+        return Type.factory(self.policy, self.policy.type_value_to_datum(self.bit))
 
 
 cdef class TypeAttributeEbitmapIterator(EbitmapIterator):
@@ -415,7 +415,7 @@ cdef class TypeAttributeEbitmapIterator(EbitmapIterator):
     def __next__(self):
         super().__next__()
         return TypeAttribute.factory(self.policy,
-                                     self.policy.handle.p.p.type_val_to_struct[self.bit])
+                                     self.policy.type_value_to_datum(self.bit))
 
 
 cdef class TypeOrAttributeEbitmapIterator(EbitmapIterator):
@@ -444,4 +444,4 @@ cdef class TypeOrAttributeEbitmapIterator(EbitmapIterator):
     def __next__(self):
         super().__next__()
         return type_or_attr_factory(self.policy,
-                                    self.policy.handle.p.p.type_val_to_struct[self.bit])
+                                    self.policy.type_value_to_datum(self.bit))

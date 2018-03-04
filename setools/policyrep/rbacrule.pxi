@@ -59,13 +59,13 @@ cdef class RoleAllow(PolicyRule):
     def source(self):
         """The rule's source role."""
         return Role.factory(self.policy,
-                            self.policy.handle.p.p.role_val_to_struct[self.handle.role - 1])
+                            self.policy.role_value_to_datum(self.handle.role - 1))
 
     @property
     def target(self):
         """The rule's target role."""
         return Role.factory(self.policy,
-                            self.policy.handle.p.p.role_val_to_struct[self.handle.new_role - 1])
+                            self.policy.role_value_to_datum(self.handle.new_role - 1))
 
     @property
     def tclass(self):
@@ -120,25 +120,25 @@ cdef class RoleTransition(PolicyRule):
     def source(self):
         """The rule's source role."""
         return Role.factory(self.policy,
-                            self.policy.handle.p.p.role_val_to_struct[self.handle.role - 1])
+                            self.policy.role_value_to_datum(self.handle.role - 1))
 
     @property
     def target(self):
         """The rule's target type/attribute."""
         return type_or_attr_factory(self.policy,
-                                    self.policy.handle.p.p.type_val_to_struct[self.handle.type - 1])
+                                    self.policy.type_value_to_datum(self.handle.type - 1))
 
     @property
     def tclass(self):
         """The rule's object class."""
         return ObjClass.factory(self.policy,
-                                self.policy.handle.p.p.class_val_to_struct[self.handle.tclass - 1])
+                                self.policy.class_value_to_datum(self.handle.tclass - 1))
 
     @property
     def default(self):
         """The rule's default role."""
         return Role.factory(self.policy,
-                            self.policy.handle.p.p.role_val_to_struct[self.handle.new_role - 1])
+                            self.policy.role_value_to_datum(self.handle.new_role - 1))
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""

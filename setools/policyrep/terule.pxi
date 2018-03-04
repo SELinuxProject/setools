@@ -66,20 +66,20 @@ cdef class BaseTERule(PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        return type_or_attr_factory(
-            self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.source_type - 1])
+        return type_or_attr_factory(self.policy,
+                                    self.policy.type_value_to_datum(self.key.source_type - 1))
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return type_or_attr_factory(
-            self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.target_type - 1])
+        return type_or_attr_factory(self.policy,
+                                    self.policy.type_value_to_datum(self.key.target_type - 1))
 
     @property
     def tclass(self):
         """The rule's object class."""
         return ObjClass.factory(self.policy,
-            self.policy.handle.p.p.class_val_to_struct[self.key.target_class - 1])
+                                self.policy.class_value_to_datum(self.key.target_class - 1))
 
     @property
     def filename(self):
@@ -441,7 +441,7 @@ cdef class TERule(BaseTERule):
     def default(self):
         """The rule's default type."""
         return Type.factory(self.policy,
-                            self.policy.handle.p.p.type_val_to_struct[self.datum.data - 1])
+                            self.policy.type_value_to_datum(self.datum.data - 1))
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
@@ -520,17 +520,20 @@ cdef class FileNameTERule(PolicyRule):
     @property
     def source(self):
         """The rule's source type/attribute."""
-        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.stype - 1])
+        return type_or_attr_factory(self.policy,
+                                    self.policy.type_value_to_datum(self.key.stype - 1))
 
     @property
     def target(self):
         """The rule's target type/attribute."""
-        return type_or_attr_factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.key.ttype - 1])
+        return type_or_attr_factory(self.policy,
+                                    self.policy.type_value_to_datum(self.key.ttype - 1))
 
     @property
     def tclass(self):
         """The rule's object class."""
-        return ObjClass.factory(self.policy, self.policy.handle.p.p.class_val_to_struct[self.key.tclass - 1])
+        return ObjClass.factory(self.policy,
+                                self.policy.class_value_to_datum(self.key.tclass - 1))
 
     @property
     def perms(self):
@@ -540,7 +543,7 @@ cdef class FileNameTERule(PolicyRule):
     @property
     def default(self):
         """The rule's default type."""
-        return Type.factory(self.policy, self.policy.handle.p.p.type_val_to_struct[self.datum.otype - 1])
+        return Type.factory(self.policy, self.policy.type_value_to_datum(self.datum.otype - 1))
 
     @property
     def filename(self):

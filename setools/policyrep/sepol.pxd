@@ -1,15 +1,39 @@
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
+#
+# This file is part of SETools.
+#
+# SETools is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as
+# published by the Free Software Foundation, either version 2.1 of
+# the License, or (at your option) any later version.
+#
+# SETools is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with SETools.  If not, see
+# <http://www.gnu.org/licenses/>.
+#
 
 from libc.stdint cimport uint8_t, uint16_t, uint32_t, uint64_t
+from libc.stdio cimport FILE
 
 
-cdef extern from "<sepol/policydb.h>":
-    cdef int SEPOL_DENY_UNKNOWN
-    cdef int SEPOL_REJECT_UNKNOWN
-    cdef int SEPOL_ALLOW_UNKNOWN
-    cdef int SEPOL_TARGET_SELINUX
-    cdef int SEPOL_TARGET_XEN
-    cdef int sepol_policy_kern_vers_min()
-    cdef int sepol_policy_kern_vers_max()
+cdef extern from "<sepol/handle.h>":
+    cdef struct sepol_handle:
+        pass
+    ctypedef sepol_handle sepol_handle_t
+
+    sepol_handle_t* sepol_handle_create()
+    void sepol_handle_destroy(sepol_handle_t *sh)
+
+
+cdef extern from "<sepol/debug.h>":
+    ctypedef void (*msg_callback)(void *varg, sepol_handle_t *handle, const char *fmt, ...)
+    void sepol_msg_set_callback(sepol_handle * handle, msg_callback cb, void *cb_arg)
+
 
 cdef extern from "<sepol/policydb/services.h>":
     cdef int SECURITY_FS_USE_XATTR
@@ -17,6 +41,7 @@ cdef extern from "<sepol/policydb/services.h>":
     cdef int SECURITY_FS_USE_TASK
     cdef int SECURITY_FS_USE_GENFS
     cdef int SECURITY_FS_USE_NONE
+
 
 cdef extern from "<sepol/policydb/flask.h>":
     cdef int SECCLASS_DIR
@@ -26,6 +51,7 @@ cdef extern from "<sepol/policydb/flask.h>":
     cdef int SECCLASS_SOCK_FILE
     cdef int SECCLASS_CHR_FILE
     cdef int SECCLASS_BLK_FILE
+
 
 cdef extern from "<sepol/policydb/flask_types.h>":
     cdef int SELINUX_MAGIC
@@ -62,6 +88,8 @@ cdef extern from "<sepol/policydb/ebitmap.h>":
     #
     # ebitmap functions
     #
+    void ebitmap_init(ebitmap_t * e)
+    size_t ebitmap_length(ebitmap_t * e)
     unsigned int ebitmap_start(const ebitmap_t * e, ebitmap_node_t ** n)
     unsigned int ebitmap_next(ebitmap_node_t ** n, unsigned int bit)
     int ebitmap_node_get_bit(ebitmap_node_t * n, unsigned int bit)
@@ -190,10 +218,6 @@ cdef extern from "<sepol/policydb/avtab.h>":
         uint32_t mask
 
     ctypedef avtab avtab_t
-
-
-cdef extern from "<sepol/policydb/util.h>":
-    char *sepol_av_to_string(policydb *policydbp, uint32_t tclass, uint32_t av)
 
 
 cdef extern from "<sepol/policydb/mls_types.h>":
@@ -824,8 +848,29 @@ cdef extern from "<sepol/policydb/policydb.h>":
 
     ctypedef policydb policydb_t
 
-    #
-    # struct sepol_policydb
-    #
+
+cdef extern from "<sepol/policydb.h>":
+    cdef struct sepol_policy_file:
+        pass
+    ctypedef sepol_policy_file sepol_policy_file_t
+
     cdef struct sepol_policydb:
         policydb p
+
+    ctypedef sepol_policydb sepol_policydb_t
+
+    cdef int SEPOL_DENY_UNKNOWN
+    cdef int SEPOL_REJECT_UNKNOWN
+    cdef int SEPOL_ALLOW_UNKNOWN
+    cdef int SEPOL_TARGET_SELINUX
+    cdef int SEPOL_TARGET_XEN
+    cdef int sepol_policy_kern_vers_min()
+    cdef int sepol_policy_kern_vers_max()
+
+    int sepol_policydb_create(sepol_policydb_t ** p)
+    int sepol_policy_file_create(sepol_policy_file_t ** pf)
+    void sepol_policy_file_set_handle(sepol_policy_file_t * pf, sepol_handle_t * handle)
+    void sepol_policy_file_set_fp(sepol_policy_file_t * pf, FILE * fp)
+    int sepol_policydb_read(sepol_policydb_t * p, sepol_policy_file_t * pf)
+    void sepol_policydb_free(sepol_policydb_t * p)
+    void sepol_policy_file_free(sepol_policy_file_t * pf)

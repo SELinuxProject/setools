@@ -35,41 +35,21 @@ class QtHelpCommand(Command):
         os.rename('qhc/apol.qch', 'setoolsgui/apol/apol.qch')
 
 
-base_lib_dirs = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
-include_dirs = ['libqpol', 'libqpol/include']
+lib_dirs = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
+include_dirs = []
 
 with suppress(KeyError):
-    base_lib_dirs.insert(0, os.environ["SEPOL_SRC"] + "/src")
     include_dirs.append(os.environ["SEPOL_SRC"] + "/include")
-
-try:
-    static_sepol = os.environ['SEPOL']
-except KeyError:
-    # try to find libsepol.a. The find_library_file function
-    # chooses dynamic libraries over static ones, so
-    # this assumes that the static lib is in the same directory
-    # as the dynamic lib.
-    dynamic_sepol = UnixCCompiler().find_library_file(base_lib_dirs, 'sepol')
-
-    if dynamic_sepol is None:
-        print('Unable to find a libsepol.so on your system!')
-        print("Looked in the following directories:\n{}".format("\n".join(base_lib_dirs)))
-        print('Please set the SEPOL or SEPOL_SRC environment variables. Exiting.')
-        exit(1)
-
-    static_sepol = dynamic_sepol.replace(".so", ".a")
 
 if sys.platform.startswith('darwin'):
     macros=[('DARWIN',1)]
 else:
     macros=[]
 
-ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
-                         ['setools/policyrep/libpolicyrep.pyx',
-                          'libqpol/policy.c',
-                          'libqpol/policy_extend.c'],
+ext_py_mods = [Extension('setools.policyrep.libpolicyrep', ['setools/policyrep/libpolicyrep.pyx'],
                          include_dirs=include_dirs,
-                         libraries=['selinux'],
+                         libraries=['selinux', 'sepol'],
+                         define_macros=macros,
                          extra_compile_args=['-Werror', '-Wextra',
                                              '-Waggregate-return',
                                              '-Wfloat-equal',
@@ -84,12 +64,11 @@ ext_py_mods = [Extension('setools.policyrep.libpolicyrep',
                                              '-Wunknown-pragmas',
                                              '-Wwrite-strings',
                                              '-Wno-unused-parameter',
+                                             '-Wno-suggest-attribute=format',
                                              '-Wno-sign-compare', # Bison
                                              '-Wno-cast-qual', # libsepol uses const-to-nonconst casts
                                              '-Wno-unreachable-code', # Bison generates unreachable code
-                                             '-fno-exceptions'],
-                         define_macros=macros,
-                         extra_objects=[static_sepol])]
+                                             '-fno-exceptions'])]
 
 setup(name='setools',
       version='4.2-dev',
