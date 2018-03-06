@@ -20,7 +20,7 @@ import re
 import logging
 
 import setools
-from setools.policyrep.symbol import PolicySymbol
+
 
 from PyQt5.QtCore import Qt, QItemSelectionModel
 
