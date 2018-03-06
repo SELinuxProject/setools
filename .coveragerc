@@ -1,8 +1,7 @@
 #coverage.py configuration
 [run]
 source = setools
-# This is SWIG generated:
-omit = setools/policyrep/qpol.py
+plugins = Cython.Coverage
 
 [report]
 exclude_lines =

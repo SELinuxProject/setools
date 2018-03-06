@@ -16,7 +16,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-#cython: language_level=3, c_string_type=str, c_string_encoding=ascii
 
 from cpython.exc cimport PyErr_SetFromErrnoWithFilename
 from cpython.mem cimport PyMem_Malloc, PyMem_Free
