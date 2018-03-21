@@ -54,6 +54,7 @@ cdef extern from "<sys/socket.h>":
 cdef extern from "<netinet/in.h>":
     cdef int INET6_ADDRSTRLEN
     cdef int IPPROTO_DCCP
+    cdef int IPPROTO_SCTP
     cdef int IPPROTO_TCP
     cdef int IPPROTO_UDP
 

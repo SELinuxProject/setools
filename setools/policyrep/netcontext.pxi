@@ -186,6 +186,7 @@ class PortconProtocol(PolicyEnum):
     tcp = IPPROTO_TCP
     udp = IPPROTO_UDP
     dccp = IPPROTO_DCCP
+    sctp = IPPROTO_SCTP
 
 
 cdef class Portcon(Ocontext):
