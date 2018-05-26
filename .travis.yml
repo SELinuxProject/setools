@@ -42,7 +42,7 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  - SELINUX_USERSPACE_VERSION=libsepol-2.7
+  - SELINUX_USERSPACE_VERSION=libsepol-2.8
 
   # Download current SELinux userspace tools and libraries
   - git clone https://github.com/SELinuxProject/selinux.git selinux-src -b ${SELINUX_USERSPACE_VERSION}

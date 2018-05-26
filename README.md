@@ -18,7 +18,7 @@ To run SETools command line tools, the following packages are required:
 * NetworkX 2.0+
 * setuptools
 * libselinux
-* libsepol 2.7+
+* libsepol 2.8+
 
 To run SETools graphical tools, the following packages are also required:
 * PyQt5
