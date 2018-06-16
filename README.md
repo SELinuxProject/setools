@@ -1,12 +1,11 @@
 # SETools: Policy analysis tools for SELinux
-https://github.com/TresysTechnology/setools/wiki
+https://github.com/SELinuxProject/setools/wiki
 
 ## Overview
 
-This file describes SETools, developed by Tresys Technology.  SETools
-is a collection of graphical tools, command-line tools, and libraries
-designed to facilitate SELinux policy analysis.  Please consult the
-KNOWN-BUGS file prior to reporting bugs.
+This file describes SETools.  SETools is a collection of graphical tools,
+command-line tools, and libraries designed to facilitate SELinux policy
+analysis.  Please consult the KNOWN-BUGS file prior to reporting bugs.
 
 ## Installation
 
@@ -42,15 +41,15 @@ and Debian.
 
 Official releases of SETools may be freely downloaded from:
 
-https://github.com/TresysTechnology/setools/releases
+https://github.com/SELinuxProject/setools/releases
 
 SETools source code is maintained within a GitHub repository.
 From the command line do:
 ```
-  $ git clone https://github.com/TresysTechnology/setools.git
+  $ git clone https://github.com/SELinuxProject/setools.git
 ```
 You may also browse the GitHub repository at
-https://github.com/TresysTechnology/setools.  The master branch
+https://github.com/SELinuxProject/setools.  The master branch
 has development code that may not be stable.  Each release series
 is considered stable, and has its own branch, e.g. "4.0" for all
 4.0.* releases.  To checkout a stable branch, do:
@@ -153,7 +152,7 @@ do our best to maintain API stability.
 
 Bugs can be reported in the SETools GitHub issues tracker:
 
-https://github.com/TresysTechnology/setools/issues
+https://github.com/SELinuxProject/setools/issues
 
 ### Copyright license
 
