@@ -436,9 +436,6 @@ cdef extern from "<sepol/policydb/policydb.h>":
     #
     # type_set_t
     #
-    cdef int TYPE_TYPE
-    cdef int TYPE_ATTRIB
-    cdef int TYPE_ALIAS
     cdef int TYPE_STAR
     cdef int TYPE_COMP
     cdef int TYPE_FLAGS_PERMISSIVE
