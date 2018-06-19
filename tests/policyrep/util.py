@@ -37,9 +37,11 @@ def compile_policy(source_file, mls=True, xen=False):
     fd, policy_path = tempfile.mkstemp()
     os.close(fd)
 
-    try:
+    if "USERSPACE_SRC" in os.environ:
+        command = [os.environ['USERSPACE_SRC'] + "/checkpolicy/checkpolicy"]
+    elif "CHECKPOLICY" in os.environ:
         command = [os.environ['CHECKPOLICY']]
-    except KeyError:
+    else:
         command = ["/usr/bin/checkpolicy"]
 
     if mls:

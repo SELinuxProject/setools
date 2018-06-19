@@ -34,12 +34,17 @@ class QtHelpCommand(Command):
         os.rename('qhc/apol.qhc', 'setoolsgui/apol/apol.qhc')
         os.rename('qhc/apol.qch', 'setoolsgui/apol/apol.qch')
 
+
 # Library linkage
 lib_dirs = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
 include_dirs = []
 
 with suppress(KeyError):
-    include_dirs.append(os.environ["SEPOL_SRC"] + "/include")
+    userspace_src = os.environ["USERSPACE_SRC"]
+    include_dirs.insert(0, userspace_src + "/libsepol/include")
+    include_dirs.insert(1, userspace_src + "/libselinux/include")
+    lib_dirs.insert(0, userspace_src + "/libsepol/src")
+    lib_dirs.insert(1, userspace_src + "/libselinux/src")
 
 if sys.platform.startswith('darwin'):
     macros=[('DARWIN',1)]
@@ -54,6 +59,8 @@ if enable_coverage:
 ext_py_mods = [Extension('setools.policyrep.libpolicyrep', ['setools/policyrep/libpolicyrep.pyx'],
                          include_dirs=include_dirs,
                          libraries=['selinux', 'sepol'],
+                         library_dirs=lib_dirs,
+                         runtime_library_dirs=lib_dirs,
                          define_macros=macros,
                          extra_compile_args=['-Werror', '-Wextra',
                                              '-Waggregate-return',
