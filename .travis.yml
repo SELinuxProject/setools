@@ -2,6 +2,12 @@
 # from: https://github.com/fishilico/selinux-refpolicy-patched/blob/travis-upstream/.travis.yml
 ---
 
+env:
+  global:
+    - USERSPACE_SRC=$TRAVIS_BUILD_DIR/selinux-src
+    - SELINUX_USERSPACE_VERSION=libsepol-2.8
+    - LIBSEPOLA="$USERSPACE_SRC/libsepol/src/libsepol.a"
+
 language: python
 
 python:
@@ -19,7 +25,7 @@ matrix:
   allow_failures:
     - env: TOX_ENV=coverage
 
-sudo: required
+sudo: false
 dist: trusty
 
 addons:
@@ -39,24 +45,19 @@ before_install:
   - bison -V
   - flex -V
   - python -V
+  - pip list
   - sudo apt-get update -qq
 
 install:
-  - SELINUX_USERSPACE_VERSION=libsepol-2.8
-
   # Download current SELinux userspace tools and libraries
-  - git clone https://github.com/SELinuxProject/selinux.git selinux-src -b ${SELINUX_USERSPACE_VERSION}
+  - git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
 
-  # Only portions of the toolchain are necessary
-  - sed -i -e 's/^SUBDIRS=.*/SUBDIRS=libsepol libselinux checkpolicy/' selinux-src/Makefile
+  # Compile SELinux userspace
+  - make  -C selinux-src/libsepol
+  - make CFLAGS="-O2 -pipe -fPIC -Wall -I$TRAVIS_BUILD_DIR/selinux-src/libsepol/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/selinux-src/libsepol/src" -C selinux-src/libselinux
+  - make CFLAGS="-O2 -pipe -fPIC -Wall -I$TRAVIS_BUILD_DIR/selinux-src/libsepol/include" -C selinux-src/checkpolicy
 
-  # Compile and install SELinux toolchain
-  # On Ubuntu 12.04, default CFLAGS make the build fail in libsepol/cil with:
-  #    error: declaration of 'index' shadows a global declarationo
-  - sudo make CFLAGS="-O2 -pipe -fPIC -Wall" -C selinux-src install
-
-  # Ubuntu 12.04's flex generates a redundant decl in libqpol
-  - sed -i -e "/Wwrite-strings/s/,/, '-Wno-redundant-decls',/" setup.py
+  - sed -i -e "/Wwrite-strings/s/,/, '-Wno-maybe-uninitialized',/" setup.py
 
   - pip install tox-travis cython
 
