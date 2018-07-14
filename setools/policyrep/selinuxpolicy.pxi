@@ -894,12 +894,11 @@ cdef class SELinuxPolicy:
             # Synthesize a name if it is missing
             if self.handle.p.sym_val_to_name[sepol.SYM_TYPES][i] == NULL:
                 # synthesize name
-                tmp_name = <char*>calloc(10, sizeof(char))
+                tmp_name = <char*>calloc(15, sizeof(char))
                 if tmp_name == NULL:
                     raise MemoryError
 
-                memset(tmp_name, 0, 10 * sizeof(char))
-                snprintf(tmp_name, 9, "@ttr%04zd", i + 1)
+                snprintf(tmp_name, 15, "@ttr%010zd", i + 1)
 
                 self.handle.p.sym_val_to_name[sepol.SYM_TYPES][i] = tmp_name
 
@@ -965,12 +964,11 @@ cdef class SELinuxPolicy:
             if self.handle.p.type_val_to_struct[i] != NULL:
                 continue
 
-            tmp_name = <char*>calloc(10, sizeof(char))
+            tmp_name = <char*>calloc(15, sizeof(char))
             if tmp_name == NULL:
                 raise MemoryError
 
-            memset(tmp_name, 0, 10 * sizeof(char))
-            snprintf(tmp_name, 9, "@ttr%04zd", i + 1)
+            snprintf(tmp_name, 15, "@ttr%010zd", i + 1)
 
             tmp_type = <sepol.type_datum_t*>calloc(1, sizeof(sepol.type_datum_t))
             if tmp_type == NULL:
