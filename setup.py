@@ -77,9 +77,11 @@ ext_py_mods = [Extension('setools.policyrep.libpolicyrep', ['setools/policyrep/l
                                              '-Wwrite-strings',
                                              '-Wno-unused-parameter',
                                              '-Wno-suggest-attribute=format',
-                                             '-Wno-sign-compare', # Bison
-                                             '-Wno-cast-qual', # libsepol uses const-to-nonconst casts
-                                             '-Wno-unreachable-code', # Bison generates unreachable code
+                                             '-Wno-sign-compare',
+                                             '-Wno-cast-qual',
+                                             '-Wno-unreachable-code',
+                                             '-Wno-implicit-fallthrough',
+                                             '-Wno-cast-function-type',
                                              '-fno-exceptions'])]
 
 setup(name='setools',
