@@ -5,15 +5,57 @@ from setuptools import setup
 import distutils.log as log
 from distutils.core import Extension
 from distutils.cmd import Command
-from distutils.unixccompiler import UnixCCompiler
-from setuptools.command.build_ext import build_ext
+from distutils.command.clean import clean
 import subprocess
 import sys
 import os
+import shutil
 from os.path import join
+from itertools import chain
 from contextlib import suppress
 from Cython.Build import cythonize
 
+
+class CleanCommand(clean):
+    """
+    Extend the clean command to clean cython and Qt files.
+
+    This will clean the .c intermediate file, and if --all is
+    specified, will remove __pycache__ and Qt help files.
+    """
+
+    def run(self):
+        extensions_to_remove = [".so", ".c"]
+        files_to_remove = []
+        dirs_to_remove = ["setools.egg-info"]
+
+        if self.all:
+            # --all includes Qt help files
+            self.announce("Cleaning __pycache__ dirs and Qt help files", level=log.INFO)
+            extensions_to_remove.extend((".qhc", ".qch"))
+
+        # collect files and dirs to delete
+        for root, dirs, files in chain(os.walk("setools"),
+                                       os.walk("setoolsgui"),
+                                       os.walk("tests"),
+                                       os.walk("qhc")):
+            for f in files:
+                if os.path.splitext(f)[-1] in extensions_to_remove:
+                    files_to_remove.append(join(root, f))
+
+            for d in dirs:
+                if d == "__pycache__" and self.all:
+                    dirs_to_remove.append(join(root, d))
+
+        for file in files_to_remove:
+            with suppress(Exception):
+                os.unlink(file)
+
+        for dir_ in dirs_to_remove:
+            with suppress(Exception):
+                shutil.rmtree(dir_, ignore_errors=True)
+
+        clean.run(self)
 
 class QtHelpCommand(Command):
     description = "Build Qt help files."
@@ -90,7 +132,7 @@ setup(name='setools',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
       url='https://github.com/SELinuxProject/setools',
-      cmdclass={'build_qhc': QtHelpCommand},
+      cmdclass={'build_qhc': QtHelpCommand, 'clean': CleanCommand},
       packages=['setools', 'setools.diff', 'setools.policyrep', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],
