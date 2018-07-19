@@ -171,8 +171,14 @@ cdef class SELinuxPolicy:
 
     def _potential_policies(self):
         """Generate a list of potential policies to use."""
+        self.log.debug("SELinuxfs exists: {}".format(selinux.selinuxfs_exists()))
+        self.log.debug("Sepol version range: {}-{}".format(sepol.sepol_policy_kern_vers_min(),
+                                                           sepol.sepol_policy_kern_vers_max()))
+        self.log.debug("Binary policy path: {}".format(selinux.selinux_binary_policy_path()))
+
         # try libselinux for current policy
         if selinux.selinuxfs_exists():
+            self.log.debug("Current policy path: {}".format(selinux.selinux_current_policy_path()))
             yield selinux.selinux_current_policy_path()
 
         # otherwise look through the supported policy versions
