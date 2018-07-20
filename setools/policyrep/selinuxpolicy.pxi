@@ -171,21 +171,27 @@ cdef class SELinuxPolicy:
 
     def _potential_policies(self):
         """Generate a list of potential policies to use."""
+        cdef:
+            int min_ver = sepol.sepol_policy_kern_vers_min()
+            int max_ver = sepol.sepol_policy_kern_vers_max()
+            const char *base_policy_path = selinux.selinux_binary_policy_path()
+            const char *current_policy_path = selinux.selinux_current_policy_path()
+
         self.log.debug("SELinuxfs exists: {}".format(selinux.selinuxfs_exists()))
-        self.log.debug("Sepol version range: {}-{}".format(sepol.sepol_policy_kern_vers_min(),
-                                                           sepol.sepol_policy_kern_vers_max()))
-        self.log.debug("Binary policy path: {}".format(selinux.selinux_binary_policy_path()))
+        self.log.debug("Sepol version range: {}-{}".format(min_ver, max_ver))
+        self.log.debug("Current policy path: {}".format(current_policy_path
+                                                        if current_policy_path != NULL else None))
+        self.log.debug("Binary policy path: {}".format(base_policy_path
+                                                       if base_policy_path != NULL else None))
 
         # try libselinux for current policy
-        if selinux.selinux_current_policy_path() != NULL:
-            self.log.debug("Current policy path: {}".format(selinux.selinux_current_policy_path()))
-            yield selinux.selinux_current_policy_path()
+        if current_policy_path != NULL:
+            yield current_policy_path
 
         # otherwise look through the supported policy versions
-        base_policy_path = selinux.selinux_binary_policy_path()
-        for version in range(sepol.sepol_policy_kern_vers_max(),
-                             sepol.sepol_policy_kern_vers_min() - 1, -1):
-            yield "{0}.{1}".format(base_policy_path, version)
+        if base_policy_path != NULL:
+            for version in range(max_ver, min_ver - 1, -1):
+                yield "{0}.{1}".format(base_policy_path, version)
 
     cdef _load_running_policy(self):
         """Try to load the current running policy."""
