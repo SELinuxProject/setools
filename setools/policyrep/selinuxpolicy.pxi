@@ -177,7 +177,7 @@ cdef class SELinuxPolicy:
         self.log.debug("Binary policy path: {}".format(selinux.selinux_binary_policy_path()))
 
         # try libselinux for current policy
-        if selinux.selinuxfs_exists():
+        if selinux.selinux_current_policy_path() != NULL:
             self.log.debug("Current policy path: {}".format(selinux.selinux_current_policy_path()))
             yield selinux.selinux_current_policy_path()
 
