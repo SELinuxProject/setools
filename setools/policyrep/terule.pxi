@@ -47,6 +47,7 @@ cdef class BaseTERule(PolicyRule):
     cdef:
         sepol.avtab_key_t *key
         sepol.avtab_datum_t *datum
+        object rule_string
         object _conditional
         object _conditional_block
 
@@ -135,22 +136,23 @@ cdef class AVRule(BaseTERule):
         return r
 
     def __str__(self):
-        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
+        if not self.rule_string:
+            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
 
-        # allow/dontaudit/auditallow/neverallow rules
-        perms = self.perms
-        if len(perms) > 1:
-            rule_string += "{{ {0} }};".format(' '.join(sorted(perms)))
-        else:
-            # convert to list since sets cannot be indexed
-            rule_string += "{0};".format(list(perms)[0])
+            # allow/dontaudit/auditallow/neverallow rules
+            perms = self.perms
+            if len(perms) > 1:
+                self.rule_string += "{{ {0} }};".format(' '.join(sorted(perms)))
+            else:
+                # convert to list since sets cannot be indexed
+                self.rule_string += "{0};".format(list(perms)[0])
 
-        try:
-            rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-        except RuleNotConditional:
-            pass
+            try:
+                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+            except RuleNotConditional:
+                pass
 
-        return rule_string
+        return self.rule_string
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -284,17 +286,18 @@ cdef class AVRuleXperm(AVRule):
         self.extended = True
 
     def __str__(self):
-        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} ". \
-                            format(self)
+        if not self.rule_string:
+            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} ". \
+                                format(self)
 
-        # generate short permission notation
-        perms = self.perms
-        if perms.ranges() > 1:
-            rule_string += "{{ {0} }};".format(perms)
-        else:
-            rule_string += "{0};".format(perms)
+            # generate short permission notation
+            perms = self.perms
+            if perms.ranges() > 1:
+                self.rule_string += "{{ {0} }};".format(perms)
+            else:
+                self.rule_string += "{0};".format(perms)
 
-        return rule_string
+        return self.rule_string
 
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}|{1}|{2}".
@@ -396,14 +399,16 @@ cdef class TERule(BaseTERule):
         return r
 
     def __str__(self):
-        rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
+        if not self.rule_string:
+            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};". \
+                               format(self)
 
-        try:
-            rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-        except RuleNotConditional:
-            pass
+            try:
+                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+            except RuleNotConditional:
+                pass
 
-        return rule_string
+        return self.rule_string
 
     def __lt__(self, other):
         return str(self) < str(other)
