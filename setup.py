@@ -102,7 +102,6 @@ ext_py_mods = [Extension('setools.policyrep.libpolicyrep', ['setools/policyrep/l
                          include_dirs=include_dirs,
                          libraries=['selinux', 'sepol'],
                          library_dirs=lib_dirs,
-                         runtime_library_dirs=lib_dirs,
                          define_macros=macros,
                          extra_compile_args=['-Werror', '-Wextra',
                                              '-Waggregate-return',
