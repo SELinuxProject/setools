@@ -4,9 +4,13 @@
 
 env:
   global:
+    # LIBSEPOLA needed by the Makefiles.
     - USERSPACE_SRC=$TRAVIS_BUILD_DIR/selinux-src
     - SELINUX_USERSPACE_VERSION=libsepol-2.8
-    - LIBSEPOLA="$USERSPACE_SRC/libsepol/src/libsepol.a"
+    - SEPOL_SRC=$USERSPACE_SRC/libsepol
+    - LIBSEPOLA=$SEPOL_SRC/src/libsepol.a
+    - SELINUX_SRC=$USERSPACE_SRC/libselinux
+    - CHECKPOLICY_SRC=$USERSPACE_SRC/checkpolicy
 
 language: python
 
@@ -53,9 +57,9 @@ install:
   - git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
 
   # Compile SELinux userspace
-  - make  -C selinux-src/libsepol
-  - make CFLAGS="-O2 -pipe -fPIC -Wall -I$TRAVIS_BUILD_DIR/selinux-src/libsepol/include" LDFLAGS="-L$TRAVIS_BUILD_DIR/selinux-src/libsepol/src" -C selinux-src/libselinux
-  - make CFLAGS="-O2 -pipe -fPIC -Wall -I$TRAVIS_BUILD_DIR/selinux-src/libsepol/include" -C selinux-src/checkpolicy
+  - make -C ${SEPOL_SRC}
+  - make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" LDFLAGS="-L${SEPOL_SRC}/src" -C ${SELINUX_SRC}
+  - make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" -C ${CHECKPOLICY_SRC}
 
   - sed -i -e "/Wwrite-strings/s/,/, '-Wno-maybe-uninitialized',/" setup.py
 
@@ -63,6 +67,7 @@ install:
 
 script:
   - tox --version
+  - export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src"
   - |
       [ -z "$TOX_ENV" ] && tox || tox -e $TOX_ENV
 
