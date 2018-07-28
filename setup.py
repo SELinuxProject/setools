@@ -98,6 +98,8 @@ enable_coverage = bool(os.environ.get("SETOOLS_COVERAGE", False))
 if enable_coverage:
     macros.append(("CYTHON_TRACE", 1))
 
+cython_annotate = bool(os.environ.get("SETOOLS_ANNOTATE", False))
+
 ext_py_mods = [Extension('setools.policyrep.libpolicyrep', ['setools/policyrep/libpolicyrep.pyx'],
                          include_dirs=include_dirs,
                          libraries=['selinux', 'sepol'],
@@ -137,6 +139,7 @@ setup(name='setools',
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],
       package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map']},
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
+                            annotate=cython_annotate,
                             compiler_directives={"language_level": 3,
                                                  "c_string_type": "str",
                                                  "c_string_encoding": "ascii",
