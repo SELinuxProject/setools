@@ -22,10 +22,8 @@ cdef class PolicyRule(PolicySymbol):
 
     """This is base class for policy rules."""
 
+    # This is initialized to False
     cdef readonly bint extended
-
-    def __init__(self):
-        self.extended = False
 
     def __str__(self):
         raise NotImplementedError

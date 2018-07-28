@@ -45,7 +45,7 @@ cdef class Bounds(PolicySymbol):
         b.policy = policy
         return b
 
-    def __init__(self, parent, child):
+    def __cinit__(self, parent, child):
         self.ruletype = BoundsRuletype.typebounds
         self.parent = parent
         self.child = child
@@ -97,10 +97,11 @@ cdef class TypeboundsIterator(HashtabIterator):
             Type.factory(self.policy, datum))
 
     def __len__(self):
-        cdef sepol.type_datum_t *datum
-        cdef sepol.hashtab_node_t *node
-        cdef uint32_t bucket = 0
-        cdef size_t count = 0
+        cdef:
+            sepol.type_datum_t *datum
+            sepol.hashtab_node_t *node
+            uint32_t bucket = 0
+            size_t count = 0
 
         while bucket < self.table[0].size:
             node = self.table[0].htable[bucket]

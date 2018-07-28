@@ -44,7 +44,7 @@ cdef class MLSRule(PolicyRule):
         r.handle = symbol
         return r
 
-    def __init__(self, rng):
+    def __cinit__(self, rng):
         self.ruletype = MLSRuletype.range_transition
         self.rng = rng
 

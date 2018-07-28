@@ -45,7 +45,7 @@ cdef class RoleAllow(PolicyRule):
         r.handle = symbol
         return r
 
-    def __init__(self):
+    def __cinit__(self):
         self.ruletype = RBACRuletype.allow
 
     def __str__(self):
@@ -106,7 +106,7 @@ cdef class RoleTransition(PolicyRule):
         r.handle = symbol
         return r
 
-    def __init__(self):
+    def __cinit__(self):
         self.ruletype = RBACRuletype.role_transition
 
     def __str__(self):

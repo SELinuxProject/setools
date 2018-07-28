@@ -25,8 +25,7 @@ cdef class PolicySymbol:
 
     """This is a base class for all policy objects."""
 
-    cdef:
-        readonly SELinuxPolicy policy
+    cdef readonly SELinuxPolicy policy
 
     def __hash__(self):
         return hash(str(self))
@@ -145,6 +144,7 @@ cdef class EbitmapIterator(PolicyIterator):
         cdef:
             sepol.ebitmap_node_t *node
             size_t curr
+            size_t count = 0
 
         count = 0
         curr = sepol.ebitmap_start(self.bmap, &node)
@@ -184,7 +184,7 @@ cdef class HashtabIterator(PolicyIterator):
         sepol.hashtab_node_t *curr
         unsigned int bucket
 
-    def _next_bucket(self):
+    cdef void _next_bucket(self):
         """Internal method for advancing to the next bucket."""
         self.bucket += 1
         if self.bucket < self.table[0].size:
@@ -192,7 +192,7 @@ cdef class HashtabIterator(PolicyIterator):
         else:
             self.node = NULL
 
-    def _next_node(self):
+    cdef void _next_node(self):
         """Internal method for advancing to the next node."""
         if self.node != NULL and self.node.next != NULL:
             self.node = self.node.next

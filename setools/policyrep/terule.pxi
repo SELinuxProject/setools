@@ -282,7 +282,7 @@ cdef class AVRuleXperm(AVRule):
         r._conditional_block = conditional_block
         return r
 
-    def __init__(self):
+    def __cinit__(self):
         self.extended = True
 
     def __str__(self):
@@ -481,7 +481,7 @@ cdef class FileNameTERule(PolicyRule):
         r.datum = datum
         return r
 
-    def __init__(self):
+    def __cinit__(self):
         self.ruletype = TERuletype.type_transition
 
     def __str__(self):
