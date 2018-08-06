@@ -23,12 +23,12 @@ cdef class PolicyCapability(PolicySymbol):
 
     """A policy capability."""
 
-    cdef str name
+    cdef readonly str name
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, size_t bit):
+    cdef inline PolicyCapability factory(SELinuxPolicy policy, size_t bit):
         """Factory function for creating PolicyCapability objects."""
-        r = PolicyCapability()
+        cdef PolicyCapability r = PolicyCapability.__new__(PolicyCapability)
         r.policy = policy
         r.name = intern(sepol.sepol_polcap_getname(bit))
         return r
