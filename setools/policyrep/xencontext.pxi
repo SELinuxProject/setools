@@ -30,37 +30,36 @@ cdef class Devicetreecon(Ocontext):
 
     """A devicetreecon statement."""
 
+    cdef readonly str path
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline Devicetreecon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating Devicetreecon objects."""
-        d = Devicetreecon()
+        cdef Devicetreecon d = Devicetreecon.__new__(Devicetreecon)
         d.policy = policy
-        d.handle = symbol
+        d.key = <uintptr_t>symbol
+        d.path = intern(symbol.u.name)
+        d.context = Context.factory(policy, symbol.context)
         return d
 
     def __str__(self):
         return "devicetreecon {0.path} {0.context}".format(self)
-
-    @property
-    def path(self):
-        """
-        The path for this devicetreecon.
-
-        Return: The device path name.
-        """
-        return intern(self.handle.u.name)
 
 
 cdef class Iomemcon(Ocontext):
 
     """A iomemcon statement."""
 
+    cdef readonly object addr
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline Iomemcon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating Iomemcon objects."""
-        i = Iomemcon()
+        cdef Iomemcon i = Iomemcon.__new__(Iomemcon)
         i.policy = policy
-        i.handle = symbol
+        i.key = <uintptr_t>symbol
+        i.addr = IomemconRange(symbol.u.iomem.low_iomem, symbol.u.iomem.high_iomem)
+        i.context = Context.factory(policy, symbol.context)
         return i
 
     def __str__(self):
@@ -71,29 +70,21 @@ cdef class Iomemcon(Ocontext):
         else:
             return "iomemcon {0}-{1} {2}".format(low, high, self.context)
 
-    @property
-    def addr(self):
-        """
-        The memory range for this iomemcon.
-
-        Return: Tuple(low, high)
-        low     The low memory of the range.
-        high    The high memory of the range.
-        """
-        return IomemconRange(self.handle.u.iomem.low_iomem,
-                             self.handle.u.iomem.high_iomem)
-
 
 cdef class Ioportcon(Ocontext):
 
     """A ioportcon statement."""
 
+    cdef readonly object ports
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline Ioportcon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating Ioportcon objects."""
-        i = Ioportcon()
+        cdef Ioportcon i = Ioportcon.__new__(Ioportcon)
         i.policy = policy
-        i.handle = symbol
+        i.key = <uintptr_t>symbol
+        i.ports = IoportconRange(symbol.u.ioport.low_ioport, symbol.u.ioport.high_ioport)
+        i.context = Context.factory(policy, symbol.context)
         return i
 
     def __str__(self):
@@ -104,67 +95,45 @@ cdef class Ioportcon(Ocontext):
         else:
             return "ioportcon {0}-{1} {2}".format(low, high, self.context)
 
-    @property
-    def ports(self):
-        """
-        The port range for this ioportcon.
-
-        Return: Tuple(low, high)
-        low     The low port of the range.
-        high    The high port of the range.
-        """
-        return IoportconRange(self.handle.u.ioport.low_ioport,
-                              self.handle.u.ioport.high_ioport)
-
 
 cdef class Pcidevicecon(Ocontext):
 
     """A pcidevicecon statement."""
 
+    cdef readonly object device
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline Pcidevicecon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating Pcidevicecon objects."""
-        p = Pcidevicecon()
+        cdef Pcidevicecon p = Pcidevicecon.__new__(Pcidevicecon)
         p.policy = policy
-        p.handle = symbol
+        p.key = <uintptr_t>symbol
+        p.device = symbol.u.device
+        p.context = Context.factory(policy, symbol.context)
         return p
 
     def __str__(self):
         return "pcidevicecon {0.device} {0.context}".format(self)
-
-    @property
-    def device(self):
-        """
-        The device for this pcidevicecon.
-
-        Return: The PCI device ID.
-        """
-        return self.handle.u.device
 
 
 cdef class Pirqcon(Ocontext):
 
     """A pirqcon statement."""
 
+    cdef readonly object irq
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline Pirqcon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating Pirqcon objects."""
-        p = Pirqcon()
+        cdef Pirqcon p = Pirqcon.__new__(Pirqcon)
         p.policy = policy
-        p.handle = symbol
+        p.key = <uintptr_t>symbol
+        p.irq = symbol.u.pirq
+        p.context = Context.factory(policy, symbol.context)
         return p
 
     def __str__(self):
         return "pirqcon {0.irq} {0.context}".format(self)
-
-    @property
-    def irq(self):
-        """
-        The irq for this pirqcon.
-
-        Return: The irq.
-        """
-        return self.handle.u.pirq
 
 
 #
