@@ -46,18 +46,16 @@ cdef class BaseType(PolicySymbol):
 
     """Type/attribute base class."""
 
-    cdef sepol.type_datum_t *handle
+    cdef:
+        sepol.type_datum_t *handle
+        readonly str name
 
     def __str__(self):
-        return self.policy.type_value_to_name(self.handle.s.value - 1)
+        return self.name
 
     def _eq(self, BaseType other):
         """Low-level equality check (C pointers)."""
         return self.handle == other.handle
-
-    @property
-    def ispermissive(self):
-        raise NotImplementedError
 
     def expand(self):
         """Generator that expands this attribute into its member types."""

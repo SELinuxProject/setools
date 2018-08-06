@@ -30,6 +30,15 @@ cdef class PolicySymbol:
     def __hash__(self):
         return hash(str(self))
 
+    def __copy__(self):
+        # Do not copy.
+        return self
+
+    def __deepcopy__(self, memo):
+        # Do not copy.
+        memo[id(self)] = self
+        return self
+
     def __eq__(self, other):
         try:
             # This is a regular Python function, so it cannot
@@ -68,16 +77,13 @@ cdef class Ocontext(PolicySymbol):
 
     """Base class for most in-policy labeling statements, (portcon, nodecon, etc.)"""
 
-    cdef sepol.ocontext_t *handle
+    cdef:
+        uintptr_t key
+        readonly Context context
 
     def _eq(self, Ocontext other):
         """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def context(self):
-        """The context for this statement."""
-        return Context.factory(self.policy, self.handle.context)
+        return self.key == other.key
 
     def statement(self):
         return str(self)

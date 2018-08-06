@@ -45,42 +45,10 @@ cdef class BaseTERule(PolicyRule):
     """Base class for TE rules."""
 
     cdef:
-        sepol.avtab_key_t *key
-        sepol.avtab_datum_t *datum
-        object rule_string
-        object _conditional
-        object _conditional_block
-
-    def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".format(
-            self, self._conditional, self._conditional_block))
-
-    def _eq(self, BaseTERule other):
-        return self.key == other.key and self.datum == other.datum
-
-    @property
-    def ruletype(self):
-        """The rule type."""
-        # mask the enabled bit for the ruletype lookup in conditional rules
-        return TERuletype(self.key.specified & ~sepol.AVTAB_ENABLED)
-
-    @property
-    def source(self):
-        """The rule's source type/attribute."""
-        return type_or_attr_factory(self.policy,
-                                    self.policy.type_value_to_datum(self.key.source_type - 1))
-
-    @property
-    def target(self):
-        """The rule's target type/attribute."""
-        return type_or_attr_factory(self.policy,
-                                    self.policy.type_value_to_datum(self.key.target_type - 1))
-
-    @property
-    def tclass(self):
-        """The rule's object class."""
-        return ObjClass.factory(self.policy,
-                                self.policy.class_value_to_datum(self.key.target_class - 1))
+        readonly ObjClass tclass
+        str rule_string
+        Conditional _conditional
+        bint _conditional_block
 
     @property
     def filename(self):

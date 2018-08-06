@@ -22,48 +22,21 @@ cdef class PolicyRule(PolicySymbol):
 
     """This is base class for policy rules."""
 
-    # This is initialized to False
-    cdef readonly bint extended
+
+    cdef:
+        uintptr_t key
+        readonly object ruletype
+        readonly object source
+        readonly object target
+        readonly object origin
+        # This is initialized to False:
+        readonly bint extended
 
     def __str__(self):
         raise NotImplementedError
 
-    def __lt__(self, other):
-        return str(self) < str(other)
-
-    @property
-    def ruletype(self):
-        """The rule type for the rule."""
-        raise NotImplementedError
-
-    @property
-    def source(self):
-        """
-        The source for the rule. This should be overridden by
-        subclasses.
-        """
-        raise NotImplementedError
-
-    @property
-    def target(self):
-        """
-        The target for the rule. This should be overridden by
-        subclasses.
-        """
-        raise NotImplementedError
-
-    @property
-    def tclass(self):
-        """The object class for the rule."""
-        raise NotImplementedError
-
-    @property
-    def default(self):
-        """
-        The default for the rule. This should be overridden by
-        subclasses.
-        """
-        raise NotImplementedError
+    def _eq(self, PolicyRule other):
+        return self.key == other.key
 
     @property
     def conditional(self):
