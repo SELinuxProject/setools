@@ -32,31 +32,31 @@ cdef class Boolean(PolicySymbol):
 
     """A Boolean."""
 
-    cdef sepol.cond_bool_datum_t *handle
+    cdef:
+        uintptr_t key
+        str name
+        readonly object state
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.cond_bool_datum_t *symbol):
+    cdef inline Boolean factory(SELinuxPolicy policy, sepol.cond_bool_datum_t *symbol):
         """Factory function for creating Boolean objects."""
-        r = Boolean()
-        r.policy = policy
-        r.handle = symbol
-        return r
+        cdef Boolean b = Boolean.__new__(Boolean)
+        b.policy = policy
+        b.key = <uintptr_t>symbol
+        b.name = policy.boolean_value_to_name(symbol.s.value - 1)
+        b.state = <bint>symbol.state
+        return b
 
     def __str__(self):
-        return self.policy.boolean_value_to_name(self.handle.s.value - 1)
+        return self.name
 
     def _eq(self, Boolean other):
         """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def state(self):
-        """The default state of the Boolean."""
-        return <bint> self.handle.state
+        return self.key == other.key
 
     def statement(self):
         """The policy statement."""
-        return "bool {0} {1};".format(self, str(self.state).lower())
+        return "bool {0} {1};".format(self.name, str(self.state).lower())
 
 
 cdef class Conditional(PolicySymbol):
