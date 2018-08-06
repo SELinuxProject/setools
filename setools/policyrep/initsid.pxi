@@ -39,14 +39,15 @@ cdef class InitialSID(Ocontext):
 
     """An initial SID statement."""
 
-    cdef str name
+    cdef readonly str name
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext *symbol):
+    cdef inline InitialSID factory(SELinuxPolicy policy, sepol.ocontext *symbol):
         """Factory function for creating InitialSID objects."""
-        i = InitialSID()
+        cdef InitialSID i = InitialSID.__new__(InitialSID)
         i.policy = policy
-        i.handle = symbol
+        i.key = <uintptr_t>symbol
+        i.context = Context.factory(policy, symbol.context)
 
         if symbol.u.name:
             i.name = intern(symbol.u.name)
