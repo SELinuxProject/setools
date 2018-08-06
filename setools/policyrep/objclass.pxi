@@ -290,7 +290,7 @@ cdef class PermissionVectorIterator(PolicyIterator):
         i.vector = vector
         i.perm_max = tclass.nprim
 
-        i.perm_table = tclass._perm_table
+        i.perm_table = tclass._perm_table.copy()
         try:
             i.perm_table.update(tclass.common._perm_table)
         except NoCommon:
