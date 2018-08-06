@@ -139,25 +139,6 @@ cdef class Conditional(PolicySymbol):
         except TypeError:
             return str(self) == str(other)
 
-    def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        newobj = Conditional.factory(self.policy, self.handle)
-        memo[id(self)] = newobj
-        return newobj
-
-    def __getstate__(self):
-        return (self.policy, self._pickle())
-
-    def __setstate__(self, state):
-        self.policy = state[0]
-        self._unpickle(state[1])
-
-    cdef bytes _pickle(self):
-        return <bytes>(<char *>self.handle)
-
-    cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(sepol.cond_node_t *))
-
     def _eq(self, Conditional other):
         """Low-level equality check (C pointers)."""
         return self.handle == other.handle
