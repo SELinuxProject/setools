@@ -33,39 +33,26 @@ cdef class RoleAllow(PolicyRule):
 
     """A role allow rule."""
 
-    cdef:
-        sepol.role_allow_t *handle
-        readonly object ruletype
-
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.role_allow_t *symbol):
+    cdef inline RoleAllow factory(SELinuxPolicy policy, sepol.role_allow_t *symbol):
         """Factory function for creating RoleAllow objects."""
-        r = RoleAllow()
+        cdef RoleAllow r = RoleAllow.__new__(RoleAllow)
         r.policy = policy
-        r.handle = symbol
+        r.key = <uintptr_t>symbol
+        r.ruletype = RBACRuletype.allow
+        r.source = Role.factory(policy, policy.role_value_to_datum(symbol.role - 1))
+        r.target = Role.factory(policy, policy.role_value_to_datum(symbol.new_role - 1))
+        r.origin = None
         return r
-
-    def __cinit__(self):
-        self.ruletype = RBACRuletype.allow
 
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target};".format(self)
 
-    def _eq(self, RoleAllow other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.source}|{0.target}".format(self))
 
-    @property
-    def source(self):
-        """The rule's source role."""
-        return Role.factory(self.policy,
-                            self.policy.role_value_to_datum(self.handle.role - 1))
-
-    @property
-    def target(self):
-        """The rule's target role."""
-        return Role.factory(self.policy,
-                            self.policy.role_value_to_datum(self.handle.new_role - 1))
+    def __lt__(self, other):
+        return str(self) < str(other)
 
     @property
     def tclass(self):
@@ -79,15 +66,22 @@ cdef class RoleAllow(PolicyRule):
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
-        for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            """Factory function for creating ExpandedRoleAllow objects."""
-            r = ExpandedRoleAllow()
-            r.policy = self.policy
-            r.handle = self.handle
-            r.source = s
-            r.target = t
-            r.origin = self
-            yield r
+        cdef RoleAllow r
+        if self.origin is None:
+            for s, t in itertools.product(self.source.expand(), self.target.expand()):
+                """Factory function for creating ExpandedRoleAllow objects."""
+                r = RoleAllow.__new__(RoleAllow)
+                r.policy = self.policy
+                r.key = self.key
+                r.ruletype = self.ruletype
+                r.source = s
+                r.target = t
+                r.origin = self
+                yield r
+
+        else:
+            # this rule is already expanded.
+            yield self
 
 
 cdef class RoleTransition(PolicyRule):
@@ -95,87 +89,27 @@ cdef class RoleTransition(PolicyRule):
     """A role_transition rule."""
 
     cdef:
-        sepol.role_trans_t *handle
-        readonly object ruletype
+        readonly ObjClass tclass
+        Role dft
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.role_trans_t *symbol):
+    cdef inline RoleTransition factory(SELinuxPolicy policy,
+                                       sepol.role_trans_t *symbol):
         """Factory function for creating RoleTransition objects."""
-        r = RoleTransition()
+        cdef RoleTransition r = RoleTransition.__new__(RoleTransition)
         r.policy = policy
-        r.handle = symbol
-        return r
+        r.key = <uintptr_t>symbol
+        r.ruletype = RBACRuletype.role_transition
+        r.source = Role.factory(policy, policy.role_value_to_datum(symbol.role - 1))
+        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(symbol.type - 1))
+        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(symbol.tclass - 1))
+        r.dft = Role.factory(policy, policy.role_value_to_datum(symbol.new_role - 1))
+        r.origin = None
 
-    def __cinit__(self):
-        self.ruletype = RBACRuletype.role_transition
+        return r
 
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
-
-    def _eq(self, RoleTransition other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def source(self):
-        """The rule's source role."""
-        return Role.factory(self.policy,
-                            self.policy.role_value_to_datum(self.handle.role - 1))
-
-    @property
-    def target(self):
-        """The rule's target type/attribute."""
-        return type_or_attr_factory(self.policy,
-                                    self.policy.type_value_to_datum(self.handle.type - 1))
-
-    @property
-    def tclass(self):
-        """The rule's object class."""
-        return ObjClass.factory(self.policy,
-                                self.policy.class_value_to_datum(self.handle.tclass - 1))
-
-    @property
-    def default(self):
-        """The rule's default role."""
-        return Role.factory(self.policy,
-                            self.policy.role_value_to_datum(self.handle.new_role - 1))
-
-    def expand(self):
-        """Expand the rule into an equivalent set of rules without attributes."""
-        for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            r = ExpandedRoleTransition()
-            r.policy = self.policy
-            r.handle = self.handle
-            r.source = s
-            r.target = t
-            r.origin = self
-            yield r
-
-
-cdef class ExpandedRoleAllow(RoleAllow):
-
-    """An expanded role allow rule."""
-
-    cdef:
-        public object source
-        public object target
-        public object origin
-
-    def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}".format(self))
-
-    def __lt__(self, other):
-        return str(self) < str(other)
-
-
-cdef class ExpandedRoleTransition(RoleTransition):
-
-    """An expanded role_transition rule."""
-
-    cdef:
-        public object source
-        public object target
-        public object origin
 
     def __hash__(self):
         try:
@@ -190,6 +124,31 @@ cdef class ExpandedRoleTransition(RoleTransition):
 
     def __lt__(self, other):
         return str(self) < str(other)
+
+    @property
+    def default(self):
+        """The rule's default role."""
+        return self.dft
+
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        cdef RoleTransition r
+        if self.origin is None:
+            for s, t in itertools.product(self.source.expand(), self.target.expand()):
+                r = RoleTransition.__new__(RoleTransition)
+                r.policy = self.policy
+                r.key = self.key
+                r.ruletype = self.ruletype
+                r.source = s
+                r.target = t
+                r.tclass = self.tclass
+                r.dft = self.dft
+                r.origin = self
+                yield r
+
+        else:
+            # this rule is already expanded.
+            yield self
 
 
 #
