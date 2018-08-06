@@ -22,59 +22,68 @@ cdef class User(PolicySymbol):
 
     """A user."""
 
-    cdef sepol.user_datum_t *handle
+    cdef:
+        uintptr_t key
+        readonly str name
+        readonly frozenset roles
+        Level _level
+        Range _range
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.user_datum_t *symbol):
+    cdef inline User factory(SELinuxPolicy policy, sepol.user_datum_t *symbol):
         """Factory function for constructing User objects."""
-        u = User()
+        cdef User u = User.__new__(User)
         u.policy = policy
-        u.handle = symbol
-        return u
+        u.key = <uintptr_t>symbol
+        u.name = policy.user_value_to_name(symbol.s.value - 1)
 
-    def __str__(self):
-        return self.policy.user_value_to_name(self.handle.s.value - 1)
-
-    def _eq(self, User other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def roles(self):
         # object_r is implicitly added to all roles by the compiler.
         # technically it is incorrect to skip it, but policy writers
         # and analysts don't expect to see it in results, and it
         # will confuse, especially for role set equality user queries.
-        return set(r for r in RoleEbitmapIterator.factory(self.policy, &self.handle.roles.roles)
+        u.roles = frozenset(r for r in RoleEbitmapIterator.factory(policy, &symbol.roles.roles)
                    if r != "object_r")
+
+        if policy.mls:
+            u._level = Level.factory(policy, &symbol.exp_dfltlevel)
+            u._range = Range.factory(policy, &symbol.exp_range)
+
+        return u
+
+    def __str__(self):
+        return self.name
+
+    def _eq(self, User other):
+        """Low-level equality check (C pointers)."""
+        return self.key == other.key
 
     @property
     def mls_level(self):
         """The user's default MLS level."""
-        if not self.policy.mls:
+        if self._level:
+            return self._level
+        else:
             raise MLSDisabled
-
-        return Level.factory(self.policy, &self.handle.exp_dfltlevel)
 
     @property
     def mls_range(self):
         """The user's MLS range."""
-        if not self.policy.mls:
+        if self._range:
+            return self._range
+        else:
             raise MLSDisabled
-
-        return Range.factory(self.policy, &self.handle.exp_range)
 
     def statement(self):
         roles = list(str(r) for r in self.roles)
-        stmt = "user {0} roles ".format(self)
+        stmt = "user {0} roles ".format(self.name)
         if len(roles) > 1:
             stmt += "{{ {0} }}".format(' '.join(roles))
         else:
             stmt += roles[0]
 
-        try:
+        if self._level:
             stmt += " level {0.mls_level} range {0.mls_range};".format(self)
-        except MLSDisabled:
+        else:
             stmt += ";"
 
         return stmt
