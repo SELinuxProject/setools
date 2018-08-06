@@ -39,16 +39,14 @@ cdef class Bounds(PolicySymbol):
         readonly object child
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, parent, child):
+    cdef inline Bounds factory(SELinuxPolicy policy, parent, child):
         """Factory function for creating Bounds objects."""
-        b = Bounds(parent, child)
+        cdef Bounds b = Bounds.__new__(Bounds)
         b.policy = policy
+        b.ruletype = BoundsRuletype.typebounds
+        b.parent = parent
+        b.child = child
         return b
-
-    def __cinit__(self, parent, child):
-        self.ruletype = BoundsRuletype.typebounds
-        self.parent = parent
-        self.child = child
 
     def __str__(self):
         return "{0.ruletype} {0.parent} {0.child};".format(self)
