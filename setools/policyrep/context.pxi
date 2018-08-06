@@ -22,48 +22,45 @@ cdef class Context(PolicySymbol):
 
     """A SELinux security context/security attribute."""
 
-    cdef sepol.context_struct_t *handle
+    cdef:
+        uintptr_t key
+        readonly User user
+        readonly Role role
+        readonly Type type_
+        Range _range
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.context_struct_t *symbol):
+    cdef inline Context factory(SELinuxPolicy policy, sepol.context_struct_t *symbol):
         """Factory function for creating Context objects."""
-        r = Context()
-        r.policy = policy
-        r.handle = symbol
-        return r
+        cdef Context c = Context.__new__(Context)
+        c.policy = policy
+        c.key = <uintptr_t>symbol
+        c.user = User.factory(policy, policy.user_value_to_datum(symbol.user - 1))
+        c.role = Role.factory(policy, policy.role_value_to_datum(symbol.role - 1))
+        c.type_ = Type.factory(policy, policy.type_value_to_datum(symbol.type - 1))
+
+        if policy.mls:
+            c._range = Range.factory(policy, &symbol.range)
+
+        return c
 
     def __str__(self):
-        try:
+        if self._range:
             return "{0.user}:{0.role}:{0.type_}:{0.range_}".format(self)
-        except MLSDisabled:
+        else:
             return "{0.user}:{0.role}:{0.type_}".format(self)
 
     def _eq(self, Context other):
         """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def user(self):
-        """The user portion of the context."""
-        return User.factory(self.policy, self.policy.user_value_to_datum(self.handle.user - 1))
-
-    @property
-    def role(self):
-        """The role portion of the context."""
-        return Role.factory(self.policy, self.policy.role_value_to_datum(self.handle.role - 1))
-
-    @property
-    def type_(self):
-        """The type portion of the context."""
-        return Type.factory(self.policy, self.policy.type_value_to_datum(self.handle.type - 1))
+        return self.key == other.key
 
     @property
     def range_(self):
         """The MLS range of the context."""
-        if not self.policy.mls:
+        if self._range:
+            return self._range
+        else:
             raise MLSDisabled
-
-        return Range.factory(self.policy, &self.handle.range)
 
     def statement(self):
         raise NoStatement
