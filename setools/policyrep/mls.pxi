@@ -47,28 +47,34 @@ cdef class Category(PolicySymbol):
 
     """An MLS category."""
 
-    cdef sepol.cat_datum_t *handle
+    cdef:
+        sepol.cat_datum_t *handle
+        readonly str name
+        readonly uint32_t _value
+        list _aliases
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.cat_datum_t *symbol):
+    cdef inline Category factory(SELinuxPolicy policy, sepol.cat_datum_t *symbol):
         """Factory function for creating Category objects."""
+        cdef Category c
         if not policy.mls:
             raise MLSDisabled
 
         try:
             return _cat_cache[<uintptr_t>symbol]
         except KeyError:
-            c = Category()
+            c = Category.__new__(Category)
             c.policy = policy
-            c.handle = symbol
+            c.name = policy.category_value_to_name(symbol.s.value - 1)
+            c._value = symbol.s.value
             _cat_cache[<uintptr_t>symbol] = c
             return c
 
     def __str__(self):
-        return self.policy.category_value_to_name(self.handle.s.value - 1)
+        return self.name
 
     def __hash__(self):
-        return hash(str(self))
+        return hash(self.name)
 
     def __lt__(self, other):
         # Comparison based on their index instead of their names.
@@ -78,27 +84,29 @@ cdef class Category(PolicySymbol):
         """Low-level equality check (C pointers)."""
         return self.handle == other.handle
 
-    @property
-    def _value(self):
-        """
-        The value of the category.
-
-        This is a low-level policy detail exposed for internal use only.
-        """
-        return self.handle.s.value
+    cdef inline void _load_aliases(self):
+        """Helper method to load aliases."""
+        if self._aliases is None:
+            self._aliases = list(self.policy.category_aliases(self))
 
     def aliases(self):
         """Generator that yields all aliases for this category."""
+        self._load_aliases()
         return self.policy.category_aliases(self)
 
     def statement(self):
-        aliases = list(self.aliases())
-        stmt = "category {0}".format(self)
-        if aliases:
-            if len(aliases) > 1:
-                stmt += " alias {{ {0} }}".format(' '.join(aliases))
-            else:
-                stmt += " alias {0}".format(aliases[0])
+        cdef:
+            str stmt
+            size_t count
+
+        self._load_aliases()
+        count = len(self._aliases)
+
+        stmt = "category {0}".format(self.name)
+        if count > 1:
+            stmt += " alias {{ {0} }}".format(' '.join(self._aliases))
+        elif count == 1:
+            stmt += " alias {0}".format(self._aliases[0])
         stmt += ";"
         return stmt
 
@@ -107,28 +115,36 @@ cdef class Sensitivity(PolicySymbol):
 
     """An MLS sensitivity"""
 
-    cdef sepol.level_datum_t *handle
+    cdef:
+        sepol.level_datum_t *handle
+        readonly str name
+        readonly uint32_t _value
+        list _aliases
+        LevelDecl _leveldecl
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.level_datum_t *symbol):
+    cdef inline Sensitivity factory(SELinuxPolicy policy, sepol.level_datum_t *symbol):
         """Factory function for creating Sensitivity objects."""
+        cdef Sensitivity s
         if not policy.mls:
             raise MLSDisabled
 
         try:
             return _sens_cache[<uintptr_t>symbol]
         except KeyError:
-            s = Sensitivity()
+            s = Sensitivity.__new__(Sensitivity)
+            _sens_cache[<uintptr_t>symbol] = s
             s.policy = policy
             s.handle = symbol
-            _sens_cache[<uintptr_t>symbol] = s
+            s.name = policy.level_value_to_name(symbol.level.sens - 1)
+            s._value = symbol.level.sens
             return s
 
     def __str__(self):
-        return self.policy.level_value_to_name(self.handle.level.sens - 1)
+        return self.name
 
     def __hash__(self):
-        return hash(str(self))
+        return hash(self.name)
 
     def __ge__(self, other):
         return self._value >= other._value
@@ -146,31 +162,36 @@ cdef class Sensitivity(PolicySymbol):
         """Low-level equality check (C pointers)."""
         return self.handle == other.handle
 
-    @property
-    def _value(self):
-        """
-        The value of the component.
-
-        This is a low-level policy detail exposed for internal use only.
-        """
-        return self.handle.level.sens
+    cdef inline void _load_aliases(self):
+        """Helper method to load aliases."""
+        if self._aliases is None:
+            self._aliases = list(self.policy.sensitivity_aliases(self))
 
     def aliases(self):
         """Generator that yields all aliases for this sensitivity."""
-        return self.policy.sensitivity_aliases(self)
+        self._load_aliases()
+        return iter(self._aliases)
 
     def level_decl(self):
         """Get the level declaration corresponding to this sensitivity."""
-        return LevelDecl.factory(self.policy, self.handle)
+        if self._leveldecl is None:
+            self._leveldecl = LevelDecl.factory(self.policy, self.handle)
+
+        return self._leveldecl
 
     def statement(self):
-        aliases = list(self.aliases())
-        stmt = "sensitivity {0}".format(self)
-        if aliases:
-            if len(aliases) > 1:
-                stmt += " alias {{ {0} }}".format(' '.join(aliases))
-            else:
-                stmt += " alias {0}".format(aliases[0])
+        cdef:
+            str stmt
+            size_t count
+
+        self._load_aliases()
+        count = len(self._aliases)
+
+        stmt = "sensitivity {0}".format(self.name)
+        if count > 1:
+            stmt += " alias {{ {0} }}".format(' '.join(self._aliases))
+        elif count == 1:
+            stmt += " alias {0}".format(self._aliases[0])
         stmt += ";"
         return stmt
 
@@ -179,11 +200,15 @@ cdef class BaseMLSLevel(PolicySymbol):
 
     """Base class for MLS levels."""
 
+    cdef:
+        set _categories
+        readonly Sensitivity sensitivity
+
     def __str__(self):
         lvl = str(self.sensitivity)
 
         # sort by policy declaration order
-        cats = sorted(self.categories(), key=lambda k: k._value)
+        cats = sorted(self._categories, key=lambda k: k._value)
 
         if cats:
             # generate short category notation
@@ -206,11 +231,7 @@ cdef class BaseMLSLevel(PolicySymbol):
         All categories are yielded, not a compact notation such as
         c0.c255
         """
-        raise NotImplementedError
-
-    @property
-    def sensitivity(self):
-        raise NotImplementedError
+        return iter(self._categories)
 
 
 cdef class LevelDecl(BaseMLSLevel):
@@ -221,21 +242,22 @@ cdef class LevelDecl(BaseMLSLevel):
     level s7:c0.c1023;
     """
 
-    cdef sepol.level_datum_t *handle
-
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.level_datum_t *symbol):
+    cdef inline LevelDecl factory(SELinuxPolicy policy, sepol.level_datum_t *symbol):
         """Factory function for creating LevelDecl objects."""
+        cdef LevelDecl l
         if not policy.mls:
             raise MLSDisabled
 
         try:
             return _leveldecl_cache[<uintptr_t>symbol]
         except KeyError:
-            l = LevelDecl()
-            l.policy = policy
-            l.handle = symbol
+            l = LevelDecl.__new__(LevelDecl)
             _leveldecl_cache[<uintptr_t>symbol] = l
+            l.policy = policy
+            l._categories = set(CategoryEbitmapIterator.factory(policy, &symbol.level.cat))
+            # the datum for levels is also used for Sensitivity objects
+            l.sensitivity = Sensitivity.factory(policy, symbol)
             return l
 
     def __hash__(self):
@@ -271,25 +293,6 @@ cdef class LevelDecl(BaseMLSLevel):
         assert not isinstance(other, Level), "Levels cannot be compared to level declarations"
         return self.sensitivity < other.sensitivity
 
-    def _eq(self, LevelDecl other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    def categories(self):
-        """
-        Generator that yields all individual categories for this level.
-        All categories are yielded, not a compact notation such as
-        c0.c255
-        """
-        return CategoryEbitmapIterator.factory(self.policy, &self.handle.level.cat)
-
-    @property
-    def sensitivity(self):
-        """The sensitivity of the level."""
-        # since the datum for levels is also used for
-        # Sensitivity objects, use self's datum
-        return Sensitivity.factory(self.policy, self.handle)
-
     def statement(self):
         return "level {0};".format(self)
 
@@ -303,39 +306,43 @@ cdef class Level(BaseMLSLevel):
     if the level is user-generated.
     """
 
-    cdef:
-        sepol.mls_level_t *handle
-        list _categories
-        Sensitivity _sensitivity
-
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.mls_level_t *symbol):
+    cdef inline Level factory(SELinuxPolicy policy, sepol.mls_level_t *symbol):
         """Factory function for creating Level objects."""
         if not policy.mls:
             raise MLSDisabled
 
-        l = Level()
+        cdef Level l = Level.__new__(Level)
         l.policy = policy
-        l.handle = symbol
+        l.sensitivity = Sensitivity.factory(policy, policy.level_value_to_datum(symbol.sens - 1))
+        l._categories = set(CategoryEbitmapIterator.factory(policy, &symbol.cat))
         return l
 
     @staticmethod
-    cdef factory_from_string(SELinuxPolicy policy, str name):
+    cdef inline Level factory_from_string(SELinuxPolicy policy, str name):
         """Factory function variant for constructing Level objects by a string."""
-
         if not policy.mls:
             raise MLSDisabled
 
-        sens_split = name.split(":")
-        sens = sens_split[0]
+        cdef:
+            Level l = Level.__new__(Level)
+            list sens_split = name.split(":")
+            str sens = sens_split[0]
+            Sensitivity s
+            list c
+            str cats
+            list catrange
+            str group
+
+        l.policy = policy
 
         try:
-            s = policy.lookup_sensitivity(sens)
+            l.sensitivity = policy.lookup_sensitivity(sens)
         except InvalidSensitivity as ex:
             raise InvalidLevel("{0} is not a valid level ({1} is not a valid sensitivity)". \
                                format(name, sens)) from ex
 
-        c = []
+        l._categories = set()
 
         try:
             cats = sens_split[1]
@@ -346,9 +353,9 @@ cdef class Level(BaseMLSLevel):
                 catrange = group.split(".")
                 if len(catrange) == 2:
                     try:
-                        c.extend(expand_cat_range(policy,
-                                                  policy.lookup_category(catrange[0]),
-                                                  policy.lookup_category(catrange[1])))
+                        l._categories.update(expand_cat_range(policy,
+                                                              policy.lookup_category(catrange[0]),
+                                                              policy.lookup_category(catrange[1])))
                     except InvalidCategory as ex:
                         raise InvalidLevel(
                             "{0} is not a valid level ({1} is not a valid category range)".
@@ -356,7 +363,7 @@ cdef class Level(BaseMLSLevel):
 
                 elif len(catrange) == 1:
                     try:
-                        c.append(policy.lookup_category(catrange[0]))
+                        l._categories.add(policy.lookup_category(catrange[0]))
                     except InvalidCategory as ex:
                         raise InvalidLevel("{0} is not a valid level ({1} is not a valid category)".
                                            format(name, group)) from ex
@@ -364,15 +371,8 @@ cdef class Level(BaseMLSLevel):
                 else:
                     raise InvalidLevel("{0} is not a valid level (level parsing error)".format(name))
 
-        # build object
-        l = Level()
-        l.policy = policy
-        l.handle = NULL
-        l._sensitivity = s
-        l._categories = c
-
         # verify level is valid
-        if not l <= s.level_decl():
+        if not l <= l.sensitivity.level_decl():
             raise InvalidLevel(
                 "{0} is not a valid level (one or more categories are not associated with the "
                 "sensitivity)".format(name))
@@ -388,60 +388,31 @@ cdef class Level(BaseMLSLevel):
         except AttributeError:
             return str(self) == str(other)
         else:
-            selfcats = set(self.categories())
-            return self.sensitivity == other.sensitivity and selfcats == othercats
+            return self.sensitivity == other.sensitivity and self._categories == othercats
 
     def __ge__(self, other):
         # Dom operator
-        selfcats = set(self.categories())
         othercats = set(other.categories())
-        return self.sensitivity >= other.sensitivity and selfcats >= othercats
+        return self.sensitivity >= other.sensitivity and self._categories >= othercats
 
     def __gt__(self, other):
-        selfcats = set(self.categories())
         othercats = set(other.categories())
-        return ((self.sensitivity > other.sensitivity and selfcats >= othercats) or
-                (self.sensitivity >= other.sensitivity and selfcats > othercats))
+        return ((self.sensitivity > other.sensitivity and self._categories >= othercats) or
+                (self.sensitivity >= other.sensitivity and self._categories > othercats))
 
     def __le__(self, other):
         # Domby operator
-        selfcats = set(self.categories())
         othercats = set(other.categories())
-        return self.sensitivity <= other.sensitivity and selfcats <= othercats
+        return self.sensitivity <= other.sensitivity and self._categories <= othercats
 
     def __lt__(self, other):
-        selfcats = set(self.categories())
         othercats = set(other.categories())
-        return ((self.sensitivity < other.sensitivity and selfcats <= othercats) or
-                (self.sensitivity <= other.sensitivity and selfcats < othercats))
+        return ((self.sensitivity < other.sensitivity and self._categories <= othercats) or
+                (self.sensitivity <= other.sensitivity and self._categories < othercats))
 
     def __xor__(self, other):
         # Incomp operator
         return not (self >= other or self <= other)
-
-    def _eq(self, Level other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    def categories(self):
-        """
-        Generator that yields all individual categories for this level.
-        All categories are yielded, not a compact notation such as
-        c0.c255
-        """
-        if self.handle == NULL:
-            return iter(self._categories)
-        else:
-            return CategoryEbitmapIterator.factory(self.policy, &self.handle.cat)
-
-    @property
-    def sensitivity(self):
-        """The sensitivity of the level."""
-        if self.handle == NULL:
-            return self._sensitivity
-        else:
-            return Sensitivity.factory(self.policy,
-                                       self.policy.level_value_to_datum(self.handle.sens - 1))
 
     def statement(self):
         raise NoStatement
@@ -452,63 +423,58 @@ cdef class Range(PolicySymbol):
     """An MLS range"""
 
     cdef:
-        sepol.mls_range_t *handle
-        Level _low
-        Level _high
+        readonly Level low
+        readonly Level high
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.mls_range_t *symbol):
+    cdef inline Range factory(SELinuxPolicy policy, sepol.mls_range_t *symbol):
         """Factory function for creating Range objects."""
         if not policy.mls:
             raise MLSDisabled
 
-        r = Range()
+        cdef Range r = Range.__new__(Range)
         r.policy = policy
-        r.handle = symbol
+        r.low = Level.factory(policy, &symbol.level[0])
+        r.high = Level.factory(policy, &symbol.level[1])
         return r
 
     @staticmethod
-    cdef factory_from_string(SELinuxPolicy policy, str name):
+    cdef inline Range factory_from_string(SELinuxPolicy policy, str name):
         """Factory function variant for constructing Range objects by name."""
         if not policy.mls:
             raise MLSDisabled
 
+        cdef Range r = Range.__new__(Range)
+        r.policy = policy
+
         # build range:
-        levels = name.split("-")
+        cdef list levels = name.split("-")
 
         # strip() levels to handle ranges with spaces in them,
         # e.g. s0:c1 - s0:c0.c255
         try:
-            low = Level.factory_from_string(policy, levels[0].strip())
+            r.low  = Level.factory_from_string(policy, levels[0].strip())
         except InvalidLevel as ex:
             raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
 
         try:
-            high = Level.factory_from_string(policy, levels[1].strip())
+            r.high = Level.factory_from_string(policy, levels[1].strip())
         except InvalidLevel as ex:
             raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
         except IndexError:
-            high = low
+            r.high = r.low
 
         # verify high level dominates low range
-        if not high >= low:
-            raise InvalidRange("{0} is not a valid range ({1} is not dominated by {2})".
-                               format(name, low, high))
-
-        r = Range()
-        r.policy = policy
-        r.handle = NULL
-        r._low = low
-        r._high = high
+        if not r.high >= r.low:
+            raise InvalidRange("{0} is not a valid range ({1.low} is not dominated by {1.high})".
+                               format(name, r))
         return r
 
     def __str__(self):
-        high = self.high
-        low = self.low
-        if high == low:
-            return str(low)
+        if self.high == self.low:
+            return str(self.low)
 
-        return "{0} - {1}".format(low, high)
+        return "{0.low} - {0.high}".format(self)
 
     def __hash__(self):
         return hash(str(self))
@@ -526,26 +492,6 @@ cdef class Range(PolicySymbol):
 
     def __contains__(self, other):
         return self.low <= other <= self.high
-
-    def _eq(self, Range other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def high(self):
-        """The high end/clearance level of this range."""
-        if self.handle == NULL:
-            return self._high
-        else:
-            return Level.factory(self.policy, &self.handle.level[1])
-
-    @property
-    def low(self):
-        """The low end/current level of this range."""
-        if self.handle == NULL:
-            return self._low
-        else:
-            return Level.factory(self.policy, &self.handle.level[0])
 
     def statement(self):
         raise NoStatement
