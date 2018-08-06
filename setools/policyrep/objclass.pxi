@@ -30,29 +30,33 @@ cdef class Common(PolicySymbol):
     """A common permission set."""
 
     cdef:
-        sepol.common_datum_t *handle
+        uintptr_t key
+        str name
         readonly dict _perm_table
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.common_datum_t *symbol):
+    cdef inline Common factory(SELinuxPolicy policy, sepol.common_datum_t *symbol):
         """Factory function for creating Common objects."""
         cdef:
+            Common c
             sepol.hashtab_node_t *node
             uint32_t bucket = 0
             str key
             uint32_t value
+            dict perm_table
 
         try:
             return _common_cache[<uintptr_t>symbol]
         except KeyError:
-            c = Common()
+            c = Common.__new__(Common)
             c.policy = policy
-            c.handle = symbol
-            c._perm_table = {}
+            c.key = <uintptr_t>symbol
+            c.name = policy.common_value_to_name(symbol.s.value - 1)
 
             #
             # Create value:name permission table (reverse of what is in the policydb)
             #
+            c._perm_table = {}
             while bucket < symbol.permissions.table[0].size:
                 node = symbol.permissions.table[0].htable[bucket]
                 while node != NULL:
@@ -67,11 +71,11 @@ cdef class Common(PolicySymbol):
             return c
 
     def __str__(self):
-        return self.policy.common_value_to_name(self.handle.s.value - 1)
+        return self.name
 
     def _eq(self, Common other):
         """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+        return self.key == other.key
 
     def __contains__(self, other):
         return other in self.perms
@@ -90,24 +94,49 @@ cdef class ObjClass(PolicySymbol):
     """An object class."""
 
     cdef:
-        sepol.class_datum_t *handle
+        uintptr_t key
+        str name
+        Common _common
         readonly dict _perm_table
+        list _defaults
+        list _constraints
+        list _validatetrans
+        # class_datum_t->permissions.nprim
+        # is needed for the permission iterator
+        uint32_t nprim
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.class_datum_t *symbol):
+    cdef inline ObjClass factory(SELinuxPolicy policy, sepol.class_datum_t *symbol):
         """Factory function for creating ObjClass objects."""
         cdef:
             sepol.hashtab_node_t *node
             uint32_t bucket = 0
             str key
             uint32_t value
+            dict perm_table
+            object com
+            ObjClass c
 
         try:
             return _objclass_cache[<uintptr_t>symbol]
         except KeyError:
-            c = ObjClass()
+            #
+            # Instantiate object class
+            #
+            c = ObjClass.__new__(ObjClass)
             c.policy = policy
-            c.handle = symbol
+            c.key = <uintptr_t>symbol
+            c.nprim = symbol.permissions.nprim
+            c.name = policy.class_value_to_name(symbol.s.value - 1)
+            c._validatetrans = list(ValidatetransIterator.factory(policy, c, symbol.validatetrans))
+            c._constraints = list(ConstraintIterator.factory(policy, c, symbol.constraints))
+
+            #
+            # Load common
+            #
+            if symbol.comdatum:
+                c._common = Common.factory(policy, symbol.comdatum)
+
             c._perm_table = {}
 
             #
@@ -116,18 +145,34 @@ cdef class ObjClass(PolicySymbol):
             while bucket < symbol.permissions.table[0].size:
                 node = symbol.permissions.table[0].htable[bucket]
                 while node != NULL:
-                    key = intern(node.key)
+                    key = intern(<char *>node.key)
                     value = (<sepol.perm_datum_t *>node.datum).s.value
                     c._perm_table[value] = key
                     node = node.next
 
                 bucket += 1
 
+            #
+            # Load defaults
+            #
+            c._defaults = []
+            if symbol.default_user:
+                c._defaults.append(Default.factory(policy, c, symbol.default_user, None, None, None))
+
+            if symbol.default_role:
+                c._defaults.append(Default.factory(policy, c, None, symbol.default_role, None, None))
+
+            if symbol.default_type:
+                c._defaults.append(Default.factory(policy, c, None, None, symbol.default_type, None))
+
+            if symbol.default_range:
+                c._defaults.append(Default.factory(policy, c, None, None, None, symbol.default_range))
+
             _objclass_cache[<uintptr_t>symbol] = c
             return c
 
     def __str__(self):
-        return self.policy.class_value_to_name(self.handle.s.value - 1)
+        return self.name
 
     def __contains__(self, other):
         try:
@@ -140,7 +185,7 @@ cdef class ObjClass(PolicySymbol):
 
     def _eq(self, ObjClass other):
         """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+        return self.key == other.key
 
     @property
     def common(self):
@@ -150,28 +195,18 @@ cdef class ObjClass(PolicySymbol):
         Exceptions:
         NoCommon    The object class does not inherit a common.
         """
-        if self.handle.comdatum:
-            return Common.factory(self.policy, self.handle.comdatum)
+        if self._common:
+            return self._common
         else:
-            raise NoCommon("{0} does not inherit a common.".format(self))
+            raise NoCommon("{0} does not inherit a common.".format(self.name))
 
     def constraints(self):
         """Iterator for the constraints that apply to this class."""
-        return ConstraintIterator.factory(self.policy, self, self.handle.constraints)
+        return iter(self._constraints)
 
     def defaults(self):
         """Iterator for the defaults for this object class."""
-        if self.handle.default_user:
-            yield Default.factory(self.policy, self, self.handle.default_user, None, None, None)
-
-        if self.handle.default_role:
-            yield Default.factory(self.policy, self, None, self.handle.default_role, None, None)
-
-        if self.handle.default_type:
-            yield Default.factory(self.policy, self, None, None, self.handle.default_type, None)
-
-        if self.handle.default_range:
-            yield Default.factory(self.policy, self, None, None, None, self.handle.default_range)
+        return iter(self._defaults)
 
     @property
     def perms(self):
@@ -179,7 +214,7 @@ cdef class ObjClass(PolicySymbol):
         return set(self._perm_table.values())
 
     def statement(self):
-        stmt = "class {0}\n".format(self)
+        stmt = "class {0}\n".format(self.name)
 
         try:
             stmt += "inherits {0}\n".format(self.common)
@@ -195,7 +230,7 @@ cdef class ObjClass(PolicySymbol):
 
     def validatetrans(self):
         """Iterator for validatetrans that apply to this class."""
-        return ValidatetransIterator.factory(self.policy, self, self.handle.validatetrans)
+        return iter(self._validatetrans)
 
 
 #
@@ -253,7 +288,7 @@ cdef class PermissionVectorIterator(PolicyIterator):
         i = PermissionVectorIterator()
         i.policy = policy
         i.vector = vector
-        i.perm_max = tclass.handle.permissions.nprim
+        i.perm_max = tclass.nprim
 
         i.perm_table = tclass._perm_table
         try:
