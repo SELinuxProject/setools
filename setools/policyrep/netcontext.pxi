@@ -32,12 +32,19 @@ cdef class Netifcon(Ocontext):
 
     """A netifcon statement."""
 
+    cdef:
+        readonly str netif
+        readonly Context packet
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline Netifcon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating Netifcon objects."""
-        n = Netifcon()
+        cdef Netifcon n = Netifcon.__new__(Netifcon)
         n.policy = policy
-        n.handle = symbol
+        n.key = <uintptr_t>symbol
+        n.netif = intern(symbol.u.name)
+        n.context = Context.factory(policy, symbol.context)
+        n.packet = Context.factory(policy, &symbol.context[1])
         return n
 
     def __str__(self):
@@ -49,16 +56,6 @@ cdef class Netifcon(Ocontext):
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
-
-    @property
-    def netif(self):
-        """The network interface name."""
-        return intern(self.handle.u.name)
-
-    @property
-    def packet(self):
-        """The context for the packets."""
-        return Context.factory(self.policy, &self.handle.context[1])
 
 
 class NodeconIPVersion(PolicyEnum):
@@ -73,16 +70,71 @@ cdef class Nodecon(Ocontext):
 
     """A nodecon statement."""
 
-    cdef readonly object ip_version
+    cdef:
+        readonly object ip_version
+        char * _addr
+        char * _mask
+        readonly object network
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, ip_version):
+    cdef inline Nodecon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, ip_version):
         """Factory function for creating Nodecon objects."""
-        n = Nodecon()
+        cdef Nodecon n = Nodecon.__new__(Nodecon)
         n.policy = policy
-        n.handle = symbol
+        n.key = <uintptr_t>symbol
         n.ip_version = ip_version
+        n.context = Context.factory(policy, symbol.context)
+
+        #
+        # Retrieve address and netmask
+        #
+        n._addr = <char *>PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
+        if not n._addr:
+            raise MemoryError
+
+        n._mask = <char *>PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
+        if not n._mask:
+            raise MemoryError
+
+        # convert network order to string
+        if ip_version == NodeconIPVersion.ipv4:
+            inet_ntop(AF_INET, &symbol.u.node.addr, n._addr, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET, &symbol.u.node.mask, n._mask, INET6_ADDRSTRLEN)
+        else:
+            inet_ntop(AF_INET6, &symbol.u.node6.addr, n._addr, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET6, &symbol.u.node6.mask, n._mask, INET6_ADDRSTRLEN)
+
+        #
+        # Build network object
+        #
+        CIDR = 0
+        # Python 3.4's IPv6Network constructor does not support
+        # expanded netmasks, only CIDR numbers. Convert netmask
+        # into CIDR.
+        # This is Brian Kernighan's method for counting set bits.
+        # If the netmask happens to be invalid, this will
+        # not detect it.
+        int_mask = int(ip_address(n._mask))
+        while int_mask:
+            int_mask &= int_mask - 1
+            CIDR += 1
+
+        net_with_mask = "{0}/{1}".format(n._addr, CIDR)
+        try:
+            # checkpolicy does not verify that no host bits are set,
+            # so strict will raise an exception if host bits are set.
+            n.network = ip_network(net_with_mask)
+        except ValueError as ex:
+            log = logging.getLogger(__name__)
+            log.warning("Nodecon with network {} {} has host bits set. Analyses may have "
+                        "unexpected results.".format(n._addr, n._mask))
+            n.network = ip_network(net_with_mask, strict=False)
+
         return n
+
+    def __dealloc__(self):
+        PyMem_Free(self._addr)
+        PyMem_Free(self._mask)
 
     def __str__(self):
         return "nodecon {1} {0.context}".format(self, self.network.with_netmask.replace("/", " "))
@@ -94,89 +146,19 @@ cdef class Nodecon(Ocontext):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
-    def _addr(self):
-        """Temporary internal function only for as long as addr property exists."""
-        cdef uint32_t *a
-        cdef unsigned char proto
-        cdef char *addr
-
-        addr = <char *> PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
-        if not addr:
-            raise MemoryError
-
-        # convert network order to string
-        if self.ip_version == NodeconIPVersion.ipv4:
-            inet_ntop(AF_INET, &self.handle.u.node.addr, addr, INET6_ADDRSTRLEN)
-        else:
-            inet_ntop(AF_INET6, &self.handle.u.node6.addr, addr, INET6_ADDRSTRLEN)
-
-        straddress = str(addr)
-        PyMem_Free(addr)
-
-        return straddress
-
-    def _mask(self):
-        """Temporary internal function only for as long as mask property exists."""
-        cdef uint32_t *m
-        cdef unsigned char proto
-        cdef char *mask
-        mask = <char *> PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
-        if not mask:
-            raise MemoryError
-
-        # convert network order to string
-        if self.ip_version == NodeconIPVersion.ipv4:
-            inet_ntop(AF_INET, &self.handle.u.node.mask, mask, INET6_ADDRSTRLEN)
-        else:
-            inet_ntop(AF_INET6, &self.handle.u.node6.mask, mask, INET6_ADDRSTRLEN)
-
-        strmask = str(mask)
-        PyMem_Free(mask)
-
-        return strmask
-
     @property
     def address(self):
         """The network address for the nodecon."""
         warnings.warn("Nodecon.address will be removed in SETools 4.3, please use nodecon.network",
                       DeprecationWarning)
-        return self._addr()
+        return self._addr
 
     @property
     def netmask(self):
         """The network mask for the nodecon."""
         warnings.warn("Nodecon.netmask will be removed in SETools 4.3, please use nodecon.network",
                       DeprecationWarning)
-        return self._mask()
-
-    @property
-    def network(self):
-        """The network for the nodecon."""
-        CIDR = 0
-        addr = self._addr()
-        mask = self._mask()
-
-        # Python 3.4's IPv6Network constructor does not support
-        # expanded netmasks, only CIDR numbers. Convert netmask
-        # into CIDR.
-        # This is Brian Kernighan's method for counting set bits.
-        # If the netmask happens to be invalid, this will
-        # not detect it.
-        int_mask = int(ip_address(mask))
-        while int_mask:
-            int_mask &= int_mask - 1
-            CIDR += 1
-
-        net_with_mask = "{0}/{1}".format(addr, CIDR)
-        try:
-            # checkpolicy does not verify that no host bits are set,
-            # so strict will raise an exception if host bits are set.
-            return ip_network(net_with_mask)
-        except ValueError as ex:
-            log = logging.getLogger(__name__)
-            log.warning("Nodecon with network {} {} has host bits set. Analyses may have "
-                        "unexpected results.".format(addr, mask))
-            return ip_network(net_with_mask, strict=False)
+        return self._mask
 
 
 class PortconProtocol(PolicyEnum):
@@ -193,12 +175,19 @@ cdef class Portcon(Ocontext):
 
     """A portcon statement."""
 
+    cdef:
+        readonly object ports
+        readonly object protocol
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline Portcon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating Portcon objects."""
-        p = Portcon()
+        cdef Portcon p = Portcon.__new__(Portcon)
         p.policy = policy
-        p.handle = symbol
+        p.key = <uintptr_t>symbol
+        p.ports = PortconRange(symbol.u.port.low_port, symbol.u.port.high_port)
+        p.protocol = PortconProtocol(symbol.u.port.protocol)
+        p.context = Context.factory(policy, symbol.context)
         return p
 
     def __str__(self):
@@ -215,24 +204,6 @@ cdef class Portcon(Ocontext):
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
-
-    @property
-    def ports(self):
-        """
-        The port range for this portcon.
-
-        Return: Tuple(low, high)
-        low     The low port of the range.
-        high    The high port of the range.
-        """
-        return PortconRange(self.handle.u.port.low_port, self.handle.u.port.high_port)
-
-    @property
-    def protocol(self):
-        """
-        The protocol type for the portcon.
-        """
-        return PortconProtocol(self.handle.u.port.protocol)
 
 
 #
