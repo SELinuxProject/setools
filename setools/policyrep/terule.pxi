@@ -91,16 +91,24 @@ cdef class AVRule(BaseTERule):
 
     """An access vector type enforcement rule."""
 
+    cdef public set perms
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
-                 conditional, conditional_block):
+    cdef inline AVRule factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
+                               conditional, conditional_block):
         """Factory function for creating AVRule objects."""
-        r = AVRule()
+        cdef AVRule r = AVRule.__new__(AVRule)
         r.policy = policy
-        r.key = key
-        r.datum = datum
+        r.key = <uintptr_t>key
+        r.ruletype = TERuletype(key.specified & ~sepol.AVTAB_ENABLED)
+        r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
+        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
+        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
+        r.perms = set(p for p in PermissionVectorIterator.factory(policy, r.tclass,
+                      ~datum.data if key.specified & sepol.AVTAB_AUDITDENY else datum.data))
         r._conditional = conditional
         r._conditional_block = conditional_block
+        r.origin = None
         return r
 
     def __str__(self):
@@ -122,62 +130,39 @@ cdef class AVRule(BaseTERule):
 
         return self.rule_string
 
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".
+            format(self, self._conditional, self._conditional_block))
+
     def __lt__(self, other):
         return str(self) < str(other)
-
-    def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        newobj = AVRule.factory(self.policy, self.key, self.datum, self._conditional,
-                                self._conditional_block)
-        memo[id(self)] = newobj
-        return newobj
-
-    def __getstate__(self):
-        return self._pickle()
-
-    def __setstate__(self, state):
-        self._unpickle(state)
-
-    cdef _pickle(self):
-        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
-            self._conditional, self._conditional_block
-
-    cdef _unpickle(self, objs):
-        self.policy = objs[0]
-        memcpy(&self.key, <char *>objs[1], sizeof(sepol.avtab_key_t*))
-        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.avtab_datum_t*))
-        self._conditional = objs[3]
-        self._conditional_block = objs[4]
-
-    @property
-    def perms(self):
-        """The rule's permission set."""
-        return set(p for p in PermissionVectorIterator.factory(self.policy, self.tclass,
-            ~self.datum.data if self.key.specified & sepol.AVTAB_AUDITDENY else self.datum.data))
 
     @property
     def default(self):
         """The rule's default type."""
         raise RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
 
-    @property
-    def filename(self):
-        raise RuleUseError("{0} rules do not have file names".format(self.ruletype))
-
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
-        for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            r = ExpandedAVRule()
-            r.policy = self.policy
-            r.key = self.key
-            r.datum = self.datum
-            r.source = s
-            r.target = t
-            r.origin = self
-            r.perms = self.perms
-            r._conditional = self._conditional
-            r._conditional_block = self._conditional_block
-            yield r
+        cdef AVRule r
+        if self.origin is None:
+            for s, t in itertools.product(self.source.expand(), self.target.expand()):
+                r = AVRule.__new__(AVRule)
+                r.policy = self.policy
+                r.key = self.key
+                r.ruletype = self.ruletype
+                r.source = s
+                r.target = t
+                r.tclass = self.tclass
+                r.perms = self.perms
+                r._conditional = self._conditional
+                r._conditional_block = self._conditional_block
+                r.origin = self
+                yield r
+
+        else:
+            # this rule is already expanded.
+            yield self
 
 
 cdef class IoctlSet(set):
@@ -234,24 +219,70 @@ cdef class IoctlSet(set):
             sorted(self), key=lambda k, c=itertools.count(): k - next(c)))
 
 
-cdef class AVRuleXperm(AVRule):
+cdef class AVRuleXperm(BaseTERule):
 
     """An extended permission access vector type enforcement rule."""
 
+    cdef:
+        public IoctlSet perms
+        readonly str xperm_type
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
-                 conditional, conditional_block):
-        """Factory function for creating AVRule objects."""
-        r = AVRuleXperm()
+    cdef inline AVRuleXperm factory(SELinuxPolicy policy, sepol.avtab_key_t *key,
+                                    sepol.avtab_datum_t *datum, conditional, conditional_block):
+        """Factory function for creating AVRuleXperm objects."""
+        cdef:
+            str xperm_type
+            sepol.avtab_extended_perms_t *xperms = datum.xperms
+            IoctlSet perms = IoctlSet()
+            size_t curr = 0
+            size_t len = sizeof(xperms.perms) * sepol.EXTENDED_PERMS_LEN
+
+        #
+        # Build permission set
+        #
+        while curr < len:
+            if sepol.xperm_test(curr, xperms.perms):
+                if xperms.specified & sepol.AVTAB_XPERMS_IOCTLFUNCTION:
+                    perms.add(xperms.driver << 8 | curr)
+                elif xperms.specified & sepol.AVTAB_XPERMS_IOCTLDRIVER:
+                    perms.add(curr << 8)
+                else:
+                    raise LowLevelPolicyError("Unknown extended permission: {}".format(
+                                              xperms.specified))
+
+            curr += 1
+
+        #
+        # Determine xperm type
+        #
+        if datum.xperms == NULL:
+            raise LowLevelPolicyError("Extended permission information is NULL")
+
+        if datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLFUNCTION \
+            or datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLDRIVER:
+            xperm_type = intern("ioctl")
+        else:
+            raise LowLevelPolicyError("Unknown extended permission: {}".format(
+                                      datum.xperms.specified))
+
+        #
+        # Construct rule object
+        #
+        cdef AVRuleXperm r = AVRuleXperm.__new__(AVRuleXperm)
         r.policy = policy
-        r.key = key
-        r.datum = datum
+        r.key = <uintptr_t>key
+        r.ruletype = TERuletype(key.specified & ~sepol.AVTAB_ENABLED)
+        r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
+        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
+        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
+        r.perms = perms
+        r.extended = True
+        r.xperm_type = xperm_type
         r._conditional = conditional
         r._conditional_block = conditional_block
+        r.origin = None
         return r
-
-    def __cinit__(self):
-        self.extended = True
 
     def __str__(self):
         if not self.rule_string:
@@ -274,97 +305,59 @@ cdef class AVRuleXperm(AVRule):
     def __lt__(self, other):
         return str(self) < str(other)
 
-    def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        newobj = AVRuleXperm.factory(self.policy, self.key, self.datum, self._conditional,
-                                     self._conditional_block)
-        memo[id(self)] = newobj
-        return newobj
-
-    def __getstate__(self):
-        return self._pickle()
-
-    def __setstate__(self, state):
-        self._unpickle(state)
-
-    cdef _pickle(self):
-        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
-            self._conditional, self._conditional_block
-
-    cdef _unpickle(self, objs):
-        self.policy = objs[0]
-        memcpy(&self.key, <char *>objs[1], sizeof(sepol.avtab_key_t*))
-        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.avtab_datum_t*))
-        self._conditional = objs[3]
-        self._conditional_block = objs[4]
-
     @property
-    def xperm_type(self):
-        """The standard permission extended by these permissions (e.g. ioctl)."""
-        if self.datum.xperms == NULL:
-            raise LowLevelPolicyError("Extended permission information is NULL")
-
-        if self.datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLFUNCTION \
-            or self.datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLDRIVER:
-            return intern("ioctl")
-        else:
-            raise LowLevelPolicyError("Unknown extended permission: {}".format(
-                                      self.datum.xperms.specified))
-
-    @property
-    def perms(self):
-        """The rule's extended permission set."""
-        cdef:
-            sepol.avtab_extended_perms_t *xperms = self.datum.xperms
-            IoctlSet ret = IoctlSet()
-            size_t curr = 0
-            size_t len = sizeof(xperms.perms) * sepol.EXTENDED_PERMS_LEN
-
-        while curr < len:
-            if sepol.xperm_test(curr, xperms.perms):
-                if xperms.specified & sepol.AVTAB_XPERMS_IOCTLFUNCTION:
-                    ret.add(xperms.driver << 8 | curr)
-                elif xperms.specified & sepol.AVTAB_XPERMS_IOCTLDRIVER:
-                    ret.add(curr << 8)
-                else:
-                    raise LowLevelPolicyError("Unknown extended permission: {}".format(
-                                              xperms.specified))
-
-            curr += 1
-
-        return ret
+    def default(self):
+        """The rule's default type."""
+        raise RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
-        for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            r = ExpandedAVRuleXperm()
-            r.policy = self.policy
-            r.key = self.key
-            r.datum = self.datum
-            r.source = s
-            r.target = t
-            r.origin = self
-            r.perms = self.perms
-            r._conditional = self._conditional
-            r._conditional_block = self._conditional_block
-            yield r
+        cdef AVRuleXperm r
+        if self.origin is None:
+            for s, t in itertools.product(self.source.expand(), self.target.expand()):
+                r = AVRuleXperm.__new__(AVRuleXperm)
+                r.policy = self.policy
+                r.key = self.key
+                r.ruletype = self.ruletype
+                r.source = s
+                r.target = t
+                r.tclass = self.tclass
+                r.perms = self.perms
+                r.extended = True
+                r.xperm_type = self.xperm_type
+                r._conditional = self._conditional
+                r._conditional_block = self._conditional_block
+                r.origin = self
+                yield r
+
+        else:
+            # this rule is already expanded.
+            yield self
 
 
 cdef class TERule(BaseTERule):
 
     """A type_* type enforcement rule."""
 
+    cdef Type dft
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
-                 conditional, conditional_block):
+    cdef inline TERule factory(SELinuxPolicy policy, sepol.avtab_key_t *key,
+                               sepol.avtab_datum_t *datum, conditional, conditional_block):
         """Factory function for creating TERule objects."""
-        r = TERule()
+        cdef TERule r = TERule.__new__(TERule)
         r.policy = policy
-        r.key = key
-        r.datum = datum
+        r.key = <uintptr_t>key
+        r.ruletype = TERuletype(key.specified & ~sepol.AVTAB_ENABLED)
+        r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
+        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
+        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
+        r.dft = Type.factory(policy, policy.type_value_to_datum(datum.data - 1))
+        r.origin = None
         r._conditional = conditional
         r._conditional_block = conditional_block
         return r
+
 
     def __str__(self):
         if not self.rule_string:
@@ -378,32 +371,12 @@ cdef class TERule(BaseTERule):
 
         return self.rule_string
 
+    def __hash__(self):
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
+            self, None, self._conditional, self._conditional_block))
+
     def __lt__(self, other):
         return str(self) < str(other)
-
-    def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        newobj = TERule.factory(self.policy, self.key, self.datum, self._conditional,
-                                self._conditional_block)
-        memo[id(self)] = newobj
-        return newobj
-
-    def __getstate__(self):
-        return self._pickle()
-
-    def __setstate__(self, state):
-        self._unpickle(state)
-
-    cdef _pickle(self):
-        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
-            self._conditional, self._conditional_block
-
-    cdef _unpickle(self, objs):
-        self.policy = objs[0]
-        memcpy(&self.key, <char *>objs[1], sizeof(sepol.avtab_key_t*))
-        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.avtab_datum_t*))
-        self._conditional = objs[3]
-        self._conditional_block = objs[4]
 
     @property
     def perms(self):
@@ -413,44 +386,54 @@ cdef class TERule(BaseTERule):
     @property
     def default(self):
         """The rule's default type."""
-        return Type.factory(self.policy,
-                            self.policy.type_value_to_datum(self.datum.data - 1))
+        return self.dft
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
-        for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            r = ExpandedTERule()
-            r.policy = self.policy
-            r.key = self.key
-            r.datum = self.datum
-            r.source = s
-            r.target = t
-            r._conditional = self._conditional
-            r._conditional_block = self._conditional_block
-            r.origin = self
-            yield r
+        cdef TERule r
+        if self.origin is None:
+            for s, t in itertools.product(self.source.expand(), self.target.expand()):
+                r = TERule.__new__(TERule)
+                r.policy = self.policy
+                r.key = self.key
+                r.ruletype = self.ruletype
+                r.source = s
+                r.target = t
+                r.tclass = self.tclass
+                r.dft = self.dft
+                r.origin = self
+                r._conditional = self._conditional
+                r._conditional_block = self._conditional_block
+                yield r
+
+        else:
+            # this rule is already expanded.
+            yield self
 
 
-cdef class FileNameTERule(PolicyRule):
+cdef class FileNameTERule(BaseTERule):
 
     """A type_transition type enforcement rule with filename."""
 
     cdef:
-        sepol.filename_trans_t *key
-        sepol.filename_trans_datum_t *datum
-        readonly object ruletype
+        Type dft
+        readonly str filename
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.filename_trans_t *key, sepol.filename_trans_datum_t *datum):
-        """Factory function for creating TERule objects."""
-        r = FileNameTERule()
+    cdef inline FileNameTERule factory(SELinuxPolicy policy, sepol.filename_trans_t *key,
+                                       sepol.filename_trans_datum_t *datum):
+        """Factory function for creating FileNameTERule objects."""
+        cdef FileNameTERule r = FileNameTERule.__new__(FileNameTERule)
         r.policy = policy
-        r.key = key
-        r.datum = datum
+        r.key = <uintptr_t>key
+        r.ruletype = TERuletype.type_transition
+        r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.stype - 1))
+        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.ttype - 1))
+        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.tclass - 1))
+        r.dft = Type.factory(policy, policy.type_value_to_datum(datum.otype - 1))
+        r.filename = intern(key.name)
+        r.origin = None
         return r
-
-    def __cinit__(self):
-        self.ruletype = TERuletype.type_transition
 
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
@@ -463,51 +446,6 @@ cdef class FileNameTERule(PolicyRule):
     def __lt__(self, other):
         return str(self) < str(other)
 
-    def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        newobj = FileNameTERule.factory(self.policy, self.key, self.datum)
-        memo[id(self)] = newobj
-        return newobj
-
-    def __getstate__(self):
-        return self._pickle()
-
-    def __setstate__(self, state):
-        self._unpickle(state)
-
-    cdef _pickle(self):
-        return self.policy, <bytes>(<char *>self.key), <bytes>(<char *>self.datum), \
-            self._conditional, self._conditional_block
-
-    cdef _unpickle(self, objs):
-        self.policy = objs[0]
-        memcpy(&self.key, <char *>objs[1], sizeof(sepol.filename_trans_t*))
-        memcpy(&self.datum, <char *>objs[2], sizeof(sepol.filename_trans_datum_t*))
-        self._conditional = objs[3]
-        self._conditional_block = objs[4]
-
-    def _eq(self, FileNameTERule other):
-        """Low-level equality check (C pointers)."""
-        return self.key == other.key and self.datum == other.datum
-
-    @property
-    def source(self):
-        """The rule's source type/attribute."""
-        return type_or_attr_factory(self.policy,
-                                    self.policy.type_value_to_datum(self.key.stype - 1))
-
-    @property
-    def target(self):
-        """The rule's target type/attribute."""
-        return type_or_attr_factory(self.policy,
-                                    self.policy.type_value_to_datum(self.key.ttype - 1))
-
-    @property
-    def tclass(self):
-        """The rule's object class."""
-        return ObjClass.factory(self.policy,
-                                self.policy.class_value_to_datum(self.key.tclass - 1))
-
     @property
     def perms(self):
         """The rule's permission set."""
@@ -516,94 +454,31 @@ cdef class FileNameTERule(PolicyRule):
     @property
     def default(self):
         """The rule's default type."""
-        return Type.factory(self.policy, self.policy.type_value_to_datum(self.datum.otype - 1))
-
-    @property
-    def filename(self):
-        """The type_transition rule's file name."""
-        return intern(self.key.name)
+        return self.dft
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
-        for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            r = ExpandedFileNameTERule()
-            r.policy = self.policy
-            r.key = self.key
-            r.datum = self.datum
-            r.source = s
-            r.target = t
-            r.origin = self
-            yield r
+        cdef FileNameTERule r
+        if self.origin is None:
+            for s, t in itertools.product(self.source.expand(), self.target.expand()):
+                r = FileNameTERule.__new__(FileNameTERule)
+                r.policy = self.policy
+                r.key = self.key
+                r.ruletype = self.ruletype
+                r.source = s
+                r.target = t
+                r.tclass = self.tclass
+                r.dft = self.dft
+                r.filename = self.filename
+                r.origin = None
+                r._conditional = self._conditional
+                r._conditional_block = self._conditional_block
+                r.origin = self
+                yield r
 
-
-cdef class ExpandedAVRule(AVRule):
-
-    """An expanded access vector type enforcement rule."""
-
-    cdef:
-        public object source
-        public object target
-        public object perms
-        public object origin
-
-    def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".
-            format(self, self._conditional, self._conditional_block))
-
-    def __lt__(self, other):
-        return str(self) < str(other)
-
-
-cdef class ExpandedAVRuleXperm(AVRuleXperm):
-
-    """An expanded extended permission access vector type enforcement rule."""
-
-    cdef:
-        public object source
-        public object target
-        public object perms
-        public object origin
-
-    def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}|{1}|{2}".
-            format(self, self._conditional, self._conditional_block))
-
-    def __lt__(self, other):
-        return str(self) < str(other)
-
-
-cdef class ExpandedTERule(TERule):
-
-    """An expanded type_* type enforcement rule."""
-
-    cdef:
-        public object source
-        public object target
-        public object origin
-
-    def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
-            self, None, self._conditional, self._conditional_block))
-
-    def __lt__(self, other):
-        return str(self) < str(other)
-
-
-cdef class ExpandedFileNameTERule(FileNameTERule):
-
-    """An expanded filename type_transition rule."""
-
-    cdef:
-        public object source
-        public object target
-        public object origin
-
-    def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.filename}|{1}|{2}".format(
-            self, None, None))
-
-    def __lt__(self, other):
-        return str(self) < str(other)
+        else:
+            # this rule is already expanded.
+            yield self
 
 
 #
