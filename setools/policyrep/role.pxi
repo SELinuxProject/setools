@@ -23,27 +23,34 @@ cdef class Role(PolicySymbol):
 
     """A role."""
 
-    cdef sepol.role_datum_t *handle
+    cdef:
+        uintptr_t key
+        str name
+        frozenset _types
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.role_datum_t *symbol):
+    cdef inline Role factory(SELinuxPolicy policy, sepol.role_datum_t *symbol):
         """Factory function for creating Role objects."""
-        r = Role()
+        cdef Role r = Role.__new__(Role)
         r.policy = policy
-        r.handle = symbol
+        r.key = <uintptr_t>symbol
+        r.name = policy.role_value_to_name(symbol.s.value - 1)
+        r._types = frozenset(TypeEbitmapIterator.factory_from_set(policy, &symbol.types))
         return r
 
     def __str__(self):
-        return self.policy.role_value_to_name(self.handle.s.value - 1)
+        return self.name
 
     def _eq(self, Role other):
         """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+        return self.key == other.key
 
     @property
     def dominated_roles(self):
         """The roles that this role dominates."""
-        return RoleEbitmapIterator.factory(self.policy, &self.handle.dominates)
+        # TODO: do dominated roles even work?
+        #return set(RoleEbitmapIterator.factory(self.policy, &self.handle.dominates))
+        return frozenset()
 
     def expand(self):
         """Generator that expands this into its member roles."""
@@ -51,7 +58,7 @@ cdef class Role(PolicySymbol):
 
     def types(self):
         """Generator which yields the role's set of types."""
-        return TypeEbitmapIterator.factory_from_set(self.policy, &self.handle.types)
+        return iter(self._types)
 
     def statement(self):
         types = list(str(t) for t in self.types())
