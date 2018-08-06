@@ -36,13 +36,19 @@ cdef class FSUse(Ocontext):
 
     """An fs_use_* statement."""
 
+    cdef:
+        readonly object ruletype
+        readonly str fs
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+    cdef inline FSUse factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
         """Factory function for creating FSUse objects."""
-        r = FSUse()
-        r.policy = policy
-        r.handle = symbol
-        return r
+        cdef FSUse f = FSUse.__new__(FSUse)
+        f.policy = policy
+        f.ruletype = FSUseRuletype(symbol.v.behavior)
+        f.fs = intern(symbol.u.name)
+        f.context = Context.factory(policy, symbol.context)
+        return f
 
     def __str__(self):
         return "{0.ruletype} {0.fs} {0.context};".format(self)
@@ -53,16 +59,6 @@ cdef class FSUse(Ocontext):
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
-
-    @property
-    def fs(self):
-        """The filesystem type for this statement."""
-        return intern(self.handle.u.name)
-
-    @property
-    def ruletype(self):
-        """The rule type for this fs_use_* statement."""
-        return FSUseRuletype(self.handle.v.behavior)
 
 
 class GenfsFiletype(int):
@@ -95,7 +91,10 @@ cdef class Genfscon(Ocontext):
 
     """A genfscon statement."""
 
-    cdef readonly str fs
+    cdef:
+        readonly str fs
+        readonly object filetype
+        readonly str path
 
     _sclass_to_stat = {0: 0,
                        sepol.SECCLASS_BLK_FILE: S_IFBLK,
@@ -107,13 +106,16 @@ cdef class Genfscon(Ocontext):
                        sepol.SECCLASS_SOCK_FILE: S_IFSOCK}
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, fstype):
+    cdef inline Genfscon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, fstype):
         """Factory function for creating Genfscon objects."""
-        r = Genfscon()
-        r.policy = policy
-        r.handle = symbol
-        r.fs = fstype
-        return r
+        cdef Genfscon g = Genfscon.__new__(Genfscon)
+        g.policy = policy
+        g.key = <uintptr_t>symbol
+        g.fs = fstype
+        g.filetype = GenfsFiletype(Genfscon._sclass_to_stat[symbol.v.sclass])
+        g.path = intern(symbol.u.name)
+        g.context = Context.factory(policy, symbol.context)
+        return g
 
     def __str__(self):
         return "genfscon {0.fs} {0.path} {0.filetype} {0.context}".format(self)
@@ -124,16 +126,6 @@ cdef class Genfscon(Ocontext):
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
-
-    @property
-    def filetype(self):
-        """The file type (e.g. stat.S_IFBLK) for this genfscon statement."""
-        return GenfsFiletype(self._sclass_to_stat[self.handle.v.sclass])
-
-    @property
-    def path(self):
-        """The path for this genfscon statement."""
-        return intern(self.handle.u.name)
 
 
 #
