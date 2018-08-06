@@ -74,9 +74,18 @@ cdef class Type(BaseType):
 
     """A type."""
 
+    cdef:
+        readonly object ispermissive
+        list _aliases
+        list _attrs
+        # type_datum_t.s.value is needed by the
+        # alias iterator
+        uint32_t value
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
+    cdef inline Type factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
         """Factory function for creating Type objects."""
+        cdef Type t
         if symbol.flavor != sepol.TYPE_TYPE:
             raise ValueError("{0} is not a type".format(
                 policy.type_value_to_name(symbol.s.value - 1)))
@@ -84,35 +93,24 @@ cdef class Type(BaseType):
         try:
             return _type_cache[<uintptr_t>symbol]
         except KeyError:
-            t = Type()
+            t = Type.__new__(Type)
             t.policy = policy
             t.handle = symbol
             _type_cache[<uintptr_t>symbol] = t
+            t.value = symbol.s.value
+            t.name = policy.type_value_to_name(symbol.s.value - 1)
+            t.ispermissive = <bint>symbol.flags & sepol.TYPE_FLAGS_PERMISSIVE
             return t
 
-    def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        newobj = Type.factory(self.policy, self.handle)
-        memo[id(self)] = newobj
-        return newobj
+    cdef inline void _load_aliases(self):
+        """Helper method to load aliases."""
+        if self._aliases is None:
+            self._aliases = list(self.policy.type_aliases(self))
 
-    def __getstate__(self):
-        return (self.policy, self._pickle())
-
-    def __setstate__(self, state):
-        self.policy = state[0]
-        self._unpickle(state[1])
-
-    cdef bytes _pickle(self):
-        return <bytes>(<char *>self.handle)
-
-    cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(sepol.type_datum_t*))
-
-    @property
-    def ispermissive(self):
-        """(T/F) the type is permissive."""
-        return <bint>self.handle.flags & sepol.TYPE_FLAGS_PERMISSIVE
+    cdef inline void _load_attributes(self):
+        """Helper method to load attributes."""
+        if self._attrs is None:
+            self._attrs = list(TypeAttributeEbitmapIterator.factory(self.policy, &self.handle.types))
 
     def expand(self):
         """Generator that expands this into its member types."""
@@ -120,22 +118,29 @@ cdef class Type(BaseType):
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
-        return TypeAttributeEbitmapIterator.factory(self.policy, &self.handle.types)
+        self._load_attributes()
+        return iter(self._attrs)
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        return self.policy.type_aliases(self)
+        self._load_aliases()
+        return iter(self._aliases)
 
     def statement(self):
-        attrs = list(self.attributes())
-        aliases = list(self.aliases())
-        stmt = "type {0}".format(self)
-        if aliases:
-            if len(aliases) > 1:
-                stmt += " alias {{ {0} }}".format(' '.join(aliases))
-            else:
-                stmt += " alias {0}".format(aliases[0])
-        for attr in attrs:
+        cdef:
+            size_t count
+            str stmt
+
+        self._load_attributes()
+        self._load_aliases()
+        count = len(self._aliases)
+
+        stmt = "type {0}".format(self.name)
+        if count > 1:
+            stmt += " alias {{ {0} }}".format(' '.join(self._aliases))
+        elif count == 1:
+            stmt += " alias {0}".format(self._aliases[0])
+        for attr in self._attrs:
             stmt += ", {0}".format(attr)
         stmt += ";"
         return stmt
@@ -145,9 +150,12 @@ cdef class TypeAttribute(BaseType):
 
     """A type attribute."""
 
+    cdef list _types
+
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
+    cdef inline TypeAttribute factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
         """Factory function for creating TypeAttribute objects."""
+        cdef TypeAttribute a
         if symbol.flavor != sepol.TYPE_ATTRIB:
             raise ValueError("{0} is not an attribute".format(
                 policy.type_value_to_name(symbol.s.value - 1)))
@@ -155,11 +163,12 @@ cdef class TypeAttribute(BaseType):
         try:
             return _typeattr_cache[<uintptr_t>symbol]
         except KeyError:
-            t = TypeAttribute()
-            t.policy = policy
-            t.handle = symbol
-            _typeattr_cache[<uintptr_t>symbol] = t
-            return t
+            a = TypeAttribute.__new__(TypeAttribute)
+            _typeattr_cache[<uintptr_t>symbol] = a
+            a.policy = policy
+            a.handle = symbol
+            a.name = policy.type_value_to_name(symbol.s.value - 1)
+            return a
 
     def __contains__(self, other):
         for type_ in self.expand():
@@ -170,23 +179,27 @@ cdef class TypeAttribute(BaseType):
 
     def expand(self):
         """Generator that expands this attribute into its member types."""
-        return TypeEbitmapIterator.factory(self.policy, &self.handle.types)
+        if self._types is None:
+            self._types = list(TypeEbitmapIterator.factory(self.policy, &self.handle.types))
+
+        return iter(self._types)
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
-        raise SymbolUseError("{0} is an attribute, thus does not have attributes.".format(self))
+        raise SymbolUseError("{0} is an attribute, thus does not have attributes.".format(
+                             self.name))
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        raise SymbolUseError("{0} is an attribute, thus does not have aliases.".format(self))
+        raise SymbolUseError("{0} is an attribute, thus does not have aliases.".format(self.name))
 
     @property
     def ispermissive(self):
         """(T/F) the type is permissive."""
-        raise SymbolUseError("{0} is an attribute, thus cannot be permissive.".format(self))
+        raise SymbolUseError("{0} is an attribute, thus cannot be permissive.".format(self.name))
 
     def statement(self):
-        return "attribute {0};".format(self)
+        return "attribute {0};".format(self.name)
 
 
 #
@@ -308,7 +321,7 @@ cdef class TypeAliasHashtabIterator(HashtabIterator):
         i = TypeAliasHashtabIterator()
         i.policy = policy
         i.table = table
-        i.primary = primary.handle.s.value
+        i.primary = primary.value
         i.reset()
         return i
 
