@@ -72,16 +72,19 @@ cdef class Default(PolicySymbol):
     """Base class for default_* statements."""
 
     cdef:
-        public object ruletype
-        public object tclass
+        readonly object ruletype
+        readonly ObjClass tclass
         object _default
 
     # the default object is not exposed as a Python
     # attribute, as it collides with CPython code
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, ObjClass tclass, user, role, type_, range_):
+    cdef inline Default factory(SELinuxPolicy policy, ObjClass tclass, user, role, type_, range_):
         """Factory function for Default objects."""
+        cdef:
+            Default obj
+            DefaultRange objr
 
         if user:
             obj = Default()
@@ -108,13 +111,13 @@ cdef class Default(PolicySymbol):
             return obj
 
         if range_:
-            obj = DefaultRange()
-            obj.policy = policy
-            obj.ruletype = DefaultRuletype.default_range
-            obj.tclass = tclass
-            obj._default = DefaultValue.from_default_range(range_)
-            obj.default_range = DefaultRangeValue.from_default_range(range_)
-            return obj
+            objr = DefaultRange()
+            objr.policy = policy
+            objr.ruletype = DefaultRuletype.default_range
+            objr.tclass = tclass
+            objr._default = DefaultValue.from_default_range(range_)
+            objr.default_range = DefaultRangeValue.from_default_range(range_)
+            return objr
 
         raise ValueError("At least one of user, role, type_, or range_ must be specified.")
 
@@ -145,7 +148,7 @@ cdef class DefaultRange(Default):
 
     """A default_range statement."""
 
-    cdef public object default_range
+    cdef readonly object default_range
 
     def __str__(self):
         return "{0.ruletype} {0.tclass} {0.default} {0.default_range};".format(self)
