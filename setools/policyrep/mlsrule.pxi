@@ -32,72 +32,26 @@ cdef class MLSRule(PolicyRule):
     """An MLS rule."""
 
     cdef:
-        sepol.range_trans_t *handle
+        readonly ObjClass tclass
         object rng
-        readonly object ruletype
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.range_trans_t *symbol, sepol.mls_range_t *rng):
+    cdef inline MLSRule factory(SELinuxPolicy policy, sepol.range_trans_t *symbol,
+                                sepol.mls_range_t *rng):
         """Factory function for creating MLSRule objects."""
-        r = MLSRule(Range.factory(policy, rng))
+        cdef MLSRule r = MLSRule.__new__(MLSRule)
         r.policy = policy
-        r.handle = symbol
+        r.key = <uintptr_t>symbol
+        r.ruletype = MLSRuletype.range_transition
+        r.source = type_or_attr_factory(policy, policy.type_value_to_datum(symbol.source_type - 1))
+        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(symbol.target_type - 1))
+        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(symbol.target_class - 1))
+        r.rng = Range.factory(policy, rng)
+        r.origin = None
         return r
-
-    def __cinit__(self, rng):
-        self.ruletype = MLSRuletype.range_transition
-        self.rng = rng
 
     def __str__(self):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
-
-    def _eq(self, MLSRule other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def source(self):
-        """The rule's source type/attribute."""
-        return type_or_attr_factory(self.policy,
-                                    self.policy.type_value_to_datum(self.handle.source_type - 1))
-
-    @property
-    def target(self):
-        """The rule's target type/attribute."""
-        return type_or_attr_factory(self.policy,
-                                    self.policy.type_value_to_datum(self.handle.target_type - 1))
-
-    @property
-    def tclass(self):
-        """The rule's object class."""
-        return ObjClass.factory(self.policy,
-                                self.policy.class_value_to_datum(self.handle.target_class - 1))
-
-    @property
-    def default(self):
-        """The rule's default range."""
-        return self.rng
-
-    def expand(self):
-        """Expand the rule into an equivalent set of rules without attributes."""
-        for s, t in itertools.product(self.source.expand(), self.target.expand()):
-            r = ExpandedMLSRule(self.rng)
-            r.policy = self.policy
-            r.handle = self.handle
-            r.source = s
-            r.target = t
-            r.origin = self
-            yield r
-
-
-cdef class ExpandedMLSRule(MLSRule):
-
-    """An expanded MLS rule."""
-
-    cdef:
-        public object source
-        public object target
-        public object origin
 
     def __hash__(self):
         try:
@@ -112,6 +66,31 @@ cdef class ExpandedMLSRule(MLSRule):
 
     def __lt__(self, other):
         return str(self) < str(other)
+
+    @property
+    def default(self):
+        """The rule's default range."""
+        return self.rng
+
+    def expand(self):
+        """Expand the rule into an equivalent set of rules without attributes."""
+        cdef MLSRule r
+        if self.origin is None:
+            for s, t in itertools.product(self.source.expand(), self.target.expand()):
+                r = MLSRule.__new__(MLSRule)
+                r.policy = self.policy
+                r.key = self.key
+                r.ruletype = self.ruletype
+                r.source = s
+                r.target = t
+                r.tclass = self.tclass
+                r.rng = self.rng
+                r.origin = self
+                yield r
+
+        else:
+            # this rule is already expanded.
+            yield self
 
 
 #
