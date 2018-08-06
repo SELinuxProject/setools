@@ -88,31 +88,14 @@ cdef class SELinuxPolicy:
     def __str__(self):
         return self.path
 
+    def __copy__(self):
+        # Do not copy.
+        return self
+
     def __deepcopy__(self, memo):
-        # shallow copy as all of the members are immutable
-        cdef SELinuxPolicy newobj
-        newobj = SELinuxPolicy.__new__()
-        newobj.handle = self.handle
-        newobj.path = self.path
-        newobj.log = self.log
-        memo[id(self)] = newobj
-        return newobj
-
-    def __getstate__(self):
-        return (self.policy, self.path, self.log, self._pickle())
-
-    def __setstate__(self, state):
-        self.policy = state[0]
-        self.path = state[1]
-        self.log = state[2]
-        self._unpickle(state[3])
-
-    cdef bytes _pickle(self):
-        return <bytes>(<char *>self.handle)
-
-    cdef _unpickle(self, bytes handle):
-        memcpy(&self.handle, <char *>handle, sizeof(sepol.sepol_policydb*))
-
+        # Do not copy.
+        memo[id(self)] = self
+        return self
 
     #
     # Policy loading functions
