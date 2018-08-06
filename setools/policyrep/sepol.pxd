@@ -438,7 +438,6 @@ cdef extern from "<sepol/policydb/policydb.h>":
     #
     cdef int TYPE_STAR
     cdef int TYPE_COMP
-    cdef int TYPE_FLAGS_PERMISSIVE
 
     cdef struct type_set:
         ebitmap_t types
