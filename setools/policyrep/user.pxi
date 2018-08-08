@@ -18,6 +18,9 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+cdef dict _user_cache = {}
+
+
 cdef class User(PolicySymbol):
 
     """A user."""
@@ -32,23 +35,28 @@ cdef class User(PolicySymbol):
     @staticmethod
     cdef inline User factory(SELinuxPolicy policy, sepol.user_datum_t *symbol):
         """Factory function for constructing User objects."""
-        cdef User u = User.__new__(User)
-        u.policy = policy
-        u.key = <uintptr_t>symbol
-        u.name = policy.user_value_to_name(symbol.s.value - 1)
+        cdef User u
+        try:
+            return _user_cache[<uintptr_t>symbol]
+        except KeyError:
+            u = User.__new__(User)
+            _user_cache[<uintptr_t>symbol] = u
+            u.policy = policy
+            u.key = <uintptr_t>symbol
+            u.name = policy.user_value_to_name(symbol.s.value - 1)
 
-        # object_r is implicitly added to all roles by the compiler.
-        # technically it is incorrect to skip it, but policy writers
-        # and analysts don't expect to see it in results, and it
-        # will confuse, especially for role set equality user queries.
-        u.roles = frozenset(r for r in RoleEbitmapIterator.factory(policy, &symbol.roles.roles)
-                   if r != "object_r")
+            # object_r is implicitly added to all roles by the compiler.
+            # technically it is incorrect to skip it, but policy writers
+            # and analysts don't expect to see it in results, and it
+            # will confuse, especially for role set equality user queries.
+            u.roles = frozenset(r for r in RoleEbitmapIterator.factory(policy, &symbol.roles.roles)
+                       if r != "object_r")
 
-        if policy.mls:
-            u._level = Level.factory(policy, &symbol.exp_dfltlevel)
-            u._range = Range.factory(policy, &symbol.exp_range)
+            if policy.mls:
+                u._level = Level.factory(policy, &symbol.exp_dfltlevel)
+                u._range = Range.factory(policy, &symbol.exp_range)
 
-        return u
+            return u
 
     def __str__(self):
         return self.name
