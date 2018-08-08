@@ -94,9 +94,9 @@ cdef class Type(BaseType):
             return _type_cache[<uintptr_t>symbol]
         except KeyError:
             t = Type.__new__(Type)
+            _type_cache[<uintptr_t>symbol] = t
             t.policy = policy
             t.handle = symbol
-            _type_cache[<uintptr_t>symbol] = t
             t.value = symbol.s.value
             t.name = policy.type_value_to_name(symbol.s.value - 1)
             t.ispermissive = <bint>symbol.flags & sepol.TYPE_FLAGS_PERMISSIVE

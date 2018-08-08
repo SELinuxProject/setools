@@ -39,6 +39,11 @@ cdef class BaseConstraint(PolicySymbol):
         sepol.constraint_node_t *handle
         readonly object ruletype
         readonly object tclass
+        list _postfix_expression
+        list _infix_expression
+        readonly frozenset users
+        readonly frozenset roles
+        readonly frozenset types
 
     def __str__(self):
         raise NotImplementedError
@@ -65,60 +70,63 @@ cdef class BaseConstraint(PolicySymbol):
         Return: list
         """
 
-        _precedence = {
-            "not": 4,
-            "and": 2,
-            "or": 1,
-            "==": 3,
-            "!=": 3,
-            "dom": 3,
-            "domby": 3,
-            "incomp": 3}
+        if self._infix_expression is None:
+            _precedence = {
+                "not": 4,
+                "and": 2,
+                "or": 1,
+                "==": 3,
+                "!=": 3,
+                "dom": 3,
+                "domby": 3,
+                "incomp": 3}
 
-        _max_precedence = 4
+            _max_precedence = 4
 
-        _operands = ["u1", "u2", "u3",
-                     "r1", "r2", "r3",
-                     "t1", "t2", "t3",
-                     "l1", "l2",
-                     "h1", "h2"]
+            _operands = ["u1", "u2", "u3",
+                         "r1", "r2", "r3",
+                         "t1", "t2", "t3",
+                         "l1", "l2",
+                         "h1", "h2"]
 
-        # qpol representation is in postfix notation.  This code
-        # converts it to infix notation.  Parentheses are added
-        # to ensure correct expressions, though they may end up
-        # being overused.  Set previous operator at start to the
-        # highest precedence (op) so if there is a single binary
-        # operator, no parentheses are output
-        stack = []
-        prev_op_precedence = _max_precedence
-        for op in self.postfix_expression():
-            if isinstance(op, frozenset) or op in _operands:
-                # operands
-                stack.append(op)
-            else:
-                # operators
-                if op == "not":
-                    # unary operator
-                    operator = op
-                    operand = stack.pop()
-                    op_precedence = _precedence[op]
-                    stack.append([operator, "(", operand, ")"])
+            # sepol representation is in postfix notation.  This code
+            # converts it to infix notation.  Parentheses are added
+            # to ensure correct expressions, though they may end up
+            # being overused.  Set previous operator at start to the
+            # highest precedence (op) so if there is a single binary
+            # operator, no parentheses are output
+            stack = []
+            prev_op_precedence = _max_precedence
+            for op in self.postfix_expression():
+                if isinstance(op, frozenset) or op in _operands:
+                    # operands
+                    stack.append(op)
                 else:
-                    # binary operators
-                    operand2 = stack.pop()
-                    operand1 = stack.pop()
-                    operator = op
-
-                    # if previous operator is of higher precedence
-                    # no parentheses are needed.
-                    if _precedence[op] < prev_op_precedence:
-                        stack.append([operand1, operator, operand2])
+                    # operators
+                    if op == "not":
+                        # unary operator
+                        operator = op
+                        operand = stack.pop()
+                        op_precedence = _precedence[op]
+                        stack.append([operator, "(", operand, ")"])
                     else:
-                        stack.append(["(", operand1, operator, operand2, ")"])
+                        # binary operators
+                        operand2 = stack.pop()
+                        operand1 = stack.pop()
+                        operator = op
 
-                prev_op_precedence = _precedence[op]
+                        # if previous operator is of higher precedence
+                        # no parentheses are needed.
+                        if _precedence[op] < prev_op_precedence:
+                            stack.append([operand1, operator, operand2])
+                        else:
+                            stack.append(["(", operand1, operator, operand2, ")"])
 
-        return self._flatten_expression(stack)
+                    prev_op_precedence = _precedence[op]
+
+            self._infix_expression = self._flatten_expression(stack)
+
+        return self._infix_expression
 
     def postfix_expression(self):
         """
@@ -126,41 +134,7 @@ cdef class BaseConstraint(PolicySymbol):
 
         Return: list
         """
-        expression = []
-        for expr_node in ConstraintExprIterator.factory(self.policy, self.handle.expr):
-            expression.extend(expr_node())
-
-        return expression
-
-    @property
-    def roles(self):
-        """The roles used in the expression."""
-        roles = set()
-        for expr_node in ConstraintExprIterator.factory(self.policy, self.handle.expr):
-            if expr_node.roles:
-                roles.update(expr_node.names)
-
-        return roles
-
-    @property
-    def types(self):
-        """The types and type attributes used in the expression."""
-        types = set()
-        for expr_node in ConstraintExprIterator.factory(self.policy, self.handle.expr):
-            if expr_node.types:
-                types.update(expr_node.names)
-
-        return types
-
-    @property
-    def users(self):
-        """The users used in the expression."""
-        users = set()
-        for expr_node in ConstraintExprIterator.factory(self.policy, self.handle.expr):
-            if expr_node.users:
-                users.update(expr_node.names)
-
-        return users
+        return self._postfix_expression
 
     #
     # Internal functions
@@ -198,20 +172,41 @@ cdef class Constraint(BaseConstraint):
 
     """A constraint rule (constrain/mlsconstrain)."""
 
+    cdef readonly frozenset perms
+
     @staticmethod
     cdef factory(SELinuxPolicy policy, ObjClass tclass, sepol.constraint_node_t *symbol):
         """Factory function for creating Constraint objects."""
-        c = Constraint()
+        cdef:
+            Constraint c = Constraint.__new__(Constraint)
+            list users = []
+            list roles = []
+            list types = []
+
         c.policy = policy
         c.handle = symbol
         c.tclass = tclass
+        c.perms = frozenset(PermissionVectorIterator.factory(policy, tclass, symbol.permissions))
 
+        c.ruletype = ConstraintRuletype.constrain
+        c._postfix_expression = []
         for expr_node in ConstraintExprIterator.factory(policy, symbol.expr):
             if expr_node.mls:
                 c.ruletype = ConstraintRuletype.mlsconstrain
-                break
-        else:
-            c.ruletype = ConstraintRuletype.constrain
+
+            if expr_node.types:
+                types.extend(expr_node.names)
+            elif expr_node.roles:
+                roles.extend(expr_node.names)
+            elif expr_node.users:
+                users.extend(expr_node.names)
+
+            c._postfix_expression.extend(expr_node())
+
+        c.users = frozenset(users)
+        c.roles = frozenset(roles)
+        c.types = frozenset(types)
+
 
         return c
 
@@ -229,12 +224,6 @@ cdef class Constraint(BaseConstraint):
 
         return rule_string
 
-    @property
-    def perms(self):
-        """The constraint's permission set."""
-        return set(p for p in PermissionVectorIterator.factory(self.policy, self.tclass,
-                                                               self.handle.permissions))
-
 
 cdef class Validatetrans(BaseConstraint):
 
@@ -243,17 +232,34 @@ cdef class Validatetrans(BaseConstraint):
     @staticmethod
     cdef factory(SELinuxPolicy policy, ObjClass tclass, sepol.constraint_node_t *symbol):
         """Factory function for creating Validatetrans objects."""
-        v = Validatetrans()
+        cdef:
+            Validatetrans v = Validatetrans.__new__(Validatetrans)
+            list users = []
+            list roles = []
+            list types = []
+
         v.policy = policy
         v.handle = symbol
         v.tclass = tclass
 
+        v.ruletype = ConstraintRuletype.validatetrans
+        v._postfix_expression = []
         for expr_node in ConstraintExprIterator.factory(policy, symbol.expr):
             if expr_node.mls:
                 v.ruletype = ConstraintRuletype.mlsvalidatetrans
-                break
-        else:
-            v.ruletype = ConstraintRuletype.validatetrans
+
+            if expr_node.types:
+                types.extend(expr_node.names)
+            elif expr_node.roles:
+                roles.extend(expr_node.names)
+            elif expr_node.users:
+                users.extend(expr_node.names)
+
+            v._postfix_expression.extend(expr_node())
+
+        v.users = frozenset(users)
+        v.roles = frozenset(roles)
+        v.types = frozenset(types)
 
         return v
 
