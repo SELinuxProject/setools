@@ -94,6 +94,7 @@ cdef class ObjClass(PolicySymbol):
     """An object class."""
 
     cdef:
+        sepol.class_datum_t *handle
         uintptr_t key
         str name
         Common _common
@@ -124,12 +125,12 @@ cdef class ObjClass(PolicySymbol):
             # Instantiate object class
             #
             c = ObjClass.__new__(ObjClass)
+            _objclass_cache[<uintptr_t>symbol] = c
             c.policy = policy
+            c.handle = symbol
             c.key = <uintptr_t>symbol
             c.nprim = symbol.permissions.nprim
             c.name = policy.class_value_to_name(symbol.s.value - 1)
-            c._validatetrans = list(ValidatetransIterator.factory(policy, c, symbol.validatetrans))
-            c._constraints = list(ConstraintIterator.factory(policy, c, symbol.constraints))
 
             #
             # Load common
@@ -168,7 +169,6 @@ cdef class ObjClass(PolicySymbol):
             if symbol.default_range:
                 c._defaults.append(Default.factory(policy, c, None, None, None, symbol.default_range))
 
-            _objclass_cache[<uintptr_t>symbol] = c
             return c
 
     def __str__(self):
@@ -202,6 +202,10 @@ cdef class ObjClass(PolicySymbol):
 
     def constraints(self):
         """Iterator for the constraints that apply to this class."""
+        if self._constraints is None:
+            self._constraints = list(ConstraintIterator.factory(self.policy, self,
+                                                                self.handle.constraints))
+
         return iter(self._constraints)
 
     def defaults(self):
@@ -230,8 +234,11 @@ cdef class ObjClass(PolicySymbol):
 
     def validatetrans(self):
         """Iterator for validatetrans that apply to this class."""
-        return iter(self._validatetrans)
+        if self._validatetrans is None:
+            self._validatetrans = list(ValidatetransIterator.factory(self.policy, self,
+                                                                     self.handle.validatetrans))
 
+        return iter(self._validatetrans)
 
 #
 # Iterators
