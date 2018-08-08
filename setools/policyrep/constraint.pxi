@@ -182,6 +182,7 @@ cdef class Constraint(BaseConstraint):
             list users = []
             list roles = []
             list types = []
+            ConstraintExprNode expr_node
 
         c.policy = policy
         c.handle = symbol
@@ -206,7 +207,6 @@ cdef class Constraint(BaseConstraint):
         c.users = frozenset(users)
         c.roles = frozenset(roles)
         c.types = frozenset(types)
-
 
         return c
 
@@ -237,6 +237,7 @@ cdef class Validatetrans(BaseConstraint):
             list users = []
             list roles = []
             list types = []
+            ConstraintExprNode expr_node
 
         v.policy = policy
         v.handle = symbol
@@ -276,7 +277,19 @@ cdef class ConstraintExprNode(PolicySymbol):
 
     """A node of a constraint expression."""
 
-    cdef sepol.constraint_expr_t *handle
+    cdef:
+        sepol.constraint_expr_t *handle
+        uint32_t expression_type
+        uint32_t operator
+        uint32_t _symbol_type
+        frozenset _names
+        list _expression
+        # T/F this node is MLS
+        bint mls
+        # T/F this node has roles/types/users
+        bint roles
+        bint types
+        bint users
 
     _expr_type_to_text = {
         sepol.CEXPR_NOT: "not",
@@ -326,12 +339,46 @@ cdef class ConstraintExprNode(PolicySymbol):
                   sepol.CEXPR_USER + sepol.CEXPR_XTARGET]
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.constraint_expr_t *symbol):
+    cdef inline ConstraintExprNode factory(SELinuxPolicy policy, sepol.constraint_expr_t *symbol):
         """Factory function for creating ConstraintExprNode objects."""
-        r = ConstraintExprNode()
-        r.policy = policy
-        r.handle = symbol
-        return r
+        cdef ConstraintExprNode n = ConstraintExprNode.__new__(ConstraintExprNode)
+        n.policy = policy
+        n.handle = symbol
+        n.expression_type = symbol.expr_type
+        n.operator = symbol.op
+
+        #
+        # Determine attributes of expression node
+        #
+        if symbol.expr_type in (sepol.CEXPR_ATTR, sepol.CEXPR_NAMES):
+            n._symbol_type = symbol.attr
+
+        try:
+            n.mls = n.symbol_type >= sepol.CEXPR_L1L2
+
+            if symbol.expr_type == sepol.CEXPR_NAMES:
+                if n.symbol_type in n._role_syms:
+                    n.roles = True
+                    n._names = frozenset(r for r in RoleEbitmapIterator.factory(policy,
+                                                                                &symbol.names))
+                elif n.symbol_type in n._type_syms:
+                    n.types = True
+                    if policy.version > 28:
+                        n._names = frozenset(t for t in
+                                             TypeOrAttributeEbitmapIterator.factory_from_set(
+                                                 policy, symbol.type_names))
+                    else:
+                        n._names = frozenset(t for t in TypeEbitmapIterator.factory(
+                                             policy, &symbol.names))
+                else:
+                    n.users = True
+                    n._names = frozenset(u for u in UserEbitmapIterator.factory(policy,
+                                                                                &symbol.names))
+
+        except AttributeError:
+            pass
+
+        return n
 
     def __call__(self):
         expression = []
@@ -358,60 +405,20 @@ cdef class ConstraintExprNode(PolicySymbol):
 
         return expression
 
-    @property
-    def expression_type(self):
-        return self.handle.expr_type
-
-    @property
-    def mls(self):
-        """T/F the node is an MLS expression."""
-        try:
-            return self.symbol_type >= sepol.CEXPR_L1L2
-        except AttributeError:
-            return False
 
     @property
     def names(self):
-        if self.expression_type != sepol.CEXPR_NAMES:
-            raise AttributeError("Names on expression type {}".format(self.expression_type))
+        if self._names is None:
+            raise AttributeError("names")
 
-        if self.symbol_type in self._role_syms:
-            return frozenset(r for r in RoleEbitmapIterator.factory(self.policy, &self.handle.names))
-        elif self.symbol_type in self._type_syms:
-            if self.policy.version > 28:
-                return frozenset(t for t in TypeOrAttributeEbitmapIterator.factory_from_set(
-                    self.policy, self.handle.type_names))
-            else:
-                return frozenset(t for t in TypeEbitmapIterator.factory(
-                    self.policy, &self.handle.names))
-        else:
-            return frozenset(u for u in UserEbitmapIterator.factory(self.policy, &self.handle.names))
-
-    @property
-    def operator(self):
-        return self.handle.op
-
-    @property
-    def roles(self):
-        """T/F the node has a role list."""
-        return self.expression_type == sepol.CEXPR_NAMES and self.symbol_type in self._role_syms
+        return self._names
 
     @property
     def symbol_type(self):
-        if self.expression_type not in (sepol.CEXPR_ATTR, sepol.CEXPR_NAMES):
-            raise AttributeError("Symbol type on expression type {}".format(self.expression_type))
+        if self._symbol_type is None:
+            raise AttributeError("symbol_type")
 
-        return self.handle.attr
-
-    @property
-    def types(self):
-        """T/F the node has a type list."""
-        return self.expression_type == sepol.CEXPR_NAMES and self.symbol_type in self._type_syms
-
-    @property
-    def users(self):
-        """T/F the node has a user list."""
-        return self.expression_type == sepol.CEXPR_NAMES and self.symbol_type in self._user_syms
+        return self._symbol_type
 
 
 #
