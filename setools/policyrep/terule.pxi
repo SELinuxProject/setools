@@ -504,7 +504,7 @@ cdef class TERuleIterator(PolicyIterator):
         i.reset()
         return i
 
-    def _next_bucket(self):
+    cdef void _next_bucket(self):
         """Internal method for advancing to the next bucket."""
         self.bucket += 1
         if self.bucket < self.table.nslot:
@@ -512,7 +512,7 @@ cdef class TERuleIterator(PolicyIterator):
         else:
             self.node = NULL
 
-    def _next_node(self):
+    cdef void _next_node(self):
         """Internal method for advancing to the next node."""
         if self.node != NULL and self.node.next != NULL:
             self.node = self.node.next

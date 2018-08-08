@@ -61,7 +61,7 @@ cdef class FSUse(Ocontext):
         return str(self) < str(other)
 
 
-class GenfsFiletype(int):
+cdef class GenfsFiletype(int):
 
     """
     A genfscon file type.

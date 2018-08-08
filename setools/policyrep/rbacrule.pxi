@@ -112,15 +112,7 @@ cdef class RoleTransition(PolicyRule):
         return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
 
     def __hash__(self):
-        try:
-            cond = self.conditional
-            cond_block = self.conditional_block
-        except RuleNotConditional:
-            cond = None
-            cond_block = None
-
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".format(
-            self, cond, cond_block))
+        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|None|None".format(self))
 
     def __lt__(self, other):
         return str(self) < str(other)

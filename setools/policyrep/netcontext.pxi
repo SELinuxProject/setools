@@ -79,7 +79,12 @@ cdef class Nodecon(Ocontext):
     @staticmethod
     cdef inline Nodecon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, ip_version):
         """Factory function for creating Nodecon objects."""
-        cdef Nodecon n = Nodecon.__new__(Nodecon)
+        cdef:
+            int CIDR = 0
+            int i
+            uint32_t block
+            Nodecon n = Nodecon.__new__(Nodecon)
+
         n.policy = policy
         n.key = <uintptr_t>symbol
         n.ip_version = ip_version
@@ -96,28 +101,38 @@ cdef class Nodecon(Ocontext):
         if not n._mask:
             raise MemoryError
 
-        # convert network order to string
-        if ip_version == NodeconIPVersion.ipv4:
-            inet_ntop(AF_INET, &symbol.u.node.addr, n._addr, INET6_ADDRSTRLEN)
-            inet_ntop(AF_INET, &symbol.u.node.mask, n._mask, INET6_ADDRSTRLEN)
-        else:
-            inet_ntop(AF_INET6, &symbol.u.node6.addr, n._addr, INET6_ADDRSTRLEN)
-            inet_ntop(AF_INET6, &symbol.u.node6.mask, n._mask, INET6_ADDRSTRLEN)
-
         #
         # Build network object
         #
-        CIDR = 0
         # Python 3.4's IPv6Network constructor does not support
         # expanded netmasks, only CIDR numbers. Convert netmask
         # into CIDR.
         # This is Brian Kernighan's method for counting set bits.
         # If the netmask happens to be invalid, this will
         # not detect it.
-        int_mask = int(ip_address(n._mask))
-        while int_mask:
-            int_mask &= int_mask - 1
-            CIDR += 1
+        if ip_version == NodeconIPVersion.ipv4:
+            # convert network order to string
+            inet_ntop(AF_INET, &symbol.u.node.addr, n._addr, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET, &symbol.u.node.mask, n._mask, INET6_ADDRSTRLEN)
+
+            # count bits
+            block = symbol.u.node.mask
+            while block:
+                block &= block - 1
+                CIDR += 1
+
+        else:  # NodeconIPVersion.ipv6
+            # convert network order to string
+            inet_ntop(AF_INET6, &symbol.u.node6.addr, n._addr, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET6, &symbol.u.node6.mask, n._mask, INET6_ADDRSTRLEN)
+
+            # count bits
+            for i in range(4):
+                block = symbol.u.node6.mask[i]
+                while block:
+                    block &= block - 1
+                    CIDR += 1
+
 
         net_with_mask = "{0}/{1}".format(n._addr, CIDR)
         try:

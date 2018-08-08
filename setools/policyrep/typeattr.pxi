@@ -29,7 +29,7 @@ cdef dict _typeattr_cache = {}
 #
 # Type or attribute factory function
 #
-cdef type_or_attr_factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
+cdef inline BaseType type_or_attr_factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
     """Factory function for creating type or attribute objects."""
     cdef sepol.type_datum_t *handle
 
@@ -205,7 +205,7 @@ cdef class TypeAttribute(BaseType):
 #
 # Hash Table Iterator Classes
 #
-cdef inline type_is_alias(sepol.type_datum_t *datum):
+cdef inline bint type_is_alias(sepol.type_datum_t *datum):
     """Determine if the type datum is an alias."""
     return (datum.primary == 0 and datum.flavor == sepol.TYPE_TYPE) \
             or datum.flavor == sepol.TYPE_ALIAS

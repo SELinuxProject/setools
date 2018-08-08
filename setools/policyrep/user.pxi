@@ -74,12 +74,15 @@ cdef class User(PolicySymbol):
             raise MLSDisabled
 
     def statement(self):
-        roles = list(str(r) for r in self.roles)
-        stmt = "user {0} roles ".format(self.name)
-        if len(roles) > 1:
-            stmt += "{{ {0} }}".format(' '.join(roles))
-        else:
+        cdef:
+            list roles = list(str(r) for r in self.roles)
+            str stmt = "user {0} roles ".format(self.name)
+            size_t count = len(roles)
+
+        if count == 1:
             stmt += roles[0]
+        else:
+            stmt += "{{ {0} }}".format(' '.join(roles))
 
         if self._level:
             stmt += " level {0.mls_level} range {0.mls_range};".format(self)

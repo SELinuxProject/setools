@@ -51,12 +51,15 @@ cdef class SELinuxPolicy:
         object constraint_counts
         object terule_counts
 
-    def __init__(self, policyfile=None):
+    def __cinit__(self, policyfile=None):
         """
         Parameter:
         policyfile  Path to a policy to open.
         """
 
+        self.handle = NULL
+        self.cat_val_to_struct = NULL
+        self.level_val_to_struct = NULL
         self.log = logging.getLogger(__name__)
 
         if policyfile:
@@ -67,10 +70,6 @@ cdef class SELinuxPolicy:
             except NameError:
                 raise RuntimeError("Loading the running policy requires libselinux Python bindings")
 
-    def __cinit__(self):
-        self.handle = NULL
-        self.cat_val_to_struct = NULL
-        self.level_val_to_struct = NULL
 
     def __dealloc__(self):
         PyMem_Free(self.cat_val_to_struct)

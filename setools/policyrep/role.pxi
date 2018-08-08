@@ -61,13 +61,15 @@ cdef class Role(PolicySymbol):
         return iter(self._types)
 
     def statement(self):
-        types = list(str(t) for t in self.types())
+        cdef size_t count
+        types = list(str(t) for t in self._types)
+        count = len(types)
         stmt = "role {0}".format(self)
-        if types:
-            if (len(types) > 1):
-                stmt += " types {{ {0} }}".format(' '.join(types))
-            else:
-                stmt += " types {0}".format(types[0])
+        if count == 1:
+            stmt += " types {0}".format(types[0])
+        else:
+            stmt += " types {{ {0} }}".format(' '.join(types))
+
         stmt += ";"
         return stmt
 
