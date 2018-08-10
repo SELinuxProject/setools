@@ -546,6 +546,32 @@ cdef class TERuleIterator(PolicyIterator):
     def __len__(self):
         return self.table.nel
 
+    def ruletype_count(self):
+        """
+        Determine the number of rules.
+
+        Return: collections.Counter object keyed by TERuletype.value
+        """
+        cdef:
+            sepol.avtab_key_t *key
+            sepol.avtab_ptr_t node
+            uint32_t bucket = 0
+
+        count = Counter()
+
+        while bucket < self.table[0].nslot:
+            node = self.table[0].htable[bucket]
+            while node != NULL:
+                key = &node.key if node else NULL
+                if key != NULL:
+                    count[key.specified & ~sepol.AVTAB_ENABLED] += 1
+
+                node = node.next
+
+            bucket += 1
+
+        return count
+
     def reset(self):
         """Reset the iterator to the start."""
         self.node = self.table.htable[0]
@@ -601,8 +627,25 @@ cdef class ConditionalTERuleIterator(PolicyIterator):
 
         curr = self.head
         while curr != NULL:
-             count += 1
-             curr = curr.next
+            count += 1
+            curr = curr.next
+
+        return count
+
+    def ruletype_count(self):
+        """
+        Determine the number of rules.
+
+        Return: collections.Counter object keyed by TERuletype.value
+        """
+        cdef sepol.cond_av_list_t *curr
+
+        count = Counter()
+
+        curr = self.head
+        while curr != NULL:
+            count[curr.node.key.specified & ~sepol.AVTAB_ENABLED] += 1
+            curr = curr.next
 
         return count
 

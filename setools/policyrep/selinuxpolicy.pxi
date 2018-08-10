@@ -228,31 +228,39 @@ cdef class SELinuxPolicy:
     cdef cache_terule_counts(self):
         """Count all TE rules in one iteration."""
         if not self.terule_counts:
-            self.terule_counts = Counter(r.ruletype for r in self.terules())
+            self.terule_counts = TERuleIterator.factory(self, &self.handle.p.te_avtab).ruletype_count()
+            self.terule_counts[TERuletype.type_transition.value] += \
+                len(FileNameTERuleIterator.factory(self, &self.handle.p.filename_trans))
+
+            for c in self.conditionals():
+                self.terule_counts.update(c.true_rules().ruletype_count())
+                self.terule_counts.update(c.false_rules().ruletype_count())
+
+            self.terule_counts
 
     @property
     def allow_count(self):
         """The number of (type) allow rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.allow]
+        return self.terule_counts[TERuletype.allow.value]
 
     @property
     def allowxperm_count(self):
         """The number of allowxperm rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.allowxperm]
+        return self.terule_counts[TERuletype.allowxperm.value]
 
     @property
     def auditallow_count(self):
         """The number of auditallow rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.auditallow]
+        return self.terule_counts[TERuletype.auditallow.value]
 
     @property
     def auditallowxperm_count(self):
         """The number of auditallowxperm rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.auditallowxperm]
+        return self.terule_counts[TERuletype.auditallowxperm.value]
 
     @property
     def boolean_count(self):
@@ -299,13 +307,13 @@ cdef class SELinuxPolicy:
     def dontaudit_count(self):
         """The number of dontaudit rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.dontaudit]
+        return self.terule_counts[TERuletype.dontaudit.value]
 
     @property
     def dontauditxperm_count(self):
         """The number of dontauditxperm rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.dontauditxperm]
+        return self.terule_counts[TERuletype.dontauditxperm.value]
 
     @property
     def fs_use_count(self):
@@ -358,13 +366,13 @@ cdef class SELinuxPolicy:
     def neverallow_count(self):
         """The number of neverallow rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.neverallow]
+        return self.terule_counts[TERuletype.neverallow.value]
 
     @property
     def neverallowxperm_count(self):
         """The number of neverallowxperm rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.neverallowxperm]
+        return self.terule_counts[TERuletype.neverallowxperm.value]
 
     @property
     def nodecon_count(self):
@@ -430,7 +438,7 @@ cdef class SELinuxPolicy:
     def type_change_count(self):
         """The number of type_change rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.type_change]
+        return self.terule_counts[TERuletype.type_change.value]
 
     @property
     def type_count(self):
@@ -441,13 +449,13 @@ cdef class SELinuxPolicy:
     def type_member_count(self):
         """The number of type_member rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.type_member]
+        return self.terule_counts[TERuletype.type_member.value]
 
     @property
     def type_transition_count(self):
         """The number of type_transition rules."""
         self.cache_terule_counts()
-        return self.terule_counts[TERuletype.type_transition]
+        return self.terule_counts[TERuletype.type_transition.value]
 
     @property
     def typebounds_count(self):
