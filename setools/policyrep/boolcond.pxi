@@ -17,11 +17,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from itertools import chain, product
-from collections import namedtuple
 
-
-truth_table_row = namedtuple("truth_table_row", ["values", "result"])
+truth_table_row = collections.namedtuple("truth_table_row", ["values", "result"])
 
 cdef dict _cond_cache = {}
 
@@ -243,7 +240,7 @@ cdef class Conditional(PolicySymbol):
         truth_table = []
 
         # create a list of all combinations of T/F for each Boolean
-        truth_list = list(product([True, False], repeat=len(bools)))
+        truth_list = list(itertools.product([True, False], repeat=len(bools)))
 
         for row in truth_list:
             values = {bools[i]: row[i] for i in range(len(bools))}

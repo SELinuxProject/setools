@@ -18,7 +18,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 # pylint: disable=protected-access
-import itertools
 
 cdef dict _cat_cache = {}
 cdef dict _sens_cache = {}

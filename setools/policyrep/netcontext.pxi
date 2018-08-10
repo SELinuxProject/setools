@@ -17,13 +17,8 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
-from ipaddress import ip_address, ip_network
 
-import warnings
-import logging
-
-PortconRange = namedtuple("PortconRange", ["low", "high"])
+PortconRange = collections.namedtuple("PortconRange", ["low", "high"])
 
 #
 # Classes
@@ -138,12 +133,12 @@ cdef class Nodecon(Ocontext):
         try:
             # checkpolicy does not verify that no host bits are set,
             # so strict will raise an exception if host bits are set.
-            n.network = ip_network(net_with_mask)
+            n.network = ipaddress.ip_network(net_with_mask)
         except ValueError as ex:
             log = logging.getLogger(__name__)
             log.warning("Nodecon with network {} {} has host bits set. Analyses may have "
                         "unexpected results.".format(n._addr, n._mask))
-            n.network = ip_network(net_with_mask, strict=False)
+            n.network = ipaddress.ip_network(net_with_mask, strict=False)
 
         return n
 

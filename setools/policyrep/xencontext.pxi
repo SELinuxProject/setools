@@ -17,10 +17,9 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
 
-IomemconRange = namedtuple("IomemconRange", ["low", "high"])
-IoportconRange = namedtuple("IoportconRange", ["low", "high"])
+IomemconRange = collections.namedtuple("IomemconRange", ["low", "high"])
+IoportconRange = collections.namedtuple("IoportconRange", ["low", "high"])
 
 
 #

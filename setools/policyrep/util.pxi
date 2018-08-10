@@ -16,14 +16,11 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import warnings
-
-from enum import Enum
 
 #
 # Classes
 #
-class PolicyEnum(Enum):
+class PolicyEnum(enum.Enum):
 
     """
     Base class for policy enumerations.

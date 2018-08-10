@@ -19,9 +19,6 @@
 #
 # pylint: disable=too-many-public-methods
 
-import logging
-from collections import Counter
-
 
 class PolicyTarget(PolicyEnum):
 
@@ -223,7 +220,7 @@ cdef class SELinuxPolicy:
     cdef cache_constraint_counts(self):
         """Count all constraints in one iteration."""
         if not self.constraint_counts:
-            self.constraint_counts = Counter(r.ruletype for r in self.constraints())
+            self.constraint_counts = collections.Counter(r.ruletype for r in self.constraints())
 
     cdef cache_terule_counts(self):
         """Count all TE rules in one iteration."""
@@ -387,7 +384,7 @@ cdef class SELinuxPolicy:
     @property
     def permission_count(self):
         """The number of permissions."""
-        return sum(len(c.perms) for c in chain(self.commons(), self.classes()))
+        return sum(len(c.perms) for c in itertools.chain(self.commons(), self.classes()))
 
     @property
     def permissives_count(self):
@@ -549,7 +546,7 @@ cdef class SELinuxPolicy:
 
     def lookup_type_or_attr(self, name):
         """Look up a type or type attribute by name."""
-        for t in chain(self.types(), self.typeattributes()):
+        for t in itertools.chain(self.types(), self.typeattributes()):
             if t == name:
                 return t
 
@@ -640,8 +637,8 @@ cdef class SELinuxPolicy:
 
     def rbacrules(self):
         """Iterator over all RBAC rules."""
-        return chain(RoleAllowIterator.factory(self, self.handle.p.role_allow),
-                     RoleTransitionIterator.factory(self, self.handle.p.role_tr))
+        return itertools.chain(RoleAllowIterator.factory(self, self.handle.p.role_allow),
+                               RoleTransitionIterator.factory(self, self.handle.p.role_tr))
 
     def terules(self):
         """Iterator over all type enforcement rules."""
@@ -682,10 +679,12 @@ cdef class SELinuxPolicy:
 
     def nodecons(self):
         """Iterator over all nodecon statements."""
-        return chain(NodeconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_NODE],
-                                             NodeconIPVersion.ipv4),
-                     NodeconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_NODE6],
-                                             NodeconIPVersion.ipv6))
+        return itertools.chain(NodeconIterator.factory(self,
+                                                       self.handle.p.ocontexts[sepol.OCON_NODE],
+                                                       NodeconIPVersion.ipv4),
+                               NodeconIterator.factory(self,
+                                                       self.handle.p.ocontexts[sepol.OCON_NODE6],
+                                                       NodeconIPVersion.ipv6))
 
     def portcons(self):
         """Iterator over all portcon statements."""

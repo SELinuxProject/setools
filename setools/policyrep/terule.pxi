@@ -17,7 +17,6 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import itertools
 
 
 #
@@ -557,7 +556,7 @@ cdef class TERuleIterator(PolicyIterator):
             sepol.avtab_ptr_t node
             uint32_t bucket = 0
 
-        count = Counter()
+        count = collections.Counter()
 
         while bucket < self.table[0].nslot:
             node = self.table[0].htable[bucket]
@@ -640,7 +639,7 @@ cdef class ConditionalTERuleIterator(PolicyIterator):
         """
         cdef sepol.cond_av_list_t *curr
 
-        count = Counter()
+        count = collections.Counter()
 
         curr = self.head
         while curr != NULL:
