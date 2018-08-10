@@ -63,29 +63,42 @@ cdef class Conditional(PolicySymbol):
 
     """A conditional policy block."""
 
-    cdef sepol.cond_node_t *handle
+    cdef:
+        sepol.cond_node_t *handle
+        list _postfix_expression
+        readonly frozenset booleans
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.cond_node_t *symbol):
+    cdef inline Conditional factory(SELinuxPolicy policy, sepol.cond_node_t *symbol):
         """Factory function for creating Conditional objects."""
+        cdef:
+            Conditional c
+            list booleans
+
         try:
             return _cond_cache[<uintptr_t>symbol]
         except KeyError:
-            c = Conditional()
+            c = Conditional.__new__(Conditional)
+            _cond_cache[<uintptr_t>symbol] = c
             c.policy = policy
             c.handle = symbol
-            _cond_cache[<uintptr_t>symbol] = c
+            c._postfix_expression = []
+            booleans = []
+
+            # Build expression list and boolean attribute
+            for n in ConditionalExprIterator.factory(policy, <sepol.cond_expr_t *>symbol.expr):
+                c._postfix_expression.append(n)
+                if isinstance(n, Boolean):
+                    booleans.append(n)
+
+            c.booleans = frozenset(booleans)
             return c
 
     def __contains__(self, other):
-        for b in self.booleans:
-            if b == other:
-                return True
-
-        return False
+        return other in self.booleans
 
     def __str__(self):
-        # qpol representation is in postfix notation.  This code
+        # sepol representation is in postfix notation.  This code
         # converts it to infix notation.  Parentheses are added
         # to ensure correct expressions, though they may end up
         # being overused.  Set previous operator at start to the
@@ -155,11 +168,6 @@ cdef class Conditional(PolicySymbol):
 
         return ' '.join(ret)
 
-    @property
-    def booleans(self):
-        """The set of Booleans in the expression."""
-        return set(i for i in self.expression() if isinstance(i, Boolean))
-
     def evaluate(self, **kwargs):
         """
         Evaluate the expression with the stated boolean values.
@@ -202,7 +210,7 @@ cdef class Conditional(PolicySymbol):
 
     def expression(self):
         """Iterator over The conditional expression."""
-        return ConditionalExprIterator.factory(self.policy, <sepol.cond_expr_t *>self.handle.expr)
+        return iter(self._postfix_expression)
 
     def false_rules(self):
         """An iterator over the rules in the false (else) block of the conditional."""
