@@ -248,7 +248,11 @@ cdef class ConditionalOperator(PolicySymbol):
 
     """A conditional expression operator"""
 
-    cdef sepol.cond_expr_t *handle
+    cdef:
+        str text
+        readonly int precedence
+        # T/F the operator is unary
+        readonly bint unary
 
     _cond_expr_val_to_text = {
         sepol.COND_NOT: "!",
@@ -267,29 +271,17 @@ cdef class ConditionalOperator(PolicySymbol):
         sepol.COND_NEQ: 4}
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.cond_expr_t *symbol):
+    cdef inline ConditionalOperator factory(SELinuxPolicy policy, sepol.cond_expr_t *symbol):
         """Factory function for conditional operators."""
-        op = ConditionalOperator()
+        cdef ConditionalOperator op = ConditionalOperator.__new__(ConditionalOperator)
         op.policy = policy
-        op.handle = symbol
+        op.unary = symbol.expr_type == sepol.COND_NOT
+        op.precedence = op._cond_expr_val_to_precedence[symbol.expr_type]
+        op.text = op._cond_expr_val_to_text[symbol.expr_type]
         return op
 
     def __str__(self):
-        return self._cond_expr_val_to_text[self.handle.expr_type]
-
-    def _eq(self, ConditionalOperator other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
-    @property
-    def precedence(self):
-        """The precedence of this operator."""
-        return self._cond_expr_val_to_precedence[self.handle.expr_type]
-
-    @property
-    def unary(self):
-        """T/F the operator is unary"""
-        return self.handle.expr_type == sepol.COND_NOT
+        return self.text
 
 
 #
