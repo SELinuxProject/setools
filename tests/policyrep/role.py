@@ -21,7 +21,7 @@ import unittest
 from unittest.mock import Mock
 
 from setools import SELinuxPolicy
-from setools.policyrep.exception import InvalidRole
+from setools.exception import InvalidRole
 
 
 @unittest.skip("Needs to be reworked for cython")

@@ -21,8 +21,8 @@ import re
 
 from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .exception import InvalidType, RuleUseError
 from .policyrep import RBACRuletype
-from .policyrep.exception import InvalidType, RuleUseError
 from .util import match_indirect_regex
 
 

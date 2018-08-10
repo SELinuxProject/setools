@@ -19,7 +19,7 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette, QTextCursor
 
-from setools.policyrep.exception import MLSDisabled
+from setools.exception import MLSDisabled
 
 from .details import DetailsPopup
 from .models import SEToolsTableModel

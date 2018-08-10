@@ -19,7 +19,7 @@
 #
 from collections import defaultdict, namedtuple
 
-from ..policyrep.exception import MLSDisabled
+from ..exception import MLSDisabled
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper

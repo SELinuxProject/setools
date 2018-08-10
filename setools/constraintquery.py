@@ -20,9 +20,9 @@ import logging
 import re
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .exception import ConstraintUseError
 from .mixins import MatchObjClass, MatchPermission
 from .policyrep import ConstraintRuletype
-from .policyrep.exception import ConstraintUseError
 from .query import PolicyQuery
 from .util import match_in_set
 

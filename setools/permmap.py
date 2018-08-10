@@ -318,7 +318,7 @@ class PermissionMap:
 
             perms = class_.perms
 
-            with suppress(policyrep.exception.NoCommon):
+            with suppress(exception.NoCommon):
                 perms |= class_.common.perms
 
             for perm_name in perms:

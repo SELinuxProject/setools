@@ -19,7 +19,7 @@
 #
 from collections import defaultdict, namedtuple
 
-from ..policyrep import MLSRuletype
+from .. import MLSRuletype
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 from .mls import RangeWrapper

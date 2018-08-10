@@ -21,7 +21,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
-from setools.policyrep.exception import InvalidType, SymbolUseError
+from setools.exception import InvalidType, SymbolUseError
 
 
 @unittest.skip("Needs to be reworked for cython")

@@ -19,7 +19,7 @@ import os
 import unittest
 
 from setools import DefaultQuery, DefaultRuletype, DefaultValue
-from setools.policyrep.exception import InvalidClass
+from setools.exception import InvalidClass
 
 from .policyrep.util import compile_policy
 

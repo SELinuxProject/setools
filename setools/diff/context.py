@@ -17,7 +17,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from ..policyrep.exception import MLSDisabled
+from ..exception import MLSDisabled
 
 from .difference import SymbolWrapper, Wrapper
 from .mls import RangeWrapper

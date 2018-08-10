@@ -4,10 +4,7 @@
 /setools.egg-info
 *.pyc
 *.pyo
-libqpol/policy_parse.c
-libqpol/policy_parse.h
-libqpol/policy_scan.c
-/setools/policyrep/libpolicyrep.c
+/setools/libpolicyrep.c
 *.so
 
 # Qt Generated Help files

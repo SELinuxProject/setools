@@ -21,7 +21,7 @@ from itertools import chain
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette, QTextCursor
 
-from setools.policyrep.exception import NoCommon
+from setools.exception import NoCommon
 
 from .details import DetailsPopup
 from .models import SEToolsTableModel

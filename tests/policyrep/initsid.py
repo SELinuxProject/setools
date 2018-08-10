@@ -21,7 +21,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
-from setools.policyrep.exception import InvalidInitialSid
+from setools.exception import InvalidInitialSid
 
 
 @unittest.skip("Needs to be reworked for cython")

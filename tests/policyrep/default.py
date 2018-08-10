@@ -20,8 +20,8 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from setools.policyrep.exception import InvalidDefaultType, InvalidDefaultValue, \
-                                        InvalidDefaultRange, NoDefaults
+from setools.exception import InvalidDefaultType, InvalidDefaultValue, \
+                              InvalidDefaultRange, NoDefaults
 
 
 @unittest.skip("Needs to be reworked for cython")

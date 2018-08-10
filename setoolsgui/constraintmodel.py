@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 from PyQt5.QtCore import Qt
-from setools.policyrep.exception import ConstraintUseError
+from setools.exception import ConstraintUseError
 
 from .models import SEToolsTableModel
 

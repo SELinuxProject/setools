@@ -21,7 +21,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from setools import MLSRuletype as MRT
-from setools.policyrep.exception import InvalidMLSRuleType, RuleNotConditional
+from setools.exception import InvalidMLSRuleType, RuleNotConditional
 
 
 @unittest.skip("Needs to be reworked for cython")

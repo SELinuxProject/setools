@@ -21,7 +21,7 @@ from contextlib import suppress
 
 from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QAbstractTableModel, \
                          QModelIndex, QStringListModel, Qt
-from setools.policyrep.exception import NoCommon
+from setools.exception import NoCommon
 
 
 def invert_list_selection(selection_model):

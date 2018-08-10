@@ -22,7 +22,7 @@ import unittest
 
 from setools import RBACRuleQuery
 from setools import RBACRuletype as RRT
-from setools.policyrep.exception import RuleUseError, RuleNotConditional
+from setools.exception import RuleUseError, RuleNotConditional
 
 from . import mixins
 from .policyrep.util import compile_policy

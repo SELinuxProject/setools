@@ -20,7 +20,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from setools.policyrep.exception import InvalidRBACRuleType, RuleNotConditional, RuleUseError
+from setools.exception import InvalidRBACRuleType, RuleNotConditional, RuleUseError
 
 
 @unittest.skip("Needs to be reworked for cython")

@@ -20,9 +20,9 @@ import unittest
 
 from setools import InfoFlowAnalysis
 from setools import TERuletype as TERT
+from setools.exception import InvalidType
 from setools.permmap import PermissionMap
-from setools.policyrep.exception import InvalidType
-from setools.policyrep.libpolicyrep import Type
+from setools.policyrep import Type
 
 from . import mixins
 from .policyrep.util import compile_policy

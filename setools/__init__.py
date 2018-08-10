@@ -28,7 +28,6 @@ except ImportError:  # pragma: no cover
 import logging
 
 # Python classes for policy representation
-from . import policyrep
 from .policyrep import SELinuxPolicy, BoundsRuletype, ConstraintRuletype, DefaultRuletype, \
                        DefaultRangeValue, DefaultValue, FSUseRuletype, HandleUnknown, MLSRuletype, \
                        NodeconIPVersion, PolicyTarget, PortconProtocol, RBACRuletype, TERuletype

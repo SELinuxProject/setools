@@ -21,8 +21,8 @@ import re
 
 from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .exception import RuleUseError, RuleNotConditional
 from .policyrep import IoctlSet, TERuletype
-from .policyrep.exception import RuleUseError, RuleNotConditional
 from .util import match_regex, match_indirect_regex, match_regex_or_set
 
 

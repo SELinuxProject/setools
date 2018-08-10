@@ -21,8 +21,8 @@ import unittest
 from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
-from setools.policyrep.exception import InvalidTERuleType, RuleNotConditional, RuleUseError, \
-                                        TERuleNoFilename
+from setools.exception import InvalidTERuleType, RuleNotConditional, RuleUseError, \
+                              TERuleNoFilename
 
 
 @unittest.skip("Needs to be reworked for cython")

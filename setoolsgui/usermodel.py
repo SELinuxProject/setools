@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 from PyQt5.QtCore import Qt, QModelIndex
-from setools.policyrep.exception import MLSDisabled
+from setools.exception import MLSDisabled
 
 from .details import DetailsPopup
 from .models import SEToolsTableModel

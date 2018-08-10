@@ -19,8 +19,8 @@
 #
 from collections import defaultdict, namedtuple
 
+from ..exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 from ..policyrep import IoctlSet, TERuletype
-from ..policyrep.exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 
 from .conditional import conditional_wrapper_factory
 from .descriptors import DiffResultDescriptor

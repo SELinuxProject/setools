@@ -21,8 +21,8 @@ import unittest
 from unittest.mock import Mock
 
 from setools import SELinuxPolicy
-from setools.policyrep.exception import MLSDisabled, InvalidLevel, InvalidLevelDecl, InvalidRange, \
-                                        InvalidSensitivity, InvalidCategory, NoStatement
+from setools.exception import MLSDisabled, InvalidLevel, InvalidLevelDecl, InvalidRange, \
+                              InvalidSensitivity, InvalidCategory, NoStatement
 
 
 @unittest.skip("Needs to be reworked for cython")

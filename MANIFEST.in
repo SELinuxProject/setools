@@ -5,7 +5,7 @@ include qhc/*
 include setools/perm_map
 include setools/policyrep/*.pxd
 include setools/policyrep/*.pxi
-include setools/policyrep/*.pyx
+include setools/*.pyx
 include setoolsui/*.ui
 include setoolsui/apol/*.ui
 include setoolsui/apol/apol.qhc

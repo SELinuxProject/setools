@@ -19,7 +19,7 @@
 # pylint: disable=too-few-public-methods
 import unittest
 
-from setools.policyrep.exception import RuleNotConditional, RuleUseError
+from setools.exception import RuleNotConditional, RuleUseError
 
 
 class ValidateRule(unittest.TestCase):

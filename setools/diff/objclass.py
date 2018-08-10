@@ -20,7 +20,7 @@
 from collections import defaultdict, namedtuple
 from contextlib import suppress
 
-from ..policyrep.exception import NoCommon
+from ..exception import NoCommon
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper

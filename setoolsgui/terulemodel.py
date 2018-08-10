@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 from PyQt5.QtCore import Qt
-from setools.policyrep.exception import RuleNotConditional, RuleUseError
+from setools.exception import RuleNotConditional, RuleUseError
 
 from .models import SEToolsTableModel
 

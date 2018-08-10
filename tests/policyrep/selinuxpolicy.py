@@ -22,7 +22,7 @@ import sys
 import unittest
 
 from setools import SELinuxPolicy, HandleUnknown
-from setools.policyrep.exception import InvalidPolicy
+from setools.exception import InvalidPolicy
 
 from .util import compile_policy
 

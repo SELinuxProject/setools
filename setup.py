@@ -100,7 +100,7 @@ if enable_coverage:
 
 cython_annotate = bool(os.environ.get("SETOOLS_ANNOTATE", False))
 
-ext_py_mods = [Extension('setools.policyrep.libpolicyrep', ['setools/policyrep/libpolicyrep.pyx'],
+ext_py_mods = [Extension('setools.policyrep', ['setools/policyrep.pyx'],
                          include_dirs=include_dirs,
                          libraries=['selinux', 'sepol'],
                          library_dirs=lib_dirs,
@@ -134,7 +134,7 @@ setup(name='setools',
       author_email='pebenito@ieee.org',
       url='https://github.com/SELinuxProject/setools',
       cmdclass={'build_qhc': QtHelpCommand, 'clean': CleanCommand},
-      packages=['setools', 'setools.diff', 'setools.policyrep', 'setoolsgui', 'setoolsgui.apol'],
+      packages=['setools', 'setools.diff', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
       data_files=[(join(sys.prefix, 'share/man/man1'), glob.glob("man/*.1"))],
       package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map']},
