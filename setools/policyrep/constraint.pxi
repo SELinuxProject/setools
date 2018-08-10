@@ -202,7 +202,7 @@ cdef class Constraint(BaseConstraint):
             elif expr_node.users:
                 users.extend(expr_node.names)
 
-            c._postfix_expression.extend(expr_node())
+            c._postfix_expression.extend(expr_node)
 
         c.users = frozenset(users)
         c.roles = frozenset(roles)
@@ -256,7 +256,7 @@ cdef class Validatetrans(BaseConstraint):
             elif expr_node.users:
                 users.extend(expr_node.names)
 
-            v._postfix_expression.extend(expr_node())
+            v._postfix_expression.extend(expr_node)
 
         v.users = frozenset(users)
         v.roles = frozenset(roles)
@@ -275,7 +275,14 @@ cdef class Validatetrans(BaseConstraint):
 
 cdef class ConstraintExprNode(PolicySymbol):
 
-    """A node of a constraint expression."""
+    """
+    A node of a constraint expression.
+
+    This is an immutable list-like object that contains one node
+    of a constraint in postfix notation, e.g.:
+
+    ["u1", "u2", "=="]
+    """
 
     cdef:
         sepol.constraint_expr_t *handle
@@ -378,33 +385,42 @@ cdef class ConstraintExprNode(PolicySymbol):
         except AttributeError:
             pass
 
-        return n
-
-    def __call__(self):
-        expression = []
-
-        if self.expression_type == sepol.CEXPR_ATTR:
+        #
+        # Build expression
+        #
+        if n.expression_type == sepol.CEXPR_ATTR:
             # logical operator with symbols (e.g. u1 == u2)
-            operand1 = self._sym_to_text[self.symbol_type]
-            operand2 = self._sym_to_text[self.symbol_type + sepol.CEXPR_TARGET]
-            operator = self._expr_op_to_text[self.operator]
+            operand1 = n._sym_to_text[n.symbol_type]
+            operand2 = n._sym_to_text[n.symbol_type + sepol.CEXPR_TARGET]
+            operator = n._expr_op_to_text[n.operator]
 
-            expression.extend([operand1, operand2, operator])
+            n._expression = [operand1, operand2, operator]
 
-        elif self.expression_type == sepol.CEXPR_NAMES:
+        elif n.expression_type == sepol.CEXPR_NAMES:
             # logical operator with type or attribute list (e.g. t1 == { spam_t eggs_t })
-            operand1 = self._sym_to_text[self.symbol_type]
-            operator = self._expr_op_to_text[self.operator]
-            operand2 = self.names
+            operand1 = n._sym_to_text[n.symbol_type]
+            operand2 = n.names
+            operator = n._expr_op_to_text[n.operator]
 
-            expression.extend([operand1, operand2, operator])
+            n._expression = [operand1, operand2, operator]
 
         else:
             # individual operators (and/or/not)
-            expression.append(self._expr_type_to_text[self.expression_type])
+            n._expression = [n._expr_type_to_text[n.expression_type]]
 
-        return expression
+        return n
 
+    def __iter__(self):
+        return iter(self._expression)
+
+    def __contains__(self, item):
+        return item in self._expression
+
+    def __len__(self):
+        return len(self._expression)
+
+    def __getitem__(self, idx):
+        return self._expression[idx]
 
     @property
     def names(self):
