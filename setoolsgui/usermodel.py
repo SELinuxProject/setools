@@ -37,19 +37,19 @@ def user_detail(parent, user):
     roles = sorted(user.roles)
     detail.append_header("Roles ({0}):".format(len(roles)))
 
-    for r in roles:
-        detail.append("    {0}".format(r))
+    for role in roles:
+        detail.append("    {0}".format(role))
 
     try:
-        l = user.mls_level
-        r = user.mls_range
+        level = user.mls_level
+        range_ = user.mls_range
     except MLSDisabled:
         pass
     else:
         detail.append_header("\nDefault MLS Level:")
-        detail.append("    {0}".format(l))
+        detail.append("    {0}".format(level))
         detail.append_header("\nMLS Range:")
-        detail.append("    {0}".format(r))
+        detail.append("    {0}".format(range_))
 
     detail.show()
 

@@ -87,5 +87,5 @@ class PortconWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.protocol == other.protocol and \
-               self.low == other.low and \
-               self.high == other.high
+            self.low == other.low and \
+            self.high == other.high

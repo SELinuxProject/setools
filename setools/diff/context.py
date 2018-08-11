@@ -45,6 +45,6 @@ class ContextWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.user == other.user and \
-               self.role == other.role and \
-               self.type_ == other.type_ and \
-               self.range_ == other.range_
+            self.role == other.role and \
+            self.type_ == other.type_ and \
+            self.range_ == other.range_

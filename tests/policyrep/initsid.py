@@ -16,7 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Until this is fixed for cython:
-# pylint: disable=undefined-variable
+# pylint: disable=undefined-variable,no-member
 import unittest
 from unittest.mock import Mock, patch
 
@@ -32,7 +32,7 @@ class InitialSIDTest(unittest.TestCase):
     def mock_sid(name):
         sid = Mock(qpol.qpol_isid_t)
         sid.name.return_value = name
-        sid.context.return_value = name+"_context"
+        sid.context.return_value = name + "_context"
         return sid
 
     @classmethod

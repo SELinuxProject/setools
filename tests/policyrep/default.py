@@ -21,7 +21,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from setools.exception import InvalidDefaultType, InvalidDefaultValue, \
-                              InvalidDefaultRange, NoDefaults
+    InvalidDefaultRange, NoDefaults
 
 
 @unittest.skip("Needs to be reworked for cython")

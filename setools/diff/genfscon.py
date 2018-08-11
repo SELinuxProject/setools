@@ -90,5 +90,5 @@ class GenfsconWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.fs == other.fs and \
-               self.path == other.path and \
-               self.filetype == other.filetype
+            self.path == other.path and \
+            self.filetype == other.filetype

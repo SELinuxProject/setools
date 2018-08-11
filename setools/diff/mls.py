@@ -237,7 +237,7 @@ class LevelWrapper(Wrapper):
     def __eq__(self, other):
         try:
             return self.sensitivity == other.sensitivity and \
-                   self.categories == other.categories
+                self.categories == other.categories
         except AttributeError:
             # comparing an MLS policy to non-MLS policy will result in
             # other being None
@@ -264,7 +264,7 @@ class RangeWrapper(Wrapper):
     def __eq__(self, other):
         try:
             return self.low == other.low and \
-                   self.high == other.high
+                self.high == other.high
         except AttributeError:
             # comparing an MLS policy to non-MLS policy will result in
             # other being None

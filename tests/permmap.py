@@ -21,7 +21,7 @@ from unittest.mock import Mock
 
 from setools import PermissionMap, TERuletype
 from setools.exception import PermissionMapParseError, RuleTypeError, \
-                              UnmappedClass, UnmappedPermission
+    UnmappedClass, UnmappedPermission
 
 from .policyrep.util import compile_policy
 

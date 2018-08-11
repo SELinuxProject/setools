@@ -16,13 +16,13 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Until this is fixed for cython:
-# pylint: disable=undefined-variable
+# pylint: disable=undefined-variable,no-member
 import unittest
 from unittest.mock import Mock
 
 from setools import SELinuxPolicy
 from setools.exception import MLSDisabled, InvalidLevel, InvalidLevelDecl, InvalidRange, \
-                              InvalidSensitivity, InvalidCategory, NoStatement
+    InvalidSensitivity, InvalidCategory, NoStatement
 
 
 @unittest.skip("Needs to be reworked for cython")

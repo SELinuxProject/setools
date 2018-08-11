@@ -116,7 +116,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                 if high < low:
                     high, low = low, high
 
-                pending_xperms.update(i for i in range(low, high+1))
+                pending_xperms.update(i for i in range(low, high + 1))
 
             self._xperms = pending_xperms
         else:

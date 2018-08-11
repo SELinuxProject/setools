@@ -22,7 +22,7 @@ from unittest.mock import Mock, patch
 
 from setools import SELinuxPolicy
 from setools.exception import InvalidTERuleType, RuleNotConditional, RuleUseError, \
-                              TERuleNoFilename
+    TERuleNoFilename
 
 
 @unittest.skip("Needs to be reworked for cython")

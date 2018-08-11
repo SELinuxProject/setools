@@ -20,7 +20,7 @@ import logging
 from contextlib import suppress
 
 from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QAbstractTableModel, \
-                         QModelIndex, QStringListModel, Qt
+    QModelIndex, QStringListModel, Qt
 from setools.exception import NoCommon
 
 

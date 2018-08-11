@@ -88,4 +88,4 @@ class NodeconWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.ip_version == other.ip_version and \
-               self.network == other.network
+            self.network == other.network

@@ -16,7 +16,7 @@
 # along with SETools.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Until this is fixed for cython:
-# pylint: disable=undefined-variable
+# pylint: disable=undefined-variable,no-member
 import unittest
 from unittest.mock import Mock
 
@@ -94,7 +94,7 @@ class ObjClassTest(unittest.TestCase):
 
         if com_perms:
             com = Mock(qpol.qpol_common_t)
-            com.name.return_value = name+"_common"
+            com.name.return_value = name + "_common"
             com.perm_iter = lambda x: iter(com_perms)
             cls.common.return_value = com
         else:

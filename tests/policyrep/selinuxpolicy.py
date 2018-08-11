@@ -47,12 +47,10 @@ class SELinuxPolicyTest(unittest.TestCase):
         """SELinuxPolicy: Non existant policy on open."""
         self.assertRaises(OSError, SELinuxPolicy, "tests/policyrep/DOES_NOT_EXIST")
 
-    @unittest.skip("Needs to be reworked for cython.")
     def test_003_deepcopy(self):
         """SELinuxPolicy: Deep copy"""
         p = copy.deepcopy(self.p)
-        self.assertIs(self.p.policy, p.policy)
-        self.assertIs(self.p.filename, p.filename)
+        self.assertIs(self.p, p)
 
     def test_010_handle_unknown(self):
         """SELinuxPolicy: handle unknown setting."""
@@ -231,7 +229,8 @@ class SELinuxPolicyLoadError(unittest.TestCase):
     """Test attempted loading of non-compiling policies."""
 
     def _load_policy(self, policy):
-        self.assertRaises(InvalidPolicy, SELinuxPolicy, "tests/policyrep/invalid_policies/"+policy)
+        self.assertRaises(InvalidPolicy, SELinuxPolicy,
+                          "tests/policyrep/invalid_policies/" + policy)
 
     def test_nodecon_invalid_range(self):
         """SELinuxPolicy: invalid nodecon range (category not associated) error."""

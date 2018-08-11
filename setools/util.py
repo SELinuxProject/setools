@@ -126,18 +126,18 @@ def match_range(obj, criteria, subset, overlap, superset, proper):
 
     if overlap:
         return ((obj.low <= criteria.low <= obj.high) or (
-                 obj.low <= criteria.high <= obj.high) or (
-                 criteria.low <= obj.low and obj.high <= criteria.high))
+            obj.low <= criteria.high <= obj.high) or (
+            criteria.low <= obj.low and obj.high <= criteria.high))
     elif subset:
         if proper:
             return ((obj.low < criteria.low and criteria.high <= obj.high) or (
-                     obj.low <= criteria.low and criteria.high < obj.high))
+                obj.low <= criteria.low and criteria.high < obj.high))
         else:
             return obj.low <= criteria.low and criteria.high <= obj.high
     elif superset:
         if proper:
             return ((criteria.low < obj.low and obj.high <= criteria.high) or (
-                     criteria.low <= obj.low and obj.high < criteria.high))
+                criteria.low <= obj.low and obj.high < criteria.high))
         else:
             return (criteria.low <= obj.low and obj.high <= criteria.high)
     else:

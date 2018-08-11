@@ -66,6 +66,7 @@ def print_transition(trans):
 
     print()
 
+
 parser = argparse.ArgumentParser(
     description="SELinux policy domain transition analysis tool.",
     epilog="If no analysis is selected, all forward transitions out of the source will be printed.")

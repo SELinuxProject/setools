@@ -81,8 +81,8 @@ def av_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-                _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleWrapper),
-                _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper))
+            _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleWrapper),
+            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper))
 
         modified = []
         for left_rule, right_rule in matched:
@@ -128,8 +128,8 @@ def avx_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-                _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
-                _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper))
+            _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
+            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper))
 
         modified = []
         for left_rule, right_rule in matched:
@@ -175,8 +175,8 @@ def te_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-                self._expand_generator(self._left_te_rules[ruletype], TERuleWrapper),
-                self._expand_generator(self._right_te_rules[ruletype], TERuleWrapper))
+            self._expand_generator(self._left_te_rules[ruletype], TERuleWrapper),
+            self._expand_generator(self._right_te_rules[ruletype], TERuleWrapper))
 
         modified = []
         for left_rule, right_rule in matched:
@@ -349,10 +349,10 @@ class AVRuleWrapper(Wrapper):
         # because TERuleDifference groups rules by ruletype,
         # the ruletype always matches.
         return self.source == other.source and \
-               self.target == other.target and \
-               self.tclass == other.tclass and \
-               self.conditional == other.conditional and \
-               self.conditional_block == other.conditional_block
+            self.target == other.target and \
+            self.tclass == other.tclass and \
+            self.conditional == other.conditional and \
+            self.conditional_block == other.conditional_block
 
 
 class AVRuleXpermWrapper(Wrapper):
@@ -379,9 +379,9 @@ class AVRuleXpermWrapper(Wrapper):
         # because TERuleDifference groups rules by ruletype,
         # the ruletype always matches.
         return self.source == other.source and \
-               self.target == other.target and \
-               self.tclass == other.tclass and \
-               self.xperm_type == other.xperm_type
+            self.target == other.target and \
+            self.tclass == other.tclass and \
+            self.xperm_type == other.xperm_type
 
 
 class TERuleWrapper(Wrapper):
@@ -419,8 +419,8 @@ class TERuleWrapper(Wrapper):
         # because TERuleDifference groups rules by ruletype,
         # the ruletype always matches.
         return self.source == other.source and \
-               self.target == other.target and \
-               self.tclass == other.tclass and \
-               self.conditional == other.conditional and \
-               self.conditional_block == other.conditional_block and \
-               self.filename == self.filename
+            self.target == other.target and \
+            self.tclass == other.tclass and \
+            self.conditional == other.conditional and \
+            self.conditional_block == other.conditional_block and \
+            self.filename == self.filename

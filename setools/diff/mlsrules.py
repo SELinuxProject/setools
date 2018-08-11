@@ -55,10 +55,10 @@ class MLSRulesDifference(Difference):
             self._create_mls_rule_lists()
 
         added, removed, matched = self._set_diff(
-                self._expand_generator(self._left_mls_rules[MLSRuletype.range_transition],
-                                       MLSRuleWrapper),
-                self._expand_generator(self._right_mls_rules[MLSRuletype.range_transition],
-                                       MLSRuleWrapper))
+            self._expand_generator(self._left_mls_rules[MLSRuletype.range_transition],
+                                   MLSRuleWrapper),
+            self._expand_generator(self._right_mls_rules[MLSRuletype.range_transition],
+                                   MLSRuleWrapper))
 
         modified = []
 
@@ -126,5 +126,5 @@ class MLSRuleWrapper(Wrapper):
         # because MLSRuleDifference groups rules by ruletype,
         # the ruletype always matches.
         return self.source == other.source and \
-               self.target == other.target and \
-               self.tclass == other.tclass
+            self.target == other.target and \
+            self.tclass == other.tclass

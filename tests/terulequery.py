@@ -313,7 +313,7 @@ class TERuleQueryXperm(mixins.ValidateRule, unittest.TestCase):
         r = sorted(q.results())
         self.assertEqual(len(r), 1)
         self.validate_rule(r[0], TRT.allowxperm, "test1a", "test1t", "infoflow",
-                           set(range(0xebe0, 0xebff+1)), xperm="ioctl")
+                           set(range(0xebe0, 0xebff + 1)), xperm="ioctl")
 
     def test_002_source_indirect(self):
         """Xperm rule query with exact, indirect, source match."""

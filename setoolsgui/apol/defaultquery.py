@@ -31,7 +31,7 @@ from ..defaultmodel import DefaultTableModel
 from .analysistab import AnalysisTab
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_comboboxes, load_listviews, load_textedits, \
-                       save_checkboxes, save_comboboxes, save_listviews, save_textedits
+    save_checkboxes, save_comboboxes, save_listviews, save_textedits
 
 
 class DefaultQueryTab(AnalysisTab):

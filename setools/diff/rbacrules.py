@@ -170,5 +170,5 @@ class RoleTransitionWrapper(Wrapper):
         # because RBACRuleDifference groups rules by ruletype,
         # the ruletype always matches.
         return self.source == other.source and \
-               self.target == other.target and \
-               self.tclass == other.tclass
+            self.target == other.target and \
+            self.tclass == other.tclass

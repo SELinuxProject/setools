@@ -30,7 +30,7 @@ from .analysistab import AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
-                       save_checkboxes, save_lineedits, save_textedits
+    save_checkboxes, save_lineedits, save_textedits
 
 
 class FSUseQueryTab(AnalysisTab):

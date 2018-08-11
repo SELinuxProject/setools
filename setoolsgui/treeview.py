@@ -19,7 +19,7 @@
 from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtGui import QKeySequence, QCursor
 from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QMenu, QTreeWidget, \
-                            QTreeWidgetItemIterator
+    QTreeWidgetItemIterator
 
 
 class SEToolsTreeWidget(QTreeWidget):
@@ -56,10 +56,10 @@ class SEToolsTreeWidget(QTreeWidget):
                 parent = parent.parent()
 
             if depth < prev_depth:
-                items.extend(["  |"*depth, "\n"])
+                items.extend(["  |" * depth, "\n"])
 
             if depth:
-                items.extend(["  |"*depth, "--", item.text(0), "\n"])
+                items.extend(["  |" * depth, "--", item.text(0), "\n"])
             else:
                 items.extend([item.text(0), "\n"])
 

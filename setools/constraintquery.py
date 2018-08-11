@@ -125,24 +125,24 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
                     continue
 
             if self.role and not self._match_expr(
-                        c.roles,
-                        self.role,
-                        self.role_indirect,
-                        self.role_regex):
-                    continue
+                    c.roles,
+                    self.role,
+                    self.role_indirect,
+                    self.role_regex):
+                continue
 
             if self.type_ and not self._match_expr(
-                        c.types,
-                        self.type_,
-                        self.type_indirect,
-                        self.type_regex):
-                    continue
+                    c.types,
+                    self.type_,
+                    self.type_indirect,
+                    self.type_regex):
+                continue
 
             if self.user and not self._match_expr(
-                        c.users,
-                        self.user,
-                        False,
-                        self.user_regex):
-                    continue
+                    c.users,
+                    self.user,
+                    False,
+                    self.user_regex):
+                continue
 
             yield c

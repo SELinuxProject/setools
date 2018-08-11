@@ -221,6 +221,6 @@ class ConstraintWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.ruletype == other.ruletype and \
-               self.tclass == other.tclass and \
-               self.perms == other.perms and \
-               self.expr == other.expr
+            self.tclass == other.tclass and \
+            self.perms == other.perms and \
+            self.expr == other.expr

@@ -112,4 +112,4 @@ class DefaultWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.ruletype == other.ruletype and \
-               self.tclass == other.tclass
+            self.tclass == other.tclass

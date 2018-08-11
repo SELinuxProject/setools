@@ -114,4 +114,4 @@ class BoundsWrapper(Wrapper):
 
     def __eq__(self, other):
         return self.ruletype == other.ruletype and \
-               self.child == other.child
+            self.child == other.child

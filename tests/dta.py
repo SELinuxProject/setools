@@ -512,7 +512,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
                 self.assertIsInstance(step.source, Type)
                 self.assertIsInstance(step.target, Type)
                 self.assertEqual(expected_path[stepnum], step.source)
-                self.assertEqual(expected_path[stepnum+1], step.target)
+                self.assertEqual(expected_path[stepnum + 1], step.target)
 
                 for r in step.transition:
                     self.assertIn("transition", r.perms)
@@ -553,7 +553,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
                 self.assertIsInstance(step.source, Type)
                 self.assertIsInstance(step.target, Type)
                 self.assertEqual(expected_path[stepnum], step.source)
-                self.assertEqual(expected_path[stepnum+1], step.target)
+                self.assertEqual(expected_path[stepnum + 1], step.target)
 
                 for r in step.transition:
                     self.assertIn("transition", r.perms)
@@ -594,7 +594,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
                 self.assertIsInstance(step.source, Type)
                 self.assertIsInstance(step.target, Type)
                 self.assertEqual(expected_path[stepnum], step.source)
-                self.assertEqual(expected_path[stepnum+1], step.target)
+                self.assertEqual(expected_path[stepnum + 1], step.target)
 
                 for r in step.transition:
                     self.assertIn("transition", r.perms)
@@ -671,7 +671,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
             for stepnum, step in enumerate(path):
                 self.assertIsInstance(step.source, Type)
                 self.assertIsInstance(step.target, Type)
-                self.assertEqual(step.source, expected_path[stepnum+1])
+                self.assertEqual(step.source, expected_path[stepnum + 1])
                 self.assertEqual(step.target, expected_path[stepnum])
 
                 for r in step.transition:
@@ -712,7 +712,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
             for stepnum, step in enumerate(path):
                 self.assertIsInstance(step.source, Type)
                 self.assertIsInstance(step.target, Type)
-                self.assertEqual(step.source, expected_path[stepnum+1])
+                self.assertEqual(step.source, expected_path[stepnum + 1])
                 self.assertEqual(step.target, expected_path[stepnum])
 
                 for r in step.transition:
@@ -753,7 +753,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
             for stepnum, step in enumerate(path):
                 self.assertIsInstance(step.source, Type)
                 self.assertIsInstance(step.target, Type)
-                self.assertEqual(expected_path[stepnum+1], step.source)
+                self.assertEqual(expected_path[stepnum + 1], step.source)
                 self.assertEqual(expected_path[stepnum], step.target)
 
                 for r in step.transition:

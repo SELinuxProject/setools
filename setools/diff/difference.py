@@ -114,17 +114,18 @@ class Difference:
             "Matched items assertion failure (this is an SETools bug), {0} != {1}". \
             format(len(left_matched_items), len(right_matched_items))
 
-        for l, r in zip(left_matched_items, right_matched_items):
-            assert l == r, \
-                "Matched items assertion failure (this is an SETools bug), {0} != {1}".format(l, r)
+        for left, right in zip(left_matched_items, right_matched_items):
+            assert left == right, \
+                "Matched items assertion failure (this is an SETools bug), {0} != {1}".format(
+                    left, right)
 
-            matched_items.add((l, r))
+            matched_items.add((left, right))
 
         try:
             # unwrap the objects
             return set(i.origin for i in added_items), \
-                   set(i.origin for i in removed_items), \
-                   set((l.origin, r.origin) for (l, r) in matched_items)
+                set(i.origin for i in removed_items), \
+                set((left.origin, right.origin) for (left, right) in matched_items)
         except AttributeError:
             return added_items, removed_items, matched_items
 

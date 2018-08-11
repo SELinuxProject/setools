@@ -29,20 +29,20 @@ def expand_attr(attr):
     contents = items if items else "<empty attribute>"
     return "{0}\n\t{1}".format(attr.statement(), contents)
 
-parser = argparse.ArgumentParser(
-    description="SELinux policy information tool.")
+
+parser = argparse.ArgumentParser(description="SELinux policy information tool.")
 parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("policy", help="Path to the SELinux policy to query.", nargs="?")
 parser.add_argument("-x", "--expand", action="store_true",
                     help="Print additional information about the specified components.")
-parser.add_argument("--flat",  help="Print without item count nor indentation.",
+parser.add_argument("--flat", help="Print without item count nor indentation.",
                     dest="flat", default=False, action="store_true")
 parser.add_argument("-v", "--verbose", action="store_true",
                     help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
 
 queries = parser.add_argument_group("Component Queries")
-queries.add_argument("-a", "--attribute",  help="Print type attributes.", dest="typeattrquery",
+queries.add_argument("-a", "--attribute", help="Print type attributes.", dest="typeattrquery",
                      nargs='?', const=True, metavar="ATTR")
 queries.add_argument("-b", "--bool", help="Print Booleans.", dest="boolquery",
                      nargs='?', const=True, metavar="BOOL")

@@ -157,6 +157,8 @@ class InvalidUser(InvalidSymbol):
 #
 # Rule type exceptions
 #
+
+
 class InvalidRuleType(InvalidSymbol):
 
     """Exception for invalid rule types."""

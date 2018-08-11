@@ -22,7 +22,7 @@ import logging
 from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, \
-                            QTreeWidgetItem
+    QTreeWidgetItem
 from setools import DomainTransitionAnalysis
 
 from ..logtosignal import LogHandlerToSignal
@@ -30,7 +30,7 @@ from .analysistab import AnalysisTab
 from .excludetypes import ExcludeTypes
 from .exception import TabFieldError
 from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_textedits, \
-                       save_checkboxes, save_spinboxes, save_lineedits, save_textedits
+    save_checkboxes, save_spinboxes, save_lineedits, save_textedits
 
 
 class DomainTransitionAnalysisTab(AnalysisTab):
