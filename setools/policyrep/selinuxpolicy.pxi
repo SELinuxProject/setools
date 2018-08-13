@@ -53,7 +53,7 @@ cdef class SELinuxPolicy:
         Parameter:
         policyfile  Path to a policy to open.
         """
-
+        self.sh = NULL
         self.handle = NULL
         self.cat_val_to_struct = NULL
         self.level_val_to_struct = NULL
@@ -72,10 +72,10 @@ cdef class SELinuxPolicy:
         PyMem_Free(self.cat_val_to_struct)
         PyMem_Free(self.level_val_to_struct)
 
-        if self.handle:
+        if self.handle != NULL:
             sepol.sepol_policydb_free(self.handle)
 
-        if self.sh:
+        if self.sh != NULL:
             sepol.sepol_handle_destroy(self.sh)
 
     def __repr__(self):
