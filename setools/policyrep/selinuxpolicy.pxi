@@ -101,25 +101,25 @@ cdef class SELinuxPolicy:
     @property
     def allow_count(self):
         """The number of (type) allow rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.allow.value]
 
     @property
     def allowxperm_count(self):
         """The number of allowxperm rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.allowxperm.value]
 
     @property
     def auditallow_count(self):
         """The number of auditallow rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.auditallow.value]
 
     @property
     def auditallowxperm_count(self):
         """The number of auditallowxperm rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.auditallowxperm.value]
 
     @property
@@ -150,7 +150,7 @@ cdef class SELinuxPolicy:
     @property
     def constraint_count(self):
         """The number of standard constraints."""
-        self.cache_constraint_counts()
+        self._cache_constraint_counts()
         return self.constraint_counts[ConstraintRuletype.constrain]
 
     @property
@@ -166,13 +166,13 @@ cdef class SELinuxPolicy:
     @property
     def dontaudit_count(self):
         """The number of dontaudit rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.dontaudit.value]
 
     @property
     def dontauditxperm_count(self):
         """The number of dontauditxperm rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.dontauditxperm.value]
 
     @property
@@ -208,13 +208,13 @@ cdef class SELinuxPolicy:
     @property
     def mlsconstraint_count(self):
         """The number of MLS constraints."""
-        self.cache_constraint_counts()
+        self._cache_constraint_counts()
         return self.constraint_counts[ConstraintRuletype.mlsconstrain]
 
     @property
     def mlsvalidatetrans_count(self):
         """The number of MLS validatetrans."""
-        self.cache_constraint_counts()
+        self._cache_constraint_counts()
         return self.constraint_counts[ConstraintRuletype.mlsvalidatetrans]
 
     @property
@@ -225,13 +225,13 @@ cdef class SELinuxPolicy:
     @property
     def neverallow_count(self):
         """The number of neverallow rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.neverallow.value]
 
     @property
     def neverallowxperm_count(self):
         """The number of neverallowxperm rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.neverallowxperm.value]
 
     @property
@@ -297,7 +297,7 @@ cdef class SELinuxPolicy:
     @property
     def type_change_count(self):
         """The number of type_change rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.type_change.value]
 
     @property
@@ -308,13 +308,13 @@ cdef class SELinuxPolicy:
     @property
     def type_member_count(self):
         """The number of type_member rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.type_member.value]
 
     @property
     def type_transition_count(self):
         """The number of type_transition rules."""
-        self.cache_terule_counts()
+        self._cache_terule_counts()
         return self.terule_counts[TERuletype.type_transition.value]
 
     @property
@@ -329,7 +329,7 @@ cdef class SELinuxPolicy:
     @property
     def validatetrans_count(self):
         """The number of validatetrans."""
-        self.cache_constraint_counts()
+        self._cache_constraint_counts()
         return self.constraint_counts[ConstraintRuletype.validatetrans]
 
     #
@@ -973,12 +973,12 @@ cdef class SELinuxPolicy:
             tmp_name = NULL
             tmp_type = NULL
 
-    cdef cache_constraint_counts(self):
+    cdef _cache_constraint_counts(self):
         """Count all constraints in one iteration."""
         if not self.constraint_counts:
             self.constraint_counts = collections.Counter(r.ruletype for r in self.constraints())
 
-    cdef cache_terule_counts(self):
+    cdef _cache_terule_counts(self):
         """Count all TE rules in one iteration."""
         if not self.terule_counts:
             self.terule_counts = TERuleIterator.factory(self, &self.handle.p.te_avtab).ruletype_count()
