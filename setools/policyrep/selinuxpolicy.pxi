@@ -43,10 +43,16 @@ cdef class SELinuxPolicy:
         sepol.sepol_handle *sh
         sepol.cat_datum_t **cat_val_to_struct
         sepol.level_datum_t **level_val_to_struct
-        readonly str path
         object log
         object constraint_counts
         object terule_counts
+
+        # Public attributes:
+        readonly str path
+        readonly object handle_unknown
+        readonly object target_platform
+        readonly unsigned int version
+        readonly bint mls
 
     def __cinit__(self, policyfile=None):
         """
@@ -62,11 +68,7 @@ cdef class SELinuxPolicy:
         if policyfile:
             self._load_policy(policyfile)
         else:
-            try:
-                self._load_running_policy()
-            except NameError:
-                raise RuntimeError("Loading the running policy requires libselinux Python bindings")
-
+            self._load_running_policy()
 
     def __dealloc__(self):
         PyMem_Free(self.cat_val_to_struct)
@@ -134,6 +136,14 @@ cdef class SELinuxPolicy:
         sepol.sepol_policy_file_free(pfile)
 
         #
+        # Load policy properties
+        #
+        self.handle_unknown = HandleUnknown(self.handle.p.handle_unknown)
+        self.target_platform = PolicyTarget(self.handle.p.target_platform)
+        self.version = self.handle.p.policyvers
+        self.mls = <bint>self.handle.p.mls
+
+        #
         # (Re)create data structures
         #
         if self.handle.p.attr_type_map != NULL:
@@ -189,30 +199,6 @@ cdef class SELinuxPolicy:
                 break
         else:
             raise RuntimeError("Unable to locate an SELinux policy to load.")
-
-    #
-    # Policy properties
-    #
-    @property
-    def handle_unknown(self):
-        """The handle unknown permissions setting (allow,deny,reject)"""
-        return HandleUnknown(self.handle.p.handle_unknown)
-
-    @property
-    def mls(self):
-        """(T/F) The policy has MLS enabled."""
-        return <bint>self.handle.p.mls
-
-    @property
-    def target_platform(self):
-        """The policy platform (selinux or xen)"""
-        return PolicyTarget(self.handle.p.target_platform)
-
-    @property
-    def version(self):
-        """The policy database version (e.g. 29)"""
-        return self.handle.p.policyvers
-
 
     #
     # Policy statistics
