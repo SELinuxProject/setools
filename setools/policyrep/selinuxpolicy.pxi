@@ -161,14 +161,16 @@ cdef class SELinuxPolicy:
         self.log.info("Successfully opened SELinux policy \"{0}\"".format(filename))
         self.path = filename
 
-    def _potential_policies(self):
-        """Generate a list of potential policies to use."""
+    cdef _load_running_policy(self):
+        """Try to load the current running policy."""
         cdef:
             int min_ver = sepol.sepol_policy_kern_vers_min()
             int max_ver = sepol.sepol_policy_kern_vers_max()
             const char *base_policy_path = selinux.selinux_binary_policy_path()
             const char *current_policy_path = selinux.selinux_current_policy_path()
+            list potential_policies = []
 
+        self.log.info("Attempting to locate current running policy.")
         self.log.debug("SELinuxfs exists: {}".format(selinux.selinuxfs_exists()))
         self.log.debug("Sepol version range: {}-{}".format(min_ver, max_ver))
         self.log.debug("Current policy path: {}".format(current_policy_path
@@ -176,20 +178,17 @@ cdef class SELinuxPolicy:
         self.log.debug("Binary policy path: {}".format(base_policy_path
                                                        if base_policy_path != NULL else None))
 
-        # try libselinux for current policy
+        # first try libselinux for current policy
         if current_policy_path != NULL:
-            yield current_policy_path
+            potential_policies.append(current_policy_path)
 
-        # otherwise look through the supported policy versions
+        # look through the supported policy versions
         if base_policy_path != NULL:
             for version in range(max_ver, min_ver - 1, -1):
-                yield "{0}.{1}".format(base_policy_path, version)
+                potential_policies.append("{0}.{1}".format(base_policy_path, version))
 
-    cdef _load_running_policy(self):
-        """Try to load the current running policy."""
-        self.log.info("Attempting to locate current running policy.")
-
-        for filename in self._potential_policies():
+        self.log.debug("Potential policies: {}".format(potential_policies))
+        for filename in potential_policies:
             try:
                 self._load_policy(filename)
             except OSError as err:
