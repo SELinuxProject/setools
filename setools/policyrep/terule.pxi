@@ -80,7 +80,7 @@ cdef class BaseTERule(PolicyRule):
             If the rule is here, this property is False
         }
         """
-        if self._conditional_block is None:
+        if self._conditional is None:
             raise RuleNotConditional
         else:
             return self._conditional_block
