@@ -37,9 +37,9 @@ class BoundsTableModel(SEToolsTableModel):
                 if col == 0:
                     return item.ruletype.name
                 elif col == 1:
-                    return str(item.parent)
+                    return item.parent.name
                 elif col == 2:
-                    return str(item.child)
+                    return item.child.name
 
             elif role == Qt.UserRole:
                 return item

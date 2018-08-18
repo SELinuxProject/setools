@@ -73,7 +73,7 @@ class ObjClassTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(item)
+                    return item.name
                 elif col == 1:
                     try:
                         com_perms = item.common.perms

@@ -38,7 +38,7 @@ class ConstraintTableModel(SEToolsTableModel):
                 if col == 0:
                     return rule.ruletype.name
                 elif col == 1:
-                    return str(rule.tclass)
+                    return rule.tclass.name
                 elif col == 2:
                     try:
                         return ", ".join(sorted(rule.perms))

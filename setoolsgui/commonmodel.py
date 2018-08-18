@@ -57,9 +57,9 @@ class CommonTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(item)
+                    return item.name
                 elif col == 1:
-                    return ", ".join(sorted(str(p) for p in item.perms))
+                    return ", ".join(sorted(item.perms))
 
             elif role == Qt.UserRole:
                 return item

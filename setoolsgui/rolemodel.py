@@ -62,9 +62,9 @@ class RoleTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(item)
+                    return item.name
                 elif col == 1:
-                    return ", ".join(sorted(str(t) for t in item.types()))
+                    return ", ".join(sorted(t.name for t in item.types()))
             elif role == Qt.UserRole:
                 # get the whole object
                 return item

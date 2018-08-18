@@ -59,9 +59,9 @@ class TypeAttributeTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(item)
+                    return item.name
                 elif col == 1:
-                    return ", ".join(sorted(str(t) for t in item.expand()))
+                    return ", ".join(sorted(t.name for t in item.expand()))
 
             elif role == Qt.UserRole:
                 return item

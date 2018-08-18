@@ -53,7 +53,7 @@ class BooleanTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(boolean)
+                    return boolean.name
                 elif col == 1:
                     return str(boolean.state)
 

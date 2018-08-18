@@ -65,11 +65,11 @@ class TypeTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(item)
+                    return item.name
                 elif col == 1:
-                    return ", ".join(sorted(str(a) for a in item.attributes()))
+                    return ", ".join(sorted(a.name for a in item.attributes()))
                 elif col == 2:
-                    return ", ".join(sorted(str(a) for a in item.aliases()))
+                    return ", ".join(sorted(a for a in item.aliases()))
                 elif col == 3 and item.ispermissive:
                     return "Permissive"
 

@@ -75,9 +75,9 @@ class UserTableModel(SEToolsTableModel):
                 user = self.resultlist[row]
 
                 if col == 0:
-                    return str(user)
+                    return user.name
                 elif col == 1:
-                    return ", ".join(sorted(str(r) for r in user.roles))
+                    return ", ".join(sorted(r.name for r in user.roles))
                 elif col == 2:
                     try:
                         return str(user.mls_level)

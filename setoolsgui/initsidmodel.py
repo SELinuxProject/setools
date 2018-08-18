@@ -35,7 +35,7 @@ class InitialSIDTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(rule)
+                    return rule.name
                 elif col == 1:
                     return str(rule.context)
 

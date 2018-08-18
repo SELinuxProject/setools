@@ -78,9 +78,9 @@ class MLSComponentTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(item)
+                    return item.name
                 elif col == 1:
-                    return ", ".join(sorted(str(a) for a in item.aliases()))
+                    return ", ".join(sorted(a for a in item.aliases()))
 
             elif role == Qt.UserRole:
                 return item
