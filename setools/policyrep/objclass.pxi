@@ -31,7 +31,7 @@ cdef class Common(PolicySymbol):
 
     cdef:
         uintptr_t key
-        str name
+        readonly str name
         readonly dict _perm_table
 
     @staticmethod
@@ -96,7 +96,7 @@ cdef class ObjClass(PolicySymbol):
     cdef:
         sepol.class_datum_t *handle
         uintptr_t key
-        str name
+        readonly str name
         Common _common
         readonly dict _perm_table
         list _defaults

@@ -31,7 +31,7 @@ cdef class Boolean(PolicySymbol):
 
     cdef:
         uintptr_t key
-        str name
+        readonly str name
         readonly object state
 
     @staticmethod

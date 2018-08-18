@@ -25,7 +25,7 @@ cdef class Role(PolicySymbol):
 
     cdef:
         uintptr_t key
-        str name
+        readonly str name
         frozenset _types
 
     @staticmethod
