@@ -37,11 +37,11 @@ class MLSRuleTableModel(SEToolsTableModel):
                 if col == 0:
                     return rule.ruletype.name
                 elif col == 1:
-                    return str(rule.source)
+                    return rule.source.name
                 elif col == 2:
-                    return str(rule.target)
+                    return rule.target.name
                 elif col == 3:
-                    return str(rule.tclass)
+                    return rule.tclass.name
                 elif col == 4:
                     return str(rule.default)
 

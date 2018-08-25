@@ -35,7 +35,7 @@ class NetifconTableModel(SEToolsTableModel):
 
             if role == Qt.DisplayRole:
                 if col == 0:
-                    return str(rule.netif)
+                    return rule.netif
                 elif col == 1:
                     return str(rule.context)
                 elif col == 2:

@@ -39,11 +39,11 @@ class TERuleTableModel(SEToolsTableModel):
                 if col == 0:
                     return rule.ruletype.name
                 elif col == 1:
-                    return str(rule.source)
+                    return rule.source.name
                 elif col == 2:
-                    return str(rule.target)
+                    return rule.target.name
                 elif col == 3:
-                    return str(rule.tclass)
+                    return rule.tclass.name
                 elif col == 4:
                     try:
                         if rule.extended:
@@ -51,7 +51,7 @@ class TERuleTableModel(SEToolsTableModel):
                         else:
                             return ", ".join(sorted(rule.perms))
                     except RuleUseError:
-                        return str(rule.default)
+                        return rule.default.name
                 elif col == 5:
                     try:
                         return str(rule.conditional)

@@ -38,19 +38,19 @@ class RBACRuleTableModel(SEToolsTableModel):
                 if col == 0:
                     return rule.ruletype.name
                 elif col == 1:
-                    return str(rule.source)
+                    return rule.source.name
                 elif col == 2:
-                    return str(rule.target)
+                    return rule.target.name
                 elif col == 3:
                     try:
-                        return str(rule.tclass)
+                        return rule.tclass.name
                     except RuleUseError:
                         # role allow
                         return None
                 elif col == 4:
                     # next most common: default
                     try:
-                        return str(rule.default)
+                        return rule.default.name
                     except RuleUseError:
                         return None
 

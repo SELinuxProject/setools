@@ -80,7 +80,7 @@ class ObjClassTableModel(SEToolsTableModel):
                     except NoCommon:
                         com_perms = []
 
-                    return ", ".join(sorted(str(p) for p in chain(com_perms, item.perms)))
+                    return ", ".join(sorted(chain(com_perms, item.perms)))
 
             elif role == Qt.UserRole:
                 return item

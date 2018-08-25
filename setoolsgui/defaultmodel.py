@@ -39,7 +39,7 @@ class DefaultTableModel(SEToolsTableModel):
                 if col == 0:
                     return item.ruletype.name
                 elif col == 1:
-                    return str(item.tclass)
+                    return item.tclass.name
                 elif col == 2:
                     return item.default.name
                 elif col == 3:
