@@ -284,7 +284,7 @@
           <item row="0" column="0">
            <widget class="QLineEdit" name="fs">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -338,7 +338,7 @@
           <item row="0" column="0">
            <widget class="QLineEdit" name="path">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -382,7 +382,7 @@
           <item row="0" column="0">
            <widget class="QLineEdit" name="user">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -391,6 +391,12 @@
              <size>
               <width>150</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>250</width>
+              <height>16777215</height>
              </size>
             </property>
            </widget>
@@ -451,7 +457,7 @@
           <item row="0" column="0">
            <widget class="QLineEdit" name="role">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -539,7 +545,7 @@
           <item row="0" column="1">
            <widget class="QLineEdit" name="type_">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -579,7 +585,7 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>16777215</height>
+           <height>100</height>
           </size>
          </property>
          <property name="title">
@@ -614,16 +620,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QRadioButton" name="range_overlap">
-            <property name="toolTip">
-             <string>Match the context's range if the criteria overlaps the context's range.</string>
-            </property>
-            <property name="text">
-             <string>Overlap</string>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="1">
            <widget class="QRadioButton" name="range_subset">
             <property name="toolTip">
@@ -644,10 +640,20 @@
             </property>
            </widget>
           </item>
+          <item row="2" column="2">
+           <widget class="QRadioButton" name="range_overlap">
+            <property name="toolTip">
+             <string>Match the context's range if the criteria overlaps the context's range.</string>
+            </property>
+            <property name="text">
+             <string>Overlap</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="1" colspan="2">
            <widget class="QLineEdit" name="range_">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -671,6 +677,9 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
@@ -682,7 +691,7 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="0" colspan="4">
+       <item row="2" column="3">
         <widget class="QDialogButtonBox" name="buttonBox">
          <property name="standardButtons">
           <set>QDialogButtonBox::Apply</set>
