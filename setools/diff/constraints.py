@@ -205,7 +205,7 @@ class ConstraintWrapper(Wrapper):
         self.key = hash(rule)
 
         self.expr = []
-        for op in rule.postfix_expression():
+        for op in rule.expression:
             if isinstance(op, frozenset):
                 # lists of types/users/roles
                 self.expr.append(frozenset(SymbolWrapper(item) for item in op))

@@ -1377,15 +1377,15 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow3", constrain.tclass)
         self.assertSetEqual(set(["null"]), constrain.perms)
-        self.assertListEqual(["u1", "u2", "!="], constrain.postfix_expression())
+        self.assertEqual(["u1", "u2", "!="], constrain.expression)
 
         constrain = lst[1]
         self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow5", constrain.tclass)
         self.assertSetEqual(set(["hi_r"]), constrain.perms)
-        self.assertListEqual(
+        self.assertEqual(
             ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '!=', 'or'],
-            constrain.postfix_expression())
+            constrain.expression)
 
     def test_removed_constrains(self):
         """Diff: removed constrains."""
@@ -1396,15 +1396,15 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow4", constrain.tclass)
         self.assertSetEqual(set(["hi_w"]), constrain.perms)
-        self.assertListEqual(["u1", "u2", "!="], constrain.postfix_expression())
+        self.assertEqual(["u1", "u2", "!="], constrain.expression)
 
         constrain = lst[1]
         self.assertEqual(CRT.constrain, constrain.ruletype)
         self.assertEqual("infoflow5", constrain.tclass)
         self.assertSetEqual(set(["hi_r"]), constrain.perms)
-        self.assertListEqual(
+        self.assertEqual(
             ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '==', 'or'],
-            constrain.postfix_expression())
+            constrain.expression)
 
     #
     # mlsconstrains
@@ -1418,19 +1418,19 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow3", mlsconstrain.tclass)
         self.assertSetEqual(set(["null"]), mlsconstrain.perms)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
                 't1', set(["mls_exempt"]), '!=', 'or'],
-            mlsconstrain.postfix_expression())
+            mlsconstrain.expression)
 
         mlsconstrain = lst[1]
         self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow5", mlsconstrain.tclass)
         self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', 'domby', 'h1', 'h2', 'incomp',
                 'and', 't1', set(["mls_exempt"]), '==', 'or'],
-            mlsconstrain.postfix_expression())
+            mlsconstrain.expression)
 
     def test_removed_mlsconstrains(self):
         """Diff: removed mlsconstrains."""
@@ -1441,18 +1441,18 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow4", mlsconstrain.tclass)
         self.assertSetEqual(set(["hi_w"]), mlsconstrain.perms)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
                 't1', set(["mls_exempt"]), '==', 'or'],
-            mlsconstrain.postfix_expression())
+            mlsconstrain.expression)
 
         mlsconstrain = lst[1]
         self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
         self.assertEqual("infoflow5", mlsconstrain.tclass)
         self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', 'domby', 'h1', 'h2', 'dom', 'and', 't1', set(["mls_exempt"]), '==', 'or'],
-            mlsconstrain.postfix_expression())
+            mlsconstrain.expression)
 
     #
     # validatetrans
@@ -1465,16 +1465,16 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         validatetrans = lst[0]
         self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow3", validatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['t1', 't2', '==', 't3', set(["system"]), '==', 'or'],
-            validatetrans.postfix_expression())
+            validatetrans.expression)
 
         validatetrans = lst[1]
         self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow5", validatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['u1', 'u2', '!=', 'r1', 'r2', '==', 'and', 't3', set(["system"]), '==', 'or'],
-            validatetrans.postfix_expression())
+            validatetrans.expression)
 
     def test_removed_validatetrans(self):
         """Diff: removed validatetrans."""
@@ -1484,16 +1484,16 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         validatetrans = lst[0]
         self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow4", validatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['u1', 'u2', '==', 't3', set(["system"]), '==', 'or'],
-            validatetrans.postfix_expression())
+            validatetrans.expression)
 
         validatetrans = lst[1]
         self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
         self.assertEqual("infoflow5", validatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['u1', 'u2', '==', 'r1', 'r2', '!=', 'and', 't3', set(["system"]), '==', 'or'],
-            validatetrans.postfix_expression())
+            validatetrans.expression)
 
     #
     # mlsvalidatetrans
@@ -1506,17 +1506,17 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         mlsvalidatetrans = lst[0]
         self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow3", mlsvalidatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.postfix_expression())
+            mlsvalidatetrans.expression)
 
         mlsvalidatetrans = lst[1]
         self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', 'incomp', 'h1', 'h2', 'domby',
                 'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.postfix_expression())
+            mlsvalidatetrans.expression)
 
     def test_removed_mlsvalidatetrans(self):
         """Diff: removed mlsvalidatetrans."""
@@ -1526,16 +1526,16 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         mlsvalidatetrans = lst[0]
         self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow4", mlsvalidatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.postfix_expression())
+            mlsvalidatetrans.expression)
 
         mlsvalidatetrans = lst[1]
         self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
         self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
-        self.assertListEqual(
+        self.assertEqual(
             ['l1', 'l2', 'dom', 'h1', 'h2', 'dom', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.postfix_expression())
+            mlsvalidatetrans.expression)
 
     #
     # typebounds

@@ -182,3 +182,24 @@ cdef int hashtab_insert(sepol.hashtab_t h, sepol.hashtab_key_t key, sepol.hashta
         h.htable[hvalue] = newnode
 
     h.nel += 1
+
+
+cdef flatten_list(input_list):
+    """
+    Flatten a list with nested lists.
+
+    e.g.
+    [A, B, [D, E], C]
+
+    turns into:
+    [A, B, D, E, C]
+    """
+    cdef list ret = []
+
+    for i in input_list:
+        if isinstance(i, list):
+            ret.extend(flatten_list(i))
+        else:
+            ret.append(i)
+
+    return ret

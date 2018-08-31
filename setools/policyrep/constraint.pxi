@@ -39,11 +39,7 @@ cdef class BaseConstraint(PolicySymbol):
         sepol.constraint_node_t *handle
         readonly object ruletype
         readonly object tclass
-        list _postfix_expression
-        list _infix_expression
-        readonly frozenset users
-        readonly frozenset roles
-        readonly frozenset types
+        readonly ConstraintExpression expression
 
     def __str__(self):
         raise NotImplementedError
@@ -52,9 +48,26 @@ cdef class BaseConstraint(PolicySymbol):
         """Low-level equality check (C pointers)."""
         return self.handle == other.handle
 
-    # There is no levels function as specific
-    # levels cannot be used in expressions, only
-    # the l1, h1, etc. symbols
+    @property
+    def roles(self):
+        """The roles used in the expression."""
+        warnings.warn("Constraint roles attribute will be removed in SETools 4.3 "
+                      "please use constraint.expression.roles attribute instead.")
+        return self.expression.roles
+
+    @property
+    def types(self):
+        """The types and type attributes used in the expression."""
+        warnings.warn("Constraint roles attribute will be removed in SETools 4.3 "
+                      "please use constraint.expression.types attribute instead.")
+        return self.expression.types
+
+    @property
+    def users(self):
+        """The users used in the expression."""
+        warnings.warn("Constraint roles attribute will be removed in SETools 4.3 "
+                      "please use constraint.expression.users attribute instead.")
+        return self.expression.users
 
     @property
     def perms(self):
@@ -63,14 +76,149 @@ cdef class BaseConstraint(PolicySymbol):
     def statement(self):
         return str(self)
 
-    def expression(self):
-        """
-        The constraint's expression in infix notation.
+    def postfix_expression(self):
+        warnings.warn("Constraint postfix_expression() method will be removed in SETools 4.3 "
+                      "please use constraint.expression attribute instead.")
+        return self.expression
 
-        Return: list
-        """
 
-        if self._infix_expression is None:
+cdef class Constraint(BaseConstraint):
+
+    """A constraint rule (constrain/mlsconstrain)."""
+
+    cdef readonly frozenset perms
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, ObjClass tclass, sepol.constraint_node_t *symbol):
+        """Factory function for creating Constraint objects."""
+        cdef Constraint c = Constraint.__new__(Constraint)
+        c.policy = policy
+        c.handle = symbol
+        c.tclass = tclass
+        c.perms = frozenset(PermissionVectorIterator.factory(policy, tclass, symbol.permissions))
+        c.expression = ConstraintExpression.factory(policy, symbol.expr)
+        c.ruletype = ConstraintRuletype.mlsconstrain if c.expression.mls \
+            else ConstraintRuletype.constrain
+        return c
+
+    def __str__(self):
+        if len(self.perms) > 1:
+            perms = "{{ {0} }}".format(' '.join(self.perms))
+        else:
+            # convert to list since sets cannot be indexed
+            perms = list(self.perms)[0]
+
+        return "{0.ruletype} {0.tclass} {1} ({0.expression}); ".format(self, perms)
+
+
+cdef class Validatetrans(BaseConstraint):
+
+    """A validatetrans rule (validatetrans/mlsvalidatetrans)."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, ObjClass tclass, sepol.constraint_node_t *symbol):
+        """Factory function for creating Validatetrans objects."""
+        cdef Validatetrans v = Validatetrans.__new__(Validatetrans)
+        v.policy = policy
+        v.handle = symbol
+        v.tclass = tclass
+        v.expression = ConstraintExpression.factory(policy, symbol.expr)
+        v.ruletype = ConstraintRuletype.mlsvalidatetrans if v.expression.mls else \
+            ConstraintRuletype.validatetrans
+        return v
+
+    def __str__(self):
+        return "{0.ruletype} {0.tclass} ({0.expression});".format(self)
+
+    @property
+    def perms(self):
+        raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
+
+
+cdef class ConstraintExpression(PolicySymbol):
+
+    """
+    A a list-like object representing a constraint's expression.
+
+    The expression is in postfix notation, as that is how it is stored in the policy.
+    The string representation, however, is in infix notation, as that is how it
+    is written by policy writers.
+    """
+
+    cdef:
+        list _infix
+        list _postfix
+        readonly bint mls
+        readonly frozenset users
+        readonly frozenset roles
+        readonly frozenset types
+
+    # There is no levels attribute as specific
+    # levels cannot be used in expressions, only
+    # the l1, h1, etc. symbols
+
+    @staticmethod
+    cdef inline ConstraintExpression factory(SELinuxPolicy policy, sepol.constraint_expr_t *symbol):
+        """Factory function for creating ConstraintExpression objects."""
+        cdef:
+            ConstraintExpression e = ConstraintExpression.__new__(ConstraintExpression)
+            list users = []
+            list roles = []
+            list types = []
+            ConstraintExprNode expr_node
+
+        e.policy = policy
+
+        e._postfix = []
+        for expr_node in ConstraintExprIterator.factory(policy, symbol):
+            if expr_node.mls:
+                e.mls = 1
+
+            if expr_node.types:
+                types.extend(expr_node.names)
+            elif expr_node.roles:
+                roles.extend(expr_node.names)
+            elif expr_node.users:
+                users.extend(expr_node.names)
+
+            e._postfix.extend(expr_node)
+
+        e.users = frozenset(users)
+        e.roles = frozenset(roles)
+        e.types = frozenset(types)
+
+        return e
+
+    def __str__(self):
+        cdef list ret = []
+        for item in self.infix():
+            if isinstance(item, frozenset):
+                if len(item) > 1:
+                    ret.append("{{ {0} }} ".format(" ".join(str(j) for j in item)))
+                else:
+                    ret.append("{0}".format(" ".join(str(j) for j in item)))
+            else:
+                ret.append(item)
+
+        return " ".join(ret)
+
+    def __getitem__(self, idx):
+        return self._postfix[idx]
+
+    def __eq__(self, other):
+        return self._postfix == other
+
+    def __call__(self):
+        warnings.warn("Constraint expression() method will be removed in SETools 4.3 "
+                      "please use constraint.expression.infix() method instead.")
+        return self.infix
+
+    def infix(self):
+        """The expression as an infix notation list."""
+
+        if self._infix is None:
+            self._infix = []
+
             _precedence = {
                 "not": 4,
                 "and": 2,
@@ -97,7 +245,7 @@ cdef class BaseConstraint(PolicySymbol):
             # operator, no parentheses are output
             stack = []
             prev_op_precedence = _max_precedence
-            for op in self.postfix_expression():
+            for op in self._postfix:
                 if isinstance(op, frozenset) or op in _operands:
                     # operands
                     stack.append(op)
@@ -124,164 +272,23 @@ cdef class BaseConstraint(PolicySymbol):
 
                     prev_op_precedence = _precedence[op]
 
-            self._infix_expression = self._flatten_expression(stack)
+            self._infix = flatten_list(stack)
 
-        return self._infix_expression
-
-    def postfix_expression(self):
-        """
-        The constraint's expression in postfix notation.
-
-        Return: list
-        """
-        return self._postfix_expression
-
-    #
-    # Internal functions
-    #
-    @staticmethod
-    def _expression_str(expr):
-        """Generate the string representation of the expression."""
-        ret = []
-
-        for item in expr:
-            if isinstance(item, frozenset):
-                if len(item) > 1:
-                    ret.append("{{ {0} }} ".format(" ".join(str(j) for j in item)))
-                else:
-                    ret.append("{0}".format(" ".join(str(j) for j in item)))
-            else:
-                ret.append(item)
-
-        return " ".join(ret)
-
-    def _flatten_expression(self, expr):
-        """Flatten the expression into a flat list."""
-        ret = []
-
-        for i in expr:
-            if isinstance(i, list):
-                ret.extend(self._flatten_expression(i))
-            else:
-                ret.append(i)
-
-        return ret
-
-
-cdef class Constraint(BaseConstraint):
-
-    """A constraint rule (constrain/mlsconstrain)."""
-
-    cdef readonly frozenset perms
-
-    @staticmethod
-    cdef factory(SELinuxPolicy policy, ObjClass tclass, sepol.constraint_node_t *symbol):
-        """Factory function for creating Constraint objects."""
-        cdef:
-            Constraint c = Constraint.__new__(Constraint)
-            list users = []
-            list roles = []
-            list types = []
-            ConstraintExprNode expr_node
-
-        c.policy = policy
-        c.handle = symbol
-        c.tclass = tclass
-        c.perms = frozenset(PermissionVectorIterator.factory(policy, tclass, symbol.permissions))
-
-        c.ruletype = ConstraintRuletype.constrain
-        c._postfix_expression = []
-        for expr_node in ConstraintExprIterator.factory(policy, symbol.expr):
-            if expr_node.mls:
-                c.ruletype = ConstraintRuletype.mlsconstrain
-
-            if expr_node.types:
-                types.extend(expr_node.names)
-            elif expr_node.roles:
-                roles.extend(expr_node.names)
-            elif expr_node.users:
-                users.extend(expr_node.names)
-
-            c._postfix_expression.extend(expr_node)
-
-        c.users = frozenset(users)
-        c.roles = frozenset(roles)
-        c.types = frozenset(types)
-
-        return c
-
-    def __str__(self):
-        rule_string = "{0.ruletype} {0.tclass} ".format(self)
-
-        perms = self.perms
-        if len(perms) > 1:
-            rule_string += "{{ {0} }} (".format(' '.join(perms))
-        else:
-            # convert to list since sets cannot be indexed
-            rule_string += "{0} (".format(list(perms)[0])
-
-        rule_string += "{0});".format(self._expression_str(self.expression()))
-
-        return rule_string
-
-
-cdef class Validatetrans(BaseConstraint):
-
-    """A validatetrans rule (validatetrans/mlsvalidatetrans)."""
-
-    @staticmethod
-    cdef factory(SELinuxPolicy policy, ObjClass tclass, sepol.constraint_node_t *symbol):
-        """Factory function for creating Validatetrans objects."""
-        cdef:
-            Validatetrans v = Validatetrans.__new__(Validatetrans)
-            list users = []
-            list roles = []
-            list types = []
-            ConstraintExprNode expr_node
-
-        v.policy = policy
-        v.handle = symbol
-        v.tclass = tclass
-
-        v.ruletype = ConstraintRuletype.validatetrans
-        v._postfix_expression = []
-        for expr_node in ConstraintExprIterator.factory(policy, symbol.expr):
-            if expr_node.mls:
-                v.ruletype = ConstraintRuletype.mlsvalidatetrans
-
-            if expr_node.types:
-                types.extend(expr_node.names)
-            elif expr_node.roles:
-                roles.extend(expr_node.names)
-            elif expr_node.users:
-                users.extend(expr_node.names)
-
-            v._postfix_expression.extend(expr_node)
-
-        v.users = frozenset(users)
-        v.roles = frozenset(roles)
-        v.types = frozenset(types)
-
-        return v
-
-    def __str__(self):
-        return "{0.ruletype} {0.tclass} ({1});".format(self,
-                                                       self._expression_str(self.expression()))
-
-    @property
-    def perms(self):
-        raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
+        return self._infix
 
 
 cdef class ConstraintExprNode(PolicySymbol):
 
     """
-    A node of a constraint expression.
+    A node of the low-level constraint expression.
 
     This is an immutable list-like object that contains one node
     of a constraint in postfix notation, e.g.:
 
     ["u1", "u2", "=="]
+
+    This is only used for initializing a ConstraintExpression
+    object.
     """
 
     cdef:
@@ -509,7 +516,12 @@ cdef class ValidatetransIterator(ConstraintIterator):
 
 cdef class ConstraintExprIterator(PolicyIterator):
 
-    """Constraint expression iterator."""
+    """
+    Constraint low-level expression iterator.
+
+    This is only used for initializing a ConstraintExpression
+    object.
+    """
 
     cdef:
         sepol.constraint_expr_t *head

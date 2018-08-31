@@ -45,7 +45,7 @@ class ConstraintTableModel(SEToolsTableModel):
                     except ConstraintUseError:
                         return None
                 elif col == 3:
-                    return rule._expression_str(rule.expression())
+                    return str(rule.expression)
 
             elif role == Qt.UserRole:
                 return rule
