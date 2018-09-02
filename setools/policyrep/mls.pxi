@@ -48,7 +48,6 @@ cdef class Category(PolicySymbol):
 
     cdef:
         sepol.cat_datum_t *handle
-        readonly str name
         readonly uint32_t _value
         list _aliases
 
@@ -68,9 +67,6 @@ cdef class Category(PolicySymbol):
             c._value = symbol.s.value
             _cat_cache[<uintptr_t>symbol] = c
             return c
-
-    def __str__(self):
-        return self.name
 
     def __hash__(self):
         return hash(self.name)
@@ -116,7 +112,6 @@ cdef class Sensitivity(PolicySymbol):
 
     cdef:
         sepol.level_datum_t *handle
-        readonly str name
         readonly uint32_t _value
         list _aliases
         LevelDecl _leveldecl
@@ -138,9 +133,6 @@ cdef class Sensitivity(PolicySymbol):
             s.name = policy.level_value_to_name(symbol.level.sens - 1)
             s._value = symbol.level.sens
             return s
-
-    def __str__(self):
-        return self.name
 
     def __hash__(self):
         return hash(self.name)
@@ -195,7 +187,7 @@ cdef class Sensitivity(PolicySymbol):
         return stmt
 
 
-cdef class BaseMLSLevel(PolicySymbol):
+cdef class BaseMLSLevel(PolicyObject):
 
     """Base class for MLS levels."""
 
@@ -417,7 +409,7 @@ cdef class Level(BaseMLSLevel):
         raise NoStatement
 
 
-cdef class Range(PolicySymbol):
+cdef class Range(PolicyObject):
 
     """An MLS range"""
 

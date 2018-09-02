@@ -25,7 +25,6 @@ cdef class Role(PolicySymbol):
 
     cdef:
         uintptr_t key
-        readonly str name
         frozenset _types
 
     @staticmethod
@@ -37,9 +36,6 @@ cdef class Role(PolicySymbol):
         r.name = policy.role_value_to_name(symbol.s.value - 1)
         r._types = frozenset(TypeEbitmapIterator.factory_from_set(policy, &symbol.types))
         return r
-
-    def __str__(self):
-        return self.name
 
     def _eq(self, Role other):
         """Low-level equality check (C pointers)."""

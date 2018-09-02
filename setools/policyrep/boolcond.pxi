@@ -31,7 +31,6 @@ cdef class Boolean(PolicySymbol):
 
     cdef:
         uintptr_t key
-        readonly str name
         readonly object state
 
     @staticmethod
@@ -44,9 +43,6 @@ cdef class Boolean(PolicySymbol):
         b.state = <bint>symbol.state
         return b
 
-    def __str__(self):
-        return self.name
-
     def _eq(self, Boolean other):
         """Low-level equality check (C pointers)."""
         return self.key == other.key
@@ -56,7 +52,7 @@ cdef class Boolean(PolicySymbol):
         return "bool {0} {1};".format(self.name, str(self.state).lower())
 
 
-cdef class Conditional(PolicySymbol):
+cdef class Conditional(PolicyObject):
 
     """A conditional policy block."""
 
@@ -249,7 +245,7 @@ cdef class Conditional(PolicySymbol):
         return truth_table
 
 
-cdef class ConditionalOperator(PolicySymbol):
+cdef class ConditionalOperator(PolicyObject):
 
     """A conditional expression operator"""
 

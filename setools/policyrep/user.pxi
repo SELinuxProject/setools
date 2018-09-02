@@ -27,7 +27,6 @@ cdef class User(PolicySymbol):
 
     cdef:
         uintptr_t key
-        readonly str name
         readonly frozenset roles
         Level _level
         Range _range
@@ -57,9 +56,6 @@ cdef class User(PolicySymbol):
                 u._range = Range.factory(policy, &symbol.exp_range)
 
             return u
-
-    def __str__(self):
-        return self.name
 
     def _eq(self, User other):
         """Low-level equality check (C pointers)."""

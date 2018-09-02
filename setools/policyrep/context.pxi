@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-cdef class Context(PolicySymbol):
+cdef class Context(PolicyObject):
 
     """A SELinux security context/security attribute."""
 

@@ -21,7 +21,7 @@
 #
 # Classes
 #
-cdef class PolicySymbol:
+cdef class PolicyObject:
 
     """This is a base class for all policy objects."""
 
@@ -73,7 +73,17 @@ cdef class PolicySymbol:
         raise NotImplementedError
 
 
-cdef class Ocontext(PolicySymbol):
+cdef class PolicySymbol(PolicyObject):
+
+    """Base class for policy symbols (declared objects: types, users, etc.)"""
+
+    cdef readonly str name
+
+    def __str__(self):
+        return self.name
+
+
+cdef class Ocontext(PolicyObject):
 
     """Base class for most in-policy labeling statements, (portcon, nodecon, etc.)"""
 

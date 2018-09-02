@@ -31,7 +31,6 @@ cdef class Common(PolicySymbol):
 
     cdef:
         uintptr_t key
-        readonly str name
         readonly dict _perm_table
 
     @staticmethod
@@ -70,9 +69,6 @@ cdef class Common(PolicySymbol):
             _common_cache[<uintptr_t>symbol] = c
             return c
 
-    def __str__(self):
-        return self.name
-
     def _eq(self, Common other):
         """Low-level equality check (C pointers)."""
         return self.key == other.key
@@ -96,7 +92,6 @@ cdef class ObjClass(PolicySymbol):
     cdef:
         sepol.class_datum_t *handle
         uintptr_t key
-        readonly str name
         Common _common
         readonly dict _perm_table
         list _defaults
@@ -170,9 +165,6 @@ cdef class ObjClass(PolicySymbol):
                 c._defaults.append(Default.factory(policy, c, None, None, None, symbol.default_range))
 
             return c
-
-    def __str__(self):
-        return self.name
 
     def __contains__(self, other):
         try:

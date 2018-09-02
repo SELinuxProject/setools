@@ -47,10 +47,6 @@ cdef class BaseType(PolicySymbol):
 
     cdef:
         sepol.type_datum_t *handle
-        readonly str name
-
-    def __str__(self):
-        return self.name
 
     def _eq(self, BaseType other):
         """Low-level equality check (C pointers)."""

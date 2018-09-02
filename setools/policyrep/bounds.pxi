@@ -29,7 +29,7 @@ class BoundsRuletype(PolicyEnum):
     typebounds = 1
 
 
-cdef class Bounds(PolicySymbol):
+cdef class Bounds(PolicyObject):
 
     """A bounds statement."""
 

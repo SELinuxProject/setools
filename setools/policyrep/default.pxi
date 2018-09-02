@@ -67,7 +67,7 @@ class DefaultRangeValue(PolicyEnum):
         return cls(default_map[range_])
 
 
-cdef class Default(PolicySymbol):
+cdef class Default(PolicyObject):
 
     """Base class for default_* statements."""
 

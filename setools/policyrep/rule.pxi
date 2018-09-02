@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-cdef class PolicyRule(PolicySymbol):
+cdef class PolicyRule(PolicyObject):
 
     """This is base class for policy rules."""
 

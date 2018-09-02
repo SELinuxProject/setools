@@ -23,8 +23,6 @@ cdef class PolicyCapability(PolicySymbol):
 
     """A policy capability."""
 
-    cdef readonly str name
-
     @staticmethod
     cdef inline PolicyCapability factory(SELinuxPolicy policy, size_t bit):
         """Factory function for creating PolicyCapability objects."""
@@ -32,9 +30,6 @@ cdef class PolicyCapability(PolicySymbol):
         r.policy = policy
         r.name = intern(sepol.sepol_polcap_getname(bit))
         return r
-
-    def __str__(self):
-        return self.name
 
     def _eq(self, PolicyCapability other):
         """Low-level equality check."""

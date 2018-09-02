@@ -31,7 +31,7 @@ class ConstraintRuletype(PolicyEnum):
     mlsvalidatetrans = 4
 
 
-cdef class BaseConstraint(PolicySymbol):
+cdef class BaseConstraint(PolicyObject):
 
     """Base class for constraint rules."""
 
@@ -135,7 +135,7 @@ cdef class Validatetrans(BaseConstraint):
         raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
 
 
-cdef class ConstraintExpression(PolicySymbol):
+cdef class ConstraintExpression(PolicyObject):
 
     """
     A a list-like object representing a constraint's expression.
@@ -277,7 +277,7 @@ cdef class ConstraintExpression(PolicySymbol):
         return self._infix
 
 
-cdef class ConstraintExprNode(PolicySymbol):
+cdef class ConstraintExprNode(PolicyObject):
 
     """
     A node of the low-level constraint expression.
