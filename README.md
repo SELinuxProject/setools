@@ -74,7 +74,7 @@ the tools can be ran from the current directory (e.g. ```./seinfo```).
 For convenience, a prebuilt copy of the apol help data file is included.
 To rebuild this file, the Qt5 development tools are required
 (particularly, the ```qcollectiongenerator``` tool).  At the root
-of the SETools soures, perform the following:
+of the SETools sources, perform the following:
 ```
   $ python setup.py build_qhc
 ```
