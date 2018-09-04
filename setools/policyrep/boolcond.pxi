@@ -134,7 +134,7 @@ cdef class Conditional(PolicyObject):
                 stack.append(subexpr)
                 prev_op_precedence = op_precedence
 
-        return self._unwind_subexpression(stack)
+        return ' '.join(flatten_list(stack))
 
     def __hash__(self):
         return hash(<uintptr_t>self.handle)
@@ -148,18 +148,6 @@ cdef class Conditional(PolicyObject):
     def _eq(self, Conditional other):
         """Low-level equality check (C pointers)."""
         return self.handle == other.handle
-
-    def _unwind_subexpression(self, expr):
-        ret = []
-
-        # do a string.join on sublists (subexpressions)
-        for i in expr:
-            if isinstance(i, list):
-                ret.append(self._unwind_subexpression(i))
-            else:
-                ret.append(i)
-
-        return ' '.join(ret)
 
     def evaluate(self, **kwargs):
         """
