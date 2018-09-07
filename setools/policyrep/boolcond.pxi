@@ -159,33 +159,26 @@ cdef class Conditional(PolicyObject):
 
         Return:     bool
         """
-        bools = sorted(self.booleans)
+        cdef:
+            list bools = sorted(self.booleans)
+            list stack = []
+            ConditionalOperator operator
 
         if sorted(kwargs.keys()) != bools:
             raise ValueError("All Booleans must have a specified value.")
 
-        stack = []
         for expr_node in self.expression():
             if isinstance(expr_node, Boolean):
                 stack.append(kwargs[expr_node])
             elif expr_node.unary:
                 operand = stack.pop()
-                operator = str(expr_node)
-                stack.append(not operand)
+                operator = expr_node
+                stack.append(operator.evaluate(operand))
             else:
                 operand1 = stack.pop()
                 operand2 = stack.pop()
-                operator = str(expr_node)
-                if operator == "||":
-                    stack.append(operand1 or operand2)
-                elif operator == "&&":
-                    stack.append(operand1 and operand2)
-                elif operator == "^":
-                    stack.append(operand1 ^ operand2)
-                elif operator == "==":
-                    stack.append(operand1 == operand2)
-                else:  # not equal
-                    stack.append(operand1 != operand2)
+                operator = expr_node
+                stack.append(operator.evaluate(operand1, operand2))
 
         return stack[0]
 
@@ -218,6 +211,12 @@ cdef class Conditional(PolicyObject):
                     with each value being T/F.
         result:     Evaluation result for the expression
                     given the values.
+
+        Example return for "a || b"
+        [({"a": True, "b": True}, True),
+         ({"a": True, "b": False}, True),
+         ({"a": False, "b": True}, True),
+         ({"a": False, "b": False}, False)]
         """
         bools = sorted(str(b) for b in self.booleans)
 
@@ -242,22 +241,18 @@ cdef class ConditionalOperator(PolicyObject):
         readonly int precedence
         # T/F the operator is unary
         readonly bint unary
+        # stores a callable for evaluating
+        # using the specified operands.
+        # see _cond_expr_val_to_eval
+        readonly object evaluate
 
-    _cond_expr_val_to_text = {
-        sepol.COND_NOT: "!",
-        sepol.COND_OR: "||",
-        sepol.COND_AND: "&&",
-        sepol.COND_XOR: "^",
-        sepol.COND_EQ: "==",
-        sepol.COND_NEQ: "!="}
-
-    _cond_expr_val_to_precedence = {
-        sepol.COND_NOT: 5,
-        sepol.COND_OR: 1,
-        sepol.COND_AND: 3,
-        sepol.COND_XOR: 2,
-        sepol.COND_EQ: 4,
-        sepol.COND_NEQ: 4}
+    _cond_expr_val_to_details = {
+        sepol.COND_NOT: ("!", 5, lambda x: not x),
+        sepol.COND_OR: ("||", 1, lambda x, y: x or y),
+        sepol.COND_AND: ("&&", 3, lambda x, y: x and y),
+        sepol.COND_XOR: ("^", 2, lambda x, y: x ^ y),
+        sepol.COND_EQ: ("==", 4, lambda x, y: x == y),
+        sepol.COND_NEQ: ("!=", 4, lambda x, y: x != y)}
 
     @staticmethod
     cdef inline ConditionalOperator factory(SELinuxPolicy policy, sepol.cond_expr_t *symbol):
@@ -265,8 +260,7 @@ cdef class ConditionalOperator(PolicyObject):
         cdef ConditionalOperator op = ConditionalOperator.__new__(ConditionalOperator)
         op.policy = policy
         op.unary = symbol.expr_type == sepol.COND_NOT
-        op.precedence = op._cond_expr_val_to_precedence[symbol.expr_type]
-        op.text = op._cond_expr_val_to_text[symbol.expr_type]
+        op.text, op.precedence, op.evaluate = op._cond_expr_val_to_details[symbol.expr_type]
         return op
 
     def __str__(self):
