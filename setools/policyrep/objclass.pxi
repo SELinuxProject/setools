@@ -31,7 +31,7 @@ cdef class Common(PolicySymbol):
 
     cdef:
         uintptr_t key
-        readonly dict _perm_table
+        dict _perm_table
 
     @staticmethod
     cdef inline Common factory(SELinuxPolicy policy, sepol.common_datum_t *symbol):
@@ -93,7 +93,7 @@ cdef class ObjClass(PolicySymbol):
         sepol.class_datum_t *handle
         uintptr_t key
         Common _common
-        readonly dict _perm_table
+        dict _perm_table
         list _defaults
         list _constraints
         list _validatetrans
@@ -284,6 +284,7 @@ cdef class PermissionVectorIterator(PolicyIterator):
     @staticmethod
     cdef factory(SELinuxPolicy policy, ObjClass tclass, uint32_t vector):
         """Factory method for access vectors."""
+        cdef Common com
         i = PermissionVectorIterator()
         i.policy = policy
         i.vector = vector
@@ -291,7 +292,8 @@ cdef class PermissionVectorIterator(PolicyIterator):
 
         i.perm_table = tclass._perm_table.copy()
         try:
-            i.perm_table.update(tclass.common._perm_table)
+            com = tclass.common
+            i.perm_table.update(com._perm_table)
         except NoCommon:
             pass
 
