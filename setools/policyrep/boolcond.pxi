@@ -29,9 +29,7 @@ cdef class Boolean(PolicySymbol):
 
     """A Boolean."""
 
-    cdef:
-        uintptr_t key
-        readonly object state
+    cdef readonly bint state
 
     @staticmethod
     cdef inline Boolean factory(SELinuxPolicy policy, sepol.cond_bool_datum_t *symbol):
@@ -42,10 +40,6 @@ cdef class Boolean(PolicySymbol):
         b.name = policy.boolean_value_to_name(symbol.s.value - 1)
         b.state = <bint>symbol.state
         return b
-
-    def _eq(self, Boolean other):
-        """Low-level equality check (C pointers)."""
-        return self.key == other.key
 
     def statement(self):
         """The policy statement."""
@@ -74,6 +68,7 @@ cdef class Conditional(PolicyObject):
             c = Conditional.__new__(Conditional)
             _cond_cache[<uintptr_t>symbol] = c
             c.policy = policy
+            c.key = <uintptr_t>symbol
             c.handle = symbol
             c._postfix_expression = []
             booleans = []
@@ -144,10 +139,6 @@ cdef class Conditional(PolicyObject):
             return self._eq(other)
         except TypeError:
             return str(self) == str(other)
-
-    def _eq(self, Conditional other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
 
     def evaluate(self, **kwargs):
         """
@@ -259,6 +250,7 @@ cdef class ConditionalOperator(PolicyObject):
         """Factory function for conditional operators."""
         cdef ConditionalOperator op = ConditionalOperator.__new__(ConditionalOperator)
         op.policy = policy
+        op.key = <uintptr_t>symbol
         op.unary = symbol.expr_type == sepol.COND_NOT
         op.text, op.precedence, op.evaluate = op._cond_expr_val_to_details[symbol.expr_type]
         return op

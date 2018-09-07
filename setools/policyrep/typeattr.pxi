@@ -45,12 +45,7 @@ cdef class BaseType(PolicySymbol):
 
     """Type/attribute base class."""
 
-    cdef:
-        sepol.type_datum_t *handle
-
-    def _eq(self, BaseType other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
+    cdef sepol.type_datum_t *handle
 
     def expand(self):
         """Generator that expands this attribute into its member types."""
@@ -91,6 +86,7 @@ cdef class Type(BaseType):
             t = Type.__new__(Type)
             _type_cache[<uintptr_t>symbol] = t
             t.policy = policy
+            t.key = <uintptr_t>symbol
             t.handle = symbol
             t.value = symbol.s.value
             t.name = policy.type_value_to_name(symbol.s.value - 1)
@@ -161,6 +157,7 @@ cdef class TypeAttribute(BaseType):
             a = TypeAttribute.__new__(TypeAttribute)
             _typeattr_cache[<uintptr_t>symbol] = a
             a.policy = policy
+            a.key = <uintptr_t>symbol
             a.handle = symbol
             a.name = policy.type_value_to_name(symbol.s.value - 1)
             return a

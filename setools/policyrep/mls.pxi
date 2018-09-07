@@ -63,6 +63,7 @@ cdef class Category(PolicySymbol):
         except KeyError:
             c = Category.__new__(Category)
             c.policy = policy
+            c.key = <uintptr_t>symbol
             c.name = policy.category_value_to_name(symbol.s.value - 1)
             c._value = symbol.s.value
             _cat_cache[<uintptr_t>symbol] = c
@@ -74,10 +75,6 @@ cdef class Category(PolicySymbol):
     def __lt__(self, other):
         # Comparison based on their index instead of their names.
         return self._value < other._value
-
-    def _eq(self, Category other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
 
     cdef inline void _load_aliases(self):
         """Helper method to load aliases."""
@@ -129,6 +126,7 @@ cdef class Sensitivity(PolicySymbol):
             s = Sensitivity.__new__(Sensitivity)
             _sens_cache[<uintptr_t>symbol] = s
             s.policy = policy
+            s.key = <uintptr_t>symbol
             s.handle = symbol
             s.name = policy.level_value_to_name(symbol.level.sens - 1)
             s._value = symbol.level.sens
@@ -148,10 +146,6 @@ cdef class Sensitivity(PolicySymbol):
 
     def __lt__(self, other):
         return self._value < other._value
-
-    def _eq(self, Sensitivity other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
 
     cdef inline void _load_aliases(self):
         """Helper method to load aliases."""

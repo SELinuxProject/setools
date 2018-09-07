@@ -24,7 +24,6 @@ cdef class PolicyRule(PolicyObject):
 
 
     cdef:
-        uintptr_t key
         readonly object ruletype
         readonly object source
         readonly object target
@@ -34,9 +33,6 @@ cdef class PolicyRule(PolicyObject):
 
     def __str__(self):
         raise NotImplementedError
-
-    def _eq(self, PolicyRule other):
-        return self.key == other.key
 
     @property
     def conditional(self):

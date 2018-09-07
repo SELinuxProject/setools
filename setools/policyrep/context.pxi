@@ -23,7 +23,6 @@ cdef class Context(PolicyObject):
     """A SELinux security context/security attribute."""
 
     cdef:
-        uintptr_t key
         readonly User user
         readonly Role role
         readonly Type type_
@@ -49,10 +48,6 @@ cdef class Context(PolicyObject):
             return "{0.user}:{0.role}:{0.type_}:{0.range_}".format(self)
         else:
             return "{0.user}:{0.role}:{0.type_}".format(self)
-
-    def _eq(self, Context other):
-        """Low-level equality check (C pointers)."""
-        return self.key == other.key
 
     @property
     def range_(self):

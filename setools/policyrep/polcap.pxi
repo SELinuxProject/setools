@@ -31,13 +31,15 @@ cdef class PolicyCapability(PolicySymbol):
         r.name = intern(sepol.sepol_polcap_getname(bit))
         return r
 
-    def _eq(self, PolicyCapability other):
-        """Low-level equality check."""
-        return self.policy == other.policy \
-            and self.name == other.name
+    def __eq__(self, other):
+        try:
+            return self.policy == other.policy \
+                and self.name == other.name
+        except AttributeError:
+            return self.name == str(other)
 
-    def statement(self):
-        return "policycap {0};".format(self.name)
+    def __hash__(self):
+        return hash(self.name)
 
 
 cdef class PolicyCapabilityIterator(EbitmapIterator):

@@ -30,7 +30,6 @@ cdef class Common(PolicySymbol):
     """A common permission set."""
 
     cdef:
-        uintptr_t key
         dict _perm_table
 
     @staticmethod
@@ -69,10 +68,6 @@ cdef class Common(PolicySymbol):
             _common_cache[<uintptr_t>symbol] = c
             return c
 
-    def _eq(self, Common other):
-        """Low-level equality check (C pointers)."""
-        return self.key == other.key
-
     def __contains__(self, other):
         return other in self.perms
 
@@ -91,7 +86,6 @@ cdef class ObjClass(PolicySymbol):
 
     cdef:
         sepol.class_datum_t *handle
-        uintptr_t key
         Common _common
         dict _perm_table
         list _defaults
@@ -174,10 +168,6 @@ cdef class ObjClass(PolicySymbol):
             pass
 
         return other in self.perms
-
-    def _eq(self, ObjClass other):
-        """Low-level equality check (C pointers)."""
-        return self.key == other.key
 
     @property
     def common(self):

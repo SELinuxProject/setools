@@ -23,9 +23,7 @@ cdef class Role(PolicySymbol):
 
     """A role."""
 
-    cdef:
-        uintptr_t key
-        frozenset _types
+    cdef frozenset _types
 
     @staticmethod
     cdef inline Role factory(SELinuxPolicy policy, sepol.role_datum_t *symbol):
@@ -36,10 +34,6 @@ cdef class Role(PolicySymbol):
         r.name = policy.role_value_to_name(symbol.s.value - 1)
         r._types = frozenset(TypeEbitmapIterator.factory_from_set(policy, &symbol.types))
         return r
-
-    def _eq(self, Role other):
-        """Low-level equality check (C pointers)."""
-        return self.key == other.key
 
     @property
     def dominated_roles(self):

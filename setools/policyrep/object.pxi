@@ -25,7 +25,9 @@ cdef class PolicyObject:
 
     """This is a base class for all policy objects."""
 
-    cdef readonly SELinuxPolicy policy
+    cdef:
+        readonly SELinuxPolicy policy
+        uintptr_t key
 
     def __hash__(self):
         return hash(str(self))
@@ -52,6 +54,10 @@ cdef class PolicyObject:
         except TypeError:
             return str(self) == str(other)
 
+    cdef inline bint _eq(self, PolicyObject other):
+        """Low-level equality check (C pointers)."""
+        return self.key == other.key
+
     def __ne__(self, other):
         return not self == other
 
@@ -61,9 +67,6 @@ cdef class PolicyObject:
 
     def __repr__(self):
         return "<{0.__class__.__name__}({1}, \"{0}\")>".format(self, repr(self.policy))
-
-    def _eq(self, other):
-        raise NotImplementedError
 
     def statement(self):
         """
@@ -87,13 +90,7 @@ cdef class Ocontext(PolicyObject):
 
     """Base class for most in-policy labeling statements, (portcon, nodecon, etc.)"""
 
-    cdef:
-        uintptr_t key
-        readonly Context context
-
-    def _eq(self, Ocontext other):
-        """Low-level equality check (C pointers)."""
-        return self.key == other.key
+    cdef readonly Context context
 
     def statement(self):
         return str(self)

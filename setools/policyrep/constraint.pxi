@@ -44,10 +44,6 @@ cdef class BaseConstraint(PolicyObject):
     def __str__(self):
         raise NotImplementedError
 
-    def _eq(self, BaseConstraint other):
-        """Low-level equality check (C pointers)."""
-        return self.handle == other.handle
-
     @property
     def roles(self):
         """The roles used in the expression."""
@@ -93,6 +89,7 @@ cdef class Constraint(BaseConstraint):
         """Factory function for creating Constraint objects."""
         cdef Constraint c = Constraint.__new__(Constraint)
         c.policy = policy
+        c.key = <uintptr_t>symbol
         c.handle = symbol
         c.tclass = tclass
         c.perms = frozenset(PermissionVectorIterator.factory(policy, tclass, symbol.permissions))
@@ -120,6 +117,7 @@ cdef class Validatetrans(BaseConstraint):
         """Factory function for creating Validatetrans objects."""
         cdef Validatetrans v = Validatetrans.__new__(Validatetrans)
         v.policy = policy
+        v.key = <uintptr_t>symbol
         v.handle = symbol
         v.tclass = tclass
         v.expression = ConstraintExpression.factory(policy, symbol.expr)
@@ -357,6 +355,7 @@ cdef class ConstraintExprNode(PolicyObject):
         """Factory function for creating ConstraintExprNode objects."""
         cdef ConstraintExprNode n = ConstraintExprNode.__new__(ConstraintExprNode)
         n.policy = policy
+        n.key = <uintptr_t>symbol
         n.handle = symbol
         n.expression_type = symbol.expr_type
         n.operator = symbol.op
