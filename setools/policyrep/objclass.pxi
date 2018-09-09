@@ -85,7 +85,6 @@ cdef class ObjClass(PolicySymbol):
     """An object class."""
 
     cdef:
-        sepol.class_datum_t *handle
         Common _common
         dict _perm_table
         list _defaults
@@ -116,7 +115,6 @@ cdef class ObjClass(PolicySymbol):
             c = ObjClass.__new__(ObjClass)
             _objclass_cache[<uintptr_t>symbol] = c
             c.policy = policy
-            c.handle = symbol
             c.key = <uintptr_t>symbol
             c.nprim = symbol.permissions.nprim
             c.name = policy.class_value_to_name(symbol.s.value - 1)
@@ -184,9 +182,10 @@ cdef class ObjClass(PolicySymbol):
 
     def constraints(self):
         """Iterator for the constraints that apply to this class."""
+        cdef sepol.class_datum_t *symbol = <sepol.class_datum_t *>self.key
         if self._constraints is None:
             self._constraints = list(ConstraintIterator.factory(self.policy, self,
-                                                                self.handle.constraints))
+                                                                symbol.constraints))
 
         return iter(self._constraints)
 
@@ -216,9 +215,10 @@ cdef class ObjClass(PolicySymbol):
 
     def validatetrans(self):
         """Iterator for validatetrans that apply to this class."""
+        cdef sepol.class_datum_t *symbol = <sepol.class_datum_t *>self.key
         if self._validatetrans is None:
             self._validatetrans = list(ValidatetransIterator.factory(self.policy, self,
-                                                                     self.handle.validatetrans))
+                                                                     symbol.validatetrans))
 
         return iter(self._validatetrans)
 

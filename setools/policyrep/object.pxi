@@ -44,18 +44,19 @@ cdef class PolicyObject:
     def __eq__(self, other):
         try:
             # This is a regular Python function, so it cannot
-            # access the handle (C) attribute since it is not
-            # a Python object.  Call the low-level _eq method
-            # for doing the pointer comparison.  If other is
-            # not the same class as this, TypeError will be
-            # raised as the _eq method must specify the type
-            # so that handle is accessible.
+            # access the other.key (C) attribute since it is not
+            # a public attribute.
             return self._eq(other)
         except TypeError:
             return str(self) == str(other)
 
     cdef inline bint _eq(self, PolicyObject other):
-        """Low-level equality check (C pointers)."""
+        """
+        Low-level equality check for policy objects (C pointers).
+
+        Exceptions:
+        TypeError   other is not a PolicyObject.
+        """
         return self.key == other.key
 
     def __ne__(self, other):

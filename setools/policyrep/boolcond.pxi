@@ -51,7 +51,6 @@ cdef class Conditional(PolicyObject):
     """A conditional policy block."""
 
     cdef:
-        sepol.cond_node_t *handle
         list _postfix_expression
         readonly frozenset booleans
 
@@ -69,7 +68,6 @@ cdef class Conditional(PolicyObject):
             _cond_cache[<uintptr_t>symbol] = c
             c.policy = policy
             c.key = <uintptr_t>symbol
-            c.handle = symbol
             c._postfix_expression = []
             booleans = []
 
@@ -132,7 +130,7 @@ cdef class Conditional(PolicyObject):
         return ' '.join(flatten_list(stack))
 
     def __hash__(self):
-        return hash(<uintptr_t>self.handle)
+        return hash(self.key)
 
     def __eq__(self, other):
         try:
@@ -179,14 +177,16 @@ cdef class Conditional(PolicyObject):
 
     def false_rules(self):
         """An iterator over the rules in the false (else) block of the conditional."""
-        return ConditionalTERuleIterator.factory(self.policy, self.handle.false_list, self, False)
+        cdef sepol.cond_node_t *symbol = <sepol.cond_node_t *>self.key
+        return ConditionalTERuleIterator.factory(self.policy, symbol.false_list, self, False)
 
     def statement(self):
         raise NoStatement
 
     def true_rules(self):
         """An iterator over the rules in the true block of the conditional."""
-        return ConditionalTERuleIterator.factory(self.policy, self.handle.true_list, self, True)
+        cdef sepol.cond_node_t *symbol = <sepol.cond_node_t *>self.key
+        return ConditionalTERuleIterator.factory(self.policy, symbol.true_list, self, True)
 
     def truth_table(self):
         """

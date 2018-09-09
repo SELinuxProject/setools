@@ -30,8 +30,6 @@ cdef dict _typeattr_cache = {}
 #
 cdef inline BaseType type_or_attr_factory(SELinuxPolicy policy, sepol.type_datum_t *symbol):
     """Factory function for creating type or attribute objects."""
-    cdef sepol.type_datum_t *handle
-
     if symbol.flavor == sepol.TYPE_ATTRIB:
         return TypeAttribute.factory(policy, symbol)
     else:
@@ -44,8 +42,6 @@ cdef inline BaseType type_or_attr_factory(SELinuxPolicy policy, sepol.type_datum
 cdef class BaseType(PolicySymbol):
 
     """Type/attribute base class."""
-
-    cdef sepol.type_datum_t *handle
 
     def expand(self):
         """Generator that expands this attribute into its member types."""
@@ -87,7 +83,6 @@ cdef class Type(BaseType):
             _type_cache[<uintptr_t>symbol] = t
             t.policy = policy
             t.key = <uintptr_t>symbol
-            t.handle = symbol
             t.value = symbol.s.value
             t.name = policy.type_value_to_name(symbol.s.value - 1)
             t.ispermissive = <bint>symbol.flags & sepol.TYPE_FLAGS_PERMISSIVE
@@ -100,8 +95,9 @@ cdef class Type(BaseType):
 
     cdef inline void _load_attributes(self):
         """Helper method to load attributes."""
+        cdef sepol.type_datum_t *symbol = <sepol.type_datum_t *>self.key
         if self._attrs is None:
-            self._attrs = list(TypeAttributeEbitmapIterator.factory(self.policy, &self.handle.types))
+            self._attrs = list(TypeAttributeEbitmapIterator.factory(self.policy, &symbol.types))
 
     def expand(self):
         """Generator that expands this into its member types."""
@@ -158,7 +154,6 @@ cdef class TypeAttribute(BaseType):
             _typeattr_cache[<uintptr_t>symbol] = a
             a.policy = policy
             a.key = <uintptr_t>symbol
-            a.handle = symbol
             a.name = policy.type_value_to_name(symbol.s.value - 1)
             return a
 
@@ -171,8 +166,9 @@ cdef class TypeAttribute(BaseType):
 
     def expand(self):
         """Generator that expands this attribute into its member types."""
+        cdef sepol.type_datum_t *symbol = <sepol.type_datum_t *>self.key
         if self._types is None:
-            self._types = list(TypeEbitmapIterator.factory(self.policy, &self.handle.types))
+            self._types = list(TypeEbitmapIterator.factory(self.policy, &symbol.types))
 
         return iter(self._types)
 

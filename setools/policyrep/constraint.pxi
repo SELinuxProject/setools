@@ -36,7 +36,6 @@ cdef class BaseConstraint(PolicyObject):
     """Base class for constraint rules."""
 
     cdef:
-        sepol.constraint_node_t *handle
         readonly object ruletype
         readonly object tclass
         readonly ConstraintExpression expression
@@ -90,7 +89,6 @@ cdef class Constraint(BaseConstraint):
         cdef Constraint c = Constraint.__new__(Constraint)
         c.policy = policy
         c.key = <uintptr_t>symbol
-        c.handle = symbol
         c.tclass = tclass
         c.perms = frozenset(PermissionVectorIterator.factory(policy, tclass, symbol.permissions))
         c.expression = ConstraintExpression.factory(policy, symbol.expr)
@@ -118,7 +116,6 @@ cdef class Validatetrans(BaseConstraint):
         cdef Validatetrans v = Validatetrans.__new__(Validatetrans)
         v.policy = policy
         v.key = <uintptr_t>symbol
-        v.handle = symbol
         v.tclass = tclass
         v.expression = ConstraintExpression.factory(policy, symbol.expr)
         v.ruletype = ConstraintRuletype.mlsvalidatetrans if v.expression.mls else \
@@ -290,7 +287,6 @@ cdef class ConstraintExprNode(PolicyObject):
     """
 
     cdef:
-        sepol.constraint_expr_t *handle
         uint32_t expression_type
         uint32_t operator
         uint32_t _symbol_type
@@ -356,7 +352,6 @@ cdef class ConstraintExprNode(PolicyObject):
         cdef ConstraintExprNode n = ConstraintExprNode.__new__(ConstraintExprNode)
         n.policy = policy
         n.key = <uintptr_t>symbol
-        n.handle = symbol
         n.expression_type = symbol.expr_type
         n.operator = symbol.op
 

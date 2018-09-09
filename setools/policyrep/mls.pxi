@@ -47,7 +47,6 @@ cdef class Category(PolicySymbol):
     """An MLS category."""
 
     cdef:
-        sepol.cat_datum_t *handle
         readonly uint32_t _value
         list _aliases
 
@@ -108,7 +107,6 @@ cdef class Sensitivity(PolicySymbol):
     """An MLS sensitivity"""
 
     cdef:
-        sepol.level_datum_t *handle
         readonly uint32_t _value
         list _aliases
         LevelDecl _leveldecl
@@ -127,7 +125,6 @@ cdef class Sensitivity(PolicySymbol):
             _sens_cache[<uintptr_t>symbol] = s
             s.policy = policy
             s.key = <uintptr_t>symbol
-            s.handle = symbol
             s.name = policy.level_value_to_name(symbol.level.sens - 1)
             s._value = symbol.level.sens
             return s
@@ -159,8 +156,9 @@ cdef class Sensitivity(PolicySymbol):
 
     def level_decl(self):
         """Get the level declaration corresponding to this sensitivity."""
+        cdef sepol.level_datum_t *symbol = <sepol.level_datum_t *>self.key
         if self._leveldecl is None:
-            self._leveldecl = LevelDecl.factory(self.policy, self.handle)
+            self._leveldecl = LevelDecl.factory(self.policy, symbol)
 
         return self._leveldecl
 
