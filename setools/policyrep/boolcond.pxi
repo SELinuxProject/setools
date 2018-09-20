@@ -142,23 +142,22 @@ cdef class Conditional(PolicyObject):
         """
         Evaluate the expression with the stated boolean values.
 
-        Keyword Parameters:
-        Each keyword parameter name corresponds to a boolean name
-        in the expression
+        Keyword Parameters: bool_name=True|False
+        Each keyword parameter name corresponds to a Boolean name
+        in the expression and the state to use in the evaluation.
+        If a Boolean value is not set, its default value is used.
+        Extra values are ignored.
 
         Return:     bool
         """
         cdef:
-            list bools = sorted(self.booleans)
             list stack = []
+            dict bool_values = {b.name: kwargs.get(b.name, b.state) for b in self.booleans}
             ConditionalOperator operator
-
-        if sorted(kwargs.keys()) != bools:
-            raise ValueError("All Booleans must have a specified value.")
 
         for expr_node in self.expression():
             if isinstance(expr_node, Boolean):
-                stack.append(kwargs[expr_node])
+                stack.append(<bint>bool_values[expr_node])
             elif expr_node.unary:
                 operand = stack.pop()
                 operator = expr_node
