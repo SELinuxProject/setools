@@ -46,6 +46,21 @@ cdef class PolicyRule(PolicyObject):
         # Most rules cannot be conditional.
         raise RuleNotConditional
 
+    def enabled(self, **kwargs):
+        """
+        Determine if the rule is enabled, given the stated boolean values.
+
+        Keyword Parameters: bool_name=True|False
+        Each keyword parameter name corresponds to a Boolean name
+        in the expression and the state to use in the evaluation.
+        If a Boolean value is not set, its default value is used.
+        Extra values are ignored.
+
+        Return:     bool
+        """
+        # Most rule types cannot be conditional, thus are always enabled.
+        return True
+
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         raise NotImplementedError

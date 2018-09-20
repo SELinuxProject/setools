@@ -85,6 +85,26 @@ cdef class BaseTERule(PolicyRule):
         else:
             return self._conditional_block
 
+    def enabled(self, **kwargs):
+        """
+        Determine if the rule is enabled, given the stated boolean values.
+
+        Keyword Parameters: bool_name=True|False
+        Each keyword parameter name corresponds to a Boolean name
+        in the expression and the state to use in the evaluation.
+        If a Boolean value is not set, its default value is used.
+        Extra values are ignored.
+
+        Return:     bool
+        """
+        if self._conditional is None:
+            return True
+
+        if self._conditional.evaluate(kwargs):
+            return self._conditional_block
+        else:
+            return not self._conditional_block
+
 
 cdef class AVRule(BaseTERule):
 
