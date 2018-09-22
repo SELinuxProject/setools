@@ -1,5 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
-# Copyright 2017, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -22,7 +22,6 @@ cdef class PolicyRule(PolicyObject):
 
     """This is base class for policy rules."""
 
-
     cdef:
         readonly object ruletype
         readonly object source
@@ -37,13 +36,13 @@ cdef class PolicyRule(PolicyObject):
     @property
     def conditional(self):
         """The conditional expression for this rule."""
-        # Most rules cannot be conditional.
+        # Most rule types cannot be conditional.
         raise RuleNotConditional
 
     @property
     def conditional_block(self):
         """The conditional block of the rule (T/F)"""
-        # Most rules cannot be conditional.
+        # Most rule types cannot be conditional.
         raise RuleNotConditional
 
     def enabled(self, **kwargs):
