@@ -110,7 +110,7 @@ cdef class AVRule(BaseTERule):
 
     """An access vector type enforcement rule."""
 
-    cdef public set perms
+    cdef readonly frozenset perms
 
     @staticmethod
     cdef inline AVRule factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.avtab_datum_t *datum,
@@ -123,7 +123,7 @@ cdef class AVRule(BaseTERule):
         r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
         r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
-        r.perms = set(p for p in PermissionVectorIterator.factory(policy, r.tclass,
+        r.perms = frozenset(p for p in PermissionVectorIterator.factory(policy, r.tclass,
                       ~datum.data if key.specified & sepol.AVTAB_AUDITDENY else datum.data))
         r._conditional = conditional
         r._conditional_block = conditional_block
@@ -184,7 +184,7 @@ cdef class AVRule(BaseTERule):
             yield self
 
 
-cdef class IoctlSet(set):
+cdef class IoctlSet(frozenset):
 
     """
     A set with overridden string functions which compresses
@@ -243,7 +243,7 @@ cdef class AVRuleXperm(BaseTERule):
     """An extended permission access vector type enforcement rule."""
 
     cdef:
-        public IoctlSet perms
+        readonly IoctlSet perms
         readonly str xperm_type
 
     @staticmethod
@@ -253,7 +253,7 @@ cdef class AVRuleXperm(BaseTERule):
         cdef:
             str xperm_type
             sepol.avtab_extended_perms_t *xperms = datum.xperms
-            IoctlSet perms = IoctlSet()
+            set perms = set()
             size_t curr = 0
             size_t len = sizeof(xperms.perms) * sepol.EXTENDED_PERMS_LEN
 
@@ -295,7 +295,7 @@ cdef class AVRuleXperm(BaseTERule):
         r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
         r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
-        r.perms = perms
+        r.perms = IoctlSet(perms)
         r.extended = True
         r.xperm_type = xperm_type
         r._conditional = conditional
