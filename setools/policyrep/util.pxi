@@ -75,6 +75,7 @@ cdef void sepol_logging_callback(void *varg, sepol.sepol_handle_t * sh, const ch
     va_end(args)
 
     logging.getLogger("libsepol").debug(msg)
+    free(msg)
 
 
 cdef void ebitmap_set_bit(sepol.ebitmap_t * e, unsigned int bit, int value):
