@@ -84,7 +84,9 @@ class ObjClassDifference(Difference):
             with suppress(NoCommon):
                 right_perms |= right_class.common.perms
 
-            added_perms, removed_perms, matched_perms = self._set_diff(left_perms, right_perms)
+            added_perms, removed_perms, matched_perms = self._set_diff(left_perms,
+                                                                       right_perms,
+                                                                       unwrap=False)
 
             if added_perms or removed_perms:
                 self.modified_classes[left_class] = modified_classes_record(added_perms,

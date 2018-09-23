@@ -94,7 +94,7 @@ class CategoriesDifference(Difference):
             # Criteria for modified categories
             # 1. change to aliases
             added_aliases, removed_aliases, matched_aliases = self._set_diff(
-                left_category.aliases(), right_category.aliases())
+                left_category.aliases(), right_category.aliases(), unwrap=False)
 
             if added_aliases or removed_aliases:
                 self.modified_categories[left_category] = modified_cat_record(added_aliases,
@@ -138,7 +138,7 @@ class SensitivitiesDifference(Difference):
             # Criteria for modified sensitivities
             # 1. change to aliases
             added_aliases, removed_aliases, matched_aliases = self._set_diff(
-                left_sens.aliases(), right_sens.aliases())
+                left_sens.aliases(), right_sens.aliases(), unwrap=False)
 
             if added_aliases or removed_aliases:
                 self.modified_sensitivities[left_sens] = modified_sens_record(added_aliases,

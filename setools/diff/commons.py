@@ -54,7 +54,8 @@ class CommonDifference(Difference):
             # Criteria for modified commons
             # 1. change to permissions
             added_perms, removed_perms, matched_perms = self._set_diff(left_common.perms,
-                                                                       right_common.perms)
+                                                                       right_common.perms,
+                                                                       unwrap=False)
 
             if added_perms or removed_perms:
                 self.modified_commons[left_common] = modified_commons_record(added_perms,

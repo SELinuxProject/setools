@@ -96,7 +96,8 @@ class TypesDifference(Difference):
                 (SymbolWrapper(a) for a in right_type.attributes()))
 
             added_aliases, removed_aliases, matched_aliases = self._set_diff(left_type.aliases(),
-                                                                             right_type.aliases())
+                                                                             right_type.aliases(),
+                                                                             unwrap=False)
 
             left_permissive = left_type.ispermissive
             right_permissive = right_type.ispermissive

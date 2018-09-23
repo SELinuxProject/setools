@@ -72,7 +72,7 @@ class Difference:
                 yield Wrapper(expanded_rule)
 
     @staticmethod
-    def _set_diff(left, right, key=None):
+    def _set_diff(left, right, key=None, unwrap=True):
         """
         Standard diff of two sets.
 
@@ -121,12 +121,11 @@ class Difference:
 
             matched_items.add((left, right))
 
-        try:
-            # unwrap the objects
+        if unwrap:
             return set(i.origin for i in added_items), \
                 set(i.origin for i in removed_items), \
                 set((left.origin, right.origin) for (left, right) in matched_items)
-        except AttributeError:
+        else:
             return added_items, removed_items, matched_items
 
 
