@@ -53,7 +53,7 @@ def _avrule_expand_generator(rule_list, WrapperClass):
             # be unioned together have the same hash, so this will union
             # the permissions together.
             try:
-                items[expanded_wrapped_rule].origin.perms |= expanded_wrapped_rule.origin.perms
+                items[expanded_wrapped_rule].perms |= expanded_wrapped_rule.perms
             except KeyError:
                 items[expanded_wrapped_rule] = expanded_wrapped_rule
 
@@ -82,26 +82,28 @@ def av_diff_template(ruletype):
 
         added, removed, matched = self._set_diff(
             _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleWrapper),
-            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper))
+            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper),
+            unwrap=False)
 
         modified = []
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to permissions
             added_perms, removed_perms, matched_perms = self._set_diff(left_rule.perms,
-                                                                       right_rule.perms)
+                                                                       right_rule.perms,
+                                                                       unwrap=False)
 
             # the final set comprehension is to avoid having lists
             # like [("perm1", "perm1"), ("perm2", "perm2")], as the
             # matched_perms return from _set_diff is a set of tuples
             if added_perms or removed_perms:
-                modified.append(modified_avrule_record(left_rule,
+                modified.append(modified_avrule_record(left_rule.origin,
                                                        added_perms,
                                                        removed_perms,
                                                        set(p[0] for p in matched_perms)))
 
-        setattr(self, "added_{0}s".format(ruletype), added)
-        setattr(self, "removed_{0}s".format(ruletype), removed)
+        setattr(self, "added_{0}s".format(ruletype), set(a.origin for a in added))
+        setattr(self, "removed_{0}s".format(ruletype), set(r.origin for r in removed))
         setattr(self, "modified_{0}s".format(ruletype), modified)
 
     return diff
@@ -129,26 +131,28 @@ def avx_diff_template(ruletype):
 
         added, removed, matched = self._set_diff(
             _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
-            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper))
+            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper),
+            unwrap=False)
 
         modified = []
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to permissions
             added_perms, removed_perms, matched_perms = self._set_diff(left_rule.perms,
-                                                                       right_rule.perms)
+                                                                       right_rule.perms,
+                                                                       unwrap=False)
 
             # the final set comprehension is to avoid having lists
             # like [("perm1", "perm1"), ("perm2", "perm2")], as the
             # matched_perms return from _set_diff is a set of tuples
             if added_perms or removed_perms:
-                modified.append(modified_avrule_record(left_rule,
+                modified.append(modified_avrule_record(left_rule.origin,
                                                        IoctlSet(added_perms),
                                                        IoctlSet(removed_perms),
                                                        IoctlSet(p[0] for p in matched_perms)))
 
-        setattr(self, "added_{0}s".format(ruletype), added)
-        setattr(self, "removed_{0}s".format(ruletype), removed)
+        setattr(self, "added_{0}s".format(ruletype), set(a.origin for a in added))
+        setattr(self, "removed_{0}s".format(ruletype), set(r.origin for r in removed))
         setattr(self, "modified_{0}s".format(ruletype), modified)
 
     return diff
@@ -323,13 +327,14 @@ class AVRuleWrapper(Wrapper):
 
     """Wrap access vector rules to allow set operations."""
 
-    __slots__ = ("source", "target", "tclass", "conditional", "conditional_block")
+    __slots__ = ("source", "target", "tclass", "perms", "conditional", "conditional_block")
 
     def __init__(self, rule):
         self.origin = rule
         self.source = type_or_attr_wrapper_factory(rule.source)
         self.target = type_or_attr_wrapper_factory(rule.target)
         self.tclass = class_wrapper_factory(rule.tclass)
+        self.perms = rule.perms
         self.key = hash(rule)
 
         try:
@@ -359,7 +364,7 @@ class AVRuleXpermWrapper(Wrapper):
 
     """Wrap extended permission access vector rules to allow set operations."""
 
-    __slots__ = ("source", "target", "tclass", "xperm_type")
+    __slots__ = ("source", "target", "tclass", "xperm_type", "perms")
 
     def __init__(self, rule):
         self.origin = rule
@@ -367,6 +372,7 @@ class AVRuleXpermWrapper(Wrapper):
         self.target = type_or_attr_wrapper_factory(rule.target)
         self.tclass = class_wrapper_factory(rule.tclass)
         self.xperm_type = rule.xperm_type
+        self.perms = rule.perms
         self.key = hash(rule)
 
     def __hash__(self):
