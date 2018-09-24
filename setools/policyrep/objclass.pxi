@@ -31,6 +31,7 @@ cdef class Common(PolicySymbol):
 
     cdef:
         dict _perm_table
+        readonly frozenset perms
 
     @staticmethod
     cdef inline Common factory(SELinuxPolicy policy, sepol.common_datum_t *symbol):
@@ -65,16 +66,13 @@ cdef class Common(PolicySymbol):
 
                 bucket += 1
 
+            c.perms = frozenset(c._perm_table.values())
+
             _common_cache[<uintptr_t>symbol] = c
             return c
 
     def __contains__(self, other):
         return other in self.perms
-
-    @property
-    def perms(self):
-        """The set of the common's permissions."""
-        return set(self._perm_table.values())
 
     def statement(self):
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
@@ -90,6 +88,7 @@ cdef class ObjClass(PolicySymbol):
         list _defaults
         list _constraints
         list _validatetrans
+        readonly frozenset perms
         # class_datum_t->permissions.nprim
         # is needed for the permission iterator
         uint32_t nprim
@@ -139,6 +138,8 @@ cdef class ObjClass(PolicySymbol):
                     node = node.next
 
                 bucket += 1
+
+            c.perms = frozenset(c._perm_table.values())
 
             #
             # Load defaults
@@ -193,11 +194,6 @@ cdef class ObjClass(PolicySymbol):
         """Iterator for the defaults for this object class."""
         return iter(self._defaults)
 
-    @property
-    def perms(self):
-        """The set of the object class's permissions."""
-        return set(self._perm_table.values())
-
     def statement(self):
         stmt = "class {0}\n".format(self.name)
 
@@ -207,9 +203,8 @@ cdef class ObjClass(PolicySymbol):
             pass
 
         # a class that inherits may not have additional permissions
-        perms = self.perms
-        if len(perms) > 0:
-            stmt += "{{\n\t{0}\n}}".format('\n\t'.join(perms))
+        if len(self.perms) > 0:
+            stmt += "{{\n\t{0}\n}}".format('\n\t'.join(self.perms))
 
         return stmt
 
