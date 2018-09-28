@@ -60,6 +60,38 @@ class PolicyEnum(enum.Enum):
         except ValueError:
             return cls[value]
 
+
+class WeakKeyDefaultDict(weakref.WeakKeyDictionary):
+
+    """
+    A dictionary with a weak-referenced key and a default value.
+
+    This is a combination of WeakKeyDictionary and defaultdict
+    classes and has the interfaces of both, with the exception
+    of the constructor.
+
+    WeakKeyDefaultDict(default_factory, [dict])
+    """
+
+    def __init__(self, default_factory, *args):
+        self.default_factory = default_factory
+        super().__init__(args)
+
+    def __getitem__(self, key):
+        try:
+            return super().__getitem__(key)
+        except KeyError:
+            return self.__missing__(key)
+
+    def __missing__(self, key):
+        if self.default_factory is None:
+            raise KeyError(key)
+
+        defaultvalue = self.default_factory()
+        self.__setitem__(key, defaultvalue)
+        return defaultvalue
+
+
 #
 # Functions
 #

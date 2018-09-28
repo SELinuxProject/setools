@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-cdef dict _user_cache = {}
+cdef object _user_cache = WeakKeyDefaultDict(dict)
 
 
 cdef class User(PolicySymbol):
@@ -35,10 +35,10 @@ cdef class User(PolicySymbol):
         """Factory function for constructing User objects."""
         cdef User u
         try:
-            return _user_cache[<uintptr_t>symbol]
+            return _user_cache[policy][<uintptr_t>symbol]
         except KeyError:
             u = User.__new__(User)
-            _user_cache[<uintptr_t>symbol] = u
+            _user_cache[policy][<uintptr_t>symbol] = u
             u.policy = policy
             u.key = <uintptr_t>symbol
             u.name = policy.user_value_to_name(symbol.s.value - 1)

@@ -46,6 +46,7 @@ cdef class SELinuxPolicy:
         object log
         object constraint_counts
         object terule_counts
+        object __weakref__
 
         # Public attributes:
         readonly str path

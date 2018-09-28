@@ -18,8 +18,8 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-cdef dict _common_cache = {}
-cdef dict _objclass_cache = {}
+cdef object _common_cache = WeakKeyDefaultDict(dict)
+cdef object _objclass_cache = WeakKeyDefaultDict(dict)
 
 
 #
@@ -45,7 +45,7 @@ cdef class Common(PolicySymbol):
             dict perm_table
 
         try:
-            return _common_cache[<uintptr_t>symbol]
+            return _common_cache[policy][<uintptr_t>symbol]
         except KeyError:
             c = Common.__new__(Common)
             c.policy = policy
@@ -68,7 +68,7 @@ cdef class Common(PolicySymbol):
 
             c.perms = frozenset(c._perm_table.values())
 
-            _common_cache[<uintptr_t>symbol] = c
+            _common_cache[policy][<uintptr_t>symbol] = c
             return c
 
     def __contains__(self, other):
@@ -106,13 +106,13 @@ cdef class ObjClass(PolicySymbol):
             ObjClass c
 
         try:
-            return _objclass_cache[<uintptr_t>symbol]
+            return _objclass_cache[policy][<uintptr_t>symbol]
         except KeyError:
             #
             # Instantiate object class
             #
             c = ObjClass.__new__(ObjClass)
-            _objclass_cache[<uintptr_t>symbol] = c
+            _objclass_cache[policy][<uintptr_t>symbol] = c
             c.policy = policy
             c.key = <uintptr_t>symbol
             c.nprim = symbol.permissions.nprim

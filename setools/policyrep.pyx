@@ -32,6 +32,7 @@ import itertools
 import ipaddress
 import collections
 import enum
+import weakref
 
 cimport sepol
 cimport selinux

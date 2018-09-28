@@ -21,8 +21,8 @@
 #
 # Cache objects
 #
-cdef dict _type_cache = {}
-cdef dict _typeattr_cache = {}
+cdef object _type_cache = WeakKeyDefaultDict(dict)
+cdef object _typeattr_cache = WeakKeyDefaultDict(dict)
 
 
 #
@@ -77,10 +77,10 @@ cdef class Type(BaseType):
                 policy.type_value_to_name(symbol.s.value - 1)))
 
         try:
-            return _type_cache[<uintptr_t>symbol]
+            return _type_cache[policy][<uintptr_t>symbol]
         except KeyError:
             t = Type.__new__(Type)
-            _type_cache[<uintptr_t>symbol] = t
+            _type_cache[policy][<uintptr_t>symbol] = t
             t.policy = policy
             t.key = <uintptr_t>symbol
             t.value = symbol.s.value
@@ -148,10 +148,10 @@ cdef class TypeAttribute(BaseType):
                 policy.type_value_to_name(symbol.s.value - 1)))
 
         try:
-            return _typeattr_cache[<uintptr_t>symbol]
+            return _typeattr_cache[policy][<uintptr_t>symbol]
         except KeyError:
             a = TypeAttribute.__new__(TypeAttribute)
-            _typeattr_cache[<uintptr_t>symbol] = a
+            _typeattr_cache[policy][<uintptr_t>symbol] = a
             a.policy = policy
             a.key = <uintptr_t>symbol
             a.name = policy.type_value_to_name(symbol.s.value - 1)

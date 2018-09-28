@@ -19,9 +19,9 @@
 #
 # pylint: disable=protected-access
 
-cdef dict _cat_cache = {}
-cdef dict _sens_cache = {}
-cdef dict _leveldecl_cache = {}
+cdef object _cat_cache = WeakKeyDefaultDict(dict)
+cdef object _sens_cache = WeakKeyDefaultDict(dict)
+cdef object _leveldecl_cache = WeakKeyDefaultDict(dict)
 
 
 #
@@ -58,14 +58,14 @@ cdef class Category(PolicySymbol):
             raise MLSDisabled
 
         try:
-            return _cat_cache[<uintptr_t>symbol]
+            return _cat_cache[policy][<uintptr_t>symbol]
         except KeyError:
             c = Category.__new__(Category)
             c.policy = policy
             c.key = <uintptr_t>symbol
             c.name = policy.category_value_to_name(symbol.s.value - 1)
             c._value = symbol.s.value
-            _cat_cache[<uintptr_t>symbol] = c
+            _cat_cache[policy][<uintptr_t>symbol] = c
             return c
 
     def __hash__(self):
@@ -119,10 +119,10 @@ cdef class Sensitivity(PolicySymbol):
             raise MLSDisabled
 
         try:
-            return _sens_cache[<uintptr_t>symbol]
+            return _sens_cache[policy][<uintptr_t>symbol]
         except KeyError:
             s = Sensitivity.__new__(Sensitivity)
-            _sens_cache[<uintptr_t>symbol] = s
+            _sens_cache[policy][<uintptr_t>symbol] = s
             s.policy = policy
             s.key = <uintptr_t>symbol
             s.name = policy.level_value_to_name(symbol.level.sens - 1)
@@ -233,10 +233,10 @@ cdef class LevelDecl(BaseMLSLevel):
             raise MLSDisabled
 
         try:
-            return _leveldecl_cache[<uintptr_t>symbol]
+            return _leveldecl_cache[policy][<uintptr_t>symbol]
         except KeyError:
             l = LevelDecl.__new__(LevelDecl)
-            _leveldecl_cache[<uintptr_t>symbol] = l
+            _leveldecl_cache[policy][<uintptr_t>symbol] = l
             l.policy = policy
             l._categories = set(CategoryEbitmapIterator.factory(policy, &symbol.level.cat))
             # the datum for levels is also used for Sensitivity objects

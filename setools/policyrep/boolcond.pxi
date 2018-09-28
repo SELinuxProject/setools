@@ -20,7 +20,7 @@
 
 truth_table_row = collections.namedtuple("truth_table_row", ["values", "result"])
 
-cdef dict _cond_cache = {}
+cdef object _cond_cache = WeakKeyDefaultDict(dict)
 
 #
 # Classes
@@ -62,10 +62,10 @@ cdef class Conditional(PolicyObject):
             list booleans
 
         try:
-            return _cond_cache[<uintptr_t>symbol]
+            return _cond_cache[policy][<uintptr_t>symbol]
         except KeyError:
             c = Conditional.__new__(Conditional)
-            _cond_cache[<uintptr_t>symbol] = c
+            _cond_cache[policy][<uintptr_t>symbol] = c
             c.policy = policy
             c.key = <uintptr_t>symbol
             c._postfix_expression = []
