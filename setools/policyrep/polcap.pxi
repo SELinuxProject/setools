@@ -41,6 +41,9 @@ cdef class PolicyCapability(PolicySymbol):
     def __hash__(self):
         return hash(self.name)
 
+    def statement(self):
+        return "policycap {0};".format(self)
+
 
 cdef class PolicyCapabilityIterator(EbitmapIterator):
 

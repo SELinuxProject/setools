@@ -64,6 +64,9 @@ cdef class Bounds(PolicyObject):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
+    def statement(self):
+        return str(self)
+
 
 #
 # Iterators

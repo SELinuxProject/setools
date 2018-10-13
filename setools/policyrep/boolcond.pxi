@@ -257,6 +257,9 @@ cdef class ConditionalOperator(PolicyObject):
     def __str__(self):
         return self.text
 
+    def statement(self):
+        raise NoStatement
+
 
 #
 # Iterators

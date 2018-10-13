@@ -271,6 +271,9 @@ cdef class ConstraintExpression(PolicyObject):
 
         return self._infix
 
+    def statement(self):
+        raise NoStatement
+
 
 cdef class ConstraintExprNode(PolicyObject):
 
@@ -436,6 +439,9 @@ cdef class ConstraintExprNode(PolicyObject):
             raise AttributeError("symbol_type")
 
         return self._symbol_type
+
+    def statement(self):
+        raise NoStatement
 
 
 #
