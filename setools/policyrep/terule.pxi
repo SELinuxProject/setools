@@ -130,25 +130,6 @@ cdef class AVRule(BaseTERule):
         r.origin = None
         return r
 
-    def __str__(self):
-        if not self.rule_string:
-            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
-
-            # allow/dontaudit/auditallow/neverallow rules
-            perms = self.perms
-            if len(perms) > 1:
-                self.rule_string += "{{ {0} }};".format(' '.join(sorted(perms)))
-            else:
-                # convert to list since sets cannot be indexed
-                self.rule_string += "{0};".format(list(perms)[0])
-
-            try:
-                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-            except RuleNotConditional:
-                pass
-
-        return self.rule_string
-
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".
             format(self, self._conditional, self._conditional_block))
@@ -182,6 +163,25 @@ cdef class AVRule(BaseTERule):
         else:
             # this rule is already expanded.
             yield self
+
+    def statement(self):
+        if not self.rule_string:
+            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
+
+            # allow/dontaudit/auditallow/neverallow rules
+            perms = self.perms
+            if len(perms) > 1:
+                self.rule_string += "{{ {0} }};".format(' '.join(sorted(perms)))
+            else:
+                # convert to list since sets cannot be indexed
+                self.rule_string += "{0};".format(list(perms)[0])
+
+            try:
+                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+            except RuleNotConditional:
+                pass
+
+        return self.rule_string
 
 
 cdef class IoctlSet(frozenset):
@@ -303,20 +303,6 @@ cdef class AVRuleXperm(BaseTERule):
         r.origin = None
         return r
 
-    def __str__(self):
-        if not self.rule_string:
-            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} ". \
-                                format(self)
-
-            # generate short permission notation
-            perms = self.perms
-            if perms.ranges() > 1:
-                self.rule_string += "{{ {0} }};".format(perms)
-            else:
-                self.rule_string += "{0};".format(perms)
-
-        return self.rule_string
-
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}|{1}|{2}".
             format(self, self._conditional, self._conditional_block))
@@ -353,6 +339,20 @@ cdef class AVRuleXperm(BaseTERule):
             # this rule is already expanded.
             yield self
 
+    def statement(self):
+        if not self.rule_string:
+            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} ". \
+                                format(self)
+
+            # generate short permission notation
+            perms = self.perms
+            if perms.ranges() > 1:
+                self.rule_string += "{{ {0} }};".format(perms)
+            else:
+                self.rule_string += "{0};".format(perms)
+
+        return self.rule_string
+
 
 cdef class TERule(BaseTERule):
 
@@ -376,19 +376,6 @@ cdef class TERule(BaseTERule):
         r._conditional = conditional
         r._conditional_block = conditional_block
         return r
-
-
-    def __str__(self):
-        if not self.rule_string:
-            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};". \
-                               format(self)
-
-            try:
-                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
-            except RuleNotConditional:
-                pass
-
-        return self.rule_string
 
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
@@ -429,6 +416,18 @@ cdef class TERule(BaseTERule):
             # this rule is already expanded.
             yield self
 
+    def statement(self):
+        if not self.rule_string:
+            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};". \
+                               format(self)
+
+            try:
+                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+            except RuleNotConditional:
+                pass
+
+        return self.rule_string
+
 
 cdef class FileNameTERule(BaseTERule):
 
@@ -453,10 +452,6 @@ cdef class FileNameTERule(BaseTERule):
         r.filename = intern(key.name)
         r.origin = None
         return r
-
-    def __str__(self):
-        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
-            format(self)
 
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.filename}|{1}|{2}".format(
@@ -498,6 +493,10 @@ cdef class FileNameTERule(BaseTERule):
         else:
             # this rule is already expanded.
             yield self
+
+    def statement(self):
+        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
+            format(self)
 
 
 #

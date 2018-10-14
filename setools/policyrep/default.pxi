@@ -126,9 +126,6 @@ cdef class Default(PolicyObject):
                 and self.tclass == other.tclass \
                 and self.default == other.default
 
-    def __str__(self):
-        return "{0.ruletype} {0.tclass} {0.default};".format(self)
-
     def __hash__(self):
         return hash("{0.ruletype}|{0.tclass}".format(self))
 
@@ -141,7 +138,7 @@ cdef class Default(PolicyObject):
         return self._default
 
     def statement(self):
-        return str(self)
+        return "{0.ruletype} {0.tclass} {0.default};".format(self)
 
 
 cdef class DefaultRange(Default):
@@ -149,9 +146,6 @@ cdef class DefaultRange(Default):
     """A default_range statement."""
 
     cdef readonly object default_range
-
-    def __str__(self):
-        return "{0.ruletype} {0.tclass} {0.default} {0.default_range};".format(self)
 
     def __eq__(self, other):
         return self.ruletype == other.ruletype \
@@ -165,3 +159,6 @@ cdef class DefaultRange(Default):
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
+
+    def statement(self):
+        return "{0.ruletype} {0.tclass} {0.default} {0.default_range};".format(self)

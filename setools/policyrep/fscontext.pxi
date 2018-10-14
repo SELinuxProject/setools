@@ -50,15 +50,15 @@ cdef class FSUse(Ocontext):
         f.context = Context.factory(policy, symbol.context)
         return f
 
-    def __str__(self):
-        return "{0.ruletype} {0.fs} {0.context};".format(self)
-
     def __hash__(self):
         return hash("{0.ruletype}|{0.fs}".format(self))
 
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
+
+    def statement(self):
+        return "{0.ruletype} {0.fs} {0.context};".format(self)
 
 
 cdef class GenfsFiletype(int):
@@ -117,15 +117,15 @@ cdef class Genfscon(Ocontext):
         g.context = Context.factory(policy, symbol.context)
         return g
 
-    def __str__(self):
-        return "genfscon {0.fs} {0.path} {0.filetype} {0.context}".format(self)
-
     def __hash__(self):
         return hash("genfscon|{0.fs}|{0.path}|{0.filetype}".format(self))
 
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
+
+    def statement(self):
+        return "genfscon {0.fs} {0.path} {0.filetype} {0.context}".format(self)
 
 
 #

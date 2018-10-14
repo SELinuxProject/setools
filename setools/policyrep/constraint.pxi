@@ -40,9 +40,6 @@ cdef class BaseConstraint(PolicyObject):
         readonly object tclass
         readonly ConstraintExpression expression
 
-    def __str__(self):
-        raise NotImplementedError
-
     @property
     def roles(self):
         """The roles used in the expression."""
@@ -67,9 +64,6 @@ cdef class BaseConstraint(PolicyObject):
     @property
     def perms(self):
         raise NotImplementedError
-
-    def statement(self):
-        return str(self)
 
     def postfix_expression(self):
         warnings.warn("Constraint postfix_expression() method will be removed in SETools 4.3 "
@@ -96,7 +90,7 @@ cdef class Constraint(BaseConstraint):
             else ConstraintRuletype.constrain
         return c
 
-    def __str__(self):
+    def statement(self):
         if len(self.perms) > 1:
             perms = "{{ {0} }}".format(' '.join(self.perms))
         else:
@@ -122,12 +116,12 @@ cdef class Validatetrans(BaseConstraint):
             ConstraintRuletype.validatetrans
         return v
 
-    def __str__(self):
-        return "{0.ruletype} {0.tclass} ({0.expression});".format(self)
-
     @property
     def perms(self):
         raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
+
+    def statement(self):
+        return "{0.ruletype} {0.tclass} ({0.expression});".format(self)
 
 
 cdef class ConstraintExpression(PolicyObject):

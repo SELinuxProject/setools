@@ -42,15 +42,15 @@ cdef class Netifcon(Ocontext):
         n.packet = Context.factory(policy, &symbol.context[1])
         return n
 
-    def __str__(self):
-        return "netifcon {0.netif} {0.context} {0.packet}".format(self)
-
     def __hash__(self):
         return hash("netifcon|{0.netif}".format(self))
 
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
+
+    def statement(self):
+        return "netifcon {0.netif} {0.context} {0.packet}".format(self)
 
 
 class NodeconIPVersion(PolicyEnum):
@@ -146,9 +146,6 @@ cdef class Nodecon(Ocontext):
         PyMem_Free(self._addr)
         PyMem_Free(self._mask)
 
-    def __str__(self):
-        return "nodecon {1} {0.context}".format(self, self.network.with_netmask.replace("/", " "))
-
     def __hash__(self):
         return hash("nodecon|{}".format(self.network.with_netmask))
 
@@ -169,6 +166,9 @@ cdef class Nodecon(Ocontext):
         warnings.warn("Nodecon.netmask will be removed in SETools 4.3, please use nodecon.network",
                       DeprecationWarning)
         return self._mask
+
+    def statement(self):
+        return "nodecon {1} {0.context}".format(self, self.network.with_netmask.replace("/", " "))
 
 
 class PortconProtocol(PolicyEnum):
@@ -200,20 +200,20 @@ cdef class Portcon(Ocontext):
         p.context = Context.factory(policy, symbol.context)
         return p
 
-    def __str__(self):
-        low, high = self.ports
-
-        if low == high:
-            return "portcon {0.protocol} {1} {0.context}".format(self, low)
-        else:
-            return "portcon {0.protocol} {1}-{2} {0.context}".format(self, low, high)
-
     def __hash__(self):
             return hash("portcon|{0.protocol}|{1.low}|{1.high}".format(self, self.ports))
 
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
+
+    def statement(self):
+        low, high = self.ports
+
+        if low == high:
+            return "portcon {0.protocol} {1} {0.context}".format(self, low)
+        else:
+            return "portcon {0.protocol} {1}-{2} {0.context}".format(self, low, high)
 
 
 #

@@ -41,7 +41,7 @@ cdef class Devicetreecon(Ocontext):
         d.context = Context.factory(policy, symbol.context)
         return d
 
-    def __str__(self):
+    def statement(self):
         return "devicetreecon {0.path} {0.context}".format(self)
 
 
@@ -61,7 +61,7 @@ cdef class Iomemcon(Ocontext):
         i.context = Context.factory(policy, symbol.context)
         return i
 
-    def __str__(self):
+    def statement(self):
         low, high = self.addr
 
         if low == high:
@@ -86,7 +86,7 @@ cdef class Ioportcon(Ocontext):
         i.context = Context.factory(policy, symbol.context)
         return i
 
-    def __str__(self):
+    def statement(self):
         low, high = self.ports
 
         if low == high:
@@ -111,7 +111,7 @@ cdef class Pcidevicecon(Ocontext):
         p.context = Context.factory(policy, symbol.context)
         return p
 
-    def __str__(self):
+    def statement(self):
         return "pcidevicecon {0.device} {0.context}".format(self)
 
 
@@ -131,7 +131,7 @@ cdef class Pirqcon(Ocontext):
         p.context = Context.factory(policy, symbol.context)
         return p
 
-    def __str__(self):
+    def statement(self):
         return "pirqcon {0.irq} {0.context}".format(self)
 
 

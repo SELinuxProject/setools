@@ -45,9 +45,6 @@ cdef class RoleAllow(PolicyRule):
         r.origin = None
         return r
 
-    def __str__(self):
-        return "{0.ruletype} {0.source} {0.target};".format(self)
-
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}".format(self))
 
@@ -83,6 +80,9 @@ cdef class RoleAllow(PolicyRule):
             # this rule is already expanded.
             yield self
 
+    def statement(self):
+        return "{0.ruletype} {0.source} {0.target};".format(self)
+
 
 cdef class RoleTransition(PolicyRule):
 
@@ -107,9 +107,6 @@ cdef class RoleTransition(PolicyRule):
         r.origin = None
 
         return r
-
-    def __str__(self):
-        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
 
     def __hash__(self):
         return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|None|None".format(self))
@@ -141,6 +138,9 @@ cdef class RoleTransition(PolicyRule):
         else:
             # this rule is already expanded.
             yield self
+
+    def statement(self):
+        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
 
 
 #

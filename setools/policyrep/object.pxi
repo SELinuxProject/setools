@@ -66,6 +66,9 @@ cdef class PolicyObject:
         # this is used by Python sorting functions
         return str(self) < str(other)
 
+    def __str__(self):
+        return self.statement()
+
     def __repr__(self):
         return "<{0.__class__.__name__}({1}, \"{0}\")>".format(self, repr(self.policy))
 
@@ -92,9 +95,6 @@ cdef class Ocontext(PolicyObject):
     """Base class for most in-policy labeling statements, (portcon, nodecon, etc.)"""
 
     cdef readonly Context context
-
-    def statement(self):
-        return str(self)
 
 
 #

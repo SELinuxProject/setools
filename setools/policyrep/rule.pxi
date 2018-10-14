@@ -30,9 +30,6 @@ cdef class PolicyRule(PolicyObject):
         # This is initialized to False:
         readonly bint extended
 
-    def __str__(self):
-        raise NotImplementedError
-
     @property
     def conditional(self):
         """The conditional expression for this rule."""
@@ -63,6 +60,3 @@ cdef class PolicyRule(PolicyObject):
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         raise NotImplementedError
-
-    def statement(self):
-        return str(self)
