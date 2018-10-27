@@ -293,7 +293,7 @@ cdef class TypeAttributeHashtabIterator(HashtabIterator):
         super().reset()
 
         # advance over any attributes or aliases
-        while (<sepol.type_datum_t *> self.node.datum).flavor != sepol.TYPE_ATTRIB:
+        while self.node != NULL and (<sepol.type_datum_t *> self.node.datum).flavor != sepol.TYPE_ATTRIB:
             self._next_node()
 
 
