@@ -27,7 +27,7 @@
 # Look to the examples below for further clarification.
 #
 # Number of object classes.
-128
+129
 
 class netlink_audit_socket 28
          nlmsg_relay         w        10
@@ -2344,3 +2344,27 @@ class infiniband_endport 1
 class infiniband_pkey 1
               access         b        10
 
+class xdp_socket 23
+              append         w        10
+                bind         w         1
+             connect         w         1
+              create         w         1
+               write         w        10
+         relabelfrom         r        10
+               ioctl         n         1
+           name_bind         n         1
+              sendto         w        10
+            recv_msg         r        10
+            send_msg         w        10
+             getattr         r         7
+             setattr         w         7
+              accept         r         1
+              getopt         r         1
+                read         r        10
+              setopt         w         1
+            shutdown         w         1
+            recvfrom         r        10
+                lock         n         1
+           relabelto         w        10
+              listen         r         1
+                 map         n         1
