@@ -1,4 +1,5 @@
 # Copyright 2014-2015, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -16,12 +17,12 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import logging
+from abc import ABC, abstractmethod
 
 
-class PolicyQuery:
+class PolicyQuery(ABC):
 
-    """Base class for SELinux policy queries."""
+    """Abstract base class for SELinux policy queries."""
 
     def __init__(self, policy, **kwargs):
         self.policy = policy
@@ -38,9 +39,10 @@ class PolicyQuery:
 
             setattr(self, name, kwargs[name])
 
+    @abstractmethod
     def results(self):
         """
         Generator which returns the matches for the query.  This method
         should be overridden by subclasses.
         """
-        raise NotImplementedError
+        pass
