@@ -43,8 +43,17 @@ class ContextWrapper(Wrapper):
         except MLSDisabled:
             self.range_ = None
 
+    def __hash__(self):
+        return hash(self.origin)
+
     def __eq__(self, other):
         return self.user == other.user and \
             self.role == other.role and \
             self.type_ == other.type_ and \
             self.range_ == other.range_
+
+    def __lt__(self, other):
+        return self.user < other.user and \
+            self.role < other.role and \
+            self.type_ < other.type_ and \
+            self.range_ < other.range_

@@ -234,10 +234,22 @@ class LevelWrapper(Wrapper):
         self.sensitivity = sensitivity_wrapper_factory(level.sensitivity)
         self.categories = set(category_wrapper_factory(c) for c in level.categories())
 
+    def __hash__(self):
+        raise hash(self.origin)
+
     def __eq__(self, other):
         try:
             return self.sensitivity == other.sensitivity and \
                 self.categories == other.categories
+        except AttributeError:
+            # comparing an MLS policy to non-MLS policy will result in
+            # other being None
+            return False
+
+    def __lt__(self, other):
+        try:
+            return self.sensitivity < other.sensitivity and \
+                self.categories < other.categories
         except AttributeError:
             # comparing an MLS policy to non-MLS policy will result in
             # other being None
@@ -261,10 +273,22 @@ class RangeWrapper(Wrapper):
         self.low = LevelWrapper(range_.low)
         self.high = LevelWrapper(range_.high)
 
+    def __hash__(self):
+        return hash(self.origin)
+
     def __eq__(self, other):
         try:
             return self.low == other.low and \
                 self.high == other.high
+        except AttributeError:
+            # comparing an MLS policy to non-MLS policy will result in
+            # other being None
+            return False
+
+    def __lt__(self, other):
+        try:
+            return self.low < other.low and \
+                self.high < other.high
         except AttributeError:
             # comparing an MLS policy to non-MLS policy will result in
             # other being None

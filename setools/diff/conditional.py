@@ -50,5 +50,11 @@ class ConditionalWrapper(Wrapper):
         self.origin = cond
         self.truth_table = cond.truth_table()
 
+    def __hash__(self):
+        return hash(self.origin)
+
     def __eq__(self, other):
         return self.truth_table == other.truth_table
+
+    def __lt__(self, other):
+        return str(self.origin) < str(other)

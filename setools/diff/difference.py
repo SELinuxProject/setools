@@ -1,4 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -17,6 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from abc import ABC, abstractmethod
 from collections import namedtuple
 
 modified_item_record = namedtuple("modified_item", ["left", "right"])
@@ -129,9 +131,9 @@ class Difference:
             return added_items, removed_items, matched_items
 
 
-class Wrapper:
+class Wrapper(ABC):
 
-    """Base class for policy object wrappers."""
+    """Abstract base class for policy object wrappers."""
 
     __slots__ = ("origin", "key")
 
@@ -139,14 +141,17 @@ class Wrapper:
         # pylint: disable=no-member
         return "<{0.__class__.__name__}(Wrapping {1})>".format(self, repr(self.origin))
 
+    @abstractmethod
     def __hash__(self):
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def __eq__(self, other):
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def __lt__(self, other):
-        raise NotImplementedError
+        pass
 
     def __ne__(self, other):
         return not self == other
