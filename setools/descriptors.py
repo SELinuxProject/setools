@@ -1,5 +1,5 @@
 # Copyright 2015, Tresys Technology, LLC
-# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016, 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -28,6 +28,7 @@ for more details.
 """
 
 import re
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from weakref import WeakKeyDictionary
 
@@ -124,10 +125,10 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
 #
 
 
-class NetworkXGraphEdgeDescriptor:
+class NetworkXGraphEdgeDescriptor(ABC):
 
     """
-    Descriptor base class for NetworkX graph edge attributes.
+    Descriptor abstract base class for NetworkX graph edge attributes.
 
     Parameter:
     name        The edge property name
@@ -145,13 +146,18 @@ class NetworkXGraphEdgeDescriptor:
         if obj is None:
             return self
 
-        return obj.G[obj.source][obj.target][self.name]
+        try:
+            return obj.G[obj.source][obj.target][self.name]
+        except KeyError:
+            raise AttributeError(self.name)
 
+    @abstractmethod
     def __set__(self, obj, value):
-        raise NotImplementedError
+        pass
 
+    @abstractmethod
     def __delete__(self, obj):
-        raise NotImplementedError
+        pass
 
 
 class EdgeAttrDict(NetworkXGraphEdgeDescriptor):
@@ -163,7 +169,8 @@ class EdgeAttrDict(NetworkXGraphEdgeDescriptor):
         if value is None:
             obj.G[obj.source][obj.target][self.name] = defaultdict(list)
         else:
-            raise ValueError("{0} dictionaries should not be assigned directly".format(self.name))
+            raise AttributeError("{0} dictionaries should not be assigned directly".
+                                 format(self.name))
 
     def __delete__(self, obj):
         obj.G[obj.source][obj.target][self.name].clear()
@@ -183,6 +190,9 @@ class EdgeAttrIntMax(NetworkXGraphEdgeDescriptor):
         else:
             current_value = obj.G[obj.source][obj.target][self.name]
             obj.G[obj.source][obj.target][self.name] = max(current_value, value)
+
+    def __delete__(self, obj):
+        obj.G[obj.source][obj.target][self.name] = 0
 
 
 class EdgeAttrList(NetworkXGraphEdgeDescriptor):
