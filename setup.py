@@ -128,7 +128,7 @@ ext_py_mods = [Extension('setools.policyrep', ['setools/policyrep.pyx'],
                                              '-fno-exceptions'])]
 
 setup(name='setools',
-      version='4.2.0-rc',
+      version='4.2.0',
       description='SELinux Policy tools.',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
