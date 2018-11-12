@@ -41,34 +41,8 @@ cdef class BaseConstraint(PolicyObject):
         readonly ConstraintExpression expression
 
     @property
-    def roles(self):
-        """The roles used in the expression."""
-        warnings.warn("Constraint roles attribute will be removed in SETools 4.3 "
-                      "please use constraint.expression.roles attribute instead.")
-        return self.expression.roles
-
-    @property
-    def types(self):
-        """The types and type attributes used in the expression."""
-        warnings.warn("Constraint roles attribute will be removed in SETools 4.3 "
-                      "please use constraint.expression.types attribute instead.")
-        return self.expression.types
-
-    @property
-    def users(self):
-        """The users used in the expression."""
-        warnings.warn("Constraint roles attribute will be removed in SETools 4.3 "
-                      "please use constraint.expression.users attribute instead.")
-        return self.expression.users
-
-    @property
     def perms(self):
         raise NotImplementedError
-
-    def postfix_expression(self):
-        warnings.warn("Constraint postfix_expression() method will be removed in SETools 4.3 "
-                      "please use constraint.expression attribute instead.")
-        return self.expression
 
 
 cdef class Constraint(BaseConstraint):
@@ -196,11 +170,6 @@ cdef class ConstraintExpression(PolicyObject):
 
     def __eq__(self, other):
         return self._postfix == other
-
-    def __call__(self):
-        warnings.warn("Constraint expression() method will be removed in SETools 4.3 "
-                      "please use constraint.expression.infix() method instead.")
-        return self.infix
 
     def infix(self):
         """The expression as an infix notation list."""

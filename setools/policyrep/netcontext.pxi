@@ -67,14 +67,14 @@ cdef class Nodecon(Ocontext):
 
     cdef:
         readonly object ip_version
-        char * _addr
-        char * _mask
         readonly object network
 
     @staticmethod
     cdef inline Nodecon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, ip_version):
         """Factory function for creating Nodecon objects."""
         cdef:
+            char * addr
+            char * mask
             int CIDR = 0
             int i
             uint32_t block
@@ -88,12 +88,13 @@ cdef class Nodecon(Ocontext):
         #
         # Retrieve address and netmask
         #
-        n._addr = <char *>PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
-        if not n._addr:
+        addr = <char *>PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
+        if addr == NULL:
             raise MemoryError
 
-        n._mask = <char *>PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
-        if not n._mask:
+        mask = <char *>PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
+        if mask == NULL:
+            PyMem_Free(addr)
             raise MemoryError
 
         #
@@ -107,8 +108,8 @@ cdef class Nodecon(Ocontext):
         # not detect it.
         if ip_version == NodeconIPVersion.ipv4:
             # convert network order to string
-            inet_ntop(AF_INET, &symbol.u.node.addr, n._addr, INET6_ADDRSTRLEN)
-            inet_ntop(AF_INET, &symbol.u.node.mask, n._mask, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET, &symbol.u.node.addr, addr, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET, &symbol.u.node.mask, mask, INET6_ADDRSTRLEN)
 
             # count bits
             block = symbol.u.node.mask
@@ -118,8 +119,8 @@ cdef class Nodecon(Ocontext):
 
         else:  # NodeconIPVersion.ipv6
             # convert network order to string
-            inet_ntop(AF_INET6, &symbol.u.node6.addr, n._addr, INET6_ADDRSTRLEN)
-            inet_ntop(AF_INET6, &symbol.u.node6.mask, n._mask, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET6, &symbol.u.node6.addr, addr, INET6_ADDRSTRLEN)
+            inet_ntop(AF_INET6, &symbol.u.node6.mask, mask, INET6_ADDRSTRLEN)
 
             # count bits
             for i in range(4):
@@ -128,8 +129,7 @@ cdef class Nodecon(Ocontext):
                     block &= block - 1
                     CIDR += 1
 
-
-        net_with_mask = "{0}/{1}".format(n._addr, CIDR)
+        net_with_mask = "{0}/{1}".format(addr, CIDR)
         try:
             # checkpolicy does not verify that no host bits are set,
             # so strict will raise an exception if host bits are set.
@@ -137,14 +137,13 @@ cdef class Nodecon(Ocontext):
         except ValueError as ex:
             log = logging.getLogger(__name__)
             log.warning("Nodecon with network {} {} has host bits set. Analyses may have "
-                        "unexpected results.".format(n._addr, n._mask))
+                        "unexpected results.".format(addr, mask))
             n.network = ipaddress.ip_network(net_with_mask, strict=False)
 
-        return n
+        PyMem_Free(addr)
+        PyMem_Free(mask)
 
-    def __dealloc__(self):
-        PyMem_Free(self._addr)
-        PyMem_Free(self._mask)
+        return n
 
     def __hash__(self):
         return hash("nodecon|{}".format(self.network.with_netmask))
@@ -152,20 +151,6 @@ cdef class Nodecon(Ocontext):
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
-
-    @property
-    def address(self):
-        """The network address for the nodecon."""
-        warnings.warn("Nodecon.address will be removed in SETools 4.3, please use nodecon.network",
-                      DeprecationWarning)
-        return self._addr
-
-    @property
-    def netmask(self):
-        """The network mask for the nodecon."""
-        warnings.warn("Nodecon.netmask will be removed in SETools 4.3, please use nodecon.network",
-                      DeprecationWarning)
-        return self._mask
 
     def statement(self):
         return "nodecon {1} {0.context}".format(self, self.network.with_netmask.replace("/", " "))

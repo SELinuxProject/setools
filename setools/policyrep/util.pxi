@@ -40,13 +40,7 @@ class PolicyEnum(enum.Enum):
             return super(PolicyEnum, self).__format__(spec)
 
     def __eq__(self, other):
-        if isinstance(other, str):
-            warnings.warn("{} has changed to an enumeration.  In the future, direct string "
-                          "comparisons will be deprecated.".format(self.__class__.__name__),
-                          PendingDeprecationWarning)
-            return self.name == other
-        else:
-            return super(PolicyEnum, self).__eq__(other)
+        return super(PolicyEnum, self).__eq__(other)
 
     def __hash__(self):
         return hash(self.name)
