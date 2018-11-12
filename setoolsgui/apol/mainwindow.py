@@ -632,9 +632,11 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
     def about_apol(self):
         QMessageBox.about(self, "About Apol", "Version {0}<br>"
                           "Apol is a graphical SELinux policy analysis tool and part of "
-                          "<a href=\"https://github.com/TresysTechnology/setools/wiki\">"
+                          "<a href=\"https://github.com/SELinuxProject/setools/wiki\">"
                           "SETools</a>.<p>"
-                          "Copyright (C) 2015-2016, Tresys Technology.".format(__version__))
+                          "Copyright (C) 2015-2016, Tresys Technology<p>"
+                          "Copyright (C) 2016, Chris PeBenito <pebenito@ieee.org>".
+                          format(__version__))
 
     def apol_help(self):
         """Open the main help window."""
@@ -647,7 +649,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.log.debug("Starting assistant with help file {0}".format(helpfile))
         self.help_process.start("assistant",
                                 ["-collectionFile", helpfile, "-showUrl",
-                                 "qthelp://com.github.tresystechnology.setools/doc/index.html",
+                                 "qthelp://com.github.selinuxproject.setools/doc/index.html",
                                  "-show", "contents", "-enableRemoteControl"])
 
     @pyqtSlot(str)
@@ -663,5 +665,5 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                 self.log.warning("Timed out waiting for Qt assistant to start.")
                 return
 
-        self.help_process.write("setSource qthelp://com.github.tresystechnology.setools/doc/{0}\n".
+        self.help_process.write("setSource qthelp://com.github.selinuxproject.setools/doc/{0}\n".
                                 format(location))
