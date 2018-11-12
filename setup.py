@@ -129,7 +129,7 @@ ext_py_mods = [Extension('setools.policyrep', ['setools/policyrep.pyx'],
 
 setup(name='setools',
       version='4.3.0-dev',
-      description='SELinux Policy tools.',
+      description='SELinux policy analysis tools.',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
       url='https://github.com/SELinuxProject/setools',
@@ -153,4 +153,10 @@ setup(name='setools',
           'Topic :: Security',
           'Topic :: Utilities',
       ],
+      keywords='SELinux SETools policy analysis tools seinfo sesearch sediff sedta seinfoflow apol',
+      python_requires='>=3.4',
+      # setup also requires libsepol and libselinux
+      # C libraries and headers to compile.
+      setup_requires=['setuptools', 'Cython>=0.27'],
+      install_requires=['setuptools', 'networkx>=2.0']
       )
