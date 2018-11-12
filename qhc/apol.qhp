@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright (c) 2016 Tresys Technology, LLC.  All rights reserved. -->
 <QtHelpProject version="1.0">
-    <namespace>com.github.tresystechnology.setools</namespace>
+    <namespace>com.github.selinuxproject.setools</namespace>
     <virtualFolder>doc</virtualFolder>
     <customFilter name="Apol">
         <filterAttribute>apol</filterAttribute>
