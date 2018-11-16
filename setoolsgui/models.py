@@ -124,7 +124,7 @@ class PermListModel(SEToolsListModel):
 
         # create intersection
         for cls in classes:
-            cls_perms = cls.perms
+            cls_perms = set(cls.perms)
 
             with suppress(NoCommon):
                 cls_perms.update(cls.common.perms)
