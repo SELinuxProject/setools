@@ -634,6 +634,7 @@ cdef extern from "<sepol/policydb/policydb.h>":
         ocontext_iomem iomem
         ocontext_ioport ioport
         ocontext_ibpkey ibpkey
+        ocontext_ibendport ibendport
 
     #
     # ocontext_t v union
