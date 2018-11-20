@@ -330,7 +330,7 @@ try:
         print("  Defaults:        {0:7}    Typebounds:      {1:7}".format(
             p.default_count, p.typebounds_count))
 
-        if p.target_platform == "selinux":
+        if p.target_platform == setools.PolicyTarget.selinux:
             print("  Allowxperm:      {0:7}    Neverallowxperm: {1:7}".format(
                 p.allowxperm_count, p.neverallowxperm_count))
             print("  Auditallowxperm: {0:7}    Dontauditxperm:  {1:7}".format(
@@ -341,7 +341,7 @@ try:
                 p.genfscon_count, p.portcon_count))
             print("  Netifcon:        {0:7}    Nodecon:         {1:7}".format(
                 p.netifcon_count, p.nodecon_count))
-        elif p.target_platform == "xen":
+        elif p.target_platform == setools.PolicyTarget.xen:
             print("  Initial SIDs:    {0:7}    Devicetreecon    {1:7}".format(
                 p.initialsids_count, p.devicetreecon_count))
             print("  Iomemcon:        {0:7}    Ioportcon:       {1:7}".format(
