@@ -342,7 +342,7 @@ try:
             print("  Netifcon:        {0:7}    Nodecon:         {1:7}".format(
                 p.netifcon_count, p.nodecon_count))
         elif p.target_platform == setools.PolicyTarget.xen:
-            print("  Initial SIDs:    {0:7}    Devicetreecon    {1:7}".format(
+            print("  Initial SIDs:    {0:7}    Devicetreecon:   {1:7}".format(
                 p.initialsids_count, p.devicetreecon_count))
             print("  Iomemcon:        {0:7}    Ioportcon:       {1:7}".format(
                 p.iomemcon_count, p.ioportcon_count))
