@@ -25,6 +25,8 @@ from . import diff
 from . import dta
 from . import fsusequery
 from . import genfsconquery
+from . import ibendportconquery
+from . import ibpkeyconquery
 from . import infoflow
 from . import initsidquery
 from . import mlsrulequery

@@ -29,7 +29,7 @@ import logging
 
 # Python classes for policy representation
 from .policyrep import SELinuxPolicy, BoundsRuletype, ConstraintRuletype, DefaultRuletype, \
-    DefaultRangeValue, DefaultValue, FSUseRuletype, HandleUnknown, MLSRuletype, \
+    DefaultRangeValue, DefaultValue, FSUseRuletype, HandleUnknown, IbpkeyconRange, MLSRuletype, \
     NodeconIPVersion, PolicyTarget, PortconProtocol, RBACRuletype, TERuletype
 
 # Exceptions
@@ -62,6 +62,8 @@ from .defaultquery import DefaultQuery
 # In-policy Context Queries
 from .fsusequery import FSUseQuery
 from .genfsconquery import GenfsconQuery
+from .ibendportconquery import IbendportconQuery
+from .ibpkeyconquery import IbpkeyconQuery
 from .initsidquery import InitialSIDQuery
 from .netifconquery import NetifconQuery
 from .nodeconquery import NodeconQuery
