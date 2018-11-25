@@ -18,11 +18,104 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+IbpkeyconRange = collections.namedtuple("IbpkeyconRange", ["low", "high"])
 PortconRange = collections.namedtuple("PortconRange", ["low", "high"])
 
 #
 # Classes
 #
+cdef class Ibendportcon(Ocontext):
+
+    """An ibendportcon statement."""
+
+    cdef:
+        readonly str name
+        readonly unsigned int port
+
+    @staticmethod
+    cdef inline Ibendportcon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Ibendportcon objects."""
+        cdef Ibendportcon i = Ibendportcon.__new__(Ibendportcon)
+        i.policy = policy
+        i.key = <uintptr_t>symbol
+        i.name = intern(symbol.u.ibendport.dev_name)
+        i.port = symbol.u.ibendport.port
+        i.context = Context.factory(policy, symbol.context)
+        return i
+
+    def __hash__(self):
+        return hash("ibendportcon|{0.name}|{0.port}".format(self))
+
+    def __lt__(self, other):
+        # this is used by Python sorting functions
+        return str(self) < str(other)
+
+    def statement(self):
+        return "ibendportcon {0.name} {0.port} {0.context}".format(self)
+
+
+cdef class Ibpkeycon(Ocontext):
+
+    """An ibpkeycon statement."""
+
+    cdef:
+        readonly object subnet_prefix
+        readonly object pkeys
+
+    @staticmethod
+    cdef inline Ibpkeycon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol):
+        """Factory function for creating Ibpkeycon objects."""
+        cdef:
+            Ibpkeycon i = Ibpkeycon.__new__(Ibpkeycon)
+            char * prefix
+            uint32_t *full_address
+
+        i.policy = policy
+        i.key = <uintptr_t>symbol
+        i.pkeys = IbpkeyconRange(symbol.u.ibpkey.low_pkey, symbol.u.ibpkey.high_pkey)
+        i.context = Context.factory(policy, symbol.context)
+
+        #
+        # The policy only stores the most significant 64bits of the subnet
+        # prefix.  Create a full IPv6 address for inet_ntop use
+        #
+        full_address = <uint32_t*>PyMem_Malloc(4 * sizeof(uint32_t))
+        if full_address == NULL:
+            raise MemoryError
+
+        memset(full_address, 0, 4 * sizeof(uint32_t))
+        memcpy(full_address, &symbol.u.ibpkey.subnet_prefix, sizeof(uint64_t))
+
+        #
+        # Create IPv6Address object for the subnet prefix
+        #
+        prefix = <char *>PyMem_Malloc(INET6_ADDRSTRLEN * sizeof(char))
+        if prefix == NULL:
+            PyMem_Free(full_address)
+            raise MemoryError
+
+        inet_ntop(AF_INET6, full_address, prefix, INET6_ADDRSTRLEN)
+        i.subnet_prefix = ipaddress.IPv6Address(prefix)
+
+        PyMem_Free(full_address)
+        PyMem_Free(prefix)
+        return i
+
+    def __hash__(self):
+        return hash("ibpkeycon|{0.subnet_prefix}|{0.pkeys.low}|{0.pkeys.high}".format(self))
+
+    def __lt__(self, other):
+        # this is used by Python sorting functions
+        return str(self) < str(other)
+
+    def statement(self):
+        if self.pkeys.low == self.pkeys.high:
+            return "ibpkeycon {0.subnet_prefix} {0.pkeys.low:#x} {0.context}".format(self)
+        else:
+            return "ibpkeycon {0.subnet_prefix} {0.pkeys.low:#x}-{0.pkeys.high:#x} {0.context}". \
+                    format(self)
+
+
 cdef class Netifcon(Ocontext):
 
     """A netifcon statement."""
@@ -204,6 +297,40 @@ cdef class Portcon(Ocontext):
 #
 # Iterators
 #
+cdef class IbendportconIterator(OcontextIterator):
+
+    """Iterator for ibendportcon statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Ibendportcon iterators."""
+        i = IbendportconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Ibendportcon.factory(self.policy, self.ocon)
+
+
+cdef class IbpkeyconIterator(OcontextIterator):
+
+    """Iterator for ibpkeycon statements in the policy."""
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.ocontext_t *head):
+        """Factory function for creating Ibpkeycon iterators."""
+        i = IbpkeyconIterator()
+        i.policy = policy
+        i.head = i.curr = head
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return Ibpkeycon.factory(self.policy, self.ocon)
+
+
 cdef class NetifconIterator(OcontextIterator):
 
     """Iterator for netifcon statements in the policy."""

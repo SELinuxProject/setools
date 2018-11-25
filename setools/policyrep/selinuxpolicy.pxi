@@ -187,6 +187,16 @@ cdef class SELinuxPolicy:
         return len(self.genfscons())
 
     @property
+    def ibendportcon_count(self):
+        """The number of ibendportcon statements."""
+        return len(self.ibendportcons())
+
+    @property
+    def ibpkeycon_count(self):
+        """The number of ibpkeycon statements."""
+        return len(self.ibpkeycons())
+
+    @property
     def initialsids_count(self):
         """The number of initial sid statements."""
         return len(self.initialsids())
@@ -532,6 +542,14 @@ cdef class SELinuxPolicy:
     def genfscons(self):
         """Iterator over all genfscon statements."""
         return GenfsconIterator.factory(self, self.handle.p.genfs)
+
+    def ibendportcons(self):
+        """Iterator over all ibendportcon statements."""
+        return IbendportconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_IBENDPORT])
+
+    def ibpkeycons(self):
+        """Iterator over all ibpkeycon statements."""
+        return IbpkeyconIterator.factory(self, self.handle.p.ocontexts[sepol.OCON_IBPKEY])
 
     def initialsids(self):
         """Iterator over all initial SID statements."""
