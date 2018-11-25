@@ -66,6 +66,10 @@ queries.add_argument("--fs_use", help="Print fs_use statements.", dest="fsuseque
                      nargs='?', const=True, metavar="FS_TYPE")
 queries.add_argument("--genfscon", help="Print genfscon statements.", dest="genfsconquery",
                      nargs='?', const=True, metavar="FS_TYPE")
+queries.add_argument("--ibpkeycon", help="Infiniband pkey statements.",
+                     dest="ibpkeyconquery", nargs='?', const=True, metavar="PKEY[-PKEY]")
+queries.add_argument("--ibendportcon", help="Infiniband endport statements.",
+                     dest="ibendportconquery", nargs='?', const=True, metavar="NAME")
 queries.add_argument("--initialsid", help="Print initial SIDs (contexts).", dest="initialsidquery",
                      nargs='?', const=True, metavar="NAME")
 queries.add_argument("--netifcon", help="Print netifcon statements.", dest="netifconquery",
@@ -170,6 +174,30 @@ try:
             q.fs = args.genfsconquery
 
         components.append(("Genfscon", q, lambda x: x.statement()))
+
+    if args.ibendportconquery or args.all:
+        q = setools.IbendportconQuery(p)
+        if isinstance(args.ibendportconquery, str):
+            q.name = args.ibendportconquery
+
+        components.append(("Ibendportcon", q, lambda x: x.statement()))
+
+    if args.ibpkeyconquery or args.all:
+        q = setools.IbpkeyconQuery(p)
+        if isinstance(args.ibpkeyconquery, str):
+            try:
+                pkeys = [int(i, 16) for i in args.ibpkeyconquery.split("-")]
+            except ValueError:
+                parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
+
+            if len(pkeys) == 2:
+                q.pkeys = pkeys
+            elif len(pkeys) == 1:
+                q.pkeys = (pkeys[0], pkeys[0])
+            else:
+                parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
+
+        components.append(("Ibpkeycon", q, lambda x: x.statement()))
 
     if args.initialsidquery or args.all:
         q = setools.InitialSIDQuery(p)
@@ -335,6 +363,8 @@ try:
                 p.allowxperm_count, p.neverallowxperm_count))
             print("  Auditallowxperm: {0:7}    Dontauditxperm:  {1:7}".format(
                 p.auditallowxperm_count, p.dontauditxperm_count))
+            print("  Ibendportcon:    {0:7}    Ibpkeycon:       {1:7}".format(
+                p.ibendportcon_count, p.ibpkeycon_count))
             print("  Initial SIDs:    {0:7}    Fs_use:          {1:7}".format(
                 p.initialsids_count, p.fs_use_count))
             print("  Genfscon:        {0:7}    Portcon:         {1:7}".format(
