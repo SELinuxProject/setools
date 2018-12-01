@@ -185,49 +185,56 @@ class IbendportconQueryTest(unittest.TestCase):
 
     def test_054_range_proper_subset2(self):
         """Ibendportcon query with context range proper subset match (equal)"""
-        q = IbendportconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = IbendportconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True,
+                              range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
         self.assertListEqual([], ibendportcons)
 
     def test_054_range_proper_subset3(self):
         """Ibendportcon query with context range proper subset match (equal low only)"""
-        q = IbendportconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True, range_proper=True)
+        q = IbendportconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True,
+                              range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
         self.assertListEqual(["test54"], ibendportcons)
 
     def test_054_range_proper_subset4(self):
         """Ibendportcon query with context range proper subset match (equal high only)"""
-        q = IbendportconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = IbendportconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True,
+                              range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
         self.assertListEqual(["test54"], ibendportcons)
 
     def test_055_range_proper_superset1(self):
         """Ibendportcon query with context range proper superset match"""
-        q = IbendportconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True, range_proper=True)
+        q = IbendportconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True,
+                              range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
         self.assertListEqual(["test55"], ibendportcons)
 
     def test_055_range_proper_superset2(self):
         """Ibendportcon query with context range proper superset match (equal)"""
-        q = IbendportconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = IbendportconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True,
+                              range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
         self.assertListEqual([], ibendportcons)
 
     def test_055_range_proper_superset3(self):
         """Ibendportcon query with context range proper superset match (equal low)"""
-        q = IbendportconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+        q = IbendportconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True,
+                              range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
         self.assertListEqual(["test55"], ibendportcons)
 
     def test_055_range_proper_superset4(self):
         """Ibendportcon query with context range proper superset match (equal high)"""
-        q = IbendportconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = IbendportconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True,
+                              range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
         self.assertListEqual(["test55"], ibendportcons)

@@ -192,7 +192,8 @@ class IbpkeyconQueryTest(unittest.TestCase):
 
     def test_054_range_proper_subset4(self):
         """ibpkeycon query with context range proper subset match (equal high only)"""
-        q = IbpkeyconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True, range_proper=True)
+        q = IbpkeyconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True,
+                           range_proper=True)
 
         ibpkeycons = sorted(n.pkeys for n in q.results())
         self.assertListEqual([(54, 54)], ibpkeycons)
@@ -206,21 +207,24 @@ class IbpkeyconQueryTest(unittest.TestCase):
 
     def test_055_range_proper_superset2(self):
         """ibpkeycon query with context range proper superset match (equal)"""
-        q = IbpkeyconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = IbpkeyconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True,
+                           range_proper=True)
 
         ibpkeycons = sorted(n.pkeys for n in q.results())
         self.assertListEqual([], ibpkeycons)
 
     def test_055_range_proper_superset3(self):
         """ibpkeycon query with context range proper superset match (equal low)"""
-        q = IbpkeyconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True, range_proper=True)
+        q = IbpkeyconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True,
+                           range_proper=True)
 
         ibpkeycons = sorted(n.pkeys for n in q.results())
         self.assertListEqual([(55, 55)], ibpkeycons)
 
     def test_055_range_proper_superset4(self):
         """ibpkeycon query with context range proper superset match (equal high)"""
-        q = IbpkeyconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True, range_proper=True)
+        q = IbpkeyconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True,
+                           range_proper=True)
 
         ibpkeycons = sorted(n.pkeys for n in q.results())
         self.assertListEqual([(55, 55)], ibpkeycons)
