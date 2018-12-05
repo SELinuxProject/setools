@@ -87,6 +87,8 @@ constrain.add_argument("--mlsvalidatetrans", action="store_true",
                        help="Print mlsvalidatetrans differences")
 
 labeling = parser.add_argument_group("labeling statement differences")
+labeling.add_argument("--ibendportcon", action="store_true", help="Print ibendportcon differences")
+labeling.add_argument("--ibpkeycon", action="store_true", help="Print ibkeycon differences")
 labeling.add_argument("--initialsid", action="store_true", help="Print initial SID differences")
 labeling.add_argument("--fs_use", action="store_true", help="Print fs_use_* differences")
 labeling.add_argument("--genfscon", action="store_true", help="Print genfscon differences")
@@ -116,7 +118,7 @@ all_differences = not any((args.class_, args.common, args.type_, args.attribute,
                            args.property, args.default, args.constrain, args.mlsconstrain,
                            args.validatetrans, args.mlsvalidatetrans, args.typebounds,
                            args.allowxperm, args.neverallowxperm, args.auditallowxperm,
-                           args.dontauditxperm))
+                           args.dontauditxperm, args.ibendportcon, args.ibpkeycon))
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -1218,6 +1220,61 @@ try:
             del diff.added_initialsids
             del diff.removed_initialsids
             del diff.modified_initialsids
+
+    if all_differences or args.ibendportcon:
+        if diff.added_ibendportcons or diff.removed_ibendportcons or diff.modified_ibendportcons \
+                or args.ibendportcon:
+            print("Ibendportcons ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_ibendportcons), len(diff.removed_ibendportcons),
+                len(diff.modified_ibendportcons)))
+            if diff.added_ibendportcons and not args.stats:
+                print("   Added Ibendportcons: {0}".format(len(diff.added_ibendportcons)))
+                for s in sorted(diff.added_ibendportcons):
+                    print("      + {0}".format(s.statement()))
+            if diff.removed_ibendportcons and not args.stats:
+                print("   Removed Ibendportcons: {0}".format(len(diff.removed_ibendportcons)))
+                for s in sorted(diff.removed_ibendportcons):
+                    print("      - {0}".format(s.statement()))
+            if diff.modified_ibendportcons and not args.stats:
+                print("   Modified Ibendportcons: {0}".format(len(diff.modified_ibendportcons)))
+                for entry in sorted(diff.modified_ibendportcons, key=lambda x: x.rule):
+                    print("      * ibendportcon {0.rule.name} {0.rule.port} " 
+                          "+[{0.added_context}] -[{0.removed_context}]".format(entry))
+
+            print()
+            del diff.added_ibendportcons
+            del diff.removed_ibendportcons
+            del diff.modified_ibendportcons
+
+    if all_differences or args.ibpkeycon:
+        if diff.added_ibpkeycons or diff.removed_ibpkeycons or diff.modified_ibpkeycons \
+                or args.ibpkeycon:
+            print("Ibpkeycons ({0} Added, {1} Removed, {2} Modified)".format(
+                len(diff.added_ibpkeycons), len(diff.removed_ibpkeycons),
+                len(diff.modified_ibpkeycons)))
+            if diff.added_ibpkeycons and not args.stats:
+                print("   Added Ibpkeycons: {0}".format(len(diff.added_ibpkeycons)))
+                for s in sorted(diff.added_ibpkeycons):
+                    print("      + {0}".format(s.statement()))
+            if diff.removed_ibpkeycons and not args.stats:
+                print("   Removed Ibpkeycons: {0}".format(len(diff.removed_ibpkeycons)))
+                for s in sorted(diff.removed_ibpkeycons):
+                    print("      - {0}".format(s.statement()))
+            if diff.modified_ibpkeycons and not args.stats:
+                print("   Modified Ibpkeycons: {0}".format(len(diff.modified_ibpkeycons)))
+                for entry in sorted(diff.modified_ibpkeycons, key=lambda x: x.rule):
+                    if entry.rule.pkeys.low == entry.rule.pkeys.high:
+                        print("      * ibpkeycon {0.rule.subnet_prefix} {0.rule.pkeys.low:#x} " \
+                              "+[{0.added_context}] -[{0.removed_context}]".format(entry))
+                    else:
+                        print("      * ibpkeycon {0.rule.subnet_prefix} "
+                              "{0.rule.pkeys.low:#x}-{0.rule.pkeys.high:#x} " \
+                              "+[{0.added_context}] -[{0.removed_context}]".format(entry))
+
+            print()
+            del diff.added_ibpkeycons
+            del diff.removed_ibpkeycons
+            del diff.modified_ibpkeycons
 
     if all_differences or args.fs_use:
         if diff.added_fs_uses or diff.removed_fs_uses or diff.modified_fs_uses \
