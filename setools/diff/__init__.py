@@ -23,6 +23,8 @@ from .constraints import ConstraintsDifference
 from .default import DefaultsDifference
 from .fsuse import FSUsesDifference
 from .genfscon import GenfsconsDifference
+from .ibendportcon import IbendportconsDifference
+from .ibpkeycon import IbpkeyconsDifference
 from .initsid import InitialSIDsDifference
 from .mls import CategoriesDifference, LevelDeclsDifference, SensitivitiesDifference
 from .mlsrules import MLSRulesDifference
@@ -50,6 +52,8 @@ class PolicyDifference(BooleansDifference,
                        DefaultsDifference,
                        FSUsesDifference,
                        GenfsconsDifference,
+                       IbendportconsDifference,
+                       IbpkeyconsDifference,
                        InitialSIDsDifference,
                        LevelDeclsDifference,
                        MLSRulesDifference,

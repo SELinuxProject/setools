@@ -18,7 +18,7 @@
 #
 import os
 import unittest
-from ipaddress import IPv4Network, IPv6Network
+from ipaddress import IPv6Address, IPv4Network, IPv6Network
 
 from setools import SELinuxPolicy, PolicyDifference, PortconProtocol
 from setools import BoundsRuletype as BRT
@@ -1833,6 +1833,92 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0006]), removed_perms)
         self.assertSetEqual(set([0x0005]), matched_perms)
 
+    #
+    # Ibendportcon statements
+    #
+    def test_added_ibendportcons(self):
+        """Diff: added ibendportcon statements."""
+        rules = sorted(self.diff.added_ibendportcons)
+        self.assertEqual(1, len(rules))
+        self.assertEqual("add", rules[0].name)
+        self.assertEqual(23, rules[0].port)
+        self.assertEqual("system:system:system:s0", rules[0].context)
+
+    def test_removed_ibendportcons(self):
+        """Diff: removed ibendportcon statements."""
+        rules = sorted(self.diff.removed_ibendportcons)
+        self.assertEqual(1, len(rules))
+        self.assertEqual("removed", rules[0].name)
+        self.assertEqual(7, rules[0].port)
+        self.assertEqual("system:system:system:s0", rules[0].context)
+
+    def test_modified_ibendportcons(self):
+        """Diff: modified ibendportcon statements"""
+        rules = sorted(self.diff.modified_ibendportcons)
+        self.assertEqual(1, len(rules))
+
+        rule, added, removed = rules[0]
+        self.assertEqual("modified", rule.name)
+        self.assertEqual(13, rule.port)
+        self.assertEqual("modified_change_level:object_r:system:s2", added)
+        self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed)
+
+    #
+    # Ibpkeycon statements
+    #
+    def test_added_ibpkeycons(self):
+        """Diff: added ibpkeycon statements."""
+        rules = sorted(self.diff.added_ibpkeycons)
+        self.assertEqual(2, len(rules))
+
+        rule = rules[0]
+        self.assertEqual(IPv6Address("beef::"), rule.subnet_prefix)
+        self.assertEqual(0xe, rule.pkeys.low)
+        self.assertEqual(0xe, rule.pkeys.high)
+        self.assertEqual("system:system:system:s0", rule.context)
+
+        rule = rules[1]
+        self.assertEqual(IPv6Address("dead::"), rule.subnet_prefix)
+        self.assertEqual(0xbeef, rule.pkeys.low)
+        self.assertEqual(0xdead, rule.pkeys.high)
+        self.assertEqual("system:system:system:s0", rule.context)
+
+    def test_removed_ibpkeycons(self):
+        """Diff: removed ibpkeycon statements."""
+        rules = sorted(self.diff.removed_ibpkeycons)
+        self.assertEqual(2, len(rules))
+
+        rule = rules[0]
+        self.assertEqual(IPv6Address("dccc::"), rule.subnet_prefix)
+        self.assertEqual(0xc, rule.pkeys.low)
+        self.assertEqual(0xc, rule.pkeys.high)
+        self.assertEqual("system:system:system:s0", rule.context)
+
+        rule = rules[1]
+        self.assertEqual(IPv6Address("feee::"), rule.subnet_prefix)
+        self.assertEqual(0xaaaa, rule.pkeys.low)
+        self.assertEqual(0xbbbb, rule.pkeys.high)
+        self.assertEqual("system:system:system:s0", rule.context)
+
+    def test_modified_ibpkeycons(self):
+        """Diff: modified ibpkeycon statements"""
+        rules = sorted(self.diff.modified_ibpkeycons)
+        self.assertEqual(2, len(rules))
+
+        rule, added, removed = rules[0]
+        self.assertEqual(IPv6Address("aaaa::"), rule.subnet_prefix)
+        self.assertEqual(0xcccc, rule.pkeys.low)
+        self.assertEqual(0xdddd, rule.pkeys.high)
+        self.assertEqual("modified_change_level:object_r:system:s2:c0", added)
+        self.assertEqual("modified_change_level:object_r:system:s2:c1", removed)
+
+        rule, added, removed = rules[1]
+        self.assertEqual(IPv6Address("bbbb::"), rule.subnet_prefix)
+        self.assertEqual(0xf, rule.pkeys.low)
+        self.assertEqual(0xf, rule.pkeys.high)
+        self.assertEqual("modified_change_level:object_r:system:s2:c1", added)
+        self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed)
+
 
 class PolicyDifferenceRmIsidTest(unittest.TestCase):
 
@@ -2302,6 +2388,30 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
         """NoDiff: no modified dontauditxperm rules."""
         self.assertFalse(self.diff.modified_dontauditxperms)
 
+    def test_added_ibendportcons(self):
+        """NoDiff: no added ibendportcon rules."""
+        self.assertFalse(self.diff.added_ibendportcons)
+
+    def test_removed_ibendportcons(self):
+        """NoDiff: no removed ibendportcon rules."""
+        self.assertFalse(self.diff.removed_ibendportcons)
+
+    def test_modified_ibendportcons(self):
+        """NoDiff: no modified ibendportcon rules."""
+        self.assertFalse(self.diff.modified_ibendportcons)
+
+    def test_added_ibpkeycons(self):
+        """NoDiff: no added ibpkeycon rules."""
+        self.assertFalse(self.diff.added_ibpkeycons)
+
+    def test_removed_ibpkeycons(self):
+        """NoDiff: no removed ibpkeycon rules."""
+        self.assertFalse(self.diff.removed_ibpkeycons)
+
+    def test_modified_ibpkeycons(self):
+        """NoDiff: no modified ibpkeycon rules."""
+        self.assertFalse(self.diff.modified_ibpkeycons)
+
 
 class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
 
@@ -2764,3 +2874,29 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     def test_modified_dontauditxperms(self):
         """NoDiff: no modified dontauditxperm rules."""
         self.assertFalse(self.diff.modified_dontauditxperms)
+
+    def test_added_ibpkeycons(self):
+        """NoDiff: no added ibpkeycon rules."""
+        self.assertFalse(self.diff.added_ibpkeycons)
+
+    def test_removed_ibpkeycons(self):
+        """NoDiff: no removed ibpkeycon rules."""
+        self.assertFalse(self.diff.removed_ibpkeycons)
+
+    def test_modified_ibpkeycons(self):
+        """NoDiff: no modified ibpkeycon rules."""
+        self.assertEqual(self.diff.left_policy.ibpkeycon_count,
+                         len(self.diff.modified_ibpkeycons))
+
+    def test_added_ibendportcons(self):
+        """NoDiff: no added ibendportcon rules."""
+        self.assertFalse(self.diff.added_ibendportcons)
+
+    def test_removed_ibendportcons(self):
+        """NoDiff: no removed ibendportcon rules."""
+        self.assertFalse(self.diff.removed_ibendportcons)
+
+    def test_modified_ibendportcons(self):
+        """NoDiff: no modified ibendportcon rules."""
+        self.assertEqual(self.diff.left_policy.ibendportcon_count,
+                         len(self.diff.modified_ibendportcons))
