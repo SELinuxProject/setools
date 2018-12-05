@@ -1238,7 +1238,7 @@ try:
             if diff.modified_ibendportcons and not args.stats:
                 print("   Modified Ibendportcons: {0}".format(len(diff.modified_ibendportcons)))
                 for entry in sorted(diff.modified_ibendportcons, key=lambda x: x.rule):
-                    print("      * ibendportcon {0.rule.name} {0.rule.port} " 
+                    print("      * ibendportcon {0.rule.name} {0.rule.port} "
                           "+[{0.added_context}] -[{0.removed_context}]".format(entry))
 
             print()
@@ -1264,11 +1264,11 @@ try:
                 print("   Modified Ibpkeycons: {0}".format(len(diff.modified_ibpkeycons)))
                 for entry in sorted(diff.modified_ibpkeycons, key=lambda x: x.rule):
                     if entry.rule.pkeys.low == entry.rule.pkeys.high:
-                        print("      * ibpkeycon {0.rule.subnet_prefix} {0.rule.pkeys.low:#x} " \
+                        print("      * ibpkeycon {0.rule.subnet_prefix} {0.rule.pkeys.low:#x} "
                               "+[{0.added_context}] -[{0.removed_context}]".format(entry))
                     else:
                         print("      * ibpkeycon {0.rule.subnet_prefix} "
-                              "{0.rule.pkeys.low:#x}-{0.rule.pkeys.high:#x} " \
+                              "{0.rule.pkeys.low:#x}-{0.rule.pkeys.high:#x} "
                               "+[{0.added_context}] -[{0.removed_context}]".format(entry))
 
             print()
