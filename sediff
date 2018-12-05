@@ -1328,10 +1328,9 @@ try:
                     print("      - {0}".format(n))
             if diff.modified_nodecons and not args.stats:
                 print("   Modified Nodecons: {0}".format(len(diff.modified_nodecons)))
-                for con, added_context, removed_context in sorted(diff.modified_nodecons,
-                                                                  key=lambda x: x.rule):
-                    print("      * nodecon {0.address} {0.netmask} +[{1}] -[{2}];".format(
-                          con, added_context, removed_context))
+                for entry in sorted(diff.modified_nodecons, key=lambda x: x.rule):
+                    print("      * nodecon {0} +[{1.added_context}] -[{1.removed_context}];".format(
+                          entry.rule.network.with_netmask.replace("/", " "), entry))
 
             print()
             del diff.added_nodecons
