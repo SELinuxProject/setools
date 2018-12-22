@@ -1,4 +1,5 @@
 # Copyright 2016, Tresys Technology, LLC
+# Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -78,6 +79,8 @@ class SummaryTab(AnalysisTab):
         self.neverallowxperm_count.setText(str(p.neverallowxperm_count))
         self.auditallowxperm_count.setText(str(p.auditallowxperm_count))
         self.dontauditxperm_count.setText(str(p.dontauditxperm_count))
+        self.ibendportcon_count.setText(str(p.ibendportcon_count))
+        self.ibpkeycon_count.setText(str(p.ibpkeycon_count))
         self.initsid_count.setText(str(p.initialsids_count))
         self.fs_use_count.setText(str(p.fs_use_count))
         self.genfscon_count.setText(str(p.genfscon_count))
