@@ -14,6 +14,7 @@ from os.path import join
 from itertools import chain
 from contextlib import suppress
 from Cython.Build import cythonize
+import os.path
 
 
 class CleanCommand(clean):
@@ -127,6 +128,17 @@ ext_py_mods = [Extension('setools.policyrep', ['setools/policyrep.pyx'],
                                              '-Wno-cast-function-type',
                                              '-fno-exceptions'])]
 
+installed_data = [('share/man/man1', glob.glob("man/*.1"))]
+
+linguas = ["ru"]
+
+with suppress(KeyError):
+    linguas = os.environ["LINGUAS"].split(" ")
+
+for lang in linguas:
+    if lang and os.path.exists(join("man", lang)):
+        installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
+
 setup(name='setools',
       version='4.3.0-dev',
       description='SELinux policy analysis tools.',
@@ -136,7 +148,7 @@ setup(name='setools',
       cmdclass={'build_qhc': QtHelpCommand, 'clean': CleanCommand},
       packages=['setools', 'setools.diff', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta'],
-      data_files=[('share/man/man1', glob.glob("man/*.1"))],
+      data_files=installed_data,
       package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map']},
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
