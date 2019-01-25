@@ -100,7 +100,7 @@ cdef class BaseTERule(PolicyRule):
         if self._conditional is None:
             return True
 
-        if self._conditional.evaluate(kwargs):
+        if self._conditional.evaluate(**kwargs):
             return self._conditional_block
         else:
             return not self._conditional_block
