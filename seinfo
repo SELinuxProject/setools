@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2014-2015, Tresys Technology, LLC
+# Copyright 2018-2019, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -122,7 +123,7 @@ try:
         components.append(("Booleans", q, lambda x: x.statement()))
 
     if args.mlscatsquery or args.all:
-        q = setools.CategoryQuery(p)
+        q = setools.CategoryQuery(p, alias_deref=True)
         if isinstance(args.mlscatsquery, str):
             q.name = args.mlscatsquery
 
@@ -231,7 +232,7 @@ try:
         components.append(("Roles", q, lambda x: x.statement()))
 
     if args.mlssensquery or args.all:
-        q = setools.SensitivityQuery(p)
+        q = setools.SensitivityQuery(p, alias_deref=True)
         if isinstance(args.mlssensquery, str):
             q.name = args.mlssensquery
 
@@ -245,7 +246,7 @@ try:
         components.append(("Typebounds", q, lambda x: x.statement()))
 
     if args.typequery or args.all:
-        q = setools.TypeQuery(p)
+        q = setools.TypeQuery(p, alias_deref=True)
         if isinstance(args.typequery, str):
             q.name = args.typequery
 
