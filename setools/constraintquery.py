@@ -122,7 +122,7 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
                 if not self._match_perms(c):
                     continue
             except ConstraintUseError:
-                    continue
+                continue
 
             if self.role and not self._match_expr(
                     c.expression.roles,
