@@ -1,5 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
-# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2019, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -354,10 +354,10 @@ cdef class SELinuxPolicy:
 
         raise InvalidBoolean("{0} is not a valid Boolean".format(name))
 
-    def lookup_category(self, name):
-        """Look up a category."""
+    def lookup_category(self, name, deref=True):
+        """Look up a category, with optional alias dereferencing."""
         for c in self.categories():
-            if c == name:
+            if c == name or (deref and name in list(c.aliases())):
                 return c
 
         raise InvalidCategory("{0} is not a valid category".format(name))
@@ -390,10 +390,10 @@ cdef class SELinuxPolicy:
         """Look up a MLS level."""
         return Level.factory_from_string(self, level)
 
-    def lookup_sensitivity(self, name):
-        """Look up a MLS sensitivity by name."""
+    def lookup_sensitivity(self, name, deref=True):
+        """Look up a MLS sensitivity by name, with optional alias dereferencing."""
         for s in self.sensitivities():
-            if s == name:
+            if s == name or (deref and name in list(s.aliases())):
                 return s
 
         raise InvalidSensitivity("{0} is not a valid sensitivity".format(name))
@@ -410,17 +410,21 @@ cdef class SELinuxPolicy:
 
         raise InvalidRole("{0} is not a valid role".format(name))
 
-    def lookup_type(self, name):
-        """Look up a type by name."""
+    def lookup_type(self, name, deref=True):
+        """Look up a type by name, with optional alias dereferencing."""
         for t in self.types():
-            if t == name:
+            if t == name or (deref and name in list(t.aliases())):
                 return t
 
         raise InvalidType("{0} is not a valid type".format(name))
 
-    def lookup_type_or_attr(self, name):
-        """Look up a type or type attribute by name."""
-        for t in itertools.chain(self.types(), self.typeattributes()):
+    def lookup_type_or_attr(self, name, deref=True):
+        """Look up a type or type attribute by name, with optional alias dereferencing."""
+        for t in self.types():
+            if t == name or (deref and name in list(t.aliases())):
+                return t
+
+        for t in self.typeattributes():
             if t == name:
                 return t
 
