@@ -1,4 +1,5 @@
 # Copyright 2015, Tresys Technology, LLC
+# Copyright 2019, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -137,14 +138,15 @@ class MatchContext:
 
 class MatchName:
 
-    """Mixin for matching an object's name."""
+    """Mixin for matching an object's name with alias dereferencing."""
 
     name = CriteriaDescriptor("name_regex")
     name_regex = False
+    alias_deref = False
 
     def _match_name_debug(self, log):
         """Log debugging messages for name matching."""
-        log.debug("Name: {0.name!r}, regex: {0.name_regex}".format(self))
+        log.debug("Name: {0.name!r}, regex: {0.name_regex}, deref: {0.alias_deref}".format(self))
 
     def _match_name(self, obj):
         """Match the object to the name criteria."""
@@ -152,7 +154,11 @@ class MatchName:
             # if there is no criteria, everything matches.
             return True
 
-        return match_regex(obj, self.name, self.name_regex)
+        if self.alias_deref:
+            return match_regex(obj, self.name, self.name_regex) or \
+                match_in_set(obj.aliases(), self.name, self.name_regex)
+        else:
+            return match_regex(obj, self.name, self.name_regex)
 
 
 class MatchObjClass:
