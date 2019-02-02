@@ -83,7 +83,7 @@ cdef class Category(PolicySymbol):
     def aliases(self):
         """Generator that yields all aliases for this category."""
         self._load_aliases()
-        return self.policy.category_aliases(self)
+        return iter(self._aliases)
 
     def statement(self):
         cdef:
