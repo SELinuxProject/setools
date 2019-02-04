@@ -21,8 +21,12 @@ import setools
 import argparse
 import sys
 import logging
+import signal
 from itertools import chain
 from contextlib import suppress
+
+
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 parser = argparse.ArgumentParser(
     description="SELinux policy semantic difference tool.",

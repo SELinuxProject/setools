@@ -20,6 +20,7 @@
 import sys
 import argparse
 import logging
+import signal
 
 import setools
 
@@ -66,6 +67,8 @@ def print_transition(trans):
 
     print()
 
+
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 parser = argparse.ArgumentParser(
     description="SELinux policy domain transition analysis tool.",

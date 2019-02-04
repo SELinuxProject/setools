@@ -22,6 +22,7 @@ import setools
 import argparse
 import sys
 import logging
+import signal
 
 
 def expand_attr(attr):
@@ -30,6 +31,8 @@ def expand_attr(attr):
     contents = items if items else "<empty attribute>"
     return "{0}\n\t{1}".format(attr.statement(), contents)
 
+
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 parser = argparse.ArgumentParser(description="SELinux policy information tool.")
 parser.add_argument("--version", action="version", version=setools.__version__)

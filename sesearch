@@ -21,6 +21,9 @@ import setools
 import argparse
 import sys
 import logging
+import signal
+
+signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
 parser = argparse.ArgumentParser(
     description="SELinux policy rule search tool.",
