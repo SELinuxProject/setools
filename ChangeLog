@@ -1,3 +1,14 @@
+*setools-4.2.1 (4 Feb 2019)
+
+  * Set SIGPIPE handler for CLI tools.
+  * Fixed alias dereferencing in TypeQuery and type, category, and sensitivity
+    lookups.
+  * Fixed sediff bug for rendering modified nodecons.
+  * Fixed devicetreecon count output.
+  * Fixed policy target platform check.
+  * Fixed bug in creating permission set intersection in apol.
+
+
 *setools-4.2.0 (10 Nov 2018)
 
   This release focused on improving performance and reducing memory usage.
