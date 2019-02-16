@@ -24,6 +24,7 @@ import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
 
 from .descriptors import EdgeAttrIntMax, EdgeAttrList
+from .exception import RuleNotConditional
 from .policyrep import TERuletype
 
 __all__ = ['InfoFlowAnalysis']
@@ -33,7 +34,7 @@ class InfoFlowAnalysis:
 
     """Information flow analysis."""
 
-    def __init__(self, policy, perm_map, min_weight=1, exclude=None):
+    def __init__(self, policy, perm_map, min_weight=1, exclude=None, booleans=None):
         """
         Parameters:
         policy      The policy to analyze.
@@ -42,6 +43,10 @@ class InfoFlowAnalysis:
                     (default is 1)
         exclude     The types excluded from the information flow analysis.
                     (default is none)
+        booleans    If None, all rules will be added to the analysis (default).
+                    otherwise it should be set to a dict with keys corresponding
+                    to boolean names and values of True/False. Any unspecified
+                    booleans will use the policy's default values.
         """
         self.log = logging.getLogger(__name__)
 
@@ -50,6 +55,7 @@ class InfoFlowAnalysis:
         self.min_weight = min_weight
         self.perm_map = perm_map
         self.exclude = exclude
+        self.booleans = booleans
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
@@ -327,6 +333,8 @@ class InfoFlowAnalysis:
         self.log.info("Building information flow subgraph...")
         self.log.debug("Excluding {0!r}".format(self.exclude))
         self.log.debug("Min weight {0}".format(self.min_weight))
+        self.log.debug("Exclude disabled conditional policy: {0}".format(
+            self.booleans is not None))
 
         # delete excluded types from subgraph
         nodes = [n for n in self.G.nodes() if n not in self.exclude]
@@ -342,6 +350,36 @@ class InfoFlowAnalysis:
                 if edge.weight < self.min_weight:
                     delete_list.append(edge)
 
+            self.subG.remove_edges_from(delete_list)
+
+        if self.booleans is not None:
+            delete_list = []
+            for s, t in self.subG.edges():
+                edge = Edge(self.subG, s, t)
+                rule_list = []
+                for rule in iter(edge.rules):
+                    try:
+                        if rule.conditional:
+                            bool_enabled = rule.conditional.evaluate(**self.booleans)
+                            # if conditional is true then delete the false rules
+                            if bool_enabled:
+                                for false_rule in rule.conditional.false_rules():
+                                    if false_rule in iter(edge.rules):
+                                        rule_list.append(false_rule)
+                            # if conditional is false then delete the true rules
+                            else:
+                                for true_rule in rule.conditional.true_rules():
+                                    if true_rule in iter(edge.rules):
+                                        rule_list.append(true_rule)
+                    except RuleNotConditional as e:
+                        pass
+                deleted_rules = []
+                for rule in rule_list:
+                    if rule not in deleted_rules:
+                        edge.rules.remove(rule)
+                        deleted_rules.append(rule)
+                if len(edge.rules) == 0:
+                    delete_list.append(edge)
             self.subG.remove_edges_from(delete_list)
 
         self.rebuildsubgraph = False
