@@ -356,30 +356,23 @@ class InfoFlowAnalysis:
             delete_list = []
             for s, t in self.subG.edges():
                 edge = Edge(self.subG, s, t)
+
+                # collect disabled rules
                 rule_list = []
-                for rule in iter(edge.rules):
-                    try:
-                        if rule.conditional:
-                            bool_enabled = rule.conditional.evaluate(**self.booleans)
-                            # if conditional is true then delete the false rules
-                            if bool_enabled:
-                                for false_rule in rule.conditional.false_rules():
-                                    if false_rule in iter(edge.rules):
-                                        rule_list.append(false_rule)
-                            # if conditional is false then delete the true rules
-                            else:
-                                for true_rule in rule.conditional.true_rules():
-                                    if true_rule in iter(edge.rules):
-                                        rule_list.append(true_rule)
-                    except RuleNotConditional as e:
-                        pass
+                # pylint: disable=not-an-iterable
+                for rule in edge.rules:
+                    if not rule.enabled(**self.booleans):
+                        rule_list.append(rule)
+
                 deleted_rules = []
                 for rule in rule_list:
                     if rule not in deleted_rules:
                         edge.rules.remove(rule)
                         deleted_rules.append(rule)
-                if len(edge.rules) == 0:
+
+                if not edge.rules:
                     delete_list.append(edge)
+
             self.subG.remove_edges_from(delete_list)
 
         self.rebuildsubgraph = False
