@@ -1,10 +1,11 @@
+/.eggs
 /.idea
 /build
 /dist
 /setools.egg-info
 *.pyc
 *.pyo
-/setools/libpolicyrep.c
+/setools/policyrep.c
 *.so
 
 # Qt Generated Help files
