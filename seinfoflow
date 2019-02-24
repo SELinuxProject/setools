@@ -58,7 +58,7 @@ opts.add_argument("-l", "--limit_flows", default=0, type=int,
                   help="Limit to the specified number of flows.  Default is unlimited.")
 opts.add_argument("-b", "--booleans", default=None,
                   help="Specify the boolean values to use."
-                       " Options are default, or \"foo:true bar:false ...\"")
+                  " Options are default, or \"foo:true,bar:false...\"")
 opts.add_argument("exclude", nargs="*",
                   help="List of excluded types in the analysis.")
 
