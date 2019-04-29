@@ -1,5 +1,5 @@
 # Copyright 2014, Tresys Technology, LLC
-# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2019, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -86,12 +86,8 @@ cdef class Type(BaseType):
             t.value = symbol.s.value
             t.name = policy.type_value_to_name(symbol.s.value - 1)
             t.ispermissive = <bint>symbol.flags & sepol.TYPE_FLAGS_PERMISSIVE
+            t._aliases = policy.type_alias_map[symbol.s.value]
             return t
-
-    cdef inline void _load_aliases(self):
-        """Helper method to load aliases."""
-        if self._aliases is None:
-            self._aliases = list(self.policy.type_aliases(self))
 
     cdef inline void _load_attributes(self):
         """Helper method to load attributes."""
@@ -110,7 +106,6 @@ cdef class Type(BaseType):
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        self._load_aliases()
         return iter(self._aliases)
 
     def statement(self):
@@ -119,7 +114,6 @@ cdef class Type(BaseType):
             str stmt
 
         self._load_attributes()
-        self._load_aliases()
         count = len(self._aliases)
 
         stmt = "type {0}".format(self.name)
@@ -295,66 +289,6 @@ cdef class TypeAttributeHashtabIterator(HashtabIterator):
         # advance over any attributes or aliases
         while self.node != NULL and (<sepol.type_datum_t *> self.node.datum).flavor != sepol.TYPE_ATTRIB:
             self._next_node()
-
-
-cdef class TypeAliasHashtabIterator(HashtabIterator):
-
-    """Iterate over type aliases in the policy."""
-
-    cdef uint32_t primary
-
-    @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table, Type primary):
-        """Factory function for creating type alias iterators."""
-        i = TypeAliasHashtabIterator()
-        i.policy = policy
-        i.table = table
-        i.primary = primary.value
-        i.reset()
-        return i
-
-    def __next__(self):
-        super().__next__()
-        datum = <sepol.type_datum_t *> self.curr.datum if self.curr else NULL
-
-        while datum != NULL and (not type_is_alias(datum) or datum.s.value != self.primary):
-            super().__next__()
-            datum = <sepol.type_datum_t *> self.curr.datum if self.curr else NULL
-
-        return intern(self.curr.key)
-
-    def __len__(self):
-        cdef sepol.type_datum_t *datum
-        cdef sepol.hashtab_node_t *node
-        cdef uint32_t bucket = 0
-        cdef size_t count = 0
-
-        while bucket < self.table[0].size:
-            node = self.table[0].htable[bucket]
-            while node != NULL:
-                datum = <sepol.type_datum_t *>node.datum if node else NULL
-                if datum != NULL and self.primary == datum.s.value and type_is_alias(datum):
-                    count += 1
-
-                node = node.next
-
-            bucket += 1
-
-        return count
-
-    def reset(self):
-        super().reset()
-
-        cdef sepol.type_datum_t *datum = <sepol.type_datum_t *> self.node.datum if self.node else NULL
-
-        # advance over any attributes or aliases
-        while datum != NULL and (not type_is_alias(datum) and self.primary != datum.s.value):
-            self._next_node()
-
-            if self.node == NULL or self.bucket >= self.table[0].size:
-                break
-
-            datum = <sepol.type_datum_t *> self.node.datum if self.node else NULL
 
 
 #

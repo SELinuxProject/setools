@@ -46,6 +46,9 @@ cdef class SELinuxPolicy:
         object log
         object constraint_counts
         object terule_counts
+        dict type_alias_map
+        dict category_alias_map
+        dict sensitivity_alias_map
         object __weakref__
 
         # Public attributes:
@@ -616,12 +619,6 @@ cdef class SELinuxPolicy:
         """Return the category datum for the specified category value."""
         return self.cat_val_to_struct[value]
 
-    cdef inline category_aliases(self, Category primary):
-        """Return an interator for the aliases for the specified category."""
-        return CategoryAliasHashtabIterator.factory(self,
-                                                    &self.handle.p.symtab[sepol.SYM_CATS].table,
-                                                    primary)
-
     cdef inline str category_value_to_name(self, size_t value):
         """Return the name of the category by its value."""
         return intern(self.handle.p.sym_val_to_name[sepol.SYM_CATS][value])
@@ -653,17 +650,6 @@ cdef class SELinuxPolicy:
     cdef inline str role_value_to_name(self, size_t value):
         """Return the name of the role by its value."""
         return intern(self.handle.p.sym_val_to_name[sepol.SYM_ROLES][value])
-
-    cdef inline sensitivity_aliases(self, Sensitivity primary):
-        """Return an interator for the aliases for the specified sensitivity."""
-        return SensitivityAliasHashtabIterator.factory(self,
-            &self.handle.p.symtab[sepol.SYM_LEVELS].table, primary)
-
-    cdef inline type_aliases(self, Type primary):
-        """Return an iterator for the aliases for the specified type."""
-        return TypeAliasHashtabIterator.factory(self,
-                                                &self.handle.p.symtab[sepol.SYM_TYPES].table,
-                                                primary)
 
     cdef inline sepol.type_datum_t* type_value_to_datum(self, size_t value):
         """Return the type datum for the specified type value."""
@@ -742,6 +728,15 @@ cdef class SELinuxPolicy:
 
         if self.mls:
             self._create_mls_val_to_struct()
+
+        #
+        # Create value to alias mappings
+        #
+        self._load_type_aliases()
+
+        if self.mls:
+            self._load_sensitivity_aliases()
+            self._load_category_aliases()
 
         self.log.info("Successfully opened SELinux policy \"{0}\"".format(filename))
         self.path = filename
@@ -859,6 +854,84 @@ cdef class SELinuxPolicy:
                 level_datum = <sepol.level_datum_t *>node.datum
                 if level_datum != NULL:
                     self.level_val_to_struct[level_datum.level.sens - 1] = level_datum
+
+                node = node.next
+
+            bucket += 1
+
+    cdef _load_category_aliases(self):
+        """Build map of aliases to categories"""
+        cdef:
+            sepol.hashtab_t *table = &self.handle.p.symtab[sepol.SYM_CATS].table
+            sepol.cat_datum_t *datum
+            sepol.hashtab_node_t *node
+            uint32_t bucket = 0
+            list entry
+
+        self.category_alias_map = dict()
+
+        while bucket < table[0].size:
+            node = table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.cat_datum_t *>node.datum if node else NULL
+                if datum == NULL:
+                    continue
+
+                entry = self.category_alias_map.setdefault(datum.s.value, list())
+                if datum.isalias:
+                    entry.append(intern(node.key))
+
+                node = node.next
+
+            bucket += 1
+
+    cdef _load_sensitivity_aliases(self):
+        """Build map of aliases to sensitivities"""
+        cdef:
+            sepol.hashtab_t *table = &self.handle.p.symtab[sepol.SYM_LEVELS].table
+            sepol.level_datum_t *datum
+            sepol.hashtab_node_t *node
+            uint32_t bucket = 0
+            list entry
+
+        self.sensitivity_alias_map = dict()
+
+        while bucket < table[0].size:
+            node = table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.level_datum_t *>node.datum if node else NULL
+                if datum == NULL:
+                    continue
+
+                entry = self.sensitivity_alias_map.setdefault(datum.level.sens, list())
+                if datum.isalias:
+                    entry.append(intern(node.key))
+
+                node = node.next
+
+            bucket += 1
+
+    cdef _load_type_aliases(self):
+        """Build map of aliases to types"""
+        cdef:
+            sepol.hashtab_t *table = &self.handle.p.symtab[sepol.SYM_TYPES].table
+            sepol.type_datum_t *datum
+            sepol.hashtab_node_t *node
+            uint32_t bucket = 0
+            list entry
+
+        self.type_alias_map = dict()
+
+        while bucket < table[0].size:
+            node = table[0].htable[bucket]
+            while node != NULL:
+                datum = <sepol.type_datum_t *>node.datum if node else NULL
+                if datum == NULL:
+                    continue
+
+                entry = self.type_alias_map.setdefault(datum.s.value, list())
+                if type_is_alias(datum):
+                    entry.append(intern(node.key))
 
                 node = node.next
 

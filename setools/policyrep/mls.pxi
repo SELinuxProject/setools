@@ -1,5 +1,5 @@
 # Copyright 2014-2016, Tresys Technology, LLC
-# Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2017-2019, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -65,6 +65,7 @@ cdef class Category(PolicySymbol):
             c.key = <uintptr_t>symbol
             c.name = policy.category_value_to_name(symbol.s.value - 1)
             c._value = symbol.s.value
+            c._aliases = policy.category_alias_map[symbol.s.value]
             _cat_cache[policy][<uintptr_t>symbol] = c
             return c
 
@@ -75,14 +76,8 @@ cdef class Category(PolicySymbol):
         # Comparison based on their index instead of their names.
         return self._value < other._value
 
-    cdef inline void _load_aliases(self):
-        """Helper method to load aliases."""
-        if self._aliases is None:
-            self._aliases = list(self.policy.category_aliases(self))
-
     def aliases(self):
         """Generator that yields all aliases for this category."""
-        self._load_aliases()
         return iter(self._aliases)
 
     def statement(self):
@@ -90,7 +85,6 @@ cdef class Category(PolicySymbol):
             str stmt
             size_t count
 
-        self._load_aliases()
         count = len(self._aliases)
 
         stmt = "category {0}".format(self.name)
@@ -127,6 +121,7 @@ cdef class Sensitivity(PolicySymbol):
             s.key = <uintptr_t>symbol
             s.name = policy.level_value_to_name(symbol.level.sens - 1)
             s._value = symbol.level.sens
+            s._aliases = policy.sensitivity_alias_map[symbol.level.sens]
             return s
 
     def __hash__(self):
@@ -144,14 +139,8 @@ cdef class Sensitivity(PolicySymbol):
     def __lt__(self, other):
         return self._value < other._value
 
-    cdef inline void _load_aliases(self):
-        """Helper method to load aliases."""
-        if self._aliases is None:
-            self._aliases = list(self.policy.sensitivity_aliases(self))
-
     def aliases(self):
         """Generator that yields all aliases for this sensitivity."""
-        self._load_aliases()
         return iter(self._aliases)
 
     def level_decl(self):
@@ -167,7 +156,6 @@ cdef class Sensitivity(PolicySymbol):
             str stmt
             size_t count
 
-        self._load_aliases()
         count = len(self._aliases)
 
         stmt = "sensitivity {0}".format(self.name)
@@ -540,66 +528,6 @@ cdef class CategoryHashtabIterator(HashtabIterator):
             datum = <sepol.cat_datum_t *> self.node.datum if self.node else NULL
 
 
-cdef class CategoryAliasHashtabIterator(HashtabIterator):
-
-    """Iterate over category aliases in the policy."""
-
-    cdef uint32_t primary
-
-    @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table, Category primary):
-        """Factory function for creating category alias iterators."""
-        i = CategoryAliasHashtabIterator()
-        i.policy = policy
-        i.table = table
-        i.primary = primary._value
-        i.reset()
-        return i
-
-    def __next__(self):
-        super().__next__()
-        datum = <sepol.cat_datum_t *> self.curr.datum if self.curr else NULL
-
-        while datum != NULL and (not datum.isalias or datum.s.value != self.primary):
-            super().__next__()
-            datum = <sepol.cat_datum_t *> self.curr.datum if self.curr else NULL
-
-        return intern(self.curr.key)
-
-    def __len__(self):
-        cdef sepol.cat_datum_t *datum
-        cdef sepol.hashtab_node_t *node
-        cdef uint32_t bucket = 0
-        cdef size_t count = 0
-
-        while bucket < self.table[0].size:
-            node = self.table[0].htable[bucket]
-            while node != NULL:
-                datum = <sepol.cat_datum_t *>node.datum if node else NULL
-                if datum != NULL and self.primary == datum.s.value and datum.isalias:
-                    count += 1
-
-                node = node.next
-
-            bucket += 1
-
-        return count
-
-    def reset(self):
-        super().reset()
-
-        cdef sepol.cat_datum_t *datum = <sepol.cat_datum_t *> self.node.datum if self.node else NULL
-
-        # advance over any attributes or aliases
-        while datum != NULL and (not datum.isalias and self.primary != datum.s.value):
-            self._next_node()
-
-            if self.node == NULL or self.bucket >= self.table[0].size:
-                break
-
-            datum = <sepol.cat_datum_t *> self.node.datum if self.node else NULL
-
-
 cdef class SensitivityHashtabIterator(HashtabIterator):
 
     """Iterate over sensitivity in the policy."""
@@ -649,66 +577,6 @@ cdef class SensitivityHashtabIterator(HashtabIterator):
 
         # advance over any attributes or aliases
         while datum != NULL and datum.isalias:
-            self._next_node()
-
-            if self.node == NULL or self.bucket >= self.table[0].size:
-                break
-
-            datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
-
-
-cdef class SensitivityAliasHashtabIterator(HashtabIterator):
-
-    """Iterate over sensitivity aliases in the policy."""
-
-    cdef uint32_t primary
-
-    @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table, Sensitivity primary):
-        """Factory function for creating Sensitivity alias iterators."""
-        i = SensitivityAliasHashtabIterator()
-        i.policy = policy
-        i.table = table
-        i.primary = primary._value
-        i.reset()
-        return i
-
-    def __next__(self):
-        super().__next__()
-        datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
-
-        while datum != NULL and (not datum.isalias or datum.level.sens != self.primary):
-            super().__next__()
-            datum = <sepol.level_datum_t *> self.curr.datum if self.curr else NULL
-
-        return intern(self.curr.key)
-
-    def __len__(self):
-        cdef sepol.level_datum_t *datum
-        cdef sepol.hashtab_node_t *node
-        cdef uint32_t bucket = 0
-        cdef size_t count = 0
-
-        while bucket < self.table[0].size:
-            node = self.table[0].htable[bucket]
-            while node != NULL:
-                datum = <sepol.level_datum_t *>node.datum if node else NULL
-                if datum != NULL and self.primary == datum.level.sens and datum.isalias:
-                    count += 1
-
-                node = node.next
-
-            bucket += 1
-
-        return count
-
-    def reset(self):
-        super().reset()
-
-        cdef sepol.level_datum_t *datum = <sepol.level_datum_t *> self.node.datum if self.node else NULL
-
-        # advance over any attributes or aliases
-        while datum != NULL and (not datum.isalias and self.primary != datum.level.sens):
             self._next_node()
 
             if self.node == NULL or self.bucket >= self.table[0].size:
