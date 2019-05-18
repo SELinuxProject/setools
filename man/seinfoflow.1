@@ -14,15 +14,7 @@ on an SELinux policy.
 
 .SH POLICY
 .PP
-\fBseinfoflow\fR supports loading SELinux policies in one of two formats.
-.RS
-.IP "source:"
-A single text file containing a monolithic policy source. This file is usually named policy.conf.
-.IP "binary:"
 A single file containing a binary policy. This file is usually named by version on Linux systems, for example, \fIpolicy.30\fR. This file is usually named \fIsepolicy\fR on Android systems.
-.RE
-.PP
-.PP
 If no policy file is provided, \fBseinfoflow\fR will search for the policy running on the current
 system. If no policy can be found, \fBseinfoflow\fR will print an error message and exit.
 
