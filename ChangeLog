@@ -1,3 +1,11 @@
+*setools-4.2.2 (15 Jun 2019)
+
+ * Remove source policy references from man pages, as loading source policies
+   is no longer supported.
+ * Fixed a performance regression in alias loading after alias dereferencing
+   fixes in 4.2.1.
+
+
 *setools-4.2.1 (4 Feb 2019)
 
   * Set SIGPIPE handler for CLI tools.
