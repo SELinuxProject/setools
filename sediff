@@ -138,14 +138,14 @@ try:
     diff = setools.PolicyDifference(p1, p2)
 
     if all_differences or args.property:
-        print("Policy Properties ({0} Modified)".format(len(diff.modified_properties)))
-
-        if diff.modified_properties and not args.stats:
-            for name, added, removed in sorted(diff.modified_properties, key=lambda x: x.property):
-                print("      * {0} +{1} -{2}".format(name, added, removed))
-
-        print()
-        del diff.modified_properties
+        if diff.modified_properties or args.property:
+            print("Policy Properties ({0} Modified)".format(len(diff.modified_properties)))
+            if not args.stats:
+                for name, added, removed in sorted(diff.modified_properties,
+                                                   key=lambda x: x.property):
+                    print("      * {0} +{1} -{2}".format(name, added, removed))
+            print()
+            del diff.modified_properties
 
     if all_differences or args.common:
         if diff.added_commons or diff.removed_commons or diff.modified_commons or args.common:
