@@ -17,6 +17,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import logging
 from collections import defaultdict, namedtuple
 
 from ..exception import RuleNotConditional, RuleUseError, TERuleNoFilename
@@ -56,6 +57,11 @@ def _avrule_expand_generator(rule_list, WrapperClass):
                 items[expanded_wrapped_rule].perms |= expanded_wrapped_rule.perms
             except KeyError:
                 items[expanded_wrapped_rule] = expanded_wrapped_rule
+
+    if items:
+        logging.getLogger(__name__).debug(
+            "Expanded {0.ruletype} rules for {0.policy}: {1}".format(
+                unexpanded_rule, len(items)))
 
     return items.keys()
 
@@ -275,9 +281,15 @@ class TERulesDifference(Difference):
         for rule in self.left_policy.terules():
             self._left_te_rules[rule.ruletype].append(rule)
 
+        for ruletype, rules in self._left_te_rules.items():
+            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+
         self.log.debug("Building TE rule lists from {0.right_policy}".format(self))
         for rule in self.right_policy.terules():
             self._right_te_rules[rule.ruletype].append(rule)
+
+        for ruletype, rules in self._right_te_rules.items():
+            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
 
         self.log.debug("Completed building TE rule lists.")
 
