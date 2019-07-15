@@ -32,6 +32,7 @@ from .defaultquery import DefaultQueryTab
 from .dta import DomainTransitionAnalysisTab
 from .fsusequery import FSUseQueryTab
 from .genfsconquery import GenfsconQueryTab
+from .ibpkeyconquery import IbpkeyconQueryTab
 from .infoflow import InfoFlowAnalysisTab
 from .initsidquery import InitialSIDQueryTab
 from .mlsrulequery import MLSRuleQueryTab
@@ -59,6 +60,7 @@ tab_map = {"BoolQueryTab": BoolQueryTab,
            "DomainTransitionAnalysisTab": DomainTransitionAnalysisTab,
            "FSUseQueryTab": FSUseQueryTab,
            "GenfsconQueryTab": GenfsconQueryTab,
+           "IbpkeyconQueryTab": IbpkeyconQueryTab,
            "InfoFlowAnalysisTab": InfoFlowAnalysisTab,
            "InitialSIDQueryTab": InitialSIDQueryTab,
            "MLSRuleQueryTab": MLSRuleQueryTab,
@@ -109,6 +111,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                     "TE Rules": TERuleQueryTab}
         labeling_map = {"Fs_use_* Statements": FSUseQueryTab,
                         "Genfscon Statements": GenfsconQueryTab,
+                        "Infiniband Partition Key Contexts": IbpkeyconQueryTab,
                         "Initial SID Statements": InitialSIDQueryTab,
                         "Netifcon Statements": NetifconQueryTab,
                         "Nodecon Statements": NodeconQueryTab,
