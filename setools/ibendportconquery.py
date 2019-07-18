@@ -56,7 +56,22 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    port = None
+    _port = None
+
+    @property
+    def port(self):
+        return self._port
+
+    @port.setter
+    def port(self, value):
+        if value:
+            pending_value = int(value)
+            if not 0 < pending_value < 256:
+                raise ValueError("Endport value must be 1-255.")
+
+            self._port = pending_value
+        else:
+            self._port = None
 
     def __init__(self, policy, **kwargs):
         super(IbendportconQuery, self).__init__(policy, **kwargs)
@@ -66,7 +81,7 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
         """Generator which yields all matching ibendportcons."""
         self.log.info("Generating ibendportcon results from {0.policy}".format(self))
         self._match_name_debug(self.log)
-        self.log.debug("Port: {0.port}".format(self))
+        self.log.debug("Port: {0.port!r}".format(self))
         self._match_context_debug(self.log)
 
         for endport in self.policy.ibendportcons():
