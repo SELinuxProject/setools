@@ -116,9 +116,9 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                         "Infiniband Endport Contexts": IbendportconQueryTab,
                         "Infiniband Partition Key Contexts": IbpkeyconQueryTab,
                         "Initial SID Statements": InitialSIDQueryTab,
-                        "Netifcon Statements": NetifconQueryTab,
-                        "Nodecon Statements": NodeconQueryTab,
-                        "Portcon Statements": PortconQueryTab}
+                        "Network Interface Contexts": NetifconQueryTab,
+                        "Network Node Contexts": NodeconQueryTab,
+                        "Network Port Contexts": PortconQueryTab}
         general_choices = {"Summary": SummaryTab}
         other_choices = {"Bounds": BoundsQueryTab,
                          "Defaults": DefaultQueryTab}

@@ -114,7 +114,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Portcon Statements</string>
+       <string>Network Port Contexts</string>
       </property>
      </widget>
     </item>

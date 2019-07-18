@@ -114,7 +114,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Netifcon Statements</string>
+       <string>Network Interface Contexts</string>
       </property>
      </widget>
     </item>
