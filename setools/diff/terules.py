@@ -19,6 +19,8 @@
 #
 import logging
 from collections import defaultdict, namedtuple
+from itertools import chain
+from contextlib import suppress
 
 from ..exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 from ..policyrep import IoctlSet, TERuletype
@@ -28,14 +30,6 @@ from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 from .types import type_wrapper_factory, type_or_attr_wrapper_factory
 from .objclass import class_wrapper_factory
-
-
-modified_avrule_record = namedtuple("modified_avrule", ["rule",
-                                                        "added_perms",
-                                                        "removed_perms",
-                                                        "matched_perms"])
-
-modified_terule_record = namedtuple("modified_terule", ["rule", "added_default", "removed_default"])
 
 
 def _avrule_expand_generator(rule_list, WrapperClass):
@@ -103,10 +97,14 @@ def av_diff_template(ruletype):
             # like [("perm1", "perm1"), ("perm2", "perm2")], as the
             # matched_perms return from _set_diff is a set of tuples
             if added_perms or removed_perms:
-                modified.append(modified_avrule_record(left_rule.origin,
-                                                       added_perms,
-                                                       removed_perms,
-                                                       set(p[0] for p in matched_perms)))
+                matched_perms = set(p[0] for p in matched_perms)
+                perms = " ".join(chain((p for p in sorted(matched_perms)),
+                                       ("+" + p for p in sorted(added_perms)),
+                                       ("-" + p for p in sorted(removed_perms))))
+                rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(left_rule.origin, perms)
+                with suppress(RuleNotConditional):
+                    rule_string += " [ {0} ]".format(left_rule.origin.conditional)
+                modified.append(rule_string)
 
         setattr(self, "added_{0}s".format(ruletype), set(a.origin for a in added))
         setattr(self, "removed_{0}s".format(ruletype), set(r.origin for r in removed))
@@ -152,10 +150,31 @@ def avx_diff_template(ruletype):
             # like [("perm1", "perm1"), ("perm2", "perm2")], as the
             # matched_perms return from _set_diff is a set of tuples
             if added_perms or removed_perms:
-                modified.append(modified_avrule_record(left_rule.origin,
-                                                       IoctlSet(added_perms),
-                                                       IoctlSet(removed_perms),
-                                                       IoctlSet(p[0] for p in matched_perms)))
+                added_perms = IoctlSet(added_perms)
+                removed_perms = IoctlSet(removed_perms)
+                matched_perms = IoctlSet(p[0] for p in matched_perms)
+                perms = []
+                if matched_perms:
+                    for p in str(matched_perms).split(" "):
+                        perms.append(p)
+                if added_perms:
+                    for p in str(added_perms).split(" "):
+                        if '-' in p:
+                            perms.append("+[{0}]".format(p))
+                        else:
+                            perms.append("+{0}".format(p))
+                if removed_perms:
+                    for p in str(removed_perms).split(" "):
+                        if '-' in p:
+                            perms.append("-[{0}]".format(p))
+                        else:
+                            perms.append("-{0}".format(p))
+                perms_str = "{ "
+                perms_str += " ".join(perms)
+                perms_str += " }"
+
+                rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {1};".format(left_rule.origin, perms_str)
+                modified.append(rule_string)
 
         setattr(self, "added_{0}s".format(ruletype), set(a.origin for a in added))
         setattr(self, "removed_{0}s".format(ruletype), set(r.origin for r in removed))
@@ -193,9 +212,13 @@ def te_diff_template(ruletype):
             # Criteria for modified rules
             # 1. change to default type
             if type_wrapper_factory(left_rule.default) != type_wrapper_factory(right_rule.default):
-                modified.append(modified_terule_record(left_rule,
-                                                       right_rule.default,
-                                                       left_rule.default))
+                rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(left_rule.origin, right_rule.default, left_rule.default)
+                with suppress(TERuleNoFilename):
+                    rule_string += " {0}".format(left_rule.filename)
+                rule_string += ";"
+                with suppress(RuleNotConditional):
+                    rule_string += " [ {0} ]".format(left_rule.conditional)
+                modified.append(rule_string)
 
         setattr(self, "added_{0}s".format(ruletype), added)
         setattr(self, "removed_{0}s".format(ruletype), removed)

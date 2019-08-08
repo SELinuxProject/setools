@@ -520,19 +520,8 @@ try:
 
             if diff.modified_allows and not args.stats:
                 print("   Modified Allow Rules: {0}".format(len(diff.modified_allows)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(diff.modified_allows,
-                                                                              key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
-                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
-
-                    with suppress(AttributeError):
-                        rule_string += " [ {0} ]".format(rule.conditional)
-
-                    print("      * {0}".format(rule_string))
+                for r in sorted(diff.modified_allows):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_allows
@@ -559,39 +548,8 @@ try:
 
             if diff.modified_allowxperms and not args.stats:
                 print("   Modified Allowxperm Rules: {0}".format(len(diff.modified_allowxperms)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_allowxperms, key=lambda x: x.rule):
-
-                    # Process the string representation of the sets
-                    # so hex representation and ranges are preserved.
-                    # Check if the perm sets have contents, otherwise
-                    # split on empty string will be an empty string.
-                    # Add brackets to added and removed permissions
-                    # in case there is a range of permissions.
-                    perms = []
-                    if matched_perms:
-                        for p in str(matched_perms).split(" "):
-                            perms.append(p)
-                    if added_perms:
-                        for p in str(added_perms).split(" "):
-                            if '-' in p:
-                                perms.append("+[{0}]".format(p))
-                            else:
-                                perms.append("+{0}".format(p))
-                    if removed_perms:
-                        for p in str(removed_perms).split(" "):
-                            if '-' in p:
-                                perms.append("-[{0}]".format(p))
-                            else:
-                                perms.append("-{0}".format(p))
-
-                    rule_string = \
-                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
-                        format(rule, perms)
-
-                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
-                          "{{ {1} }};".format(rule, " ".join(perms)))
+                for r in sorted(diff.modified_allowxperms):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_allowxperms
@@ -617,19 +575,8 @@ try:
 
             if diff.modified_neverallows and not args.stats:
                 print("   Modified Neverallow Rules: {0}".format(len(diff.modified_neverallows)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_neverallows, key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
-                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
-
-                    with suppress(AttributeError):
-                        rule_string += " [ {0} ]".format(rule.conditional)
-
-                    print("      * {0}".format(rule_string))
+                for r in sorted(diff.modified_neverallows):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_neverallows
@@ -659,39 +606,8 @@ try:
             if diff.modified_neverallowxperms and not args.stats:
                 print("   Modified Neverallowxperm Rules: {0}".format(
                       len(diff.modified_neverallowxperms)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_neverallowxperms, key=lambda x: x.rule):
-
-                    # Process the string representation of the sets
-                    # so hex representation and ranges are preserved.
-                    # Check if the perm sets have contents, otherwise
-                    # split on empty string will be an empty string.
-                    # Add brackets to added and removed permissions
-                    # in case there is a range of permissions.
-                    perms = []
-                    if matched_perms:
-                        for p in str(matched_perms).split(" "):
-                            perms.append(p)
-                    if added_perms:
-                        for p in str(added_perms).split(" "):
-                            if '-' in p:
-                                perms.append("+[{0}]".format(p))
-                            else:
-                                perms.append("+{0}".format(p))
-                    if removed_perms:
-                        for p in str(removed_perms).split(" "):
-                            if '-' in p:
-                                perms.append("-[{0}]".format(p))
-                            else:
-                                perms.append("-{0}".format(p))
-
-                    rule_string = \
-                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
-                        format(rule, perms)
-
-                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
-                          "{{ {1} }};".format(rule, " ".join(perms)))
+                for r in sorted(diff.modified_neverallowxperms):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_neverallowxperms
@@ -717,19 +633,8 @@ try:
 
             if diff.modified_auditallows and not args.stats:
                 print("   Modified Auditallow Rules: {0}".format(len(diff.modified_auditallows)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_auditallows, key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
-                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
-
-                    with suppress(AttributeError):
-                        rule_string += " [ {0} ]".format(rule.conditional)
-
-                    print("      * {0}".format(rule_string))
+                for r in sorted(diff.modified_auditallows):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_auditallows
@@ -759,39 +664,8 @@ try:
             if diff.modified_auditallowxperms and not args.stats:
                 print("   Modified Auditallowxperm Rules: {0}".format(
                       len(diff.modified_auditallowxperms)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_auditallowxperms, key=lambda x: x.rule):
-
-                    # Process the string representation of the sets
-                    # so hex representation and ranges are preserved.
-                    # Check if the perm sets have contents, otherwise
-                    # split on empty string will be an empty string.
-                    # Add brackets to added and removed permissions
-                    # in case there is a range of permissions.
-                    perms = []
-                    if matched_perms:
-                        for p in str(matched_perms).split(" "):
-                            perms.append(p)
-                    if added_perms:
-                        for p in str(added_perms).split(" "):
-                            if '-' in p:
-                                perms.append("+[{0}]".format(p))
-                            else:
-                                perms.append("+{0}".format(p))
-                    if removed_perms:
-                        for p in str(removed_perms).split(" "):
-                            if '-' in p:
-                                perms.append("-[{0}]".format(p))
-                            else:
-                                perms.append("-{0}".format(p))
-
-                    rule_string = \
-                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
-                        format(rule, perms)
-
-                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
-                          "{{ {1} }};".format(rule, " ".join(perms)))
+                for r in sorted(diff.modified_auditallowxperms):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_auditallowxperms
@@ -817,19 +691,8 @@ try:
 
             if diff.modified_dontaudits and not args.stats:
                 print("   Modified Dontaudit Rules: {0}".format(len(diff.modified_dontaudits)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_dontaudits, key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
-                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
-
-                    with suppress(AttributeError):
-                        rule_string += " [ {0} ]".format(rule.conditional)
-
-                    print("      * {0}".format(rule_string))
+                for r in sorted(diff.modified_dontaudits):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_dontaudits
@@ -859,39 +722,8 @@ try:
             if diff.modified_dontauditxperms and not args.stats:
                 print("   Modified Dontauditxperm Rules: {0}".format(
                       len(diff.modified_dontauditxperms)))
-
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_dontauditxperms, key=lambda x: x.rule):
-
-                    # Process the string representation of the sets
-                    # so hex representation and ranges are preserved.
-                    # Check if the perm sets have contents, otherwise
-                    # split on empty string will be an empty string.
-                    # Add brackets to added and removed permissions
-                    # in case there is a range of permissions.
-                    perms = []
-                    if matched_perms:
-                        for p in str(matched_perms).split(" "):
-                            perms.append(p)
-                    if added_perms:
-                        for p in str(added_perms).split(" "):
-                            if '-' in p:
-                                perms.append("+[{0}]".format(p))
-                            else:
-                                perms.append("+{0}".format(p))
-                    if removed_perms:
-                        for p in str(removed_perms).split(" "):
-                            if '-' in p:
-                                perms.append("-[{0}]".format(p))
-                            else:
-                                perms.append("-{0}".format(p))
-
-                    rule_string = \
-                        "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} {{ {1} }};". \
-                        format(rule, perms)
-
-                    print("      * {0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} "
-                          "{{ {1} }};".format(rule, " ".join(perms)))
+                for r in sorted(diff.modified_dontauditxperms):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_dontauditxperms
@@ -920,21 +752,8 @@ try:
             if diff.modified_type_transitions and not args.stats:
                 print("   Modified Type_transition Rules: {0}".format(
                     len(diff.modified_type_transitions)))
-
-                for rule, added_default, removed_default in sorted(diff.modified_type_transitions,
-                                                                   key=lambda x: x.rule):
-                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
-                        rule, added_default, removed_default)
-
-                    with suppress(AttributeError):
-                        rule_string += " {0}".format(rule.filename)
-
-                    rule_string += ";"
-
-                    with suppress(AttributeError):
-                        rule_string += " [ {0} ]".format(rule.conditional)
-
-                    print("      * {0}".format(rule_string))
+                for r in sorted(diff.modified_type_transitions):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_type_transitions
@@ -960,21 +779,8 @@ try:
 
             if diff.modified_type_changes and not args.stats:
                 print("   Modified Type_change Rules: {0}".format(len(diff.modified_type_changes)))
-
-                for rule, added_default, removed_default in sorted(diff.modified_type_changes,
-                                                                   key=lambda x: x.rule):
-                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
-                        rule, added_default, removed_default)
-
-                    with suppress(AttributeError):
-                        rule_string += " {0}".format(rule.filename)
-
-                    rule_string += ";"
-
-                    with suppress(AttributeError):
-                        rule_string += " [ {0} ]".format(rule.conditional)
-
-                    print("      * {0}".format(rule_string))
+                for r in sorted(diff.modified_type_changes):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_type_changes
@@ -1000,21 +806,8 @@ try:
 
             if diff.modified_type_members and not args.stats:
                 print("   Modified Type_member Rules: {0}".format(len(diff.modified_type_members)))
-
-                for rule, added_default, removed_default in sorted(diff.modified_type_members,
-                                                                   key=lambda x: x.rule):
-                    rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
-                        rule, added_default, removed_default)
-
-                    with suppress(AttributeError):
-                        rule_string += " {0}".format(rule.filename)
-
-                    rule_string += ";"
-
-                    with suppress(AttributeError):
-                        rule_string += " [ {0} ]".format(rule.conditional)
-
-                    print("      * {0}".format(rule_string))
+                for r in sorted(diff.modified_type_members):
+                    print("      * {0}".format(r))
 
             print()
             del diff.added_type_members
