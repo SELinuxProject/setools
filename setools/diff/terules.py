@@ -441,4 +441,4 @@ class TERuleWrapper(Wrapper):
             self.tclass == other.tclass and \
             self.conditional == other.conditional and \
             self.conditional_block == other.conditional_block and \
-            self.filename == self.filename
+            self.filename == other.filename

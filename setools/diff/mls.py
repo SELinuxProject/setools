@@ -235,7 +235,7 @@ class LevelWrapper(Wrapper):
         self.categories = set(category_wrapper_factory(c) for c in level.categories())
 
     def __hash__(self):
-        raise hash(self.origin)
+        return hash(self.origin)
 
     def __eq__(self, other):
         try:
