@@ -114,7 +114,7 @@
        </font>
       </property>
       <property name="text">
-       <string>Infiniband Endport Context Statements</string>
+       <string>Infiniband Endport Contexts</string>
       </property>
      </widget>
     </item>
