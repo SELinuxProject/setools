@@ -142,6 +142,32 @@ cdef class AVRule(BaseTERule):
         """The rule's default type."""
         raise RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
 
+    def derive_expanded(self, BaseType source, BaseType target, perms):
+        """Derive an expanded rule from source, target, and perms."""
+        cdef AVRule r
+        if self.origin is not None:
+            raise RuleUseError("{0} rule is already expanded.".format(self.ruletype))
+
+        if source is not self.source and source not in self.source:
+            raise RuleUseError("{0} is not {1} and is not in {1}".format(source, self.source))
+        if target is not self.target and target not in self.target:
+            raise RuleUseError("{0} is not {1} and is not in {1}".format(target, self.target))
+        if not perms <= self.perms:
+            raise RuleUseError("Permissions for derived expanded {0} rule are not a subset of the original permissions".format(self.ruletype))
+
+        r = AVRule.__new__(AVRule)
+        r.policy = self.policy
+        r.key = self.key
+        r.ruletype = self.ruletype
+        r.source = source
+        r.target = target
+        r.tclass = self.tclass
+        r.perms = frozenset(p for p in perms)
+        r._conditional = self._conditional
+        r._conditional_block = self._conditional_block
+        r.origin = self
+        return r
+
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         cdef AVRule r

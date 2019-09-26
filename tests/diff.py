@@ -2900,3 +2900,34 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
         """NoDiff: no modified ibendportcon rules."""
         self.assertEqual(self.diff.left_policy.ibendportcon_count,
                          len(self.diff.modified_ibendportcons))
+
+
+class PolicyDifferenceTestRedundant(unittest.TestCase):
+
+    """
+    Policy difference test with redundant rules.
+    There should be no policy differences.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.p_left = compile_policy("tests/diff_left.conf")
+        cls.p_right = compile_policy("tests/diff_left_redundant.conf")
+        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.unlink(cls.p_left.path)
+        os.unlink(cls.p_right.path)
+
+    def test_added_allows(self):
+        """Redundant: no added allow rules."""
+        self.assertFalse(self.diff.added_allows)
+
+    def test_removed_allows(self):
+        """Redundant: no removed allow rules."""
+        self.assertFalse(self.diff.removed_allows)
+
+    def test_modified_allows(self):
+        """Redundant: no modified allow rules."""
+        self.assertFalse(self.diff.modified_allows)

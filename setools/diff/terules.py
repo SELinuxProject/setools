@@ -19,6 +19,8 @@
 #
 import logging
 from collections import defaultdict, namedtuple
+from sys import intern
+from enum import Enum
 
 from ..exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 from ..policyrep import IoctlSet, TERuletype
@@ -29,6 +31,8 @@ from .difference import Difference, Wrapper
 from .types import type_wrapper_factory, type_or_attr_wrapper_factory
 from .objclass import class_wrapper_factory
 
+TERULES_UNCONDITIONAL = intern("<<unconditional>>")
+TERULES_UNCONDITIONAL_BLOCK = intern("True")
 
 modified_avrule_record = namedtuple("modified_avrule", ["rule",
                                                         "added_perms",
@@ -38,7 +42,231 @@ modified_avrule_record = namedtuple("modified_avrule", ["rule",
 modified_terule_record = namedtuple("modified_terule", ["rule", "added_default", "removed_default"])
 
 
-def _avrule_expand_generator(rule_list, WrapperClass):
+class Side(Enum):
+    left = 0
+    right = 1
+
+
+rule_db_side_data_record = namedtuple("rule_db_side_data", ["perms", "orig_rule"])
+
+rule_db_sides_record = namedtuple("rule_db_sides", ["left", "right"])
+
+type_db_record = namedtuple("Type_db", ["left", "right"])
+
+
+def _avrule_expand_generator(rule_list, rule_db, type_db, side):
+    """
+    Using rule_list, build up rule_db which is a data structure which consists
+    of nested dicts that store BOTH the left and the right policies. All of the
+    keys are interned strings. The permissions are stored as a set. The basic
+    structure is rule_db[cond_exp][block_bool][src][tgt][tclass] = sides
+    where:
+      cond_exp is a boolean expression
+      block_bool is either true or false
+      src is the source type
+      tgt is the target type
+      tclass is the target class
+      sides is a named tuple with attributes "left" and "right" referring to the
+        left or right policy. Each attribute in the sides named tuple refers to a
+        named tuple with attributes "perms" and "orig_rule" which refer to a
+        permission set and the original unexpanded rule.
+        sides = ((left_perms, left_orig_rule),(right_perms, right_orig_rule))
+    There are a few advantages to this structure. First, it takes up way less
+    memory. Second, it allows redundant rules to be easily eliminated. And,
+    third, it makes it easy to create the added, removed, and modified rules.
+    """
+    if side == Side.left:
+        types = type_db.left
+    else:
+        types = type_db.right
+
+    for unexpanded_rule in rule_list:
+        cond_exp = TERULES_UNCONDITIONAL
+        block_bool = TERULES_UNCONDITIONAL_BLOCK
+        try:
+            cond_exp = intern(str(unexpanded_rule.conditional))
+            block_bool = intern(str(unexpanded_rule.conditional_block))
+        except RuleNotConditional:
+            pass
+
+        if cond_exp not in rule_db:
+            rule_db[cond_exp] = dict()
+            rule_db[cond_exp][block_bool] = dict()
+        elif block_bool not in rule_db[cond_exp]:
+            rule_db[cond_exp][block_bool] = dict()
+
+        tclass = unexpanded_rule.tclass.name
+        perms = {p for p in unexpanded_rule.perms}
+        side_data = rule_db_side_data_record(perms, unexpanded_rule)
+
+        block = rule_db[cond_exp][block_bool]
+        for src in unexpanded_rule.source.expand():
+            src_str = src.name
+            if src_str not in types:
+                types[src_str] = src
+            if src_str not in block:
+                block[src_str] = dict()
+            for tgt in unexpanded_rule.target.expand():
+                tgt_str = tgt.name
+                if tgt_str not in types:
+                    types[tgt_str] = tgt
+                if tgt_str not in block[src_str]:
+                    block[src_str][tgt_str] = dict()
+                left_side = None
+                right_side = None
+                if tclass in block[src_str][tgt_str]:
+                    sides = block[src_str][tgt_str][tclass]
+                    left_side = sides.left
+                    right_side = sides.right
+                if side == Side.left:
+                    if not left_side:
+                        left_side = side_data
+                    else:
+                        """
+                        The original tuple and perm set might be shared with many
+                        expanded rules so a new ones must created.
+                        Using "|=" would cause the old perm set to be modified
+                        instead of creating a new one.
+                        """
+                        p = left_side.perms | perms
+                        orig = left_side.orig_rule
+                        left_side = rule_db_side_data_record(p, orig)
+                else:
+                    if not right_side:
+                        right_side = side_data
+                    else:
+                        """
+                        Must create new tuple and perm set as explained above.
+                        """
+                        p = right_side.perms | perms
+                        orig = right_side.orig_rule
+                        right_side = rule_db_side_data_record(p, orig)
+                block[src_str][tgt_str][tclass] = rule_db_sides_record(left_side, right_side)
+
+
+def _av_remove_redundant_rules(rule_db):
+    uncond_block = rule_db[TERULES_UNCONDITIONAL][TERULES_UNCONDITIONAL_BLOCK]
+    for cond_exp, cond_blocks in rule_db.items():
+        if cond_exp == TERULES_UNCONDITIONAL:
+            continue
+        for block_bool, block in cond_blocks.items():
+            for src, src_data in block.items():
+                if src not in uncond_block:
+                    continue
+                for tgt, tgt_data in src_data.items():
+                    if tgt not in uncond_block[src]:
+                        continue
+                    for tclass, side_data in tgt_data.items():
+                        if tclass not in uncond_block[src][tgt]:
+                            continue
+                        uncond_side_data = uncond_block[src][tgt][tclass]
+                        left_side = side_data.left
+                        right_side = side_data.right
+                        if uncond_side_data.left and left_side:
+                            c = left_side.perms & uncond_side_data.left.perms
+                            if c:
+                                p = left_side.perms - c
+                                if p:
+                                    left_side = rule_db_side_data_record(p, left_side.orig_rule)
+                                else:
+                                    left_side = None
+                                tgt_data[tclass] = rule_db_sides_record(left_side, right_side)
+                        if uncond_side_data.right and right_side:
+                            c = right_side.perms & uncond_side_data.right.perms
+                            if c:
+                                p = right_side.perms - c
+                                if p:
+                                    right_side = rule_db_side_data_record(p, right_side.orig_rule)
+                                else:
+                                    right_side = None
+                                tgt_data[tclass] = rule_db_sides_record(left_side, right_side)
+
+
+def _av_generate_diffs(ruletype, rule_db, type_db):
+    added = []
+    removed = []
+    modified = []
+    for cond_exp, cond_blocks in rule_db.items():
+        for block_bool, block in cond_blocks.items():
+            for src, src_data in block.items():
+                for tgt, tgt_data in src_data.items():
+                    for tclass, side_data in tgt_data.items():
+                        if side_data.left and side_data.right:
+                            common_perms = side_data.left.perms & side_data.right.perms
+                            left_perms = side_data.left.perms - common_perms
+                            right_perms = side_data.right.perms - common_perms
+                            if left_perms or right_perms:
+                                original_rule = side_data.left.orig_rule
+                                rule = original_rule.derive_expanded(
+                                    type_db.left[src], type_db.left[tgt],
+                                    side_data.left.perms)
+                                modified.append(modified_avrule_record(rule, right_perms,
+                                                                       left_perms,
+                                                                       common_perms))
+                        elif side_data.left:
+                            original_rule = side_data.left.orig_rule
+                            rule = original_rule.derive_expanded(
+                                type_db.left[src], type_db.left[tgt],
+                                side_data.left.perms)
+                            removed.append(rule)
+                        elif side_data.right:
+                            original_rule = side_data.right.orig_rule
+                            rule = original_rule.derive_expanded(
+                                type_db.right[src], type_db.right[tgt],
+                                side_data.right.perms)
+                            added.append(rule)
+    return added, removed, modified
+
+
+def av_diff_template(ruletype):
+
+    """
+    This is a template for the access vector diff functions.
+
+    Parameters:
+    ruletype    The rule type, e.g. "allow".
+    """
+    ruletype = TERuletype.lookup(ruletype)
+
+    def diff(self):
+        """Generate the difference in rules between the policies."""
+
+        self.log.info(
+            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
+            format(ruletype, self))
+
+        if not self._left_te_rules or not self._right_te_rules:
+            self._create_te_rule_lists()
+
+        type_db = type_db_record(dict(), dict())
+        rule_db = dict()
+        rule_db[TERULES_UNCONDITIONAL] = dict()
+        rule_db[TERULES_UNCONDITIONAL][TERULES_UNCONDITIONAL_BLOCK] = dict()
+
+        logging.info("Expanding left policy")
+        _avrule_expand_generator(self._left_te_rules[ruletype], rule_db, type_db, Side.left)
+
+        logging.info("Expanding right policy")
+        _avrule_expand_generator(self._right_te_rules[ruletype], rule_db, type_db, Side.right)
+
+        logging.info("Removing redundant rules")
+        _av_remove_redundant_rules(rule_db)
+
+        logging.info("Generating added, removed, and modified av rules")
+        added, removed, modified = _av_generate_diffs(ruletype, rule_db, type_db)
+
+        type_db.left.clear()
+        type_db.right.clear()
+        rule_db.clear()
+
+        setattr(self, "added_{0}s".format(ruletype), added)
+        setattr(self, "removed_{0}s".format(ruletype), removed)
+        setattr(self, "modified_{0}s".format(ruletype), modified)
+
+    return diff
+
+
+def _avxrule_expand_generator(rule_list, WrapperClass):
     """
     Generator that yields wrapped, expanded, av(x) rules with
     unioned permission sets.
@@ -66,55 +294,6 @@ def _avrule_expand_generator(rule_list, WrapperClass):
     return items.keys()
 
 
-def av_diff_template(ruletype):
-
-    """
-    This is a template for the access vector diff functions.
-
-    Parameters:
-    ruletype    The rule type, e.g. "allow".
-    """
-    ruletype = TERuletype.lookup(ruletype)
-
-    def diff(self):
-        """Generate the difference in rules between the policies."""
-
-        self.log.info(
-            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
-            format(ruletype, self))
-
-        if not self._left_te_rules or not self._right_te_rules:
-            self._create_te_rule_lists()
-
-        added, removed, matched = self._set_diff(
-            _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleWrapper),
-            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleWrapper),
-            unwrap=False)
-
-        modified = []
-        for left_rule, right_rule in matched:
-            # Criteria for modified rules
-            # 1. change to permissions
-            added_perms, removed_perms, matched_perms = self._set_diff(left_rule.perms,
-                                                                       right_rule.perms,
-                                                                       unwrap=False)
-
-            # the final set comprehension is to avoid having lists
-            # like [("perm1", "perm1"), ("perm2", "perm2")], as the
-            # matched_perms return from _set_diff is a set of tuples
-            if added_perms or removed_perms:
-                modified.append(modified_avrule_record(left_rule.origin,
-                                                       added_perms,
-                                                       removed_perms,
-                                                       set(p[0] for p in matched_perms)))
-
-        setattr(self, "added_{0}s".format(ruletype), set(a.origin for a in added))
-        setattr(self, "removed_{0}s".format(ruletype), set(r.origin for r in removed))
-        setattr(self, "modified_{0}s".format(ruletype), modified)
-
-    return diff
-
-
 def avx_diff_template(ruletype):
 
     """
@@ -136,8 +315,8 @@ def avx_diff_template(ruletype):
             self._create_te_rule_lists()
 
         added, removed, matched = self._set_diff(
-            _avrule_expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
-            _avrule_expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper),
+            _avxrule_expand_generator(self._left_te_rules[ruletype], AVRuleXpermWrapper),
+            _avxrule_expand_generator(self._right_te_rules[ruletype], AVRuleXpermWrapper),
             unwrap=False)
 
         modified = []
@@ -333,43 +512,6 @@ class TERulesDifference(Difference):
         # Sets of rules for each policy
         self._left_te_rules.clear()
         self._right_te_rules.clear()
-
-
-class AVRuleWrapper(Wrapper):
-
-    """Wrap access vector rules to allow set operations."""
-
-    __slots__ = ("source", "target", "tclass", "perms", "conditional", "conditional_block")
-
-    def __init__(self, rule):
-        self.origin = rule
-        self.source = type_or_attr_wrapper_factory(rule.source)
-        self.target = type_or_attr_wrapper_factory(rule.target)
-        self.tclass = class_wrapper_factory(rule.tclass)
-        self.perms = rule.perms
-        self.key = hash(rule)
-
-        try:
-            self.conditional = conditional_wrapper_factory(rule.conditional)
-            self.conditional_block = rule.conditional_block
-        except RuleNotConditional:
-            self.conditional = None
-            self.conditional_block = None
-
-    def __hash__(self):
-        return self.key
-
-    def __lt__(self, other):
-        return self.key < other.key
-
-    def __eq__(self, other):
-        # because TERuleDifference groups rules by ruletype,
-        # the ruletype always matches.
-        return self.source == other.source and \
-            self.target == other.target and \
-            self.tclass == other.tclass and \
-            self.conditional == other.conditional and \
-            self.conditional_block == other.conditional_block
 
 
 class AVRuleXpermWrapper(Wrapper):
