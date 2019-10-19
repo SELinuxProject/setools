@@ -151,19 +151,26 @@ cdef class TypeAttribute(BaseType):
             a.name = policy.type_value_to_name(symbol.s.value - 1)
             return a
 
-    def __contains__(self, other):
-        for type_ in self.expand():
-            if other == type_:
-                return True
-
-        return False
-
-    def expand(self):
-        """Generator that expands this attribute into its member types."""
+    cdef load_types(self):
         cdef sepol.type_datum_t *symbol = <sepol.type_datum_t *>self.key
         if self._types is None:
             self._types = list(TypeEbitmapIterator.factory(self.policy, &symbol.types))
 
+    def __contains__(self, other):
+        self.load_types()
+        return other in self._types
+
+    def __iter__(self):
+        self.load_types()
+        return iter(self._types)
+
+    def __len__(self):
+        self.load_types()
+        return len(self._types)
+
+    def expand(self):
+        """Generator that expands this attribute into its member types."""
+        self.load_types()
         return iter(self._types)
 
     def attributes(self):
