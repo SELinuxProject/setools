@@ -169,7 +169,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         if self.AnalysisTabs.count() > 0:
             reply = QMessageBox.question(
                 self, "Continue?",
-                "Loading a policy will close all existing analyses.  Continue?",
+                "Closing a policy will close all existing analyses.  Continue?",
                 QMessageBox.Yes | QMessageBox.No)
 
             if reply == QMessageBox.No:
