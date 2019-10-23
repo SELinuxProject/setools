@@ -302,7 +302,7 @@ class FSUseQueryTab(AnalysisTab):
         self.thread.start()
 
     def update_complete(self, count):
-        self.log.info("{0} fs_use_* statment(s) found.".format(count))
+        self.log.info("{0} fs_use_* statement(s) found.".format(count))
 
         # update sizes/location of result displays
         if not self.busy.wasCanceled():

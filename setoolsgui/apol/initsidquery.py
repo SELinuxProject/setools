@@ -277,7 +277,7 @@ class InitialSIDQueryTab(AnalysisTab):
         self.thread.start()
 
     def update_complete(self, count):
-        self.log.info("{0} initial SID statment(s) found.".format(count))
+        self.log.info("{0} initial SID statement(s) found.".format(count))
 
         # update sizes/location of result displays
         if not self.busy.wasCanceled():
