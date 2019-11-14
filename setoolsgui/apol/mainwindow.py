@@ -1,5 +1,5 @@
 # Copyright 2015-2016, Tresys Technology, LLC
-# Copyright 2016, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016, 2019, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -22,6 +22,7 @@ import sys
 import stat
 import logging
 import json
+import configparser
 from errno import ENOENT
 from contextlib import suppress
 
@@ -38,6 +39,14 @@ from .permmapedit import PermissionMapEditor
 from .summary import SummaryTab
 
 
+#
+# Configfile constants
+#
+APOLCONFIG = "~/.config/setools/apol.conf"
+HELP_SECTION = "Help"
+HELP_PGM = "assistant"
+DEFAULT_HELP_PGM = ("/usr/bin/assistant")
+
 class ApolMainWindow(SEToolsWidget, QMainWindow):
 
     def __init__(self, filename):
@@ -45,6 +54,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.log = logging.getLogger(__name__)
         self._permmap = None
         self._policy = None
+        self._configfile = os.path.expanduser(APOLCONFIG)
+        self._load_config()
         self.setupUi()
 
         self.load_permmap()
@@ -123,6 +134,37 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.setWindowTitle("{0} - apol".format(self._policy))
         else:
             self.setWindowTitle("apol")
+
+    #
+    # Apol config file
+    #
+    def _load_config(self):
+        """Load the apol configuration"""
+        self._config = configparser.ConfigParser()
+        save = False
+
+        if not self._config.read((self._configfile,)):
+            save = True
+
+        if not self._config.has_section(HELP_SECTION):
+            self._config.add_section(HELP_SECTION)
+            self._config.set(HELP_SECTION, HELP_PGM, DEFAULT_HELP_PGM)
+            save = True
+
+        if save:
+            self._save_config()
+
+    def _save_config(self):
+        """Save configuration file."""
+        try:
+            os.makedirs(os.path.dirname(self._configfile), mode=0o755, exist_ok=True)
+
+            with open(self._configfile, "w") as fd:
+                self._config.write(fd)
+
+        except Exception as ex:
+            self.log.critical("Failed to save configuration file \"{0}\"".format(self._configfile))
+            self.error_msg.critical(self, "Configuration save error", str(ex))
 
     #
     # Policy handling
@@ -635,7 +677,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                           "<a href=\"https://github.com/SELinuxProject/setools/wiki\">"
                           "SETools</a>.<p>"
                           "Copyright (C) 2015-2016, Tresys Technology<p>"
-                          "Copyright (C) 2016, Chris PeBenito <pebenito@ieee.org>".
+                          "Copyright (C) 2016-2019, Chris PeBenito <pebenito@ieee.org>".
                           format(__version__))
 
     def apol_help(self):
@@ -647,7 +689,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         helpfile = "{0}/setoolsgui/apol/apol.qhc".format(distro.location)
 
         self.log.debug("Starting assistant with help file {0}".format(helpfile))
-        self.help_process.start("assistant",
+        self.help_process.start(self._config.get(HELP_SECTION, HELP_PGM),
                                 ["-collectionFile", helpfile, "-showUrl",
                                  "qthelp://com.github.selinuxproject.setools/doc/index.html",
                                  "-show", "contents", "-enableRemoteControl"])
