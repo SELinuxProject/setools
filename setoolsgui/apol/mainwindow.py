@@ -21,7 +21,6 @@ import os
 import shutil
 import logging
 import json
-import configparser
 from contextlib import suppress
 
 import pkg_resources
@@ -32,20 +31,15 @@ from setools import __version__, PermissionMap, SELinuxPolicy
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
 from .chooseanalysis import ChooseAnalysis, tab_map
+from .config import ApolConfig
 from .exception import TabFieldError
 from .permmapedit import PermissionMapEditor
 from .summary import SummaryTab
 
 
-#
-# Configfile constants
-#
-APOLCONFIG = "~/.config/setools/apol.conf"
-HELP_SECTION = "Help"
-HELP_PGM = "assistant"
-DEFAULT_HELP_PGM = ("/usr/bin/assistant")
 BIN_SEARCH_PATHS = ("/usr/local/bin:/usr/bin:/bin")
 POSSIBLE_ASSISTANT = ("assistant", "assistant-qt5")
+
 
 class ApolMainWindow(SEToolsWidget, QMainWindow):
 
@@ -54,8 +48,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.log = logging.getLogger(__name__)
         self._permmap = None
         self._policy = None
-        self._configfile = os.path.expanduser(APOLCONFIG)
-        self._load_config()
+        self.config = ApolConfig()
         self.setupUi()
 
         self.load_permmap()
@@ -135,37 +128,6 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
             self.setWindowTitle("{0} - apol".format(self._policy))
         else:
             self.setWindowTitle("apol")
-
-    #
-    # Apol config file
-    #
-    def _load_config(self):
-        """Load the apol configuration"""
-        self._config = configparser.ConfigParser()
-        save = False
-
-        if not self._config.read((self._configfile,)):
-            save = True
-
-        if not self._config.has_section(HELP_SECTION):
-            self._config.add_section(HELP_SECTION)
-            self._config.set(HELP_SECTION, HELP_PGM, DEFAULT_HELP_PGM)
-            save = True
-
-        if save:
-            self._save_config()
-
-    def _save_config(self):
-        """Save configuration file."""
-        try:
-            os.makedirs(os.path.dirname(self._configfile), mode=0o755, exist_ok=True)
-
-            with open(self._configfile, "w") as fd:
-                self._config.write(fd)
-
-        except Exception as ex:
-            self.log.critical("Failed to save configuration file \"{0}\"".format(self._configfile))
-            self.error_msg.critical(self, "Configuration save error", str(ex))
 
     #
     # Policy handling
@@ -690,7 +652,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         helpfile = "{0}/setoolsgui/apol/apol.qhc".format(distro.location)
 
         self.log.debug("Starting assistant with help file {0}".format(helpfile))
-        self.help_process.start(self._config.get(HELP_SECTION, HELP_PGM),
+        self.help_process.start(self.config.assistant,
                                 ["-collectionFile", helpfile, "-showUrl",
                                  "qthelp://com.github.selinuxproject.setools/doc/index.html",
                                  "-show", "contents", "-enableRemoteControl"])
@@ -701,7 +663,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         if error != QProcess.FailedToStart:
             return
 
-        self.log.error("Failed to start Qt assistant {}.".format(self._config.get(HELP_SECTION, HELP_PGM)))
+        self.log.error("Failed to start Qt assistant {}.".format(self.config.assistant))
         self._find_assistant()
 
     def _find_assistant(self):
@@ -715,10 +677,10 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         else:
             reply = QMessageBox.question(
                 self, "Qt Assistant Package Installed?",
-                "Failed to start QT Assistant program {}. ".
-                format(self._config.get(HELP_SECTION, HELP_PGM)) +
-                "This is typically in the assistant or qt5-assistant package. " +
-                "Choose location of Qt Assistant executable?",
+                "Failed to start QT Assistant program {}. "
+                "This is typically in the assistant or qt5-assistant package. "
+                "Choose location of Qt Assistant executable?".format(
+                    self.config.assistant),
                 QMessageBox.Yes | QMessageBox.No)
 
             if reply == QMessageBox.No:
@@ -732,8 +694,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         if filename:
             self.log.debug("Updating config with assistant {}".format(filename))
-            self._config.set(HELP_SECTION, HELP_PGM, filename)
-            self._save_config()
+            self.config.assistant = filename
+            self.config.save()
             self.apol_help()
 
     @pyqtSlot(str)
