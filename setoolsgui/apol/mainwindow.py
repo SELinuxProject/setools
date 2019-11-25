@@ -18,12 +18,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import os
-import sys
-import stat
+import shutil
 import logging
 import json
 import configparser
-from errno import ENOENT
 from contextlib import suppress
 
 import pkg_resources
@@ -46,6 +44,8 @@ APOLCONFIG = "~/.config/setools/apol.conf"
 HELP_SECTION = "Help"
 HELP_PGM = "assistant"
 DEFAULT_HELP_PGM = ("/usr/bin/assistant")
+BIN_SEARCH_PATHS = ("/usr/local/bin:/usr/bin:/bin")
+POSSIBLE_ASSISTANT = ("assistant", "assistant-qt5")
 
 class ApolMainWindow(SEToolsWidget, QMainWindow):
 
@@ -126,6 +126,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         self.save_permmap_action.triggered.connect(self.save_permmap)
         self.about_apol_action.triggered.connect(self.about_apol)
         self.apol_help_action.triggered.connect(self.apol_help)
+        self.help_process.errorOccurred.connect(self.help_failed)
 
         self.show()
 
@@ -693,6 +694,47 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                                 ["-collectionFile", helpfile, "-showUrl",
                                  "qthelp://com.github.selinuxproject.setools/doc/index.html",
                                  "-show", "contents", "-enableRemoteControl"])
+
+    @pyqtSlot(QProcess.ProcessError)
+    def help_failed(self, error):
+        """Starting assistant failed."""
+        if error != QProcess.FailedToStart:
+            return
+
+        self.log.error("Failed to start Qt assistant {}.".format(self._config.get(HELP_SECTION, HELP_PGM)))
+        self._find_assistant()
+
+    def _find_assistant(self):
+        """Try to find qt assistant in a few standard locations."""
+        for name in POSSIBLE_ASSISTANT:
+            self.log.debug("Trying assistant {}".format(name))
+            filename = shutil.which(name, mode=os.F_OK | os.X_OK, path=BIN_SEARCH_PATHS)
+            if filename:
+                self.log.debug("Assistant {} is available and executable.".format(filename))
+                break
+        else:
+            reply = QMessageBox.question(
+                self, "Qt Assistant Package Installed?",
+                "Failed to start QT Assistant program {}. ".
+                format(self._config.get(HELP_SECTION, HELP_PGM)) +
+                "This is typically in the assistant or qt5-assistant package. " +
+                "Choose location of Qt Assistant executable?",
+                QMessageBox.Yes | QMessageBox.No)
+
+            if reply == QMessageBox.No:
+                return
+
+            filename = QFileDialog.getOpenFileName(self, "Location of qt-assistant executable",
+                                                "/usr/bin",
+                                                "All Files (*)")[0]
+
+            self.log.debug("User chose assistant {}.".format(filename))
+
+        if filename:
+            self.log.debug("Updating config with assistant {}".format(filename))
+            self._config.set(HELP_SECTION, HELP_PGM, filename)
+            self._save_config()
+            self.apol_help()
 
     @pyqtSlot(str)
     def set_help(self, location):
