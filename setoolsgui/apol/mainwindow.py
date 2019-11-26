@@ -687,8 +687,8 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
                 return
 
             filename = QFileDialog.getOpenFileName(self, "Location of qt-assistant executable",
-                                                "/usr/bin",
-                                                "All Files (*)")[0]
+                                                   "/usr/bin",
+                                                   "All Files (*)")[0]
 
             self.log.debug("User chose assistant {}.".format(filename))
 
