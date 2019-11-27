@@ -43,7 +43,7 @@ class netlink_audit_socket 28
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -434,7 +434,7 @@ class netlink_nflog_socket 23
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -470,7 +470,7 @@ class netlink_tcpdiag_socket 25
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -556,7 +556,7 @@ class netlink_route_socket 25
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -612,7 +612,7 @@ class netlink_selinux_socket 23
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -673,7 +673,7 @@ class netlink_ip6fw_socket 25
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -727,7 +727,7 @@ class netlink_firewall_socket 25
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -851,7 +851,7 @@ class netlink_xfrm_socket 25
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
@@ -908,7 +908,7 @@ class netlink_dnrt_socket 23
          relabelfrom         r        10
                ioctl         n         1
            name_bind         n         1
-              sendto         r        10
+              sendto         w        10
             recv_msg         r        10
             send_msg         w        10
              getattr         r         7
