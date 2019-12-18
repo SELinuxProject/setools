@@ -152,8 +152,6 @@ cdef class AVRule(BaseTERule):
             raise RuleUseError("{0} is not {1} and is not in {1}".format(source, self.source))
         if target is not self.target and target not in self.target:
             raise RuleUseError("{0} is not {1} and is not in {1}".format(target, self.target))
-        if not perms <= self.perms:
-            raise RuleUseError("Permissions for derived expanded {0} rule are not a subset of the original permissions".format(self.ruletype))
 
         r = AVRule.__new__(AVRule)
         r.policy = self.policy
