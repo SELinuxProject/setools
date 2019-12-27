@@ -154,9 +154,9 @@ cdef class AVRule(BaseTERule):
             raise RuleUseError("{0} is not {1} and is not in {1}".format(target, self.target))
         if self.perms.isdisjoint(perms):
             raise RuleUseError(
-                "Permissions for derived expanded {0} rule: {1} are disjoint "
-                "from the original permissions: {1}".
-                format(self.ruletype, perms))
+                "Permissions for derived expanded {0.ruletype} rule: {1} are disjoint "
+                "from the original permissions: {0.perms}".
+                format(self, perms))
 
         r = AVRule.__new__(AVRule)
         r.policy = self.policy
