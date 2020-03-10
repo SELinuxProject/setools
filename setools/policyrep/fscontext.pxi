@@ -1,5 +1,5 @@
 # Copyright 2014, 2016, Tresys Technology, LLC
-# Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2016-2018, 2020, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -97,13 +97,13 @@ cdef class Genfscon(Ocontext):
         readonly str path
 
     _sclass_to_stat = {0: 0,
-                       sepol.SECCLASS_BLK_FILE: S_IFBLK,
-                       sepol.SECCLASS_CHR_FILE: S_IFCHR,
-                       sepol.SECCLASS_DIR: S_IFDIR,
-                       sepol.SECCLASS_FIFO_FILE: S_IFIFO,
-                       sepol.SECCLASS_FILE: S_IFREG,
-                       sepol.SECCLASS_LNK_FILE: S_IFLNK,
-                       sepol.SECCLASS_SOCK_FILE: S_IFSOCK}
+                       "dir": S_IFDIR,
+                       "file": S_IFREG,
+                       "lnk_file": S_IFLNK,
+                       "fifo_file": S_IFIFO,
+                       "sock_file": S_IFSOCK,
+                       "blk_file": S_IFBLK,
+                       "chr_file": S_IFCHR}
 
     @staticmethod
     cdef inline Genfscon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, fstype):
@@ -112,8 +112,21 @@ cdef class Genfscon(Ocontext):
         g.policy = policy
         g.key = <uintptr_t>symbol
         g.fs = fstype
-        g.filetype = GenfsFiletype(Genfscon._sclass_to_stat[symbol.v.sclass])
         g.path = intern(symbol.u.name)
+
+        cdef ObjClass cls
+        if symbol.v.sclass:
+            try:
+                cls = ObjClass.factory(policy, policy.class_value_to_datum(symbol.v.sclass-1))
+                g.filetype = GenfsFiletype(Genfscon._sclass_to_stat[cls.name])
+            except KeyError as ex:
+                log = logging.getLogger(__name__)
+                log.warning("Genfscon {} {} object class {} does not match a file object class. "
+                            "Dropping file type.".format(g.fs, g.path, cls.name))
+                g.filetype = GenfsFiletype(0)
+        else:
+            g.filetype = GenfsFiletype(0)
+
         g.context = Context.factory(policy, symbol.context)
         return g
 
