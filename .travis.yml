@@ -15,9 +15,9 @@ env:
 language: python
 
 python:
-  - "3.4"
-  - "3.5"
   - "3.6"
+  - "3.7"
+  - "3.8"
 
 matrix:
   fast_finish: true
@@ -30,7 +30,7 @@ matrix:
     - env: TOX_ENV=coverage
 
 sudo: false
-dist: trusty
+dist: bionic
 
 addons:
   apt:
