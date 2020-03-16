@@ -23,11 +23,11 @@ matrix:
   fast_finish: true
   include:
     - env: TOX_ENV=pep8
-    - env: TOX_ENV=coverage
     - env: TOX_ENV=lint
+#    - env: TOX_ENV=coverage
 
-  allow_failures:
-    - env: TOX_ENV=coverage
+#  allow_failures:
+#    - env: TOX_ENV=coverage
 
 sudo: false
 dist: bionic
