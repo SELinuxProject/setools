@@ -94,6 +94,7 @@ cdef class Genfscon(Ocontext):
     cdef:
         readonly str fs
         readonly object filetype
+        readonly ObjClass tclass
         readonly str path
 
     _sclass_to_stat = {0: 0,
@@ -114,18 +115,20 @@ cdef class Genfscon(Ocontext):
         g.fs = fstype
         g.path = intern(symbol.u.name)
 
-        cdef ObjClass cls
         if symbol.v.sclass:
             try:
-                cls = ObjClass.factory(policy, policy.class_value_to_datum(symbol.v.sclass-1))
-                g.filetype = GenfsFiletype(Genfscon._sclass_to_stat[cls.name])
+                g.tclass = ObjClass.factory(policy, policy.class_value_to_datum(symbol.v.sclass-1))
+                g.filetype = GenfsFiletype(Genfscon._sclass_to_stat[g.tclass.name])
             except KeyError as ex:
                 log = logging.getLogger(__name__)
                 log.warning("Genfscon {} {} object class {} does not match a file object class. "
-                            "Dropping file type.".format(g.fs, g.path, cls.name))
+                            "Dropping file type.".format(g.fs, g.path, g.tclass.name))
                 g.filetype = GenfsFiletype(0)
+                g.tclass = None
+
         else:
             g.filetype = GenfsFiletype(0)
+            g.tclass = None
 
         g.context = Context.factory(policy, symbol.context)
         return g
