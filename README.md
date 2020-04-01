@@ -27,7 +27,7 @@ To run SETools graphical tools, the following packages are also required:
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
 * gcc
-* cython 0.27+
+* cython 0.27+ (0.29.14+ for Python 3.8)
 
 To run SETools unit tests, the following packages are required, in
 addition to the above dependencies:

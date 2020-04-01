@@ -1,3 +1,16 @@
+*setools-4.3.0 (1 Apr 2020)
+
+  * Revised sediff method for TE rules. This drastically reduced memory and run time.
+  * Added infiniband context support to seinfo, sediff, and apol.
+  * Added apol configuration for location of Qt assistant.
+  * Fixed sediff issue where properties header would display when not requested.
+  * Fixed sediff issue with type_transition file name comparison.
+  * Fixed permission map socket sendto information flow direction.
+  * Added methods to TypeAttribute class to make it a complete Python collection.
+  * Genfscon now will look up classes rather than using fixed values which
+    were dropped from libsepol.
+
+
 *setools-4.2.2 (15 Jun 2019)
 
  * Remove source policy references from man pages, as loading source policies
