@@ -129,7 +129,8 @@ class InfoFlowAnalysis:
             # excluded or disconnected due to min weight
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
-            yield self.__generate_steps(nx.shortest_path(self.subG, s, t))
+            # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
+            yield self.__generate_steps(nx.shortest_path(self.subG, source=s, target=t))
 
     def all_paths(self, source, target, maxlen=2):
         """
