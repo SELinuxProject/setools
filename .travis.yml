@@ -6,7 +6,7 @@ env:
   global:
     # LIBSEPOLA needed by the Makefiles.
     - USERSPACE_SRC=$TRAVIS_BUILD_DIR/selinux-src
-    - SELINUX_USERSPACE_VERSION=libsepol-2.8
+    - SELINUX_USERSPACE_VERSION=libsepol-3.0
     - SEPOL_SRC=$USERSPACE_SRC/libsepol
     - LIBSEPOLA=$SEPOL_SRC/src/libsepol.a
     - SELINUX_SRC=$USERSPACE_SRC/libselinux
