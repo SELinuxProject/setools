@@ -44,7 +44,10 @@ class DefaultValue(PolicyEnum):
                        sepol.DEFAULT_TARGET_HIGH: sepol.DEFAULT_TARGET,
                        sepol.DEFAULT_TARGET_LOW_HIGH: sepol.DEFAULT_TARGET}
 
-        return cls(default_map[range_])
+        try:
+            return cls(default_map[range_])
+        except KeyError as e:
+            raise LowLevelPolicyError("Unsupported default value: {}".format(e)) from e
 
 
 class DefaultRangeValue(PolicyEnum):
@@ -64,7 +67,10 @@ class DefaultRangeValue(PolicyEnum):
                        sepol.DEFAULT_TARGET_HIGH: 2,
                        sepol.DEFAULT_TARGET_LOW_HIGH: 3}
 
-        return cls(default_map[range_])
+        try:
+            return cls(default_map[range_])
+        except KeyError as e:
+            raise LowLevelPolicyError("Unsupported default_range value: {}".format(e)) from e
 
 
 cdef class Default(PolicyObject):
