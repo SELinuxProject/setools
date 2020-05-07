@@ -34,6 +34,7 @@ class DefaultValue(PolicyEnum):
 
     source = sepol.DEFAULT_SOURCE
     target = sepol.DEFAULT_TARGET
+    glblub = sepol.DEFAULT_GLBLUB
 
     @classmethod
     def from_default_range(cls, range_):
@@ -42,7 +43,8 @@ class DefaultValue(PolicyEnum):
                        sepol.DEFAULT_SOURCE_LOW_HIGH: sepol.DEFAULT_SOURCE,
                        sepol.DEFAULT_TARGET_LOW: sepol.DEFAULT_TARGET,
                        sepol.DEFAULT_TARGET_HIGH: sepol.DEFAULT_TARGET,
-                       sepol.DEFAULT_TARGET_LOW_HIGH: sepol.DEFAULT_TARGET}
+                       sepol.DEFAULT_TARGET_LOW_HIGH: sepol.DEFAULT_TARGET,
+                       sepol.DEFAULT_GLBLUB: sepol.DEFAULT_GLBLUB}
 
         try:
             return cls(default_map[range_])
@@ -65,10 +67,12 @@ class DefaultRangeValue(PolicyEnum):
                        sepol.DEFAULT_SOURCE_LOW_HIGH: 3,
                        sepol.DEFAULT_TARGET_LOW: 1,
                        sepol.DEFAULT_TARGET_HIGH: 2,
-                       sepol.DEFAULT_TARGET_LOW_HIGH: 3}
+                       sepol.DEFAULT_TARGET_LOW_HIGH: 3,
+                       sepol.DEFAULT_GLBLUB: None}
 
         try:
-            return cls(default_map[range_])
+            value = default_map[range_]
+            return None if value is None else cls(value)
         except KeyError as e:
             raise LowLevelPolicyError("Unsupported default_range value: {}".format(e)) from e
 
@@ -167,4 +171,7 @@ cdef class DefaultRange(Default):
         return str(self) < str(other)
 
     def statement(self):
-        return "{0.ruletype} {0.tclass} {0.default} {0.default_range};".format(self)
+        if self.default_range:
+            return "{0.ruletype} {0.tclass} {0.default} {0.default_range};".format(self)
+        else:
+            return "{0.ruletype} {0.tclass} {0.default};".format(self)

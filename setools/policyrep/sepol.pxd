@@ -515,6 +515,7 @@ cdef extern from "<sepol/policydb/policydb.h>":
     cdef int DEFAULT_TARGET_LOW
     cdef int DEFAULT_TARGET_HIGH
     cdef int DEFAULT_TARGET_LOW_HIGH
+    cdef int DEFAULT_GLBLUB
 
     cdef struct class_datum:
         symtab_datum_t s
