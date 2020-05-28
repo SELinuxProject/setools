@@ -17,6 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+from contextlib import suppress
+
+from .exception import InvalidPermission, NoCommon
+
 
 def match_regex(obj, criteria, regex):
     """
@@ -163,3 +167,50 @@ def match_level(obj, criteria, dom, domby, incomp):
         return (criteria ^ obj)
     else:
         return (criteria == obj)
+
+
+def validate_perms_any(perms, tclass=None, policy=None):
+    """
+    Validate that each permission is valid for at least one
+    of specified object classes.  If no classes are specified,
+    then all classes in the policy are checked.
+
+    A tclass or policy must be specified.
+
+    Parameters:
+    perms       A container of str permission names.
+
+    Keyword Parameters.
+    tclass      An iterable of 1 or more ObjClass.
+    policy      A SELinuxPolicy
+
+    Exceptions:
+    ValueError          Invalid parameter.
+    InvalidPermission   One or more permissions is invalid.
+
+    Return:     None
+    """
+
+    if not perms:
+        raise ValueError("No permissions specified.")
+
+    if not tclass and not policy:
+        raise ValueError("No object class(es) or policy specified.")
+
+    if tclass:
+        # make local mutable set
+        tclass = set(c for c in tclass)
+    else:
+        tclass = set(policy.classes())
+
+    invalid = set(p for p in perms)
+    for c in tclass:
+        invalid -= c.perms
+
+        with suppress(NoCommon):
+            invalid -= c.common.perms
+
+        if not invalid:
+            break
+    else:
+        raise InvalidPermission("Invalid permissions: {}".format(", ".join(invalid)))
