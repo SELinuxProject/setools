@@ -17,4 +17,5 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+from . import emptyattr
 from . import util
