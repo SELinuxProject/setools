@@ -17,5 +17,6 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+from . import assertte
 from . import emptyattr
 from . import util
