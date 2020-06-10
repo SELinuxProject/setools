@@ -17,8 +17,4 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-from . import assertte
-from . import checker
-from . import emptyattr
-from . import roexec
-from . import util
+from .checker import PolicyChecker
