@@ -19,4 +19,5 @@
 
 from . import assertte
 from . import emptyattr
+from . import roexec
 from . import util
