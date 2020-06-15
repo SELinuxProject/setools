@@ -1,0 +1,190 @@
+.TH sechecker 1 2020-06-09 "SELinux Project" "SETools: SELinux Policy Analysis Tools"
+
+.SH NAME
+sechecker \- Configuration-driven automated SELinux policy analysis
+
+.SH SYNOPSIS
+\fBsechecker\fR [OPTIONS] config.ini [POLICY]
+
+.SH DESCRIPTION
+.PP
+\fBsechecker\fR is an automated SELinux policy analysis tool. It uses a
+configuration file to define one or more analysis checks.
+
+.SH POLICY
+.PP
+A single file containing a binary policy. This file is usually named by version
+on Linux systems, for example, \fIpolicy.30\fR. This file is usually named
+\fIsepolicy\fR on Android systems.  If not provided, \fBsechecker\fR will attempt
+to locate and open the current policy running on the system.
+
+.SH OPTIONS
+.IP "-o <path>"
+Output the results to the specified path instead of stdout.
+.IP "-h, --help"
+Print help information and exit.
+.IP "--version"
+Print version information and exit.
+.IP "-v, --verbose"
+Print additional informational messages.
+.IP "--debug"
+Enable debugging output.
+
+.SH RETURN CODES
+\fBsechecker\fR has the following return codes:
+.TP
+.B 0
+All checks passed.
+.TP
+.B 1
+One or more checks failed.
+.TP
+.B 2
+Error in the configuration file.
+.TP
+.B 3
+Other errors, such as policy open error.
+
+.SH "CONFIGURATION FILE"
+The configuration file is in the .ini format. Each section is considered
+a check, with the configuration section name being the name of the check.  All
+checks have the following options:
+
+.IP "check_type = <name>"
+This selects the type of test be be used in this check.  This is required.
+.IP "desc = <text>"
+This is an optional text field.  If set, the contents are printed in the output
+and is typically used to explain the purpose of the check.
+.IP "disable = <text>"
+This is an optional text field.  If it is set, the check will not run and the
+contents of this text will be added to the report to explain why the check
+was not ran.
+
+.SH "TYPE ENFORCEMENT ALLOW RULE ASSERTION"
+This checks for the nonexistence of type enforcement allow rules. The check_type
+is \fBassert_te\fR.  It will run the query and any results from the query,
+removing any exempted sources or targets, will be listed as failures.
+If a rule has an empty attribute, rendering it useless, it will
+be ignored.  If a rule has an attribute, it will be considered
+a failure unless all of the member types are exempted.
+
+.PP
+Criteria options:
+.IP "source = <type or type attribute>"
+The source type/attribute criteria for the query.
+.IP "target = <type or type attribute>"
+The target type/attribute criteria for the query.
+.IP "tclass = <type or type attribute>[, ....]"
+A comma-separated list of object class criteria for the query.
+.IP "perms = <type or type attribute>[, ....]"
+A comma-separated list of permissions for the query.
+
+.PP
+\fBA least one of the above options must be set in this check.\fR
+
+.PP
+Additional Options:
+
+.IP "exempt_source = <type or type attribute>[, ....]"
+A comma-separated list of types and type attributes.  Rules with these
+as the source will be ignored. This is optional.
+.IP "exempt_target = <type or type attribute>[, ....]"
+A comma-separated list of types and type attributes.  Rules with these
+as the target will be ignored. This is optional.
+
+.SH "EMPTY TYPE ATTRIBUTE ASSERTION"
+This checks that the specified attribute is empty.  This can optionally
+be set to also pass if the attribute does not exist.
+The check_type is \fBempty_typeattr\fR.
+
+.PP
+Options:
+.IP "attr = <type attribute>"
+The type attribute to check.  This is required.
+.IP "missing_ok = <type attribute>"
+Consider the check passing if the attribute does not exist.
+This is optional.  Default is false.
+
+.SH "READ-ONLY EXECUTABLES ASSERTION"
+This checks that all file types that are executable are read-only.
+The check_type is \fBro_execs\fR.
+
+.PP
+Options:
+.IP "exempt_file = <type or type attribute>[, ....]"
+A comma-separated list of types and type attributes.  These
+will not be considered executable.  This is optional.
+.IP "exempt_exec_domain = <type or type attribute>[, ....]"
+A comma-separated list of types and type attributes.  Rules with these
+as the source will be ignored if they allow file execute permission.
+This is optional.
+.IP "exempt_write_domain = <type or type attribute>[, ....]"
+A comma-separated list of types and type attributes.  Rules with these
+as the source will be ignored if they allow file write or append permissions
+on types determined executable.  This is optional.
+
+.SH "CONFIGURATION EXAMPLES"
+
+.PP
+\fBExample\ \&1.\ \&A check called "no_unconfined" that will determine if the
+domain_unconfined_type attribute is empty or missing.\fR
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[no_unconfined]
+check_type = empty_typeattr
+desc = Verify that the domain_unconfined_type attribute is missing or empty.
+attr = domain_unconfined_type
+missing_ok = True
+.fi
+.if n \{\
+.RE
+.\}
+
+.PP
+\fBExample\ \&2.\ \&A check called "ro_execs" that will determine if all
+executable types are read-only.\fR
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[ro_execs]
+check_type = empty_typeattr
+desc = Verify that the all executables and libraries are read-only.
+.fi
+.if n \{\
+.RE
+.\}
+
+.PP
+\fBExample\ \&3.\ \&A check called "execheap" that will determine that
+there are no domains with the execheap permission except for
+unconfined_execheap_t.\fR
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+[execheap]
+check_type = assert_te
+desc = Verify no domains have executable heap.
+tclass = process
+perms = execheap
+exempt_source = unconfined_execheap_t
+.fi
+.if n \{\
+.RE
+.\}
+.PP
+
+.SH AUTHOR
+Chris PeBenito <chpebeni@linux.microsoft.com>
+
+.SH BUGS
+Please report bugs via the SETools bug tracker, https://github.com/SELinuxProject/setools/issues
+
+.SH SEE ALSO
+apol(1), sediff(1), sedta(1), seinfo(1), seinfoflow(1), sesearch(1)

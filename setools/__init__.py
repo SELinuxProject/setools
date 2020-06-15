@@ -84,4 +84,7 @@ from .dta import DomainTransitionAnalysis
 # Policy difference
 from .diff import PolicyDifference
 
+# Policy checker
+from .checker import PolicyChecker
+
 logging.getLogger(__name__).addHandler(logging.NullHandler())

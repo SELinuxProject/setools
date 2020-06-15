@@ -18,6 +18,7 @@
 from . import boolquery
 from . import boundsquery
 from . import categoryquery
+from . import checker
 from . import constraintquery
 from . import commonquery
 from . import defaultquery

@@ -477,12 +477,12 @@ try:
                 len(diff.modified_levels)))
             if diff.added_levels and not args.stats:
                 print("   Added Levels: {0}".format(len(diff.added_levels)))
-                for l in sorted(diff.added_levels):
-                    print("      + {0}".format(l))
+                for a in sorted(diff.added_levels):
+                    print("      + {0}".format(a))
             if diff.removed_levels and not args.stats:
                 print("   Removed Levels: {0}".format(len(diff.removed_levels)))
-                for l in sorted(diff.removed_levels):
-                    print("      - {0}".format(l))
+                for r in sorted(diff.removed_levels):
+                    print("      - {0}".format(r))
             if diff.modified_levels and not args.stats:
                 print("   Modified Levels: {0}".format(len(diff.modified_levels)))
                 for level, added_categories, removed_categories, _ in sorted(diff.modified_levels,

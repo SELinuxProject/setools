@@ -121,6 +121,14 @@ class InvalidLevelDecl(InvalidSymbol):
     pass
 
 
+class InvalidPermission(InvalidSymbol):
+
+    """
+    Exception for an invalid permission.
+    """
+    pass
+
+
 class InvalidRange(InvalidSymbol):
 
     """
@@ -292,6 +300,33 @@ class TERuleNoFilename(AttributeError, PolicyrepException):
     Exception when getting the file name of a
     type_transition rule that has no file name.
     """
+    pass
+
+
+#
+# PolicyChecker exceptions
+#
+class InvalidCheckerConfig(SEToolsException):
+
+    """Base class for invalid checker configurations."""
+    pass
+
+
+class InvalidCheckerModule(InvalidCheckerConfig):
+
+    """Exception when an unknown checker module is requested."""
+    pass
+
+
+class InvalidCheckOption(InvalidCheckerConfig):
+
+    """Exception for invalid options in a checker module."""
+    pass
+
+
+class InvalidCheckValue(InvalidCheckerConfig):
+
+    """Exception for invalid values for a checker module's option."""
     pass
 
 
