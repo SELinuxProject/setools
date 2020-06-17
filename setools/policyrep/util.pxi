@@ -230,3 +230,25 @@ cdef flatten_list(input_list):
             ret.append(i)
 
     return ret
+
+
+def lookup_boolean_name_sub(name):
+    """
+    Read the /etc/selinux/TYPE/booleans.subs_dist file looking
+    for a record with 'name'.
+    Return the translated name if a corresponding substitution exists,
+    otherwise return the original name.
+    """
+    cdef:
+        char *_name = selinux.selinux_boolean_sub(name)
+        str new_name = name
+
+    if _name == NULL:
+        raise MemoryError
+    # cast "char *" to "str" and free
+    try:
+        new_name = _name
+    finally:
+        free(_name)
+
+    return new_name

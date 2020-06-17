@@ -125,7 +125,11 @@ try:
     if args.boolquery or args.all:
         q = setools.BoolQuery(p)
         if isinstance(args.boolquery, str):
-            q.name = args.boolquery
+            if args.policy:
+                q.name = args.boolquery
+            else:
+                # try to find substitutions for old boolean names
+                q.name = setools.policyrep.lookup_boolean_name_sub(args.boolquery)
 
         components.append(("Booleans", q, lambda x: x.statement()))
 

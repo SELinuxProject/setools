@@ -189,7 +189,12 @@ try:
             if args.boolean_regex:
                 q.boolean = args.boolean
             else:
-                q.boolean = args.boolean.split(",")
+                if args.policy:
+                    q.boolean = args.boolean.split(",")
+                else:
+                    # try to find substitutions for old boolean names
+                    q.boolean = map(setools.policyrep.lookup_boolean_name_sub,
+                                    args.boolean.split(","))
 
         for r in sorted(q.results()):
             print(r)
