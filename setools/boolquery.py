@@ -21,6 +21,7 @@ import logging
 from .descriptors import CriteriaDescriptor
 from .mixins import MatchName
 from .query import PolicyQuery
+from selinux import selinux_boolean_sub
 
 
 class BoolQuery(MatchName, PolicyQuery):
@@ -60,6 +61,10 @@ class BoolQuery(MatchName, PolicyQuery):
         self.log.info("Generating Boolean results from {0.policy}".format(self))
         self._match_name_debug(self.log)
         self.log.debug("Default: {0.default}".format(self))
+
+        # Translate old boolean names based on /etc/selinux/*/booleans.subs_dist file
+        if self.name:
+            self.name = selinux_boolean_sub(self.name)
 
         for boolean in self.policy.bools():
             if not self._match_name(boolean):
