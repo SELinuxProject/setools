@@ -19,16 +19,47 @@
 
 import sys
 import logging
-from abc import ABC, abstractmethod
+import collections
+from abc import ABCMeta, abstractmethod
 
-from .globalkeys import CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE, GLOBAL_CONFIG_KEYS
+from .globalkeys import CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE, GLOBAL_CONFIG_KEYS, \
+    CHECKER_REGISTRY
 from ..exception import InvalidCheckOption
 
 
 __all__ = ['CheckerModule']
 
 
-class CheckerModule(ABC):
+class CheckRegistry(ABCMeta):
+
+    """Checker module registry metaclass.  This registers modules in the check registry."""
+
+    def __new__(cls, clsname, superclasses, attributedict):
+        check_type = attributedict.get("check_type")
+        check_config = attributedict.get("check_config")
+
+        if clsname != "CheckerModule":
+            if not isinstance(check_type, str):
+                raise TypeError("Checker module {} does not set a check_type.".format(clsname))
+
+            if not isinstance(check_config, collections.abc.Collection):
+                raise TypeError("Checker module {} does not set a valid check_config.".format(
+                    clsname))
+
+            if check_type in CHECKER_REGISTRY:
+                existing_check_module = CHECKER_REGISTRY[check_type].__name__
+                raise TypeError("Checker module {} conflicts with registered check {}".format(
+                                clsname, existing_check_module))
+
+        classdef = super().__new__(cls, clsname, superclasses, attributedict)
+
+        if check_type:
+            CHECKER_REGISTRY[check_type] = classdef
+
+        return classdef
+
+
+class CheckerModule(metaclass=CheckRegistry):
 
     """Abstract base class for policy checker modules."""
 
@@ -50,12 +81,6 @@ class CheckerModule(ABC):
     output = sys.stdout
 
     def __init__(self, policy, checkname, config):
-        if self.check_type is None:
-            raise NotImplementedError("Checker module does not set a check_type.")
-
-        if self.check_config is None:
-            raise NotImplementedError("Checker module does not set a valid key list.")
-
         self.policy = policy
         self.checkname = checkname
 

@@ -27,16 +27,11 @@ from ..exception import InvalidCheckerConfig, InvalidCheckerModule
 
 from .assertte import AssertTE
 from .emptyattr import EmptyTypeAttr
-from .globalkeys import CHECK_TYPE_KEY, CHECK_DISABLE
+from .globalkeys import CHECK_TYPE_KEY, CHECK_DISABLE, CHECKER_REGISTRY
 from .roexec import ReadOnlyExecutables
 
 
 SECTION_SEPARATOR = "---------------------------------------------------------\n\n"
-
-# TODO make this more dynamic:
-CHECKER_MAP = {AssertTE.check_type: AssertTE,
-               EmptyTypeAttr.check_type: EmptyTypeAttr,
-               ReadOnlyExecutables.check_type: ReadOnlyExecutables}
 
 
 class PolicyChecker:
@@ -44,6 +39,8 @@ class PolicyChecker:
     """Configuration file-driven automated policy analysis checks."""
 
     def __init__(self, policy, configpath):
+        assert CHECKER_REGISTRY, "No checks are loaded, this is a bug."
+
         self.log = logging.getLogger(__name__)
         self.policy = policy
         self.checks = []
@@ -79,7 +76,7 @@ class PolicyChecker:
                                            format(checkname, CHECK_TYPE_KEY))
 
             try:
-                newcheck = CHECKER_MAP[check_type](self.policy, checkname, checkconfig)
+                newcheck = CHECKER_REGISTRY[check_type](self.policy, checkname, checkconfig)
             except KeyError as e:
                 raise InvalidCheckerModule("{}: Unknown policy check type: {}".
                                            format(checkname, check_type)) from e
