@@ -1,3 +1,5 @@
+  * Added sechecker tool which is a configuration file driven analysis tool.
+
 *setools-4.3.0 (1 Apr 2020)
 
   * Revised sediff method for TE rules. This drastically reduced memory and run time.
