@@ -103,6 +103,7 @@ class PolicyChecker:
         output.write("Policy being checked: {}\n".format(self.policy))
         output.write("Start time: {}\n\n".format(datetime.now(timezone.utc)))
 
+        result_summary = []
         for check in self.checks:
 
             check_failures = 0
@@ -114,6 +115,7 @@ class PolicyChecker:
 
                 if check.disable:
                     output.write("Check DISABLED.  Reason: {}\n\n".format(check.disable))
+                    result_summary.append((check.checkname, "DISABLED ({})".format(check.disable)))
                     self.log.debug("Skipping disabled check {!r}: {}".format(check.checkname,
                                    check.disable))
                     continue
@@ -128,11 +130,24 @@ class PolicyChecker:
                 self.log.debug("Exception info", exc_info=e)
                 check_failures += 1
 
-            output.write("Check {}\n\n".format("FAILED" if check_failures else "PASSED"))
+            if check_failures:
+                output.write("Check FAILED\n\n")
+                result_summary.append((check.checkname, "FAILED ({} failures)".format(
+                    check_failures)))
+            else:
+                output.write("Check PASSED\n\n")
+                result_summary.append((check.checkname, "PASSED"))
+
             failures += check_failures
 
         output.write(SECTION_SEPARATOR)
-        output.write("{} failure(s) found.\n\n".format(failures))
+        output.write("Result Summary:\n\n")
+        for checkname, result in result_summary:
+            output.write("{:<39} {}\n".format(checkname, result))
+
+        output.write("\n{} failure(s) found.\n\n".format(failures))
+        output.write("Policy check configuration: {}\n".format(self.config))
+        output.write("Policy being checked: {}\n".format(self.policy))
         output.write("End time: {}\n".format(datetime.now(timezone.utc)))
         self.log.info("{} failures found in {} checks.".format(failures, len(self.checks)))
         return failures
