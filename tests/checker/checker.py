@@ -65,31 +65,30 @@ class PolicyCheckerTest(unittest.TestCase):
 
     def test_run_pass(self):
         """Test run with passing config."""
-        with open("/dev/null", "w") as fd:
+        with open(os.devnull, "w") as fd:
             checker = PolicyChecker(self.p, "tests/checker/checker-valid.ini")
 
             # create additional disabled mock test
             newcheck = Mock()
-            newcheck.testname = "disabled"
+            newcheck.checkname = "disabled"
             newcheck.disable = True
             newcheck.validate_config.return_value = None
             newcheck.run.return_value = []
             checker.checks.append(newcheck)
 
             self.assertEqual(4, len(checker.checks))
-
             result = checker.run(output=fd)
             self.assertEqual(0, result)
             newcheck.run.assert_not_called()
 
     def test_run_fail(self):
         """Test run with failing config."""
-        with open("/dev/null", "w") as fd:
+        with open(os.devnull, "w") as fd:
             checker = PolicyChecker(self.p, "tests/checker/checker-valid.ini")
 
             # create additional failing mock test
             newcheck = Mock()
-            newcheck.testname = "failing test"
+            newcheck.checkname = "failing test"
             newcheck.disable = False
             newcheck.validate_config.return_value = None
             newcheck.run.return_value = list(range(13))
