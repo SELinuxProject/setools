@@ -470,17 +470,18 @@ cdef class FileNameTERule(BaseTERule):
         readonly str filename
 
     @staticmethod
-    cdef inline FileNameTERule factory(SELinuxPolicy policy, sepol.filename_trans_t *key,
-                                       sepol.filename_trans_datum_t *datum):
+    cdef inline FileNameTERule factory(SELinuxPolicy policy,
+                                       sepol.filename_trans_key_t *key,
+                                       Type stype, size_t otype):
         """Factory function for creating FileNameTERule objects."""
         cdef FileNameTERule r = FileNameTERule.__new__(FileNameTERule)
         r.policy = policy
         r.key = <uintptr_t>key
         r.ruletype = TERuletype.type_transition
-        r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.stype - 1))
+        r.source = stype
         r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.ttype - 1))
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.tclass - 1))
-        r.dft = Type.factory(policy, policy.type_value_to_datum(datum.otype - 1))
+        r.dft = Type.factory(policy, policy.type_value_to_datum(otype - 1))
         r.filename = intern(key.name)
         r.origin = None
         return r
@@ -708,6 +709,10 @@ cdef class FileNameTERuleIterator(HashtabIterator):
 
     """Iterate over FileNameTERules in the policy."""
 
+    cdef:
+        sepol.filename_trans_datum_t *datum
+        TypeEbitmapIterator stypei
+
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
         """Factory function for creating FileNameTERule iterators."""
@@ -717,7 +722,29 @@ cdef class FileNameTERuleIterator(HashtabIterator):
         i.reset()
         return i
 
+    def _next_stype(self):
+        while True:
+            if self.datum == NULL:
+                super().__next__()
+                self.datum = <sepol.filename_trans_datum_t *>self.curr.datum
+                self.stypei = TypeEbitmapIterator.factory(self.policy, &self.datum.stypes)
+            try:
+                return next(self.stypei)
+            except StopIteration:
+                pass
+            self.datum = self.datum.next
+            if self.datum != NULL:
+                self.stypei = TypeEbitmapIterator.factory(self.policy, &self.datum.stypes)
+
     def __next__(self):
-        super().__next__()
-        return FileNameTERule.factory(self.policy, <sepol.filename_trans_t *>self.curr.key,
-                                      <sepol.filename_trans_datum_t *>self.curr.datum)
+        stype = self._next_stype()
+        return FileNameTERule.factory(self.policy,
+                                      <sepol.filename_trans_key_t *>self.curr.key,
+                                      stype, self.datum.otype)
+
+    def __len__(self):
+        return sum(1 for r in FileNameTERuleIterator.factory(self.policy, self.table))
+
+    def reset(self):
+        super().reset()
+        self.datum = NULL
