@@ -150,6 +150,7 @@ apol       | A Qt graphical analysis tool.  Use it to perform various types of a
 
 Tool Name  | Use
 ---------- | -------------------------------------------
+sechecker  | Configuration file-driven automated analysis.
 sediff     | Compare two policies to find differences.
 sedta      | Perform domain transition analyses.
 seinfo     | List policy components.
