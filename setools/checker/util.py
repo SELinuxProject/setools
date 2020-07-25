@@ -25,11 +25,11 @@ from ..util import validate_perms_any
 
 def config_list_to_class(policy, config):
     """
-    Convert a comma separated string into a set of object classes.
+    Convert a space separated string into a set of object classes.
 
     Parameters:
     policy      A SELinuxPolicy
-    config      A str with a comma-separated set of object classes.
+    config      A str with a space-separated set of object classes.
 
     Return:     Frozenset containing policy objects in the config.
     """
@@ -37,7 +37,7 @@ def config_list_to_class(policy, config):
         return frozenset()
 
     try:
-        tclass = frozenset(policy.lookup_class(c.strip()) for c in config.split(","))
+        tclass = frozenset(policy.lookup_class(c) for c in config.split(" ") if c)
     except InvalidClass as e:
         raise InvalidCheckValue("Invalid tclass setting: {}".format(e)) from e
 
@@ -46,11 +46,11 @@ def config_list_to_class(policy, config):
 
 def config_list_to_perms(policy, config, tclass=None):
     """
-    Convert a comma separated string into a set of permissions.
+    Convert a space separated string into a set of permissions.
 
     Parameters:
     policy      A SELinuxPolicy
-    config      A str with a comma-separated set of permissions.
+    config      A str with a space-separated set of permissions.
 
     Keyword Parameters:
     tclass      A container of ObjClass.  If specified, the perms must be valid
@@ -63,7 +63,7 @@ def config_list_to_perms(policy, config, tclass=None):
         return frozenset()
 
     try:
-        perms = frozenset(p.strip() for p in config.split(","))
+        perms = frozenset(i for i in config.split(" ") if i)
         validate_perms_any(perms, tclass=tclass, policy=policy)
     except InvalidPermission as e:
         raise InvalidCheckValue("Invalid perms setting: {}".format(e)) from e
@@ -93,12 +93,12 @@ def config_to_type_or_attr(policy, config):
 
 def config_list_to_types_or_attrs(log, policy, config, strict=True, expand=False):
     """
-    Convert a comma separated string into a set of types/type attributes.
+    Convert a space separated string into a set of types/type attributes.
 
     Parameters:
     log         A logging object.
     policy      A SELinuxPolicy
-    config      A str with a comma-separated set of types/type attributes.
+    config      A str with a space-separated set of types/type attributes.
 
     Keyword Parameters:
     strict      Bool, if True policy lookup errors will be a configuration error.
@@ -113,9 +113,9 @@ def config_list_to_types_or_attrs(log, policy, config, strict=True, expand=False
         return frozenset()
 
     ret = set()
-    for item in config.split(","):
+    for item in (i for i in config.split(" ") if i):
         try:
-            obj = policy.lookup_type_or_attr(item.strip())
+            obj = policy.lookup_type_or_attr(item)
             if expand:
                 ret.update(obj.expand())
             else:

@@ -74,10 +74,10 @@ Criteria options:
 The source type/attribute criteria for the query.
 .IP "target = <type or type attribute>"
 The target type/attribute criteria for the query.
-.IP "tclass = <type or type attribute>[, ....]"
-A comma-separated list of object class criteria for the query.
-.IP "perms = <type or type attribute>[, ....]"
-A comma-separated list of permissions for the query.
+.IP "tclass = <type or type attribute>[ ....]"
+A space-separated list of object class criteria for the query.
+.IP "perms = <type or type attribute>[ ....]"
+A space-separated list of permissions for the query.
 
 .PP
 \fBA least one of the above options must be set in this check.\fR
@@ -85,11 +85,11 @@ A comma-separated list of permissions for the query.
 .PP
 Additional Options:
 
-.IP "exempt_source = <type or type attribute>[, ....]"
-A comma-separated list of types and type attributes.  Rules with these
+.IP "exempt_source = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Rules with these
 as the source will be ignored. This is optional.
-.IP "exempt_target = <type or type attribute>[, ....]"
-A comma-separated list of types and type attributes.  Rules with these
+.IP "exempt_target = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Rules with these
 as the target will be ignored. This is optional.
 
 .SH "EMPTY TYPE ATTRIBUTE ASSERTION"
@@ -111,15 +111,15 @@ The check_type is \fBro_execs\fR.
 
 .PP
 Options:
-.IP "exempt_file = <type or type attribute>[, ....]"
-A comma-separated list of types and type attributes.  These
+.IP "exempt_file = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  These
 will not be considered executable.  This is optional.
-.IP "exempt_exec_domain = <type or type attribute>[, ....]"
-A comma-separated list of types and type attributes.  Rules with these
+.IP "exempt_exec_domain = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Rules with these
 as the source will be ignored if they allow file execute permission.
 This is optional.
-.IP "exempt_write_domain = <type or type attribute>[, ....]"
-A comma-separated list of types and type attributes.  Rules with these
+.IP "exempt_write_domain = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Rules with these
 as the source will be ignored if they allow file write or append permissions
 on types determined executable.  This is optional.
 

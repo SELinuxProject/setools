@@ -96,7 +96,7 @@ class ReadOnlyExecutablesTest(unittest.TestCase):
         """Test for passing."""
         with open("/dev/null", "w") as fd:
             config = {"exempt_exec_domain": "unconfined",
-                      "exempt_write_domain": "domain1, domain2, unconfined"}
+                      "exempt_write_domain": "domain1  domain2  unconfined"}
             check = ReadOnlyExecutables(self.p, "test_pass", config)
             check.output = fd
             result = check.run()
@@ -108,7 +108,7 @@ class ReadOnlyExecutablesTest(unittest.TestCase):
         with open("/dev/null", "w") as fd:
             config = {"exempt_exec_domain": "unconfined",
                       "exempt_file": "execfile2",
-                      "exempt_write_domain": "domain1, unconfined"}
+                      "exempt_write_domain": "domain1  unconfined"}
             check = ReadOnlyExecutables(self.p, "test_pass2", config)
             check.output = fd
             result = check.run()

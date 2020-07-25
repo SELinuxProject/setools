@@ -82,7 +82,7 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
     def test_exempt_source(self):
         """Test exempt_source setting."""
         config = {"source": "system",
-                  "exempt_source": " exempt_src1 , exempt_src2 "}
+                  "exempt_source": " exempt_src1   exempt_src2 "}
         check = AssertTE(self.p, "test_exempt_source", config)
 
         # exempt_src2 is an attr
@@ -94,7 +94,7 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
     def test_source_missing_ignored(self):
         """Test exempt_source missing type is ignroed."""
         config = {"source": "system",
-                  "exempt_source": "FAIL, exempt_src2"}
+                  "exempt_source": "FAIL  exempt_src2"}
         check = AssertTE(self.p, "test_source_missing_ignored", config)
 
         # exempt_src2 is an attr
@@ -105,7 +105,7 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
     def test_exempt_target(self):
         """Test exempt_target setting."""
         config = {"target": "system",
-                  "exempt_target": " exempt_tgt1 , exempt_tgt2 "}
+                  "exempt_target": " exempt_tgt1   exempt_tgt2 "}
         check = AssertTE(self.p, "test_exempt_target", config)
 
         # exempt_tgt2 is an attr
@@ -117,7 +117,7 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
     def test_target_missing_ignored(self):
         """Test exempt_target missing type is ignroed."""
         config = {"target": "system",
-                  "exempt_target": "FAIL, exempt_tgt2"}
+                  "exempt_target": "FAIL  exempt_tgt2"}
         check = AssertTE(self.p, "test_target_missing_ignored", config)
 
         # exempt_tgt2 is an attr
@@ -127,7 +127,7 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
 
     def test_tclass(self):
         """Test tclass setting."""
-        config = {"tclass": "infoflow3, infoflow2"}
+        config = {"tclass": "infoflow3  infoflow2"}
         check = AssertTE(self.p, "test_tclass", config)
 
         expected = set((self.p.lookup_class("infoflow3"),
@@ -142,7 +142,7 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
 
     def test_perms(self):
         """Test perms setting."""
-        config = {"perms": " hi_w, super_r "}
+        config = {"perms": " hi_w  super_r "}
         check = AssertTE(self.p, "test_perms", config)
 
         expected = set(("hi_w", "super_r"))

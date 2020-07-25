@@ -43,7 +43,7 @@ class CheckerUtilTest(unittest.TestCase):
         expected = set((self.p.lookup_class("infoflow"),
                         self.p.lookup_class("infoflow2")))
 
-        result = util.config_list_to_class(self.p, " infoflow , infoflow2 ")
+        result = util.config_list_to_class(self.p, " infoflow   infoflow2 ")
         self.assertIsInstance(result, frozenset)
         self.assertSetEqual(expected, result)
 
@@ -63,13 +63,13 @@ class CheckerUtilTest(unittest.TestCase):
             util.config_list_to_class(self.p, "FAIL")
 
         with self.assertRaises(InvalidCheckValue):
-            util.config_list_to_class(self.p, "infoflow, FAIL")
+            util.config_list_to_class(self.p, "infoflow  FAIL")
 
     def test_config_list_to_perms_no_class(self):
         """Test config_list_to_perms() success with no classes set."""
         expected = set(("hi_w", "null"))
 
-        result = util.config_list_to_perms(self.p, " hi_w , null ", tclass=None)
+        result = util.config_list_to_perms(self.p, " hi_w   null ", tclass=None)
         self.assertIsInstance(result, frozenset)
         self.assertSetEqual(expected, result)
 
@@ -86,7 +86,7 @@ class CheckerUtilTest(unittest.TestCase):
     def test_config_list_to_perms_no_class_fail(self):
         """Test config_list_to_perms() failure with no classes set."""
         with self.assertRaises(InvalidCheckValue):
-            util.config_list_to_perms(self.p, " hi_w , null , invalid_perm ", tclass=None)
+            util.config_list_to_perms(self.p, " hi_w   null   invalid_perm ", tclass=None)
 
     def test_config_list_to_perms_class(self):
         """Test config_list_to_perms() success with classes set."""
@@ -94,7 +94,7 @@ class CheckerUtilTest(unittest.TestCase):
                        self.p.lookup_class("infoflow3")))
         expected = set(("super_r", "null"))
 
-        result = util.config_list_to_perms(self.p, " super_r , null ", tclass=classes)
+        result = util.config_list_to_perms(self.p, " super_r   null ", tclass=classes)
         self.assertIsInstance(result, frozenset)
         self.assertSetEqual(expected, result)
 
@@ -118,7 +118,7 @@ class CheckerUtilTest(unittest.TestCase):
 
         with self.assertRaises(InvalidCheckValue):
             # super_none isn't in either class
-            util.config_list_to_perms(self.p, " super_none , null ", tclass=classes)
+            util.config_list_to_perms(self.p, " super_none   null ", tclass=classes)
 
     def test_config_to_type_or_attr(self):
         """Test config_to_type_or_attr() success."""
@@ -148,7 +148,7 @@ class CheckerUtilTest(unittest.TestCase):
         expected = set((self.p.lookup_type("test1"),
                         self.p.lookup_typeattr("test10c")))
 
-        result = util.config_list_to_types_or_attrs(self.log, self.p, " test1, test10c ")
+        result = util.config_list_to_types_or_attrs(self.log, self.p, " test1  test10c ")
         self.assertIsInstance(result, frozenset)
         self.assertSetEqual(expected, result)
 
@@ -160,7 +160,7 @@ class CheckerUtilTest(unittest.TestCase):
                         self.p.lookup_type("test10t5"),
                         self.p.lookup_type("test10t7")))
 
-        result = util.config_list_to_types_or_attrs(self.log, self.p, " test1, test10c ",
+        result = util.config_list_to_types_or_attrs(self.log, self.p, " test1  test10c ",
                                                     expand=True)
         self.assertIsInstance(result, frozenset)
         self.assertSetEqual(expected, result)
