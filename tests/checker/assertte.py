@@ -1,4 +1,5 @@
 # Copyright 2020, Microsoft Corporation
+# Copyright 2020, Chris PeBenito <pebenito@ieee.org>
 #
 # This file is part of SETools.
 #
@@ -125,6 +126,44 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
         self.assertIsInstance(check.exempt_target, frozenset)
         self.assertSetEqual(expected, check.exempt_target)
 
+    def test_expect_source(self):
+        """Test expect_source setting."""
+        with self.subTest("Success"):
+            config = {"tclass": "infoflow3",
+                      "expect_source": " exempt_src1   exempt_src2 "}
+            check = AssertTE(self.p, "test_expect_source", config)
+
+            # exempt_src2 is an attr
+            expected = set((self.p.lookup_type("exempt_src1"),
+                            self.p.lookup_type("exempt_source_type")))
+            self.assertIsInstance(check.expect_source, frozenset)
+            self.assertSetEqual(expected, check.expect_source)
+
+        with self.subTest("Failure"):
+            with self.assertRaises(InvalidCheckValue):
+                config = {"tclass": "infoflow3",
+                          "expect_source": " source1   INVALID "}
+                check = AssertTE(self.p, "test_expect_source_fail", config)
+
+    def test_expect_target(self):
+        """Test expect_target setting."""
+        with self.subTest("Success"):
+            config = {"tclass": "infoflow3",
+                      "expect_target": " exempt_tgt1   exempt_tgt2 "}
+            check = AssertTE(self.p, "test_expect_target", config)
+
+            # exempt_tgt2 is an attr
+            expected = set((self.p.lookup_type("exempt_tgt1"),
+                            self.p.lookup_type("exempt_target_type")))
+            self.assertIsInstance(check.expect_target, frozenset)
+            self.assertSetEqual(expected, check.expect_target)
+
+        with self.subTest("Failure"):
+            with self.assertRaises(InvalidCheckValue):
+                config = {"tclass": "infoflow3",
+                          "expect_target": " target1   INVALID "}
+                check = AssertTE(self.p, "test_expect_target_fail", config)
+
     def test_tclass(self):
         """Test tclass setting."""
         config = {"tclass": "infoflow3  infoflow2"}
@@ -206,6 +245,56 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
         check = AssertTE(self.p, "test_check_passes_exempt_target_attr", config)
         self.assertFalse(check.run())
 
+    def test_check_passes_expect_source(self):
+        """Test the check passes, expect_source"""
+        config = {"tclass": "infoflow6",
+                  "perms": "hi_r",
+                  "expect_source": "source1 source2"}
+        check = AssertTE(self.p, "test_check_passes_expect_source", config)
+        self.assertFalse(check.run())
+
+    def test_check_passes_expect_source_attr(self):
+        """Test the check passes, expect_source with attribute"""
+        config = {"tclass": "infoflow4",
+                  "perms": "med_w",
+                  "expect_source": "all_sources"}
+        check = AssertTE(self.p, "test_check_passes_expect_source_attr", config)
+        self.assertFalse(check.run())
+
+    def test_check_passes_expect_target(self):
+        """Test the check passes, expect_target"""
+        config = {"tclass": "infoflow6",
+                  "perms": "hi_r",
+                  "expect_target": "target1 target2"}
+        check = AssertTE(self.p, "test_check_passes_expect_target", config)
+        self.assertFalse(check.run())
+
+    def test_check_passes_expect_target_attr(self):
+        """Test the check passes, expect_target with attribute"""
+        config = {"tclass": "infoflow4",
+                  "perms": "med_w",
+                  "expect_target": "all_targets"}
+        check = AssertTE(self.p, "test_check_passes_expect_target_attr", config)
+        self.assertFalse(check.run())
+
+    def test_check_passes_expect_exempt_source(self):
+        """"Test the check passes with both expected and exempted sources."""
+        config = {"tclass": "infoflow5",
+                  "perms": "low_r",
+                  "expect_source": "source1",
+                  "exempt_source": "source2"}
+        check = AssertTE(self.p, "test_check_passes_expect_exempt_source", config)
+        self.assertFalse(check.run())
+
+    def test_check_passes_expect_exempt_target(self):
+        """"Test the check passes with both expected and exempted targets."""
+        config = {"tclass": "infoflow5",
+                  "perms": "low_r",
+                  "expect_source": "source1",
+                  "exempt_source": "source2"}
+        check = AssertTE(self.p, "test_check_passes_expect_exempt_target", config)
+        self.assertFalse(check.run())
+
     def test_check_fails(self):
         """Test the check fails"""
         with open("/dev/null", "w") as fd:
@@ -216,6 +305,26 @@ class AssertTETest(mixins.ValidateRule, unittest.TestCase):
             check = AssertTE(self.p, "test_check_passes_exempt_target_attr", config)
             check.output = fd
             result = check.run()
-            self.assertEqual(1, len(result))
+            self.assertEqual(1, len(result), msg=result)
             self.validate_rule(result[0], TERuletype.allow, "source3", "target3", "infoflow4",
                                set(["med_w"]))
+
+    def test_check_fails_expect_source(self):
+        """Test the check fails, expect_source"""
+        config = {"tclass": "infoflow7",
+                  "perms": "super_w",
+                  "expect_source": "source1"}
+        check = AssertTE(self.p, "test_check_fails_expect_source", config)
+        result = check.run()
+        self.assertEqual(1, len(result), msg=result)
+        self.assertIn("source1", result[0])
+
+    def test_check_fails_expect_target(self):
+        """Test the check fails, expect_target"""
+        config = {"tclass": "infoflow7",
+                  "perms": "super_r",
+                  "expect_target": "target2"}
+        check = AssertTE(self.p, "test_check_fails_expect_target", config)
+        result = check.run()
+        self.assertEqual(1, len(result), msg=result)
+        self.assertIn("target2", result[0])

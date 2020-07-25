@@ -85,12 +85,28 @@ A space-separated list of permissions for the query.
 .PP
 Additional Options:
 
+.IP "expect_source = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Each of these
+types must be seen as the source of a rule that matches the criteria.
+At the end of the query, each unseen type in this list will be reported
+as a failure.
+.IP "expect_target = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Each of these
+types must be seen as the target of a rule that matches the criteria.
+At the end of the query, each unseen type in this list will be reported
+as a failure.
 .IP "exempt_source = <type or type attribute>[ ....]"
 A space-separated list of types and type attributes.  Rules with these
 as the source will be ignored. This is optional.
 .IP "exempt_target = <type or type attribute>[ ....]"
 A space-separated list of types and type attributes.  Rules with these
 as the target will be ignored. This is optional.
+
+.PP
+\fBNote:\fR If a rule has an attribute source, all of the member types must be
+in the expect_source list or exempt_source list to pass.  Similarly, if a rule has
+an attribute target, all of the member types must be in the expect_target list or
+exempt_target list to pass.
 
 .SH "EMPTY TYPE ATTRIBUTE ASSERTION"
 This checks that the specified attribute is empty.  This can optionally
