@@ -91,7 +91,7 @@ class CriteriaDescriptor:
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = None
+            self.instances[obj] = self.default_value
         elif self.regex and getattr(obj, self.regex, False):
             self.instances[obj] = re.compile(value)
         elif self.lookup_function:
@@ -109,7 +109,7 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = None
+            self.instances[obj] = self.default_value
         elif self.regex and getattr(obj, self.regex, False):
             self.instances[obj] = re.compile(value)
         elif self.lookup_function:
