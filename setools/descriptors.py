@@ -95,7 +95,10 @@ class CriteriaDescriptor:
         elif self.regex and getattr(obj, self.regex, False):
             self.instances[obj] = re.compile(value)
         elif self.lookup_function:
-            lookup = getattr(obj.policy, self.lookup_function)
+            if callable(self.lookup_function):
+                lookup = self.lookup_function
+            else:
+                lookup = getattr(obj.policy, self.lookup_function)
             self.instances[obj] = lookup(value)
         elif self.enum_class:
             self.instances[obj] = self.enum_class.lookup(value)
@@ -113,12 +116,15 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
         elif self.regex and getattr(obj, self.regex, False):
             self.instances[obj] = re.compile(value)
         elif self.lookup_function:
-            lookup = getattr(obj.policy, self.lookup_function)
-            self.instances[obj] = set(lookup(v) for v in value)
+            if callable(self.lookup_function):
+                lookup = self.lookup_function
+            else:
+                lookup = getattr(obj.policy, self.lookup_function)
+            self.instances[obj] = frozenset(lookup(v) for v in value)
         elif self.enum_class:
-            self.instances[obj] = set(self.enum_class.lookup(v) for v in value)
+            self.instances[obj] = frozenset(self.enum_class.lookup(v) for v in value)
         else:
-            self.instances[obj] = set(value)
+            self.instances[obj] = frozenset(value)
 
 
 #
