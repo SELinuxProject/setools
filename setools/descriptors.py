@@ -73,11 +73,15 @@ class CriteriaDescriptor:
         self.default_value = default_value
         self.lookup_function = lookup_function
         self.enum_class = enum_class
+        self.name = None
 
         # use weak references so instances can be
         # garbage collected, rather than unnecessarily
         # kept around due to this descriptor.
         self.instances = WeakKeyDictionary()
+
+    def __set_name__(self, owner, name):
+        self.name = name
 
     def __get__(self, obj, objtype=None):
         if obj is None:
