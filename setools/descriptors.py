@@ -30,7 +30,10 @@ for more details.
 import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
+from collections.abc import Collection
 from weakref import WeakKeyDictionary
+
+from .util import validate_perms_any
 
 #
 # Query criteria descriptors
@@ -125,6 +128,49 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
             self.instances[obj] = frozenset(self.enum_class.lookup(v) for v in value)
         else:
             self.instances[obj] = frozenset(value)
+
+
+class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
+
+    """
+    Descriptor for a set of permissions criteria.
+
+    name_regex      The name of instance's regex setting attribute;
+                    used as name_regex below.  If unset,
+                    regular expressions will never be used.
+    default_value   The default value of the criteria.  The default
+                    is None.
+
+    Read-only instance attribute use (obj parameter):
+    policy          The instance of SELinuxPolicy
+    tclass          If it exists, it will be used to validate the
+                    permissions.  See validate_perms_any()
+    """
+
+    def __init__(self, name_regex=None, default_value=None):
+        self.regex = name_regex
+        self.default_value = default_value
+        self.name = None
+
+        # use weak references so instances can be
+        # garbage collected, rather than unnecessarily
+        # kept around due to this descriptor.
+        self.instances = WeakKeyDictionary()
+
+    def __set__(self, obj, value):
+        if not value:
+            self.instances[obj] = self.default_value
+        elif self.regex and getattr(obj, self.regex, False):
+            self.instances[obj] = re.compile(value)
+        else:
+            perms = frozenset(v for v in value)
+            tclass = getattr(obj, "tclass", None)
+            if tclass and not isinstance(tclass, Collection):
+                tclass = frozenset((tclass,))
+            validate_perms_any(perms,
+                               tclass=tclass,
+                               policy=obj.policy)
+            self.instances[obj] = perms
 
 
 #
