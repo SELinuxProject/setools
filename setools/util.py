@@ -199,12 +199,12 @@ def validate_perms_any(perms, tclass=None, policy=None):
 
     if tclass:
         # make local mutable set
-        tclass = set(c for c in tclass)
+        selected_classes = set(c for c in tclass)
     else:
-        tclass = set(policy.classes())
+        selected_classes = set(policy.classes())
 
     invalid = set(p for p in perms)
-    for c in tclass:
+    for c in selected_classes:
         invalid -= c.perms
 
         with suppress(NoCommon):
@@ -213,4 +213,11 @@ def validate_perms_any(perms, tclass=None, policy=None):
         if not invalid:
             break
     else:
-        raise InvalidPermission("Invalid permissions: {}".format(", ".join(invalid)))
+        if tclass:
+            raise InvalidPermission(
+                "Permission(s) do not exist in the specified classes: {}"
+                .format(", ".join(invalid)))
+        else:
+            raise InvalidPermission(
+                "Permission(s) do not exist any class: {}"
+                .format(", ".join(invalid)))
