@@ -20,7 +20,7 @@
 # pylint: disable=attribute-defined-outside-init,no-member
 import re
 
-from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
+from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, CriteriaPermissionSetDescriptor
 from .util import match_in_set, match_regex, match_range, match_regex_or_set
 
 
@@ -193,7 +193,7 @@ class MatchPermission:
 
     """Mixin for matching an object's permissions."""
 
-    perms = CriteriaSetDescriptor("perms_regex")
+    perms = CriteriaPermissionSetDescriptor(name_regex="perms_regex")
     perms_equal = False
     perms_regex = False
     perms_subset = False
