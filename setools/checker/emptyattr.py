@@ -21,6 +21,7 @@ import logging
 
 from ..exception import InvalidType, InvalidCheckValue
 from .checkermodule import CheckerModule
+from .util import config_bool_value
 
 
 ATTR_OPT = "attr"
@@ -37,38 +38,59 @@ class EmptyTypeAttr(CheckerModule):
     def __init__(self, policy, checkname, config):
         super().__init__(policy, checkname, config)
         self.log = logging.getLogger(__name__)
+        self._attr = None
+        self._missing_ok = False
 
         # this will make the check pass automatically
         # since the attribute is missing.  Only set if
         # missing_ok is True AND attr is missing.
-        self.pass_by_missing = False
+        self._pass_by_missing = False
 
-        missing_ok = config.get(MISSINOK_OPT)
-        if missing_ok and missing_ok.strip().lower() in ("yes", "true", "1"):
-            self.missing_ok = True
-        else:
-            self.missing_ok = False
+        self.missing_ok = config.get(MISSINOK_OPT)
+        self.attr = config.get(ATTR_OPT)
 
+    @property
+    def attr(self):
+        return self._attr
+
+    @attr.setter
+    def attr(self, value):
         try:
-            attr = config.get(ATTR_OPT)
-            if not attr:
+            if not value:
                 raise InvalidCheckValue("{}: \"{}\" setting is missing.".format(self.checkname,
                                                                                 ATTR_OPT))
 
-            self.attr = self.policy.lookup_typeattr(attr)
+            self._attr = self.policy.lookup_typeattr(value)
+            self._pass_by_missing = False
+
         except InvalidType as e:
             if not self.missing_ok:
-                raise InvalidCheckValue("attr setting error: {}".format(e)) from e
-            else:
-                self.pass_by_missing = True
-                self.attr = attr
+                raise InvalidCheckValue("{}: attr setting error: {}".format(
+                    self.checkname, e)) from e
+
+            self._attr = value
+            self._pass_by_missing = True
+
+    @property
+    def missing_ok(self):
+        return self._missing_ok
+
+    @missing_ok.setter
+    def missing_ok(self, value):
+        self._missing_ok = config_bool_value(value)
+
+        if self._missing_ok and isinstance(self.attr, str):
+            # attr is only a string if it doesn't exist.
+            self._pass_by_missing = True
+        else:
+            self._pass_by_missing = False
 
     def run(self):
         self.log.info("Checking type attribute {} is empty.".format(self.attr))
 
         failures = []
 
-        if self.pass_by_missing:
+        if self._pass_by_missing:
             self.log_info("    {} does not exist.".format(self.attr))
         else:
             self.output.write("Member types of {}:\n".format(self.attr))
