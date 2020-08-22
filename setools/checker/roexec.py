@@ -23,7 +23,7 @@ from collections import defaultdict
 
 from ..terulequery import TERuleQuery
 from .checkermodule import CheckerModule
-from .util import config_list_to_types_or_attrs
+from .descriptors import ConfigSetDescriptor
 
 
 EXEMPT_WRITE = "exempt_write_domain"
@@ -38,27 +38,17 @@ class ReadOnlyExecutables(CheckerModule):
     check_type = "ro_execs"
     check_config = frozenset((EXEMPT_WRITE, EXEMPT_EXEC, EXEMPT_FILE))
 
+    exempt_write_domain = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
+    exempt_file = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
+    exempt_exec_domain = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
+
     def __init__(self, policy, checkname, config):
         super().__init__(policy, checkname, config)
         self.log = logging.getLogger(__name__)
 
-        self.exempt_write_domain = config_list_to_types_or_attrs(self.log,
-                                                                 self.policy,
-                                                                 config.get(EXEMPT_WRITE),
-                                                                 strict=False,
-                                                                 expand=True)
-
-        self.exempt_file = config_list_to_types_or_attrs(self.log,
-                                                         self.policy,
-                                                         config.get(EXEMPT_FILE),
-                                                         strict=False,
-                                                         expand=True)
-
-        self.exempt_exec_domain = config_list_to_types_or_attrs(self.log,
-                                                                self.policy,
-                                                                config.get(EXEMPT_EXEC),
-                                                                strict=False,
-                                                                expand=True)
+        self.exempt_write_domain = config.get(EXEMPT_WRITE)
+        self.exempt_file = config.get(EXEMPT_FILE)
+        self.exempt_exec_domain = config.get(EXEMPT_EXEC)
 
     def _collect_executables(self):
         self.log.debug("Collecting list of executable file types.")

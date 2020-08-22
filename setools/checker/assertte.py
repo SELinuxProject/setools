@@ -23,9 +23,7 @@ import logging
 from ..exception import InvalidCheckValue, InvalidClass
 from ..terulequery import TERuleQuery
 from .checkermodule import CheckerModule
-from .util import config_list_to_class, config_list_to_perms, config_list_to_types_or_attrs, \
-    config_to_type_or_attr
-
+from .descriptors import ConfigDescriptor, ConfigSetDescriptor, ConfigPermissionSetDescriptor
 
 SOURCE_OPT = "source"
 TARGET_OPT = "target"
@@ -45,38 +43,29 @@ class AssertTE(CheckerModule):
     check_config = frozenset((SOURCE_OPT, TARGET_OPT, CLASS_OPT, PERMS_OPT, EXEMPT_SRC_OPT,
                               EXEMPT_TGT_OPT, EXPECT_SRC_OPT, EXPECT_TGT_OPT))
 
+    source = ConfigDescriptor("lookup_type_or_attr")
+    target = ConfigDescriptor("lookup_type_or_attr")
+    tclass = ConfigSetDescriptor("lookup_class", strict=True, expand=False)
+    perms = ConfigPermissionSetDescriptor()
+
+    exempt_source = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
+    exempt_target = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
+    expect_source = ConfigSetDescriptor("lookup_type_or_attr", strict=True, expand=True)
+    expect_target = ConfigSetDescriptor("lookup_type_or_attr", strict=True, expand=True)
+
     def __init__(self, policy, checkname, config):
         super().__init__(policy, checkname, config)
         self.log = logging.getLogger(__name__)
 
-        self.source = config_to_type_or_attr(self.policy, config.get(SOURCE_OPT))
-        self.target = config_to_type_or_attr(self.policy, config.get(TARGET_OPT))
-        self.tclass = config_list_to_class(self.policy, config.get(CLASS_OPT))
-        self.perms = config_list_to_perms(self.policy, config.get(PERMS_OPT), self.tclass)
+        self.source = config.get(SOURCE_OPT)
+        self.target = config.get(TARGET_OPT)
+        self.tclass = config.get(CLASS_OPT)
+        self.perms = config.get(PERMS_OPT)
 
-        self.exempt_source = config_list_to_types_or_attrs(self.log,
-                                                           self.policy,
-                                                           config.get(EXEMPT_SRC_OPT),
-                                                           strict=False,
-                                                           expand=True)
-
-        self.exempt_target = config_list_to_types_or_attrs(self.log,
-                                                           self.policy,
-                                                           config.get(EXEMPT_TGT_OPT),
-                                                           strict=False,
-                                                           expand=True)
-
-        self.expect_source = config_list_to_types_or_attrs(self.log,
-                                                           self.policy,
-                                                           config.get(EXPECT_SRC_OPT),
-                                                           strict=True,
-                                                           expand=True)
-
-        self.expect_target = config_list_to_types_or_attrs(self.log,
-                                                           self.policy,
-                                                           config.get(EXPECT_TGT_OPT),
-                                                           strict=True,
-                                                           expand=True)
+        self.exempt_source = config.get(EXEMPT_SRC_OPT)
+        self.exempt_target = config.get(EXEMPT_TGT_OPT)
+        self.expect_source = config.get(EXPECT_SRC_OPT)
+        self.expect_target = config.get(EXPECT_TGT_OPT)
 
         if not any((self.source, self.target, self.tclass, self.perms)):
             raise InvalidCheckValue(
