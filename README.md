@@ -13,7 +13,7 @@ SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
 To run SETools command line tools, the following packages are required:
-* Python 3.4+
+* Python 3.6+
 * NetworkX 2.0+
 * setuptools
 * libselinux
