@@ -62,8 +62,9 @@ was not ran.
 
 .SH "TYPE ENFORCEMENT ALLOW RULE ASSERTION"
 This checks for the nonexistence of type enforcement allow rules. The check_type
-is \fBassert_te\fR.  It will run the query and any results from the query,
+is \fBassert_te\fR.  It will run the query and any unexpected results from the query,
 removing any exempted sources or targets, will be listed as failures.
+Any expected results that are not seen will also be listed as failures.
 If a rule has an empty attribute, rendering it useless, it will
 be ignored.  If a rule has an attribute, it will be considered
 a failure unless all of the member types are exempted.
@@ -89,12 +90,12 @@ Additional Options:
 A space-separated list of types and type attributes.  Each of these
 types must be seen as the source of a rule that matches the criteria.
 At the end of the query, each unseen type in this list will be reported
-as a failure.
+as a failure. This is optional.
 .IP "expect_target = <type or type attribute>[ ....]"
 A space-separated list of types and type attributes.  Each of these
 types must be seen as the target of a rule that matches the criteria.
 At the end of the query, each unseen type in this list will be reported
-as a failure.
+as a failure. This is optional.
 .IP "exempt_source = <type or type attribute>[ ....]"
 A space-separated list of types and type attributes.  Rules with these
 as the source will be ignored. This is optional.
