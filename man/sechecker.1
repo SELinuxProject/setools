@@ -108,6 +108,42 @@ in the expect_source list or exempt_source list to pass.  Similarly, if a rule h
 an attribute target, all of the member types must be in the expect_target list or
 exempt_target list to pass.
 
+.SH "ROLE BASED ACCESS CONTROL ALLOW RULE ASSERTION"
+This checks for the nonexistence of role based access control (RBAC) allow rules. The
+check_type is \fBassert_rbac\fR.  It will run the query and any unexpected results
+from the query, removing any exempted sources or targets, will be listed as failures.
+Any expected results that are not seen will also be listed as failures.
+
+.PP
+Criteria options:
+.IP "source = <role"
+The source role criteria for the query.
+.IP "target = <role>"
+The target role criteria for the query.
+
+.PP
+\fBA least one of the above options must be set in this check.\fR
+
+.PP
+Additional Options:
+
+.IP "expect_source = <role>[ ....]"
+A space-separated list of roles.  Each of these
+roles must be seen as the source of a rule that matches the criteria.
+At the end of the query, each unseen role in this list will be reported
+as a failure. This is optional.
+.IP "expect_target = <role>[ ....]"
+A space-separated list of roles.  Each of these
+roles must be seen as the target of a rule that matches the criteria.
+At the end of the query, each unseen role in this list will be reported
+as a failure. This is optional.
+.IP "exempt_source = <role>[ ....]"
+A space-separated list of roles.  Rules with these
+as the source will be ignored. This is optional.
+.IP "exempt_target = <role>[ ....]"
+A space-separated list of roles.  Rules with these
+as the target will be ignored. This is optional.
+
 .SH "EMPTY TYPE ATTRIBUTE ASSERTION"
 This checks that the specified attribute is empty.  This can optionally
 be set to also pass if the attribute does not exist.

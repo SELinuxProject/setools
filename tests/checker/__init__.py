@@ -17,6 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+from . import assertrbac
 from . import assertte
 from . import checker
 from . import emptyattr
