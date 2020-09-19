@@ -19,6 +19,12 @@
 #
 
 #
+# Typing
+#
+AnyConstraint = TypeVar("AnyConstraint", bound=BaseConstraint)
+
+
+#
 # Classes
 #
 class ConstraintRuletype(PolicyEnum):

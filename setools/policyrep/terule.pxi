@@ -20,6 +20,12 @@
 
 
 #
+# Typing
+#
+AnyTERule = TypeVar("AnyTERule", bound=BaseTERule)
+
+
+#
 # Classes
 #
 class TERuletype(PolicyEnum):

@@ -33,6 +33,7 @@ import ipaddress
 import collections
 import enum
 import weakref
+from typing import TypeVar, Union
 
 cimport sepol
 cimport selinux
