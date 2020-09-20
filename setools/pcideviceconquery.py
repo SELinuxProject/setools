@@ -17,8 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable, Optional
 
 from .mixins import MatchContext
+from .policyrep import Pcidevicecon
 from .query import PolicyQuery
 
 
@@ -56,14 +58,14 @@ class PcideviceconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _device = None
+    _device: Optional[int] = None
 
     @property
-    def device(self):
+    def device(self) -> Optional[int]:
         return self._device
 
     @device.setter
-    def device(self, value):
+    def device(self, value: Optional[int]) -> None:
         if value:
             if value < 1:
                 raise ValueError("PCI device ID must be positive: {0}".format(value))
@@ -72,11 +74,11 @@ class PcideviceconQuery(MatchContext, PolicyQuery):
         else:
             self._device = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(PcideviceconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Pcidevicecon]:
         """Generator which yields all matching pcidevicecons."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Device ID: {0.device!r}".format(self))

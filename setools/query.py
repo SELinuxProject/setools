@@ -18,13 +18,20 @@
 # <http://www.gnu.org/licenses/>.
 #
 from abc import ABC, abstractmethod
+from logging import Logger
+from typing import Iterable
+
+from .policyrep import SELinuxPolicy
 
 
 class PolicyQuery(ABC):
 
     """Abstract base class for SELinux policy queries."""
 
-    def __init__(self, policy, **kwargs):
+    log: Logger
+    policy: SELinuxPolicy
+
+    def __init__(self, policy: SELinuxPolicy, **kwargs) -> None:
         self.policy = policy
 
         # keys are sorted in reverse order so regex settings
@@ -40,7 +47,7 @@ class PolicyQuery(ABC):
             setattr(self, name, kwargs[name])
 
     @abstractmethod
-    def results(self):
+    def results(self) -> Iterable:
         """
         Generator which returns the matches for the query.  This method
         should be overridden by subclasses.

@@ -18,11 +18,12 @@
 #
 import logging
 import re
+from typing import cast, Iterable, Optional, Pattern, Union
 
 from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .exception import InvalidType, RuleUseError
-from .policyrep import RBACRuletype
+from .policyrep import AnyRBACRule, RBACRuletype, Role, TypeOrAttr
 from .util import match_indirect_regex
 
 
@@ -58,37 +59,37 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
 
     ruletype = CriteriaSetDescriptor(enum_class=RBACRuletype)
     source = CriteriaDescriptor("source_regex", "lookup_role")
-    source_regex = False
-    source_indirect = True
-    _target = None
-    target_regex = False
-    target_indirect = True
+    source_regex: bool = False
+    source_indirect: bool = True
+    _target: Optional[Union[Pattern, Role, TypeOrAttr]] = None
+    target_regex: bool = False
+    target_indirect: bool = True
     tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
-    tclass_regex = False
+    tclass_regex: bool = False
     default = CriteriaDescriptor("default_regex", "lookup_role")
-    default_regex = False
+    default_regex: bool = False
 
     @property
-    def target(self):
+    def target(self) -> Optional[Union[Pattern, Role, TypeOrAttr]]:
         return self._target
 
     @target.setter
-    def target(self, value):
+    def target(self, value: Optional[Union[str, Role, TypeOrAttr]]) -> None:
         if not value:
             self._target = None
         elif self.target_regex:
             self._target = re.compile(value)
         else:
             try:
-                self._target = self.policy.lookup_type_or_attr(value)
+                self._target = self.policy.lookup_type_or_attr(cast(Union[str, TypeOrAttr], value))
             except InvalidType:
-                self._target = self.policy.lookup_role(value)
+                self._target = self.policy.lookup_role(cast(Union[str, Role], value))
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(RBACRuleQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[AnyRBACRule]:
         """Generator which yields all matching RBAC rules."""
         self.log.info("Generating RBAC rule results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))

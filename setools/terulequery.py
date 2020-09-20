@@ -17,13 +17,13 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
-import re
+from typing import cast, Iterable, Optional, Set, Tuple
 
 from . import mixins, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .exception import RuleUseError, RuleNotConditional
-from .policyrep import IoctlSet, TERuletype
-from .util import match_regex, match_indirect_regex, match_regex_or_set
+from .policyrep import AnyTERule, AVRuleXperm, IoctlSet, TERuletype
+from .util import match_indirect_regex, match_regex_or_set
 
 
 class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuery):
@@ -84,27 +84,27 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
 
     ruletype = CriteriaSetDescriptor(enum_class=TERuletype)
     source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
-    source_regex = False
-    source_indirect = True
+    source_regex: bool = False
+    source_indirect: bool = True
     target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
-    target_regex = False
-    target_indirect = True
+    target_regex: bool = False
+    target_indirect: bool = True
     default = CriteriaDescriptor("default_regex", "lookup_type_or_attr")
-    default_regex = False
+    default_regex: bool = False
     boolean = CriteriaSetDescriptor("boolean_regex", "lookup_boolean")
-    boolean_regex = False
-    boolean_equal = False
-    _xperms = None
-    xperms_equal = False
+    boolean_regex: bool = False
+    boolean_equal: bool = False
+    _xperms: Optional[IoctlSet] = None
+    xperms_equal: bool = False
 
     @property
-    def xperms(self):
+    def xperms(self) -> Optional[IoctlSet]:
         return self._xperms
 
     @xperms.setter
-    def xperms(self, value):
+    def xperms(self, value: Optional[Iterable[Tuple[int, int]]]) -> None:
         if value:
-            pending_xperms = set()
+            pending_xperms: Set[int] = set()
 
             for low, high in value:
                 if not (0 <= low <= 0xffff):
@@ -122,11 +122,11 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
         else:
             self._xperms = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(TERuleQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[AnyTERule]:
         """Generator which yields all matching TE rules."""
         self.log.info("Generating TE rule results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))
@@ -186,7 +186,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                         # permission set equality option is on.
                         continue
 
-                    if rule.xperm_type not in self.perms:
+                    if cast(AVRuleXperm, rule).xperm_type not in self.perms:
                         continue
                 elif not self._match_perms(rule):
                     continue

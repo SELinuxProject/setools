@@ -18,9 +18,11 @@
 #
 import logging
 import re
+from typing import Iterable, Optional
 
 from .descriptors import CriteriaDescriptor
 from .mixins import MatchContext
+from .policyrep import Genfscon
 from .query import PolicyQuery
 from .util import match_regex
 
@@ -60,17 +62,17 @@ class GenfsconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    filetype = None
+    filetype: Optional[int] = None
     fs = CriteriaDescriptor("fs_regex")
-    fs_regex = False
+    fs_regex: bool = False
     path = CriteriaDescriptor("path_regex")
-    path_regex = False
+    path_regex: bool = False
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(GenfsconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Genfscon]:
         """Generator which yields all matching genfscons."""
         self.log.info("Generating genfscon results from {0.policy}".format(self))
         self.log.debug("FS: {0.fs!r}, regex: {0.fs_regex}".format(self))

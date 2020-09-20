@@ -17,9 +17,11 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable, Optional
 
 from .descriptors import CriteriaDescriptor
 from .mixins import MatchName
+from .policyrep import Boolean
 from .query import PolicyQuery
 
 
@@ -38,24 +40,24 @@ class BoolQuery(MatchName, PolicyQuery):
                     is None, the default state not be matched.
     """
 
-    _default = None
+    _default: Optional[bool] = None
 
     @property
-    def default(self):
+    def default(self) -> Optional[bool]:
         return self._default
 
     @default.setter
-    def default(self, value):
+    def default(self, value) -> None:
         if value is None:
             self._default = None
         else:
             self._default = bool(value)
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(BoolQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Boolean]:
         """Generator which yields all Booleans matching the criteria."""
         self.log.info("Generating Boolean results from {0.policy}".format(self))
         self._match_name_debug(self.log)

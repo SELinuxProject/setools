@@ -17,10 +17,11 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchObjClass
-from .policyrep import MLSRuletype
+from .policyrep import MLSRule, MLSRuletype
 from .query import PolicyQuery
 from .util import match_indirect_regex, match_range
 
@@ -48,24 +49,24 @@ class MLSRuleQuery(MatchObjClass, PolicyQuery):
 
     ruletype = CriteriaSetDescriptor(enum_class=MLSRuletype)
     source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
-    source_regex = False
-    source_indirect = True
+    source_regex: bool = False
+    source_indirect: bool = True
     target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
-    target_regex = False
-    target_indirect = True
+    target_regex: bool = False
+    target_indirect: bool = True
     tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
-    tclass_regex = False
+    tclass_regex: bool = False
     default = CriteriaDescriptor(lookup_function="lookup_range")
-    default_overlap = False
-    default_subset = False
-    default_superset = False
-    default_proper = False
+    default_overlap: bool = False
+    default_subset: bool = False
+    default_superset: bool = False
+    default_proper: bool = False
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(MLSRuleQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[MLSRule]:
         """Generator which yields all matching MLS rules."""
         self.log.info("Generating MLS rule results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))

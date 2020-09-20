@@ -17,8 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable
 
 from .mixins import MatchName
+from .policyrep import PolicyCapability
 from .query import PolicyQuery
 
 
@@ -36,11 +38,11 @@ class PolCapQuery(MatchName, PolicyQuery):
                 be used for matching the name.
     """
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(PolCapQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[PolicyCapability]:
         """Generator which yields all matching policy capabilities."""
         self.log.info("Generating policy capability results from {0.policy}".format(self))
         self._match_name_debug(self.log)

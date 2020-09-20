@@ -18,8 +18,10 @@
 #
 import logging
 import re
+from typing import Iterable
 
 from .mixins import MatchName, MatchPermission
+from .policyrep import Common
 from .query import PolicyQuery
 
 
@@ -44,11 +46,11 @@ class CommonQuery(MatchPermission, MatchName, PolicyQuery):
                  on the permission names instead of set logic.
     """
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(CommonQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Common]:
         """Generator which yields all matching commons."""
         self.log.info("Generating common results from {0.policy}".format(self))
         self._match_name_debug(self.log)

@@ -17,9 +17,11 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor
 from .mixins import MatchAlias, MatchName
+from .policyrep import Sensitivity
 from .query import PolicyQuery
 from .util import match_level
 
@@ -47,14 +49,14 @@ class SensitivityQuery(MatchAlias, MatchName, PolicyQuery):
     """
 
     sens = CriteriaDescriptor(lookup_function="lookup_sensitivity")
-    sens_dom = False
-    sens_domby = False
+    sens_dom: bool = False
+    sens_domby: bool = False
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(SensitivityQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Sensitivity]:
         """Generator which yields all matching sensitivities."""
         self.log.info("Generating sensitivity results from {0.policy}".format(self))
         self._match_name_debug(self.log)
@@ -68,12 +70,14 @@ class SensitivityQuery(MatchAlias, MatchName, PolicyQuery):
             if not self._match_alias(s):
                 continue
 
-            if self.sens and not match_level(
-                    s,
-                    self.sens,
-                    self.sens_dom,
-                    self.sens_domby,
-                    False):
-                continue
+            if self.sens:
+                if self.sens_dom:
+                    if self.sens < s:
+                        continue
+                elif self.sens_domby:
+                    if self.sens > s:
+                        continue
+                elif self.sens != s:
+                    continue
 
             yield s

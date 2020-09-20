@@ -17,8 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable, Optional
 
 from .mixins import MatchContext
+from .policyrep import Pirqcon
 from .query import PolicyQuery
 
 
@@ -56,14 +58,14 @@ class PirqconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _irq = None
+    _irq: Optional[int] = None
 
     @property
-    def irq(self):
+    def irq(self) -> Optional[int]:
         return self._irq
 
     @irq.setter
-    def irq(self, value):
+    def irq(self, value: Optional[int]) -> None:
         if value:
             if value < 1:
                 raise ValueError("The IRQ must be positive: {0}".format(value))
@@ -72,11 +74,11 @@ class PirqconQuery(MatchContext, PolicyQuery):
         else:
             self._irq = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(PirqconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Pirqcon]:
         """Generator which yields all matching pirqcons."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("IRQ: {0.irq!r}".format(self))

@@ -17,9 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable, Optional, Tuple
 
 from .mixins import MatchContext
-from .policyrep import IoportconRange
+from .policyrep import Ioportcon, IoportconRange
 from .query import PolicyQuery
 from .util import match_range
 
@@ -67,21 +68,20 @@ class IoportconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _ports = None
-    ports_subset = False
-    ports_overlap = False
-    ports_superset = False
-    ports_proper = False
+    _ports: Optional[IoportconRange] = None
+    ports_subset: bool = False
+    ports_overlap: bool = False
+    ports_superset: bool = False
+    ports_proper: bool = False
 
     @property
-    def ports(self):
+    def ports(self) -> Optional[IoportconRange]:
         return self._ports
 
     @ports.setter
-    def ports(self, value):
-        pending_ports = IoportconRange(*value)
-
-        if all(pending_ports):
+    def ports(self, value: Optional[Tuple[int, int]]) -> None:
+        if value:
+            pending_ports = IoportconRange(*value)
             if pending_ports.low < 1 or pending_ports.high < 1:
                 raise ValueError("Port numbers must be positive: {0.low}-{0.high}".
                                  format(pending_ports))
@@ -95,11 +95,11 @@ class IoportconQuery(MatchContext, PolicyQuery):
         else:
             self._ports = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(IoportconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Ioportcon]:
         """Generator which yields all matching ioportcons."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Ports: {0.ports!r}, overlap: {0.ports_overlap}, "

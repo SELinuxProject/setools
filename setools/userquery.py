@@ -18,9 +18,11 @@
 #
 import logging
 import re
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchName
+from .policyrep import User
 from .query import PolicyQuery
 from .util import match_regex_or_set, match_level, match_range
 
@@ -64,23 +66,23 @@ class UserQuery(MatchName, PolicyQuery):
     """
 
     level = CriteriaDescriptor(lookup_function="lookup_level")
-    level_dom = False
-    level_domby = False
-    level_incomp = False
+    level_dom: bool = False
+    level_domby: bool = False
+    level_incomp: bool = False
     range_ = CriteriaDescriptor(lookup_function="lookup_range")
-    range_overlap = False
-    range_subset = False
-    range_superset = False
-    range_proper = False
+    range_overlap: bool = False
+    range_subset: bool = False
+    range_superset: bool = False
+    range_proper: bool = False
     roles = CriteriaSetDescriptor("roles_regex", "lookup_role")
-    roles_equal = False
-    roles_regex = False
+    roles_equal: bool = False
+    roles_regex: bool = False
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(UserQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[User]:
         """Generator which yields all matching users."""
         self.log.info("Generating user results from {0.policy}".format(self))
         self._match_name_debug(self.log)

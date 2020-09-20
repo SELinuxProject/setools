@@ -17,8 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable
 
 from .mixins import MatchContext, MatchName
+from .policyrep import Netifcon
 from .query import PolicyQuery
 from .util import match_regex
 
@@ -55,11 +57,11 @@ class NetifconQuery(MatchContext, MatchName, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(NetifconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Netifcon]:
         """Generator which yields all matching netifcons."""
         self.log.info("Generating netifcon results from {0.policy}".format(self))
         self._match_name_debug(self.log)
