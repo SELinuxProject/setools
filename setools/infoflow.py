@@ -30,7 +30,7 @@ from .policyrep import AVRule, SELinuxPolicy, TERuletype, Type
 
 __all__ = ['InfoFlowAnalysis']
 
-InfoFlowPath = Iterable['Edge']
+InfoFlowPath = Iterable['InfoFlowStep']
 
 
 class InfoFlowAnalysis:
@@ -217,7 +217,7 @@ class InfoFlowAnalysis:
             for path in nx.all_shortest_paths(self.subG, s, t):
                 yield self.__generate_steps(path)
 
-    def infoflows(self, type_: Union[Type, str], out: bool = True) -> Iterable['Edge']:
+    def infoflows(self, type_: Union[Type, str], out: bool = True) -> Iterable['InfoFlowStep']:
         """
         Generator which yields all information flows in/out of a
         specified source type.
@@ -254,7 +254,7 @@ class InfoFlowAnalysis:
                 flows = self.subG.in_edges(s)
 
             for source, target in flows:
-                yield Edge(self.subG, source, target)
+                yield InfoFlowStep(self.subG, source, target)
 
     def get_stats(self) -> str:  # pragma: no cover
         """
@@ -286,7 +286,7 @@ class InfoFlowAnalysis:
         rules   The list of rules creating this information flow step.
         """
         for s in range(1, len(path)):
-            yield Edge(self.subG, path[s - 1], path[s])
+            yield InfoFlowStep(self.subG, path[s - 1], path[s])
 
     #
     #
@@ -322,12 +322,12 @@ class InfoFlowAnalysis:
                 # in or out of the source type type
                 if s != t:
                     if wweight:
-                        edge = Edge(self.G, s, t, create=True)
+                        edge = InfoFlowStep(self.G, s, t, create=True)
                         edge.rules.append(rule)
                         edge.weight = wweight
 
                     if rweight:
-                        edge = Edge(self.G, t, s, create=True)
+                        edge = InfoFlowStep(self.G, t, s, create=True)
                         edge.rules.append(rule)
                         edge.weight = rweight
 
@@ -358,7 +358,7 @@ class InfoFlowAnalysis:
         if self.min_weight > 1:
             delete_list = []
             for s, t in self.subG.edges():
-                edge = Edge(self.subG, s, t)
+                edge = InfoFlowStep(self.subG, s, t)
                 if edge.weight < self.min_weight:
                     delete_list.append(edge)
 
@@ -367,7 +367,7 @@ class InfoFlowAnalysis:
         if self.booleans is not None:
             delete_list = []
             for s, t in self.subG.edges():
-                edge = Edge(self.subG, s, t)
+                edge = InfoFlowStep(self.subG, s, t)
 
                 # collect disabled rules
                 rule_list = []
@@ -394,7 +394,7 @@ class InfoFlowAnalysis:
             nx.number_of_edges(self.subG)))
 
 
-class Edge:
+class InfoFlowStep:
 
     """
     A graph edge.  Also used for returning information flow steps.
@@ -429,7 +429,7 @@ class Edge:
                 self.rules = None
                 self.weight = None
             else:
-                raise ValueError("Edge does not exist in graph")
+                raise ValueError("InfoFlowStep does not exist in graph")
 
     def __getitem__(self, key):
         # This is implemented so this object can be used in NetworkX
