@@ -284,7 +284,7 @@ class PermissionMapDescriptor:
     validator   A callable for validating the setting.
 
     Instance class attribute use (obj parameter):
-    perm_map    The full permission map.
+    _perm_map   The full permission map.
     class_      The mapping's object class
     perm        The mapping's permission
     """
@@ -297,10 +297,10 @@ class PermissionMapDescriptor:
         if obj is None:
             return self
 
-        return obj.perm_map[obj.class_][obj.perm][self.name]
+        return obj._perm_map[obj.class_][obj.perm][self.name]
 
     def __set__(self, obj, value):
-        obj.perm_map[obj.class_][obj.perm][self.name] = self.validator(value)
+        obj._perm_map[obj.class_][obj.perm][self.name] = self.validator(value)
 
     def __delete__(self, obj):
         raise AttributeError
