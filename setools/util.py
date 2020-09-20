@@ -18,11 +18,13 @@
 #
 
 from contextlib import suppress
+from typing import Iterable, Optional
 
 from .exception import InvalidPermission, NoCommon
+from .policyrep import Level, ObjClass, SELinuxPolicy
 
 
-def match_regex(obj, criteria, regex):
+def match_regex(obj, criteria, regex: bool) -> bool:
     """
     Match the object with optional regular expression.
 
@@ -38,7 +40,7 @@ def match_regex(obj, criteria, regex):
         return obj == criteria
 
 
-def match_set(obj, criteria, equal):
+def match_set(obj, criteria, equal: bool) -> bool:
     """
     Match the object (a set) with optional set equality.
 
@@ -55,7 +57,7 @@ def match_set(obj, criteria, equal):
         return bool(obj.intersection(criteria))
 
 
-def match_in_set(obj, criteria, regex):
+def match_in_set(obj, criteria, regex: bool) -> bool:
     """
     Match if the criteria is in the list, with optional
     regular expression matching.
@@ -67,12 +69,12 @@ def match_in_set(obj, criteria, regex):
     """
 
     if regex:
-        return [m for m in obj if criteria.search(str(m))]
+        return bool([m for m in obj if criteria.search(str(m))])
     else:
         return criteria in obj
 
 
-def match_indirect_regex(obj, criteria, indirect, regex):
+def match_indirect_regex(obj, criteria, indirect: bool, regex: bool) -> bool:
     """
     Match the object with optional regular expression and indirection.
 
@@ -86,14 +88,14 @@ def match_indirect_regex(obj, criteria, indirect, regex):
 
     if indirect:
         if regex:
-            return [o for o in obj.expand() if criteria.search(str(o))]
+            return bool([o for o in obj.expand() if criteria.search(str(o))])
         else:
-            return set(criteria.expand()).intersection(obj.expand())
+            return bool(set(criteria.expand()).intersection(obj.expand()))
     else:
         return match_regex(obj, criteria, regex)
 
 
-def match_regex_or_set(obj, criteria, equal, regex):
+def match_regex_or_set(obj, criteria, equal: bool, regex: bool) -> bool:
     """
     Match the object (a set) with either set comparisons
     (equality or intersection) or by regex matching of the
@@ -110,12 +112,12 @@ def match_regex_or_set(obj, criteria, equal, regex):
     """
 
     if regex:
-        return [m for m in obj if criteria.search(str(m))]
+        return bool([m for m in obj if criteria.search(str(m))])
     else:
         return match_set(obj, set(criteria), equal)
 
 
-def match_range(obj, criteria, subset, overlap, superset, proper):
+def match_range(obj, criteria, subset: bool, overlap: bool, superset: bool, proper: bool) -> bool:
     """
     Match ranges of objects.
 
@@ -148,7 +150,7 @@ def match_range(obj, criteria, subset, overlap, superset, proper):
         return criteria.low == obj.low and obj.high == criteria.high
 
 
-def match_level(obj, criteria, dom, domby, incomp):
+def match_level(obj: Level, criteria: Level, dom: bool, domby: bool, incomp: bool) -> bool:
     """
     Match the an MLS level.
 
@@ -169,7 +171,8 @@ def match_level(obj, criteria, dom, domby, incomp):
         return (criteria == obj)
 
 
-def validate_perms_any(perms, tclass=None, policy=None):
+def validate_perms_any(perms: Iterable[str], tclass: Optional[Iterable[ObjClass]] = None,
+                       policy: Optional[SELinuxPolicy] = None) -> None:
     """
     Validate that each permission is valid for at least one
     of specified object classes.  If no classes are specified,
@@ -194,14 +197,13 @@ def validate_perms_any(perms, tclass=None, policy=None):
     if not perms:
         raise ValueError("No permissions specified.")
 
-    if not tclass and not policy:
-        raise ValueError("No object class(es) or policy specified.")
-
     if tclass:
         # make local mutable set
         selected_classes = set(c for c in tclass)
-    else:
+    elif policy:
         selected_classes = set(policy.classes())
+    else:
+        raise ValueError("No object class(es) or policy specified.")
 
     invalid = set(p for p in perms)
     for c in selected_classes:
