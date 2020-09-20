@@ -19,8 +19,11 @@
 #
 # pylint: disable=attribute-defined-outside-init,no-member
 import re
+from logging import Logger
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, CriteriaPermissionSetDescriptor
+from .policyrep import Context
 from .util import match_in_set, match_regex, match_range, match_regex_or_set
 
 
@@ -29,9 +32,9 @@ class MatchAlias:
     """Mixin for matching an object's aliases."""
 
     alias = CriteriaDescriptor("alias_regex")
-    alias_regex = False
+    alias_regex: bool = False
 
-    def _match_alias_debug(self, log):
+    def _match_alias_debug(self, log: Logger) -> None:
         """Emit log debugging info for alias matching."""
         log.debug("Alias: {0.alias}, regex: {0.alias_regex}".format(self))
 
@@ -78,18 +81,18 @@ class MatchContext:
     """
 
     user = CriteriaDescriptor("user_regex", "lookup_user")
-    user_regex = False
+    user_regex: bool = False
     role = CriteriaDescriptor("role_regex", "lookup_role")
-    role_regex = False
+    role_regex: bool = False
     type_ = CriteriaDescriptor("type_regex", "lookup_type")
-    type_regex = False
+    type_regex: bool = False
     range_ = CriteriaDescriptor(lookup_function="lookup_range")
-    range_overlap = False
-    range_subset = False
-    range_superset = False
-    range_proper = False
+    range_overlap: bool = False
+    range_subset: bool = False
+    range_superset: bool = False
+    range_proper: bool = False
 
-    def _match_context_debug(self, log):
+    def _match_context_debug(self, log: Logger):
         """Emit log debugging info for context matching."""
         log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
         log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
@@ -97,7 +100,7 @@ class MatchContext:
         log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
                   "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
 
-    def _match_context(self, context):
+    def _match_context(self, context: Context) -> bool:
         """
         Match the context criteria.
 
@@ -141,10 +144,10 @@ class MatchName:
     """Mixin for matching an object's name with alias dereferencing."""
 
     name = CriteriaDescriptor("name_regex")
-    name_regex = False
-    alias_deref = False
+    name_regex: bool = False
+    alias_deref: bool = False
 
-    def _match_name_debug(self, log):
+    def _match_name_debug(self, log: Logger) -> None:
         """Log debugging messages for name matching."""
         log.debug("Name: {0.name!r}, regex: {0.name_regex}, deref: {0.alias_deref}".format(self))
 
@@ -166,9 +169,9 @@ class MatchObjClass:
     """Mixin for matching an object's class."""
 
     tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
-    tclass_regex = False
+    tclass_regex: bool = False
 
-    def _match_object_class_debug(self, log):
+    def _match_object_class_debug(self, log: Logger) -> None:
         """Emit log debugging info for permission matching."""
         log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
 
@@ -194,11 +197,11 @@ class MatchPermission:
     """Mixin for matching an object's permissions."""
 
     perms = CriteriaPermissionSetDescriptor(name_regex="perms_regex")
-    perms_equal = False
-    perms_regex = False
-    perms_subset = False
+    perms_equal: bool = False
+    perms_regex: bool = False
+    perms_subset: bool = False
 
-    def _match_perms_debug(self, log):
+    def _match_perms_debug(self, log: Logger):
         """Emit log debugging info for permission matching."""
         log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}, "
                   "subset: {0.perms_subset!r}".format(self))
