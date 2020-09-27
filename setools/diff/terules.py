@@ -81,13 +81,12 @@ def _avrule_expand_generator(rule_list, rule_db, type_db, side):
         types = type_db.right
 
     for unexpanded_rule in rule_list:
-        cond_exp = TERULES_UNCONDITIONAL
-        block_bool = TERULES_UNCONDITIONAL_BLOCK
         try:
             cond_exp = intern(str(unexpanded_rule.conditional))
             block_bool = intern(str(unexpanded_rule.conditional_block))
         except RuleNotConditional:
-            pass
+            cond_exp = TERULES_UNCONDITIONAL
+            block_bool = TERULES_UNCONDITIONAL_BLOCK
 
         if cond_exp not in rule_db:
             rule_db[cond_exp] = dict()
@@ -96,7 +95,7 @@ def _avrule_expand_generator(rule_list, rule_db, type_db, side):
             rule_db[cond_exp][block_bool] = dict()
 
         tclass = unexpanded_rule.tclass.name
-        perms = {p for p in unexpanded_rule.perms}
+        perms = set(unexpanded_rule.perms)
         side_data = rule_db_side_data_record(perms, unexpanded_rule)
 
         block = rule_db[cond_exp][block_bool]
@@ -149,7 +148,7 @@ def _av_remove_redundant_rules(rule_db):
     for cond_exp, cond_blocks in rule_db.items():
         if cond_exp == TERULES_UNCONDITIONAL:
             continue
-        for block_bool, block in cond_blocks.items():
+        for block in cond_blocks.values():
             for src, src_data in block.items():
                 if src not in uncond_block:
                     continue
@@ -182,15 +181,15 @@ def _av_remove_redundant_rules(rule_db):
                                 tgt_data[tclass] = rule_db_sides_record(left_side, right_side)
 
 
-def _av_generate_diffs(ruletype, rule_db, type_db):
+def _av_generate_diffs(rule_db, type_db):
     added = []
     removed = []
     modified = []
-    for cond_exp, cond_blocks in rule_db.items():
-        for block_bool, block in cond_blocks.items():
+    for cond_blocks in rule_db.values():
+        for block in cond_blocks.values():
             for src, src_data in block.items():
                 for tgt, tgt_data in src_data.items():
-                    for tclass, side_data in tgt_data.items():
+                    for side_data in tgt_data.values():
                         if side_data.left and side_data.right:
                             common_perms = side_data.left.perms & side_data.right.perms
                             left_perms = side_data.left.perms - common_perms
@@ -253,7 +252,7 @@ def av_diff_template(ruletype):
         _av_remove_redundant_rules(rule_db)
 
         logging.info("Generating added, removed, and modified av rules")
-        added, removed, modified = _av_generate_diffs(ruletype, rule_db, type_db)
+        added, removed, modified = _av_generate_diffs(rule_db, type_db)
 
         type_db.left.clear()
         type_db.right.clear()
