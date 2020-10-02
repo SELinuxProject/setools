@@ -1,5 +1,6 @@
 /.eggs
 /.idea
+/.mypy_cache
 /build
 /dist
 /setools.egg-info

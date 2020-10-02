@@ -24,6 +24,7 @@ matrix:
   include:
     - env: TOX_ENV=pep8
     - env: TOX_ENV=lint
+    - env: TOX_ENV=mypy
 #    - env: TOX_ENV=coverage
 
 #  allow_failures:
