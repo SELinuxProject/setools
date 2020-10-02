@@ -278,16 +278,16 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
         rule_db[TERULES_UNCONDITIONAL] = dict()
         rule_db[TERULES_UNCONDITIONAL][TERULES_UNCONDITIONAL_BLOCK] = dict()
 
-        logging.info("Expanding left policy")
+        self.log.info("Expanding AV rules from {0.left_policy}.".format(self))
         _avrule_expand_generator(self._left_te_rules[ruletype], rule_db, type_db, Side.left)
 
-        logging.info("Expanding right policy")
+        self.log.info("Expanding AV rules from {0.right_policy}.".format(self))
         _avrule_expand_generator(self._right_te_rules[ruletype], rule_db, type_db, Side.right)
 
-        logging.info("Removing redundant rules")
+        self.log.info("Removing redundant AV rules.")
         _av_remove_redundant_rules(rule_db)
 
-        logging.info("Generating added, removed, and modified av rules")
+        self.log.info("Generating AV rule diff.")
         added, removed, modified = _av_generate_diffs(rule_db, type_db)
 
         type_db.left.clear()
