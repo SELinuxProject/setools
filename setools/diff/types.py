@@ -17,28 +17,34 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple, Set, Union
+
+from ..policyrep import Type, TypeAttribute, TypeOrAttr
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
 from .typeattr import typeattr_wrapper_factory
+from .typing import SymbolCache
 
-from ..policyrep import Type
-
-
-modified_types_record = namedtuple("modified_type", ["added_attributes",
-                                                     "removed_attributes",
-                                                     "matched_attributes",
-                                                     "modified_permissive",
-                                                     "permissive",
-                                                     "added_aliases",
-                                                     "removed_aliases",
-                                                     "matched_aliases"])
-
-_types_cache = defaultdict(dict)
+_types_cache: SymbolCache[Type] = defaultdict(dict)
 
 
-def type_wrapper_factory(type_):
+class ModifiedType(NamedTuple):
+
+    """Difference details for a modified type."""
+
+    added_attributes: Set[TypeAttribute]
+    removed_attributes: Set[TypeAttribute]
+    matched_attributes: Set[TypeAttribute]
+    modified_permissive: bool
+    permissive: bool
+    added_aliases: Set[str]
+    removed_aliases: Set[str]
+    matched_aliases: Set[str]
+
+
+def type_wrapper_factory(type_: Type) -> SymbolWrapper[Type]:
     """
     Wrap types from the specified policy.
 
@@ -53,7 +59,9 @@ def type_wrapper_factory(type_):
         return t
 
 
-def type_or_attr_wrapper_factory(type_):
+def type_or_attr_wrapper_factory(type_: TypeOrAttr) -> \
+        Union[SymbolWrapper[Type], SymbolWrapper[TypeAttribute]]:
+
     """
     Wrap types or attributes from the specified policy.
 
@@ -74,7 +82,7 @@ class TypesDifference(Difference):
     removed_types = DiffResultDescriptor("diff_types")
     modified_types = DiffResultDescriptor("diff_types")
 
-    def diff_types(self):
+    def diff_types(self) -> None:
         """Generate the difference in types between the policies."""
 
         self.log.info(
@@ -104,19 +112,19 @@ class TypesDifference(Difference):
             mod_permissive = left_permissive != right_permissive
 
             if added_attr or removed_attr or added_aliases or removed_aliases or mod_permissive:
-                self.modified_types[left_type] = modified_types_record(added_attr,
-                                                                       removed_attr,
-                                                                       matched_attr,
-                                                                       mod_permissive,
-                                                                       left_permissive,
-                                                                       added_aliases,
-                                                                       removed_aliases,
-                                                                       matched_aliases)
+                self.modified_types[left_type] = ModifiedType(added_attr,
+                                                              removed_attr,
+                                                              matched_attr,
+                                                              mod_permissive,
+                                                              left_permissive,
+                                                              added_aliases,
+                                                              removed_aliases,
+                                                              matched_aliases)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting type differences")
         self.added_types = None

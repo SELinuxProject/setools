@@ -18,11 +18,14 @@
 # <http://www.gnu.org/licenses/>.
 #
 from collections import defaultdict
+from typing import FrozenSet, List, Optional, Union
 
-from ..policyrep import ConstraintRuletype
+from ..policyrep import AnyConstraint, ConstraintRuletype, Role, Type, User
+
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 from .objclass import class_wrapper_factory
+from .typing import RuleList
 
 
 class ConstraintsDifference(Difference):
@@ -55,10 +58,10 @@ class ConstraintsDifference(Difference):
     removed_mlsvalidatetrans = DiffResultDescriptor("diff_mlsvalidatetrans")
 
     # Lists of rules for each policy
-    _left_constraints = None
-    _right_constraints = None
+    _left_constraints: RuleList[ConstraintRuletype, AnyConstraint] = None
+    _right_constraints: RuleList[ConstraintRuletype, AnyConstraint] = None
 
-    def diff_constrains(self):
+    def diff_constrains(self) -> None:
         """Generate the difference in constraint rules between the policies."""
 
         self.log.info("Generating constraint differences from {0.left_policy} to {0.right_policy}".
@@ -67,11 +70,14 @@ class ConstraintsDifference(Difference):
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
 
+        assert self._left_constraints is not None, "Left constraints didn't load, this a bug."
+        assert self._right_constraints is not None, "Right constraints didn't load, this a bug."
+
         self.added_constrains, self.removed_constrains, _ = self._set_diff(
             (ConstraintWrapper(c) for c in self._left_constraints[ConstraintRuletype.constrain]),
             (ConstraintWrapper(c) for c in self._right_constraints[ConstraintRuletype.constrain]))
 
-    def diff_mlsconstrains(self):
+    def diff_mlsconstrains(self) -> None:
         """Generate the difference in MLS constraint rules between the policies."""
 
         self.log.info(
@@ -81,13 +87,16 @@ class ConstraintsDifference(Difference):
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
 
+        assert self._left_constraints is not None, "Left constraints didn't load, this a bug."
+        assert self._right_constraints is not None, "Right constraints didn't load, this a bug."
+
         self.added_mlsconstrains, self.removed_mlsconstrains, _ = self._set_diff(
             (ConstraintWrapper(c) for c in self._left_constraints[
                 ConstraintRuletype.mlsconstrain]),
             (ConstraintWrapper(c) for c in self._right_constraints[
                 ConstraintRuletype.mlsconstrain]))
 
-    def diff_validatetrans(self):
+    def diff_validatetrans(self) -> None:
         """Generate the difference in validatetrans rules between the policies."""
 
         self.log.info(
@@ -97,13 +106,16 @@ class ConstraintsDifference(Difference):
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
 
+        assert self._left_constraints is not None, "Left constraints didn't load, this a bug."
+        assert self._right_constraints is not None, "Right constraints didn't load, this a bug."
+
         self.added_validatetrans, self.removed_validatetrans, _ = self._set_diff(
             (ConstraintWrapper(c) for c in self._left_constraints[
                 ConstraintRuletype.validatetrans]),
             (ConstraintWrapper(c) for c in self._right_constraints[
                 ConstraintRuletype.validatetrans]))
 
-    def diff_mlsvalidatetrans(self):
+    def diff_mlsvalidatetrans(self) -> None:
         """Generate the difference in MLS validatetrans rules between the policies."""
 
         self.log.info(
@@ -112,6 +124,9 @@ class ConstraintsDifference(Difference):
 
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
+
+        assert self._left_constraints is not None, "Left constraints didn't load, this a bug."
+        assert self._right_constraints is not None, "Right constraints didn't load, this a bug."
 
         self.added_mlsvalidatetrans, self.removed_mlsvalidatetrans, _ = self._set_diff(
             (ConstraintWrapper(c) for c in self._left_constraints[
@@ -122,7 +137,7 @@ class ConstraintsDifference(Difference):
     #
     # Internal functions
     #
-    def _create_constrain_lists(self):
+    def _create_constrain_lists(self) -> None:
         """Create rule lists for both policies."""
         self._left_constraints = defaultdict(list)
         self.log.debug("Building constraint lists from {0.left_policy}".format(self))
@@ -142,7 +157,7 @@ class ConstraintsDifference(Difference):
 
         self.log.debug("Completed building constraint rule lists.")
 
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting all constraints differences")
         self.added_constrains = None
@@ -159,26 +174,28 @@ class ConstraintsDifference(Difference):
         self._right_constraints = None
 
 
-class ConstraintWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class ConstraintWrapper(Wrapper[AnyConstraint]):  # pylint: disable=unsubscriptable-object
 
     """Wrap constraints for diff purposes."""
 
     __slots__ = ("ruletype", "tclass", "perms", "expr")
 
-    def __init__(self, rule):
+    def __init__(self, rule: AnyConstraint) -> None:
         self.origin = rule
         self.ruletype = rule.ruletype
         self.tclass = class_wrapper_factory(rule.tclass)
 
         try:
-            self.perms = rule.perms
+            self.perms: Optional[FrozenSet[str]] = rule.perms
         except AttributeError:
             # (mls)validatetrans
             self.perms = None
 
         self.key = hash(rule)
 
-        self.expr = []
+        self.expr: List[Union[FrozenSet[SymbolWrapper[Union[Role, Type, User]]], str]] = []
+
         for op in rule.expression:
             if isinstance(op, frozenset):
                 # lists of types/users/roles

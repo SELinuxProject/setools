@@ -16,14 +16,21 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple
+
+from ..policyrep import Context
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
 
 
-modified_initsids_record = namedtuple("modified_initsid", ["added_context", "removed_context"])
+class ModifiedInitialSID(NamedTuple):
+
+    """Difference details for a modified initial SID."""
+
+    added_context: Context
+    removed_context: Context
 
 
 class InitialSIDsDifference(Difference):
@@ -34,7 +41,7 @@ class InitialSIDsDifference(Difference):
     removed_initialsids = DiffResultDescriptor("diff_initialsids")
     modified_initialsids = DiffResultDescriptor("diff_initialsids")
 
-    def diff_initialsids(self):
+    def diff_initialsids(self) -> None:
         """Generate the difference in initial SIDs between the policies."""
 
         self.log.info("Generating initial SID differences from {0.left_policy} to {0.right_policy}".
@@ -50,13 +57,13 @@ class InitialSIDsDifference(Difference):
             # Criteria for modified initialsids
             # 1. change to context
             if ContextWrapper(left_initialsid.context) != ContextWrapper(right_initialsid.context):
-                self.modified_initialsids[left_initialsid] = modified_initsids_record(
+                self.modified_initialsids[left_initialsid] = ModifiedInitialSID(
                     right_initialsid.context, left_initialsid.context)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting initialsid differences")
         self.added_initialsids = None

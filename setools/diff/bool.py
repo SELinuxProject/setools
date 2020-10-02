@@ -17,18 +17,28 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple
+
+from ..policyrep import SELinuxPolicy, Boolean
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
+from .typing import SymbolCache
 
 
-modified_bool_record = namedtuple("modified_boolean", ["added_state", "removed_state"])
-
-_bool_cache = defaultdict(dict)
+_bool_cache: SymbolCache[Boolean] = defaultdict(dict)
 
 
-def boolean_wrapper(policy, boolean):
+class ModifiedBoolean(NamedTuple):
+
+    """Difference details for a modified Boolean."""
+
+    added_state: bool
+    removed_state: bool
+
+
+def boolean_wrapper(policy: SELinuxPolicy, boolean: Boolean) -> SymbolWrapper[Boolean]:
     """
     Wrap booleans from the specified policy.
 
@@ -51,7 +61,7 @@ class BooleansDifference(Difference):
     removed_booleans = DiffResultDescriptor("diff_booleans")
     modified_booleans = DiffResultDescriptor("diff_booleans")
 
-    def diff_booleans(self):
+    def diff_booleans(self) -> None:
         """Generate the difference in type attributes between the policies."""
 
         self.log.info("Generating Boolean differences from {0.left_policy} to {0.right_policy}".
@@ -68,13 +78,13 @@ class BooleansDifference(Difference):
             # Criteria for modified booleans
             # 1. change to default state
             if left_boolean.state != right_boolean.state:
-                self.modified_booleans[left_boolean] = modified_bool_record(right_boolean.state,
-                                                                            left_boolean.state)
+                self.modified_booleans[left_boolean] = ModifiedBoolean(right_boolean.state,
+                                                                       left_boolean.state)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting Boolean differences")
         self.added_booleans = None

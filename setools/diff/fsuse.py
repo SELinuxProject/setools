@@ -16,16 +16,22 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple
+
+from ..policyrep import Context, FSUse
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 
 
-modified_fsuse_record = namedtuple("modified_fsuse", ["rule",
-                                                      "added_context",
-                                                      "removed_context"])
+class ModifiedFSUse(NamedTuple):
+
+    """Difference details for a modified fs_use_*."""
+
+    rule: FSUse
+    added_context: Context
+    removed_context: Context
 
 
 class FSUsesDifference(Difference):
@@ -36,7 +42,7 @@ class FSUsesDifference(Difference):
     removed_fs_uses = DiffResultDescriptor("diff_fs_uses")
     modified_fs_uses = DiffResultDescriptor("diff_fs_uses")
 
-    def diff_fs_uses(self):
+    def diff_fs_uses(self) -> None:
         """Generate the difference in fs_use rules between the policies."""
 
         self.log.info(
@@ -53,14 +59,14 @@ class FSUsesDifference(Difference):
             # Criteria for modified rules
             # 1. change to context
             if ContextWrapper(left_rule.context) != ContextWrapper(right_rule.context):
-                self.modified_fs_uses.append(modified_fsuse_record(left_rule,
-                                                                   right_rule.context,
-                                                                   left_rule.context))
+                self.modified_fs_uses.append(ModifiedFSUse(left_rule,
+                                                           right_rule.context,
+                                                           left_rule.context))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting fs_use_* rule differences")
         self.added_fs_uses = None
@@ -68,13 +74,14 @@ class FSUsesDifference(Difference):
         self.modified_fs_uses = None
 
 
-class FSUseWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class FSUseWrapper(Wrapper[FSUse]):  # pylint: disable=unsubscriptable-object
 
     """Wrap fs_use_* rules to allow set operations."""
 
     __slots__ = ("ruletype", "fs", "context")
 
-    def __init__(self, rule):
+    def __init__(self, rule: FSUse) -> None:
         self.origin = rule
         self.ruletype = rule.ruletype
         self.fs = rule.fs

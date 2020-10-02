@@ -17,21 +17,29 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple, Set
+
+from ..policyrep import Role, Type
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
+from .typing import SymbolCache
 from .types import type_wrapper_factory
 
-
-modified_roles_record = namedtuple("modified_role", ["added_types",
-                                                     "removed_types",
-                                                     "matched_types"])
-
-_roles_cache = defaultdict(dict)
+_roles_cache: SymbolCache[Role] = defaultdict(dict)
 
 
-def role_wrapper_factory(role):
+class ModifiedRole(NamedTuple):
+
+    """Difference details for a modified role."""
+
+    added_types: Set[Type]
+    removed_types: Set[Type]
+    matched_types: Set[Type]
+
+
+def role_wrapper_factory(role: Role) -> SymbolWrapper[Role]:
     """
     Wrap roles from the specified policy.
 
@@ -54,7 +62,7 @@ class RolesDifference(Difference):
     removed_roles = DiffResultDescriptor("diff_roles")
     modified_roles = DiffResultDescriptor("diff_roles")
 
-    def diff_roles(self):
+    def diff_roles(self) -> None:
         """Generate the difference in roles between the policies."""
 
         self.log.info(
@@ -75,14 +83,14 @@ class RolesDifference(Difference):
                 (type_wrapper_factory(t) for t in right_role.types()))
 
             if added_types or removed_types:
-                self.modified_roles[left_role] = modified_roles_record(added_types,
-                                                                       removed_types,
-                                                                       matched_types)
+                self.modified_roles[left_role] = ModifiedRole(added_types,
+                                                              removed_types,
+                                                              matched_types)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting role differences")
         self.added_roles = None

@@ -17,20 +17,28 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple, Set
+
+from ..policyrep import Type, TypeAttribute
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
+from .typing import SymbolCache
+
+_typeattr_cache: SymbolCache[TypeAttribute] = defaultdict(dict)
 
 
-modified_typeattr_record = namedtuple("modified_typeattr", ["added_types",
-                                                            "removed_types",
-                                                            "matched_types"])
+class ModifiedTypeAttribute(NamedTuple):
 
-_typeattr_cache = defaultdict(dict)
+    """Difference details for a modified type attribute."""
+
+    added_types: Set[Type]
+    removed_types: Set[Type]
+    matched_types: Set[Type]
 
 
-def typeattr_wrapper_factory(attr):
+def typeattr_wrapper_factory(attr: TypeAttribute) -> SymbolWrapper[TypeAttribute]:
     """
     Wrap type attributes from the specified policy.
 
@@ -53,7 +61,7 @@ class TypeAttributesDifference(Difference):
     removed_type_attributes = DiffResultDescriptor("diff_type_attributes")
     modified_type_attributes = DiffResultDescriptor("diff_type_attributes")
 
-    def diff_type_attributes(self):
+    def diff_type_attributes(self) -> None:
         """Generate the difference in type attributes between the policies."""
 
         self.log.info(
@@ -75,13 +83,13 @@ class TypeAttributesDifference(Difference):
                 (SymbolWrapper(t) for t in right_attribute.expand()))
 
             if added_types or removed_types:
-                self.modified_type_attributes[left_attribute] = modified_typeattr_record(
+                self.modified_type_attributes[left_attribute] = ModifiedTypeAttribute(
                     added_types, removed_types, matched_types)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting type attribute differences")
         self.added_type_attributes = None

@@ -17,28 +17,35 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple, Set, Optional, Union
 
 from ..exception import MLSDisabled
+from ..policyrep import Level, Range, Role, User
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
 from .mls import LevelWrapper, RangeWrapper
 from .roles import role_wrapper_factory
+from .typing import SymbolCache
+
+_users_cache: SymbolCache[User] = defaultdict(dict)
 
 
-modified_users_record = namedtuple("modified_user", ["added_roles",
-                                                     "removed_roles",
-                                                     "matched_roles",
-                                                     "added_level",
-                                                     "removed_level",
-                                                     "added_range",
-                                                     "removed_range"])
+class ModifiedUser(NamedTuple):
 
-_users_cache = defaultdict(dict)
+    """Difference details for a modified user."""
+
+    added_roles: Set[Role]
+    removed_roles: Set[Role]
+    matched_roles: Set[Role]
+    added_level: Optional[Union[Level, str]]
+    removed_level: Optional[Union[Level, str]]
+    added_range: Optional[Union[Range, str]]
+    removed_range: Optional[Union[Range, str]]
 
 
-def user_wrapper_factory(user):
+def user_wrapper_factory(user: User) -> SymbolWrapper[User]:
     """
     Wrap users from the specified policy.
 
@@ -61,7 +68,7 @@ class UsersDifference(Difference):
     removed_users = DiffResultDescriptor("diff_users")
     modified_users = DiffResultDescriptor("diff_users")
 
-    def diff_users(self):
+    def diff_users(self) -> None:
         """Generate the difference in users between the policies."""
 
         self.log.info(
@@ -84,6 +91,18 @@ class UsersDifference(Difference):
 
             # keep wrapped and unwrapped MLS objects here so there
             # are not several nested try blocks
+            left_level_wrap: Optional[LevelWrapper]
+            left_range_wrap: Optional[RangeWrapper]
+            left_level: Union[Level, str]
+            left_range: Union[Range, str]
+            right_level_wrap: Optional[LevelWrapper]
+            right_range_wrap: Optional[RangeWrapper]
+            right_level: Union[Level, str]
+            right_range: Union[Range, str]
+            added_level: Optional[Union[Level, str]]
+            added_range: Optional[Union[Range, str]]
+            removed_level: Optional[Union[Level, str]]
+            removed_range: Optional[Union[Range, str]]
             try:
                 left_level_wrap = LevelWrapper(left_user.mls_level)
                 left_range_wrap = RangeWrapper(left_user.mls_range)
@@ -121,18 +140,18 @@ class UsersDifference(Difference):
                 removed_range = None
 
             if added_roles or removed_roles or removed_level or removed_range:
-                self.modified_users[left_user] = modified_users_record(added_roles,
-                                                                       removed_roles,
-                                                                       matched_roles,
-                                                                       added_level,
-                                                                       removed_level,
-                                                                       added_range,
-                                                                       removed_range)
+                self.modified_users[left_user] = ModifiedUser(added_roles,
+                                                              removed_roles,
+                                                              matched_roles,
+                                                              added_level,
+                                                              removed_level,
+                                                              added_range,
+                                                              removed_range)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting user differences")
         self.added_users = None

@@ -17,16 +17,22 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple
+
+from ..policyrep import Context, Nodecon
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 
 
-modified_nodecon_record = namedtuple("modified_nodecon", ["rule",
-                                                          "added_context",
-                                                          "removed_context"])
+class ModifiedNodecon(NamedTuple):
+
+    """Difference details for a modified netifcon."""
+
+    rule: Nodecon
+    added_context: Context
+    removed_context: Context
 
 
 class NodeconsDifference(Difference):
@@ -37,7 +43,7 @@ class NodeconsDifference(Difference):
     removed_nodecons = DiffResultDescriptor("diff_nodecons")
     modified_nodecons = DiffResultDescriptor("diff_nodecons")
 
-    def diff_nodecons(self):
+    def diff_nodecons(self) -> None:
         """Generate the difference in nodecons between the policies."""
 
         self.log.info("Generating nodecon differences from {0.left_policy} to {0.right_policy}".
@@ -53,14 +59,14 @@ class NodeconsDifference(Difference):
             # Criteria for modified nodecons
             # 1. change to context
             if ContextWrapper(left_nodecon.context) != ContextWrapper(right_nodecon.context):
-                self.modified_nodecons.append(modified_nodecon_record(left_nodecon,
-                                                                      right_nodecon.context,
-                                                                      left_nodecon.context))
+                self.modified_nodecons.append(ModifiedNodecon(left_nodecon,
+                                                              right_nodecon.context,
+                                                              left_nodecon.context))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting nodecon differences")
         self.added_nodecons = None
@@ -68,13 +74,14 @@ class NodeconsDifference(Difference):
         self.modified_nodecons = None
 
 
-class NodeconWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class NodeconWrapper(Wrapper[Nodecon]):  # pylint: disable=unsubscriptable-object
 
     """Wrap nodecon statements for diff purposes."""
 
     __slots__ = ("ip_version", "network")
 
-    def __init__(self, ocon):
+    def __init__(self, ocon: Nodecon) -> None:
         self.origin = ocon
         self.ip_version = ocon.ip_version
         self.network = ocon.network

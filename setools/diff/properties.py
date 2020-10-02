@@ -16,13 +16,21 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple, Union
+
+from ..policyrep import PolicyEnum
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference
 
 
-modified_properties_record = namedtuple("modified_property", ["property", "added", "removed"])
+class ModifiedProperty(NamedTuple):
+
+    """Difference details for a modified policy property."""
+
+    property: str
+    added: Union[PolicyEnum, bool, int]
+    removed: Union[PolicyEnum, bool, int]
 
 
 class PropertiesDifference(Difference):
@@ -34,31 +42,31 @@ class PropertiesDifference(Difference):
 
     modified_properties = DiffResultDescriptor("diff_properties")
 
-    def diff_properties(self):
+    def diff_properties(self) -> None:
         self.modified_properties = []
 
         if self.left_policy.handle_unknown != self.right_policy.handle_unknown:
             self.modified_properties.append(
-                modified_properties_record("handle_unknown",
-                                           self.right_policy.handle_unknown,
-                                           self.left_policy.handle_unknown))
+                ModifiedProperty("handle_unknown",
+                                 self.right_policy.handle_unknown,
+                                 self.left_policy.handle_unknown))
 
         if self.left_policy.mls != self.right_policy.mls:
             self.modified_properties.append(
-                modified_properties_record("MLS",
-                                           self.right_policy.mls,
-                                           self.left_policy.mls))
+                ModifiedProperty("MLS",
+                                 self.right_policy.mls,
+                                 self.left_policy.mls))
 
         if self.left_policy.version != self.right_policy.version:
             self.modified_properties.append(
-                modified_properties_record("version",
-                                           self.right_policy.version,
-                                           self.left_policy.version))
+                ModifiedProperty("version",
+                                 self.right_policy.version,
+                                 self.left_policy.version))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting property differences")
         self.modified_properties = None

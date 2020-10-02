@@ -16,18 +16,24 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple, Optional
+
+from ..policyrep import Context, Netifcon
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 
 
-modified_netifcon_record = namedtuple("modified_netifcon", ["rule",
-                                                            "added_context",
-                                                            "removed_context",
-                                                            "added_packet",
-                                                            "removed_packet"])
+class ModifiedNetifcon(NamedTuple):
+
+    """Difference details for a modified netifcon."""
+
+    rule: Netifcon
+    added_context: Optional[Context]
+    removed_context: Optional[Context]
+    added_packet: Optional[Context]
+    removed_packet: Optional[Context]
 
 
 class NetifconsDifference(Difference):
@@ -38,7 +44,7 @@ class NetifconsDifference(Difference):
     removed_netifcons = DiffResultDescriptor("diff_netifcons")
     modified_netifcons = DiffResultDescriptor("diff_netifcons")
 
-    def diff_netifcons(self):
+    def diff_netifcons(self) -> None:
         """Generate the difference in netifcons between the policies."""
 
         self.log.info("Generating netifcon differences from {0.left_policy} to {0.right_policy}".
@@ -69,13 +75,13 @@ class NetifconsDifference(Difference):
                 added_packet = None
 
             if removed_context or removed_packet:
-                self.modified_netifcons.append(modified_netifcon_record(
+                self.modified_netifcons.append(ModifiedNetifcon(
                     left_netifcon, added_context, removed_context, added_packet, removed_packet))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting netifcon differences")
         self.added_netifcons = None
@@ -83,13 +89,14 @@ class NetifconsDifference(Difference):
         self.modified_netifcons = None
 
 
-class NetifconWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class NetifconWrapper(Wrapper[Netifcon]):  # pylint: disable=unsubscriptable-object
 
     """Wrap netifcon statements for diff purposes."""
 
     __slots__ = ("netif")
 
-    def __init__(self, ocon):
+    def __init__(self, ocon: Netifcon) -> None:
         self.origin = ocon
         self.netif = ocon.netif
         self.key = hash(ocon)

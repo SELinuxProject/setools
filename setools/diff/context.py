@@ -17,29 +17,34 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from ..exception import MLSDisabled
 
-from .difference import SymbolWrapper, Wrapper
+from typing import Optional
+
+from ..exception import MLSDisabled
+from ..policyrep import Context
+
+from .difference import Wrapper
 from .mls import RangeWrapper
 from .roles import role_wrapper_factory
 from .types import type_wrapper_factory
 from .users import user_wrapper_factory
 
 
-class ContextWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class ContextWrapper(Wrapper[Context]):  # pylint: disable=unsubscriptable-object
 
     """Wrap contexts to allow comparisons."""
 
     __slots__ = ("user", "role", "type_", "range_")
 
-    def __init__(self, ctx):
+    def __init__(self, ctx: Context) -> None:
         self.origin = ctx
         self.user = user_wrapper_factory(ctx.user)
         self.role = role_wrapper_factory(ctx.role)
         self.type_ = type_wrapper_factory(ctx.type_)
 
         try:
-            self.range_ = RangeWrapper(ctx.range_)
+            self.range_: Optional[RangeWrapper] = RangeWrapper(ctx.range_)
         except MLSDisabled:
             self.range_ = None
 

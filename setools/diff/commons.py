@@ -16,15 +16,19 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple, Set
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
 
 
-modified_commons_record = namedtuple("modified_common", ["added_perms",
-                                                         "removed_perms",
-                                                         "matched_perms"])
+class ModifiedCommon(NamedTuple):
+
+    """Difference details for a modified common permission set."""
+
+    added_perms: Set[str]
+    removed_perms: Set[str]
+    matched_perms: Set[str]
 
 
 class CommonDifference(Difference):
@@ -38,7 +42,7 @@ class CommonDifference(Difference):
     removed_commons = DiffResultDescriptor("diff_commons")
     modified_commons = DiffResultDescriptor("diff_commons")
 
-    def diff_commons(self):
+    def diff_commons(self) -> None:
         """Generate the difference in commons between the policies."""
 
         self.log.info(
@@ -58,14 +62,14 @@ class CommonDifference(Difference):
                                                                        unwrap=False)
 
             if added_perms or removed_perms:
-                self.modified_commons[left_common] = modified_commons_record(added_perms,
-                                                                             removed_perms,
-                                                                             matched_perms)
+                self.modified_commons[left_common] = ModifiedCommon(added_perms,
+                                                                    removed_perms,
+                                                                    matched_perms)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting common differences")
         self.added_commons = None
