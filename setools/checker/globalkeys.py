@@ -23,6 +23,3 @@ CHECK_DESC_KEY = "desc"
 CHECK_DISABLE = "disable"
 
 GLOBAL_CONFIG_KEYS = frozenset((CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE))
-
-# A map of check_type(str) to Checker class
-CHECKER_REGISTRY = {}

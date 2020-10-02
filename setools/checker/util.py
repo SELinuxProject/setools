@@ -18,7 +18,7 @@
 #
 
 
-def config_bool_value(value):
+def config_bool_value(value) -> bool:
     """Convert a boolean configuration value."""
 
     if isinstance(value, str):

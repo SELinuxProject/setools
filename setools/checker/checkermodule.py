@@ -19,13 +19,16 @@
 
 import sys
 import logging
-import collections
 from abc import ABCMeta, abstractmethod
+from typing import Dict, FrozenSet, List, Mapping
 
-from .globalkeys import CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE, GLOBAL_CONFIG_KEYS, \
-    CHECKER_REGISTRY
 from ..exception import InvalidCheckOption
+from ..policyrep import SELinuxPolicy
 
+from .globalkeys import CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE, GLOBAL_CONFIG_KEYS
+
+
+CHECKER_REGISTRY: Dict[str, type] = {}
 
 __all__ = ['CheckerModule']
 
@@ -42,7 +45,7 @@ class CheckRegistry(ABCMeta):
             if not isinstance(check_type, str):
                 raise TypeError("Checker module {} does not set a check_type.".format(clsname))
 
-            if not isinstance(check_config, collections.abc.Collection):
+            if not isinstance(check_config, frozenset):
                 raise TypeError("Checker module {} does not set a valid check_config.".format(
                     clsname))
 
@@ -65,22 +68,24 @@ class CheckerModule(metaclass=CheckRegistry):
 
     # The name of the check used in config files.
     # This must be set by subclasses.
-    check_type = None
+    check_type: str
 
     # The container of valid config keys specific to the check
     # This is in addition to the common config keys
     # in the GLOBAL_CONFIG_KEYS above.  This must be set by subclasses.
     # If no additional keys  are needed, this should be set to an
     # empty container.
-    check_config = None
+    check_config: FrozenSet[str]
 
     # T/F log findings that pass the check.
-    log_passing = False
+    log_passing: bool = False
 
     # Default output to stdout.
     output = sys.stdout
 
-    def __init__(self, policy, checkname, config):
+    policy: SELinuxPolicy
+
+    def __init__(self, policy: SELinuxPolicy, checkname: str, config: Mapping[str, str]) -> None:
         self.policy = policy
         self.checkname = checkname
 
@@ -99,13 +104,13 @@ class CheckerModule(metaclass=CheckRegistry):
         self.desc = config.get(CHECK_DESC_KEY)
         self.disable = config.get(CHECK_DISABLE)
 
-    def log_info(self, msg):
+    def log_info(self, msg: str) -> None:
         """Output an informational message."""
         self.output.write(msg)
         self.output.write("\n")
         self.log.debug(msg)
 
-    def log_ok(self, msg):
+    def log_ok(self, msg: str) -> None:
         """
         Log findings that pass the check.  By default these messages are
         surpressed unless self.log_passing is True.
@@ -114,13 +119,13 @@ class CheckerModule(metaclass=CheckRegistry):
             self.output.write("P   * {}\n".format(msg))
         self.log.debug("P   * {}".format(msg))
 
-    def log_fail(self, msg):
+    def log_fail(self, msg: str) -> None:
         """Log findings that fail the check."""
         self.output.write("{}   * {}\n".format("F" if self.log_passing else " ", msg))
         self.log.debug("F   * {}".format(msg))
 
     @abstractmethod
-    def run(self):
+    def run(self) -> List:
         """
         Run the configured check on the policy.
 

@@ -16,10 +16,10 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from typing import Callable, Union
 
-from ..exception import InvalidCheckValue, InvalidClass, InvalidPermission, InvalidType
+from ..exception import InvalidCheckValue
 from ..descriptors import CriteriaDescriptor, CriteriaPermissionSetDescriptor
-from ..util import validate_perms_any
 
 
 class ConfigDescriptor(CriteriaDescriptor):
@@ -36,7 +36,7 @@ class ConfigDescriptor(CriteriaDescriptor):
     policy          The instance of SELinuxPolicy
     """
 
-    def __init__(self, lookup_function):
+    def __init__(self, lookup_function: Union[Callable, str]) -> None:
         super().__init__(lookup_function=lookup_function)
 
     def __set__(self, obj, value):
@@ -73,7 +73,9 @@ class ConfigSetDescriptor(CriteriaDescriptor):
     policy          The instance of SELinuxPolicy
     """
 
-    def __init__(self, lookup_function, strict=True, expand=False):
+    def __init__(self, lookup_function: Union[Callable, str], strict: bool = True,
+                 expand: bool = False) -> None:
+
         super().__init__(lookup_function=lookup_function, default_value=frozenset())
         self.strict = strict
         self.expand = expand
@@ -120,7 +122,7 @@ class ConfigPermissionSetDescriptor(CriteriaPermissionSetDescriptor):
                     permissions.  See validate_perms_any()
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(default_value=frozenset())
 
     def __set__(self, obj, value):

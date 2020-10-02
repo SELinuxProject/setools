@@ -17,18 +17,17 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-import os
 import sys
 import configparser
 import logging
 from datetime import datetime, timezone
+from typing import List
 
 from ..exception import InvalidCheckerConfig, InvalidCheckerModule
+from ..policyrep import SELinuxPolicy
 
-from .assertte import AssertTE
-from .emptyattr import EmptyTypeAttr
-from .globalkeys import CHECK_TYPE_KEY, CHECK_DISABLE, CHECKER_REGISTRY
-from .roexec import ReadOnlyExecutables
+from .checkermodule import CHECKER_REGISTRY, CheckerModule
+from .globalkeys import CHECK_TYPE_KEY
 
 
 SECTION_SEPARATOR = "---------------------------------------------------------\n\n"
@@ -38,12 +37,12 @@ class PolicyChecker:
 
     """Configuration file-driven automated policy analysis checks."""
 
-    def __init__(self, policy, configpath):
+    def __init__(self, policy: SELinuxPolicy, configpath: str) -> None:
         assert CHECKER_REGISTRY, "No checks are loaded, this is a bug."
 
         self.log = logging.getLogger(__name__)
         self.policy = policy
-        self.checks = []
+        self.checks: List[CheckerModule] = []
         self.config = configpath
 
     @property
@@ -51,7 +50,7 @@ class PolicyChecker:
         return self._configpath
 
     @config.setter
-    def config(self, configpath):
+    def config(self, configpath: str):
         self.log.info("Opening policy checker config {}.".format(configpath))
         try:
             with open(configpath, "r") as fd:
@@ -92,7 +91,7 @@ class PolicyChecker:
         self.checks = checks
         self._config = config
 
-    def run(self, output=sys.stdout):
+    def run(self, output=sys.stdout) -> int:
         """Run all configured checks and print report to the file-like output."""
         failures = 0
 
