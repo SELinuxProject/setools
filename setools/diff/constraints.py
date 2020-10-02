@@ -17,13 +17,12 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from collections import defaultdict
 
 from ..policyrep import ConstraintRuletype
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 from .objclass import class_wrapper_factory
-from .types import type_wrapper_factory
 
 
 class ConstraintsDifference(Difference):
@@ -56,17 +55,8 @@ class ConstraintsDifference(Difference):
     removed_mlsvalidatetrans = DiffResultDescriptor("diff_mlsvalidatetrans")
 
     # Lists of rules for each policy
-    _left_constrains = None
-    _right_constrains = None
-
-    _left_mlsconstrains = None
-    _right_mlsconstrains = None
-
-    _left_validatetrans = None
-    _right_validatetrans = None
-
-    _left_mlsvalidatetrans = None
-    _right_mlsvalidatetrans = None
+    _left_constraints = None
+    _right_constraints = None
 
     def diff_constrains(self):
         """Generate the difference in constraint rules between the policies."""
@@ -74,12 +64,12 @@ class ConstraintsDifference(Difference):
         self.log.info("Generating constraint differences from {0.left_policy} to {0.right_policy}".
                       format(self))
 
-        if self._left_constrains is None or self._right_constrains is None:
+        if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
 
         self.added_constrains, self.removed_constrains, _ = self._set_diff(
-            (ConstraintWrapper(c) for c in self._left_constrains),
-            (ConstraintWrapper(c) for c in self._right_constrains))
+            (ConstraintWrapper(c) for c in self._left_constraints[ConstraintRuletype.constrain]),
+            (ConstraintWrapper(c) for c in self._right_constraints[ConstraintRuletype.constrain]))
 
     def diff_mlsconstrains(self):
         """Generate the difference in MLS constraint rules between the policies."""
@@ -88,12 +78,14 @@ class ConstraintsDifference(Difference):
             "Generating MLS constraint differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if self._left_mlsconstrains is None or self._right_mlsconstrains is None:
+        if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
 
         self.added_mlsconstrains, self.removed_mlsconstrains, _ = self._set_diff(
-            (ConstraintWrapper(c) for c in self._left_mlsconstrains),
-            (ConstraintWrapper(c) for c in self._right_mlsconstrains))
+            (ConstraintWrapper(c) for c in self._left_constraints[
+                ConstraintRuletype.mlsconstrain]),
+            (ConstraintWrapper(c) for c in self._right_constraints[
+                ConstraintRuletype.mlsconstrain]))
 
     def diff_validatetrans(self):
         """Generate the difference in validatetrans rules between the policies."""
@@ -102,12 +94,14 @@ class ConstraintsDifference(Difference):
             "Generating validatetrans differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if self._left_validatetrans is None or self._right_validatetrans is None:
+        if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
 
         self.added_validatetrans, self.removed_validatetrans, _ = self._set_diff(
-            (ConstraintWrapper(c) for c in self._left_validatetrans),
-            (ConstraintWrapper(c) for c in self._right_validatetrans))
+            (ConstraintWrapper(c) for c in self._left_constraints[
+                ConstraintRuletype.validatetrans]),
+            (ConstraintWrapper(c) for c in self._right_constraints[
+                ConstraintRuletype.validatetrans]))
 
     def diff_mlsvalidatetrans(self):
         """Generate the difference in MLS validatetrans rules between the policies."""
@@ -116,51 +110,37 @@ class ConstraintsDifference(Difference):
             "Generating mlsvalidatetrans differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if self._left_mlsvalidatetrans is None or self._right_mlsvalidatetrans is None:
+        if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
 
         self.added_mlsvalidatetrans, self.removed_mlsvalidatetrans, _ = self._set_diff(
-            (ConstraintWrapper(c) for c in self._left_mlsvalidatetrans),
-            (ConstraintWrapper(c) for c in self._right_mlsvalidatetrans))
+            (ConstraintWrapper(c) for c in self._left_constraints[
+                ConstraintRuletype.mlsvalidatetrans]),
+            (ConstraintWrapper(c) for c in self._right_constraints[
+                ConstraintRuletype.mlsvalidatetrans]))
 
     #
     # Internal functions
     #
     def _create_constrain_lists(self):
         """Create rule lists for both policies."""
-        self._left_constrains = []
-        self._left_mlsconstrains = []
-        self._left_validatetrans = []
-        self._left_mlsvalidatetrans = []
+        self._left_constraints = defaultdict(list)
+        self.log.debug("Building constraint lists from {0.left_policy}".format(self))
         for rule in self.left_policy.constraints():
-            if rule.ruletype == ConstraintRuletype.constrain:
-                self._left_constrains.append(rule)
-            elif rule.ruletype == ConstraintRuletype.mlsconstrain:
-                self._left_mlsconstrains.append(rule)
-            elif rule.ruletype == ConstraintRuletype.validatetrans:
-                self._left_validatetrans.append(rule)
-            elif rule.ruletype == ConstraintRuletype.mlsvalidatetrans:
-                self._left_mlsvalidatetrans.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
+            self._left_constraints[rule.ruletype].append(rule)
 
-        self._right_constrains = []
-        self._right_mlsconstrains = []
-        self._right_validatetrans = []
-        self._right_mlsvalidatetrans = []
+        for ruletype, rules in self._left_constraints.items():
+            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+
+        self._right_constraints = defaultdict(list)
+        self.log.debug("Building constraint lists from {0.right_policy}".format(self))
         for rule in self.right_policy.constraints():
-            if rule.ruletype == ConstraintRuletype.constrain:
-                self._right_constrains.append(rule)
-            elif rule.ruletype == ConstraintRuletype.mlsconstrain:
-                self._right_mlsconstrains.append(rule)
-            elif rule.ruletype == ConstraintRuletype.validatetrans:
-                self._right_validatetrans.append(rule)
-            elif rule.ruletype == ConstraintRuletype.mlsvalidatetrans:
-                self._right_mlsvalidatetrans.append(rule)
-            else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
+            self._right_constraints[rule.ruletype].append(rule)
+
+        for ruletype, rules in self._right_constraints.items():
+            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+
+        self.log.debug("Completed building constraint rule lists.")
 
     def _reset_diff(self):
         """Reset diff results on policy changes."""
@@ -175,14 +155,8 @@ class ConstraintsDifference(Difference):
         self.removed_mlsvalidatetrans = None
 
         # Sets of rules for each policy
-        self._left_constrains = None
-        self._left_mlsconstrains = None
-        self._left_validatetrans = None
-        self._left_mlsvalidatetrans = None
-        self._right_constrains = None
-        self._right_mlsconstrains = None
-        self._right_validatetrans = None
-        self._right_mlsvalidatetrans = None
+        self._left_constraints = None
+        self._right_constraints = None
 
 
 class ConstraintWrapper(Wrapper):
