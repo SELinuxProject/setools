@@ -25,7 +25,7 @@ import signal
 import setools
 
 
-def print_transition(trans):
+def print_transition(trans: setools.DomainTransition) -> None:
     if trans.transition:
         print("Domain transition rule(s):")
         for t in trans.transition:
