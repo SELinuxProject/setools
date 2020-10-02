@@ -23,6 +23,8 @@ import argparse
 import sys
 import logging
 import signal
+import ipaddress
+from typing import Callable, List, Tuple
 
 
 def expand_attr(attr):
@@ -120,78 +122,79 @@ else:
 
 try:
     p = setools.SELinuxPolicy(args.policy)
-    components = []
+    components: List[Tuple[str, setools.PolicyQuery, Callable]] = []
 
     if args.boolquery or args.all:
-        q = setools.BoolQuery(p)
+        bq = setools.BoolQuery(p)
         if isinstance(args.boolquery, str):
             if args.policy:
-                q.name = args.boolquery
+                bq.name = args.boolquery
             else:
                 # try to find substitutions for old boolean names
-                q.name = setools.policyrep.lookup_boolean_name_sub(args.boolquery)
+                bq.name = setools.policyrep.lookup_boolean_name_sub(args.boolquery)
 
-        components.append(("Booleans", q, lambda x: x.statement()))
+        components.append(("Booleans", bq, lambda x: x.statement()))
 
     if args.mlscatsquery or args.all:
-        q = setools.CategoryQuery(p, alias_deref=True)
+        mcq = setools.CategoryQuery(p, alias_deref=True)
         if isinstance(args.mlscatsquery, str):
-            q.name = args.mlscatsquery
+            mcq.name = args.mlscatsquery
 
-        components.append(("Categories", q, lambda x: x.statement()))
+        components.append(("Categories", mcq, lambda x: x.statement()))
 
     if args.classquery or args.all:
-        q = setools.ObjClassQuery(p)
+        ocq = setools.ObjClassQuery(p)
         if isinstance(args.classquery, str):
-            q.name = args.classquery
+            ocq.name = args.classquery
 
-        components.append(("Classes", q, lambda x: x.statement()))
+        components.append(("Classes", ocq, lambda x: x.statement()))
 
     if args.commonquery or args.all:
-        q = setools.CommonQuery(p)
+        cq = setools.CommonQuery(p)
         if isinstance(args.commonquery, str):
-            q.name = args.commonquery
+            cq.name = args.commonquery
 
-        components.append(("Commons", q, lambda x: x.statement()))
+        components.append(("Commons", cq, lambda x: x.statement()))
 
     if args.constraintquery or args.all:
-        q = setools.ConstraintQuery(p, ruletype=[setools.ConstraintRuletype.constrain,
-                                                 setools.ConstraintRuletype.mlsconstrain])
+        coq = setools.ConstraintQuery(
+            p, ruletype=[setools.ConstraintRuletype.constrain,
+                         setools.ConstraintRuletype.mlsconstrain])
         if isinstance(args.constraintquery, str):
-            q.tclass = [args.constraintquery]
+            coq.tclass = [args.constraintquery]
 
-        components.append(("Constraints", q, lambda x: x.statement()))
+        components.append(("Constraints", coq, lambda x: x.statement()))
 
     if args.defaultquery or args.all:
-        q = setools.DefaultQuery(p)
+        dq: setools.DefaultQuery = setools.DefaultQuery(p)
         if isinstance(args.defaultquery, str):
-            q.tclass = [args.defaultquery]
+            dq.tclass = [args.defaultquery]
 
-        components.append(("Default rules", q, lambda x: x.statement()))
+        components.append(("Default rules", dq, lambda x: x.statement()))
 
     if args.fsusequery or args.all:
-        q = setools.FSUseQuery(p)
+        fq: setools.FSUseQuery = setools.FSUseQuery(p)
         if isinstance(args.fsusequery, str):
-            q.fs = args.fsusequery
+            fq.fs = args.fsusequery
 
-        components.append(("Fs_use", q, lambda x: x.statement()))
+        components.append(("Fs_use", fq, lambda x: x.statement()))
 
     if args.genfsconquery or args.all:
-        q = setools.GenfsconQuery(p)
+        gq: setools.GenfsconQuery = setools.GenfsconQuery(p)
         if isinstance(args.genfsconquery, str):
-            q.fs = args.genfsconquery
+            gq.fs = args.genfsconquery
 
-        components.append(("Genfscon", q, lambda x: x.statement()))
+        components.append(("Genfscon", gq, lambda x: x.statement()))
 
     if args.ibendportconquery or args.all:
-        q = setools.IbendportconQuery(p)
+        ibepq: setools.IbendportconQuery = setools.IbendportconQuery(p)
         if isinstance(args.ibendportconquery, str):
-            q.name = args.ibendportconquery
+            ibepq.name = args.ibendportconquery
 
-        components.append(("Ibendportcon", q, lambda x: x.statement()))
+        components.append(("Ibendportcon", ibepq, lambda x: x.statement()))
 
     if args.ibpkeyconquery or args.all:
-        q = setools.IbpkeyconQuery(p)
+        ibpkq = setools.IbpkeyconQuery(p)
         if isinstance(args.ibpkeyconquery, str):
             try:
                 pkeys = [int(i, 16) for i in args.ibpkeyconquery.split("-")]
@@ -199,51 +202,51 @@ try:
                 parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
 
             if len(pkeys) == 2:
-                q.pkeys = pkeys
+                ibpkq.pkeys = setools.IbpkeyconRange(pkeys)
             elif len(pkeys) == 1:
-                q.pkeys = (pkeys[0], pkeys[0])
+                ibpkq.pkeys = setools.IbpkeyconRange(pkeys[0], pkeys[0])
             else:
                 parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
 
-        components.append(("Ibpkeycon", q, lambda x: x.statement()))
+        components.append(("Ibpkeycon", ibpkq, lambda x: x.statement()))
 
     if args.initialsidquery or args.all:
-        q = setools.InitialSIDQuery(p)
+        isidq = setools.InitialSIDQuery(p)
         if isinstance(args.initialsidquery, str):
-            q.name = args.initialsidquery
+            isidq.name = args.initialsidquery
 
-        components.append(("Initial SIDs", q, lambda x: x.statement()))
+        components.append(("Initial SIDs", isidq, lambda x: x.statement()))
 
     if args.netifconquery or args.all:
-        q = setools.NetifconQuery(p)
+        netifq = setools.NetifconQuery(p)
         if isinstance(args.netifconquery, str):
-            q.name = args.netifconquery
+            netifq.name = args.netifconquery
 
-        components.append(("Netifcon", q, lambda x: x.statement()))
+        components.append(("Netifcon", netifq, lambda x: x.statement()))
 
     if args.nodeconquery or args.all:
-        q = setools.NodeconQuery(p)
+        nodeq = setools.NodeconQuery(p)
         if isinstance(args.nodeconquery, str):
-            q.network = args.nodeconquery
+            nodeq.network = ipaddress.ip_network(args.nodeconquery)
 
-        components.append(("Nodecon", q, lambda x: x.statement()))
+        components.append(("Nodecon", nodeq, lambda x: x.statement()))
 
     if args.permissivequery or args.all:
-        q = setools.TypeQuery(p, permissive=True, match_permissive=True)
+        permq = setools.TypeQuery(p, permissive=True, match_permissive=True)
         if isinstance(args.permissivequery, str):
-            q.name = args.permissivequery
+            permq.name = args.permissivequery
 
-        components.append(("Permissive Types", q, lambda x: x.statement()))
+        components.append(("Permissive Types", permq, lambda x: x.statement()))
 
     if args.polcapquery or args.all:
-        q = setools.PolCapQuery(p)
+        capq = setools.PolCapQuery(p)
         if isinstance(args.polcapquery, str):
-            q.name = args.polcapquery
+            capq.name = args.polcapquery
 
-        components.append(("Polcap", q, lambda x: x.statement()))
+        components.append(("Polcap", capq, lambda x: x.statement()))
 
     if args.portconquery or args.all:
-        q = setools.PortconQuery(p, ports_subset=True)
+        pcq = setools.PortconQuery(p, ports_subset=True)
         if isinstance(args.portconquery, str):
             try:
                 ports = [int(i) for i in args.portconquery.split("-")]
@@ -251,84 +254,86 @@ try:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
             if len(ports) == 2:
-                q.ports = ports
+                pcq.ports = setools.PortconRange(ports)
             elif len(ports) == 1:
-                q.ports = (ports[0], ports[0])
+                pcq.ports = setools.PortconRange(ports[0], ports[0])
             else:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
-        components.append(("Portcon", q, lambda x: x.statement()))
+        components.append(("Portcon", pcq, lambda x: x.statement()))
 
     if args.rolequery or args.all:
-        q = setools.RoleQuery(p)
+        rq = setools.RoleQuery(p)
         if isinstance(args.rolequery, str):
-            q.name = args.rolequery
+            rq.name = args.rolequery
 
-        components.append(("Roles", q, lambda x: x.statement()))
+        components.append(("Roles", rq, lambda x: x.statement()))
 
     if args.mlssensquery or args.all:
-        q = setools.SensitivityQuery(p, alias_deref=True)
+        msq = setools.SensitivityQuery(p, alias_deref=True)
         if isinstance(args.mlssensquery, str):
-            q.name = args.mlssensquery
+            msq.name = args.mlssensquery
 
-        components.append(("Sensitivities", q, lambda x: x.statement()))
+        components.append(("Sensitivities", msq, lambda x: x.statement()))
 
     if args.typeboundsquery or args.all:
-        q = setools.BoundsQuery(p, ruletype=[setools.BoundsRuletype.typebounds])
+        tbq = setools.BoundsQuery(
+            p, ruletype=[setools.BoundsRuletype.typebounds])
         if isinstance(args.typeboundsquery, str):
-            q.child = args.typeboundsquery
+            tbq.child = args.typeboundsquery
 
-        components.append(("Typebounds", q, lambda x: x.statement()))
+        components.append(("Typebounds", tbq, lambda x: x.statement()))
 
     if args.typequery or args.all:
-        q = setools.TypeQuery(p, alias_deref=True)
+        tq = setools.TypeQuery(p, alias_deref=True)
         if isinstance(args.typequery, str):
-            q.name = args.typequery
+            tq.name = args.typequery
 
-        components.append(("Types", q, lambda x: x.statement()))
+        components.append(("Types", tq, lambda x: x.statement()))
 
     if args.typeattrquery or args.all:
-        q = setools.TypeAttributeQuery(p)
+        taq = setools.TypeAttributeQuery(p)
         if isinstance(args.typeattrquery, str):
-            q.name = args.typeattrquery
+            taq.name = args.typeattrquery
 
-        components.append(("Type Attributes", q, expand_attr))
+        components.append(("Type Attributes", taq, expand_attr))
 
     if args.userquery or args.all:
-        q = setools.UserQuery(p)
+        uq = setools.UserQuery(p)
         if isinstance(args.userquery, str):
-            q.name = args.userquery
+            uq.name = args.userquery
 
-        components.append(("Users", q, lambda x: x.statement()))
+        components.append(("Users", uq, lambda x: x.statement()))
 
     if args.validatetransquery or args.all:
-        q = setools.ConstraintQuery(p, ruletype=[setools.ConstraintRuletype.validatetrans,
-                                                 setools.ConstraintRuletype.mlsvalidatetrans])
+        vtq = setools.ConstraintQuery(
+            p, ruletype=[setools.ConstraintRuletype.validatetrans,
+                         setools.ConstraintRuletype.mlsvalidatetrans])
         if isinstance(args.validatetransquery, str):
-            q.tclass = [args.validatetransquery]
+            vtq.tclass = [args.validatetransquery]
 
-        components.append(("Validatetrans", q, lambda x: x.statement()))
+        components.append(("Validatetrans", vtq, lambda x: x.statement()))
 
     if p.target_platform == "xen":
         if args.ioportconquery or args.all:
-            q = setools.IoportconQuery(p)
-            components.append(("Ioportcon", q, lambda x: x.statement()))
+            xiopq = setools.IoportconQuery(p)
+            components.append(("Ioportcon", xiopq, lambda x: x.statement()))
 
         if args.iomemconquery or args.all:
-            q = setools.IomemconQuery(p)
-            components.append(("Iomemcon", q, lambda x: x.statement()))
+            xiomq = setools.IomemconQuery(p)
+            components.append(("Iomemcon", xiomq, lambda x: x.statement()))
 
         if args.pcideviceconquery or args.all:
-            q = setools.PcideviceconQuery(p)
-            components.append(("Pcidevicecon", q, lambda x: x.statement()))
+            pcidq = setools.PcideviceconQuery(p)
+            components.append(("Pcidevicecon", pcidq, lambda x: x.statement()))
 
         if args.pirqconquery or args.all:
-            q = setools.PirqconQuery(p)
-            components.append(("Pirqcon", q, lambda x: x.statement()))
+            pirqq = setools.PirqconQuery(p)
+            components.append(("Pirqcon", pirqq, lambda x: x.statement()))
 
         if args.devicetreeconquery or args.all:
-            q = setools.DevicetreeconQuery(p)
-            components.append(("Devicetreecon", q, lambda x: x.statement()))
+            dtq = setools.DevicetreeconQuery(p)
+            components.append(("Devicetreecon", dtq, lambda x: x.statement()))
 
     if (not components or args.all) and not args.flat:
         mls = "enabled" if p.mls else "disabled"
