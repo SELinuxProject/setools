@@ -120,6 +120,8 @@ opts.add_argument("-rd", action="store_true", dest="default_regex",
                   help="Use regular expression matching for the default type/role.")
 opts.add_argument("-rb", action="store_true", dest="boolean_regex",
                   help="Use regular expression matching for Booleans.")
+opts.add_argument("--self", action="store_true", dest="target_self",
+                  help="Match rules where the source and target types are identical.")
 
 args = parser.parse_args()
 
@@ -131,6 +133,9 @@ if args.A:
 
 if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
     parser.error("At least one rule type must be specified.")
+
+if args.target and args.target_self:
+    parser.error("Only one of -t and --self may be specified")
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
@@ -152,6 +157,7 @@ try:
                                 target=args.target,
                                 target_indirect=args.target_indirect,
                                 target_regex=args.target_regex,
+                                target_self=args.target_self,
                                 tclass_regex=args.tclass_regex,
                                 perms_equal=args.perms_equal,
                                 xperms_equal=args.xperms_equal,

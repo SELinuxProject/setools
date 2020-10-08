@@ -431,7 +431,7 @@ cdef class SELinuxPolicy:
             if t == name:
                 return t
 
-        raise InvalidType("{0} is not a valid type attribute".format(name))
+        raise InvalidType("{0} is not a valid type/attribute".format(name))
 
     def lookup_typeattr(self, name):
         """Look up a type attribute by name."""

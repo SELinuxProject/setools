@@ -52,6 +52,8 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                       be used on the target type/attribute.
                       Obeys target_indirect option.
                       Default is false.
+    target_self       If true, target type much match source type
+                      Default is false.
     tclass            The object class(es) to match.
     tclass_regex      If true, use a regular expression for
                       matching the rule's object class.
@@ -89,6 +91,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
     target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
     target_regex = False
     target_indirect = True
+    target_self = False
     default = CriteriaDescriptor("default_regex", "lookup_type_or_attr")
     default_regex = False
     boolean = CriteriaSetDescriptor("boolean_regex", "lookup_boolean")
@@ -141,6 +144,13 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
         self.log.debug("Boolean: {0.boolean!r}, eq: {0.boolean_equal}, "
                        "regex: {0.boolean_regex}".format(self))
 
+        if self.target and self.target_self:
+            raise ValueError("target and target_self both specified")
+
+        if self.target_self and (self.target_regex or (self.target_indirect is False)):
+            self.log.warning("Ignoring specification of target regex and "
+                             "target indirect when used with --self")
+
         for rule in self.policy.terules():
             #
             # Matching on rule type
@@ -167,6 +177,9 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                     self.target,
                     self.target_indirect,
                     self.target_regex):
+                continue
+
+            if self.target_self and not rule.target == rule.source:
                 continue
 
             #
