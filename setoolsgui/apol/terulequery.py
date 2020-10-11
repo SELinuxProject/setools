@@ -22,7 +22,7 @@ import logging
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
 from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
-from setools import TERuleQuery
+from setools import TERuleQuery, xperm_str_to_tuple_ranges
 
 from ..logtosignal import LogHandlerToSignal
 from ..models import PermListModel, SEToolsListModel, invert_list_selection
@@ -267,22 +267,11 @@ class TERuleQueryTab(AnalysisTab):
                                   "Comma-separated permissions or ranges of permissions.")
 
     def set_xperm(self):
-        xperms = []
         try:
             text = self.xperms.text()
 
             if text:
-                for item in self.xperms.text().split(","):
-                    rng = item.split("-")
-                    if len(rng) == 2:
-                        xperms.append((int(rng[0], base=16), int(rng[1], base=16)))
-                    elif len(rng) == 1:
-                        xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
-                    else:
-                        raise ValueError("Enter an extended permission or extended permission "
-                                         "range, e.g. 0x5411 or 0x8800-0x88ff.")
-
-                self.query.xperms = xperms
+                self.query.xperms = xperm_str_to_tuple_ranges(text)
             else:
                 self.query.xperms = None
 

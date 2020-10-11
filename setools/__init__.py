@@ -48,6 +48,9 @@ from . import exception
 # Base class for policy queries for type checking purposes
 from .query import PolicyQuery
 
+# utility functions
+from .util import xperm_str_to_tuple_ranges
+
 # Component Queries
 from .boolquery import BoolQuery
 from .categoryquery import CategoryQuery

@@ -18,7 +18,7 @@
 #
 
 from contextlib import suppress
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional, Tuple
 
 from .exception import InvalidPermission, NoCommon
 from .policyrep import Level, ObjClass, SELinuxPolicy
@@ -223,3 +223,32 @@ def validate_perms_any(perms: Iterable[str], tclass: Optional[Iterable[ObjClass]
             raise InvalidPermission(
                 "Permission(s) do not exist any class: {}"
                 .format(", ".join(invalid)))
+
+
+def xperm_str_to_tuple_ranges(perms: str, separator: str = ",") -> List[Tuple[int, int]]:
+    """
+    Create a extended permission list of ranges from a string representation of ranges.
+    This does not do any checking for out-of-range values.
+
+    Parameters:
+    perms       A string representation of integer extended permissions, such as
+                "0x08,0x30-0x40,0x55,0x60-0x65"
+
+    Keyword Parameters:
+    separator   The separator between permissions/permission ranges.
+                Default is ","
+
+    Return:     List[Tuple[int, int]] equivalent of the permissions.
+    """
+
+    xperms: List[Tuple[int, int]] = []
+    for item in perms.split(separator):
+        rng = item.split("-")
+        if len(rng) == 2:
+            xperms.append((int(rng[0], base=16), int(rng[1], base=16)))
+        elif len(rng) == 1:
+            xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
+        else:
+            raise ValueError("Unable to parse \"{}\" for xperms.".format(item))
+
+    return xperms

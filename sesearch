@@ -172,19 +172,8 @@ try:
             terq.perms = args.perms.split(",")
 
         if args.xperms:
-            xperms = []
-            for item in args.xperms.split(","):
-                rng = item.split("-")
-                if len(rng) == 2:
-                    xperms.append((int(rng[0], base=16), int(rng[1], base=16)))
-                elif len(rng) == 1:
-                    xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
-                else:
-                    parser.error("Enter an extended permission or extended permission range, e.g. "
-                                 "0x5411 or 0x8800-0x88ff.")
-
             # https://github.com/python/mypy/issues/220
-            terq.xperms = setools.xperm_str_to_tuple_ranges(xperms)  # type: ignore
+            terq.xperms = setools.xperm_str_to_tuple_ranges(args.xperms)  # type: ignore
 
         if args.boolean:
             if args.boolean_regex:
