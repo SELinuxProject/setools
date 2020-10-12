@@ -183,6 +183,37 @@ class TERuleQueryTest(mixins.ValidateRule, unittest.TestCase):
         self.validate_rule(r[1], TRT.dontaudit, "test14", "test14", "infoflow7",
                            set(["super_unmapped"]))
 
+    def test_015_self_type(self):
+        """TE Rule query for self with a source type"""
+        q = TERuleQuery(self.p, source="test15b", target_self=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 1)
+        self.validate_rule(r[0], TRT.allow, "test15b", "test15b", "infoflow", set(["hi_w"]))
+
+    def test_015_self_type_negative(self):
+        """TE Rule query for self with a source type, negative test"""
+        q = TERuleQuery(self.p, source="test15c", target_self=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 0)
+
+    def test_015_self_attr(self):
+        """TE Rule query for self with a source attribute"""
+
+        q = TERuleQuery(self.p, source="test15a", target_self=True)
+
+        r = sorted(q.results())
+        self.assertEqual(len(r), 2)
+        self.validate_rule(r[0], TRT.allow, "test15d", "test15d", "infoflow", set(["hi_w"]))
+        self.validate_rule(r[1], TRT.allow, "test15e", "test15e", "infoflow", set(["hi_w"]))
+
+    def test_015_self_exceptions(self):
+        """TE Rule query for self exception handling"""
+        q = TERuleQuery(self.p, source="test15b", target="test15b", target_self=True)
+        with self.assertRaises(ValueError):
+            r = sorted(q.results())
+
     def test_052_perms_subset1(self):
         """TE rule query with permission subset."""
         q = TERuleQuery(self.p, perms=["super_none", "super_both"], perms_subset=True)
