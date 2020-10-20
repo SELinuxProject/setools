@@ -18,6 +18,7 @@
 #
 import logging
 from contextlib import suppress
+from typing import List
 
 from PyQt5.QtCore import QAbstractListModel, QItemSelectionModel, QAbstractTableModel, \
     QModelIndex, QStringListModel, Qt
@@ -138,7 +139,7 @@ class SEToolsTableModel(QAbstractTableModel):
 
     """Base class for SETools table models."""
 
-    headers = []
+    headers: List[str] = []
 
     def __init__(self, parent):
         super(SEToolsTableModel, self).__init__(parent)

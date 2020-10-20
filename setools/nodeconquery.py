@@ -21,10 +21,13 @@ import ipaddress
 
 import logging
 from socket import AF_INET, AF_INET6
+from typing import Iterable, Optional, Union
 
 from .mixins import MatchContext
-from .policyrep import NodeconIPVersion
+from .policyrep import Nodecon, NodeconIPVersion
 from .query import PolicyQuery
+
+AnyIPNetwork = Union[ipaddress.IPv4Network, ipaddress.IPv6Network]
 
 
 class NodeconQuery(MatchContext, PolicyQuery):
@@ -63,37 +66,37 @@ class NodeconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _network = None
-    network_overlap = False
-    _ip_version = None
+    _network: Optional[AnyIPNetwork] = None
+    network_overlap: bool = False
+    _ip_version: Optional[NodeconIPVersion] = None
 
     @property
-    def ip_version(self):
+    def ip_version(self) -> Optional[NodeconIPVersion]:
         return self._ip_version
 
     @ip_version.setter
-    def ip_version(self, value):
+    def ip_version(self, value: Optional[Union[str, NodeconIPVersion]]) -> None:
         if value:
             self._ip_version = NodeconIPVersion.lookup(value)
         else:
             self._ip_version = None
 
     @property
-    def network(self):
+    def network(self) -> Optional[AnyIPNetwork]:
         return self._network
 
     @network.setter
-    def network(self, value):
+    def network(self, value: Optional[Union[str, AnyIPNetwork]]) -> None:
         if value:
             self._network = ipaddress.ip_network(value)
         else:
             self._network = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(NodeconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Nodecon]:
         """Generator which yields all matching nodecons."""
         self.log.info("Generating nodecon results from {0.policy}".format(self))
         self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
@@ -104,7 +107,7 @@ class NodeconQuery(MatchContext, PolicyQuery):
 
             if self.network:
                 if self.network_overlap:
-                    if not self.network.overlaps(nodecon.network):
+                    if not self.network.overlaps(nodecon.network):  # type: ignore
                         continue
                 else:
                     if not nodecon.network == self.network:

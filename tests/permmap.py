@@ -58,44 +58,44 @@ class PermissionMapTest(unittest.TestCase):
         permmap = PermissionMap("tests/perm_map")
 
         # validate permission map contents
-        self.assertEqual(5, len(permmap.permmap))
+        self.assertEqual(5, len(permmap._permmap))
 
         # class infoflow
-        self.assertIn("infoflow", permmap.permmap)
-        self.assertEqual(6, len(permmap.permmap['infoflow']))
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'low_w', 'w', 1, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'med_w', 'w', 5, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'hi_w', 'w', 10, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'low_r', 'r', 1, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'med_r', 'r', 5, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'hi_r', 'r', 10, True)
+        self.assertIn("infoflow", permmap._permmap)
+        self.assertEqual(6, len(permmap._permmap['infoflow']))
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'low_w', 'w', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'med_w', 'w', 5, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'hi_w', 'w', 10, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'low_r', 'r', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'med_r', 'r', 5, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'hi_r', 'r', 10, True)
 
         # class infoflow2
-        self.assertIn("infoflow2", permmap.permmap)
-        self.assertEqual(7, len(permmap.permmap['infoflow2']))
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'w', 1, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'med_w', 'w', 5, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'hi_w', 'w', 10, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_r', 'r', 1, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'med_r', 'r', 5, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'hi_r', 'r', 10, True)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'super', 'b', 10, True)
+        self.assertIn("infoflow2", permmap._permmap)
+        self.assertEqual(7, len(permmap._permmap['infoflow2']))
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'low_w', 'w', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'med_w', 'w', 5, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'hi_w', 'w', 10, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'low_r', 'r', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'med_r', 'r', 5, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'hi_r', 'r', 10, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'super', 'b', 10, True)
 
         # class infoflow3
-        self.assertIn("infoflow3", permmap.permmap)
-        self.assertEqual(1, len(permmap.permmap['infoflow3']))
-        self.validate_permmap_entry(permmap.permmap, 'infoflow3', 'null', 'n', 1, True)
+        self.assertIn("infoflow3", permmap._permmap)
+        self.assertEqual(1, len(permmap._permmap['infoflow3']))
+        self.validate_permmap_entry(permmap._permmap, 'infoflow3', 'null', 'n', 1, True)
 
         # class file
-        self.assertIn("file", permmap.permmap)
-        self.assertEqual(2, len(permmap.permmap['file']))
-        self.validate_permmap_entry(permmap.permmap, 'file', 'execute', 'r', 10, True)
-        self.validate_permmap_entry(permmap.permmap, 'file', 'entrypoint', 'r', 10, True)
+        self.assertIn("file", permmap._permmap)
+        self.assertEqual(2, len(permmap._permmap['file']))
+        self.validate_permmap_entry(permmap._permmap, 'file', 'execute', 'r', 10, True)
+        self.validate_permmap_entry(permmap._permmap, 'file', 'entrypoint', 'r', 10, True)
 
         # class process
-        self.assertIn("process", permmap.permmap)
-        self.assertEqual(1, len(permmap.permmap['process']))
-        self.validate_permmap_entry(permmap.permmap, 'process', 'transition', 'w', 10, True)
+        self.assertIn("process", permmap._permmap)
+        self.assertEqual(1, len(permmap._permmap['process']))
+        self.validate_permmap_entry(permmap._permmap, 'process', 'transition', 'w', 10, True)
 
     def test_002_load_invalid(self):
         """PermMap load completely wrong file type"""
@@ -162,9 +162,9 @@ class PermissionMapTest(unittest.TestCase):
     def test_100_set_weight(self):
         """PermMap set weight"""
         permmap = PermissionMap("tests/perm_map")
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'w', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'low_w', 'w', 1, True)
         permmap.set_weight("infoflow2", "low_w", 10)
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'w', 10, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'low_w', 'w', 10, True)
 
     def test_101_set_weight_low(self):
         """PermMap set weight low"""
@@ -199,9 +199,9 @@ class PermissionMapTest(unittest.TestCase):
     def test_110_set_direction(self):
         """PermMap set direction"""
         permmap = PermissionMap("tests/perm_map")
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'w', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'low_w', 'w', 1, True)
         permmap.set_direction("infoflow2", "low_w", "r")
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'low_w', 'r', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'low_w', 'r', 1, True)
 
     def test_111_set_direction_invalid(self):
         """PermMap set invalid direction"""
@@ -225,7 +225,7 @@ class PermissionMapTest(unittest.TestCase):
         """PermMap exclude permission."""
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_permission("infoflow", "med_w")
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'med_w', 'w', 5, False)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'med_w', 'w', 5, False)
 
     def test_121_exclude_perm_unmapped_class(self):
         """PermMap exclude permission unmapped class."""
@@ -243,10 +243,10 @@ class PermissionMapTest(unittest.TestCase):
         """PermMap include permission."""
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_permission("infoflow", "med_w")
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'med_w', 'w', 5, False)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'med_w', 'w', 5, False)
 
         permmap.include_permission("infoflow", "med_w")
-        self.validate_permmap_entry(permmap.permmap, 'infoflow', 'med_w', 'w', 5, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow', 'med_w', 'w', 5, True)
 
     def test_124_include_perm_unmapped_class(self):
         """PermMap include permission unmapped class."""
@@ -264,8 +264,8 @@ class PermissionMapTest(unittest.TestCase):
         """PermMap exclude class."""
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_class("file")
-        self.validate_permmap_entry(permmap.permmap, 'file', 'execute', 'r', 10, False)
-        self.validate_permmap_entry(permmap.permmap, 'file', 'entrypoint', 'r', 10, False)
+        self.validate_permmap_entry(permmap._permmap, 'file', 'execute', 'r', 10, False)
+        self.validate_permmap_entry(permmap._permmap, 'file', 'entrypoint', 'r', 10, False)
 
     def test_131_exclude_class_unmapped_class(self):
         """PermMap exclude class unmapped class."""
@@ -277,12 +277,12 @@ class PermissionMapTest(unittest.TestCase):
         """PermMap exclude class."""
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_class("file")
-        self.validate_permmap_entry(permmap.permmap, 'file', 'execute', 'r', 10, False)
-        self.validate_permmap_entry(permmap.permmap, 'file', 'entrypoint', 'r', 10, False)
+        self.validate_permmap_entry(permmap._permmap, 'file', 'execute', 'r', 10, False)
+        self.validate_permmap_entry(permmap._permmap, 'file', 'entrypoint', 'r', 10, False)
 
         permmap.include_class("file")
-        self.validate_permmap_entry(permmap.permmap, 'file', 'execute', 'r', 10, True)
-        self.validate_permmap_entry(permmap.permmap, 'file', 'entrypoint', 'r', 10, True)
+        self.validate_permmap_entry(permmap._permmap, 'file', 'execute', 'r', 10, True)
+        self.validate_permmap_entry(permmap._permmap, 'file', 'entrypoint', 'r', 10, True)
 
     def test_133_include_class_unmapped_class(self):
         """PermMap include class unmapped class."""
@@ -398,8 +398,8 @@ class PermissionMapTest(unittest.TestCase):
         permmap = PermissionMap("tests/perm_map")
         permmap.map_policy(self.p)
 
-        self.validate_permmap_entry(permmap.permmap, 'infoflow2', 'new_perm', 'u', 1, True)
+        self.validate_permmap_entry(permmap._permmap, 'infoflow2', 'new_perm', 'u', 1, True)
 
-        self.assertIn("new_class", permmap.permmap)
-        self.assertEqual(1, len(permmap.permmap['new_class']))
-        self.validate_permmap_entry(permmap.permmap, 'new_class', 'new_class_perm', 'u', 1, True)
+        self.assertIn("new_class", permmap._permmap)
+        self.assertEqual(1, len(permmap._permmap['new_class']))
+        self.validate_permmap_entry(permmap._permmap, 'new_class', 'new_class_perm', 'u', 1, True)

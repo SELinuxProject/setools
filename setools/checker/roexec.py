@@ -18,10 +18,12 @@
 #
 
 import logging
-from contextlib import suppress
 from collections import defaultdict
+from typing import Dict, List, Set
 
+from ..policyrep import AnyTERule, Type
 from ..terulequery import TERuleQuery
+
 from .checkermodule import CheckerModule
 from .descriptors import ConfigSetDescriptor
 
@@ -42,7 +44,7 @@ class ReadOnlyExecutables(CheckerModule):
     exempt_file = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
     exempt_exec_domain = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
 
-    def __init__(self, policy, checkname, config):
+    def __init__(self, policy, checkname, config) -> None:
         super().__init__(policy, checkname, config)
         self.log = logging.getLogger(__name__)
 
@@ -50,7 +52,7 @@ class ReadOnlyExecutables(CheckerModule):
         self.exempt_file = config.get(EXEMPT_FILE)
         self.exempt_exec_domain = config.get(EXEMPT_EXEC)
 
-    def _collect_executables(self):
+    def _collect_executables(self) -> Dict[Type, Set[AnyTERule]]:
         self.log.debug("Collecting list of executable file types.")
         self.log.debug("Ignore exec domains: {!r}".format(self.exempt_exec_domain))
         query = TERuleQuery(self.policy,
@@ -74,8 +76,7 @@ class ReadOnlyExecutables(CheckerModule):
 
         return collected
 
-    def run(self):
-
+    def run(self) -> List:
         self.log.info("Checking executables are read-only.")
 
         query = TERuleQuery(self.policy,
@@ -85,7 +86,7 @@ class ReadOnlyExecutables(CheckerModule):
         executables = self._collect_executables()
         failures = defaultdict(set)
 
-        for exec_type, rules in executables.items():
+        for exec_type in executables.keys():
             self.log.debug("Checking if executable type {} is writable.".format(exec_type))
 
             query.target = exec_type

@@ -20,67 +20,91 @@
 
 import itertools
 import logging
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from contextlib import suppress
+from typing import DefaultDict, Iterable, List, NamedTuple, Optional, Union
 
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
 
 from .descriptors import EdgeAttrDict, EdgeAttrList
-from .policyrep import TERuletype
+from .policyrep import AnyTERule, SELinuxPolicy, TERuletype, Type
 
-__all__ = ['DomainTransitionAnalysis']
+__all__ = ['DomainTransitionAnalysis', 'DomainTransition', 'DomainEntrypoint', 'DTAPath']
 
-# Return values for the analysis
-# are in the following tuple formats:
-step_output = namedtuple("step", ["source",
-                                  "target",
-                                  "transition",
-                                  "entrypoints",
-                                  "setexec",
-                                  "dyntransition",
-                                  "setcurrent"])
 
-entrypoint_output = namedtuple("entrypoints", ["name",
-                                               "entrypoint",
-                                               "execute",
-                                               "type_transition"])
+class DomainEntrypoint(NamedTuple):
+
+    """Entrypoint list entry named tuple output format."""
+
+    name: Type
+    entrypoint: List[AnyTERule]
+    execute: List[AnyTERule]
+    type_transition: List[AnyTERule]
+
+
+class DomainTransition(NamedTuple):
+
+    """Transition step output named tuple format."""
+
+    source: Type
+    target: Type
+    transition: List[AnyTERule]
+    entrypoints: List[DomainEntrypoint]
+    setexec: List[AnyTERule]
+    dyntransition: List[AnyTERule]
+    setcurrent: List[AnyTERule]
+
+
+#
+# Typing
+#
+DTAPath = Iterable[DomainTransition]
+RuleHash = DefaultDict[Type, List[AnyTERule]]
 
 
 class DomainTransitionAnalysis:
 
     """Domain transition analysis."""
 
-    def __init__(self, policy, reverse=False, exclude=None):
+    _exclude: List[Type]
+    _reverse: bool
+
+    def __init__(self, policy: SELinuxPolicy, reverse: bool = False,
+                 exclude: Optional[Iterable[Union[Type, str]]] = None) -> None:
         """
         Parameter:
         policy   The policy to analyze.
+
+        Keyword Parameters:
+        reverse  True means reverse the direction of the analysis (find parent domains).
+        exclude  An iterable of types to exclude from the analysis.
         """
         self.log = logging.getLogger(__name__)
 
         self.policy = policy
-        self.exclude = exclude
+        self.exclude = exclude  # type: ignore # https://github.com/python/mypy/issues/220
         self.reverse = reverse
         self.rebuildgraph = True
         self.rebuildsubgraph = True
         self.G = nx.DiGraph()
-        self.subG = None
+        self.subG = self.G.copy()
 
     @property
-    def reverse(self):
+    def reverse(self) -> bool:
         return self._reverse
 
     @reverse.setter
-    def reverse(self, direction):
+    def reverse(self, direction) -> None:
         self._reverse = bool(direction)
         self.rebuildsubgraph = True
 
     @property
-    def exclude(self):
+    def exclude(self) -> List[Type]:
         return self._exclude
 
     @exclude.setter
-    def exclude(self, types):
+    def exclude(self, types: Optional[Iterable[Union[Type, str]]]) -> None:
         if types:
             self._exclude = [self.policy.lookup_type(t) for t in types]
         else:
@@ -88,7 +112,8 @@ class DomainTransitionAnalysis:
 
         self.rebuildsubgraph = True
 
-    def shortest_path(self, source, target):
+    def shortest_path(self, source: Union[Type, str], target: Union[Type, str]) \
+            -> Iterable[DTAPath]:
         """
         Generator which yields one shortest domain transition path
         between the source and target types (there may be more).
@@ -103,8 +128,8 @@ class DomainTransitionAnalysis:
                 source, target, and rules for each
                 domain transition.
         """
-        s = self.policy.lookup_type(source)
-        t = self.policy.lookup_type(target)
+        s: Type = self.policy.lookup_type(source)
+        t: Type = self.policy.lookup_type(target)
 
         if self.rebuildsubgraph:
             self._build_subgraph()
@@ -118,7 +143,8 @@ class DomainTransitionAnalysis:
             # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
             yield self.__generate_steps(nx.shortest_path(self.subG, source=s, target=t))
 
-    def all_paths(self, source, target, maxlen=2):
+    def all_paths(self, source: Union[Type, str], target: Union[Type, str], maxlen: int = 2) \
+            -> Iterable[DTAPath]:
         """
         Generator which yields all domain transition paths between
         the source and target up to the specified maximum path
@@ -138,8 +164,8 @@ class DomainTransitionAnalysis:
         if maxlen < 1:
             raise ValueError("Maximum path length must be positive.")
 
-        s = self.policy.lookup_type(source)
-        t = self.policy.lookup_type(target)
+        s: Type = self.policy.lookup_type(source)
+        t: Type = self.policy.lookup_type(target)
 
         if self.rebuildsubgraph:
             self._build_subgraph()
@@ -154,7 +180,8 @@ class DomainTransitionAnalysis:
             for path in nx.all_simple_paths(self.subG, s, t, maxlen):
                 yield self.__generate_steps(path)
 
-    def all_shortest_paths(self, source, target):
+    def all_shortest_paths(self, source: Union[Type, str], target: Union[Type, str]) \
+            -> Iterable[DTAPath]:
         """
         Generator which yields all shortest domain transition paths
         between the source and target types.
@@ -169,8 +196,8 @@ class DomainTransitionAnalysis:
                  source, target, and rules for each
                  domain transition.
         """
-        s = self.policy.lookup_type(source)
-        t = self.policy.lookup_type(target)
+        s: Type = self.policy.lookup_type(source)
+        t: Type = self.policy.lookup_type(target)
 
         if self.rebuildsubgraph:
             self._build_subgraph()
@@ -185,7 +212,7 @@ class DomainTransitionAnalysis:
             for path in nx.all_shortest_paths(self.subG, s, t):
                 yield self.__generate_steps(path)
 
-    def transitions(self, type_):
+    def transitions(self, type_: Union[Type, str]) -> DTAPath:
         """
         Generator which yields all domain transitions out of a
         specified source type.
@@ -199,7 +226,7 @@ class DomainTransitionAnalysis:
                 source, target, and rules for each
                 domain transition.
         """
-        s = self.policy.lookup_type(type_)
+        s: Type = self.policy.lookup_type(type_)
 
         if self.rebuildsubgraph:
             self._build_subgraph()
@@ -217,14 +244,15 @@ class DomainTransitionAnalysis:
                 else:
                     real_source, real_target = source, target
 
-                yield step_output(real_source, real_target,
-                                  edge.transition,
-                                  self.__generate_entrypoints(edge),
-                                  edge.setexec,
-                                  edge.dyntransition,
-                                  edge.setcurrent)
+                yield DomainTransition(real_source,
+                                       real_target,
+                                       edge.transition,
+                                       self.__generate_entrypoints(edge),
+                                       edge.setexec,
+                                       edge.dyntransition,
+                                       edge.setcurrent)
 
-    def get_stats(self):  # pragma: no cover
+    def get_stats(self) -> str:  # pragma: no cover
         """
         Get the domain transition graph statistics.
 
@@ -239,7 +267,7 @@ class DomainTransitionAnalysis:
     # Internal functions follow
     #
     @staticmethod
-    def __generate_entrypoints(edge):
+    def __generate_entrypoints(edge: 'Edge') -> List[DomainEntrypoint]:
         """
         Creates a list of entrypoint, execute, and
         type_transition rules for each entrypoint.
@@ -254,10 +282,10 @@ class DomainTransitionAnalysis:
         exec     The list of execute rules.
         trans    The list of type_transition rules.
         """
-        return [entrypoint_output(e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e])
+        return [DomainEntrypoint(e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e])
                 for e in edge.entrypoint]
 
-    def __generate_steps(self, path):
+    def __generate_steps(self, path: List[Type]) -> DTAPath:
         """
         Generator which yields the source, target, and associated rules
         for each domain transition.
@@ -278,8 +306,8 @@ class DomainTransitionAnalysis:
         """
 
         for s in range(1, len(path)):
-            source = path[s - 1]
-            target = path[s]
+            source: Type = path[s - 1]
+            target: Type = path[s]
             edge = Edge(self.subG, source, target)
 
             # Yield the actual source and target.
@@ -290,12 +318,12 @@ class DomainTransitionAnalysis:
             else:
                 real_source, real_target = source, target
 
-            yield step_output(real_source, real_target,
-                              edge.transition,
-                              self.__generate_entrypoints(edge),
-                              edge.setexec,
-                              edge.dyntransition,
-                              edge.setcurrent)
+            yield DomainTransition(real_source, real_target,
+                                   edge.transition,
+                                   self.__generate_entrypoints(edge),
+                                   edge.setexec,
+                                   edge.dyntransition,
+                                   edge.setcurrent)
 
     #
     # Graph building functions
@@ -351,34 +379,33 @@ class DomainTransitionAnalysis:
     #   3. if the edge has an invalid dyntrans, clear the related
     #      lists on the edge.
     #
-    def _build_graph(self):
+    def _build_graph(self) -> None:
         self.G.clear()
         self.G.name = "Domain transition graph for {0}.".format(self.policy)
 
         self.log.info("Building domain transition graph from {0}...".format(self.policy))
 
         # hash tables keyed on domain type
-        setexec = defaultdict(list)
-        setcurrent = defaultdict(list)
+        setexec: RuleHash = defaultdict(list)
+        setcurrent: RuleHash = defaultdict(list)
 
         # hash tables keyed on (domain, entrypoint file type)
         # the parameter for defaultdict has to be callable
         # hence the lambda for the nested defaultdict
-        execute = defaultdict(lambda: defaultdict(list))
-        entrypoint = defaultdict(lambda: defaultdict(list))
+        execute: DefaultDict[Type, RuleHash] = defaultdict(lambda: defaultdict(list))
+        entrypoint: DefaultDict[Type, RuleHash] = defaultdict(lambda: defaultdict(list))
 
         # hash table keyed on (domain, entrypoint, target domain)
-        type_trans = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+        type_trans: DefaultDict[Type, DefaultDict[Type, RuleHash]] = \
+            defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         for rule in self.policy.terules():
             if rule.ruletype == TERuletype.allow:
                 if rule.tclass not in ["process", "file"]:
                     continue
 
-                perms = rule.perms
-
                 if rule.tclass == "process":
-                    if "transition" in perms:
+                    if "transition" in rule.perms:
                         for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             # only add edges if they actually
                             # transition to a new type
@@ -386,7 +413,7 @@ class DomainTransitionAnalysis:
                                 edge = Edge(self.G, s, t, create=True)
                                 edge.transition.append(rule)
 
-                    if "dyntransition" in perms:
+                    if "dyntransition" in rule.perms:
                         for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             # only add edges if they actually
                             # transition to a new type
@@ -394,22 +421,22 @@ class DomainTransitionAnalysis:
                                 e = Edge(self.G, s, t, create=True)
                                 e.dyntransition.append(rule)
 
-                    if "setexec" in perms:
+                    if "setexec" in rule.perms:
                         for s in rule.source.expand():
                             setexec[s].append(rule)
 
-                    if "setcurrent" in perms:
+                    if "setcurrent" in rule.perms:
                         for s in rule.source.expand():
                             setcurrent[s].append(rule)
 
                 else:
-                    if "execute" in perms:
+                    if "execute" in rule.perms:
                         for s, t in itertools.product(
                                 rule.source.expand(),
                                 rule.target.expand()):
                             execute[s][t].append(rule)
 
-                    if "entrypoint" in perms:
+                    if "entrypoint" in rule.perms:
                         for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             entrypoint[s][t].append(rule)
 
@@ -421,9 +448,9 @@ class DomainTransitionAnalysis:
                 for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                     type_trans[s][t][d].append(rule)
 
-        invalid_edge = []
-        clear_transition = []
-        clear_dyntransition = []
+        invalid_edge: List[Edge] = []
+        clear_transition: List[Edge] = []
+        clear_dyntransition: List[Edge] = []
 
         for s, t in self.G.edges():
             edge = Edge(self.G, s, t)
@@ -500,8 +527,8 @@ class DomainTransitionAnalysis:
             nx.number_of_nodes(self.G),
             nx.number_of_edges(self.G)))
 
-    def __remove_excluded_entrypoints(self):
-        invalid_edges = []
+    def __remove_excluded_entrypoints(self) -> None:
+        invalid_edges: List[Edge] = []
         for source, target in self.subG.edges():
             edge = Edge(self.subG, source, target)
             entrypoints = set(edge.entrypoint)
@@ -528,7 +555,7 @@ class DomainTransitionAnalysis:
 
         self.subG.remove_edges_from(invalid_edges)
 
-    def _build_subgraph(self):
+    def _build_subgraph(self) -> None:
         if self.rebuildgraph:
             self._build_graph()
 
@@ -579,10 +606,10 @@ class Edge:
     execute = EdgeAttrDict('execute')
     type_transition = EdgeAttrDict('type_transition')
 
-    def __init__(self, graph, source, target, create=False):
+    def __init__(self, graph, source: Type, target: Type, create: bool = False) -> None:
         self.G = graph
-        self.source = source
-        self.target = target
+        self.source: Type = source
+        self.target: Type = target
 
         if not self.G.has_edge(source, target):
             if not create:
@@ -605,7 +632,7 @@ class Edge:
         else:
             return self._index_to_item(key)
 
-    def _index_to_item(self, index):
+    def _index_to_item(self, index: int) -> Type:
         """Return source or target based on index."""
         if index == 0:
             return self.source

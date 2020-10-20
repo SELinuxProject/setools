@@ -19,8 +19,10 @@
 #
 
 import logging
+from typing import List, Union
 
-from ..exception import InvalidCheckValue, InvalidClass
+from ..exception import InvalidCheckValue
+from ..policyrep import AnyRBACRule
 from ..rbacrulequery import RBACRuleQuery
 from .checkermodule import CheckerModule
 from .descriptors import ConfigDescriptor, ConfigSetDescriptor
@@ -49,7 +51,7 @@ class AssertRBAC(CheckerModule):
     expect_source = ConfigSetDescriptor("lookup_role", strict=True, expand=True)
     expect_target = ConfigSetDescriptor("lookup_role", strict=True, expand=True)
 
-    def __init__(self, policy, checkname, config):
+    def __init__(self, policy, checkname, config) -> None:
         super().__init__(policy, checkname, config)
         self.log = logging.getLogger(__name__)
 
@@ -75,7 +77,7 @@ class AssertRBAC(CheckerModule):
             self.log.info("Overlap in expect_target and exempt_target: {}".
                           format(", ".join(i.name for i in target_exempt_expect_overlap)))
 
-    def run(self):
+    def run(self) -> List:
         assert any((self.source, self.target)), "AssertRBAC no options set, this is a bug."
 
         self.log.info("Checking RBAC allow rule assertion.")
@@ -87,7 +89,7 @@ class AssertRBAC(CheckerModule):
 
         unseen_sources = set(self.expect_source)
         unseen_targets = set(self.expect_target)
-        failures = []
+        failures: List[Union[AnyRBACRule, str]] = []
         for rule in sorted(query.results()):
             srcs = set(rule.source.expand())
             tgts = set(rule.target.expand())

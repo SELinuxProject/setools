@@ -19,16 +19,16 @@
 #
 import logging
 from abc import ABC, abstractmethod
-from collections import namedtuple
+from typing import Generic, Iterable, TypeVar
 
-modified_item_record = namedtuple("modified_item", ["left", "right"])
+from ..policyrep import PolicyObject, PolicySymbol, SELinuxPolicy
 
 
 class Difference:
 
     """Base class for all policy differences."""
 
-    def __init__(self, left_policy, right_policy):
+    def __init__(self, left_policy: SELinuxPolicy, right_policy: SELinuxPolicy) -> None:
         self.log = logging.getLogger(__name__)
         self.left_policy = left_policy
         self.right_policy = right_policy
@@ -59,19 +59,19 @@ class Difference:
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         raise NotImplementedError
 
     @staticmethod
-    def _expand_generator(rule_list, Wrapper):
+    def _expand_generator(rule_list: Iterable, wrapper_class) -> Iterable:
         """Generator that yields a wrapped, expanded rule list."""
         # this is to delay creating any containers
         # as long as possible, since rule lists
         # are typically massive.
         for unexpanded_rule in rule_list:
             for expanded_rule in unexpanded_rule.expand():
-                yield Wrapper(expanded_rule)
+                yield wrapper_class(expanded_rule)
 
     @staticmethod
     def _set_diff(left, right, key=None, unwrap=True):
@@ -131,11 +131,20 @@ class Difference:
             return added_items, removed_items, matched_items
 
 
-class Wrapper(ABC):
+T = TypeVar("T", bound=PolicyObject)
+
+
+class Wrapper(ABC, Generic[T]):
 
     """Abstract base class for policy object wrappers."""
 
+    origin: T
+    key: int
+
     __slots__ = ("origin", "key")
+
+    def __init__(self, symbol: T) -> None:
+        pass
 
     def __repr__(self):
         # pylint: disable=no-member
@@ -157,7 +166,11 @@ class Wrapper(ABC):
         return not self == other
 
 
-class SymbolWrapper(Wrapper):
+S = TypeVar("S", bound=PolicySymbol)
+
+
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class SymbolWrapper(Wrapper[S]):  # pylint: disable=unsubscriptable-object
 
     """
     General wrapper for policy symbols, e.g. types, roles
@@ -165,9 +178,11 @@ class SymbolWrapper(Wrapper):
     on its name.
     """
 
-    __slots__ = ("name")
+    name: str
 
-    def __init__(self, symbol):
+    __slots__ = ("name",)
+
+    def __init__(self, symbol: S) -> None:
         self.origin = symbol
         self.name = str(symbol)
         self.key = hash(self.name)

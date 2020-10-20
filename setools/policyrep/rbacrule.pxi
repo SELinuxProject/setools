@@ -19,6 +19,12 @@
 #
 
 #
+# Typing
+#
+AnyRBACRule = Union[RoleAllow, RoleTransition]
+
+
+#
 # Classes
 #
 class RBACRuletype(PolicyEnum):

@@ -18,10 +18,11 @@
 #
 import logging
 from socket import IPPROTO_TCP, IPPROTO_UDP
+from typing import Iterable, Optional, Tuple, Union
 
 from .mixins import MatchContext
 from .query import PolicyQuery
-from .policyrep import PortconRange, PortconProtocol
+from .policyrep import Portcon, PortconRange, PortconProtocol
 from .util import match_range
 
 
@@ -71,51 +72,52 @@ class PortconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _protocol = None
-    _ports = None
-    ports_subset = False
-    ports_overlap = False
-    ports_superset = False
-    ports_proper = False
+    _protocol: Optional[PortconProtocol] = None
+    _ports: Optional[PortconRange] = None
+    ports_subset: bool = False
+    ports_overlap: bool = False
+    ports_superset: bool = False
+    ports_proper: bool = False
 
     @property
-    def ports(self):
+    def ports(self) -> Optional[PortconRange]:
         return self._ports
 
     @ports.setter
-    def ports(self, value):
-        pending_ports = PortconRange(*value)
+    def ports(self, value: Optional[Tuple[int, int]]) -> None:
+        if value:
+            pending_ports = PortconRange(*value)
 
-        if all(pending_ports):
-            if pending_ports.low < 1 or pending_ports.high < 1:
-                raise ValueError("Port numbers must be positive: {0.low}-{0.high}".
-                                 format(pending_ports))
+            if all(pending_ports):
+                if pending_ports.low < 1 or pending_ports.high < 1:
+                    raise ValueError("Port numbers must be positive: {0.low}-{0.high}".
+                                     format(pending_ports))
 
-            if pending_ports.low > pending_ports.high:
-                raise ValueError(
-                    "The low port must be smaller than the high port: {0.low}-{0.high}".
-                    format(pending_ports))
+                if pending_ports.low > pending_ports.high:
+                    raise ValueError(
+                        "The low port must be smaller than the high port: {0.low}-{0.high}".
+                        format(pending_ports))
 
-            self._ports = pending_ports
+                self._ports = pending_ports
         else:
             self._ports = None
 
     @property
-    def protocol(self):
+    def protocol(self) -> Optional[PortconProtocol]:
         return self._protocol
 
     @protocol.setter
-    def protocol(self, value):
+    def protocol(self, value: Optional[Union[str, PortconProtocol]]) -> None:
         if value:
             self._protocol = PortconProtocol.lookup(value)
         else:
             self._protocol = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(PortconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Portcon]:
         """Generator which yields all matching portcons."""
         self.log.info("Generating portcon results from {0.policy}".format(self))
         self.log.debug("Ports: {0.ports}, overlap: {0.ports_overlap}, "

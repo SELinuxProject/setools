@@ -17,30 +17,48 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple, Set
+
+from ..policyrep import Category, Level, LevelDecl, Range, Sensitivity
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
+from .typing import SymbolCache
 
-modified_cat_record = namedtuple("modified_category", ["added_aliases",
-                                                       "removed_aliases",
-                                                       "matched_aliases"])
-
-modified_sens_record = namedtuple("modified_sensitivity", ["added_aliases",
-                                                           "removed_aliases",
-                                                           "matched_aliases"])
-
-modified_level_record = namedtuple("modified_level", ["level",
-                                                      "added_categories",
-                                                      "removed_categories",
-                                                      "matched_categories"])
+_cats_cache: SymbolCache[Category] = defaultdict(dict)
+_sens_cache: SymbolCache[Sensitivity] = defaultdict(dict)
 
 
-_cats_cache = defaultdict(dict)
-_sens_cache = defaultdict(dict)
+class ModifiedCategory(NamedTuple):
+
+    """Difference details for a modified category."""
+
+    added_aliases: Set[str]
+    removed_aliases: Set[str]
+    matched_aliases: Set[str]
 
 
-def category_wrapper_factory(category):
+class ModifiedSensitivity(NamedTuple):
+
+    """Difference details for a modified sensitivity."""
+
+    added_aliases: Set[str]
+    removed_aliases: Set[str]
+    matched_aliases: Set[str]
+
+
+class ModifiedLevelDecl(NamedTuple):
+
+    """Difference details for a modified level declaration."""
+
+    level: LevelDecl
+    added_categories: Set[Category]
+    removed_categories: Set[Category]
+    matched_categories: Set[Category]
+
+
+def category_wrapper_factory(category: Category) -> SymbolWrapper[Category]:
     """
     Wrap category from the specified policy.
 
@@ -55,7 +73,7 @@ def category_wrapper_factory(category):
         return c
 
 
-def sensitivity_wrapper_factory(sensitivity):
+def sensitivity_wrapper_factory(sensitivity: Sensitivity) -> SymbolWrapper[Sensitivity]:
     """
     Wrap sensitivity from the specified policy.
 
@@ -78,7 +96,7 @@ class CategoriesDifference(Difference):
     removed_categories = DiffResultDescriptor("diff_categories")
     modified_categories = DiffResultDescriptor("diff_categories")
 
-    def diff_categories(self):
+    def diff_categories(self) -> None:
         """Generate the difference in categories between the policies."""
 
         self.log.info(
@@ -97,14 +115,14 @@ class CategoriesDifference(Difference):
                 left_category.aliases(), right_category.aliases(), unwrap=False)
 
             if added_aliases or removed_aliases:
-                self.modified_categories[left_category] = modified_cat_record(added_aliases,
-                                                                              removed_aliases,
-                                                                              matched_aliases)
+                self.modified_categories[left_category] = ModifiedCategory(added_aliases,
+                                                                           removed_aliases,
+                                                                           matched_aliases)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting category differences")
         self.added_categories = None
@@ -120,7 +138,7 @@ class SensitivitiesDifference(Difference):
     removed_sensitivities = DiffResultDescriptor("diff_sensitivities")
     modified_sensitivities = DiffResultDescriptor("diff_sensitivities")
 
-    def diff_sensitivities(self):
+    def diff_sensitivities(self) -> None:
         """Generate the difference in sensitivities between the policies."""
 
         self.log.info(
@@ -141,14 +159,14 @@ class SensitivitiesDifference(Difference):
                 left_sens.aliases(), right_sens.aliases(), unwrap=False)
 
             if added_aliases or removed_aliases:
-                self.modified_sensitivities[left_sens] = modified_sens_record(added_aliases,
-                                                                              removed_aliases,
-                                                                              matched_aliases)
+                self.modified_sensitivities[left_sens] = ModifiedSensitivity(added_aliases,
+                                                                             removed_aliases,
+                                                                             matched_aliases)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting sensitivity differences")
         self.added_sensitivities = None
@@ -164,7 +182,7 @@ class LevelDeclsDifference(Difference):
     removed_levels = DiffResultDescriptor("diff_levels")
     modified_levels = DiffResultDescriptor("diff_levels")
 
-    def diff_levels(self):
+    def diff_levels(self) -> None:
         """Generate the difference in levels between the policies."""
 
         self.log.info(
@@ -186,13 +204,13 @@ class LevelDeclsDifference(Difference):
                 (category_wrapper_factory(c) for c in right_level.categories()))
 
             if added_categories or removed_categories:
-                self.modified_levels.append(modified_level_record(
+                self.modified_levels.append(ModifiedLevelDecl(
                     left_level, added_categories, removed_categories, matched_categories))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting sensitivity differences")
         self.added_levels = None
@@ -200,13 +218,14 @@ class LevelDeclsDifference(Difference):
         self.modified_levels = None
 
 
-class LevelDeclWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class LevelDeclWrapper(Wrapper[LevelDecl]):  # pylint: disable=unsubscriptable-object
 
     """Wrap level declarations to allow comparisons."""
 
-    __slots__ = ("sensitivity")
+    __slots__ = ("sensitivity",)
 
-    def __init__(self, level):
+    def __init__(self, level: LevelDecl) -> None:
         self.origin = level
         self.sensitivity = sensitivity_wrapper_factory(level.sensitivity)
         self.key = hash(level)
@@ -223,13 +242,14 @@ class LevelDeclWrapper(Wrapper):
         return self.sensitivity < other.sensitivity
 
 
-class LevelWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class LevelWrapper(Wrapper[Level]):  # pylint: disable=unsubscriptable-object
 
     """Wrap levels to allow comparisons."""
 
     __slots__ = ("sensitivity", "categories")
 
-    def __init__(self, level):
+    def __init__(self, level: Level) -> None:
         self.origin = level
         self.sensitivity = sensitivity_wrapper_factory(level.sensitivity)
         self.categories = set(category_wrapper_factory(c) for c in level.categories())
@@ -256,7 +276,8 @@ class LevelWrapper(Wrapper):
             return False
 
 
-class RangeWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class RangeWrapper(Wrapper[Range]):  # pylint: disable=unsubscriptable-object
 
     """
     Wrap ranges to allow comparisons.
@@ -268,7 +289,7 @@ class RangeWrapper(Wrapper):
 
     __slots__ = ("low", "high")
 
-    def __init__(self, range_):
+    def __init__(self, range_: Range) -> None:
         self.origin = range_
         self.low = LevelWrapper(range_.low)
         self.high = LevelWrapper(range_.high)

@@ -17,15 +17,21 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import cast, List, NamedTuple, Optional
 
-from ..policyrep import BoundsRuletype
+from ..policyrep import Bounds, BoundsRuletype, Type
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 from .types import type_wrapper_factory
 
 
-modified_bounds_record = namedtuple("modified_bound", ["rule", "added_bound", "removed_bound"])
+class ModifiedBounds(NamedTuple):
+
+    """Difference details for a modified bounds rule."""
+
+    rule: Bounds
+    added_bound: Type
+    removed_bound: Type
 
 
 class BoundsDifference(Difference):
@@ -37,10 +43,10 @@ class BoundsDifference(Difference):
     modified_typebounds = DiffResultDescriptor("diff_typebounds")
 
     # Lists of rules for each policy
-    _left_typebounds = None
-    _right_typebounds = None
+    _left_typebounds: Optional[List[Bounds]] = None
+    _right_typebounds: Optional[List[Bounds]] = None
 
-    def diff_typebounds(self):
+    def diff_typebounds(self) -> None:
         """Generate the difference in typebound rules between the policies."""
 
         self.log.info("Generating typebounds differences from {0.left_policy} to {0.right_policy}".
@@ -50,21 +56,21 @@ class BoundsDifference(Difference):
             self._create_typebound_lists()
 
         self.added_typebounds, self.removed_typebounds, matched_typebounds = self._set_diff(
-            (BoundsWrapper(c) for c in self._left_typebounds),
-            (BoundsWrapper(c) for c in self._right_typebounds),
+            (BoundsWrapper(c) for c in cast(List[Bounds], self._left_typebounds)),
+            (BoundsWrapper(c) for c in cast(List[Bounds], self._right_typebounds)),
             key=lambda b: str(b.child))
 
         self.modified_typebounds = []
 
         for left_bound, right_bound in matched_typebounds:
             if type_wrapper_factory(left_bound.parent) != type_wrapper_factory(right_bound.parent):
-                self.modified_typebounds.append(modified_bounds_record(
+                self.modified_typebounds.append(ModifiedBounds(
                     left_bound, right_bound.parent, left_bound.parent))
 
     #
     # Internal functions
     #
-    def _create_typebound_lists(self):
+    def _create_typebound_lists(self) -> None:
         """Create rule lists for both policies."""
         self._left_typebounds = []
         for rule in self.left_policy.bounds():
@@ -82,7 +88,7 @@ class BoundsDifference(Difference):
                 self.log.error("Unknown rule type: {0} (This is an SETools bug)".
                                format(rule.ruletype))
 
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting all *bounds differences")
         self.added_typebounds = None
@@ -93,13 +99,14 @@ class BoundsDifference(Difference):
         self._right_typebounds = None
 
 
-class BoundsWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class BoundsWrapper(Wrapper[Bounds]):  # pylint: disable=unsubscriptable-object
 
     """Wrap *bounds for diff purposes."""
 
     __slots__ = ("ruletype", "parent", "child")
 
-    def __init__(self, rule):
+    def __init__(self, rule: Bounds) -> None:
         self.origin = rule
         self.ruletype = rule.ruletype
         self.parent = type_wrapper_factory(rule.parent)

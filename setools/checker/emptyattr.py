@@ -18,6 +18,7 @@
 #
 
 import logging
+from typing import List
 
 from ..exception import InvalidType, InvalidCheckValue
 from .checkermodule import CheckerModule
@@ -35,7 +36,7 @@ class EmptyTypeAttr(CheckerModule):
     check_type = "empty_typeattr"
     check_config = frozenset((ATTR_OPT, MISSINOK_OPT))
 
-    def __init__(self, policy, checkname, config):
+    def __init__(self, policy, checkname, config) -> None:
         super().__init__(policy, checkname, config)
         self.log = logging.getLogger(__name__)
         self._attr = None
@@ -85,7 +86,7 @@ class EmptyTypeAttr(CheckerModule):
         else:
             self._pass_by_missing = False
 
-    def run(self):
+    def run(self) -> List:
         self.log.info("Checking type attribute {} is empty.".format(self.attr))
 
         failures = []

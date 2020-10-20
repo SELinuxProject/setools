@@ -19,22 +19,31 @@
 import itertools
 import logging
 from contextlib import suppress
+from typing import cast, Iterable, List, Mapping, Optional, Union
 
 import networkx as nx
 from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
 
 from .descriptors import EdgeAttrIntMax, EdgeAttrList
-from .exception import RuleNotConditional
-from .policyrep import TERuletype
+from .permmap import PermissionMap
+from .policyrep import AVRule, SELinuxPolicy, TERuletype, Type
 
 __all__ = ['InfoFlowAnalysis']
+
+InfoFlowPath = Iterable['InfoFlowStep']
 
 
 class InfoFlowAnalysis:
 
     """Information flow analysis."""
 
-    def __init__(self, policy, perm_map, min_weight=1, exclude=None, booleans=None):
+    _exclude: List[Type]
+    _min_weight: int
+    _perm_map: PermissionMap
+
+    def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, min_weight: int = 1,
+                 exclude: Optional[Iterable[Union[Type, str]]] = None,
+                 booleans: Optional[Mapping[str, bool]] = None) -> None:
         """
         Parameters:
         policy      The policy to analyze.
@@ -54,20 +63,20 @@ class InfoFlowAnalysis:
 
         self.min_weight = min_weight
         self.perm_map = perm_map
-        self.exclude = exclude
+        self.exclude = exclude  # type: ignore # https://github.com/python/mypy/issues/220
         self.booleans = booleans
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
         self.G = nx.DiGraph()
-        self.subG = None
+        self.subG = self.G.copy()
 
     @property
-    def min_weight(self):
+    def min_weight(self) -> int:
         return self._min_weight
 
     @min_weight.setter
-    def min_weight(self, weight):
+    def min_weight(self, weight: int) -> None:
         if not 1 <= weight <= 10:
             raise ValueError(
                 "Min information flow weight must be an integer 1-10.")
@@ -76,29 +85,29 @@ class InfoFlowAnalysis:
         self.rebuildsubgraph = True
 
     @property
-    def perm_map(self):
+    def perm_map(self) -> PermissionMap:
         return self._perm_map
 
     @perm_map.setter
-    def perm_map(self, perm_map):
+    def perm_map(self, perm_map: PermissionMap) -> None:
         self._perm_map = perm_map
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
     @property
-    def exclude(self):
+    def exclude(self) -> List[Type]:
         return self._exclude
 
     @exclude.setter
-    def exclude(self, types):
+    def exclude(self, types: Optional[Iterable[Union[Type, str]]]) -> None:
         if types:
-            self._exclude = [self.policy.lookup_type(t) for t in types]
+            self._exclude: List[Type] = [self.policy.lookup_type(t) for t in types]
         else:
             self._exclude = []
 
         self.rebuildsubgraph = True
 
-    def shortest_path(self, source, target):
+    def shortest_path(self, source: Type, target: Type) -> Iterable[InfoFlowPath]:
         """
         Generator which yields one shortest path between the source
         and target types (there may be more).
@@ -132,7 +141,8 @@ class InfoFlowAnalysis:
             # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
             yield self.__generate_steps(nx.shortest_path(self.subG, source=s, target=t))
 
-    def all_paths(self, source, target, maxlen=2):
+    def all_paths(self, source: Union[Type, str], target: Union[Type, str], maxlen: int = 2) \
+            -> Iterable[InfoFlowPath]:
         """
         Generator which yields all paths between the source and target
         up to the specified maximum path length.  This algorithm
@@ -172,7 +182,8 @@ class InfoFlowAnalysis:
             for path in nx.all_simple_paths(self.subG, s, t, maxlen):
                 yield self.__generate_steps(path)
 
-    def all_shortest_paths(self, source, target):
+    def all_shortest_paths(self, source: Union[Type, str], target: Union[Type, str]) \
+            -> Iterable[InfoFlowPath]:
         """
         Generator which yields all shortest paths between the source
         and target types.
@@ -206,7 +217,7 @@ class InfoFlowAnalysis:
             for path in nx.all_shortest_paths(self.subG, s, t):
                 yield self.__generate_steps(path)
 
-    def infoflows(self, type_, out=True):
+    def infoflows(self, type_: Union[Type, str], out: bool = True) -> Iterable['InfoFlowStep']:
         """
         Generator which yields all information flows in/out of a
         specified source type.
@@ -243,9 +254,9 @@ class InfoFlowAnalysis:
                 flows = self.subG.in_edges(s)
 
             for source, target in flows:
-                yield Edge(self.subG, source, target)
+                yield InfoFlowStep(self.subG, source, target)
 
-    def get_stats(self):  # pragma: no cover
+    def get_stats(self) -> str:  # pragma: no cover
         """
         Get the information flow graph statistics.
 
@@ -260,7 +271,7 @@ class InfoFlowAnalysis:
     # Internal functions follow
     #
 
-    def __generate_steps(self, path):
+    def __generate_steps(self, path: List[Type]) -> InfoFlowPath:
         """
         Generator which returns the source, target, and associated rules
         for each information flow step.
@@ -275,7 +286,7 @@ class InfoFlowAnalysis:
         rules   The list of rules creating this information flow step.
         """
         for s in range(1, len(path)):
-            yield Edge(self.subG, path[s - 1], path[s])
+            yield InfoFlowStep(self.subG, path[s - 1], path[s])
 
     #
     #
@@ -292,7 +303,7 @@ class InfoFlowAnalysis:
     #    minimum weight. This subgraph is rebuilt only if the main graph
     #    is rebuilt or the minimum weight or excluded types change.
 
-    def _build_graph(self):
+    def _build_graph(self) -> None:
         self.G.clear()
         self.G.name = "Information flow graph for {0}.".format(self.policy)
 
@@ -304,19 +315,19 @@ class InfoFlowAnalysis:
             if rule.ruletype != TERuletype.allow:
                 continue
 
-            (rweight, wweight) = self.perm_map.rule_weight(rule)
+            (rweight, wweight) = self.perm_map.rule_weight(cast(AVRule, rule))
 
             for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                 # only add flows if they actually flow
                 # in or out of the source type type
                 if s != t:
                     if wweight:
-                        edge = Edge(self.G, s, t, create=True)
+                        edge = InfoFlowStep(self.G, s, t, create=True)
                         edge.rules.append(rule)
                         edge.weight = wweight
 
                     if rweight:
-                        edge = Edge(self.G, t, s, create=True)
+                        edge = InfoFlowStep(self.G, t, s, create=True)
                         edge.rules.append(rule)
                         edge.weight = rweight
 
@@ -327,7 +338,7 @@ class InfoFlowAnalysis:
             nx.number_of_nodes(self.G),
             nx.number_of_edges(self.G)))
 
-    def _build_subgraph(self):
+    def _build_subgraph(self) -> None:
         if self.rebuildgraph:
             self._build_graph()
 
@@ -347,7 +358,7 @@ class InfoFlowAnalysis:
         if self.min_weight > 1:
             delete_list = []
             for s, t in self.subG.edges():
-                edge = Edge(self.subG, s, t)
+                edge = InfoFlowStep(self.subG, s, t)
                 if edge.weight < self.min_weight:
                     delete_list.append(edge)
 
@@ -356,7 +367,7 @@ class InfoFlowAnalysis:
         if self.booleans is not None:
             delete_list = []
             for s, t in self.subG.edges():
-                edge = Edge(self.subG, s, t)
+                edge = InfoFlowStep(self.subG, s, t)
 
                 # collect disabled rules
                 rule_list = []
@@ -365,7 +376,7 @@ class InfoFlowAnalysis:
                     if not rule.enabled(**self.booleans):
                         rule_list.append(rule)
 
-                deleted_rules = []
+                deleted_rules: List[AVRule] = []
                 for rule in rule_list:
                     if rule not in deleted_rules:
                         edge.rules.remove(rule)
@@ -383,7 +394,7 @@ class InfoFlowAnalysis:
             nx.number_of_edges(self.subG)))
 
 
-class Edge:
+class InfoFlowStep:
 
     """
     A graph edge.  Also used for returning information flow steps.
@@ -407,7 +418,7 @@ class Edge:
     # (see below add_edge() call)
     weight = EdgeAttrIntMax('capacity')
 
-    def __init__(self, graph, source, target, create=False):
+    def __init__(self, graph, source: Type, target: Type, create: bool = False) -> None:
         self.G = graph
         self.source = source
         self.target = target
@@ -418,7 +429,7 @@ class Edge:
                 self.rules = None
                 self.weight = None
             else:
-                raise ValueError("Edge does not exist in graph")
+                raise ValueError("InfoFlowStep does not exist in graph")
 
     def __getitem__(self, key):
         # This is implemented so this object can be used in NetworkX

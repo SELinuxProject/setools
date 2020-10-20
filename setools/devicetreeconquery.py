@@ -17,8 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable, Optional
 
 from .mixins import MatchContext
+from .policyrep import Devicetreecon
 from .query import PolicyQuery
 
 
@@ -56,13 +58,13 @@ class DevicetreeconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    path = None
+    path: Optional[str] = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(DevicetreeconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Devicetreecon]:
         """Generator which yields all matching devicetreecons."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Path: {0.path!r}".format(self))

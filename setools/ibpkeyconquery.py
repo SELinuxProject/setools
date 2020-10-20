@@ -16,11 +16,12 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-import ipaddress
+from ipaddress import IPv6Address
 import logging
+from typing import Iterable, Optional, Tuple, Union
 
 from .mixins import MatchContext
-from .policyrep import IbpkeyconRange
+from .policyrep import Ibpkeycon, IbpkeyconRange
 from .query import PolicyQuery
 from .util import match_range
 
@@ -65,23 +66,23 @@ class IbpkeyconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _subnet_prefix = None
-    _pkeys = None
-    pkeys_subset = False
-    pkeys_overlap = False
-    pkeys_superset = False
-    pkeys_proper = False
+    _subnet_prefix: Optional[IPv6Address] = None
+    _pkeys: Optional[IbpkeyconRange] = None
+    pkeys_subset: bool = False
+    pkeys_overlap: bool = False
+    pkeys_superset: bool = False
+    pkeys_proper: bool = False
 
     def __init__(self, policy, **kwargs):
         super(IbpkeyconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
     @property
-    def pkeys(self):
+    def pkeys(self) -> Optional[IbpkeyconRange]:
         return self._pkeys
 
     @pkeys.setter
-    def pkeys(self, value):
+    def pkeys(self, value: Optional[Tuple[int, int]]) -> None:
         if value is not None:
             pending_pkeys = IbpkeyconRange(*value)
 
@@ -103,17 +104,17 @@ class IbpkeyconQuery(MatchContext, PolicyQuery):
             self._pkeys = None
 
     @property
-    def subnet_prefix(self):
+    def subnet_prefix(self) -> Optional[IPv6Address]:
         return self._subnet_prefix
 
     @subnet_prefix.setter
-    def subnet_prefix(self, value):
+    def subnet_prefix(self, value: Optional[Union[str, IPv6Address]]) -> None:
         if value:
-            self._subnet_prefix = ipaddress.IPv6Address(value)
+            self._subnet_prefix = IPv6Address(value)
         else:
             self._subnet_prefix = None
 
-    def results(self):
+    def results(self) -> Iterable[Ibpkeycon]:
         """Generator which yields all matching ibpkeycons."""
         self.log.info("Generating ibpkeycon results from {0.policy}".format(self))
         self.log.debug("Subnet Prefix: {0.subnet_prefix}".format(self))

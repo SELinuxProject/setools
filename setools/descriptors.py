@@ -31,6 +31,8 @@ import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Collection
+from enum import Enum
+from typing import Any, Callable, MutableMapping, Optional, Union
 from weakref import WeakKeyDictionary
 
 from .util import validate_perms_any
@@ -67,21 +69,24 @@ class CriteriaDescriptor:
                     does not exist, False is assumed.
     """
 
-    def __init__(self, name_regex=None, lookup_function=None, default_value=None, enum_class=None):
+    def __init__(self, name_regex: Optional[str] = None,
+                 lookup_function: Optional[Union[Callable, str]] = None,
+                 default_value=None, enum_class: Optional[Enum] = None) -> None:
+
         assert name_regex or lookup_function or enum_class, \
             "A simple attribute should be used if there is no regex, lookup function, or enum."
         assert not (lookup_function and enum_class), \
             "Lookup functions and enum classes are mutually exclusive."
-        self.regex = name_regex
+        self.regex: Optional[str] = name_regex
         self.default_value = default_value
-        self.lookup_function = lookup_function
+        self.lookup_function: Optional[Union[Callable, str]] = lookup_function
         self.enum_class = enum_class
-        self.name = None
+        self.name: str = ""
 
         # use weak references so instances can be
         # garbage collected, rather than unnecessarily
         # kept around due to this descriptor.
-        self.instances = WeakKeyDictionary()
+        self.instances: MutableMapping = WeakKeyDictionary()
 
     def __set_name__(self, owner, name):
         self.name = name
@@ -147,15 +152,15 @@ class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
                     permissions.  See validate_perms_any()
     """
 
-    def __init__(self, name_regex=None, default_value=None):
-        self.regex = name_regex
+    def __init__(self, name_regex: Optional[str] = None, default_value=None) -> None:
+        self.regex: Optional[str] = name_regex
         self.default_value = default_value
-        self.name = None
+        self.name: str = ""
 
         # use weak references so instances can be
         # garbage collected, rather than unnecessarily
         # kept around due to this descriptor.
-        self.instances = WeakKeyDictionary()
+        self.instances: MutableMapping = WeakKeyDictionary()
 
     def __set__(self, obj, value):
         if not value:
@@ -195,7 +200,7 @@ class NetworkXGraphEdgeDescriptor(ABC):
     target      The edge's target node
     """
 
-    def __init__(self, propname):
+    def __init__(self, propname: str) -> None:
         self.name = propname
 
     def __get__(self, obj, objtype=None):
@@ -279,23 +284,23 @@ class PermissionMapDescriptor:
     validator   A callable for validating the setting.
 
     Instance class attribute use (obj parameter):
-    perm_map    The full permission map.
+    _perm_map   The full permission map.
     class_      The mapping's object class
     perm        The mapping's permission
     """
 
-    def __init__(self, propname, validator):
-        self.name = propname
-        self.validator = validator
+    def __init__(self, propname: str, validator: Callable):
+        self.name: str = propname
+        self.validator: Callable = validator
 
     def __get__(self, obj, objtype=None):
         if obj is None:
             return self
 
-        return obj.perm_map[obj.class_][obj.perm][self.name]
+        return obj._perm_map[obj.class_][obj.perm][self.name]
 
     def __set__(self, obj, value):
-        obj.perm_map[obj.class_][obj.perm][self.name] = self.validator(value)
+        obj._perm_map[obj.class_][obj.perm][self.name] = self.validator(value)
 
     def __delete__(self, obj):
         raise AttributeError

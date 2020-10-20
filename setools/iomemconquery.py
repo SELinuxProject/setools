@@ -17,9 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable, Optional, Tuple
 
 from .mixins import MatchContext
-from .policyrep import IomemconRange
+from .policyrep import Iomemcon, IomemconRange
 from .query import PolicyQuery
 from .util import match_range
 
@@ -67,21 +68,21 @@ class IomemconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _addr = None
-    addr_subset = False
-    addr_overlap = False
-    addr_superset = False
-    addr_proper = False
+    _addr: Optional[IomemconRange] = None
+    addr_subset: bool = False
+    addr_overlap: bool = False
+    addr_superset: bool = False
+    addr_proper: bool = False
 
     @property
-    def addr(self):
+    def addr(self) -> Optional[IomemconRange]:
         return self._addr
 
     @addr.setter
-    def addr(self, value):
-        pending_addr = IomemconRange(*value)
+    def addr(self, value: Optional[Tuple[int, int]]) -> None:
+        if value:
+            pending_addr = IomemconRange(*value)
 
-        if all(pending_addr):
             if pending_addr.low < 1 or pending_addr.high < 1:
                 raise ValueError("Memory address must be positive: {0.low}-{0.high}".
                                  format(pending_addr))
@@ -95,11 +96,11 @@ class IomemconQuery(MatchContext, PolicyQuery):
         else:
             self._addr = None
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(IomemconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Iomemcon]:
         """Generator which yields all matching iomemcons."""
         self.log.info("Generating results from {0.policy}".format(self))
         self.log.debug("Address: {0.addr!r}, overlap: {0.addr_overlap}, "

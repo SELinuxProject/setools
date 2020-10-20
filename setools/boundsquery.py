@@ -18,9 +18,10 @@
 #
 import logging
 import re
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .policyrep import BoundsRuletype
+from .policyrep import Bounds, BoundsRuletype
 from .query import PolicyQuery
 from .util import match_regex
 
@@ -39,15 +40,15 @@ class BoundsQuery(PolicyQuery):
 
     ruletype = CriteriaSetDescriptor(enum_class=BoundsRuletype)
     parent = CriteriaDescriptor("parent_regex")
-    parent_regex = False
+    parent_regex: bool = False
     child = CriteriaDescriptor("child_regex")
-    child_regex = False
+    child_regex: bool = False
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(BoundsQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Bounds]:
         """Generator which yields all matching *bounds statements."""
         self.log.info("Generating bounds results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))

@@ -16,16 +16,22 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple
+
+from ..policyrep import Context, Ibpkeycon
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 
 
-modified_ibpkeycon_record = namedtuple("modified_ibpkeycon", ["rule",
-                                                              "added_context",
-                                                              "removed_context"])
+class ModifiedIbpkeycon(NamedTuple):
+
+    """Difference details for a modified ibpkeycon."""
+
+    rule: Ibpkeycon
+    added_context: Context
+    removed_context: Context
 
 
 class IbpkeyconsDifference(Difference):
@@ -36,7 +42,7 @@ class IbpkeyconsDifference(Difference):
     removed_ibpkeycons = DiffResultDescriptor("diff_ibpkeycons")
     modified_ibpkeycons = DiffResultDescriptor("diff_ibpkeycons")
 
-    def diff_ibpkeycons(self):
+    def diff_ibpkeycons(self) -> None:
         """Generate the difference in ibpkeycons between the policies."""
 
         self.log.info(
@@ -55,14 +61,12 @@ class IbpkeyconsDifference(Difference):
             # 1. change to context
             if ContextWrapper(left_ibpkey.context) != ContextWrapper(right_ibpkey.context):
                 self.modified_ibpkeycons.append(
-                    modified_ibpkeycon_record(left_ibpkey,
-                                              right_ibpkey.context,
-                                              left_ibpkey.context))
+                    ModifiedIbpkeycon(left_ibpkey, right_ibpkey.context, left_ibpkey.context))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting ibpkeycon differences")
         self.added_ibpkeycons = None
@@ -70,13 +74,14 @@ class IbpkeyconsDifference(Difference):
         self.modified_ibpkeycons = None
 
 
-class IbpkeyconWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class IbpkeyconWrapper(Wrapper[Ibpkeycon]):  # pylint: disable=unsubscriptable-object
 
     """Wrap ibpkeycon statements for diff purposes."""
 
     __slots__ = ("subnet_prefix", "low", "high")
 
-    def __init__(self, ocon):
+    def __init__(self, ocon: Ibpkeycon) -> None:
         self.origin = ocon
         self.subnet_prefix = ocon.subnet_prefix
         self.low, self.high = ocon.pkeys

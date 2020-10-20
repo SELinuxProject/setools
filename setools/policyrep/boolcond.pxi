@@ -18,7 +18,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-truth_table_row = collections.namedtuple("truth_table_row", ["values", "result"])
+TruthTableRow = collections.namedtuple("TruthTableRow", ["values", "result"])
 
 cdef object _cond_cache = WeakKeyDefaultDict(dict)
 
@@ -217,7 +217,7 @@ cdef class Conditional(PolicyObject):
 
         for row in truth_list:
             values = {bools[i]: row[i] for i in range(len(bools))}
-            truth_table.append(truth_table_row(values, self.evaluate(**values)))
+            truth_table.append(TruthTableRow(values, self.evaluate(**values)))
 
         return truth_table
 

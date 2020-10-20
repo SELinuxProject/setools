@@ -18,6 +18,12 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+#
+# Typing and enums
+#
+AnyDefault = Union[Default, DefaultRange]
+
+
 class DefaultRuletype(PolicyEnum):
 
     """Enumeration of default rule types."""
@@ -77,6 +83,9 @@ class DefaultRangeValue(PolicyEnum):
             raise LowLevelPolicyError("Unsupported default_range value: {}".format(e)) from e
 
 
+#
+# Classes
+#
 cdef class Default(PolicyObject):
 
     """Base class for default_* statements."""

@@ -1,8 +1,11 @@
 /.eggs
 /.idea
+/.mypy_cache
+/.vscode
 /build
 /dist
 /setools.egg-info
+/venv
 *.pyc
 *.pyo
 /setools/policyrep.c

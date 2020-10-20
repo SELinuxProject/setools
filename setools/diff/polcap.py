@@ -27,7 +27,7 @@ class PolCapsDifference(Difference):
     added_polcaps = DiffResultDescriptor("diff_polcaps")
     removed_polcaps = DiffResultDescriptor("diff_polcaps")
 
-    def diff_polcaps(self):
+    def diff_polcaps(self) -> None:
         """Generate the difference in polcaps between the policies."""
 
         self.log.info("Generating policy cap differences from {0.left_policy} to {0.right_policy}".
@@ -40,7 +40,7 @@ class PolCapsDifference(Difference):
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting policy capability differences")
         self.added_polcaps = None

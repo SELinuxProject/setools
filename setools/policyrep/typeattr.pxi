@@ -24,6 +24,10 @@
 cdef object _type_cache = WeakKeyDefaultDict(dict)
 cdef object _typeattr_cache = WeakKeyDefaultDict(dict)
 
+#
+# Typing
+#
+TypeOrAttr = TypeVar("TypeOrAttr", bound=BaseType)
 
 #
 # Type or attribute factory function

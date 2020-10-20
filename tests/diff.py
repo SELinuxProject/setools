@@ -2112,10 +2112,6 @@ class PolicyDifferenceTestNoDiff(unittest.TestCase):
         """NoDiff: no removed role_allow rules."""
         self.assertFalse(self.diff.removed_role_allows)
 
-    def test_modified_role_allows(self):
-        """NoDiff: no modified role_allow rules."""
-        self.assertFalse(self.diff.modified_role_allows)
-
     def test_added_role_transitions(self):
         """NoDiff: no added role_transition rules."""
         self.assertFalse(self.diff.added_role_transitions)
@@ -2585,10 +2581,6 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     def test_removed_role_allows(self):
         """MLSvsStandardDiff: no removed role_allow rules."""
         self.assertFalse(self.diff.removed_role_allows)
-
-    def test_modified_role_allows(self):
-        """MLSvsStandardDiff: no modified role_allow rules."""
-        self.assertFalse(self.diff.modified_role_allows)
 
     def test_added_role_transitions(self):
         """MLSvsStandardDiff: no added role_transition rules."""

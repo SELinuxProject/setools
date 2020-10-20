@@ -17,8 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable
 
 from .mixins import MatchContext, MatchName
+from .policyrep import InitialSID
 from .query import PolicyQuery
 
 
@@ -58,7 +60,7 @@ class InitialSIDQuery(MatchName, MatchContext, PolicyQuery):
         super(InitialSIDQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[InitialSID]:
         """Generator which yields all matching initial SIDs."""
         self.log.info("Generating initial SID results from {0.policy}".format(self))
         self._match_name_debug(self.log)

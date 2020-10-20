@@ -18,10 +18,11 @@
 #
 import logging
 import re
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchContext
-from .policyrep import FSUseRuletype
+from .policyrep import FSUse, FSUseRuletype
 from .query import PolicyQuery
 from .util import match_regex
 
@@ -61,13 +62,13 @@ class FSUseQuery(MatchContext, PolicyQuery):
 
     ruletype = CriteriaSetDescriptor(enum_class=FSUseRuletype)
     fs = CriteriaDescriptor("fs_regex")
-    fs_regex = False
+    fs_regex: bool = False
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(FSUseQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[FSUse]:
         """Generator which yields all matching fs_use_* statements."""
         self.log.info("Generating fs_use_* results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))

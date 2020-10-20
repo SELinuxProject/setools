@@ -16,16 +16,22 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple
+
+from ..policyrep import Context, Genfscon
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 
 
-modified_genfs_record = namedtuple("modified_genfs", ["rule",
-                                                      "added_context",
-                                                      "removed_context"])
+class ModifiedGenfscon(NamedTuple):
+
+    """Difference details for a modified genfscons."""
+
+    rule: Genfscon
+    added_context: Context
+    removed_context: Context
 
 
 class GenfsconsDifference(Difference):
@@ -36,7 +42,7 @@ class GenfsconsDifference(Difference):
     removed_genfscons = DiffResultDescriptor("diff_genfscons")
     modified_genfscons = DiffResultDescriptor("diff_genfscons")
 
-    def diff_genfscons(self):
+    def diff_genfscons(self) -> None:
         """Generate the difference in genfscon rules between the policies."""
 
         self.log.info(
@@ -53,14 +59,14 @@ class GenfsconsDifference(Difference):
             # Criteria for modified rules
             # 1. change to context
             if ContextWrapper(left_rule.context) != ContextWrapper(right_rule.context):
-                self.modified_genfscons.append(modified_genfs_record(left_rule,
-                                                                     right_rule.context,
-                                                                     left_rule.context))
+                self.modified_genfscons.append(ModifiedGenfscon(left_rule,
+                                                                right_rule.context,
+                                                                left_rule.context))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting genfscon rule differences")
         self.added_genfscons = None
@@ -68,13 +74,14 @@ class GenfsconsDifference(Difference):
         self.modified_genfscons = None
 
 
-class GenfsconWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class GenfsconWrapper(Wrapper[Genfscon]):  # pylint: disable=unsubscriptable-object
 
     """Wrap genfscon rules to allow set operations."""
 
     __slots__ = ("fs", "path", "filetype", "context")
 
-    def __init__(self, rule):
+    def __init__(self, rule: Genfscon) -> None:
         self.origin = rule
         self.fs = rule.fs
         self.path = rule.path

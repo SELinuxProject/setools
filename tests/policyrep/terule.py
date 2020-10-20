@@ -143,7 +143,7 @@ class AVRuleTest(unittest.TestCase):
 
         # permissions are stored in a set, so the order may vary
         self.assertRegex(rule.statement(), "("
-                         "allow a b:c { d1 d2 }; \[ cond103 ]"
+                         "allow a b:c { d1 d2 }; \[ cond103 ]"  # noqa
                          "|"
                          "allow a b:c { d2 d1 }; \[ cond103 ]"
                          ")")

@@ -144,107 +144,97 @@ try:
     p = setools.SELinuxPolicy(args.policy)
 
     if args.tertypes:
-        q = setools.TERuleQuery(p,
-                                ruletype=args.tertypes,
-                                source=args.source,
-                                source_indirect=args.source_indirect,
-                                source_regex=args.source_regex,
-                                target=args.target,
-                                target_indirect=args.target_indirect,
-                                target_regex=args.target_regex,
-                                tclass_regex=args.tclass_regex,
-                                perms_equal=args.perms_equal,
-                                xperms_equal=args.xperms_equal,
-                                default=args.default,
-                                default_regex=args.default_regex,
-                                boolean_regex=args.boolean_regex,
-                                boolean_equal=args.boolean_equal)
+        terq = setools.TERuleQuery(p,
+                                   ruletype=args.tertypes,
+                                   source=args.source,
+                                   source_indirect=args.source_indirect,
+                                   source_regex=args.source_regex,
+                                   target=args.target,
+                                   target_indirect=args.target_indirect,
+                                   target_regex=args.target_regex,
+                                   tclass_regex=args.tclass_regex,
+                                   perms_equal=args.perms_equal,
+                                   xperms_equal=args.xperms_equal,
+                                   default=args.default,
+                                   default_regex=args.default_regex,
+                                   boolean_regex=args.boolean_regex,
+                                   boolean_equal=args.boolean_equal)
 
         # these are broken out from the above statement to prevent making a list
         # with an empty string in it (split on empty string)
         if args.tclass:
             if args.tclass_regex:
-                q.tclass = args.tclass
+                terq.tclass = args.tclass
             else:
-                q.tclass = args.tclass.split(",")
+                terq.tclass = args.tclass.split(",")
 
         if args.perms:
-            q.perms = args.perms.split(",")
+            terq.perms = args.perms.split(",")
 
         if args.xperms:
-            xperms = []
-            for item in args.xperms.split(","):
-                rng = item.split("-")
-                if len(rng) == 2:
-                    xperms.append((int(rng[0], base=16), int(rng[1], base=16)))
-                elif len(rng) == 1:
-                    xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
-                else:
-                    parser.error("Enter an extended permission or extended permission range, e.g. "
-                                 "0x5411 or 0x8800-0x88ff.")
-
-            q.xperms = xperms
+            # https://github.com/python/mypy/issues/220
+            terq.xperms = setools.xperm_str_to_tuple_ranges(args.xperms)  # type: ignore
 
         if args.boolean:
             if args.boolean_regex:
-                q.boolean = args.boolean
+                terq.boolean = args.boolean
             else:
                 if args.policy:
-                    q.boolean = args.boolean.split(",")
+                    terq.boolean = args.boolean.split(",")
                 else:
                     # try to find substitutions for old boolean names
-                    q.boolean = map(setools.policyrep.lookup_boolean_name_sub,
-                                    args.boolean.split(","))
+                    terq.boolean = map(setools.policyrep.lookup_boolean_name_sub,
+                                       args.boolean.split(","))
 
-        for r in sorted(q.results()):
-            print(r)
+        for te_result in sorted(terq.results()):
+            print(te_result)
 
     if args.rbacrtypes:
-        q = setools.RBACRuleQuery(p,
-                                  ruletype=args.rbacrtypes,
-                                  source=args.source,
-                                  source_indirect=args.source_indirect,
-                                  source_regex=args.source_regex,
-                                  target=args.target,
-                                  target_indirect=args.target_indirect,
-                                  target_regex=args.target_regex,
-                                  default=args.default,
-                                  default_regex=args.default_regex,
-                                  tclass_regex=args.tclass_regex)
+        rbacrq = setools.RBACRuleQuery(p,
+                                       ruletype=args.rbacrtypes,
+                                       source=args.source,
+                                       source_indirect=args.source_indirect,
+                                       source_regex=args.source_regex,
+                                       target=args.target,
+                                       target_indirect=args.target_indirect,
+                                       target_regex=args.target_regex,
+                                       default=args.default,
+                                       default_regex=args.default_regex,
+                                       tclass_regex=args.tclass_regex)
 
         # these are broken out from the above statement to prevent making a list
         # with an empty string in it (split on empty string)
         if args.tclass:
             if args.tclass_regex:
-                q.tclass = args.tclass
+                rbacrq.tclass = args.tclass
             else:
-                q.tclass = args.tclass.split(",")
+                rbacrq.tclass = args.tclass.split(",")
 
-        for r in sorted(q.results()):
-            print(r)
+        for rbac_result in sorted(rbacrq.results()):
+            print(rbac_result)
 
     if args.mlsrtypes:
-        q = setools.MLSRuleQuery(p,
-                                 ruletype=args.mlsrtypes,
-                                 source=args.source,
-                                 source_indirect=args.source_indirect,
-                                 source_regex=args.source_regex,
-                                 target=args.target,
-                                 target_indirect=args.target_indirect,
-                                 target_regex=args.target_regex,
-                                 tclass_regex=args.tclass_regex,
-                                 default=args.default)
+        mlsrq = setools.MLSRuleQuery(p,
+                                     ruletype=args.mlsrtypes,
+                                     source=args.source,
+                                     source_indirect=args.source_indirect,
+                                     source_regex=args.source_regex,
+                                     target=args.target,
+                                     target_indirect=args.target_indirect,
+                                     target_regex=args.target_regex,
+                                     tclass_regex=args.tclass_regex,
+                                     default=args.default)
 
         # these are broken out from the above statement to prevent making a list
         # with an empty string in it (split on empty string)
         if args.tclass:
             if args.tclass_regex:
-                q.tclass = args.tclass
+                mlsrq.tclass = args.tclass
             else:
-                q.tclass = args.tclass.split(",")
+                mlsrq.tclass = args.tclass.split(",")
 
-        for r in sorted(q.results()):
-            print(r)
+        for mls_result in sorted(mlsrq.results()):
+            print(mls_result)
 
 except Exception as err:
     if args.debug:

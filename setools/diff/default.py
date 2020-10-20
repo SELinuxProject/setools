@@ -16,17 +16,23 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple, Optional
+
+from ..policyrep import Default, DefaultRuletype, DefaultValue, DefaultRangeValue, ObjClass
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper, Wrapper
 
 
-modified_default_record = namedtuple("modified_default", ["rule",
-                                                          "added_default",
-                                                          "removed_default",
-                                                          "added_default_range",
-                                                          "removed_default_range"])
+class ModifiedDefault(NamedTuple):
+
+    """Difference details for a modified default_*."""
+
+    rule: Default
+    added_default: Optional[DefaultValue]
+    removed_default: Optional[DefaultValue]
+    added_default_range: Optional[DefaultRangeValue]
+    removed_default_range: Optional[DefaultRangeValue]
 
 
 class DefaultsDifference(Difference):
@@ -37,7 +43,7 @@ class DefaultsDifference(Difference):
     removed_defaults = DiffResultDescriptor("diff_defaults")
     modified_defaults = DiffResultDescriptor("diff_defaults")
 
-    def diff_defaults(self):
+    def diff_defaults(self) -> None:
         """Generate the difference in type defaults between the policies."""
 
         self.log.info(
@@ -75,16 +81,16 @@ class DefaultsDifference(Difference):
 
             if removed_default or removed_default_range:
                 self.modified_defaults.append(
-                    modified_default_record(left_default,
-                                            added_default,
-                                            removed_default,
-                                            added_default_range,
-                                            removed_default_range))
+                    ModifiedDefault(left_default,
+                                    added_default,
+                                    removed_default,
+                                    added_default_range,
+                                    removed_default_range))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting default_* differences")
         self.added_defaults = None
@@ -92,13 +98,14 @@ class DefaultsDifference(Difference):
         self.modified_defaults = None
 
 
-class DefaultWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class DefaultWrapper(Wrapper[Default]):  # pylint: disable=unsubscriptable-object
 
     """Wrap default_* to allow comparisons."""
 
     __slots__ = ("ruletype", "tclass")
 
-    def __init__(self, default):
+    def __init__(self, default: Default) -> None:
         self.origin = default
         self.ruletype = default.ruletype
         self.tclass = SymbolWrapper(default.tclass)

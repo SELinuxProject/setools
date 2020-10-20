@@ -1,5 +1,3 @@
-# Copyright 2020, Microsoft Corporation
-#
 # This file is part of SETools.
 #
 # SETools is free software: you can redistribute it and/or modify
@@ -16,10 +14,16 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from typing import DefaultDict, Dict, List, Optional, TypeVar
 
-# This is a separate file to break a circular import.
-CHECK_TYPE_KEY = "check_type"
-CHECK_DESC_KEY = "desc"
-CHECK_DISABLE = "disable"
+from ..policyrep import PolicyObject, SELinuxPolicy
 
-GLOBAL_CONFIG_KEYS = frozenset((CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE))
+from .difference import Wrapper, SymbolWrapper
+
+
+T = TypeVar("T", bound=PolicyObject)
+U = TypeVar("U", bound=Wrapper)
+Cache = DefaultDict[SELinuxPolicy, Dict[T, U]]
+SymbolCache = Cache[T, SymbolWrapper[T]]
+
+RuleList = Optional[DefaultDict[T, List[U]]]

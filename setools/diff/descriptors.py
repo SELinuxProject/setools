@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from typing import MutableMapping
 from weakref import WeakKeyDictionary
 
 
@@ -26,13 +27,13 @@ class DiffResultDescriptor:
     # @properties could be used instead, but there are so
     # many result attributes, this will keep the code cleaner.
 
-    def __init__(self, diff_function):
+    def __init__(self, diff_function: str) -> None:
         self.diff_function = diff_function
 
         # use weak references so instances can be
         # garbage collected, rather than unnecessarily
         # kept around due to this descriptor.
-        self.instances = WeakKeyDictionary()
+        self.instances: MutableMapping = WeakKeyDictionary()
 
     def __get__(self, obj, objtype=None):
         if obj is None:

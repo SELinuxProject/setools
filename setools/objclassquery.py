@@ -19,10 +19,12 @@
 import logging
 import re
 from contextlib import suppress
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .exception import NoCommon
 from .mixins import MatchName
+from .policyrep import ObjClass
 from .query import PolicyQuery
 from .util import match_regex, match_regex_or_set
 
@@ -57,17 +59,17 @@ class ObjClassQuery(MatchName, PolicyQuery):
     """
 
     common = CriteriaDescriptor("common_regex", "lookup_common")
-    common_regex = False
+    common_regex: bool = False
     perms = CriteriaSetDescriptor("perms_regex")
-    perms_equal = False
-    perms_indirect = True
-    perms_regex = False
+    perms_equal: bool = False
+    perms_indirect: bool = True
+    perms_regex: bool = False
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(ObjClassQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[ObjClass]:
         """Generator which yields all matching object classes."""
         self.log.info("Generating object class results from {0.policy}".format(self))
         self._match_name_debug(self.log)

@@ -17,19 +17,26 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
+from typing import NamedTuple
 
-from ..policyrep import RBACRuletype
+from ..policyrep import AnyRBACRule, RBACRuletype, Role, RoleAllow, RoleTransition
+
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 from .objclass import class_wrapper_factory
 from .roles import role_wrapper_factory
 from .types import type_or_attr_wrapper_factory
+from .typing import RuleList
 
 
-modified_rbacrule_record = namedtuple("modified_rbacrule", ["rule",
-                                                            "added_default",
-                                                            "removed_default"])
+class ModifiedRBACRule(NamedTuple):
+
+    """Difference details for a modified RBAC rule."""
+
+    rule: AnyRBACRule
+    added_default: Role
+    removed_default: Role
 
 
 class RBACRulesDifference(Difference):
@@ -45,32 +52,38 @@ class RBACRulesDifference(Difference):
     modified_role_transitions = DiffResultDescriptor("diff_role_transitions")
 
     # Lists of rules for each policy
-    _left_rbac_rules = defaultdict(list)
-    _right_rbac_rules = defaultdict(list)
+    _left_rbac_rules: RuleList[RBACRuletype, AnyRBACRule] = None
+    _right_rbac_rules: RuleList[RBACRuletype, AnyRBACRule] = None
 
-    def diff_role_allows(self):
+    def diff_role_allows(self) -> None:
         """Generate the difference in role allow rules between the policies."""
 
         self.log.info(
             "Generating role allow differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if not self._left_rbac_rules or not self._right_rbac_rules:
+        if self._left_rbac_rules is None or self._right_rbac_rules is None:
             self._create_rbac_rule_lists()
+
+        assert self._left_rbac_rules is not None, "Left RBAC rules didn't load, this a bug."
+        assert self._right_rbac_rules is not None, "Right RBAC rules didn't load, this a bug."
 
         self.added_role_allows, self.removed_role_allows, _ = self._set_diff(
             self._expand_generator(self._left_rbac_rules[RBACRuletype.allow], RoleAllowWrapper),
             self._expand_generator(self._right_rbac_rules[RBACRuletype.allow], RoleAllowWrapper))
 
-    def diff_role_transitions(self):
+    def diff_role_transitions(self) -> None:
         """Generate the difference in role_transition rules between the policies."""
 
         self.log.info(
             "Generating role_transition differences from {0.left_policy} to {0.right_policy}".
             format(self))
 
-        if not self._left_rbac_rules or not self._right_rbac_rules:
+        if self._left_rbac_rules is None or self._right_rbac_rules is None:
             self._create_rbac_rule_lists()
+
+        assert self._left_rbac_rules is not None, "Left RBAC rules didn't load, this a bug."
+        assert self._right_rbac_rules is not None, "Right RBAC rules didn't load, this a bug."
 
         added, removed, matched = self._set_diff(
             self._expand_generator(self._left_rbac_rules[RBACRuletype.role_transition],
@@ -83,9 +96,9 @@ class RBACRulesDifference(Difference):
             # Criteria for modified rules
             # 1. change to default role
             if role_wrapper_factory(left_rule.default) != role_wrapper_factory(right_rule.default):
-                modified.append(modified_rbacrule_record(left_rule,
-                                                         right_rule.default,
-                                                         left_rule.default))
+                modified.append(ModifiedRBACRule(left_rule,
+                                                 right_rule.default,
+                                                 left_rule.default))
 
         self.added_role_transitions = added
         self.removed_role_transitions = removed
@@ -94,42 +107,44 @@ class RBACRulesDifference(Difference):
     #
     # Internal functions
     #
-    def _create_rbac_rule_lists(self):
+    def _create_rbac_rule_lists(self) -> None:
         """Create rule lists for both policies."""
         # do not expand yet, to keep memory
         # use down as long as possible
+        self._left_rbac_rules = defaultdict(list)
         self.log.debug("Building RBAC rule lists from {0.left_policy}".format(self))
         for rule in self.left_policy.rbacrules():
             self._left_rbac_rules[rule.ruletype].append(rule)
 
+        self._right_rbac_rules = defaultdict(list)
         self.log.debug("Building RBAC rule lists from {0.right_policy}".format(self))
         for rule in self.right_policy.rbacrules():
             self._right_rbac_rules[rule.ruletype].append(rule)
 
         self.log.debug("Completed building RBAC rule lists.")
 
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting RBAC rule differences")
         self.added_role_allows = None
         self.removed_role_allows = None
-        self.modified_role_allows = None
         self.added_role_transitions = None
         self.removed_role_transitions = None
         self.modified_role_transitions = None
 
         # Sets of rules for each policy
-        self._left_rbac_rules.clear()
-        self._right_rbac_rules.clear()
+        self._left_rbac_rules = None
+        self._right_rbac_rules = None
 
 
-class RoleAllowWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class RoleAllowWrapper(Wrapper[RoleAllow]):  # pylint: disable=unsubscriptable-object
 
     """Wrap role allow rules to allow set operations."""
 
     __slots__ = ("source", "target")
 
-    def __init__(self, rule):
+    def __init__(self, rule: RoleAllow) -> None:
         self.origin = rule
         self.source = role_wrapper_factory(rule.source)
         self.target = role_wrapper_factory(rule.target)
@@ -147,13 +162,14 @@ class RoleAllowWrapper(Wrapper):
         return self.source == other.source and self.target == other.target
 
 
-class RoleTransitionWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class RoleTransitionWrapper(Wrapper[RoleTransition]):  # pylint: disable=unsubscriptable-object
 
     """Wrap role_transition rules to allow set operations."""
 
     __slots__ = ("source", "target", "tclass")
 
-    def __init__(self, rule):
+    def __init__(self, rule: RoleTransition) -> None:
         self.origin = rule
         self.source = role_wrapper_factory(rule.source)
         self.target = type_or_attr_wrapper_factory(rule.target)

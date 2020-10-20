@@ -16,16 +16,21 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import namedtuple
+from typing import NamedTuple
 
+from ..policyrep import Context, Ibendportcon
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, Wrapper
 
 
-modified_ibendportcon_record = namedtuple("modified_ibendportcon", ["rule",
-                                                                    "added_context",
-                                                                    "removed_context"])
+class ModifiedIbendportcon(NamedTuple):
+
+    """Difference details for a modified ibendportcon."""
+
+    rule: Ibendportcon
+    added_context: Context
+    removed_context: Context
 
 
 class IbendportconsDifference(Difference):
@@ -36,7 +41,7 @@ class IbendportconsDifference(Difference):
     removed_ibendportcons = DiffResultDescriptor("diff_ibendportcons")
     modified_ibendportcons = DiffResultDescriptor("diff_ibendportcons")
 
-    def diff_ibendportcons(self):
+    def diff_ibendportcons(self) -> None:
         """Generate the difference in ibendportcons between the policies."""
 
         self.log.info(
@@ -55,14 +60,12 @@ class IbendportconsDifference(Difference):
             # 1. change to context
             if ContextWrapper(left_ibep.context) != ContextWrapper(right_ibep.context):
                 self.modified_ibendportcons.append(
-                    modified_ibendportcon_record(left_ibep,
-                                                 right_ibep.context,
-                                                 left_ibep.context))
+                    ModifiedIbendportcon(left_ibep, right_ibep.context, left_ibep.context))
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting ibendportcon differences")
         self.added_ibendportcons = None
@@ -70,13 +73,14 @@ class IbendportconsDifference(Difference):
         self.modified_ibendportcons = None
 
 
-class IbendportconWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class IbendportconWrapper(Wrapper[Ibendportcon]):  # pylint: disable=unsubscriptable-object
 
     """Wrap ibendportcon statements for diff purposes."""
 
     __slots__ = ("name", "port")
 
-    def __init__(self, ocon):
+    def __init__(self, ocon: Ibendportcon) -> None:
         self.origin = ocon
         self.name = ocon.name
         self.port = ocon.port

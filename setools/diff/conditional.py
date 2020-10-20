@@ -19,13 +19,16 @@
 #
 from collections import defaultdict
 
+from ..policyrep import Conditional
+
 from .difference import Wrapper
+from .typing import Cache
 
 
-_cond_cache = defaultdict(dict)
+_cond_cache: Cache[Conditional, "ConditionalWrapper"] = defaultdict(dict)
 
 
-def conditional_wrapper_factory(cond):
+def conditional_wrapper_factory(cond: Conditional) -> "ConditionalWrapper":
     """
     Wrap type attributes from the specified policy.
 
@@ -40,13 +43,14 @@ def conditional_wrapper_factory(cond):
         return a
 
 
-class ConditionalWrapper(Wrapper):
+# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
+class ConditionalWrapper(Wrapper[Conditional]):  # pylint: disable=unsubscriptable-object
 
     """Wrap conditional policy expressions to allow comparisons by truth table."""
 
     __slots__ = ("truth_table")
 
-    def __init__(self, cond):
+    def __init__(self, cond: Conditional) -> None:
         self.origin = cond
         self.truth_table = cond.truth_table()
 

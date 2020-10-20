@@ -32,8 +32,24 @@ from .policyrep import SELinuxPolicy, BoundsRuletype, ConstraintRuletype, Defaul
     DefaultRangeValue, DefaultValue, FSUseRuletype, HandleUnknown, IbpkeyconRange, MLSRuletype, \
     NodeconIPVersion, PolicyTarget, PortconProtocol, RBACRuletype, TERuletype
 
+# Policy representation classes for type checking purposes.  Few can be instantiated
+# outside of this library.
+from .policyrep import AnyConstraint, AnyDefault, AnyRBACRule, AnyTERule, AVRule, AVRuleXperm, \
+    Boolean, Bounds, Category, Common, Conditional, Constraint, Context, Default, DefaultRange, \
+    Devicetreecon, FSUse, FileNameTERule, Genfscon, Ibendportcon, Ibpkeycon, InitialSID, \
+    IoctlSet, Iomemcon, IomemconRange, Ioportcon, IoportconRange, Level, LevelDecl, MLSRule, \
+    Netifcon, Nodecon, ObjClass, Pcidevicecon, Pirqcon, PolicyCapability, Portcon, PortconRange, \
+    Range, Role, RoleAllow, RoleTransition, Sensitivity, TERule, TruthTableRow, Type, \
+    TypeAttribute, User, Validatetrans
+
 # Exceptions
 from . import exception
+
+# Base class for policy queries for type checking purposes
+from .query import PolicyQuery
+
+# utility functions
+from .util import xperm_str_to_tuple_ranges
 
 # Component Queries
 from .boolquery import BoolQuery
@@ -76,10 +92,10 @@ from .devicetreeconquery import DevicetreeconQuery
 
 # Information Flow Analysis
 from .infoflow import InfoFlowAnalysis
-from .permmap import PermissionMap
+from .permmap import PermissionMap, RuleWeight, Mapping
 
 # Domain Transition Analysis
-from .dta import DomainTransitionAnalysis
+from .dta import DomainTransitionAnalysis, DomainEntrypoint, DomainTransition
 
 # Policy difference
 from .diff import PolicyDifference

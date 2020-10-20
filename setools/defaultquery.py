@@ -18,11 +18,12 @@
 #
 import logging
 import re
+from typing import cast, Iterable
 
 from .query import PolicyQuery
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .mixins import MatchObjClass
-from .policyrep import DefaultRuletype, DefaultValue, DefaultRangeValue
+from .policyrep import AnyDefault, DefaultRange, DefaultRuletype, DefaultValue, DefaultRangeValue
 
 
 class DefaultQuery(MatchObjClass, PolicyQuery):
@@ -47,11 +48,11 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
     default = CriteriaDescriptor(enum_class=DefaultValue)
     default_range = CriteriaDescriptor(enum_class=DefaultRangeValue)
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(DefaultQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[AnyDefault]:
         """Generator which yields all matching default_* statements."""
         self.log.info("Generating default_* results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype!r}".format(self))
@@ -71,7 +72,7 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
 
             if self.default_range:
                 try:
-                    if d.default_range != self.default_range:
+                    if cast(DefaultRange, d).default_range != self.default_range:
                         continue
                 except AttributeError:
                     continue

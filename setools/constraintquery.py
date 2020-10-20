@@ -18,11 +18,12 @@
 #
 import logging
 import re
+from typing import Iterable, Set
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .exception import ConstraintUseError
 from .mixins import MatchObjClass, MatchPermission
-from .policyrep import ConstraintRuletype
+from .policyrep import AnyConstraint, ConstraintRuletype
 from .query import PolicyQuery
 from .util import match_in_set
 
@@ -67,15 +68,15 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
 
     ruletype = CriteriaSetDescriptor(enum_class=ConstraintRuletype)
     user = CriteriaDescriptor("user_regex", "lookup_user")
-    user_regex = False
+    user_regex: bool = False
     role = CriteriaDescriptor("role_regex", "lookup_role")
-    role_regex = False
-    role_indirect = True
+    role_regex: bool = False
+    role_indirect: bool = True
     type_ = CriteriaDescriptor("type_regex", "lookup_type_or_attr")
-    type_regex = False
-    type_indirect = True
+    type_regex: bool = False
+    type_indirect: bool = True
 
-    def __init__(self, policy, **kwargs):
+    def __init__(self, policy, **kwargs) -> None:
         super(ConstraintQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
@@ -100,7 +101,7 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
 
         return match_in_set(obj, criteria, regex)
 
-    def results(self):
+    def results(self) -> Iterable[AnyConstraint]:
         """Generator which yields all matching constraints rules."""
         self.log.info("Generating constraint results from {0.policy}".format(self))
         self.log.debug("Ruletypes: {0.ruletype}".format(self))

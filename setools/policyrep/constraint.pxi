@@ -19,6 +19,12 @@
 #
 
 #
+# Typing
+#
+AnyConstraint = TypeVar("AnyConstraint", bound=BaseConstraint)
+
+
+#
 # Classes
 #
 class ConstraintRuletype(PolicyEnum):
@@ -167,6 +173,9 @@ cdef class ConstraintExpression(PolicyObject):
 
     def __getitem__(self, idx):
         return self._postfix[idx]
+
+    def __iter__(self):
+        return iter(self._postfix)
 
     def __eq__(self, other):
         return self._postfix == other

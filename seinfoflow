@@ -22,6 +22,7 @@ import argparse
 import sys
 import logging
 import signal
+from typing import Dict, Optional
 
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
@@ -81,7 +82,7 @@ elif args.verbose:
 else:
     logging.basicConfig(level=logging.WARNING, format='%(message)s')
 
-booleans = None
+booleans: Optional[Dict[str, bool]] = None
 if args.booleans == 'default':
     booleans = {}
 elif args.booleans is not None:

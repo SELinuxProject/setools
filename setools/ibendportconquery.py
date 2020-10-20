@@ -17,8 +17,10 @@
 # <http://www.gnu.org/licenses/>.
 #
 import logging
+from typing import Iterable, Optional
 
 from .mixins import MatchContext, MatchName
+from .policyrep import Ibendportcon
 from .query import PolicyQuery
 from .util import match_regex
 
@@ -56,14 +58,14 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _port = None
+    _port: Optional[int] = None
 
     @property
-    def port(self):
+    def port(self) -> Optional[int]:
         return self._port
 
     @port.setter
-    def port(self, value):
+    def port(self, value: Optional[int]) -> None:
         if value:
             pending_value = int(value)
             if not 0 < pending_value < 256:
@@ -77,7 +79,7 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
         super(IbendportconQuery, self).__init__(policy, **kwargs)
         self.log = logging.getLogger(__name__)
 
-    def results(self):
+    def results(self) -> Iterable[Ibendportcon]:
         """Generator which yields all matching ibendportcons."""
         self.log.info("Generating ibendportcon results from {0.policy}".format(self))
         self._match_name_debug(self.log)

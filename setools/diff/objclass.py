@@ -17,23 +17,30 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
-from collections import defaultdict, namedtuple
+from collections import defaultdict
 from contextlib import suppress
+from typing import NamedTuple, Set
 
 from ..exception import NoCommon
+from ..policyrep import ObjClass
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
+from .typing import SymbolCache
+
+_class_cache: SymbolCache[ObjClass] = defaultdict(dict)
 
 
-modified_classes_record = namedtuple("modified_class", ["added_perms",
-                                                        "removed_perms",
-                                                        "matched_perms"])
+class ModifiedObjClass(NamedTuple):
 
-_class_cache = defaultdict(dict)
+    """Difference details for a modified object class."""
+
+    added_perms: Set[str]
+    removed_perms: Set[str]
+    matched_perms: Set[str]
 
 
-def class_wrapper_factory(class_):
+def class_wrapper_factory(class_: ObjClass) -> SymbolWrapper[ObjClass]:
     """
     Wrap class from the specified policy.
 
@@ -60,7 +67,7 @@ class ObjClassDifference(Difference):
     removed_classes = DiffResultDescriptor("diff_classes")
     modified_classes = DiffResultDescriptor("diff_classes")
 
-    def diff_classes(self):
+    def diff_classes(self) -> None:
         """Generate the difference in object classes between the policies."""
 
         self.log.info(
@@ -89,14 +96,14 @@ class ObjClassDifference(Difference):
                                                                        unwrap=False)
 
             if added_perms or removed_perms:
-                self.modified_classes[left_class] = modified_classes_record(added_perms,
-                                                                            removed_perms,
-                                                                            matched_perms)
+                self.modified_classes[left_class] = ModifiedObjClass(added_perms,
+                                                                     removed_perms,
+                                                                     matched_perms)
 
     #
     # Internal functions
     #
-    def _reset_diff(self):
+    def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting object class differences")
         self.added_classes = None

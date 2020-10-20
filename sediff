@@ -24,6 +24,7 @@ import logging
 import signal
 from itertools import chain
 from contextlib import suppress
+from typing import List
 
 
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -136,6 +137,8 @@ try:
     p1 = setools.SELinuxPolicy(args.POLICY1[0])
     p2 = setools.SELinuxPolicy(args.POLICY2[0])
     diff = setools.PolicyDifference(p1, p2)
+
+    perms: List[str]
 
     if all_differences or args.property:
         if diff.modified_properties or args.property:
@@ -523,11 +526,11 @@ try:
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(diff.modified_allows,
                                                                               key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
+                    perm_str = " ".join(chain((p for p in matched_perms),
+                                              ("+" + p for p in added_perms),
+                                              ("-" + p for p in removed_perms)))
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
+                        rule, perm_str)
 
                     with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
@@ -620,11 +623,11 @@ try:
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
                         diff.modified_neverallows, key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
+                    perm_str = " ".join(chain((p for p in matched_perms),
+                                              ("+" + p for p in added_perms),
+                                              ("-" + p for p in removed_perms)))
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
+                        rule, perm_str)
 
                     with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
@@ -720,11 +723,11 @@ try:
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
                         diff.modified_auditallows, key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
+                    perm_str = " ".join(chain((p for p in matched_perms),
+                                              ("+" + p for p in added_perms),
+                                              ("-" + p for p in removed_perms)))
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
+                        rule, perm_str)
 
                     with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
@@ -820,11 +823,11 @@ try:
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
                         diff.modified_dontaudits, key=lambda x: x.rule):
-                    perms = " ".join(chain((p for p in matched_perms),
-                                           ("+" + p for p in added_perms),
-                                           ("-" + p for p in removed_perms)))
+                    perm_str = " ".join(chain((p for p in matched_perms),
+                                              ("+" + p for p in added_perms),
+                                              ("-" + p for p in removed_perms)))
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {{ {1} }};".format(
-                        rule, perms)
+                        rule, perm_str)
 
                     with suppress(AttributeError):
                         rule_string += " [ {0} ]".format(rule.conditional)
