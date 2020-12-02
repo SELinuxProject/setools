@@ -27,7 +27,7 @@ from setools import BoundsQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..boundsmodel import BoundsTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
@@ -37,6 +37,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, \
 class BoundsQueryTab(AnalysisTab):
 
     """Bounds browser and query tab."""
+
+    section = AnalysisSection.Other
+    tab_title = "Bounds"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(BoundsQueryTab, self).__init__(parent)

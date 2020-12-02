@@ -27,7 +27,7 @@ from setools import PortconQuery, PortconProtocol
 
 from ..logtosignal import LogHandlerToSignal
 from ..portconmodel import PortconTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, load_comboboxes, \
@@ -37,6 +37,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, load_com
 class PortconQueryTab(AnalysisTab):
 
     """An portcon query."""
+
+    section = AnalysisSection.Labeling
+    tab_title = "Network Port Contexts"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(PortconQueryTab, self).__init__(parent)

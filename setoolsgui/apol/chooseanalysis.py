@@ -16,68 +16,13 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from collections import defaultdict
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QTreeWidgetItem
 
 from ..widget import SEToolsWidget
-
-# Analysis tabs:
-from .boolquery import BoolQueryTab
-from .boundsquery import BoundsQueryTab
-from .categoryquery import CategoryQueryTab
-from .commonquery import CommonQueryTab
-from .constraintquery import ConstraintQueryTab
-from .defaultquery import DefaultQueryTab
-from .dta import DomainTransitionAnalysisTab
-from .fsusequery import FSUseQueryTab
-from .genfsconquery import GenfsconQueryTab
-from .ibendportconquery import IbendportconQueryTab
-from .ibpkeyconquery import IbpkeyconQueryTab
-from .infoflow import InfoFlowAnalysisTab
-from .initsidquery import InitialSIDQueryTab
-from .mlsrulequery import MLSRuleQueryTab
-from .netifconquery import NetifconQueryTab
-from .nodeconquery import NodeconQueryTab
-from .objclassquery import ObjClassQueryTab
-from .portconquery import PortconQueryTab
-from .rbacrulequery import RBACRuleQueryTab
-from .rolequery import RoleQueryTab
-from .sensitivityquery import SensitivityQueryTab
-from .summary import SummaryTab
-from .terulequery import TERuleQueryTab
-from .typeattrquery import TypeAttributeQueryTab
-from .typequery import TypeQueryTab
-from .userquery import UserQueryTab
-
-
-# TODO: is there a better way than hardcoding this while still being safe?
-tab_map = {"BoolQueryTab": BoolQueryTab,
-           "BoundsQueryTab": BoundsQueryTab,
-           "CategoryQueryTab": CategoryQueryTab,
-           "CommonQueryTab": CommonQueryTab,
-           "ConstraintQueryTab": ConstraintQueryTab,
-           "DefaultQueryTab": DefaultQueryTab,
-           "DomainTransitionAnalysisTab": DomainTransitionAnalysisTab,
-           "FSUseQueryTab": FSUseQueryTab,
-           "GenfsconQueryTab": GenfsconQueryTab,
-           "IbendportconQueryTab": IbendportconQueryTab,
-           "IbpkeyconQueryTab": IbpkeyconQueryTab,
-           "InfoFlowAnalysisTab": InfoFlowAnalysisTab,
-           "InitialSIDQueryTab": InitialSIDQueryTab,
-           "MLSRuleQueryTab": MLSRuleQueryTab,
-           "NetifconQueryTab": NetifconQueryTab,
-           "NodeconQueryTab": NodeconQueryTab,
-           "ObjClassQueryTab": ObjClassQueryTab,
-           "PortconQueryTab": PortconQueryTab,
-           "RBACRuleQueryTab": RBACRuleQueryTab,
-           "RoleQueryTab": RoleQueryTab,
-           "SensitivityQueryTab": SensitivityQueryTab,
-           "SummaryTab": SummaryTab,
-           "TERuleQueryTab": TERuleQueryTab,
-           "TypeAttributeQueryTab": TypeAttributeQueryTab,
-           "TypeQueryTab": TypeQueryTab,
-           "UserQueryTab": UserQueryTab}
+from .analysistab import AnalysisSection, AnalysisTab, TAB_REGISTRY
 
 
 class ChooseAnalysis(SEToolsWidget, QDialog):
@@ -93,54 +38,27 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
     def __init__(self, parent):
         super(ChooseAnalysis, self).__init__(parent)
         self.parent = parent
+
+        # populate the analysis choices tree:
+        self.analysis_choices = defaultdict(dict)
+        for clsobj in TAB_REGISTRY.values():
+            self.analysis_choices[clsobj.section.name][clsobj.tab_title] = clsobj
+
         self.setupUi()
 
     def setupUi(self):
         self.load_ui("apol/choose_analysis.ui")
 
     def show(self, mls):
-        analysis_map = {"Domain Transition Analysis": DomainTransitionAnalysisTab,
-                        "Information Flow Analysis": InfoFlowAnalysisTab}
-        components_map = {"Booleans": BoolQueryTab,
-                          "Commons": CommonQueryTab,
-                          "Roles": RoleQueryTab,
-                          "Object Classes": ObjClassQueryTab,
-                          "Types": TypeQueryTab,
-                          "Type Attributes": TypeAttributeQueryTab,
-                          "Users": UserQueryTab}
-        rule_map = {"Constraints": ConstraintQueryTab,
-                    "RBAC Rules": RBACRuleQueryTab,
-                    "TE Rules": TERuleQueryTab}
-        labeling_map = {"Fs_use_* Statements": FSUseQueryTab,
-                        "Genfscon Statements": GenfsconQueryTab,
-                        "Infiniband Endport Contexts": IbendportconQueryTab,
-                        "Infiniband Partition Key Contexts": IbpkeyconQueryTab,
-                        "Initial SID Statements": InitialSIDQueryTab,
-                        "Network Interface Contexts": NetifconQueryTab,
-                        "Network Node Contexts": NodeconQueryTab,
-                        "Network Port Contexts": PortconQueryTab}
-        general_choices = {"Summary": SummaryTab}
-        other_choices = {"Bounds": BoundsQueryTab,
-                         "Defaults": DefaultQueryTab}
-        analysis_choices = {"Components": components_map,
-                            "Rules": rule_map,
-                            "Analyses": analysis_map,
-                            "Labeling": labeling_map,
-                            "General": general_choices,
-                            "Other": other_choices}
-
-        if mls:
-            rule_map["MLS Rules"] = MLSRuleQueryTab
-            components_map["Categories"] = CategoryQueryTab
-            components_map["Sensitivities"] = SensitivityQueryTab
-
-        # populate the item list:
         self.analysisTypes.clear()
-        for groupname, group in analysis_choices.items():
+        for groupname, group in self.analysis_choices.items():
             groupitem = QTreeWidgetItem(self.analysisTypes)
             groupitem.setText(0, groupname)
             groupitem._tab_class = None
             for entryname, cls in group.items():
+                if cls.mlsonly and not mls:
+                    continue
+
                 item = QTreeWidgetItem(groupitem)
                 item.setText(0, entryname)
                 item._tab_class = cls

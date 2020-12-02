@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialo
 from setools import DomainTransitionAnalysis
 
 from ..logtosignal import LogHandlerToSignal
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .excludetypes import ExcludeTypes
 from .exception import TabFieldError
 from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_textedits, \
@@ -36,6 +36,10 @@ from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_tex
 class DomainTransitionAnalysisTab(AnalysisTab):
 
     """A domain transition analysis tab."""
+
+    section = AnalysisSection.Analysis
+    tab_title = "Domain Transition Analysis"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(DomainTransitionAnalysisTab, self).__init__(parent)

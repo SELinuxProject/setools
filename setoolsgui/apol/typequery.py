@@ -27,7 +27,7 @@ from setools import TypeQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..typemodel import TypeTableModel, type_detail
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
@@ -37,6 +37,10 @@ from .workspace import load_checkboxes, load_lineedits, load_listviews, load_tex
 class TypeQueryTab(AnalysisTab):
 
     """Type browser and query tab."""
+
+    section = AnalysisSection.Components
+    tab_title = "Types"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(TypeQueryTab, self).__init__(parent)

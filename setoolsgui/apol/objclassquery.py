@@ -27,7 +27,7 @@ from setools import ObjClassQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import PermListModel, SEToolsListModel, invert_list_selection
 from ..objclassmodel import ObjClassTableModel, class_detail
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
@@ -37,6 +37,10 @@ from .workspace import load_checkboxes, load_lineedits, load_listviews, load_tex
 class ObjClassQueryTab(AnalysisTab):
 
     """ObjClass browser and query tab."""
+
+    section = AnalysisSection.Components
+    tab_title = "Object Classes"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(ObjClassQueryTab, self).__init__(parent)

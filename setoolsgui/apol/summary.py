@@ -28,7 +28,7 @@ from setools import MLSRuleQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..mlsrulemodel import MLSRuleTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_textedits, save_checkboxes, save_textedits
 
@@ -36,6 +36,10 @@ from .workspace import load_checkboxes, load_textedits, save_checkboxes, save_te
 class SummaryTab(AnalysisTab):
 
     """An SELinux policy summary."""
+
+    section = AnalysisSection.General
+    tab_title = "Summary"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(SummaryTab, self).__init__(parent)

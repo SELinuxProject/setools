@@ -26,7 +26,7 @@ from setools import FSUseQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..fsusemodel import FSUseTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
@@ -36,6 +36,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, \
 class FSUseQueryTab(AnalysisTab):
 
     """A fs_use_* rule query."""
+
+    section = AnalysisSection.Labeling
+    tab_title = "Fs_use_* Statements"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(FSUseQueryTab, self).__init__(parent)

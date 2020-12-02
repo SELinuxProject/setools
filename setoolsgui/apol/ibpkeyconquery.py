@@ -26,7 +26,7 @@ from setools import IbpkeyconQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..ibpkeyconmodel import IbpkeyconTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
@@ -36,6 +36,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, \
 class IbpkeyconQueryTab(AnalysisTab):
 
     """An ibpkeycon query."""
+
+    section = AnalysisSection.Labeling
+    tab_title = "Infiniband Partition Key Contexts"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super().__init__(parent)
