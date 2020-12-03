@@ -1,0 +1,86 @@
+name: Build tests
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+env:
+  SELINUX_USERSPACE_VERSION: libsepol-3.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        build-opts:
+          - {python: 3.6, tox: py36}
+          - {python: 3.7, tox: py37}
+          - {python: 3.8, tox: py38}
+          - {python: 3.6, tox: pep8}
+          - {python: 3.6, tox: lint}
+          - {python: 3.6, tox: mypy}
+          #- {python: 3.6, tox: coverage}
+  
+    steps:
+    - uses: actions/checkout@v2
+
+    # This should be the minimum required Python version to build refpolicy.
+    - name: Set up Python ${{ matrix.build-opts.python }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.build-opts.python }}
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -qqy \
+            bison \
+            flex \
+            gettext \
+            libaudit-dev \
+            libbz2-dev \
+            libpcre3-dev \
+            python3-pip
+
+        sudo pip3 install \
+            cython \
+            setuptools \
+            tox
+
+    - name: Configure environment
+      run: |
+        USERSPACE_SRC=/tmp/selinux-src
+        SEPOL_SRC=${USERSPACE_SRC}/libsepol
+        LIBSEPOLA=${SEPOL_SRC}/src/libsepol.a
+        echo "USERSPACE_SRC=$USERSPACE_SRC" >> $GITHUB_ENV
+        echo "SEPOL_SRC=${SEPOL_SRC}" >> $GITHUB_ENV
+        echo "LIBSEPOLA=${LIBSEPOLA}" >> $GITHUB_ENV
+        echo "SELINUX_SRC=${USERSPACE_SRC}/libselinux" >> $GITHUB_ENV
+        echo "CHECKPOLICY_SRC=${USERSPACE_SRC}/checkpolicy" >> $GITHUB_ENV
+
+    - name: Build toolchain
+      run: |
+        # Download current SELinux userspace tools and libraries
+        git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
+
+        # Compile SELinux userspace
+        make -C ${SEPOL_SRC}
+        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" LDFLAGS="-L${SEPOL_SRC}/src" -C ${SELINUX_SRC}
+        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" -C ${CHECKPOLICY_SRC}
+
+    - name: Set up setools for CI build
+      run: |
+        sed -i \
+          -e "/Wwrite-strings/s/,/, '-Wno-maybe-uninitialized',/" \
+          -e "s/-Wno-cast-function-type/-Wno-missing-include-dirs/" \
+          setup.py
+
+    - name: Run test
+      run: |
+        export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src:${LD_LIBRARY_PATH}"
+        tox -vv -e ${{ matrix.build-opts.tox }}
