@@ -150,6 +150,11 @@ class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
     policy          The instance of SELinuxPolicy
     tclass          If it exists, it will be used to validate the
                     permissions.  See validate_perms_any()
+    tclass_regex    If tclass is a regex, the above permission validation
+                    will not use tclass: permissions are verified to be in
+                    at least one class in the policy but not verified that the
+                    permissions are in classes that the regex matches.  Assumes False
+                    if the attribute doesn't exist.
     """
 
     def __init__(self, name_regex: Optional[str] = None, default_value=None) -> None:
@@ -169,12 +174,19 @@ class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
             self.instances[obj] = re.compile(value)
         else:
             perms = frozenset(v for v in value)
-            tclass = getattr(obj, "tclass", None)
+
+            if getattr(obj, "tclass_regex", False):
+                tclass = None
+            else:
+                tclass = getattr(obj, "tclass", None)
+
             if tclass and not isinstance(tclass, Collection):
                 tclass = frozenset((tclass,))
+
             validate_perms_any(perms,
                                tclass=tclass,
                                policy=obj.policy)
+
             self.instances[obj] = perms
 
 
