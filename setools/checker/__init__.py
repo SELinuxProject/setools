@@ -17,4 +17,9 @@
 # <http://www.gnu.org/licenses/>.
 #
 
+from . import assertrbac
+from . import assertte
+from . import emptyattr
+from . import roexec
+
 from .checker import PolicyChecker
