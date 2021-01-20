@@ -29,7 +29,7 @@ from setools import DefaultQuery, DefaultValue, DefaultRangeValue
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..defaultmodel import DefaultTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_comboboxes, load_listviews, load_textedits, \
     save_checkboxes, save_comboboxes, save_listviews, save_textedits
@@ -38,6 +38,10 @@ from .workspace import load_checkboxes, load_comboboxes, load_listviews, load_te
 class DefaultQueryTab(AnalysisTab):
 
     """Default browser and query tab."""
+
+    section = AnalysisSection.Other
+    tab_title = "Defaults"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(DefaultQueryTab, self).__init__(parent)

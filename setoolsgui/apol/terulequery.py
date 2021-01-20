@@ -28,7 +28,7 @@ from setools import TERuleQuery, xperm_str_to_tuple_ranges
 from ..logtosignal import LogHandlerToSignal
 from ..models import PermListModel, SEToolsListModel, invert_list_selection
 from ..terulemodel import TERuleTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
@@ -38,6 +38,10 @@ from .workspace import load_checkboxes, load_lineedits, load_listviews, load_tex
 class TERuleQueryTab(AnalysisTab):
 
     """A Type Enforcement rule query."""
+
+    section = AnalysisSection.Rules
+    tab_title = "TE Rules"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(TERuleQueryTab, self).__init__(parent)

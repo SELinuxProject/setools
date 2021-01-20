@@ -27,7 +27,7 @@ from setools import NetifconQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..netifconmodel import NetifconTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
@@ -37,6 +37,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, \
 class NetifconQueryTab(AnalysisTab):
 
     """A netifcon query."""
+
+    section = AnalysisSection.Labeling
+    tab_title = "Network Interface Contexts"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(NetifconQueryTab, self).__init__(parent)

@@ -28,7 +28,7 @@ from setools import MLSRuleQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..mlsrulemodel import MLSRuleTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
@@ -38,6 +38,10 @@ from .workspace import load_checkboxes, load_lineedits, load_listviews, load_tex
 class MLSRuleQueryTab(AnalysisTab):
 
     """An MLS rule query."""
+
+    section = AnalysisSection.Rules
+    tab_title = "MLS Rules"
+    mlsonly = True
 
     def __init__(self, parent, policy, perm_map):
         super(MLSRuleQueryTab, self).__init__(parent)

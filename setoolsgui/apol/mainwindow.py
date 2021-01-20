@@ -30,7 +30,8 @@ from setools import __version__, PermissionMap, SELinuxPolicy
 
 from ..widget import SEToolsWidget
 from ..logtosignal import LogHandlerToSignal
-from .chooseanalysis import ChooseAnalysis, tab_map
+from .analysistab import TAB_REGISTRY
+from .chooseanalysis import ChooseAnalysis
 from .config import ApolConfig
 from .exception import TabFieldError
 from .permmapedit import PermissionMapEditor
@@ -393,7 +394,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
 
         if new:
             try:
-                tabclass = tab_map[settings["__tab__"]]
+                tabclass = TAB_REGISTRY[settings["__tab__"]]
             except KeyError:
                 self.log.critical("Missing analysis type in \"{0}\"".format(filename))
                 self.error_msg.critical(self, "Failed to load settings",
@@ -546,7 +547,7 @@ class ApolMainWindow(SEToolsWidget, QMainWindow):
         loading_errors = []
         for i, settings in enumerate(tab_list):
             try:
-                tabclass = tab_map[settings["__tab__"]]
+                tabclass = TAB_REGISTRY[settings["__tab__"]]
             except KeyError:
                 error_str = "Missing analysis type for tab {0}. Skipping this tab.".format(i)
                 self.log.error(error_str)

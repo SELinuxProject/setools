@@ -28,7 +28,7 @@ from setools import SensitivityQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..mlsmodel import MLSComponentTableModel, sensitivity_detail
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
@@ -38,6 +38,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, \
 class SensitivityQueryTab(AnalysisTab):
 
     """Sensitivity browser and query tab."""
+
+    section = AnalysisSection.Components
+    tab_title = "MLS Sensitivities"
+    mlsonly = True
 
     def __init__(self, parent, policy, perm_map):
         super(SensitivityQueryTab, self).__init__(parent)

@@ -28,7 +28,7 @@ from setools import TypeAttributeQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..typeattrmodel import TypeAttributeTableModel, typeattr_detail
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
@@ -38,6 +38,10 @@ from .workspace import load_checkboxes, load_lineedits, load_listviews, load_tex
 class TypeAttributeQueryTab(AnalysisTab):
 
     """TypeAttribute browser and query tab."""
+
+    section = AnalysisSection.Components
+    tab_title = "Type Attributes"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(TypeAttributeQueryTab, self).__init__(parent)

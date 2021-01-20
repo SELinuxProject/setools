@@ -27,7 +27,7 @@ from setools import GenfsconQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..genfsconmodel import GenfsconTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
@@ -37,6 +37,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, \
 class GenfsconQueryTab(AnalysisTab):
 
     """A fs_use_* rule query."""
+
+    section = AnalysisSection.Labeling
+    tab_title = "Genfscon Statements"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(GenfsconQueryTab, self).__init__(parent)

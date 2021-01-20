@@ -30,7 +30,7 @@ from setools import InfoFlowAnalysis
 from setools.exception import UnmappedClass, UnmappedPermission
 
 from ..logtosignal import LogHandlerToSignal
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .excludetypes import ExcludeTypes
 from .permmapedit import PermissionMapEditor
@@ -41,6 +41,10 @@ from .workspace import load_checkboxes, load_spinboxes, load_lineedits, load_tex
 class InfoFlowAnalysisTab(AnalysisTab):
 
     """An information flow analysis tab."""
+
+    section = AnalysisSection.Analysis
+    tab_title = "Information Flow Analysis"
+    mlsonly = False
 
     @property
     def perm_map(self):

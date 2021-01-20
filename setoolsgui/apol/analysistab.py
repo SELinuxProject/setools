@@ -16,12 +16,69 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+from typing import Dict, NamedTuple
+from enum import Enum
+
+import sip
 from PyQt5.QtWidgets import QDialogButtonBox, QScrollArea
 
 from ..widget import SEToolsWidget
 
 
-class AnalysisTab(SEToolsWidget, QScrollArea):
+class AnalysisSection(Enum):
+
+    """Groupings of analysis tabs"""
+
+    Analysis = 1
+    Components = 2
+    General = 3
+    Labeling = 4
+    Other = 5
+    Rules = 6
+
+
+TAB_REGISTRY: Dict[str, type] = {}
+
+
+class TabRegistry(sip.wrappertype):
+
+    """
+    Analysis tab registry metaclass.  This registers tabs to be used both for
+    populating the content of the "choose analysis" dialog and also for
+    saving tab/workspace info.
+    """
+
+    def __new__(cls, clsname, superclasses, attributedict):
+        classdef = super().__new__(cls, clsname, superclasses, attributedict)
+
+        if clsname != "AnalysisTab":
+            assert "section" in attributedict, "Class {} is missing the section value, " \
+                "this is an setools bug".format(clsname)
+
+            assert "tab_title" in attributedict, "Class {} is missing the tab_title value, " \
+                "this is an setools bug".format(clsname)
+
+            assert "mlsonly" in attributedict, "Class {} is missing the mlsonly value, " \
+                "this is an setools bug".format(clsname)
+
+            # ensure there is no duplication of class name or title
+            for existing_tabname, existing_class in TAB_REGISTRY.items():
+                if existing_tabname == clsname:
+                    raise TypeError("Analysis tab {} conflicts with registered tab {}, "
+                                    "this is an setools bug".format(clsname, existing_tabname))
+
+                if existing_class.tab_title == attributedict["tab_title"]:
+                    raise TypeError("Analysis tab {}'s title \"{}\" conflicts with registered tab "
+                                    "{}, this is an setools bug.".
+                                    format(clsname, attributedict["tab_title"], existing_tabname))
+
+            TAB_REGISTRY[clsname] = classdef
+
+        return classdef
+
+
+# pylint: disable=invalid-metaclass
+class AnalysisTab(SEToolsWidget, QScrollArea, metaclass=TabRegistry):
 
     """Base class for Apol analysis tabs."""
 

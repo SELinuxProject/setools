@@ -27,7 +27,7 @@ from setools import InitialSIDQuery
 
 from ..logtosignal import LogHandlerToSignal
 from ..initsidmodel import InitialSIDTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_textedits, \
@@ -37,6 +37,10 @@ from .workspace import load_checkboxes, load_lineedits, load_textedits, \
 class InitialSIDQueryTab(AnalysisTab):
 
     """An initial SID query."""
+
+    section = AnalysisSection.Labeling
+    tab_title = "Initial SID Statements"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(InitialSIDQueryTab, self).__init__(parent)

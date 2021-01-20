@@ -28,7 +28,7 @@ from setools import RBACRuleQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import SEToolsListModel, invert_list_selection
 from ..rbacrulemodel import RBACRuleTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
@@ -38,6 +38,10 @@ from .workspace import load_checkboxes, load_lineedits, load_listviews, load_tex
 class RBACRuleQueryTab(AnalysisTab):
 
     """A RBAC rule query."""
+
+    section = AnalysisSection.Rules
+    tab_title = "RBAC Rules"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(RBACRuleQueryTab, self).__init__(parent)

@@ -28,7 +28,7 @@ from setools import ConstraintQuery
 from ..logtosignal import LogHandlerToSignal
 from ..models import PermListModel, SEToolsListModel, invert_list_selection
 from ..constraintmodel import ConstraintTableModel
-from .analysistab import AnalysisTab
+from .analysistab import AnalysisSection, AnalysisTab
 from .exception import TabFieldError
 from .queryupdater import QueryResultsUpdater
 from .workspace import load_checkboxes, load_lineedits, load_listviews, load_textedits, \
@@ -38,6 +38,10 @@ from .workspace import load_checkboxes, load_lineedits, load_listviews, load_tex
 class ConstraintQueryTab(AnalysisTab):
 
     """A constraint query."""
+
+    section = AnalysisSection.Rules
+    tab_title = "Constraints"
+    mlsonly = False
 
     def __init__(self, parent, policy, perm_map):
         super(ConstraintQueryTab, self).__init__(parent)
