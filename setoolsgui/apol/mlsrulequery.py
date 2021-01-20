@@ -18,6 +18,7 @@
 #
 
 import logging
+from contextlib import suppress
 
 from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
 from PyQt5.QtGui import QPalette, QTextCursor
@@ -46,8 +47,10 @@ class MLSRuleQueryTab(AnalysisTab):
         self.setupUi()
 
     def __del__(self):
-        self.thread.quit()
-        self.thread.wait(5000)
+        with suppress(RuntimeError):
+            self.thread.quit()
+            self.thread.wait(5000)
+
         logging.getLogger("setools.mlsrulequery").removeHandler(self.handler)
 
     def setupUi(self):
