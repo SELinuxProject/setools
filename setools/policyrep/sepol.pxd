@@ -544,21 +544,22 @@ cdef extern from "<sepol/policydb/policydb.h>":
     ctypedef cond_bool_datum cond_bool_datum_t
 
     #
-    # filename_trans_t
+    # filename_trans_key_t
     #
-    cdef struct filename_trans:
-        uint32_t stype
+    cdef struct filename_trans_key:
         uint32_t ttype
         uint32_t tclass
         char *name
 
-    ctypedef filename_trans filename_trans_t
+    ctypedef filename_trans_key filename_trans_key_t
 
     #
     # filename_trans_datum_t
     #
     cdef struct filename_trans_datum:
+        ebitmap_t stypes
         uint32_t otype
+        filename_trans_datum *next
 
     ctypedef filename_trans_datum filename_trans_datum_t
 
