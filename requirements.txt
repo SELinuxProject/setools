@@ -1,0 +1,4 @@
+setuptools
+networkx
+Cython
+PyQt5==5.14
