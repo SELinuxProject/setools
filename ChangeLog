@@ -1,3 +1,18 @@
+*setools-4.4.0 (5 Mar 2021)
+
+  * Updated policy representation to handle policydb version 33, compressed
+    filename transitions.
+  * Changed apol tab registry to use metaclasses rather than having a multiple static
+    dictionaries in the code.
+  * Fixed bug in queries where checks that permissions were part of the specified
+    object class would incorrectly raise exceptions when the object class
+    criteria is a regex.
+  * Reduced aggressiveness of default compiler flags.  Since the C code is generated
+    by Cython, there typically isn't anything SETools can do when Cython causes
+    compiler warnings.
+  * Added type annotations to the code and added static type checking for
+    continuous integration tests.
+  * Added support for old Boolean name substitution in seinfo and sesearch.
   * Added sechecker tool which is a configuration file driven analysis tool.
 
 *setools-4.3.0 (1 Apr 2020)
