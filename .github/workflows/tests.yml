@@ -3,7 +3,7 @@ name: Build tests
 on: [push, pull_request]
 
 env:
-  SELINUX_USERSPACE_VERSION: 3.2-rc1
+  SELINUX_USERSPACE_VERSION: 3.2
 
 jobs:
   build:
