@@ -16,6 +16,7 @@
 # License along with SETools.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
+import re
 from typing import Callable, Union
 
 from ..exception import InvalidCheckValue
@@ -90,7 +91,7 @@ class ConfigSetDescriptor(CriteriaDescriptor):
             else:
                 lookup = getattr(obj.policy, self.lookup_function)
             ret = set()
-            for item in (i for i in value.split(" ") if i):
+            for item in (i for i in re.split(r"\s", value) if i):
                 try:
                     o = lookup(item)
                     if self.expand:

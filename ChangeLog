@@ -1,3 +1,5 @@
+  * Fix bug in sechecker parsing of multiline values.
+
 *setools-4.4.0 (5 Mar 2021)
 
   * Updated policy representation to handle policydb version 33, compressed
