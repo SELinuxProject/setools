@@ -121,7 +121,7 @@ class db_procedure 9
              setattr         w         7
            relabelto         w         1
 
-class dir 26
+class dir 31
                rmdir         b         1
         audit_access         r         1
          remove_name         w         1
@@ -148,11 +148,16 @@ class dir 26
              quotaon         b         1
               swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class peer 1
                 recv         r        10
 
-class blk_file 21
+class blk_file 26
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -174,12 +179,15 @@ class blk_file 21
              quotaon         b         1
               swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
-class chr_file 23
+class chr_file 26
         audit_access         r         1
-          entrypoint         r         1
              execmod         n         1
-    execute_no_trans         r         1
                 open         n         1
               append         w        10
               create         w         1
@@ -199,6 +207,11 @@ class chr_file 23
              quotaon         b         1
               swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class db_table 11
               select         n         1
@@ -237,7 +250,7 @@ class ipc 9
                 read         r        10
           unix_write         w         3
 
-class lnk_file 21
+class lnk_file 26
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -259,6 +272,11 @@ class lnk_file 21
              quotaon         b         1
               swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class process 31
               getcap         r         3
@@ -338,7 +356,7 @@ class socket 23
               listen         r         1
                  map         n         1
 
-class fifo_file 21
+class fifo_file 26
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -360,8 +378,13 @@ class fifo_file 21
              quotaon         b         1
               swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
-class file 23
+class file 28
         audit_access         r         1
           entrypoint         r         1
              execmod         n         1
@@ -385,6 +408,11 @@ class file 23
              quotaon         b         1
               swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class node 11
           rawip_recv         r        10
@@ -743,7 +771,7 @@ class netlink_firewall_socket 25
               listen         r         1
                  map         n         1
 
-class sock_file 21
+class sock_file 26
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -765,6 +793,11 @@ class sock_file 21
              quotaon         b         1
               swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class unix_dgram_socket 23
               append         w        10
@@ -828,7 +861,7 @@ class db_blob 10
              setattr         w         7
            relabelto         w         1
 
-class filesystem 10
+class filesystem 11
            associate         n         1
             quotaget         r         1
          relabelfrom         r        10
@@ -839,6 +872,7 @@ class filesystem 10
              remount         w         1
              unmount         w         1
            relabelto         w        10
+               watch         r         3
 
 class netlink_xfrm_socket 25
          nlmsg_write         w        10
@@ -2368,3 +2402,42 @@ class xdp_socket 23
            relabelto         w        10
               listen         r         1
                  map         n         1
+
+class lockdown 2
+           integrity         b         1
+     confidentiality         r         1
+
+class perf_event 6
+                open         r         1
+                 cpu         r         5
+              kernel         r         5
+          tracepoint         r         5
+                read         r         1
+               write         w         1
+
+class anon_inode 25
+        audit_access         r         1
+             execmod         n         1
+                open         n         1
+              append         w        10
+              create         w         1
+             execute         r         1
+               write         w        10
+         relabelfrom         r        10
+                link         w         1
+              unlink         w         1
+               ioctl         n         1
+             getattr         r         7
+             setattr         w         7
+                read         r        10
+              rename         w         5
+                lock         n         1
+           relabelto         w        10
+             mounton         b         1
+             quotaon         b         1
+                 map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
