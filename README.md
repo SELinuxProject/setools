@@ -14,7 +14,7 @@ As such it contains a setup.py script that will install the tools.
 
 To run SETools command line tools, the following packages are required:
 * Python 3.6+
-* NetworkX 2.0+
+* NetworkX 2.0+ (2.6+ for Python 3.9+)
 * setuptools
 * libselinux
 * libsepol 3.2+
@@ -27,7 +27,7 @@ To run SETools graphical tools, the following packages are also required:
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
 * gcc
-* cython 0.27+ (0.29.14+ for Python 3.8)
+* cython 0.27+ (0.29.14+ for Python 3.8+)
 
 To run SETools unit tests, the following packages are required, in
 addition to the above dependencies:
@@ -108,7 +108,7 @@ be compiled.
 ```
 
 This feature assumes that the directory structure at $USERSPACE_SRC is the
-same as the SELinux userspace code checked out from GitHub. 
+same as the SELinux userspace code checked out from GitHub.
 
 Since SETools is dynamically linked to libsepol and libselinux, you must
 specify the path to the libsepol/src and libselinux/src directories by
