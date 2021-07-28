@@ -174,8 +174,7 @@ class ConstraintsDifference(Difference):
         self._right_constraints = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class ConstraintWrapper(Wrapper[AnyConstraint]):  # pylint: disable=unsubscriptable-object
+class ConstraintWrapper(Wrapper[AnyConstraint]):
 
     """Wrap constraints for diff purposes."""
 

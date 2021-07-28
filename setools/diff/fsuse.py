@@ -74,8 +74,7 @@ class FSUsesDifference(Difference):
         self.modified_fs_uses = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class FSUseWrapper(Wrapper[FSUse]):  # pylint: disable=unsubscriptable-object
+class FSUseWrapper(Wrapper[FSUse]):
 
     """Wrap fs_use_* rules to allow set operations."""
 

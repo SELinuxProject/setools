@@ -43,8 +43,7 @@ def conditional_wrapper_factory(cond: Conditional) -> "ConditionalWrapper":
         return a
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class ConditionalWrapper(Wrapper[Conditional]):  # pylint: disable=unsubscriptable-object
+class ConditionalWrapper(Wrapper[Conditional]):
 
     """Wrap conditional policy expressions to allow comparisons by truth table."""
 

@@ -218,8 +218,7 @@ class LevelDeclsDifference(Difference):
         self.modified_levels = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class LevelDeclWrapper(Wrapper[LevelDecl]):  # pylint: disable=unsubscriptable-object
+class LevelDeclWrapper(Wrapper[LevelDecl]):
 
     """Wrap level declarations to allow comparisons."""
 
@@ -242,8 +241,7 @@ class LevelDeclWrapper(Wrapper[LevelDecl]):  # pylint: disable=unsubscriptable-o
         return self.sensitivity < other.sensitivity
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class LevelWrapper(Wrapper[Level]):  # pylint: disable=unsubscriptable-object
+class LevelWrapper(Wrapper[Level]):
 
     """Wrap levels to allow comparisons."""
 
@@ -276,8 +274,7 @@ class LevelWrapper(Wrapper[Level]):  # pylint: disable=unsubscriptable-object
             return False
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class RangeWrapper(Wrapper[Range]):  # pylint: disable=unsubscriptable-object
+class RangeWrapper(Wrapper[Range]):
 
     """
     Wrap ranges to allow comparisons.

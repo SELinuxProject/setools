@@ -99,8 +99,7 @@ class BoundsDifference(Difference):
         self._right_typebounds = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class BoundsWrapper(Wrapper[Bounds]):  # pylint: disable=unsubscriptable-object
+class BoundsWrapper(Wrapper[Bounds]):
 
     """Wrap *bounds for diff purposes."""
 

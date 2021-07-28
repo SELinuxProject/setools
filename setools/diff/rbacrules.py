@@ -137,8 +137,7 @@ class RBACRulesDifference(Difference):
         self._right_rbac_rules = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class RoleAllowWrapper(Wrapper[RoleAllow]):  # pylint: disable=unsubscriptable-object
+class RoleAllowWrapper(Wrapper[RoleAllow]):
 
     """Wrap role allow rules to allow set operations."""
 
@@ -162,8 +161,7 @@ class RoleAllowWrapper(Wrapper[RoleAllow]):  # pylint: disable=unsubscriptable-o
         return self.source == other.source and self.target == other.target
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class RoleTransitionWrapper(Wrapper[RoleTransition]):  # pylint: disable=unsubscriptable-object
+class RoleTransitionWrapper(Wrapper[RoleTransition]):
 
     """Wrap role_transition rules to allow set operations."""
 

@@ -550,8 +550,7 @@ class TERulesDifference(Difference):
         self._right_te_rules = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class AVRuleXpermWrapper(Wrapper[AVRuleXperm]):  # pylint: disable=unsubscriptable-object
+class AVRuleXpermWrapper(Wrapper[AVRuleXperm]):
 
     """Wrap extended permission access vector rules to allow set operations."""
 
@@ -581,8 +580,7 @@ class AVRuleXpermWrapper(Wrapper[AVRuleXperm]):  # pylint: disable=unsubscriptab
             self.xperm_type == other.xperm_type
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class TERuleWrapper(Wrapper):  # pylint: disable=unsubscriptable-object
+class TERuleWrapper(Wrapper):
 
     """Wrap type_* rules to allow set operations."""
 

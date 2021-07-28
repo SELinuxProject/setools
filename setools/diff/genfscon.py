@@ -74,8 +74,7 @@ class GenfsconsDifference(Difference):
         self.modified_genfscons = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class GenfsconWrapper(Wrapper[Genfscon]):  # pylint: disable=unsubscriptable-object
+class GenfsconWrapper(Wrapper[Genfscon]):
 
     """Wrap genfscon rules to allow set operations."""
 

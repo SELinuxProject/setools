@@ -74,8 +74,7 @@ class NodeconsDifference(Difference):
         self.modified_nodecons = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class NodeconWrapper(Wrapper[Nodecon]):  # pylint: disable=unsubscriptable-object
+class NodeconWrapper(Wrapper[Nodecon]):
 
     """Wrap nodecon statements for diff purposes."""
 

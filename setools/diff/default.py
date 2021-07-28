@@ -98,8 +98,7 @@ class DefaultsDifference(Difference):
         self.modified_defaults = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class DefaultWrapper(Wrapper[Default]):  # pylint: disable=unsubscriptable-object
+class DefaultWrapper(Wrapper[Default]):
 
     """Wrap default_* to allow comparisons."""
 

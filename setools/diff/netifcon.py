@@ -89,8 +89,7 @@ class NetifconsDifference(Difference):
         self.modified_netifcons = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class NetifconWrapper(Wrapper[Netifcon]):  # pylint: disable=unsubscriptable-object
+class NetifconWrapper(Wrapper[Netifcon]):
 
     """Wrap netifcon statements for diff purposes."""
 
