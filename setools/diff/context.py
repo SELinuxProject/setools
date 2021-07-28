@@ -30,8 +30,7 @@ from .types import type_wrapper_factory
 from .users import user_wrapper_factory
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class ContextWrapper(Wrapper[Context]):  # pylint: disable=unsubscriptable-object
+class ContextWrapper(Wrapper[Context]):
 
     """Wrap contexts to allow comparisons."""
 
