@@ -115,8 +115,7 @@ class MLSRulesDifference(Difference):
         self._right_mls_rules = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class MLSRuleWrapper(Wrapper[MLSRule]):  # pylint: disable=unsubscriptable-object
+class MLSRuleWrapper(Wrapper[MLSRule]):
 
     """Wrap MLS rules to allow set operations."""
 

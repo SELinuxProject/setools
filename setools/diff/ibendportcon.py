@@ -73,8 +73,7 @@ class IbendportconsDifference(Difference):
         self.modified_ibendportcons = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class IbendportconWrapper(Wrapper[Ibendportcon]):  # pylint: disable=unsubscriptable-object
+class IbendportconWrapper(Wrapper[Ibendportcon]):
 
     """Wrap ibendportcon statements for diff purposes."""
 

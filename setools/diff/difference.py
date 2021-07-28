@@ -169,8 +169,7 @@ class Wrapper(ABC, Generic[T]):
 S = TypeVar("S", bound=PolicySymbol)
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class SymbolWrapper(Wrapper[S]):  # pylint: disable=unsubscriptable-object
+class SymbolWrapper(Wrapper[S]):
 
     """
     General wrapper for policy symbols, e.g. types, roles

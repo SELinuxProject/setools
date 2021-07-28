@@ -73,8 +73,7 @@ class PortconsDifference(Difference):
         self.modified_portcons = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class PortconWrapper(Wrapper[Portcon]):  # pylint: disable=unsubscriptable-object
+class PortconWrapper(Wrapper[Portcon]):
 
     """Wrap portcon statements for diff purposes."""
 

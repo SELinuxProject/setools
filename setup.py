@@ -159,7 +159,7 @@ setup(name='setools',
           'Topic :: Utilities',
       ],
       keywords='SELinux SETools policy analysis tools seinfo sesearch sediff sedta seinfoflow apol',
-      python_requires='>=3.4',
+      python_requires='>=3.6',
       # setup also requires libsepol and libselinux
       # C libraries and headers to compile.
       setup_requires=['setuptools', 'Cython>=0.27'],

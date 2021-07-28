@@ -74,8 +74,7 @@ class IbpkeyconsDifference(Difference):
         self.modified_ibpkeycons = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class IbpkeyconWrapper(Wrapper[Ibpkeycon]):  # pylint: disable=unsubscriptable-object
+class IbpkeyconWrapper(Wrapper[Ibpkeycon]):
 
     """Wrap ibpkeycon statements for diff purposes."""
 

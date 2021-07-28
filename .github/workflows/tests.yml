@@ -17,11 +17,12 @@ jobs:
           - {python: 3.6, tox: py36}
           - {python: 3.7, tox: py37}
           - {python: 3.8, tox: py38}
+          - {python: 3.9, tox: py39}
           - {python: 3.6, tox: pep8}
           - {python: 3.6, tox: lint}
           - {python: 3.6, tox: mypy}
           #- {python: 3.6, tox: coverage}
-  
+
     steps:
     - uses: actions/checkout@v2
 
