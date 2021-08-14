@@ -27,7 +27,7 @@
 # Look to the examples below for further clarification.
 #
 # Number of object classes.
-129
+132
 
 class netlink_audit_socket 26
          nlmsg_relay         w        10
