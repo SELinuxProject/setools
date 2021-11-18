@@ -81,7 +81,7 @@ cdef class User(PolicySymbol):
         if count == 1:
             stmt += roles[0]
         else:
-            stmt += "{{ {0} }}".format(' '.join(roles))
+            stmt += "{{ {0} }}".format(' '.join(sorted(roles)))
 
         if self._level:
             stmt += " level {0.mls_level} range {0.mls_range};".format(self)

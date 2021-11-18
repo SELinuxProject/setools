@@ -75,7 +75,7 @@ cdef class Common(PolicySymbol):
         return other in self.perms
 
     def statement(self):
-        return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
+        return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(sorted(self.perms)))
 
 
 cdef class ObjClass(PolicySymbol):
@@ -204,7 +204,7 @@ cdef class ObjClass(PolicySymbol):
 
         # a class that inherits may not have additional permissions
         if len(self.perms) > 0:
-            stmt += "{{\n\t{0}\n}}".format('\n\t'.join(self.perms))
+            stmt += "{{\n\t{0}\n}}".format('\n\t'.join(sorted(self.perms)))
 
         return stmt
 
