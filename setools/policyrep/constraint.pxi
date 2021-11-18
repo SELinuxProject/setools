@@ -72,7 +72,7 @@ cdef class Constraint(BaseConstraint):
 
     def statement(self):
         if len(self.perms) > 1:
-            perms = "{{ {0} }}".format(' '.join(self.perms))
+            perms = "{{ {0} }}".format(' '.join(sorted(self.perms)))
         else:
             # convert to list since sets cannot be indexed
             perms = list(self.perms)[0]

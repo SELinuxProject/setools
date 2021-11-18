@@ -58,7 +58,7 @@ cdef class Role(PolicySymbol):
         if count == 1:
             stmt += " types {0}".format(types[0])
         else:
-            stmt += " types {{ {0} }}".format(' '.join(types))
+            stmt += " types {{ {0} }}".format(' '.join(sorted(types)))
 
         stmt += ";"
         return stmt
