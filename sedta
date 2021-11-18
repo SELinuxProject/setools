@@ -26,6 +26,8 @@ import setools
 
 
 def print_transition(trans: setools.DomainTransition) -> None:
+    print()
+
     if trans.transition:
         print("Domain transition rule(s):")
         for t in trans.transition:
@@ -77,6 +79,7 @@ parser.add_argument("--version", action="version", version=setools.__version__)
 parser.add_argument("-p", "--policy", help="Path to SELinux policy to analyze.")
 parser.add_argument("-s", "--source", help="Source type of the analysis.", required=True)
 parser.add_argument("-t", "--target", help="Target type of the analysis.")
+parser.add_argument("--full", help="Print rule lists for transitions.", action="store_true")
 parser.add_argument("--stats", action="store_true",
                     help="Display statistics at the end of the analysis.")
 parser.add_argument("-v", "--verbose", action="store_true",
@@ -128,26 +131,32 @@ try:
 
             for stepnum, step in enumerate(path, start=1):
 
-                print("Step {0}: {1} -> {2}\n".format(stepnum, step.source, step.target))
-                print_transition(step)
+                print("Step {0}: {1} -> {2}".format(stepnum, step.source, step.target))
+
+                if args.full:
+                    print_transition(step)
 
             if args.limit_trans and i >= args.limit_trans:
                 break
 
-        print(i, "domain transition path(s) found.")
+            print()
+
+        print("\n{} domain transition path(s) found.".format(i))
 
     else:  # single transition
         transitions = g.transitions(args.source)
 
         i = 0
         for i, step in enumerate(transitions, start=1):
-            print("Transition {0}: {1} -> {2}\n".format(i, step.source, step.target))
-            print_transition(step)
+            print("Transition {0}: {1} -> {2}".format(i, step.source, step.target))
+
+            if args.full:
+                print_transition(step)
 
             if args.limit_trans and i >= args.limit_trans:
                 break
 
-        print(i, "domain transition(s) found.")
+        print("\n{} domain transition(s) found.".format(i))
 
     if args.stats:
         print("\nGraph statistics:")
