@@ -7,8 +7,11 @@ import logging
 from contextlib import suppress
 from typing import cast, Iterable, List, Mapping, Optional, Union
 
-import networkx as nx
-from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
+try:
+    import networkx as nx
+    from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
+except ImportError:
+    logging.getLogger(__name__).debug("NetworkX failed to import.")
 
 from .descriptors import EdgeAttrIntMax, EdgeAttrList
 from .permmap import PermissionMap
@@ -54,8 +57,14 @@ class InfoFlowAnalysis:
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
-        self.G = nx.DiGraph()
-        self.subG = self.G.copy()
+        try:
+            self.G = nx.DiGraph()
+            self.subG = self.G.copy()
+        except NameError:
+            self.log.critical("NetworkX is not available.  This is "
+                              "requried for Information Flow Analysis.")
+            self.log.critical("This is typically in the python3-networkx package.")
+            raise
 
     @property
     def min_weight(self) -> int:

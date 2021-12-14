@@ -10,8 +10,11 @@ from collections import defaultdict
 from contextlib import suppress
 from typing import DefaultDict, Iterable, List, NamedTuple, Optional, Union
 
-import networkx as nx
-from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
+try:
+    import networkx as nx
+    from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
+except ImportError:
+    logging.getLogger(__name__).debug("NetworkX failed to import.")
 
 from .descriptors import EdgeAttrDict, EdgeAttrList
 from .policyrep import AnyTERule, SELinuxPolicy, TERuletype, Type
@@ -73,8 +76,15 @@ class DomainTransitionAnalysis:
         self.reverse = reverse
         self.rebuildgraph = True
         self.rebuildsubgraph = True
-        self.G = nx.DiGraph()
-        self.subG = self.G.copy()
+
+        try:
+            self.G = nx.DiGraph()
+            self.subG = self.G.copy()
+        except NameError:
+            self.log.critical("NetworkX is not available.  This is "
+                              "requried for Domain Transition Analysis.")
+            self.log.critical("This is typically in the python3-networkx package.")
+            raise
 
     @property
     def reverse(self) -> bool:
