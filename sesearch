@@ -93,6 +93,9 @@ opts.add_argument("-ep", action="store_true", dest="perms_equal",
 opts.add_argument("-ex", action="store_true", dest="xperms_equal",
                   help="Match extended permission set exactly instead of matching any listed "
                   "permission.")
+opts.add_argument("-Sp", action="store_true", dest="perms_subset",
+                  help="Match rules where the listed permissions are a subset of the rule "
+                  "permissions.")
 opts.add_argument("-ds", action="store_false", dest="source_indirect",
                   help="Match source attributes directly instead of matching member types/roles.")
 opts.add_argument("-dt", action="store_false", dest="target_indirect",
@@ -141,6 +144,7 @@ try:
                                    target_regex=args.target_regex,
                                    tclass_regex=args.tclass_regex,
                                    perms_equal=args.perms_equal,
+                                   perms_subset=args.perms_subset,
                                    xperms_equal=args.xperms_equal,
                                    default=args.default,
                                    default_regex=args.default_regex,
