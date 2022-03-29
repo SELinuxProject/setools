@@ -15,7 +15,7 @@
 # This is followed by each permission and its individual mapping to one
 # of the following:
 #
-# 	r   =	Read
+#	r   =	Read
 #	w   =	Write
 #	n   =	None
 #	b   =	Both
@@ -27,7 +27,7 @@
 # Look to the examples below for further clarification.
 #
 # Number of object classes.
-132
+133
 
 class netlink_audit_socket 26
          nlmsg_relay         w        10
@@ -2291,3 +2291,7 @@ class anon_inode 25
             watch_sb         r         3
      watch_with_perm         r         3
          watch_reads         r         3
+
+class io_uring 2
+      override_creds         w        10
+              sqpoll         w        10
