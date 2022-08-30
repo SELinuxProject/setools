@@ -274,21 +274,21 @@ cdef class AVRuleXperm(BaseTERule):
             set perms = set()
             size_t curr = 0
             size_t len = sizeof(xperms.perms) * sepol.EXTENDED_PERMS_LEN
+            size_t base_value = 0
 
         #
         # Build permission set
         #
-        while curr < len:
+        for curr in range(len):
             if sepol.xperm_test(curr, xperms.perms):
                 if xperms.specified & sepol.AVTAB_XPERMS_IOCTLFUNCTION:
                     perms.add(xperms.driver << 8 | curr)
                 elif xperms.specified & sepol.AVTAB_XPERMS_IOCTLDRIVER:
-                    perms.add(curr << 8)
+                    base_value = curr << 8
+                    perms.update(range(base_value, base_value + 0x100))
                 else:
                     raise LowLevelPolicyError("Unknown extended permission: {}".format(
                                               xperms.specified))
-
-            curr += 1
 
         #
         # Determine xperm type
