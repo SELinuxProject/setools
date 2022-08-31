@@ -11,6 +11,8 @@ from setools import SELinuxPolicy
 from setools.exception import InvalidTERuleType, RuleNotConditional, RuleUseError, \
     TERuleNoFilename
 
+from .util import compile_policy
+
 
 @unittest.skip("Needs to be reworked for cython")
 @patch('setools.policyrep.boolcond.condexpr_factory', lambda x, y: y)
@@ -247,6 +249,30 @@ class AVRuleXpermTest(unittest.TestCase):
         rule = self.mock_avrule_factory("allowxperm", "a", "b", "c", "d",
                                         [0x0003, 0x0004, 0x0005, 0x0007, 0x0008, 0x0009])
         self.assertEqual(rule.statement(), "allowxperm a b:c d { 0x0003-0x0005 0x0007-0x0009 };")
+
+
+class AVRuleXpermTestIssue74(unittest.TestCase):
+
+    """
+    Regression test for xperm ranges starting with 0x00 not being loaded.
+    https://github.com/SELinuxProject/setools/issues/74
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.p = compile_policy("tests/policyrep/terule_issue74.conf")
+
+    def test_issue74_regression(self):
+        """Regression test for GitHub issue 74."""
+        rules = sorted(self.p.terules())
+        print(rules)
+        self.assertEqual(2, len(rules))
+
+        # expect 2 rules:
+        # allowxperm init_type_t init_type_t : unix_dgram_socket ioctl { 0x8910 };
+        # allowxperm init_type_t init_type_t : unix_dgram_socket ioctl { 0x0-0xff };
+        self.assertSetEqual(set(range(0x100)), rules[0].perms)
+        self.assertSetEqual(set([0x8910]), rules[1].perms)
 
 
 @unittest.skip("Needs to be reworked for cython")
