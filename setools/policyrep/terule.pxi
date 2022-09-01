@@ -412,7 +412,8 @@ cdef class TERule(BaseTERule):
         r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
         if key.specified & sepol.AVTAB_TRANSITION:
-            r.dft = Type.factory(policy, policy.type_value_to_datum(datum.trans.otype - 1))
+            if datum.trans.otype != 0:
+                r.dft = Type.factory(policy, policy.type_value_to_datum(datum.trans.otype - 1))
         else:
             r.dft = Type.factory(policy, policy.type_value_to_datum(datum.data - 1))
         r.origin = None
@@ -482,18 +483,18 @@ cdef class FileNameTERule(BaseTERule):
 
     @staticmethod
     cdef inline FileNameTERule factory(SELinuxPolicy policy,
-                                       sepol.filename_trans_key_t *key,
-                                       Type stype, size_t otype):
+                                       sepol.avtab_key_t *key,
+                                       char *name, uint32_t *otype):
         """Factory function for creating FileNameTERule objects."""
         cdef FileNameTERule r = FileNameTERule.__new__(FileNameTERule)
         r.policy = policy
         r.key = <uintptr_t>key
         r.ruletype = TERuletype.type_transition
-        r.source = stype
-        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.ttype - 1))
-        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.tclass - 1))
-        r.dft = Type.factory(policy, policy.type_value_to_datum(otype - 1))
-        r.filename = intern(key.name)
+        r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
+        r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
+        r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
+        r.dft = Type.factory(policy, policy.type_value_to_datum(otype[0] - 1))
+        r.filename = intern(name)
         r.origin = None
         return r
 
@@ -556,6 +557,7 @@ cdef class TERuleIterator(PolicyIterator):
         unsigned int bucket
         object conditional
         object cond_block
+        object name_trans_iter
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.avtab *table):
@@ -563,6 +565,7 @@ cdef class TERuleIterator(PolicyIterator):
         i = TERuleIterator()
         i.policy = policy
         i.table = table
+        i.name_trans_iter = None
         i.reset()
         return i
 
@@ -576,6 +579,8 @@ cdef class TERuleIterator(PolicyIterator):
 
     cdef void _next_node(self):
         """Internal method for advancing to the next node."""
+        if self.node != NULL and self.node.key.specified & sepol.AVTAB_TRANSITION and self.node.datum.trans.name_trans.table:
+            self.name_trans_iter = NameTransHashtabIterator.factory(self.policy, &self.node.key, &self.node.datum.trans.name_trans.table)
         if self.node != NULL and self.node.next != NULL:
             self.node = self.node.next
         else:
@@ -588,6 +593,12 @@ cdef class TERuleIterator(PolicyIterator):
             sepol.avtab_key_t *key
             sepol.avtab_datum_t *datum
 
+        if self.name_trans_iter is not None:
+            try:
+                return self.name_trans_iter.__next__()
+            except StopIteration:
+                self.name_trans_iter = None
+
         if self.table == NULL or self.table.nel == 0 or self.bucket >= self.table.nslot:
             raise StopIteration
 
@@ -599,6 +610,9 @@ cdef class TERuleIterator(PolicyIterator):
         if key.specified & sepol.AVRULE_AV:
             return AVRule.factory(self.policy, key, datum, None, None)
         elif key.specified & sepol.AVRULE_TYPE:
+            # empty default transition, advance to filename transitions
+            if key.specified & sepol.AVRULE_TRANSITION and datum.trans.otype == 0:
+                return self.__next__()
             return TERule.factory(self.policy, key, datum, None, None)
         elif key.specified & sepol.AVRULE_XPERMS:
             return AVRuleXperm.factory(self.policy, key, datum, None, None)
@@ -625,7 +639,12 @@ cdef class TERuleIterator(PolicyIterator):
             node = self.table[0].htable[bucket]
             while node != NULL:
                 key = &node.key if node else NULL
-                if key != NULL:
+                if key != NULL and key.specified & sepol.AVTAB_TRANSITION:
+                    if node.datum.trans.otype != 0:
+                        count[key.specified & ~sepol.AVTAB_ENABLED] += 1
+                    if node.datum.trans.name_trans.table:
+                        count[key.specified & ~sepol.AVTAB_ENABLED] += node.datum.trans.name_trans.table.nel
+                elif key != NULL:
                     count[key.specified & ~sepol.AVTAB_ENABLED] += 1
 
                 node = node.next
@@ -637,10 +656,33 @@ cdef class TERuleIterator(PolicyIterator):
     def reset(self):
         """Reset the iterator to the start."""
         self.node = self.table.htable[0]
+        self.name_trans_iter = None
 
         # advance to first item
         if self.node == NULL:
             self._next_node()
+
+
+cdef class NameTransHashtabIterator(HashtabIterator):
+
+    """Iterate over name transition in avtab_trans_t."""
+
+    cdef:
+        sepol.avtab_key_t *key
+
+    @staticmethod
+    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.hashtab_t *table):
+        """Factory function for creating name transition iterators."""
+        i = NameTransHashtabIterator()
+        i.policy = policy
+        i.key = key
+        i.table = table
+        i.reset()
+        return i
+
+    def __next__(self):
+        super().__next__()
+        return FileNameTERule.factory(self.policy, self.key, self.curr.key, <uint32_t *>self.curr.datum)
 
 
 cdef class ConditionalTERuleIterator(PolicyIterator):
@@ -714,48 +756,3 @@ cdef class ConditionalTERuleIterator(PolicyIterator):
     def reset(self):
         """Reset the iterator back to the start."""
         self.curr = self.head
-
-
-cdef class FileNameTERuleIterator(HashtabIterator):
-
-    """Iterate over FileNameTERules in the policy."""
-
-    cdef:
-        sepol.filename_trans_datum_t *datum
-        TypeEbitmapIterator stypei
-
-    @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.hashtab_t *table):
-        """Factory function for creating FileNameTERule iterators."""
-        i = FileNameTERuleIterator()
-        i.policy = policy
-        i.table = table
-        i.reset()
-        return i
-
-    def _next_stype(self):
-        while True:
-            if self.datum == NULL:
-                super().__next__()
-                self.datum = <sepol.filename_trans_datum_t *>self.curr.datum
-                self.stypei = TypeEbitmapIterator.factory(self.policy, &self.datum.stypes)
-            try:
-                return next(self.stypei)
-            except StopIteration:
-                pass
-            self.datum = self.datum.next
-            if self.datum != NULL:
-                self.stypei = TypeEbitmapIterator.factory(self.policy, &self.datum.stypes)
-
-    def __next__(self):
-        stype = self._next_stype()
-        return FileNameTERule.factory(self.policy,
-                                      <sepol.filename_trans_key_t *>self.curr.key,
-                                      stype, self.datum.otype)
-
-    def __len__(self):
-        return sum(1 for r in FileNameTERuleIterator.factory(self.policy, self.table))
-
-    def reset(self):
-        super().reset()
-        self.datum = NULL

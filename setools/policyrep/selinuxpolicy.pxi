@@ -510,7 +510,6 @@ cdef class SELinuxPolicy:
     def terules(self):
         """Iterator over all type enforcement rules."""
         yield from TERuleIterator.factory(self, &self.handle.p.te_avtab)
-        yield from FileNameTERuleIterator.factory(self, &self.handle.p.filename_trans)
 
         for c in self.conditionals():
             yield from c.true_rules()
@@ -1064,8 +1063,6 @@ cdef class SELinuxPolicy:
         """Count all TE rules in one iteration."""
         if not self.terule_counts:
             self.terule_counts = TERuleIterator.factory(self, &self.handle.p.te_avtab).ruletype_count()
-            self.terule_counts[TERuletype.type_transition.value] += \
-                len(FileNameTERuleIterator.factory(self, &self.handle.p.filename_trans))
 
             for c in self.conditionals():
                 self.terule_counts.update(c.true_rules().ruletype_count())
