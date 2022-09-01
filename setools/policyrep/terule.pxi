@@ -411,7 +411,10 @@ cdef class TERule(BaseTERule):
         r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
         r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
-        r.dft = Type.factory(policy, policy.type_value_to_datum(datum.data - 1))
+        if key.specified & sepol.AVTAB_TRANSITION:
+            r.dft = Type.factory(policy, policy.type_value_to_datum(datum.trans.otype - 1))
+        else:
+            r.dft = Type.factory(policy, policy.type_value_to_datum(datum.data - 1))
         r.origin = None
         r._conditional = conditional
         r._conditional_block = conditional_block

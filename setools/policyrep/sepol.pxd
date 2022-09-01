@@ -151,6 +151,14 @@ cdef extern from "<sepol/policydb/avtab.h>":
     ctypedef avtab_key avtab_key_t
 
     #
+    # avtab_trans_t
+    #
+    cdef struct avtab_trans:
+        uint32_t otype                # resulting type of the new object
+
+    ctypedef avtab_trans avtab_trans_t
+
+    #
     # avtab_extended_perms_t
     #
     cdef int AVTAB_XPERMS_IOCTLFUNCTION
@@ -168,6 +176,7 @@ cdef extern from "<sepol/policydb/avtab.h>":
     #
     cdef struct avtab_datum:
         uint32_t data
+        avtab_trans_t *trans            # transition value
         avtab_extended_perms_t *xperms
 
     ctypedef avtab_datum avtab_datum_t
