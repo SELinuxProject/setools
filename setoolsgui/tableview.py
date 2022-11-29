@@ -28,34 +28,32 @@ class SEToolsTableView(QTableView):
     def contextMenuEvent(self, event):
         self.menu.popup(QCursor.pos())
 
-    def event(self, e):
-        if e == QKeySequence.Copy or e == QKeySequence.Cut:
-            datamodel = self.model()
+    def copy(self):
+        datamodel = self.model()
 
-            selected_text = []
-            current_row = None
-            current_col = None
-            prev_row = None
-            prev_col = None
-            for index in sorted(self.selectionModel().selectedIndexes()):
-                current_row = index.row()
-                current_col = index.column()
+        selected_text = []
+        current_row = None
+        current_col = None
+        prev_row = None
+        prev_col = None
+        for index in sorted(self.selectionModel().selectedIndexes()):
+            current_row = index.row()
+            current_col = index.column()
 
-                if prev_row is not None and current_row != prev_row:
-                    selected_text.append('\n')
-                elif prev_col is not None and current_col != prev_col:
-                    selected_text.append('\t')
+            if prev_row is not None and current_row != prev_row:
+                selected_text.append('\n')
+            elif prev_col is not None and current_col != prev_col:
+                selected_text.append('\t')
 
-                selected_text.append(datamodel.data(index, Qt.DisplayRole))
+            selected_text.append(datamodel.data(index, Qt.DisplayRole))
 
-                prev_row = current_row
-                prev_col = current_col
+            prev_row = current_row
+            prev_col = current_col
 
-            QApplication.clipboard().setText("".join(selected_text))
-            return True
+        QApplication.clipboard().setText("".join(selected_text))
 
-        else:
-            return super(SEToolsTableView, self).event(e)
+    def cut(self):
+        self.copy()
 
     def choose_csv_save_location(self):
         filename = QFileDialog.getSaveFileName(self, "Save to CSV", "table.csv",
