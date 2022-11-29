@@ -22,12 +22,12 @@ class SEToolsTreeWidget(QTreeWidget):
         self.menu.addAction(self.copy_tree_action)
 
         # connect signals
-        self.copy_tree_action.triggered.connect(self.copy_tree)
+        self.copy_tree_action.triggered.connect(self.copy)
 
     def contextMenuEvent(self, event):
         self.menu.popup(QCursor.pos())
 
-    def copy_tree(self):
+    def copy(self):
         """Copy the tree to the clipboard."""
 
         items = []
@@ -55,9 +55,5 @@ class SEToolsTreeWidget(QTreeWidget):
 
         QApplication.clipboard().setText("".join(items))
 
-    def event(self, e):
-        if e == QKeySequence.Copy or e == QKeySequence.Cut:
-            self.copy_tree()
-            return True
-        else:
-            return super(SEToolsTreeWidget, self).event(e)
+    def cut(self):
+        self.copy()
