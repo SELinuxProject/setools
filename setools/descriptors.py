@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Collection
 from enum import Enum
-from typing import Any, Callable, MutableMapping, Optional, Union
+from typing import Any, Callable, MutableMapping, Optional, Type, Union
 from weakref import WeakKeyDictionary
 
 from .util import validate_perms_any
@@ -57,7 +57,7 @@ class CriteriaDescriptor:
 
     def __init__(self, name_regex: Optional[str] = None,
                  lookup_function: Optional[Union[Callable, str]] = None,
-                 default_value=None, enum_class: Optional[Enum] = None) -> None:
+                 default_value=None, enum_class: Optional[Type[Enum]] = None) -> None:
 
         assert name_regex or lookup_function or enum_class, \
             "A simple attribute should be used if there is no regex, lookup function, or enum."

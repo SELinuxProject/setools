@@ -115,8 +115,8 @@ class PermissionMap:
     def __deepcopy__(self, memo) -> 'PermissionMap':
         newobj = PermissionMap.__new__(PermissionMap)
         newobj.log = self.log
-        newobj.permmap = copy.deepcopy(self._permmap)
-        newobj.permmapfile = self._permmapfile
+        newobj._permmap = copy.deepcopy(self._permmap)
+        newobj._permmapfile = self._permmapfile
         memo[id(self)] = newobj
         return newobj
 

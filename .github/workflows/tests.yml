@@ -14,21 +14,23 @@ jobs:
 
       matrix:
         build-opts:
-          - {python: 3.6, tox: py36}
-          - {python: 3.7, tox: py37}
-          - {python: 3.8, tox: py38}
-          - {python: 3.9, tox: py39}
-          - {python: 3.6, tox: pep8}
-          - {python: 3.6, tox: lint}
-          - {python: 3.6, tox: mypy}
-          #- {python: 3.6, tox: coverage}
+          - {python: '3.6', tox: py36}
+          - {python: '3.7', tox: py37}
+          - {python: '3.8', tox: py38}
+          - {python: '3.9', tox: py39}
+          - {python: '3.10', tox: py310}
+          - {python: '3.11', tox: py311}
+          - {python: '3.6', tox: pep8}
+          - {python: '3.6', tox: lint}
+          - {python: '3.6', tox: mypy}
+          #- {python: '3.6', tox: coverage}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     # This should be the minimum required Python version to build refpolicy.
     - name: Set up Python ${{ matrix.build-opts.python }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.build-opts.python }}
 
