@@ -35,9 +35,11 @@ class TabRegistry(sip.wrappertype):
     saving tab/workspace info.
     """
 
-    def __new__(cls, clsname, superclasses, attributedict):
-        classdef = super().__new__(cls, clsname, superclasses, attributedict)
+    def __new__(cls, *args, **kwargs):
+        classdef = super().__new__(cls, *args, **kwargs)
 
+        clsname = args[0]
+        attributedict = args[2]
         if clsname != "AnalysisTab":
             assert "section" in attributedict, "Class {} is missing the section value, " \
                 "this is an setools bug".format(clsname)
