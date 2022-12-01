@@ -480,11 +480,13 @@ cdef class FileNameTERule(BaseTERule):
     cdef:
         Type dft
         readonly str filename
+        uint8_t name_match
 
     @staticmethod
     cdef inline FileNameTERule factory(SELinuxPolicy policy,
                                        sepol.avtab_key_t *key,
-                                       char *name, uint32_t *otype):
+                                       char *name, uint8_t name_match,
+                                       uint32_t *otype):
         """Factory function for creating FileNameTERule objects."""
         cdef FileNameTERule r = FileNameTERule.__new__(FileNameTERule)
         r.policy = policy
@@ -495,6 +497,7 @@ cdef class FileNameTERule(BaseTERule):
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
         r.dft = Type.factory(policy, policy.type_value_to_datum(otype[0] - 1))
         r.filename = intern(name)
+        r.name_match = name_match
         r.origin = None
         return r
 
@@ -529,6 +532,7 @@ cdef class FileNameTERule(BaseTERule):
                 r.tclass = self.tclass
                 r.dft = self.dft
                 r.filename = self.filename
+                r.name_match = self.name_match
                 r.origin = None
                 r._conditional = self._conditional
                 r._conditional_block = self._conditional_block
@@ -540,8 +544,15 @@ cdef class FileNameTERule(BaseTERule):
             yield self
 
     def statement(self):
-        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
-            format(self)
+        name_match_str = "???"
+        if self.name_match == sepol.NAME_TRANS_MATCH_EXACT:
+            name_match_str = "";
+        elif self.name_match == sepol.NAME_TRANS_MATCH_PREFIX:
+            name_match_str = " PREFIX";
+        elif self.name_match == sepol.NAME_TRANS_MATCH_SUFFIX:
+            name_match_str = " SUFFIX";
+        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename}{1};". \
+            format(self, name_match_str)
 
 
 #
@@ -558,6 +569,8 @@ cdef class TERuleIterator(PolicyIterator):
         object conditional
         object cond_block
         object name_trans_iter
+        object prefix_trans_iter
+        object suffix_trans_iter
 
     @staticmethod
     cdef factory(SELinuxPolicy policy, sepol.avtab *table):
@@ -566,6 +579,8 @@ cdef class TERuleIterator(PolicyIterator):
         i.policy = policy
         i.table = table
         i.name_trans_iter = None
+        i.prefix_trans_iter = None
+        i.suffix_trans_iter = None
         i.reset()
         return i
 
@@ -579,8 +594,22 @@ cdef class TERuleIterator(PolicyIterator):
 
     cdef void _next_node(self):
         """Internal method for advancing to the next node."""
-        if self.node != NULL and self.node.key.specified & sepol.AVTAB_TRANSITION and self.node.datum.trans.name_trans.table:
-            self.name_trans_iter = NameTransHashtabIterator.factory(self.policy, &self.node.key, &self.node.datum.trans.name_trans.table)
+        if self.node != NULL and self.node.key.specified & sepol.AVTAB_TRANSITION:
+            if self.node.datum.trans.name_trans.table:
+                self.name_trans_iter = NameTransHashtabIterator.factory(self.policy,
+                                                                        &self.node.key,
+                                                                        &self.node.datum.trans.name_trans.table,
+                                                                        sepol.NAME_TRANS_MATCH_EXACT)
+            if self.node.datum.trans.prefix_trans.table:
+                self.prefix_trans_iter = NameTransHashtabIterator.factory(self.policy,
+                                                                          &self.node.key,
+                                                                          &self.node.datum.trans.prefix_trans.table,
+                                                                          sepol.NAME_TRANS_MATCH_PREFIX)
+            if  self.node.datum.trans.suffix_trans.table:
+                self.suffix_trans_iter = NameTransHashtabIterator.factory(self.policy,
+                                                                          &self.node.key,
+                                                                          &self.node.datum.trans.suffix_trans.table,
+                                                                          sepol.NAME_TRANS_MATCH_SUFFIX)
         if self.node != NULL and self.node.next != NULL:
             self.node = self.node.next
         else:
@@ -598,6 +627,16 @@ cdef class TERuleIterator(PolicyIterator):
                 return self.name_trans_iter.__next__()
             except StopIteration:
                 self.name_trans_iter = None
+        if self.prefix_trans_iter is not None:
+            try:
+                return self.prefix_trans_iter.__next__()
+            except StopIteration:
+                self.prefix_trans_iter = None
+        if self.suffix_trans_iter is not None:
+            try:
+                return self.suffix_trans_iter.__next__()
+            except StopIteration:
+                self.suffix_trans_iter = None
 
         if self.table == NULL or self.table.nel == 0 or self.bucket >= self.table.nslot:
             raise StopIteration
@@ -644,6 +683,10 @@ cdef class TERuleIterator(PolicyIterator):
                         count[key.specified & ~sepol.AVTAB_ENABLED] += 1
                     if node.datum.trans.name_trans.table:
                         count[key.specified & ~sepol.AVTAB_ENABLED] += node.datum.trans.name_trans.table.nel
+                    if node.datum.trans.prefix_trans.table:
+                        count[key.specified & ~sepol.AVTAB_ENABLED] += node.datum.trans.prefix_trans.table.nel
+                    if node.datum.trans.suffix_trans.table:
+                        count[key.specified & ~sepol.AVTAB_ENABLED] += node.datum.trans.suffix_trans.table.nel
                 elif key != NULL:
                     count[key.specified & ~sepol.AVTAB_ENABLED] += 1
 
@@ -657,6 +700,8 @@ cdef class TERuleIterator(PolicyIterator):
         """Reset the iterator to the start."""
         self.node = self.table.htable[0]
         self.name_trans_iter = None
+        self.prefix_trans_iter = None
+        self.suffix_trans_iter = None
 
         # advance to first item
         if self.node == NULL:
@@ -669,20 +714,24 @@ cdef class NameTransHashtabIterator(HashtabIterator):
 
     cdef:
         sepol.avtab_key_t *key
+        uint8_t name_match
 
     @staticmethod
-    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.hashtab_t *table):
+    cdef factory(SELinuxPolicy policy, sepol.avtab_key_t *key, sepol.hashtab_t *table,
+                 uint8_t name_match):
         """Factory function for creating name transition iterators."""
         i = NameTransHashtabIterator()
         i.policy = policy
         i.key = key
         i.table = table
+        i.name_match = name_match
         i.reset()
         return i
 
     def __next__(self):
         super().__next__()
-        return FileNameTERule.factory(self.policy, self.key, self.curr.key, <uint32_t *>self.curr.datum)
+        return FileNameTERule.factory(self.policy, self.key, self.curr.key,
+                                      self.name_match, <uint32_t *>self.curr.datum)
 
 
 cdef class ConditionalTERuleIterator(PolicyIterator):

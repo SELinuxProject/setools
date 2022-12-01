@@ -156,6 +156,8 @@ cdef extern from "<sepol/policydb/avtab.h>":
     cdef struct avtab_trans:
         uint32_t otype          # resulting type of the new object
         symtab_t name_trans     # filename transitions
+        symtab_t prefix_trans   # filename transitions
+        symtab_t suffix_trans   # filename transitions
 
     ctypedef avtab_trans avtab_trans_t
 
@@ -467,6 +469,9 @@ cdef extern from "<sepol/policydb/policydb.h>":
     cdef int AVRULE_XPERMS_NEVERALLOW
     cdef int AVRULE_XPERMS
     cdef int RULE_SELF
+    cdef int NAME_TRANS_MATCH_EXACT
+    cdef int NAME_TRANS_MATCH_PREFIX
+    cdef int NAME_TRANS_MATCH_SUFFIX
 
     cdef struct avrule:
         uint32_t specified
