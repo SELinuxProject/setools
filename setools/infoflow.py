@@ -5,6 +5,7 @@
 import itertools
 import logging
 from contextlib import suppress
+from dataclasses import dataclass, InitVar
 from typing import cast, Iterable, List, Mapping, Optional, Union
 
 try:
@@ -390,6 +391,7 @@ class InfoFlowAnalysis:
             nx.number_of_edges(self.subG)))
 
 
+@dataclass
 class InfoFlowStep:
 
     """
@@ -405,6 +407,10 @@ class InfoFlowStep:
                 The default is False.
     """
 
+    G: nx.DiGraph
+    source: Type
+    target: Type
+    create: InitVar[bool] = False
     rules = EdgeAttrList()
 
     # use capacity to store the info flow weight so
@@ -414,14 +420,10 @@ class InfoFlowStep:
     # (see below add_edge() call)
     weight = EdgeAttrIntMax('capacity')
 
-    def __init__(self, graph, source: Type, target: Type, create: bool = False) -> None:
-        self.G = graph
-        self.source = source
-        self.target = target
-
-        if not self.G.has_edge(source, target):
+    def __post_init__(self, create) -> None:
+        if not self.G.has_edge(self.source, self.target):
             if create:
-                self.G.add_edge(source, target, weight=1)
+                self.G.add_edge(self.source, self.target, weight=1)
                 self.rules = None
                 self.weight = None
             else:
@@ -435,11 +437,11 @@ class InfoFlowStep:
         else:
             return self._index_to_item(key)
 
-    def _index_to_item(self, index):
+    def _index_to_item(self, index: int) -> Type:
         """Return source or target based on index."""
         if index == 0:
             return self.source
         elif index == 1:
             return self.target
         else:
-            raise IndexError("Invalid index (edges only have 2 items): {0}".format(index))
+            raise IndexError("Invalid index (InfoFlowSteps only have 2 items): {0}".format(index))
