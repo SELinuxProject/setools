@@ -260,7 +260,8 @@ class InfoFlowAnalysis:
         if self.rebuildgraph:
             self._build_graph()
 
-        return nx.info(self.G)
+        return f"Graph nodes: {nx.number_of_nodes(self.G)}\n" \
+               f"Graph edges: {nx.number_of_edges(self.G)}"
 
     #
     # Internal functions follow
