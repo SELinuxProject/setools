@@ -27,7 +27,7 @@
 # Look to the examples below for further clarification.
 #
 # Number of object classes.
-133
+134
 
 class netlink_audit_socket 26
          nlmsg_relay         w        10
@@ -2292,6 +2292,10 @@ class anon_inode 25
      watch_with_perm         r         3
          watch_reads         r         3
 
-class io_uring 2
+class io_uring 3
       override_creds         w        10
               sqpoll         w        10
+                 cmd         w        10
+
+class user_namespace 1
+              create         w        10
