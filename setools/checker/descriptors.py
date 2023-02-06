@@ -28,7 +28,7 @@ class ConfigDescriptor(CriteriaDescriptor):
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = None
+            setattr(obj, self.name, None)
         else:
             try:
                 super().__set__(obj, value.strip())
@@ -69,7 +69,7 @@ class ConfigSetDescriptor(CriteriaDescriptor):
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = frozenset()
+            setattr(obj, self.name, frozenset())
         else:
             log = obj.log
             if callable(self.lookup_function):
@@ -94,7 +94,7 @@ class ConfigSetDescriptor(CriteriaDescriptor):
                     log.info("{}: Invalid {} item: {}".format(
                         obj.checkname, self.name, e))
 
-            self.instances[obj] = frozenset(ret)
+            setattr(obj, self.name, frozenset(ret))
 
 
 class ConfigPermissionSetDescriptor(CriteriaPermissionSetDescriptor):
@@ -114,7 +114,7 @@ class ConfigPermissionSetDescriptor(CriteriaPermissionSetDescriptor):
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = frozenset()
+            setattr(obj, self.name, frozenset())
         else:
             try:
                 super().__set__(obj, (v for v in value.split(" ") if v))
