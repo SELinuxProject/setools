@@ -52,9 +52,9 @@ class Mapping:
 
     """A mapping for a permission in the permission map."""
 
-    weight = PermissionMapDescriptor("weight", validate_weight)
-    direction = PermissionMapDescriptor("direction", validate_direction)
-    enabled = PermissionMapDescriptor("enabled", bool)
+    weight = PermissionMapDescriptor(validate_weight)
+    direction = PermissionMapDescriptor(validate_direction)
+    enabled = PermissionMapDescriptor(bool)
     class_: str
     perm: str
 

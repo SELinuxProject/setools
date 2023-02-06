@@ -278,7 +278,6 @@ class PermissionMapDescriptor:
     Descriptor for Permission Map mappings.
 
     Parameter:
-    name        The map setting name.
     validator   A callable for validating the setting.
 
     Instance class attribute use (obj parameter):
@@ -287,9 +286,11 @@ class PermissionMapDescriptor:
     perm        The mapping's permission
     """
 
-    def __init__(self, propname: str, validator: Callable):
-        self.name: str = propname
+    def __init__(self, validator: Callable):
         self.validator: Callable = validator
+
+    def __set_name__(self, owner, name):
+        self.name = name
 
     def __get__(self, obj, objtype=None):
         if obj is None:
