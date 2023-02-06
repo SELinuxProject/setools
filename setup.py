@@ -133,7 +133,7 @@ for lang in linguas:
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
 setup(name='setools',
-      version='4.4.0',
+      version='4.4.1',
       description='SELinux policy analysis tools.',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
@@ -159,7 +159,7 @@ setup(name='setools',
           'Topic :: Utilities',
       ],
       keywords='SELinux SETools policy analysis tools seinfo sesearch sediff sedta seinfoflow apol',
-      python_requires='>=3.4',
+      python_requires='>=3.6',
       # setup also requires libsepol and libselinux
       # C libraries and headers to compile.
       setup_requires=['setuptools', 'Cython>=0.27'],

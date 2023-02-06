@@ -1,21 +1,7 @@
 # Copyright 2014-2016, Tresys Technology, LLC
 # Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
 #
-# This file is part of SETools.
-#
-# SETools is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation, either version 2.1 of
-# the License, or (at your option) any later version.
-#
-# SETools is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with SETools.  If not, see
-# <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: LGPL-2.1-only
 #
 
 
@@ -288,21 +274,21 @@ cdef class AVRuleXperm(BaseTERule):
             set perms = set()
             size_t curr = 0
             size_t len = sizeof(xperms.perms) * sepol.EXTENDED_PERMS_LEN
+            size_t base_value = 0
 
         #
         # Build permission set
         #
-        while curr < len:
+        for curr in range(len):
             if sepol.xperm_test(curr, xperms.perms):
                 if xperms.specified & sepol.AVTAB_XPERMS_IOCTLFUNCTION:
                     perms.add(xperms.driver << 8 | curr)
                 elif xperms.specified & sepol.AVTAB_XPERMS_IOCTLDRIVER:
-                    perms.add(curr << 8)
+                    base_value = curr << 8
+                    perms.update(range(base_value, base_value + 0x100))
                 else:
                     raise LowLevelPolicyError("Unknown extended permission: {}".format(
                                               xperms.specified))
-
-            curr += 1
 
         #
         # Determine xperm type

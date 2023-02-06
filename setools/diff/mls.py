@@ -1,21 +1,7 @@
 # Copyright 2016, Tresys Technology, LLC
 # Copyright 2018, Chris PeBenito <pebenito@ieee.org>
 #
-# This file is part of SETools.
-#
-# SETools is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation, either version 2.1 of
-# the License, or (at your option) any later version.
-#
-# SETools is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with SETools.  If not, see
-# <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
 from typing import NamedTuple, Set
@@ -218,8 +204,7 @@ class LevelDeclsDifference(Difference):
         self.modified_levels = None
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class LevelDeclWrapper(Wrapper[LevelDecl]):  # pylint: disable=unsubscriptable-object
+class LevelDeclWrapper(Wrapper[LevelDecl]):
 
     """Wrap level declarations to allow comparisons."""
 
@@ -242,8 +227,7 @@ class LevelDeclWrapper(Wrapper[LevelDecl]):  # pylint: disable=unsubscriptable-o
         return self.sensitivity < other.sensitivity
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class LevelWrapper(Wrapper[Level]):  # pylint: disable=unsubscriptable-object
+class LevelWrapper(Wrapper[Level]):
 
     """Wrap levels to allow comparisons."""
 
@@ -276,8 +260,7 @@ class LevelWrapper(Wrapper[Level]):  # pylint: disable=unsubscriptable-object
             return False
 
 
-# Pylint bug: https://github.com/PyCQA/pylint/issues/2822
-class RangeWrapper(Wrapper[Range]):  # pylint: disable=unsubscriptable-object
+class RangeWrapper(Wrapper[Range]):
 
     """
     Wrap ranges to allow comparisons.

@@ -15,7 +15,7 @@
 # This is followed by each permission and its individual mapping to one
 # of the following:
 #
-# 	r   =	Read
+#	r   =	Read
 #	w   =	Write
 #	n   =	None
 #	b   =	Both
@@ -27,9 +27,9 @@
 # Look to the examples below for further clarification.
 #
 # Number of object classes.
-129
+134
 
-class netlink_audit_socket 28
+class netlink_audit_socket 26
          nlmsg_relay         w        10
      nlmsg_tty_audit         w        10
       nlmsg_readpriv         r        10
@@ -44,8 +44,6 @@ class netlink_audit_socket 28
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -59,11 +57,8 @@ class netlink_audit_socket 28
               listen         r         1
                  map         n         1
 
-class tcp_socket 28
-          acceptfrom         r         1
-           connectto         w         1
+class tcp_socket 23
            node_bind         n         1
-             newconn         w         1
         name_connect         w         1
               append         w        10
                 bind         w         1
@@ -74,8 +69,6 @@ class tcp_socket 28
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -121,7 +114,7 @@ class db_procedure 9
              setattr         w         7
            relabelto         w         1
 
-class dir 26
+class dir 30
                rmdir         b         1
         audit_access         r         1
          remove_name         w         1
@@ -146,13 +139,17 @@ class dir 26
            relabelto         w        10
              mounton         b         1
              quotaon         b         1
-              swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class peer 1
                 recv         r        10
 
-class blk_file 21
+class blk_file 25
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -172,14 +169,16 @@ class blk_file 21
            relabelto         w        10
              mounton         b         1
              quotaon         b         1
-              swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
-class chr_file 23
+class chr_file 25
         audit_access         r         1
-          entrypoint         r         1
              execmod         n         1
-    execute_no_trans         r         1
                 open         n         1
               append         w        10
               create         w         1
@@ -197,8 +196,12 @@ class chr_file 23
            relabelto         w        10
              mounton         b         1
              quotaon         b         1
-              swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class db_table 11
               select         n         1
@@ -237,7 +240,7 @@ class ipc 9
                 read         r        10
           unix_write         w         3
 
-class lnk_file 21
+class lnk_file 25
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -257,8 +260,12 @@ class lnk_file 21
            relabelto         w        10
              mounton         b         1
              quotaon         b         1
-              swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
 class process 31
               getcap         r         3
@@ -313,7 +320,7 @@ class packet 7
            relabelto         w         3
              flow_in         r        10
 
-class socket 23
+class socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -323,8 +330,6 @@ class socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -338,7 +343,7 @@ class socket 23
               listen         r         1
                  map         n         1
 
-class fifo_file 21
+class fifo_file 25
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -358,10 +363,14 @@ class fifo_file 21
            relabelto         w        10
              mounton         b         1
              quotaon         b         1
-              swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
-class file 23
+class file 27
         audit_access         r         1
           entrypoint         r         1
              execmod         n         1
@@ -383,19 +392,14 @@ class file 23
            relabelto         w        10
              mounton         b         1
              quotaon         b         1
-              swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
-class node 11
-          rawip_recv         r        10
-            tcp_recv         r        10
-            udp_recv         r        10
-          rawip_send         w        10
-            tcp_send         w        10
-            udp_send         w        10
-           dccp_recv         r        10
-           dccp_send         w        10
-        enforce_dest         n         1
+class node 2
               sendto         w        10
             recvfrom         r        10
 
@@ -425,7 +429,7 @@ class db_view 7
              setattr         w         5
            relabelto         w         1
 
-class netlink_nflog_socket 23
+class netlink_nflog_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -435,8 +439,6 @@ class netlink_nflog_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -459,7 +461,7 @@ class key 7
                 read         r        10
               search         r         5
 
-class netlink_tcpdiag_socket 25
+class netlink_tcpdiag_socket 23
          nlmsg_write         w        10
           nlmsg_read         r        10
               append         w        10
@@ -471,8 +473,6 @@ class netlink_tcpdiag_socket 25
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -486,10 +486,8 @@ class netlink_tcpdiag_socket 25
               listen         r         1
                  map         n         1
 
-class unix_stream_socket 26
-          acceptfrom         r         1
+class unix_stream_socket 22
            connectto         w         1
-             newconn         w         1
               append         w        10
                 bind         w         1
              connect         w         1
@@ -499,8 +497,6 @@ class unix_stream_socket 26
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -545,7 +541,7 @@ class kernel_service 2
      create_files_as         n         1
      use_as_override         n         1
 
-class netlink_route_socket 25
+class netlink_route_socket 23
          nlmsg_write         w        10
           nlmsg_read         r        10
               append         w        10
@@ -557,8 +553,6 @@ class netlink_route_socket 25
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -603,7 +597,7 @@ class x_resource 2
                write         w        10
                 read         r        10
 
-class netlink_selinux_socket 23
+class netlink_selinux_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -613,8 +607,6 @@ class netlink_selinux_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -662,7 +654,7 @@ class capability 32
         sys_resource         n         1
                chown         n         1
 
-class netlink_ip6fw_socket 25
+class netlink_ip6fw_socket 23
          nlmsg_write         w        10
           nlmsg_read         r        10
               append         w        10
@@ -674,8 +666,6 @@ class netlink_ip6fw_socket 25
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -689,7 +679,7 @@ class netlink_ip6fw_socket 25
               listen         r         1
                  map         n         1
 
-class dccp_socket 25
+class dccp_socket 23
            node_bind         n         1
         name_connect         w        10
               append         w        10
@@ -701,8 +691,6 @@ class dccp_socket 25
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -716,7 +704,7 @@ class dccp_socket 25
               listen         r         1
                  map         n         1
 
-class netlink_firewall_socket 25
+class netlink_firewall_socket 23
          nlmsg_write         w        10
           nlmsg_read         r        10
               append         w        10
@@ -728,8 +716,6 @@ class netlink_firewall_socket 25
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -743,7 +729,7 @@ class netlink_firewall_socket 25
               listen         r         1
                  map         n         1
 
-class sock_file 21
+class sock_file 25
         audit_access         r         1
              execmod         n         1
                 open         n         1
@@ -763,10 +749,14 @@ class sock_file 21
            relabelto         w        10
              mounton         b         1
              quotaon         b         1
-              swapon         b         1
                  map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
 
-class unix_dgram_socket 23
+class unix_dgram_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -776,8 +766,6 @@ class unix_dgram_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -791,7 +779,7 @@ class unix_dgram_socket 23
               listen         r         1
                  map         n         1
 
-class netlink_kobject_uevent_socket 23
+class netlink_kobject_uevent_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -801,8 +789,6 @@ class netlink_kobject_uevent_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -832,15 +818,15 @@ class filesystem 10
            associate         n         1
             quotaget         r         1
          relabelfrom         r        10
-          transition         w         1
              getattr         r         1
             quotamod         w         1
                mount         w         1
              remount         w         1
              unmount         w         1
            relabelto         w        10
+               watch         r         3
 
-class netlink_xfrm_socket 25
+class netlink_xfrm_socket 23
          nlmsg_write         w        10
           nlmsg_read         r        10
               append         w        10
@@ -852,8 +838,6 @@ class netlink_xfrm_socket 25
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -899,7 +883,7 @@ class db_schema 9
              setattr         w         5
            relabelto         r         1
 
-class netlink_dnrt_socket 23
+class netlink_dnrt_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -909,8 +893,6 @@ class netlink_dnrt_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -972,7 +954,7 @@ class x_font 6
              getattr         r         7
                  use         r         1
 
-class key_socket 23
+class key_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -982,8 +964,6 @@ class key_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -997,19 +977,11 @@ class key_socket 23
               listen         r         1
                  map         n         1
 
-class netif 10
-          rawip_recv         r        10
-            tcp_recv         r        10
-            udp_recv         r        10
-          rawip_send         w        10
+class netif 2
               egress         w        10
              ingress         r        10
-            tcp_send         w        10
-            udp_send         w        10
-           dccp_recv         r        10
-           dccp_send         w        10
 
-class packet_socket 23
+class packet_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1019,8 +991,6 @@ class packet_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1041,7 +1011,7 @@ class msg 2
                 send         w        10
              receive         r        10
 
-class tun_socket 24
+class tun_socket 22
         attach_queue         w         5
               append         w        10
                 bind         w         1
@@ -1052,8 +1022,6 @@ class tun_socket 24
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1067,7 +1035,7 @@ class tun_socket 24
               listen         r         1
                  map         n         1
 
-class udp_socket 24
+class udp_socket 22
            node_bind         n         1
               append         w        10
                 bind         w         1
@@ -1078,8 +1046,6 @@ class udp_socket 24
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1093,7 +1059,7 @@ class udp_socket 24
               listen         r         1
                  map         n         1
 
-class appletalk_socket 23
+class appletalk_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1103,8 +1069,6 @@ class appletalk_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         1
              setattr         w         1
               accept         r         1
@@ -1140,7 +1104,7 @@ class x_screen 8
        saver_getattr         r         7
        saver_setattr         w         7
 
-class rawip_socket 24
+class rawip_socket 22
            node_bind         n         1
               append         w        10
                 bind         w         1
@@ -1151,8 +1115,6 @@ class rawip_socket 24
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         1
              setattr         w         1
               accept         r         1
@@ -1194,7 +1156,7 @@ class db_column 9
              setattr         w         7
            relabelto         w         1
 
-class netlink_socket 23
+class netlink_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1204,8 +1166,6 @@ class netlink_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1330,7 +1290,7 @@ class binder 4
      set_context_mgr         w         1
          impersonate         n         1
 
-class netlink_connector_socket 23
+class netlink_connector_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1340,8 +1300,6 @@ class netlink_connector_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1355,7 +1313,7 @@ class netlink_connector_socket 23
               listen         r         1
                  map         n         1
 
-class netlink_netfilter_socket 23
+class netlink_netfilter_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1365,8 +1323,6 @@ class netlink_netfilter_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1380,7 +1336,7 @@ class netlink_netfilter_socket 23
               listen         r         1
                  map         n         1
 
-class netlink_iscsi_socket 23
+class netlink_iscsi_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1390,8 +1346,6 @@ class netlink_iscsi_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1414,7 +1368,7 @@ class db_exception 7
            relabelto         w         1
                  use         r         1
 
-class netlink_rdma_socket 23
+class netlink_rdma_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1424,8 +1378,6 @@ class netlink_rdma_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1439,7 +1391,7 @@ class netlink_rdma_socket 23
               listen         r         1
                  map         n         1
 
-class netlink_generic_socket 23
+class netlink_generic_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1449,8 +1401,6 @@ class netlink_generic_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1464,7 +1414,7 @@ class netlink_generic_socket 23
               listen         r         1
                  map         n         1
 
-class netlink_scsitransport_socket 23
+class netlink_scsitransport_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1474,8 +1424,6 @@ class netlink_scsitransport_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1497,7 +1445,7 @@ class service 6
               reload         w         1
                 stop         w         1
 
-class netlink_crypto_socket 23
+class netlink_crypto_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1507,8 +1455,6 @@ class netlink_crypto_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1531,7 +1477,7 @@ class db_datatype 7
            relabelto         w         1
                  use         r         1
 
-class netlink_fib_lookup_socket 23
+class netlink_fib_lookup_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1541,8 +1487,6 @@ class netlink_fib_lookup_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1598,7 +1542,7 @@ class cap2_userns 6
           wake_alarm         n         1
           audit_read         n         1
 
-class ax25_socket 23
+class ax25_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1608,8 +1552,6 @@ class ax25_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1623,7 +1565,7 @@ class ax25_socket 23
               listen         r         1
                  map         n         1
 
-class ipx_socket 23
+class ipx_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1633,8 +1575,6 @@ class ipx_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1648,7 +1588,7 @@ class ipx_socket 23
               listen         r         1
                  map         n         1
 
-class netrom_socket 23
+class netrom_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1658,8 +1598,6 @@ class netrom_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1673,7 +1611,7 @@ class netrom_socket 23
               listen         r         1
                  map         n         1
 
-class x25_socket 23
+class x25_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1683,8 +1621,6 @@ class x25_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1698,7 +1634,7 @@ class x25_socket 23
               listen         r         1
                  map         n         1
 
-class rose_socket 23
+class rose_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1708,8 +1644,6 @@ class rose_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1723,7 +1657,7 @@ class rose_socket 23
               listen         r         1
                  map         n         1
 
-class decnet_socket 23
+class decnet_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1733,8 +1667,6 @@ class decnet_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1748,7 +1680,7 @@ class decnet_socket 23
               listen         r         1
                  map         n         1
 
-class atmsvc_socket 23
+class atmsvc_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1758,8 +1690,6 @@ class atmsvc_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1773,7 +1703,7 @@ class atmsvc_socket 23
               listen         r         1
                  map         n         1
 
-class rds_socket 23
+class rds_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1783,8 +1713,6 @@ class rds_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1798,7 +1726,7 @@ class rds_socket 23
               listen         r         1
                  map         n         1
 
-class irda_socket 23
+class irda_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1808,8 +1736,6 @@ class irda_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1823,7 +1749,7 @@ class irda_socket 23
               listen         r         1
                  map         n         1
 
-class pppox_socket 23
+class pppox_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1833,8 +1759,6 @@ class pppox_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1848,7 +1772,7 @@ class pppox_socket 23
               listen         r         1
                  map         n         1
 
-class llc_socket 23
+class llc_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1858,8 +1782,6 @@ class llc_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1873,7 +1795,7 @@ class llc_socket 23
               listen         r         1
                  map         n         1
 
-class can_socket 23
+class can_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1883,8 +1805,6 @@ class can_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1898,7 +1818,7 @@ class can_socket 23
               listen         r         1
                  map         n         1
 
-class tipc_socket 23
+class tipc_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1908,8 +1828,6 @@ class tipc_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1923,7 +1841,7 @@ class tipc_socket 23
               listen         r         1
                  map         n         1
 
-class bluetooth_socket 23
+class bluetooth_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1933,8 +1851,6 @@ class bluetooth_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1948,7 +1864,7 @@ class bluetooth_socket 23
               listen         r         1
                  map         n         1
 
-class iucv_socket 23
+class iucv_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1958,8 +1874,6 @@ class iucv_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1973,7 +1887,7 @@ class iucv_socket 23
               listen         r         1
                  map         n         1
 
-class rxrpc_socket 23
+class rxrpc_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -1983,8 +1897,6 @@ class rxrpc_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -1998,7 +1910,7 @@ class rxrpc_socket 23
               listen         r         1
                  map         n         1
 
-class isdn_socket 23
+class isdn_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2008,8 +1920,6 @@ class isdn_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2023,7 +1933,7 @@ class isdn_socket 23
               listen         r         1
                  map         n         1
 
-class phonet_socket 23
+class phonet_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2033,8 +1943,6 @@ class phonet_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2048,7 +1956,7 @@ class phonet_socket 23
               listen         r         1
                  map         n         1
 
-class ieee802154_socket 23
+class ieee802154_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2058,8 +1966,6 @@ class ieee802154_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2073,7 +1979,7 @@ class ieee802154_socket 23
               listen         r         1
                  map         n         1
 
-class caif_socket 23
+class caif_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2083,8 +1989,6 @@ class caif_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2098,7 +2002,7 @@ class caif_socket 23
               listen         r         1
                  map         n         1
 
-class alg_socket 23
+class alg_socket 21
               append         w        10
                 bind         w         1
              connect         n         1
@@ -2108,8 +2012,6 @@ class alg_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2123,7 +2025,7 @@ class alg_socket 23
               listen         r         1
                  map         n         1
 
-class nfc_socket 23
+class nfc_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2133,8 +2035,6 @@ class nfc_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2148,7 +2048,7 @@ class nfc_socket 23
               listen         r         1
                  map         n         1
 
-class vsock_socket 23
+class vsock_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2158,8 +2058,6 @@ class vsock_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2173,7 +2071,7 @@ class vsock_socket 23
               listen         r         1
                  map         n         1
 
-class kcm_socket 23
+class kcm_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2183,8 +2081,6 @@ class kcm_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2198,7 +2094,7 @@ class kcm_socket 23
               listen         r         1
                  map         n         1
 
-class qipcrtr_socket 23
+class qipcrtr_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2208,8 +2104,6 @@ class qipcrtr_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2223,7 +2117,7 @@ class qipcrtr_socket 23
               listen         r         1
                  map         n         1
 
-class smc_socket 23
+class smc_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2233,8 +2127,6 @@ class smc_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2248,7 +2140,7 @@ class smc_socket 23
               listen         r         1
                  map         n         1
 
-class sctp_socket 26
+class sctp_socket 24
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2258,8 +2150,6 @@ class sctp_socket 26
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2276,7 +2166,7 @@ class sctp_socket 26
          association         w         1
         name_connect         w        10
 
-class atmpvc_socket 23
+class atmpvc_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2286,8 +2176,6 @@ class atmpvc_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2301,7 +2189,7 @@ class atmpvc_socket 23
               listen         r         1
                  map         n         1
 
-class icmp_socket 24
+class icmp_socket 22
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2311,8 +2199,6 @@ class icmp_socket 24
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2344,7 +2230,7 @@ class infiniband_endport 1
 class infiniband_pkey 1
               access         b        10
 
-class xdp_socket 23
+class xdp_socket 21
               append         w        10
                 bind         w         1
              connect         w         1
@@ -2354,8 +2240,6 @@ class xdp_socket 23
                ioctl         n         1
            name_bind         n         1
               sendto         w        10
-            recv_msg         r        10
-            send_msg         w        10
              getattr         r         7
              setattr         w         7
               accept         r         1
@@ -2368,3 +2252,50 @@ class xdp_socket 23
            relabelto         w        10
               listen         r         1
                  map         n         1
+
+class lockdown 2
+           integrity         b         1
+     confidentiality         r         1
+
+class perf_event 6
+                open         r         1
+                 cpu         r         5
+              kernel         r         5
+          tracepoint         r         5
+                read         r         1
+               write         w         1
+
+class anon_inode 25
+        audit_access         r         1
+             execmod         n         1
+                open         n         1
+              append         w        10
+              create         w         1
+             execute         r         1
+               write         w        10
+         relabelfrom         r        10
+                link         w         1
+              unlink         w         1
+               ioctl         n         1
+             getattr         r         7
+             setattr         w         7
+                read         r        10
+              rename         w         5
+                lock         n         1
+           relabelto         w        10
+             mounton         b         1
+             quotaon         b         1
+                 map         n         1
+               watch         r         3
+         watch_mount         r         3
+            watch_sb         r         3
+     watch_with_perm         r         3
+         watch_reads         r         3
+
+class io_uring 3
+      override_creds         w        10
+              sqpoll         w        10
+                 cmd         w        10
+
+class user_namespace 1
+              create         w        10

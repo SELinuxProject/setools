@@ -1,21 +1,7 @@
 # Copyright 2014-2015, Tresys Technology, LLC
 # Copyright 2017-2018, Chris PeBenito <pebenito@ieee.org>
 #
-# This file is part of SETools.
-#
-# SETools is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation, either version 2.1 of
-# the License, or (at your option) any later version.
-#
-# SETools is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with SETools.  If not, see
-# <http://www.gnu.org/licenses/>.
+# SPDX-License-Identifier: LGPL-2.1-only
 #
 
 cdef object _common_cache = WeakKeyDefaultDict(dict)
@@ -75,7 +61,7 @@ cdef class Common(PolicySymbol):
         return other in self.perms
 
     def statement(self):
-        return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(self.perms))
+        return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(sorted(self.perms)))
 
 
 cdef class ObjClass(PolicySymbol):
@@ -204,7 +190,7 @@ cdef class ObjClass(PolicySymbol):
 
         # a class that inherits may not have additional permissions
         if len(self.perms) > 0:
-            stmt += "{{\n\t{0}\n}}".format('\n\t'.join(self.perms))
+            stmt += "{{\n\t{0}\n}}".format('\n\t'.join(sorted(self.perms)))
 
         return stmt
 

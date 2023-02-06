@@ -1,7 +1,21 @@
-The intent is to allow free use of this source code.  All programs'
-source files are copyright protected and freely distributed under the
-GNU General Public License (see COPYING.GPL).  All library source
-files are copyright under the GNU Lesser General Public License (see
-COPYING.LGPL).  All files distributed with this package indicate the
-appropriate license to use with that file.  Absolutely no warranty is
-provided or implied.
+SETools libraries are provided under:
+
+    SPDX-License-Identifier: LGPL-2.1-only
+
+Being under the terms of the GNU Lesser General Public License version 2.1
+only, according with:
+
+    COPYING.LGPL
+
+
+SETools applications and unit tests are provided under:
+
+    SPDX-License-Identifier: GPL-2.0-only
+
+Being under the terms of the GNU General Public License version 2 only,
+according with:
+
+    COPYING.GPL
+
+
+All contributions to the SETools are subject to this COPYING file.

@@ -1,3 +1,18 @@
+*setools-4.4.1 (6 Feb 2023)
+
+  * Replace deprecated NetworkX function use in information flow and domain
+    transition analysis.  This function was removed in NetworkX 3.0.
+  * Fix bug in apol copy and cut functions when copying from a tree view.
+  * Fix bug with extended permission set construction when a range includes
+    0x0.
+  * Add sesearch -Sp option for permission subset match.
+  * Fix error in man page description for sesearch -ep option.
+  * Improve output stability in constraint, common, class, role, and user
+    queries.
+  * Updated permission map.
+  * Fix bug in sechecker parsing of multiline values.
+  * Other code cleanups not visible to users.
+
 *setools-4.4.0 (5 Mar 2021)
 
   * Updated policy representation to handle policydb version 33, compressed
