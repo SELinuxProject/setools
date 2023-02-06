@@ -189,8 +189,8 @@ class NetworkXGraphEdgeDescriptor(ABC):
     """
     Descriptor abstract base class for NetworkX graph edge attributes.
 
-    Parameter:
-    name        The edge property name
+    Keyword Parameter:
+    name        Override the graph edge property name.
 
     Instance class attribute use (obj parameter):
     G           The NetworkX graph
@@ -198,8 +198,11 @@ class NetworkXGraphEdgeDescriptor(ABC):
     target      The edge's target node
     """
 
-    def __init__(self, propname: str) -> None:
-        self.name = propname
+    def __init__(self, propname: Optional[str] = None) -> None:
+        self.override_name = propname
+
+    def __set_name__(self, owner, name):
+        self.name = self.override_name if self.override_name else name
 
     def __get__(self, obj, objtype=None):
         if obj is None:

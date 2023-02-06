@@ -595,13 +595,13 @@ class Edge:
                 The default is False.
     """
 
-    transition = EdgeAttrList('transition')
-    setexec = EdgeAttrList('setexec')
-    dyntransition = EdgeAttrList('dyntransition')
-    setcurrent = EdgeAttrList('setcurrent')
-    entrypoint = EdgeAttrDict('entrypoint')
-    execute = EdgeAttrDict('execute')
-    type_transition = EdgeAttrDict('type_transition')
+    transition = EdgeAttrList()
+    setexec = EdgeAttrList()
+    dyntransition = EdgeAttrList()
+    setcurrent = EdgeAttrList()
+    entrypoint = EdgeAttrDict()
+    execute = EdgeAttrDict()
+    type_transition = EdgeAttrDict()
 
     def __init__(self, graph, source: Type, target: Type, create: bool = False) -> None:
         self.G = graph
