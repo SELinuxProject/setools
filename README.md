@@ -16,6 +16,7 @@ To run SETools command line tools, the following packages are required:
 * Python 3.6+
 * NetworkX 2.0+ (2.6+ for Python 3.9+)
 * setuptools
+* dataclasses (Python 3.6 only)
 * libselinux
 * libsepol 3.2+
 
