@@ -18,8 +18,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Collection
 from enum import Enum
-from typing import Any, Callable, MutableMapping, Optional, Type, Union
-from weakref import WeakKeyDictionary
+from typing import Callable, Optional, Type, Union
 
 from .util import validate_perms_any
 
@@ -67,37 +66,31 @@ class CriteriaDescriptor:
         self.default_value = default_value
         self.lookup_function: Optional[Union[Callable, str]] = lookup_function
         self.enum_class = enum_class
-        self.name: str = ""
-
-        # use weak references so instances can be
-        # garbage collected, rather than unnecessarily
-        # kept around due to this descriptor.
-        self.instances: MutableMapping = WeakKeyDictionary()
 
     def __set_name__(self, owner, name):
-        self.name = name
+        self.name = f"_internal_{name}"
 
     def __get__(self, obj, objtype=None):
         if obj is None:
             return self
 
-        return self.instances.setdefault(obj, self.default_value)
+        return getattr(obj, self.name, self.default_value)
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = self.default_value
+            setattr(obj, self.name, self.default_value)
         elif self.regex and getattr(obj, self.regex, False):
-            self.instances[obj] = re.compile(value)
+            setattr(obj, self.name, re.compile(value))
         elif self.lookup_function:
             if callable(self.lookup_function):
                 lookup = self.lookup_function
             else:
                 lookup = getattr(obj.policy, self.lookup_function)
-            self.instances[obj] = lookup(value)
+            setattr(obj, self.name, lookup(value))
         elif self.enum_class:
-            self.instances[obj] = self.enum_class.lookup(value)
+            setattr(obj, self.name, self.enum_class.lookup(value))
         else:
-            self.instances[obj] = value
+            setattr(obj, self.name, value)
 
 
 class CriteriaSetDescriptor(CriteriaDescriptor):
@@ -106,19 +99,19 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = self.default_value
+            setattr(obj, self.name, self.default_value)
         elif self.regex and getattr(obj, self.regex, False):
-            self.instances[obj] = re.compile(value)
+            setattr(obj, self.name, re.compile(value))
         elif self.lookup_function:
             if callable(self.lookup_function):
                 lookup = self.lookup_function
             else:
                 lookup = getattr(obj.policy, self.lookup_function)
-            self.instances[obj] = frozenset(lookup(v) for v in value)
+            setattr(obj, self.name, frozenset(lookup(v) for v in value))
         elif self.enum_class:
-            self.instances[obj] = frozenset(self.enum_class.lookup(v) for v in value)
+            setattr(obj, self.name, frozenset(self.enum_class.lookup(v) for v in value))
         else:
-            self.instances[obj] = frozenset(value)
+            setattr(obj, self.name, frozenset(value))
 
 
 class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
@@ -146,18 +139,12 @@ class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
     def __init__(self, name_regex: Optional[str] = None, default_value=None) -> None:
         self.regex: Optional[str] = name_regex
         self.default_value = default_value
-        self.name: str = ""
-
-        # use weak references so instances can be
-        # garbage collected, rather than unnecessarily
-        # kept around due to this descriptor.
-        self.instances: MutableMapping = WeakKeyDictionary()
 
     def __set__(self, obj, value):
         if not value:
-            self.instances[obj] = self.default_value
+            setattr(obj, self.name, self.default_value)
         elif self.regex and getattr(obj, self.regex, False):
-            self.instances[obj] = re.compile(value)
+            setattr(obj, self.name, re.compile(value))
         else:
             perms = frozenset(v for v in value)
 
@@ -173,7 +160,7 @@ class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
                                tclass=tclass,
                                policy=obj.policy)
 
-            self.instances[obj] = perms
+            setattr(obj, self.name, perms)
 
 
 #
@@ -189,8 +176,8 @@ class NetworkXGraphEdgeDescriptor(ABC):
     """
     Descriptor abstract base class for NetworkX graph edge attributes.
 
-    Parameter:
-    name        The edge property name
+    Keyword Parameter:
+    name        Override the graph edge property name.
 
     Instance class attribute use (obj parameter):
     G           The NetworkX graph
@@ -198,8 +185,11 @@ class NetworkXGraphEdgeDescriptor(ABC):
     target      The edge's target node
     """
 
-    def __init__(self, propname: str) -> None:
-        self.name = propname
+    def __init__(self, propname: Optional[str] = None) -> None:
+        self.override_name = propname
+
+    def __set_name__(self, owner, name):
+        self.name = self.override_name if self.override_name else name
 
     def __get__(self, obj, objtype=None):
         if obj is None:
@@ -278,7 +268,6 @@ class PermissionMapDescriptor:
     Descriptor for Permission Map mappings.
 
     Parameter:
-    name        The map setting name.
     validator   A callable for validating the setting.
 
     Instance class attribute use (obj parameter):
@@ -287,9 +276,11 @@ class PermissionMapDescriptor:
     perm        The mapping's permission
     """
 
-    def __init__(self, propname: str, validator: Callable):
-        self.name: str = propname
+    def __init__(self, validator: Callable):
         self.validator: Callable = validator
+
+    def __set_name__(self, owner, name):
+        self.name = name
 
     def __get__(self, obj, objtype=None):
         if obj is None:

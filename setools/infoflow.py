@@ -405,7 +405,7 @@ class InfoFlowStep:
                 The default is False.
     """
 
-    rules = EdgeAttrList('rules')
+    rules = EdgeAttrList()
 
     # use capacity to store the info flow weight so
     # we can use network flow algorithms naturally.

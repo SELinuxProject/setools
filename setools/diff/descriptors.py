@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import MutableMapping
-from weakref import WeakKeyDictionary
 
 
 class DiffResultDescriptor:
@@ -16,23 +14,21 @@ class DiffResultDescriptor:
     def __init__(self, diff_function: str) -> None:
         self.diff_function = diff_function
 
-        # use weak references so instances can be
-        # garbage collected, rather than unnecessarily
-        # kept around due to this descriptor.
-        self.instances: MutableMapping = WeakKeyDictionary()
+    def __set_name__(self, owner, name):
+        self.name = f"_internal_{name}"
 
     def __get__(self, obj, objtype=None):
         if obj is None:
             return self
 
-        if self.instances.setdefault(obj, None) is None:
+        if getattr(obj, self.name, None) is None:
             diff = getattr(obj, self.diff_function)
             diff()
 
-        return self.instances[obj]
+        return getattr(obj, self.name)
 
     def __set__(self, obj, value):
-        self.instances[obj] = value
+        setattr(obj, self.name, value)
 
     def __delete__(self, obj):
-        self.instances[obj] = None
+        setattr(obj, self.name, None)
