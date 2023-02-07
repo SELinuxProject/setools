@@ -5,6 +5,7 @@
 import itertools
 import logging
 from contextlib import suppress
+from dataclasses import dataclass, InitVar
 from typing import cast, Iterable, List, Mapping, Optional, Union
 
 try:
@@ -14,6 +15,7 @@ except ImportError:
     logging.getLogger(__name__).debug("NetworkX failed to import.")
 
 from .descriptors import EdgeAttrIntMax, EdgeAttrList
+from .mixins import NetworkXGraphEdge
 from .permmap import PermissionMap
 from .policyrep import AVRule, SELinuxPolicy, TERuletype, Type
 
@@ -390,7 +392,8 @@ class InfoFlowAnalysis:
             nx.number_of_edges(self.subG)))
 
 
-class InfoFlowStep:
+@dataclass
+class InfoFlowStep(NetworkXGraphEdge):
 
     """
     A graph edge.  Also used for returning information flow steps.
@@ -405,6 +408,10 @@ class InfoFlowStep:
                 The default is False.
     """
 
+    G: nx.DiGraph
+    source: Type
+    target: Type
+    create: InitVar[bool] = False
     rules = EdgeAttrList()
 
     # use capacity to store the info flow weight so
@@ -414,32 +421,11 @@ class InfoFlowStep:
     # (see below add_edge() call)
     weight = EdgeAttrIntMax('capacity')
 
-    def __init__(self, graph, source: Type, target: Type, create: bool = False) -> None:
-        self.G = graph
-        self.source = source
-        self.target = target
-
-        if not self.G.has_edge(source, target):
+    def __post_init__(self, create) -> None:
+        if not self.G.has_edge(self.source, self.target):
             if create:
-                self.G.add_edge(source, target, weight=1)
+                self.G.add_edge(self.source, self.target, weight=1)
                 self.rules = None
                 self.weight = None
             else:
                 raise ValueError("InfoFlowStep does not exist in graph")
-
-    def __getitem__(self, key):
-        # This is implemented so this object can be used in NetworkX
-        # functions that operate on (source, target) tuples
-        if isinstance(key, slice):
-            return [self._index_to_item(i) for i in range(* key.indices(2))]
-        else:
-            return self._index_to_item(key)
-
-    def _index_to_item(self, index):
-        """Return source or target based on index."""
-        if index == 0:
-            return self.source
-        elif index == 1:
-            return self.target
-        else:
-            raise IndexError("Invalid index (edges only have 2 items): {0}".format(index))
