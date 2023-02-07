@@ -15,6 +15,7 @@ except ImportError:
     logging.getLogger(__name__).debug("NetworkX failed to import.")
 
 from .descriptors import EdgeAttrIntMax, EdgeAttrList
+from .mixins import NetworkXGraphEdge
 from .permmap import PermissionMap
 from .policyrep import AVRule, SELinuxPolicy, TERuletype, Type
 
@@ -392,7 +393,7 @@ class InfoFlowAnalysis:
 
 
 @dataclass
-class InfoFlowStep:
+class InfoFlowStep(NetworkXGraphEdge):
 
     """
     A graph edge.  Also used for returning information flow steps.
@@ -428,20 +429,3 @@ class InfoFlowStep:
                 self.weight = None
             else:
                 raise ValueError("InfoFlowStep does not exist in graph")
-
-    def __getitem__(self, key):
-        # This is implemented so this object can be used in NetworkX
-        # functions that operate on (source, target) tuples
-        if isinstance(key, slice):
-            return [self._index_to_item(i) for i in range(* key.indices(2))]
-        else:
-            return self._index_to_item(key)
-
-    def _index_to_item(self, index: int) -> Type:
-        """Return source or target based on index."""
-        if index == 0:
-            return self.source
-        elif index == 1:
-            return self.target
-        else:
-            raise IndexError("Invalid index (InfoFlowSteps only have 2 items): {0}".format(index))

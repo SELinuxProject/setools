@@ -18,6 +18,7 @@ except ImportError:
     logging.getLogger(__name__).debug("NetworkX failed to import.")
 
 from .descriptors import EdgeAttrDict, EdgeAttrList
+from .mixins import NetworkXGraphEdge
 from .policyrep import AnyTERule, SELinuxPolicy, TERuletype, Type
 
 __all__ = ['DomainTransitionAnalysis', 'DomainTransition', 'DomainEntrypoint', 'DTAPath']
@@ -584,7 +585,7 @@ class DomainTransitionAnalysis:
 
 
 @dataclass
-class Edge:
+class Edge(NetworkXGraphEdge):
 
     """
     A graph edge.  Also used for returning domain transition steps.
@@ -624,20 +625,3 @@ class Edge:
                 self.setcurrent = None
             else:
                 raise ValueError("Edge does not exist in graph")
-
-    def __getitem__(self, key):
-        # This is implemented so this object can be used in NetworkX
-        # functions that operate on (source, target) tuples
-        if isinstance(key, slice):
-            return [self._index_to_item(i) for i in range(* key.indices(2))]
-        else:
-            return self._index_to_item(key)
-
-    def _index_to_item(self, index: int) -> Type:
-        """Return source or target based on index."""
-        if index == 0:
-            return self.source
-        elif index == 1:
-            return self.target
-        else:
-            raise IndexError("Invalid index (edges only have 2 items): {0}".format(index))
