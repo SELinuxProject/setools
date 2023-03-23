@@ -23,7 +23,7 @@ jobs:
           - {python: '3.6', tox: pep8}
           - {python: '3.6', tox: lint}
           - {python: '3.6', tox: mypy}
-          #- {python: '3.6', tox: coverage}
+          - {python: '3.6', tox: coverage}
 
     steps:
     - uses: actions/checkout@v3
