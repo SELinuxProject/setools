@@ -2,15 +2,17 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import NamedTuple, Optional
+from dataclasses import dataclass
+from typing import Optional
 
-from ..policyrep import Default, DefaultRuletype, DefaultValue, DefaultRangeValue, ObjClass
+from ..policyrep import Default, DefaultValue, DefaultRangeValue
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper, Wrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper, Wrapper
 
 
-class ModifiedDefault(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedDefault(DifferenceResult):
 
     """Difference details for a modified default_*."""
 
@@ -19,6 +21,9 @@ class ModifiedDefault(NamedTuple):
     removed_default: Optional[DefaultValue]
     added_default_range: Optional[DefaultRangeValue]
     removed_default_range: Optional[DefaultRangeValue]
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 class DefaultsDifference(Difference):

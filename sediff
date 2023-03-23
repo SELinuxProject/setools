@@ -131,8 +131,7 @@ try:
         if diff.modified_properties or args.property:
             print("Policy Properties ({0} Modified)".format(len(diff.modified_properties)))
             if not args.stats:
-                for name, added, removed in sorted(diff.modified_properties,
-                                                   key=lambda x: x.property):
+                for name, added, removed in sorted(diff.modified_properties):
                     print("      * {0} +{1} -{2}".format(name, added, removed))
             print()
             del diff.modified_properties
@@ -475,8 +474,7 @@ try:
                     print("      - {0}".format(r))
             if diff.modified_levels and not args.stats:
                 print("   Modified Levels: {0}".format(len(diff.modified_levels)))
-                for level, added_categories, removed_categories, _ in sorted(diff.modified_levels,
-                                                                             key=lambda x: x.level):
+                for level, added_categories, removed_categories, _ in sorted(diff.modified_levels):
                     change = []
                     if added_categories:
                         change.append("{0} Added Categories".format(len(added_categories)))
@@ -511,8 +509,7 @@ try:
             if diff.modified_allows and not args.stats:
                 print("   Modified Allow Rules: {0}".format(len(diff.modified_allows)))
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(diff.modified_allows,
-                                                                              key=lambda x: x.rule):
+                for rule, added_perms, removed_perms, matched_perms in sorted(diff.modified_allows):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -551,7 +548,7 @@ try:
                 print("   Modified Allowxperm Rules: {0}".format(len(diff.modified_allowxperms)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_allowxperms, key=lambda x: x.rule):
+                        diff.modified_allowxperms):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -609,7 +606,7 @@ try:
                 print("   Modified Neverallow Rules: {0}".format(len(diff.modified_neverallows)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_neverallows, key=lambda x: x.rule):
+                        diff.modified_neverallows):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -651,7 +648,7 @@ try:
                       len(diff.modified_neverallowxperms)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_neverallowxperms, key=lambda x: x.rule):
+                        diff.modified_neverallowxperms):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -709,7 +706,7 @@ try:
                 print("   Modified Auditallow Rules: {0}".format(len(diff.modified_auditallows)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_auditallows, key=lambda x: x.rule):
+                        diff.modified_auditallows):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -751,7 +748,7 @@ try:
                       len(diff.modified_auditallowxperms)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_auditallowxperms, key=lambda x: x.rule):
+                        diff.modified_auditallowxperms):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -809,7 +806,7 @@ try:
                 print("   Modified Dontaudit Rules: {0}".format(len(diff.modified_dontaudits)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_dontaudits, key=lambda x: x.rule):
+                        diff.modified_dontaudits):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -851,7 +848,7 @@ try:
                       len(diff.modified_dontauditxperms)))
 
                 for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_dontauditxperms, key=lambda x: x.rule):
+                        diff.modified_dontauditxperms):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -911,8 +908,7 @@ try:
                 print("   Modified Type_transition Rules: {0}".format(
                     len(diff.modified_type_transitions)))
 
-                for rule, added_default, removed_default in sorted(diff.modified_type_transitions,
-                                                                   key=lambda x: x.rule):
+                for rule, added_default, removed_default in sorted(diff.modified_type_transitions):
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                         rule, added_default, removed_default)
 
@@ -951,8 +947,7 @@ try:
             if diff.modified_type_changes and not args.stats:
                 print("   Modified Type_change Rules: {0}".format(len(diff.modified_type_changes)))
 
-                for rule, added_default, removed_default in sorted(diff.modified_type_changes,
-                                                                   key=lambda x: x.rule):
+                for rule, added_default, removed_default in sorted(diff.modified_type_changes):
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                         rule, added_default, removed_default)
 
@@ -991,8 +986,7 @@ try:
             if diff.modified_type_members and not args.stats:
                 print("   Modified Type_member Rules: {0}".format(len(diff.modified_type_members)))
 
-                for rule, added_default, removed_default in sorted(diff.modified_type_members,
-                                                                   key=lambda x: x.rule):
+                for rule, added_default, removed_default in sorted(diff.modified_type_members):
                     rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                         rule, added_default, removed_default)
 
@@ -1055,8 +1049,7 @@ try:
                 print("   Modified Role_transition Rules: {0}".format(
                     len(diff.modified_role_transitions)))
 
-                for rule, added_default, removed_default in sorted(diff.modified_role_transitions,
-                                                                   key=lambda x: x.rule):
+                for rule, added_default, removed_default in sorted(diff.modified_role_transitions):
                     rule_string = \
                         "{0.ruletype} {0.source} {0.target}:{0.tclass} +{1} -{2}".format(
                             rule, added_default, removed_default)
@@ -1091,8 +1084,7 @@ try:
                 print("   Modified Range_transition Rules: {0}".format(
                     len(diff.modified_range_transitions)))
 
-                for rule, added_default, removed_default in sorted(diff.modified_range_transitions,
-                                                                   key=lambda x: x.rule):
+                for rule, added_default, removed_default in sorted(diff.modified_range_transitions):
                     # added brackets around range change for clarity since ranges
                     # can have '-' and spaces.
                     rule_string = \
@@ -1231,7 +1223,7 @@ try:
                     print("      - {0}".format(s.statement()))
             if diff.modified_ibendportcons and not args.stats:
                 print("   Modified Ibendportcons: {0}".format(len(diff.modified_ibendportcons)))
-                for entry in sorted(diff.modified_ibendportcons, key=lambda x: x.rule):
+                for entry in sorted(diff.modified_ibendportcons):
                     print("      * ibendportcon {0.rule.name} {0.rule.port} "
                           "+[{0.added_context}] -[{0.removed_context}]".format(entry))
 
@@ -1256,7 +1248,7 @@ try:
                     print("      - {0}".format(s.statement()))
             if diff.modified_ibpkeycons and not args.stats:
                 print("   Modified Ibpkeycons: {0}".format(len(diff.modified_ibpkeycons)))
-                for entry in sorted(diff.modified_ibpkeycons, key=lambda x: x.rule):
+                for entry in sorted(diff.modified_ibpkeycons):
                     if entry.rule.pkeys.low == entry.rule.pkeys.high:
                         print("      * ibpkeycon {0.rule.subnet_prefix} {0.rule.pkeys.low:#x} "
                               "+[{0.added_context}] -[{0.removed_context}]".format(entry))
@@ -1286,7 +1278,7 @@ try:
                     print("      - {0}".format(s))
             if diff.modified_fs_uses and not args.stats:
                 print("   Modified Fs_use: {0}".format(len(diff.modified_fs_uses)))
-                for entry in sorted(diff.modified_fs_uses, key=lambda x: x.rule):
+                for entry in sorted(diff.modified_fs_uses):
                     print("      * {0.ruletype} {0.fs} +[{1}] -[{2}];".format(
                           entry.rule, entry.added_context, entry.removed_context))
 
@@ -1311,7 +1303,7 @@ try:
                     print("      - {0}".format(s))
             if diff.modified_genfscons and not args.stats:
                 print("   Modified Genfscons: {0}".format(len(diff.modified_genfscons)))
-                for entry in sorted(diff.modified_genfscons, key=lambda x: x.rule):
+                for entry in sorted(diff.modified_genfscons):
                     print("      * genfscon {0.fs} {0.path} {0.filetype} +[{1}] -[{2}];".format(
                           entry.rule, entry.added_context, entry.removed_context))
 
@@ -1336,7 +1328,7 @@ try:
                     print("      - {0}".format(n))
             if diff.modified_netifcons and not args.stats:
                 print("   Modified Netifcons: {0}".format(len(diff.modified_netifcons)))
-                for entry in sorted(diff.modified_netifcons, key=lambda x: x.rule):
+                for entry in sorted(diff.modified_netifcons):
                     # This output is different than other statements because
                     # it becomes difficult to read if this was condensed
                     # into a single line, especially if both contexts
@@ -1379,7 +1371,7 @@ try:
                     print("      - {0}".format(n))
             if diff.modified_nodecons and not args.stats:
                 print("   Modified Nodecons: {0}".format(len(diff.modified_nodecons)))
-                for entry in sorted(diff.modified_nodecons, key=lambda x: x.rule):
+                for entry in sorted(diff.modified_nodecons):
                     print("      * nodecon {0} +[{1.added_context}] -[{1.removed_context}];".format(
                           entry.rule.network.with_netmask.replace("/", " "), entry))
 
@@ -1404,8 +1396,7 @@ try:
                     print("      - {0}".format(n))
             if diff.modified_portcons and not args.stats:
                 print("   Modified Portcons: {0}".format(len(diff.modified_portcons)))
-                for con, added_context, removed_context in sorted(diff.modified_portcons,
-                                                                  key=lambda x: x.rule):
+                for con, added_context, removed_context in sorted(diff.modified_portcons):
                     low, high = con.ports
                     if low == high:
                         print("      * portcon {0.protocol} {1} +[{2}] -[{3}];".format(
@@ -1451,7 +1442,7 @@ try:
             if diff.modified_defaults and not args.stats:
                 print("   Modified Defaults: {0}".format(len(diff.modified_defaults)))
                 for default, added_default, removed_default, added_range, removed_range in sorted(
-                        diff.modified_defaults, key=lambda x: x.rule):
+                        diff.modified_defaults):
                     line = "      * {0.ruletype} {0.tclass} ".format(default)
                     if removed_default:
                         line += "+{0} -{1}".format(added_default, removed_default)
@@ -1488,7 +1479,7 @@ try:
             if diff.modified_typebounds and not args.stats:
                 print("   Modified Typebounds: {0}".format(len(diff.modified_typebounds)))
                 for bound, added_bound, removed_bound in sorted(
-                        diff.modified_typebounds, key=lambda x: x.rule):
+                        diff.modified_typebounds):
                     print("      * {0.ruletype} +{1} -{2} {0.child};".format(
                           bound, added_bound, removed_bound))
 

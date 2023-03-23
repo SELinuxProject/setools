@@ -2,16 +2,17 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from ..policyrep import Context
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper
 
 
-class ModifiedInitialSID(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedInitialSID(DifferenceResult):
 
     """Difference details for a modified initial SID."""
 

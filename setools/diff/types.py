@@ -4,19 +4,21 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
-from typing import NamedTuple, Set, Union
+from dataclasses import dataclass
+from typing import Set, Union
 
 from ..policyrep import Type, TypeAttribute, TypeOrAttr
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper
 from .typeattr import typeattr_wrapper_factory
 from .typing import SymbolCache
 
 _types_cache: SymbolCache[Type] = defaultdict(dict)
 
 
-class ModifiedType(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedType(DifferenceResult):
 
     """Difference details for a modified type."""
 

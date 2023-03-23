@@ -4,19 +4,21 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
-from typing import NamedTuple, Set
+from dataclasses import dataclass
+from typing import Set
 
 from ..policyrep import Category, Level, LevelDecl, Range, Sensitivity
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper, Wrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper, Wrapper
 from .typing import SymbolCache
 
 _cats_cache: SymbolCache[Category] = defaultdict(dict)
 _sens_cache: SymbolCache[Sensitivity] = defaultdict(dict)
 
 
-class ModifiedCategory(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedCategory(DifferenceResult):
 
     """Difference details for a modified category."""
 
@@ -25,7 +27,8 @@ class ModifiedCategory(NamedTuple):
     matched_aliases: Set[str]
 
 
-class ModifiedSensitivity(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedSensitivity(DifferenceResult):
 
     """Difference details for a modified sensitivity."""
 
@@ -34,7 +37,8 @@ class ModifiedSensitivity(NamedTuple):
     matched_aliases: Set[str]
 
 
-class ModifiedLevelDecl(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedLevelDecl(DifferenceResult):
 
     """Difference details for a modified level declaration."""
 
@@ -42,6 +46,9 @@ class ModifiedLevelDecl(NamedTuple):
     added_categories: Set[Category]
     removed_categories: Set[Category]
     matched_categories: Set[Category]
+
+    def __lt__(self, other) -> bool:
+        return self.level < other.level
 
 
 def category_wrapper_factory(category: Category) -> SymbolWrapper[Category]:

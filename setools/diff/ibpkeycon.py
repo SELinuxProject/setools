@@ -2,22 +2,26 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from ..policyrep import Context, Ibpkeycon
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, Wrapper
+from .difference import Difference, DifferenceResult, Wrapper
 
 
-class ModifiedIbpkeycon(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedIbpkeycon(DifferenceResult):
 
     """Difference details for a modified ibpkeycon."""
 
     rule: Ibpkeycon
     added_context: Context
     removed_context: Context
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 class IbpkeyconsDifference(Difference):

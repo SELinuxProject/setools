@@ -5,19 +5,21 @@
 #
 from collections import defaultdict
 from contextlib import suppress
-from typing import NamedTuple, Set
+from dataclasses import dataclass
+from typing import Set
 
 from ..exception import NoCommon
 from ..policyrep import ObjClass
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper
 from .typing import SymbolCache
 
 _class_cache: SymbolCache[ObjClass] = defaultdict(dict)
 
 
-class ModifiedObjClass(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedObjClass(DifferenceResult):
 
     """Difference details for a modified object class."""
 

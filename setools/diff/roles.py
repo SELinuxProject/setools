@@ -4,19 +4,21 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
-from typing import NamedTuple, Set
+from dataclasses import dataclass
+from typing import Set
 
 from ..policyrep import Role, Type
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper
 from .typing import SymbolCache
 from .types import type_wrapper_factory
 
 _roles_cache: SymbolCache[Role] = defaultdict(dict)
 
 
-class ModifiedRole(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedRole(DifferenceResult):
 
     """Difference details for a modified role."""
 

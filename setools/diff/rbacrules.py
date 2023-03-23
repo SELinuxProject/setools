@@ -4,25 +4,29 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from ..policyrep import AnyRBACRule, RBACRuletype, Role, RoleAllow, RoleTransition
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, Wrapper
+from .difference import Difference, DifferenceResult, Wrapper
 from .objclass import class_wrapper_factory
 from .roles import role_wrapper_factory
 from .types import type_or_attr_wrapper_factory
 from .typing import RuleList
 
 
-class ModifiedRBACRule(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedRBACRule(DifferenceResult):
 
     """Difference details for a modified RBAC rule."""
 
     rule: AnyRBACRule
     added_default: Role
     removed_default: Role
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 class RBACRulesDifference(Difference):
