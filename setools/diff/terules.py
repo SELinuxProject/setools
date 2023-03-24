@@ -5,16 +5,17 @@
 #
 import logging
 from collections import defaultdict
+from dataclasses import dataclass
 from sys import intern
 from enum import Enum
-from typing import Any, Callable, Dict, Iterable, List, NamedTuple, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from ..exception import RuleNotConditional, RuleUseError, TERuleNoFilename
 from ..policyrep import AnyTERule, AVRule, AVRuleXperm, Conditional, IoctlSet, TERuletype, Type
 
 from .conditional import conditional_wrapper_factory
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, Wrapper
+from .difference import Difference, DifferenceResult, Wrapper
 from .types import type_wrapper_factory, type_or_attr_wrapper_factory
 from .typing import RuleList
 from .objclass import class_wrapper_factory
@@ -23,7 +24,8 @@ TERULES_UNCONDITIONAL = intern("<<unconditional>>")
 TERULES_UNCONDITIONAL_BLOCK = intern("True")
 
 
-class ModifiedAVRule(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedAVRule(DifferenceResult):
 
     """Difference details for a modified access vector rule."""
 
@@ -32,14 +34,21 @@ class ModifiedAVRule(NamedTuple):
     removed_perms: Union[Set[str], IoctlSet]
     matched_perms: Union[Set[str], IoctlSet]
 
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
-class ModifiedTERule(NamedTuple):
+
+@dataclass(frozen=True)
+class ModifiedTERule(DifferenceResult):
 
     """Difference details for a modified type_* rule."""
 
     rule: AVRule
     added_default: Type
     removed_default: Type
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 #
@@ -50,17 +59,20 @@ class Side(Enum):
     right = 1
 
 
-class RuleDBSideDataRecord(NamedTuple):
+@dataclass
+class RuleDBSideDataRecord:
     perms: Set[str]
     orig_rule: AVRule
 
 
-class RuleDBSidesRecord(NamedTuple):
+@dataclass
+class RuleDBSidesRecord:
     left: Optional[RuleDBSideDataRecord]
     right: Optional[RuleDBSideDataRecord]
 
 
-class TypeDBRecord(NamedTuple):
+@dataclass
+class TypeDBRecord:
     left: Dict[str, Type]
     right: Dict[str, Type]
 

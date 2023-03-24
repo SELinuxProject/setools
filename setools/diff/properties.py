@@ -2,21 +2,26 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import NamedTuple, Union
+from dataclasses import dataclass
+from typing import Union
 
 from ..policyrep import PolicyEnum
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference
+from .difference import Difference, DifferenceResult
 
 
-class ModifiedProperty(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedProperty(DifferenceResult):
 
     """Difference details for a modified policy property."""
 
     property: str
     added: Union[PolicyEnum, bool, int]
     removed: Union[PolicyEnum, bool, int]
+
+    def __lt__(self, other) -> bool:
+        return self.property < other.property
 
 
 class PropertiesDifference(Difference):

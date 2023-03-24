@@ -4,19 +4,20 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from ..policyrep import SELinuxPolicy, Boolean
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper
 from .typing import SymbolCache
 
 
 _bool_cache: SymbolCache[Boolean] = defaultdict(dict)
 
 
-class ModifiedBoolean(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedBoolean(DifferenceResult):
 
     """Difference details for a modified Boolean."""
 

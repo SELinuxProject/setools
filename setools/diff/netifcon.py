@@ -2,16 +2,18 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import NamedTuple, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 from ..policyrep import Context, Netifcon
 
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, Wrapper
+from .difference import Difference, DifferenceResult, Wrapper
 
 
-class ModifiedNetifcon(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedNetifcon(DifferenceResult):
 
     """Difference details for a modified netifcon."""
 
@@ -20,6 +22,9 @@ class ModifiedNetifcon(NamedTuple):
     removed_context: Optional[Context]
     added_packet: Optional[Context]
     removed_packet: Optional[Context]
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 class NetifconsDifference(Difference):

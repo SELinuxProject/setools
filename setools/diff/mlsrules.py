@@ -4,25 +4,29 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from ..policyrep import MLSRule, MLSRuletype, Range
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, Wrapper
+from .difference import Difference, DifferenceResult, Wrapper
 from .mls import RangeWrapper
 from .objclass import class_wrapper_factory
 from .types import type_or_attr_wrapper_factory
 from .typing import RuleList
 
 
-class ModifiedMLSRule(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedMLSRule(DifferenceResult):
 
     """Difference details for a modified MLS rule."""
 
     rule: MLSRule
     added_default: Range
     removed_default: Range
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 class MLSRulesDifference(Difference):

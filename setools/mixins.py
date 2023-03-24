@@ -4,9 +4,10 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 # pylint: disable=attribute-defined-outside-init,no-member
-import re
+from dataclasses import astuple
 from logging import Logger
 from typing import Any
+import warnings
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, CriteriaPermissionSetDescriptor
 from .policyrep import Context
@@ -233,3 +234,23 @@ class NetworkXGraphEdge:
             return self.target
         else:
             raise IndexError(f"Invalid index (NetworkXGraphEdge only has 2 items): {index}")
+
+
+class TupleCompat:
+
+    """Mixin for named tuple backwards compatibility for dataclasses."""
+
+    def __getitem__(self, key):
+        warnings.warn("Named tuple returns are deprecated, replaced with dataclasses.",
+                      DeprecationWarning)
+        return astuple(self)[key]
+
+    def __iter__(self):
+        warnings.warn("Named tuple returns are deprecated, replaced with dataclasses.",
+                      DeprecationWarning)
+        return iter(astuple(self))
+
+    def __len__(self):
+        warnings.warn("Named tuple returns are deprecated, replaced with dataclasses.",
+                      DeprecationWarning)
+        return len(astuple(self))

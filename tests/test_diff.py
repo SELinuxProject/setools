@@ -5,9 +5,10 @@
 #
 import os
 import unittest
+from dataclasses import astuple
 from ipaddress import IPv6Address, IPv4Network, IPv6Network
 
-from setools import SELinuxPolicy, PolicyDifference, PortconProtocol
+from setools import PolicyDifference, PortconProtocol
 from setools import BoundsRuletype as BRT
 from setools import ConstraintRuletype as CRT
 from setools import DefaultRuletype as DRT
@@ -275,7 +276,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(3, len(lst))
 
         # add permissions
-        rule, added_perms, removed_perms, matched_perms = lst[0]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
         self.assertEqual(TRT.allow, rule.ruletype)
         self.assertEqual("modified_rule_add_perms", rule.source)
         self.assertEqual("modified_rule_add_perms", rule.target)
@@ -285,7 +286,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set(["hi_r"]), matched_perms)
 
         # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[1]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
         self.assertEqual(TRT.allow, rule.ruletype)
         self.assertEqual("modified_rule_add_remove_perms", rule.source)
         self.assertEqual("modified_rule_add_remove_perms", rule.target)
@@ -295,7 +296,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set(["low_w"]), matched_perms)
 
         # remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[2]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
         self.assertEqual(TRT.allow, rule.ruletype)
         self.assertEqual("modified_rule_remove_perms", rule.source)
         self.assertEqual("modified_rule_remove_perms", rule.target)
@@ -363,7 +364,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(3, len(lst))
 
         # add permissions
-        rule, added_perms, removed_perms, matched_perms = lst[0]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
         self.assertEqual(TRT.auditallow, rule.ruletype)
         self.assertEqual("aa_modified_rule_add_perms", rule.source)
         self.assertEqual("aa_modified_rule_add_perms", rule.target)
@@ -373,7 +374,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set(["hi_r"]), matched_perms)
 
         # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[1]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
         self.assertEqual(TRT.auditallow, rule.ruletype)
         self.assertEqual("aa_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("aa_modified_rule_add_remove_perms", rule.target)
@@ -383,7 +384,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set(["low_w"]), matched_perms)
 
         # remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[2]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
         self.assertEqual(TRT.auditallow, rule.ruletype)
         self.assertEqual("aa_modified_rule_remove_perms", rule.source)
         self.assertEqual("aa_modified_rule_remove_perms", rule.target)
@@ -451,7 +452,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(3, len(lst))
 
         # add permissions
-        rule, added_perms, removed_perms, matched_perms = lst[0]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
         self.assertEqual(TRT.dontaudit, rule.ruletype)
         self.assertEqual("da_modified_rule_add_perms", rule.source)
         self.assertEqual("da_modified_rule_add_perms", rule.target)
@@ -461,7 +462,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set(["hi_r"]), matched_perms)
 
         # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[1]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
         self.assertEqual(TRT.dontaudit, rule.ruletype)
         self.assertEqual("da_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("da_modified_rule_add_remove_perms", rule.target)
@@ -471,7 +472,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set(["low_w"]), matched_perms)
 
         # remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[2]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
         self.assertEqual(TRT.dontaudit, rule.ruletype)
         self.assertEqual("da_modified_rule_remove_perms", rule.source)
         self.assertEqual("da_modified_rule_remove_perms", rule.target)
@@ -609,7 +610,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_type_transitions, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        rule, added_default, removed_default = lst[0]
+        rule, added_default, removed_default = astuple(lst[0])
         self.assertEqual(TRT.type_transition, rule.ruletype)
         self.assertEqual("tt_matched_source", rule.source)
         self.assertEqual("system", rule.target)
@@ -675,7 +676,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_type_changes, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        rule, added_default, removed_default = lst[0]
+        rule, added_default, removed_default = astuple(lst[0])
         self.assertEqual(TRT.type_change, rule.ruletype)
         self.assertEqual("tc_matched_source", rule.source)
         self.assertEqual("system", rule.target)
@@ -741,7 +742,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_type_members, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        rule, added_default, removed_default = lst[0]
+        rule, added_default, removed_default = astuple(lst[0])
         self.assertEqual(TRT.type_member, rule.ruletype)
         self.assertEqual("tm_matched_source", rule.source)
         self.assertEqual("system", rule.target)
@@ -783,7 +784,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_range_transitions, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        rule, added_default, removed_default = lst[0]
+        rule, added_default, removed_default = astuple(lst[0])
         self.assertEqual(MRT.range_transition, rule.ruletype)
         self.assertEqual("rt_matched_source", rule.source)
         self.assertEqual("system", rule.target)
@@ -858,7 +859,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_role_transitions, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        rule, added_default, removed_default = lst[0]
+        rule, added_default, removed_default = astuple(lst[0])
         self.assertEqual(RRT.role_transition, rule.ruletype)
         self.assertEqual("role_tr_matched_source", rule.source)
         self.assertEqual("role_tr_matched_target", rule.target)
@@ -1035,7 +1036,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_fs_uses, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        rule, added_context, removed_context = lst[0]
+        rule, added_context, removed_context = astuple(lst[0])
         self.assertEqual(FSURT.fs_use_trans, rule.ruletype)
         self.assertEqual("modified_fsuse", rule.fs)
         self.assertEqual("added_user:object_r:system:s1", added_context)
@@ -1079,7 +1080,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_genfscons, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        rule, added_context, removed_context = lst[0]
+        rule, added_context, removed_context = astuple(lst[0])
         self.assertEqual("modified_genfs", rule.fs)
         self.assertEqual("/", rule.path)
         self.assertEqual("added_user:object_r:system:s0", added_context)
@@ -1144,7 +1145,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(3, len(lst))
 
         # modified both contexts
-        rule, added_context, removed_context, added_packet, removed_packet = lst[0]
+        rule, added_context, removed_context, added_packet, removed_packet = astuple(lst[0])
         self.assertEqual("mod_both_netif", rule.netif)
         self.assertEqual("added_user:object_r:system:s0", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
@@ -1152,7 +1153,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual("removed_user:object_r:system:s0", removed_packet)
 
         # modified context
-        rule, added_context, removed_context, added_packet, removed_packet = lst[1]
+        rule, added_context, removed_context, added_packet, removed_packet = astuple(lst[1])
         self.assertEqual("mod_ctx_netif", rule.netif)
         self.assertEqual("added_user:object_r:system:s0", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
@@ -1160,7 +1161,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertIsNone(removed_packet)
 
         # modified packet context
-        rule, added_context, removed_context, added_packet, removed_packet = lst[2]
+        rule, added_context, removed_context, added_packet, removed_packet = astuple(lst[2])
         self.assertEqual("mod_pkt_netif", rule.netif)
         self.assertIsNone(added_context)
         self.assertIsNone(removed_context)
@@ -1218,13 +1219,13 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(2, len(lst))
 
         # changed IPv4
-        nodecon, added_context, removed_context = lst[0]
+        nodecon, added_context, removed_context = astuple(lst[0])
         self.assertEqual(IPv4Network("123.0.0.0/8"), nodecon.network)
         self.assertEqual("modified_change_level:object_r:system:s2:c0", added_context)
         self.assertEqual("modified_change_level:object_r:system:s2:c1", removed_context)
 
         # changed IPv6
-        nodecon, added_context, removed_context = lst[1]
+        nodecon, added_context, removed_context = astuple(lst[1])
         self.assertEqual(IPv6Network("ff03::/62"), nodecon.network)
         self.assertEqual("modified_change_level:object_r:system:s2:c1", added_context)
         self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed_context)
@@ -1274,13 +1275,13 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_portcons, key=lambda x: x.rule)
         self.assertEqual(2, len(lst))
 
-        portcon, added_context, removed_context = lst[0]
+        portcon, added_context, removed_context = astuple(lst[0])
         self.assertEqual(PortconProtocol.tcp, portcon.protocol)
         self.assertTupleEqual((3024, 3026), portcon.ports)
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 
-        portcon, added_context, removed_context = lst[1]
+        portcon, added_context, removed_context = astuple(lst[1])
         self.assertEqual(PortconProtocol.udp, portcon.protocol)
         self.assertTupleEqual((3024, 3024), portcon.ports)
         self.assertEqual("added_user:object_r:system:s1", added_context)
@@ -1320,7 +1321,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_defaults, key=lambda x: x.rule)
         self.assertEqual(4, len(lst))
 
-        default, added_default, removed_default, added_range, removed_range = lst[0]
+        default, added_default, removed_default, added_range, removed_range = astuple(lst[0])
         self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow4", default.tclass)
         self.assertEqual(DV.target, added_default)
@@ -1328,7 +1329,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertIsNone(added_range)
         self.assertIsNone(removed_range)
 
-        default, added_default, removed_default, added_range, removed_range = lst[1]
+        default, added_default, removed_default, added_range, removed_range = astuple(lst[1])
         self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow5", default.tclass)
         self.assertIsNone(added_default)
@@ -1336,7 +1337,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(DRV.high, added_range)
         self.assertEqual(DRV.low, removed_range)
 
-        default, added_default, removed_default, added_range, removed_range = lst[2]
+        default, added_default, removed_default, added_range, removed_range = astuple(lst[2])
         self.assertEqual(DRT.default_range, default.ruletype)
         self.assertEqual("infoflow6", default.tclass)
         self.assertEqual(DV.target, added_default)
@@ -1344,7 +1345,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(DRV.low, added_range)
         self.assertEqual(DRV.high, removed_range)
 
-        default, added_default, removed_default, added_range, removed_range = lst[3]
+        default, added_default, removed_default, added_range, removed_range = astuple(lst[3])
         self.assertEqual(DRT.default_type, default.ruletype)
         self.assertEqual("infoflow4", default.tclass)
         self.assertEqual(DV.target, added_default)
@@ -1552,7 +1553,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         lst = sorted(self.diff.modified_typebounds, key=lambda x: x.rule)
         self.assertEqual(1, len(lst))
 
-        bounds, added_bound, removed_bound = lst[0]
+        bounds, added_bound, removed_bound = astuple(lst[0])
         self.assertEqual(BRT.typebounds, bounds.ruletype)
         self.assertEqual("mod_child", bounds.child)
         self.assertEqual("mod_parent_added", added_bound)
@@ -1593,7 +1594,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(3, len(lst))
 
         # add permissions
-        rule, added_perms, removed_perms, matched_perms = lst[0]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
         self.assertEqual(TRT.allowxperm, rule.ruletype)
         self.assertEqual("ax_modified_rule_add_perms", rule.source)
         self.assertEqual("ax_modified_rule_add_perms", rule.target)
@@ -1603,7 +1604,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0004]), matched_perms)
 
         # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[1]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
         self.assertEqual(TRT.allowxperm, rule.ruletype)
         self.assertEqual("ax_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("ax_modified_rule_add_remove_perms", rule.target)
@@ -1613,7 +1614,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0008]), matched_perms)
 
         # remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[2]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
         self.assertEqual(TRT.allowxperm, rule.ruletype)
         self.assertEqual("ax_modified_rule_remove_perms", rule.source)
         self.assertEqual("ax_modified_rule_remove_perms", rule.target)
@@ -1657,7 +1658,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(3, len(lst))
 
         # add permissions
-        rule, added_perms, removed_perms, matched_perms = lst[0]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
         self.assertEqual(TRT.auditallowxperm, rule.ruletype)
         self.assertEqual("aax_modified_rule_add_perms", rule.source)
         self.assertEqual("aax_modified_rule_add_perms", rule.target)
@@ -1667,7 +1668,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0004]), matched_perms)
 
         # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[1]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
         self.assertEqual(TRT.auditallowxperm, rule.ruletype)
         self.assertEqual("aax_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("aax_modified_rule_add_remove_perms", rule.target)
@@ -1677,7 +1678,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0008]), matched_perms)
 
         # remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[2]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
         self.assertEqual(TRT.auditallowxperm, rule.ruletype)
         self.assertEqual("aax_modified_rule_remove_perms", rule.source)
         self.assertEqual("aax_modified_rule_remove_perms", rule.target)
@@ -1791,7 +1792,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertEqual(3, len(lst))
 
         # add permissions
-        rule, added_perms, removed_perms, matched_perms = lst[0]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
         self.assertEqual(TRT.dontauditxperm, rule.ruletype)
         self.assertEqual("dax_modified_rule_add_perms", rule.source)
         self.assertEqual("dax_modified_rule_add_perms", rule.target)
@@ -1801,7 +1802,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0004]), matched_perms)
 
         # add and remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[1]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
         self.assertEqual(TRT.dontauditxperm, rule.ruletype)
         self.assertEqual("dax_modified_rule_add_remove_perms", rule.source)
         self.assertEqual("dax_modified_rule_add_remove_perms", rule.target)
@@ -1811,7 +1812,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.assertSetEqual(set([0x0008]), matched_perms)
 
         # remove permissions
-        rule, added_perms, removed_perms, matched_perms = lst[2]
+        rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
         self.assertEqual(TRT.dontauditxperm, rule.ruletype)
         self.assertEqual("dax_modified_rule_remove_perms", rule.source)
         self.assertEqual("dax_modified_rule_remove_perms", rule.target)
@@ -1844,7 +1845,7 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         rules = sorted(self.diff.modified_ibendportcons)
         self.assertEqual(1, len(rules))
 
-        rule, added, removed = rules[0]
+        rule, added, removed = astuple(rules[0])
         self.assertEqual("modified", rule.name)
         self.assertEqual(13, rule.port)
         self.assertEqual("modified_change_level:object_r:system:s2", added)
@@ -1892,14 +1893,14 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         rules = sorted(self.diff.modified_ibpkeycons)
         self.assertEqual(2, len(rules))
 
-        rule, added, removed = rules[0]
+        rule, added, removed = astuple(rules[0])
         self.assertEqual(IPv6Address("aaaa::"), rule.subnet_prefix)
         self.assertEqual(0xcccc, rule.pkeys.low)
         self.assertEqual(0xdddd, rule.pkeys.high)
         self.assertEqual("modified_change_level:object_r:system:s2:c0", added)
         self.assertEqual("modified_change_level:object_r:system:s2:c1", removed)
 
-        rule, added, removed = rules[1]
+        rule, added, removed = astuple(rules[1])
         self.assertEqual(IPv6Address("bbbb::"), rule.subnet_prefix)
         self.assertEqual(0xf, rule.pkeys.low)
         self.assertEqual(0xf, rule.pkeys.high)
@@ -2738,7 +2739,7 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
         """MLSvsStandardDiff: MLS property modified only."""
         self.assertEqual(1, len(self.diff.modified_properties))
 
-        name, added, removed = self.diff.modified_properties[0]
+        name, added, removed = astuple(self.diff.modified_properties[0])
         self.assertEqual("MLS", name)
         self.assertIs(False, added)
         self.assertIs(True, removed)

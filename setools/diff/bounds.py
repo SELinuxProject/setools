@@ -3,21 +3,27 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import cast, List, NamedTuple, Optional
+from dataclasses import dataclass
+from typing import cast, List, Optional
 
 from ..policyrep import Bounds, BoundsRuletype, Type
+
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, Wrapper
+from .difference import Difference, DifferenceResult, Wrapper
 from .types import type_wrapper_factory
 
 
-class ModifiedBounds(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedBounds(DifferenceResult):
 
     """Difference details for a modified bounds rule."""
 
     rule: Bounds
     added_bound: Type
     removed_bound: Type
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 class BoundsDifference(Difference):

@@ -4,13 +4,14 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from collections import defaultdict
-from typing import NamedTuple, Set, Optional, Union
+from dataclasses import dataclass
+from typing import Set, Optional, Union
 
 from ..exception import MLSDisabled
 from ..policyrep import Level, Range, Role, User
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper
 from .mls import LevelWrapper, RangeWrapper
 from .roles import role_wrapper_factory
 from .typing import SymbolCache
@@ -18,7 +19,8 @@ from .typing import SymbolCache
 _users_cache: SymbolCache[User] = defaultdict(dict)
 
 
-class ModifiedUser(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedUser(DifferenceResult):
 
     """Difference details for a modified user."""
 

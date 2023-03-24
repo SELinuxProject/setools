@@ -2,21 +2,26 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import NamedTuple
+from dataclasses import dataclass
 
 from ..policyrep import Context, Ibendportcon
+
 from .context import ContextWrapper
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, Wrapper
+from .difference import Difference, DifferenceResult, Wrapper
 
 
-class ModifiedIbendportcon(NamedTuple):
+@dataclass(frozen=True)
+class ModifiedIbendportcon(DifferenceResult):
 
     """Difference details for a modified ibendportcon."""
 
     rule: Ibendportcon
     added_context: Context
     removed_context: Context
+
+    def __lt__(self, other) -> bool:
+        return self.rule < other.rule
 
 
 class IbendportconsDifference(Difference):

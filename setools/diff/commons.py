@@ -2,13 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import NamedTuple, Set
+from dataclasses import dataclass
+from typing import Set
 
 from .descriptors import DiffResultDescriptor
-from .difference import Difference, SymbolWrapper
+from .difference import Difference, DifferenceResult, SymbolWrapper
 
 
-class ModifiedCommon(NamedTuple):
+@dataclass(frozen=True, order=True)
+class ModifiedCommon(DifferenceResult):
 
     """Difference details for a modified common permission set."""
 
