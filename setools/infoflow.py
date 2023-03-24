@@ -313,21 +313,21 @@ class InfoFlowAnalysis:
             if rule.ruletype != TERuletype.allow:
                 continue
 
-            (rweight, wweight) = self.perm_map.rule_weight(cast(AVRule, rule))
+            weight = self.perm_map.rule_weight(cast(AVRule, rule))
 
             for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                 # only add flows if they actually flow
                 # in or out of the source type type
                 if s != t:
-                    if wweight:
+                    if weight.write:
                         edge = InfoFlowStep(self.G, s, t, create=True)
                         edge.rules.append(rule)
-                        edge.weight = wweight
+                        edge.weight = weight.write
 
-                    if rweight:
+                    if weight.read:
                         edge = InfoFlowStep(self.G, t, s, create=True)
                         edge.rules.append(rule)
-                        edge.weight = rweight
+                        edge.weight = weight.read
 
         self.rebuildgraph = False
         self.rebuildsubgraph = True

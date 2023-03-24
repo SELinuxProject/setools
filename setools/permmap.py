@@ -6,12 +6,14 @@ import logging
 import copy
 from collections import OrderedDict
 from contextlib import suppress
-from typing import cast, Dict, Iterable, NamedTuple, Optional, Union
+from dataclasses import dataclass
+from typing import cast, Dict, Iterable, Optional, Union
 
 import pkg_resources
 
 from . import exception
 from .descriptors import PermissionMapDescriptor
+from .mixins import TupleCompat
 from .policyrep import AVRule, SELinuxPolicy, TERuletype
 
 INFOFLOW_DIRECTIONS = ("r", "w", "b", "n", "u")
@@ -19,7 +21,8 @@ MIN_WEIGHT = 1
 MAX_WEIGHT = 10
 
 
-class RuleWeight(NamedTuple):
+@dataclass
+class RuleWeight(TupleCompat):
 
     """The read and write weights for a rule, given all of its permissions."""
 

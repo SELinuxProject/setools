@@ -285,9 +285,9 @@ class PermissionMapTest(unittest.TestCase):
         rule.perms = set(["med_r", "hi_r"])
 
         permmap = PermissionMap("tests/perm_map")
-        r, w = permmap.rule_weight(rule)
-        self.assertEqual(r, 10)
-        self.assertEqual(w, 0)
+        weight = permmap.rule_weight(rule)
+        self.assertEqual(weight.read, 10)
+        self.assertEqual(weight.write, 0)
 
     def test_141_weight_write_only(self):
         """PermMap get weight of write-only rule."""
@@ -297,9 +297,9 @@ class PermissionMapTest(unittest.TestCase):
         rule.perms = set(["low_w", "med_w"])
 
         permmap = PermissionMap("tests/perm_map")
-        r, w = permmap.rule_weight(rule)
-        self.assertEqual(r, 0)
-        self.assertEqual(w, 5)
+        weight = permmap.rule_weight(rule)
+        self.assertEqual(weight.read, 0)
+        self.assertEqual(weight.write, 5)
 
     def test_142_weight_both(self):
         """PermMap get weight of both rule."""
@@ -309,9 +309,9 @@ class PermissionMapTest(unittest.TestCase):
         rule.perms = set(["low_r", "hi_w"])
 
         permmap = PermissionMap("tests/perm_map")
-        r, w = permmap.rule_weight(rule)
-        self.assertEqual(r, 1)
-        self.assertEqual(w, 10)
+        weight = permmap.rule_weight(rule)
+        self.assertEqual(weight.read, 1)
+        self.assertEqual(weight.write, 10)
 
     def test_143_weight_none(self):
         """PermMap get weight of none rule."""
@@ -321,9 +321,9 @@ class PermissionMapTest(unittest.TestCase):
         rule.perms = set(["null"])
 
         permmap = PermissionMap("tests/perm_map")
-        r, w = permmap.rule_weight(rule)
-        self.assertEqual(r, 0)
-        self.assertEqual(w, 0)
+        weight = permmap.rule_weight(rule)
+        self.assertEqual(weight.read, 0)
+        self.assertEqual(weight.write, 0)
 
     def test_144_weight_unmapped_class(self):
         """PermMap get weight of rule with unmapped class."""
@@ -363,9 +363,9 @@ class PermissionMapTest(unittest.TestCase):
 
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_permission("infoflow", "hi_r")
-        r, w = permmap.rule_weight(rule)
-        self.assertEqual(r, 5)
-        self.assertEqual(w, 0)
+        weight = permmap.rule_weight(rule)
+        self.assertEqual(weight.read, 5)
+        self.assertEqual(weight.write, 0)
 
     def test_148_weight_excluded_class(self):
         """PermMap get weight of a rule with excluded class."""
@@ -376,9 +376,9 @@ class PermissionMapTest(unittest.TestCase):
 
         permmap = PermissionMap("tests/perm_map")
         permmap.exclude_class("infoflow")
-        r, w = permmap.rule_weight(rule)
-        self.assertEqual(r, 0)
-        self.assertEqual(w, 0)
+        weight = permmap.rule_weight(rule)
+        self.assertEqual(weight.read, 0)
+        self.assertEqual(weight.write, 0)
 
     def test_150_map_policy(self):
         """PermMap create mappings for classes/perms in a policy."""
