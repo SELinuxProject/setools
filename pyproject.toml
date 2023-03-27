@@ -2,6 +2,24 @@
 requires = ["setuptools", "Cython>=0.27"]
 build-backend = "setuptools.build_meta"
 
+
+#
+# Coverage config
+#
+[tool.coverage.run]
+source = ["setools"]
+plugins = ["Cython.Coverage"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover",
+                 "def __repr__",
+                 "raise NotImplementedError",
+                 "return NotImplemented"]
+
+
+#
+# Pytest config
+#
 [tool.pytest.ini_options]
 addopts = ["--import-mode=importlib",]
 pythonpath = "."
