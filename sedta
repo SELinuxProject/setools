@@ -8,6 +8,7 @@ import sys
 import argparse
 import logging
 import signal
+import warnings
 
 import setools
 
@@ -97,10 +98,16 @@ if args.target and not (args.shortest_path or args.all_paths):
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
 elif args.verbose:
     logging.basicConfig(level=logging.INFO, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
 else:
     logging.basicConfig(level=logging.WARNING, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("ignore")
 
 try:
     p = setools.SELinuxPolicy(args.policy)
