@@ -18,6 +18,20 @@ exclude_lines = ["pragma: no cover",
 
 
 #
+# Mypy config
+#
+[tool.mypy]
+no_implicit_optional = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = ['networkx.*',
+          'PyQt5.*',
+          'sip']
+ignore_missing_imports = true
+
+
+#
 # Pytest config
 #
 [tool.pytest.ini_options]
