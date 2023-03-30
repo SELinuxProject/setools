@@ -9,6 +9,7 @@ import argparse
 import sys
 import logging
 import signal
+import warnings
 from typing import Dict, Optional
 
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -66,10 +67,16 @@ if args.limit_flows < 0:
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
 elif args.verbose:
     logging.basicConfig(level=logging.INFO, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
 else:
     logging.basicConfig(level=logging.WARNING, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("ignore")
 
 booleans: Optional[Dict[str, bool]] = None
 if args.booleans == 'default':

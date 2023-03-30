@@ -1,5 +1,4 @@
 # SETools: Policy analysis tools for SELinux
-https://github.com/SELinuxProject/setools/wiki
 
 ## Overview
 
@@ -13,6 +12,7 @@ SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
 To run SETools command line tools, the following packages are required:
+
 * Python 3.6+
 * NetworkX 2.0+ (2.6+ for Python 3.9+)
 * setuptools
@@ -21,17 +21,20 @@ To run SETools command line tools, the following packages are required:
 * libsepol 3.2+
 
 To run SETools graphical tools, the following packages are also required:
+
 * PyQt5
 * qt5-assistant
 * qt-devel (only if rebuilding the help file)
 
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
+
 * gcc
 * cython 0.27+ (0.29.14+ for Python 3.8+)
 
 To run SETools unit tests, the following packages are required, in
 addition to the above dependencies:
+
 * pytest
 * tox (optional)
 
@@ -41,23 +44,25 @@ SETools is included in most Linux distributions which support
 SELinux, such as Fedora, Red Hat Enterprise Linux, Gentoo,
 and Debian.
 
-Official releases of SETools may be freely downloaded from:
-
-https://github.com/SELinuxProject/setools/releases
+Official releases of SETools may be freely downloaded from the
+[GitHub releases page](https://github.com/SELinuxProject/setools/releases).
 
 SETools source code is maintained within a GitHub repository.
 From the command line do:
-```
+
+```bash
   $ git clone https://github.com/SELinuxProject/setools.git
 ```
-You may also browse the GitHub repository at
-https://github.com/SELinuxProject/setools.  The master branch
-has development code that may not be stable.  Each release series
-is considered stable, and has its own branch, e.g. "4.0" for all
+
+You may also browse the [GitHub repository](https://github.com/SELinuxProject/setools).
+The master branch has development code that may not be stable.  Each release
+series is considered stable, and has its own branch, e.g. "4.0" for all
 4.0.* releases.  To checkout a stable branch, do:
-```
+
+```bash
   $ git checkout 4.0
 ```
+
 Where `4.0` is the release series.  Each release will have a tag.
 
 ### Building SETools for Local Use
@@ -65,19 +70,22 @@ Where `4.0` is the release series.  Each release will have a tag.
 To use SETools locally, without installing it onto the system,
 unpack the official distribution or check out the git repository,
 and perform the following at the root:
-```
+
+```bash
   $ python setup.py build_ext -i
 ```
+
 This will compile the C portion of SETools locally, and then
-the tools can be ran from the current directory (e.g. ```./seinfo```).
+the tools can be ran from the current directory (e.g. `./seinfo`).
 
 ### Rebuilding the Apol Help File
 
 For convenience, a prebuilt copy of the apol help data file is included.
 To rebuild this file, the Qt5 development tools are required
-(particularly, the ```qcollectiongenerator``` tool).  At the root
+(particularly, the `qcollectiongenerator` tool).  At the root
 of the SETools sources, perform the following:
-```
+
+```bash
   $ python setup.py build_qhc
 ```
 
@@ -85,38 +93,40 @@ of the SETools sources, perform the following:
 
 Unpack the official distribution or check out the git repository,
 and perform the following at the root:
-```
+
+```bash
   $ python setup.py build_ext
   $ python setup.py build
   $ python setup.py install
 ```
-This will put the applications in /usr/bin, data files in /usr/share/setools,
-and libraries in /usr/lib/pythonX.Y/site-packages/setools.
+
+This will put the applications in /usr/bin, data files in `/usr/share/setools`,
+and libraries in `/usr/lib/pythonX.Y/site-packages/setools`.
 
 ### Building SETools with a Local Libsepol and Libselinux
 
 At times, SETools requires a newer libsepol than is available from
 distributions.  To use a locally-built libsepol instead of the libsepol
 provided by the Linux distribution, build the libsepol sources and then
-set the USERSPACE_SRC environmental variable to the path to the root of
+set the `USERSPACE_SRC` environmental variable to the path to the root of
 SELinux userspace source tree. The libsepol and libselinux must already
 be compiled.
 
-```
+```bash
   $ export USERSPACE_SRC=/home/user/src/selinux
   $ python setup.py build_ext
   $ python setup.py build
   $ python setup.py install
 ```
 
-This feature assumes that the directory structure at $USERSPACE_SRC is the
+This feature assumes that the directory structure at `$USERSPACE_SRC` is the
 same as the SELinux userspace code checked out from GitHub.
 
 Since SETools is dynamically linked to libsepol and libselinux, you must
 specify the path to the libsepol/src and libselinux/src directories by
-using LD_LIBRARY_PATH so that the newer versions of the libraries are used.
+using `LD_LIBRARY_PATH` so that the newer versions of the libraries are used.
 
-```
+```bash
   $ export LD_LIBRARY_PATH="/home/user/src/selinux/libsepol/src:/home/user/src/selinux/libselinux/src"
   $ ./seinfo policy.31
   $ ./sesearch -A sysadm_t policy.31
@@ -133,7 +143,7 @@ One goal for SETools is to provide confidence in the validity of the
 output for the tools.  The unit tests for SETools can be run with
 the following commands:
 
-```
+```bash
   $ python setup.py build_ext -i
   $ pytest tests
 ```
@@ -169,15 +179,13 @@ do our best to maintain API stability.
 
 ### Reporting bugs
 
-Bugs can be reported in the SETools GitHub issues tracker:
-
-https://github.com/SELinuxProject/setools/issues
+Bugs can be reported in the [SETools GitHub issues tracker](https://github.com/SELinuxProject/setools/issues).
 
 ### Copyright license
 
 The intent is to allow free use of this source code.  All programs'
 source files are copyright protected and freely distributed under the
-GNU General Public License (see COPYING.GPL).  All library source
+GNU General Public License (see `COPYING.GPL`).  All library source
 files are copyright under the GNU Lesser General Public License (see
-COPYING.LGPL).  All files distributed with this package indicate the
+`COPYING.LGPL`).  All files distributed with this package indicate the
 appropriate license to use.  Absolutely no warranty is provided or implied.

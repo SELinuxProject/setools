@@ -11,6 +11,7 @@ import sys
 import logging
 import signal
 import ipaddress
+import warnings
 from typing import Callable, List, Tuple
 
 
@@ -102,10 +103,16 @@ args = parser.parse_args()
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
 elif args.verbose:
     logging.basicConfig(level=logging.INFO, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
 else:
     logging.basicConfig(level=logging.WARNING, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("ignore")
 
 try:
     p = setools.SELinuxPolicy(args.policy)

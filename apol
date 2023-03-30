@@ -7,6 +7,7 @@
 import sys
 import argparse
 import logging
+import warnings
 
 from PyQt5.QtWidgets import QApplication
 import setools
@@ -30,12 +31,22 @@ if args.debug:
     console_handler.setLevel(logging.DEBUG)
     console_handler.setFormatter(
         logging.Formatter('%(asctime)s|%(levelname)s|%(name)s|%(message)s'))
+
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
+
 elif args.verbose:
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(logging.Formatter('%(message)s'))
+
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
 else:
     console_handler.setLevel(logging.WARNING)
     console_handler.setFormatter(logging.Formatter('%(message)s'))
+
+    if not sys.warnoptions:
+        warnings.simplefilter("ignore")
 
 logging.getLogger().addHandler(console_handler)
 
