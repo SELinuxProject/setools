@@ -465,6 +465,12 @@
           </item>
           <item row="0" column="1">
            <widget class="QCheckBox" name="neverallow">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Neverallow is not available in binary policies.</string>
+            </property>
             <property name="text">
              <string>Neverallow</string>
             </property>
@@ -482,6 +488,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QCheckBox" name="neverallowxperm">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Neverallowxperms is not available in binary policies.</string>
+            </property>
             <property name="text">
              <string>Neverallowxperms</string>
             </property>

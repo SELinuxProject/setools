@@ -42,12 +42,12 @@ rtypes.add_argument("--dontaudit", action="append_const",
 rtypes.add_argument("--dontauditxperm", action="append_const",
                     const=setools.TERuletype.dontauditxperm, dest="tertypes",
                     help="Search dontauditxperm rules.")
-rtypes.add_argument("--neverallow", action="append_const",
-                    const=setools.TERuletype.neverallow, dest="tertypes",
-                    help="Search neverallow rules.")
-rtypes.add_argument("--neverallowxperm", action="append_const",
-                    const=setools.TERuletype.neverallowxperm, dest="tertypes",
-                    help="Search neverallowxperm rules.")
+# rtypes.add_argument("--neverallow", action="append_const",
+#                    const=setools.TERuletype.neverallow, dest="tertypes",
+#                    help="Search neverallow rules.")
+# rtypes.add_argument("--neverallowxperm", action="append_const",
+#                    const=setools.TERuletype.neverallowxperm, dest="tertypes",
+#                    help="Search neverallowxperm rules.")
 rtypes.add_argument("-T", "--type_trans", action="append_const",
                     const=setools.TERuletype.type_transition, dest="tertypes",
                     help="Search type_transition rules.")
