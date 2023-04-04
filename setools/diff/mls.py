@@ -227,7 +227,7 @@ class LevelDeclWrapper(Wrapper[LevelDecl]):
 
     def __eq__(self, other):
         # non-MLS policies have no level declarations so there
-        # should be no AttributeError possiblity here
+        # should be no AttributeError possibility here
         return self.sensitivity == other.sensitivity
 
     def __lt__(self, other):
