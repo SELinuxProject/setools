@@ -24,6 +24,7 @@ jobs:
           - {python: '3.6', tox: lint}
           - {python: '3.6', tox: mypy}
           - {python: '3.6', tox: coverage}
+          - {python: '3.6', tox: install}
 
     steps:
     - uses: actions/checkout@v3
@@ -43,12 +44,9 @@ jobs:
             gettext \
             libaudit-dev \
             libbz2-dev \
-            libpcre3-dev \
-            python3-pip
+            libpcre3-dev
 
-        sudo pip3 install \
-            cython \
-            setuptools \
+        sudo python -m pip install -U \
             tox
 
     - name: Configure environment
@@ -82,4 +80,4 @@ jobs:
     - name: Run test
       run: |
         export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src:${LD_LIBRARY_PATH}"
-        tox -vv -e ${{ matrix.build-opts.tox }}
+        tox -e ${{ matrix.build-opts.tox }}
