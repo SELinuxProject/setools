@@ -80,13 +80,6 @@ jobs:
         make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" LDFLAGS="-L${SEPOL_SRC}/src" -C ${SELINUX_SRC}
         make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" -C ${CHECKPOLICY_SRC}
 
-    - name: Set up setools for CI build
-      run: |
-        sed -i \
-          -e "/Wwrite-strings/s/,/, '-Wno-maybe-uninitialized',/" \
-          -e "s/-Wno-cast-function-type/-Wno-missing-include-dirs/" \
-          setup.py
-
     - name: Run test
       run: |
         export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src:${LD_LIBRARY_PATH}"
