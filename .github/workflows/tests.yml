@@ -62,7 +62,15 @@ jobs:
         sudo python -m pip install -U \
             tox
 
-    - name: Build toolchain
+    - name: Cache SELinux userspace
+      uses: actions/cache@v3
+      id: cache-userspace
+      with:
+        path: ${{ env.USERSPACE_SRC }}
+        key: ${{ runner.os }}-selinux-userspace-${{ env.SELINUX_USERSPACE_VERSION }}
+
+    - name: Build SELinux userspace
+      if: ${{ steps.cache-userspace.outputs.cache-hit != 'true' }}
       run: |
         # Download current SELinux userspace tools and libraries
         git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
