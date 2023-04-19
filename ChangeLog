@@ -1,3 +1,13 @@
+*setools-4-4.2 (19 Apr 2023)
+
+  * Make NetworkX optional.  sedta and seinfoflow tools, along with the
+    equivalent analyses in apol require NetworkX.
+  * Changed unit test runner to pytest, as setuptools' test command is
+    deprecated.
+  * Remove neverallow options in sesearch and apol.  These are not usable
+    since they are removed in the final binary policy.
+  * Unit tests and CI tests improvements.
+
 *setools-4.4.1 (6 Feb 2023)
 
   * Replace deprecated NetworkX function use in information flow and domain
