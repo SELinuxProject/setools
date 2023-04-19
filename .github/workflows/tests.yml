@@ -3,7 +3,20 @@ name: Build tests
 on: [push, pull_request]
 
 env:
+  # This should be the minimum version required to run setools:
   SELINUX_USERSPACE_VERSION: 3.2
+
+  # GitHub doesn't support building env
+  # vars from others in this block.
+  USERSPACE_SRC: /tmp/selinux-src
+  #SEPOL_SRC: ${USERSPACE_SRC}/libsepol
+  SEPOL_SRC: /tmp/selinux-src/libsepol
+  #LIBSEPOLA: ${SEPOL_SRC}/src/libsepol.a
+  LIBSEPOLA: /tmp/selinux-src/libsepol/src/libsepol.a
+  #SELINUX_SRC: ${USERSPACE_SRC}/libselinux
+  SELINUX_SRC: /tmp/selinux-src/libselinux
+  #CHECKPOLICY_SRC: ${USERSPACE_SRC}/checkpolicy
+  CHECKPOLICY_SRC: /tmp/selinux-src/checkpolicy
 
 jobs:
   build:
@@ -23,7 +36,8 @@ jobs:
           - {python: '3.6', tox: pep8}
           - {python: '3.6', tox: lint}
           - {python: '3.6', tox: mypy}
-          #- {python: '3.6', tox: coverage}
+          - {python: '3.6', tox: coverage}
+          - {python: '3.6', tox: install}
 
     steps:
     - uses: actions/checkout@v2
@@ -43,26 +57,20 @@ jobs:
             gettext \
             libaudit-dev \
             libbz2-dev \
-            libpcre3-dev \
-            python3-pip
+            libpcre3-dev
 
-        sudo pip3 install \
-            cython \
-            setuptools \
+        sudo python -m pip install -U \
             tox
 
-    - name: Configure environment
-      run: |
-        USERSPACE_SRC=/tmp/selinux-src
-        SEPOL_SRC=${USERSPACE_SRC}/libsepol
-        LIBSEPOLA=${SEPOL_SRC}/src/libsepol.a
-        echo "USERSPACE_SRC=$USERSPACE_SRC" >> $GITHUB_ENV
-        echo "SEPOL_SRC=${SEPOL_SRC}" >> $GITHUB_ENV
-        echo "LIBSEPOLA=${LIBSEPOLA}" >> $GITHUB_ENV
-        echo "SELINUX_SRC=${USERSPACE_SRC}/libselinux" >> $GITHUB_ENV
-        echo "CHECKPOLICY_SRC=${USERSPACE_SRC}/checkpolicy" >> $GITHUB_ENV
+    - name: Cache SELinux userspace
+      uses: actions/cache@v3
+      id: cache-userspace
+      with:
+        path: ${{ env.USERSPACE_SRC }}
+        key: ${{ runner.os }}-selinux-userspace-${{ env.SELINUX_USERSPACE_VERSION }}
 
-    - name: Build toolchain
+    - name: Build SELinux userspace
+      if: ${{ steps.cache-userspace.outputs.cache-hit != 'true' }}
       run: |
         # Download current SELinux userspace tools and libraries
         git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
@@ -72,14 +80,7 @@ jobs:
         make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" LDFLAGS="-L${SEPOL_SRC}/src" -C ${SELINUX_SRC}
         make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" -C ${CHECKPOLICY_SRC}
 
-    - name: Set up setools for CI build
-      run: |
-        sed -i \
-          -e "/Wwrite-strings/s/,/, '-Wno-maybe-uninitialized',/" \
-          -e "s/-Wno-cast-function-type/-Wno-missing-include-dirs/" \
-          setup.py
-
     - name: Run test
       run: |
         export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src:${LD_LIBRARY_PATH}"
-        tox -vv -e ${{ matrix.build-opts.tox }}
+        tox -e ${{ matrix.build-opts.tox }}

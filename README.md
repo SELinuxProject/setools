@@ -31,6 +31,7 @@ addition to the development packages from the above list:
 
 To run SETools unit tests, the following packages are required, in
 addition to the above dependencies:
+* pytest
 * tox (optional)
 
 ### Obtaining SETools
@@ -129,9 +130,11 @@ for up-to-date information on build and install options, respectively.
 
 One goal for SETools is to provide confidence in the validity of the
 output for the tools.  The unit tests for SETools can be run with
-the following command
+the following commands:
+
 ```
-  $ python setup.py test
+  $ python setup.py build_ext -i
+  $ pytest tests
 ```
 
 ## Features

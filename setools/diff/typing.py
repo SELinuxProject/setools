@@ -2,7 +2,7 @@
 #
 from typing import DefaultDict, Dict, List, Optional, TypeVar
 
-from ..policyrep import PolicyObject, SELinuxPolicy
+from ..policyrep import PolicyEnum, PolicyObject, SELinuxPolicy
 
 from .difference import Wrapper, SymbolWrapper
 
@@ -12,4 +12,5 @@ U = TypeVar("U", bound=Wrapper)
 Cache = DefaultDict[SELinuxPolicy, Dict[T, U]]
 SymbolCache = Cache[T, SymbolWrapper[T]]
 
-RuleList = Optional[DefaultDict[T, List[U]]]
+E = TypeVar("E", bound=PolicyEnum)
+RuleList = Optional[DefaultDict[E, List[T]]]

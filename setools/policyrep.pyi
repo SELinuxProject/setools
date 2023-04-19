@@ -7,7 +7,6 @@ from typing import Any, Callable, Dict, FrozenSet, Iterable, Iterator, List, Nam
 import enum
 import ipaddress
 import setools.exception
-import typing
 import weakref
 
 AnyConstraint = Union["Constraint", "Validatetrans"]

@@ -133,7 +133,7 @@ for lang in linguas:
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
 setup(name='setools',
-      version='4.4.1',
+      version='4.4.2',
       description='SELinux policy analysis tools.',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
@@ -142,7 +142,9 @@ setup(name='setools',
       packages=['setools', 'setools.checker', 'setools.diff', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta', 'sechecker'],
       data_files=installed_data,
-      package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map']},
+      package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map',
+                                                                'policyrep.pyi',
+                                                                'py.typed']},
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
                             compiler_directives={"language_level": 3,
@@ -163,5 +165,9 @@ setup(name='setools',
       # setup also requires libsepol and libselinux
       # C libraries and headers to compile.
       setup_requires=['setuptools', 'Cython>=0.27'],
-      install_requires=['setuptools', 'networkx>=2.0']
+      install_requires=['setuptools'],
+      extras_require={
+          "analysis": "networkx>=2.0",
+          "test": "tox"
+      }
       )
