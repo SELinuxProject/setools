@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
+from PyQt6.QtCore import Qt
 
 from .models import SEToolsTableModel
 
@@ -20,7 +20,7 @@ class BoundsTableModel(SEToolsTableModel):
             col = index.column()
             item = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.ruletype.name
                 elif col == 1:
@@ -28,5 +28,5 @@ class BoundsTableModel(SEToolsTableModel):
                 elif col == 2:
                     return item.child.name
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return item

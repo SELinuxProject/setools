@@ -7,9 +7,9 @@
 
 import logging
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
-from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
+from PyQt6.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
+from PyQt6.QtGui import QPalette, QTextCursor
+from PyQt6.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
 from setools import MLSRuleQuery
 
 from ..logtosignal import LogHandlerToSignal

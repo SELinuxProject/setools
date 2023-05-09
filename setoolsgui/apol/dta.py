@@ -7,9 +7,9 @@
 import logging
 from contextlib import suppress
 
-from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
-from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, \
+from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel, QThread
+from PyQt6.QtGui import QPalette, QTextCursor
+from PyQt6.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, \
     QTreeWidgetItem
 from setools import DomainTransitionAnalysis
 
@@ -62,7 +62,7 @@ class DomainTransitionAnalysisTab(AnalysisTab):
         self.errors = set()
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
-        self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.error_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.red)
         self.clear_source_error()
         self.clear_target_error()
 
@@ -281,7 +281,7 @@ class DomainTransitionAnalysisTab(AnalysisTab):
 
             print_transition(self.browser_details.appendPlainText, current.rules)
 
-            self.browser_details.moveCursor(QTextCursor.Start)
+            self.browser_details.moveCursor(QTextCursor.MoveOperation.Start)
 
         if not current.child_populated:
             self.busy.setLabelText("Gathering additional browser details for {0}...".format(
@@ -337,7 +337,7 @@ class DomainTransitionAnalysisTab(AnalysisTab):
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
             self.busy.repaint()
-            self.raw_results.moveCursor(QTextCursor.Start)
+            self.raw_results.moveCursor(QTextCursor.MoveOperation.Start)
 
             if self.flows_in.isChecked() or self.flows_out.isChecked():
                 # move to browser tab for transitions in/out

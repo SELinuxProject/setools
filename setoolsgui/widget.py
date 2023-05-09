@@ -7,7 +7,7 @@ import sys
 from errno import ENOENT
 
 import pkg_resources
-from PyQt5.uic import loadUi
+from PyQt6.uic import loadUi
 
 
 # Stylesheet that adds a frame around QGroupBoxes

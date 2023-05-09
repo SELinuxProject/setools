@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import pyqtSignal, QObject, QThread
+from PyQt6.QtCore import pyqtSignal, QObject, QThread
 
 
 class QueryResultsUpdater(QObject):

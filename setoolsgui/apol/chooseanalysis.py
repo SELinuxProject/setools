@@ -5,8 +5,8 @@
 #
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QTreeWidgetItem
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDialog, QTreeWidgetItem
 
 from ..widget import SEToolsWidget
 from .analysistab import AnalysisSection, AnalysisTab, TAB_REGISTRY
@@ -52,7 +52,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                 groupitem.addChild(item)
 
         self.analysisTypes.expandAll()
-        self.analysisTypes.sortByColumn(0, Qt.AscendingOrder)
+        self.analysisTypes.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         super(ChooseAnalysis, self).show()
 
     def accept(self, item=None):

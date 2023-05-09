@@ -6,8 +6,8 @@
 from typing import Dict, NamedTuple
 from enum import Enum
 
-import sip
-from PyQt5.QtWidgets import QDialogButtonBox, QScrollArea
+import PyQt6.sip as sip
+from PyQt6.QtWidgets import QDialogButtonBox, QScrollArea
 
 from ..widget import SEToolsWidget
 
@@ -100,7 +100,7 @@ class AnalysisTab(SEToolsWidget, QScrollArea, metaclass=TabRegistry):
         self._check_query()
 
     def _check_query(self):
-        button = self.buttonBox.button(QDialogButtonBox.Apply)
+        button = self.buttonBox.button(QDialogButtonBox.StandardButton.Apply)
         enabled = not self.errors
         button.setEnabled(enabled)
         button.setToolTip("Run the analysis." if enabled else "There are errors in the tab.")

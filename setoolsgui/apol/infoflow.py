@@ -9,9 +9,9 @@ import copy
 from collections import defaultdict
 from contextlib import suppress
 
-from PyQt5.QtCore import pyqtSignal, Qt, QStringListModel, QThread
-from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, \
+from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel, QThread
+from PyQt6.QtGui import QPalette, QTextCursor
+from PyQt6.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog, \
     QTreeWidgetItem
 from setools import InfoFlowAnalysis
 from setools.exception import UnmappedClass, UnmappedPermission
@@ -75,7 +75,7 @@ class InfoFlowAnalysisTab(AnalysisTab):
 
         # set up error message for missing perm map
         self.error_msg = QMessageBox(self)
-        self.error_msg.setStandardButtons(QMessageBox.Ok)
+        self.error_msg.setStandardButtons(QMessageBox.StandardButton.Ok)
 
         # set up perm map editor
         self.permmap_editor = PermissionMapEditor(self, False)
@@ -93,7 +93,7 @@ class InfoFlowAnalysisTab(AnalysisTab):
         self.errors = set()
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
-        self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.error_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.red)
         self.clear_source_error()
         self.clear_target_error()
 
@@ -325,7 +325,7 @@ class InfoFlowAnalysisTab(AnalysisTab):
             for rule in current.rules:
                 self.browser_details.appendPlainText(rule)
 
-            self.browser_details.moveCursor(QTextCursor.Start)
+            self.browser_details.moveCursor(QTextCursor.MoveOperation.Start)
 
         if not current.child_populated:
             self.busy.setLabelText("Gathering additional browser details for {0}...".format(
@@ -390,7 +390,7 @@ class InfoFlowAnalysisTab(AnalysisTab):
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
             self.busy.repaint()
-            self.raw_results.moveCursor(QTextCursor.Start)
+            self.raw_results.moveCursor(QTextCursor.MoveOperation.Start)
 
             if self.flows_in.isChecked() or self.flows_out.isChecked():
                 # move to browser tab for flows in/out

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
+from PyQt6.QtCore import Qt
 
 from .models import SEToolsTableModel
 
@@ -20,7 +20,7 @@ class IbendportconTableModel(SEToolsTableModel):
             col = index.column()
             rule = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return rule.name
                 elif col == 1:
@@ -28,5 +28,5 @@ class IbendportconTableModel(SEToolsTableModel):
                 elif col == 2:
                     return str(rule.context)
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return rule

@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette, QTextCursor
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPalette, QTextCursor
 
 from .details import DetailsPopup
 from .models import SEToolsTableModel
@@ -63,11 +63,11 @@ class MLSComponentTableModel(SEToolsTableModel):
             col = index.column()
             item = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.name
                 elif col == 1:
                     return ", ".join(sorted(a for a in item.aliases()))
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return item

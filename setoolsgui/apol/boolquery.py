@@ -7,9 +7,9 @@
 import logging
 from contextlib import suppress
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
-from PyQt5.QtGui import QPalette, QTextCursor
-from PyQt5.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
+from PyQt6.QtCore import Qt, QSortFilterProxyModel, QStringListModel, QThread
+from PyQt6.QtGui import QPalette, QTextCursor
+from PyQt6.QtWidgets import QCompleter, QHeaderView, QMessageBox, QProgressDialog
 from setools import BoolQuery
 
 from ..logtosignal import LogHandlerToSignal
@@ -57,13 +57,13 @@ class BoolQueryTab(AnalysisTab):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
-        self.table_results.sortByColumn(0, Qt.AscendingOrder)
+        self.table_results.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
         # setup indications of errors on level/range
         self.errors = set()
         self.orig_palette = self.name.palette()
         self.error_palette = self.name.palette()
-        self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.error_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.red)
         self.clear_name_error()
 
         # set up processing thread
@@ -105,7 +105,7 @@ class BoolQueryTab(AnalysisTab):
     def get_detail(self):
         # .ui is set for single item selection.
         index = self.bools.selectedIndexes()[0]
-        item = self.bool_model.data(index, Qt.UserRole)
+        item = self.bool_model.data(index, Qt.ItemDataRole.UserRole)
 
         self.log.debug("Generating detail window for {0}".format(item))
         boolean_detail(self, item)
@@ -187,6 +187,6 @@ class BoolQueryTab(AnalysisTab):
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
             self.busy.repaint()
-            self.raw_results.moveCursor(QTextCursor.Start)
+            self.raw_results.moveCursor(QTextCursor.MoveOperation.Start)
 
         self.busy.reset()

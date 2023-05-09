@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt, QModelIndex
-from PyQt5.QtGui import QKeySequence, QCursor
-from PyQt5.QtWidgets import QAction, QApplication, QFileDialog, QMenu, QTreeWidget, \
+from PyQt6.QtCore import Qt, QModelIndex
+from PyQt6.QtGui import QAction, QKeySequence, QCursor
+from PyQt6.QtWidgets import QApplication, QFileDialog, QMenu, QTreeWidget, \
     QTreeWidgetItemIterator
 
 

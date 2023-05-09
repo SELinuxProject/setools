@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QAction, QListView, QMenu
+from PyQt6.QtGui import QCursor, QAction
+from PyQt6.QtWidgets import QListView, QMenu
 
 
 class GetDetailsListView(QListView):

@@ -6,9 +6,9 @@
 import logging
 import copy
 
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt5.QtGui import QPalette
-from PyQt5.QtWidgets import QDialog, QFrame, QWidget
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt6.QtGui import QPalette
+from PyQt6.QtWidgets import QDialog, QFrame, QWidget
 
 from ..models import SEToolsListModel
 from ..widget import SEToolsWidget
@@ -86,7 +86,7 @@ class PermissionMapEditor(SEToolsWidget, QDialog):
     def class_selected(self):
         # the .ui is set to 1 selection
         for index in self.classes.selectionModel().selectedIndexes():
-            class_name = self.class_model.data(index, Qt.DisplayRole)
+            class_name = self.class_model.data(index, Qt.ItemDataRole.DisplayRole)
 
         self.log.debug("Setting class to {0}".format(class_name))
 
@@ -99,7 +99,7 @@ class PermissionMapEditor(SEToolsWidget, QDialog):
         for perm in sorted(self.perm_map.perms(class_name)):
             # create permission mapping
             mapping = PermissionMapping(self, perm, self.edit)
-            mapping.setAttribute(Qt.WA_DeleteOnClose)
+            mapping.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
             self.class_toggle.connect(mapping.enabled.setChecked)
             self.perm_mappings.addWidget(mapping)
             self.widgets.append(mapping)
@@ -179,7 +179,7 @@ class PermissionMapping(SEToolsWidget, QWidget):
         # setup color palettes for direction
         self.orig_palette = self.direction.palette()
         self.error_palette = self.direction.palette()
-        self.error_palette.setColor(QPalette.Button, Qt.red)
+        self.error_palette.setColor(QPalette.Button, Qt.GlobalColor.red)
         self.error_palette.setColor(QPalette.ButtonText, Qt.white)
 
         # setup direction

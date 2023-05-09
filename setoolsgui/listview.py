@@ -6,9 +6,9 @@
 import logging
 from collections import defaultdict
 
-from PyQt5.QtCore import Qt, QItemSelectionModel
-from PyQt5.QtGui import QKeySequence
-from PyQt5.QtWidgets import QAbstractItemView, QListView
+from PyQt6.QtCore import Qt, QItemSelectionModel
+from PyQt6.QtGui import QKeySequence
+from PyQt6.QtWidgets import QAbstractItemView, QListView
 
 
 class SEToolsListView(QListView):
@@ -36,12 +36,12 @@ class SEToolsListView(QListView):
             index = model.createIndex(row, 0)
             selection_model.select(index, QItemSelectionModel.Toggle)
 
-    def selection(self, qt_role=Qt.UserRole):
+    def selection(self, qt_role=Qt.ItemDataRole.UserRole):
         """
         Generator which returns the selection.
 
         Parameter:
-        qt_role     The Qt model role. Default is Qt.UserRole.
+        qt_role     The Qt model role. Default is Qt.ItemDataRole.UserRole.
 
         Yield: tuple(row, data)
         row         The row number of the selection.

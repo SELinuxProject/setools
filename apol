@@ -8,7 +8,7 @@ import sys
 import argparse
 import logging
 
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 import setools
 import setoolsgui
 
@@ -42,7 +42,7 @@ logging.getLogger().addHandler(console_handler)
 try:
     app = QApplication(sys.argv)
     mainwindow = setoolsgui.ApolMainWindow(args.policy)
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 except Exception as err:
     if args.debug:
