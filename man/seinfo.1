@@ -56,6 +56,10 @@ There is no expanded information for this component.
 .IP "--genfscon [FS_TYPE]"
 Print a list of genfscon statements or, if FS_TYPE is provided, print the statement for the named filesystem type.
 There is no expanded information for this component.
+.IP "--ibpkeycon [PKEY[-PKEY]]"
+Print a list of InfiniBand parition key contexts.
+.IP "--ibendportcon [NAME]"
+Print a list of InfiniBand endport contexts.
 .IP "--initialsid [NAME]"
 Print a list of initial SIDs or, if NAME is provided, print the named initial SID.
 With \fI-x\fR, print the context assigned to each displayed SID.
@@ -86,6 +90,18 @@ There is no expanded information for this component.
 .IP "--all"
 Print all components.
 
+.IP "\fB Xen Component Queries: \fR"
+.IP "--ioportcon"
+Print all ioportcon statements.
+.IP "--iomemcon"
+Print all iomemcon statements.
+.IP "--pcidevicecon"
+Print all pcidevicecon statements.
+.IP "--pirqcon"
+Print all pirqcon statements.
+.IP "--devicetreecon"
+Print all devicetreecon statements.
+
 .SH OPTIONS
 .IP "-x, --expand"
 Print additional details for each component matching the expression.
@@ -100,6 +116,15 @@ Print version information and exit.
 Print additional informational messages.
 .IP "--debug"
 Enable debugging output.
+
+.SH EXAMPLE
+.nf
+List aliases of and attributes assigned to type httpd_t
+# seinfo -t httpd_t -x
+List all executable types (all types assigned to "exec_type" attribute)
+# seinfo -a exec_type -x
+List all constrains and mlsconstrains for class "file"
+# seinfo --constrain file
 
 .SH AUTHOR
 Chris PeBenito <pebenito@ieee.org>
