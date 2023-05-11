@@ -54,12 +54,21 @@ A space-separated list of types to exclude from the analysis.
 Print information flow graph statistics at the end of the analysis.
 .IP "-h, --help"
 Print help information and exit.
+.IP "--full"
+Print full rule lists for information flows.
 .IP "--version"
 Print version information and exit.
 .IP "-v, --verbose"
 Print additional informational messages.
 .IP "--debug"
 Enable debugging output.
+
+.SH EXAMPLE
+.nf
+Show the shortest paths for process running as httpd_t to access user home files, using permission map from /var/lib/sepolgen/perm_map
+# seinfoflow -m /var/lib/sepolgen/perm_map -s httpd_t -t user_home_t -S
+List all data paths shorter than 3 steps from smbd_t to httpd_log_t, when samba_enable_home_dirs and samba_create_home_dirs booleans are enabled
+# seinfoflow -m /var/lib/sepolgen/perm_map -s smbd_t -t user_home_t -A 3 -b "samba_enable_home_dirs:true,samba_create_home_dirs:true"
 
 .SH AUTHOR
 Chris PeBenito <pebenito@ieee.org>
