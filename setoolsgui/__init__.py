@@ -4,8 +4,5 @@
 #
 #
 
-from .apol import ApolMainWindow
-from . import widget
-
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
