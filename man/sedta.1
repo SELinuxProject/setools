@@ -49,6 +49,8 @@ Specify the maximum number of domain transitions to output. The default is unlim
 A space-separated list of types to exclude from the analysis.
 
 .SS General Options
+.IP "--full"
+Print rule lists for transitions.
 .IP "--stats"
 Print domain transition graph statistics at the end of the analysis.
 .IP "-h, --help"
@@ -59,6 +61,13 @@ Print version information and exit.
 Print additional informational messages.
 .IP "--debug"
 Enable debugging output.
+
+.SH EXAMPLE
+.nf
+Show the shortest transition paths from httpd_t to unconfined_t, while not using container_runtime_t
+# sedta -s httpd_t -t unconfined_t -S container_runtime_t
+List all domain transition paths shorter than 3 steps from init_t to smbd_t
+# sedta -s init_t -t smbd_t -A 3
 
 .SH AUTHOR
 Chris PeBenito <pebenito@ieee.org>
