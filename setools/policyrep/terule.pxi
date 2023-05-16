@@ -120,6 +120,17 @@ cdef class AVRule(BaseTERule):
         r._conditional = conditional
         r._conditional_block = conditional_block
         r.origin = None
+
+        if not r.perms:
+            rule_string = f"{r.ruletype} {r.source} {r.target}:{r.tclass} {{ }};"
+            try:
+                rule_string += f" [ {r.conditional} ]:{r.conditional_block}"
+            except RuleNotConditional:
+                pass
+
+            raise LowLevelPolicyError("Invalid policy: Found a rule with no permissions: "
+                                      f"{rule_string}")
+
         return r
 
     def __hash__(self):
@@ -319,6 +330,17 @@ cdef class AVRuleXperm(BaseTERule):
         r._conditional = conditional
         r._conditional_block = conditional_block
         r.origin = None
+
+        if not perms:
+            rule_string = f"{r.ruletype} {r.source} {r.target}:{r.tclass} {r.xperm_type} {{ }};"
+            try:
+                rule_string += f" [ {r.conditional} ]:{r.conditional_block}"
+            except RuleNotConditional:
+                pass
+
+            raise LowLevelPolicyError(
+                f"Invalid policy: Found a rule with no extended permissions: {rule_string}.")
+
         return r
 
     def __hash__(self):
