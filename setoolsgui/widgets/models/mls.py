@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette, QTextCursor
 
 from .details import DetailsPopup
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 def _mls_detail(parent, obj, objtype):
@@ -58,10 +58,10 @@ class MLSComponentTableModel(SEToolsTableModel):
     headers = ["Name", "Aliases"]
 
     def data(self, index, role):
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            item = self.resultlist[row]
+            item = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

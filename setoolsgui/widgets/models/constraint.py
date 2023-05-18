@@ -6,7 +6,7 @@
 from PyQt5.QtCore import Qt
 from setools.exception import ConstraintUseError
 
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 class ConstraintTableModel(SEToolsTableModel):
@@ -16,10 +16,10 @@ class ConstraintTableModel(SEToolsTableModel):
     headers = ["Rule Type", "Class", "Permissions", "Expression"]
 
     def data(self, index, role):
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            rule = self.resultlist[row]
+            rule = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

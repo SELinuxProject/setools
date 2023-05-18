@@ -9,7 +9,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from setools.exception import NoCommon
 
 from .details import DetailsPopup
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 def common_detail(parent, common):
@@ -37,10 +37,10 @@ class CommonTableModel(SEToolsTableModel):
     headers = ["Name", "Permissions"]
 
     def data(self, index, role):
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            item = self.resultlist[row]
+            item = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

@@ -6,7 +6,7 @@
 from PyQt5.QtCore import Qt
 from setools.exception import RuleUseError
 
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 class RBACRuleTableModel(SEToolsTableModel):
@@ -16,10 +16,10 @@ class RBACRuleTableModel(SEToolsTableModel):
     headers = ["Rule Type", "Source", "Target", "Object Class", "Default Role"]
 
     def data(self, index, role):
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            rule = self.resultlist[row]
+            rule = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

@@ -5,7 +5,7 @@
 #
 from PyQt5.QtCore import Qt
 
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 class IbpkeyconTableModel(SEToolsTableModel):
@@ -15,10 +15,10 @@ class IbpkeyconTableModel(SEToolsTableModel):
     headers = ["Subnet Prefix", "Partition Keys", "Context"]
 
     def data(self, index, role):
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            rule = self.resultlist[row]
+            rule = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

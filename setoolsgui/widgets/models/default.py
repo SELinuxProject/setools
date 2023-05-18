@@ -7,7 +7,7 @@ from contextlib import suppress
 
 from PyQt5.QtCore import Qt
 
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 class DefaultTableModel(SEToolsTableModel):
@@ -17,10 +17,10 @@ class DefaultTableModel(SEToolsTableModel):
     headers = ["Rule Type", "Class", "Default", "Default Range"]
 
     def data(self, index, role):
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            item = self.resultlist[row]
+            item = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

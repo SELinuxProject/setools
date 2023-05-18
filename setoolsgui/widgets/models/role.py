@@ -9,7 +9,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from setools.exception import MLSDisabled
 
 from .details import DetailsPopup
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 def role_detail(parent, role):
@@ -42,10 +42,10 @@ class RoleTableModel(SEToolsTableModel):
         # There are two roles here.
         # The parameter, role, is the Qt role
         # The below item is a role in the list.
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            item = self.resultlist[row]
+            item = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

@@ -9,7 +9,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 from setools.exception import MLSDisabled
 
 from .details import DetailsPopup
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 def type_detail(parent, type_):
@@ -45,10 +45,10 @@ class TypeTableModel(SEToolsTableModel):
     headers = ["Name", "Attributes", "Aliases", "Permissive"]
 
     def data(self, index, role):
-        if self.resultlist and index.isValid():
+        if self.item_list and index.isValid():
             row = index.row()
             col = index.column()
-            item = self.resultlist[row]
+            item = self.item_list[row]
 
             if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:

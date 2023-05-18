@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt, QModelIndex
 from setools.exception import MLSDisabled
 
 from .details import DetailsPopup
-from .models import SEToolsTableModel
+from .table import SEToolsTableModel
 
 
 def user_detail(parent, user):
@@ -59,7 +59,7 @@ class UserTableModel(SEToolsTableModel):
             if role == Qt.ItemDataRole.DisplayRole:
                 row = index.row()
                 col = index.column()
-                user = self.resultlist[row]
+                user = self.item_list[row]
 
                 if col == 0:
                     return user.name
