@@ -30,8 +30,6 @@ class QueryResultsUpdater(QObject):
 
     def update(self):
         """Run the query and update results."""
-        self.model.beginResetModel()
-
         results = []
         counter = 0
 
@@ -46,7 +44,6 @@ class QueryResultsUpdater(QObject):
                 # yield execution every 10 rules
                 QThread.yieldCurrentThread()
 
-        self.model.resultlist = results
-        self.model.endResetModel()
+        self.model.item_list = results
 
         self.finished.emit(counter)
