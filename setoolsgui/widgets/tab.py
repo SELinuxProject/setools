@@ -11,7 +11,6 @@ from .exception import TabFieldError
 from .models.typing import QObjectType
 from .queryupdater import QueryResultsUpdater
 from .tableview import SEToolsTableView
-from ..logtosignal import LogHandlerToSignal
 
 if TYPE_CHECKING:
     from typing import Dict, Final, List, Optional, Tuple, Type, Union
@@ -261,6 +260,8 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
     #
     # Workspace methods
     #
+    def handle_permmap_change(self, permmap: "PermissionMap") -> None:
+        pass
 
     def save(self) -> "Dict":
         """Return a dictionary of settings for this tab."""
@@ -374,17 +375,10 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         self.busy.canceled.connect(self.processing_thread.requestInterruption)
         self.busy.reset()
 
-        # Use INFO messages from the query to update the progress dialog
-        self.handler = LogHandlerToSignal()
-        self.handler.message.connect(self.busy.setLabelText)
-        logging.getLogger(self.query.__module__).addHandler(self.handler)
-
     def __del__(self):
         with suppress(RuntimeError):
             self.processing_thread.quit()
             self.processing_thread.wait(5000)
-
-        logging.getLogger(self.query.__module__).removeHandler(self.handler)
 
     @property
     def table_results_model(self) -> "SEToolsTableModel":

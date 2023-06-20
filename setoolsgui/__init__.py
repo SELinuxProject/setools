@@ -4,5 +4,7 @@
 #
 #
 
+from .apol import run_apol
+
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
