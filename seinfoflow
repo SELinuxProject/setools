@@ -42,6 +42,9 @@ alg.add_argument("-A", "--all_paths", type=int, metavar="MAX_STEPS",
                  help="Calculate all paths, with the specified maximum path length. (Expensive)")
 
 opts = parser.add_argument_group("Analysis options")
+opts.add_argument("-r", "--reverse", action="store_false",
+                  help="Display information flows into the source type. "
+                  "No effect if a target type is specified.")
 opts.add_argument("-w", "--min_weight", default=3, type=int,
                   help="Minimum permission weight.  Default is 3.")
 opts.add_argument("-l", "--limit_flows", default=0, type=int,
@@ -119,7 +122,7 @@ try:
 
     else:  # single direct info flow
         flownum = 0
-        for flownum, flow in enumerate(g.infoflows(args.source), start=1):
+        for flownum, flow in enumerate(g.infoflows(args.source, out=args.reverse), start=1):
             print("Flow {0}: {1} -> {2}".format(flownum, flow.source, flow.target))
 
             if args.full:
