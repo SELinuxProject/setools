@@ -26,8 +26,7 @@ pretty = true
 
 [[tool.mypy.overrides]]
 module = ['networkx.*',
-          'PyQt5.*',
-          'sip']
+          'pytestqt.*']
 ignore_missing_imports = true
 
 
