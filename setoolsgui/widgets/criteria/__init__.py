@@ -2,4 +2,5 @@
 
 from .objclass import ObjClassCriteriaWidget
 from .permission import PermissionCriteriaWidget
+from .teruletype import TERuleTypeCriteriaWidget
 from .type import TypeOrAttrNameMode, TypeOrAttrNameWidget
