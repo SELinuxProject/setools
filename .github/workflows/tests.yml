@@ -53,7 +53,9 @@ jobs:
             gettext \
             libaudit-dev \
             libbz2-dev \
-            libpcre3-dev
+            libpcre3-dev \
+            xvfb \
+            x11-xserver-utils
 
         sudo python -m pip install -U \
             tox
@@ -69,14 +71,14 @@ jobs:
       if: ${{ steps.cache-userspace.outputs.cache-hit != 'true' }}
       run: |
         # Download current SELinux userspace tools and libraries
-        git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
+        git clone https://github.com/SELinuxProject/selinux.git ${{env.USERSPACE_SRC}} -b ${{env.SELINUX_USERSPACE_VERSION}}
 
         # Compile SELinux userspace
-        make -C ${SEPOL_SRC}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" LDFLAGS="-L${SEPOL_SRC}/src" -C ${SELINUX_SRC}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" -C ${CHECKPOLICY_SRC}
+        make -C ${{env.SEPOL_SRC}}
+        make CFLAGS="-O2 -pipe -fPIC -Wall -I${{env.SEPOL_SRC}}/include" LDFLAGS="-L${{env.SEPOL_SRC}}/src" -C ${{env.SELINUX_SRC}}
+        make CFLAGS="-O2 -pipe -fPIC -Wall -I${{env.SEPOL_SRC}}/include" -C ${{env.CHECKPOLICY_SRC}}
 
     - name: Run test
-      run: |
-        export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src:${LD_LIBRARY_PATH}"
-        tox -e ${{ matrix.build-opts.tox }}
+      run: tox -e ${{ matrix.build-opts.tox }}
+      env:
+        LD_LIBRARY_PATH: "${{env.SEPOL_SRC}}/src:${{env.SELINUX_SRC}}/src:${LD_LIBRARY_PATH}"
