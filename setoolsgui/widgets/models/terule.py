@@ -11,7 +11,7 @@ from setools.exception import RuleNotConditional, RuleUseError
 
 from . import modelroles
 from .table import SEToolsTableModel
-from ..details import type_detail, type_or_attr_detail
+from ..details import objclass_detail, type_detail, type_or_attr_detail
 
 
 class TERuleTableModel(SEToolsTableModel[AnyTERule]):
@@ -58,15 +58,15 @@ class TERuleTableModel(SEToolsTableModel[AnyTERule]):
         elif role == modelroles.ContextMenuRole:
             if col == 1:
                 a = QtWidgets.QAction(f"Properties of {rule.source}")
-                a.triggered.connect(lambda x: print(rule.source))
+                a.triggered.connect(lambda x: type_or_attr_detail(rule.source))
                 return (a, )
             elif col == 2:
                 a = QtWidgets.QAction(f"Properties of {rule.target}")
-                a.triggered.connect(lambda x: print(rule.target))
+                a.triggered.connect(lambda x: type_or_attr_detail(rule.target))
                 return (a, )
             elif col == 3:
                 a = QtWidgets.QAction(f"Properties of {rule.tclass}")
-                a.triggered.connect(lambda x: print(rule.tclass))
+                a.triggered.connect(lambda x: objclass_detail(rule.tclass))
                 return (a, )
             elif col == 4:
                 with suppress(RuleUseError):
