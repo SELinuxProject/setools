@@ -11,6 +11,7 @@ from setools.exception import RuleNotConditional, RuleUseError
 
 from . import modelroles
 from .table import SEToolsTableModel
+from ..details import type_detail, type_or_attr_detail
 
 
 class TERuleTableModel(SEToolsTableModel[AnyTERule]):
@@ -67,6 +68,11 @@ class TERuleTableModel(SEToolsTableModel[AnyTERule]):
                 a = QtWidgets.QAction(f"Properties of {rule.tclass}")
                 a.triggered.connect(lambda x: print(rule.tclass))
                 return (a, )
+            elif col == 4:
+                with suppress(RuleUseError):
+                    a = QtWidgets.QAction(f"Properties of {rule.default}")
+                    a.triggered.connect(lambda x: type_detail(rule.default))
+                    return (a, )
 
             return ()
 

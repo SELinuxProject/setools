@@ -8,28 +8,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 
 from setools.exception import MLSDisabled
 
-from .details import DetailsPopup
 from .table import SEToolsTableModel
-
-
-def typeattr_detail(parent, attr):
-    """
-    Create a dialog box for attribute details.
-
-    Parameters:
-    parent      The parent Qt Widget
-    role        The role
-    """
-
-    detail = DetailsPopup(parent, "Type attribute detail: {0}".format(attr))
-
-    types = sorted(attr.expand())
-    detail.append_header("Types ({0}): ".format(len(types)))
-
-    for t in types:
-        detail.append("    {0}".format(t))
-
-    detail.show()
 
 
 class TypeAttributeTableModel(SEToolsTableModel):

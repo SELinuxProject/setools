@@ -4,38 +4,8 @@
 #
 #
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette, QTextCursor
 
-from setools.exception import MLSDisabled
-
-from .details import DetailsPopup
 from .table import SEToolsTableModel
-
-
-def type_detail(parent, type_):
-    """
-    Create a dialog box for type details.
-
-    Parameters:
-    parent      The parent Qt Widget
-    type_       The type
-    """
-
-    detail = DetailsPopup(parent, "Type detail: {0}".format(type_))
-
-    detail.append_header("Permissive: {0}\n".format("Yes" if type_.ispermissive else "No"))
-
-    attrs = sorted(type_.attributes())
-    detail.append_header("Attributes ({0}):".format(len(attrs)))
-    for a in attrs:
-        detail.append("    {0}".format(a))
-
-    aliases = sorted(type_.aliases())
-    detail.append_header("\nAliases ({0}):".format(len(aliases)))
-    for a in aliases:
-        detail.append("    {0}".format(a))
-
-    detail.show()
 
 
 class TypeTableModel(SEToolsTableModel):
