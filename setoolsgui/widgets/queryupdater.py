@@ -23,10 +23,12 @@ class QueryResultsUpdater(QtCore.QObject):
     model       The model for the results
 
     Qt signals:
+    failed      (str) The updated failed, with an error message.
     finished    (int) The update has completed, with the number of results.
     raw_line    (str) A string to be appended to the raw results.
     """
 
+    failed = QtCore.pyqtSignal(str)
     finished = QtCore.pyqtSignal(int)
     raw_line = QtCore.pyqtSignal(str)
 
@@ -41,21 +43,26 @@ class QueryResultsUpdater(QtCore.QObject):
         results = []
         counter = 0
 
-        for counter, item in enumerate(self.query.results(), start=1):
-            results.append(item)
+        try:
+            for counter, item in enumerate(self.query.results(), start=1):
+                results.append(item)
 
-            self.raw_line.emit(str(item))
+                self.raw_line.emit(str(item))
 
-            if QtCore.QThread.currentThread().isInterruptionRequested():
-                break
-            elif counter % 10 == 0:
-                # yield execution every 10 rules
-                QtCore.QThread.yieldCurrentThread()
+                if QtCore.QThread.currentThread().isInterruptionRequested():
+                    break
+                elif counter % 10 == 0:
+                    # yield execution every 10 rules
+                    QtCore.QThread.yieldCurrentThread()
 
-            if counter % 100 == 0:
-                self.log.info(f"Generated {counter} results so far.")
+                if counter % 1000 == 0:
+                    self.log.info(f"Generated {counter} results so far.")
 
-        self.log.info(f"Generated {counter} total results.")
-        self.model.item_list = results
+            self.log.info(f"Generated {counter} total results.")
 
-        self.finished.emit(counter)
+        except Exception as e:
+            self.failed.emit(str(e))
+
+        else:
+            self.model.item_list = results
+            self.finished.emit(counter)

@@ -255,6 +255,9 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
     def query_completed(self, count: int) -> None:
         raise NotImplementedError
 
+    def query_failed(self, message: str) -> None:
+        raise NotImplementedError
+
     #
     # Workspace methods
     #
@@ -396,6 +399,8 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
         self.worker.finished.connect(self.query_completed)
         self.worker.finished.connect(self.processing_thread.quit)
+        self.worker.failed.connect(self.query_failed)
+        self.worker.failed.connect(self.processing_thread.quit)
         self.processing_thread.started.connect(self.worker.update)
 
     #
@@ -444,6 +449,13 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
             self.raw_results.moveCursor(QtGui.QTextCursor.MoveOperation.Start)
 
         self.busy.reset()
+
+    def query_failed(self, message: str) -> None:
+        self.busy.reset()
+        self.setStatusTip(f"Error: {message}.")
+
+        QtWidgets.QMessageBox.critical(
+            self, "Error", message, QtWidgets.QMessageBox.StandardButton.Ok)
 
 
 if __name__ == '__main__':
