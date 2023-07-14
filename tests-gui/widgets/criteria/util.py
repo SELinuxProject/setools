@@ -2,7 +2,7 @@
 from unittest.mock import Mock
 
 from setools import SELinuxPolicy
-from setools.policyrep import (Boolean, Common, ObjClass, Type, TypeAttribute)
+from setools.policyrep import (Boolean, Common, ObjClass, Role, Type, TypeAttribute)
 from setools.query import PolicyQuery
 
 
@@ -45,9 +45,15 @@ def _build_mock_policy() -> Mock:
     barattr = SortableMock(TypeAttribute)
     barattr.name = "bar_type"
 
+    foo_r = SortableMock(Role)
+    foo_r.name = "foo_r"
+    bar_r = SortableMock(Role)
+    bar_r.name = "bar_r"
+
     policy = Mock(SELinuxPolicy)
     policy.bools.return_value = (foo_bool, bar_bool)
     policy.classes.return_value = (foo_class, bar_class)
+    policy.roles.return_value = (foo_r, bar_r)
     policy.types.return_value = (foo_t, bar_t)
     policy.typeattributes.return_value = (fooattr, barattr)
     return policy

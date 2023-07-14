@@ -3,5 +3,6 @@
 from .boolean import BooleanListCriteriaWidget, BooleanNameCriteriaWidget
 from .objclass import ObjClassCriteriaWidget
 from .permission import PermissionCriteriaWidget
+from .role import RoleNameWidget
 from .teruletype import TERuleTypeCriteriaWidget
 from .type import TypeOrAttrNameMode, TypeOrAttrNameWidget
