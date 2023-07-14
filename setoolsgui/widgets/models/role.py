@@ -8,28 +8,7 @@ from PyQt5.QtGui import QPalette, QTextCursor
 
 from setools.exception import MLSDisabled
 
-from .details import DetailsPopup
 from .table import SEToolsTableModel
-
-
-def role_detail(parent, role):
-    """
-    Create a dialog box for role details.
-
-    Parameters:
-    parent      The parent Qt Widget
-    role        The role
-    """
-
-    detail = DetailsPopup(parent, "Role detail: {0}".format(role))
-
-    types = sorted(role.types())
-    detail.append_header("Types ({0}): ".format(len(types)))
-
-    for t in types:
-        detail.append("    {0}".format(t))
-
-    detail.show()
 
 
 class RoleTableModel(SEToolsTableModel):
