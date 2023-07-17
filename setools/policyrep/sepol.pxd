@@ -16,8 +16,10 @@ cdef extern from "<sepol/handle.h>":
     void sepol_handle_destroy(sepol_handle_t *sh)
 
 
+ctypedef void (*msg_callback)(void *varg, sepol_handle_t *handle, const char *fmt, ...)
+
+
 cdef extern from "<sepol/debug.h>":
-    ctypedef void (*msg_callback)(void *varg, sepol_handle_t *handle, const char *fmt, ...)
     void sepol_msg_set_callback(sepol_handle * handle, msg_callback cb, void *cb_arg)
 
 
