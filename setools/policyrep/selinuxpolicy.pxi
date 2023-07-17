@@ -668,7 +668,7 @@ cdef class SELinuxPolicy:
         if self.sh == NULL:
             raise MemoryError
 
-        sepol.sepol_msg_set_callback(self.sh, sepol_logging_callback, self.handle)
+        sepol.sepol_msg_set_callback(self.sh, <sepol.msg_callback>sepol_logging_callback, self.handle)
 
         if sepol.sepol_policydb_create(&self.handle) < 0:
             raise MemoryError
