@@ -1,3 +1,10 @@
+*setools-4-4.3 (27 Jul 2023)
+  * Fix compilation with Cython 3.0.0.
+  * Improve man pages.
+  * Remove neverallow options in sediff.
+  * Add -r option to seinfoflow to get flows into the source type.
+  * Reject a rule with no permissions as invalid policy.
+
 *setools-4-4.2 (19 Apr 2023)
 
   * Make NetworkX optional.  sedta and seinfoflow tools, along with the
