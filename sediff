@@ -45,12 +45,12 @@ comp.add_argument("--level", action="store_true", help="Print MLS level definiti
 terule = parser.add_argument_group("type enforcement rule differences")
 terule.add_argument("-A", action="store_true", help="Print allow and allowxperm rule differences")
 terule.add_argument("--allow", action="store_true", help="Print allow rule differences")
-terule.add_argument("--neverallow", action="store_true", help="Print neverallow rule differences")
+# terule.add_argument("--neverallow", action="store_true", help="Print neverallow rule differences")
 terule.add_argument("--auditallow", action="store_true", help="Print auditallow rule differences")
 terule.add_argument("--dontaudit", action="store_true", help="Print dontaudit rule differences")
 terule.add_argument("--allowxperm", action="store_true", help="Print allowxperm rule differences")
-terule.add_argument("--neverallowxperm", action="store_true",
-                    help="Print neverallowxperm rule differences")
+# terule.add_argument("--neverallowxperm", action="store_true",
+#                     help="Print neverallowxperm rule differences")
 terule.add_argument("--auditallowxperm", action="store_true",
                     help="Print auditallowxperm rule differences")
 terule.add_argument("--dontauditxperm", action="store_true",
@@ -96,6 +96,10 @@ other.add_argument("--polcap", action="store_true", help="Print policy capabilit
 other.add_argument("--typebounds", action="store_true", help="Print typebounds differences")
 
 args = parser.parse_args()
+
+# neverallow and neverallowxperm options are disabled
+args.neverallow = False
+args.neverallowxperm = False
 
 if args.A:
     args.allow = True

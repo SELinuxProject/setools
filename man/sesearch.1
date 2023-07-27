@@ -48,6 +48,7 @@ Find type_change rules.
 Find role allow rules.
 .IP "--role_trans"
 Find role_transition rules.
+.IP "Note: TE/MLS rule searches cannot be mixed with RBAC rule searches"
 
 .SS MLS Rule Types
 .IP "--range_trans"
@@ -80,6 +81,8 @@ A matching rule must have the specified target attribute/type/role explicitly, i
 A matching rule must have all specified Booleans, instead of matching any of the specified Boolean.
 .IP "-ep"
 A matching rule must have exactly the specified permissions, instead of matching any of the specified permission.
+.IP "-ex"
+A matching rule must have exactly the specified extended permissions, instead of matching any listed extended permission.
 .IP "-Sp"
 A matching rule must have permissions where are a superset of the specified permissions, instead of matching any of the permissions.
 .IP "-rs"
@@ -102,6 +105,15 @@ Print version information and exit.
 Print additional informational messages.
 .IP "--debug"
 Enable debugging output.
+
+.SH EXAMPLE
+.nf
+List allow (and allowxperm) rules for accessing files labeled container_file_t from domains with attribute container_domain
+# sesearch -A -s container_domain -t container_file_t -c file
+List allow and dontaudit rules for accessing chr_files labeled container_file_t, that are controlled by boolean container_use_devices
+# sesearch -A --dontaudit -t container_file_t -c chr_file -b container_use_devices
+List dontaudit rules assigned via application_domain_type attribute (rules concerning specific types with that attribute are excluded)
+# sesearch --dontaudit -s application_domain_type -ds
 
 .SH AUTHOR
 Chris PeBenito <pebenito@ieee.org>

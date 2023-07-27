@@ -50,16 +50,12 @@ Find differences in allow rules.
 Find differences in auditallow rules.
 .IP "--dontaudit"
 Find differences in dontaudit rules.
-.IP "--neverallow"
-Find differences in neverallow rules.
 .IP "--allowxperm"
 Find differences in allowxperm rules.
 .IP "--auditallowxperm"
 Find differences in auditallowxperm rules.
 .IP "--dontauditxperm"
 Find differences in dontauditxperm rules.
-.IP "--neverallowxperm"
-Find differences in neverallowxperm rules.
 .IP "-T, --type_trans"
 Find differences in type_transition rules.
 .IP "--type_member"
@@ -88,6 +84,10 @@ Find differences in validatetrans rules.
 Find differences in mlsvalidatetrans rules.
 
 .SS Labeling Statement Differences
+.IP "--ibendportcon"
+Find differences in ibendportcon (InfiniBand endport context) statements.
+.IP "--ibpkeycon"
+Find differences in ibpkeycon (InfiniBand parition key context) statements.
 .IP "--initialsid"
 Find differences in initial SID statements.
 .IP "--fs_use"
@@ -139,6 +139,14 @@ The element exists in both policies but its semantic meaning has changed.
 For example, a class is modified if one or more permissions are added or removed.
 .RE
 .PP
+
+.SH EXAMPLE
+.nf
+Show differences in boolean settings
+# sediff -b /backup/policy.33 /etc/selinux/targeted/policy/policy.33
+Show statistics for allow and allowxperm rule changes (how many rules where added, removed, or modified)
+#sediff -A --stats /backup/policy.33 /etc/selinux/targeted/policy/policy.33
+
 
 .SH AUTHOR
 Chris PeBenito <pebenito@ieee.org>
