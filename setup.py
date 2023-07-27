@@ -133,7 +133,7 @@ for lang in linguas:
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
 setup(name='setools',
-      version='4.4.2',
+      version='4.4.3',
       description='SELinux policy analysis tools.',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
