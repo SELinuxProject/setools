@@ -22,7 +22,7 @@ from .widgets.tab import TAB_REGISTRY
 
 # Supported analyses.  These are not directly used here, but
 # will init the tab registry in widgets.tab for apol's analyses.
-from .widgets import (rbacrulequery, terulequery)
+from .widgets import (mlsrulequery, rbacrulequery, terulequery)
 
 if TYPE_CHECKING:
     from typing import Dict, Final, Optional

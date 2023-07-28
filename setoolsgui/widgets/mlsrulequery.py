@@ -1,0 +1,157 @@
+# SPDX-License-Identifier: LGPL-2.1-only
+
+from typing import TYPE_CHECKING
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+import setools
+
+from . import criteria, tab
+from .models.mlsrule import MLSRuleTableModel
+
+if TYPE_CHECKING:
+    from typing import Optional
+
+
+class MLSRuleQueryTab(tab.TableResultTabWidget):
+
+    """An MLS rule query."""
+
+    section = tab.AnalysisSection.Rules
+    tab_title = "Multi-Level Security (MLS) Rules"
+    mlsonly = True
+
+    def __init__(self, policy: "setools.SELinuxPolicy", _,
+                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+
+        super().__init__(setools.MLSRuleQuery(policy), enable_criteria=True, parent=parent)
+
+        self.setWhatsThis("<b>Search Type Enforcement rules in a SELinux policy.</b>")
+
+        #
+        # Set up criteria widgets
+        #
+        rt = criteria.MLSRuleTypeCriteriaWidget("Rule Type",
+                                                self.query,
+                                                parent=self.criteria_frame)
+        rt.setToolTip("The rule types for rule matching.")
+        rt.setWhatsThis(
+            """
+            <p><b>Select rule types for rule matching.</b></p>
+
+            <p>If a rule's has a one of the selected types, it will be returned.</p>
+            """)
+
+        src = criteria.TypeOrAttrNameWidget("Source Type/Attribute",
+                                            self.query,
+                                            "source",
+                                            mode=criteria.TypeOrAttrNameMode.type_or_attribute,
+                                            enable_regex=True,
+                                            enable_indirect=True,
+                                            parent=self.criteria_frame)
+        src.setToolTip("The source type/attribute for rule matching.")
+        src.setWhatsThis(
+            """
+            <p><b>Enter the source type/attribute for rule matching.</b></p>
+
+            <p>The behavior differs if a type or attribute is entered.</p>
+
+            <p>For types, if a rule has this type as the source, it will be
+            returned.  If indirect is enabled, rules that have an attribute as
+            a source will be returned if the attribute contains this type.</p>
+
+            <p>For attributes, if a rule has this attribute as the source, it
+            will be returned.  If indirect is enabled, rules that have a source
+            type that is contained by this attribute will be returned.</p>
+
+            <p>If regex is enabled, a regular expression is used for matching
+            the type/attribute name instead of direct string comparison.</p>
+            """)
+
+        dst = criteria.TypeOrAttrNameWidget("Target Type/Attribute",
+                                            self.query,
+                                            "target",
+                                            mode=criteria.TypeOrAttrNameMode.type_or_attribute,
+                                            enable_regex=True,
+                                            enable_indirect=True,
+                                            parent=self.criteria_frame)
+        dst.setToolTip("The target type/attribute for rule matching.")
+        dst.setWhatsThis(
+            """
+            <p><b>Enter the target type/attribute for rule matching.</b></p>
+
+            <p>The behavior differs if a type or attribute is entered.</p>
+
+            <p>For types, if a rule has this type as the target, it will be
+            returned.  If indirect is enabled, rules that have an attribute as
+            a target will be returned if the attribute contains this type.</p>
+
+            <p>For attributes, if a rule has this attribute as the target, it
+            will be returned.  If indirect is enabled, rules that have a target
+            type that is contained by this attribute will be returned.</p>
+
+            <p>If regex is enabled, a regular expression is used for matching
+            the type/attribute name instead of direct string comparison.</p>
+            """)
+
+        tclass = criteria.ObjClassCriteriaWidget("Object Class",
+                                                 self.query,
+                                                 "tclass",
+                                                 parent=self.criteria_frame)
+        tclass.setToolTip("The object class(es) for rule matching.")
+        tclass.setWhatsThis(
+            """
+            <p><b>Select object classes for rule matching.</b></p>
+
+            <p>A rule will be returned if its object class is one of the selected
+            classes</p>
+            """)
+
+        dflt = criteria.MLSLevelRangeWidget("Default Range",
+                                            self.query,
+                                            "default",
+                                            parent=self.criteria_frame)
+        dflt.setToolTip("The default range for rule matching.")
+        dflt.setWhatsThis(
+            """
+            <p><b>Enter the default role for rule matching.</b></p>
+
+            <p>If a rule has this range as the default, it will be returned.</p>
+            """)
+
+        # Add widgets to layout
+        self.criteria_frame_layout.addWidget(rt, 0, 0, 1, 2)
+        self.criteria_frame_layout.addWidget(src, 1, 0, 1, 1)
+        self.criteria_frame_layout.addWidget(dst, 1, 1, 1, 1)
+        self.criteria_frame_layout.addWidget(tclass, 2, 0, 1, 1)
+        self.criteria_frame_layout.addWidget(dflt, 2, 1, 1, 1)
+        self.criteria_frame_layout.addWidget(self.buttonBox, 3, 0, 1, 2)
+
+        # Save widget references
+        self.criteria = (rt, src, dst, tclass, dflt)
+
+        # Set result table's model
+        self.table_results_model = MLSRuleTableModel(self.table_results)
+
+
+if __name__ == '__main__':
+    import sys
+    import logging
+    import pprint
+    import warnings
+
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
+    warnings.simplefilter("default")
+
+    app = QtWidgets.QApplication(sys.argv)
+    mw = QtWidgets.QMainWindow()
+    widget = MLSRuleQueryTab(setools.SELinuxPolicy(), mw)
+    mw.setCentralWidget(widget)
+    mw.resize(widget.size())
+    whatsthis = QtWidgets.QWhatsThis.createAction(mw)
+    mw.menuBar().addAction(whatsthis)
+    mw.setStatusBar(QtWidgets.QStatusBar(mw))
+    mw.show()
+    rc = app.exec_()
+    pprint.pprint(widget.save())
+    sys.exit(rc)

@@ -21,7 +21,7 @@ class MLSLevelRangeWidget(NameCriteriaWidget):
                  parent: "Optional[QtWidgets.QWidget]" = None):
 
         # Not much we can do here. Leave all validation to the query.
-        super().__init__(title, query, attrname, None, None,
+        super().__init__(title, query, attrname, [], "",
                          enable_regex=False, parent=parent)
 
 
