@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 from contextlib import suppress
-import logging
 from typing import TYPE_CHECKING
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .criteria import CriteriaWidget
+from ..models import modelroles
 
 if TYPE_CHECKING:
     from ..models.list import SEToolsListModel
@@ -43,6 +43,8 @@ class ListCriteriaWidget(CriteriaWidget):
         sizePolicy.setHeightForWidth(self.criteria.sizePolicy().hasHeightForWidth())
         self.criteria.setSizePolicy(sizePolicy)
         self.criteria.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
+        self.criteria.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.criteria.customContextMenuRequested.connect(self._criteria_context_menu)
         self.criteria.setObjectName(self.attrname)
         self.criteria.setModel(model)
         self.criteria.selectionModel().selectionChanged.connect(self._selection_changed)
@@ -112,6 +114,21 @@ class ListCriteriaWidget(CriteriaWidget):
         """
         return False
 
+    def _criteria_context_menu(self, pos: QtCore.QPoint) -> None:
+        """Collect actions from the model and display a context menu if there are any actions."""
+        actionlist = []
+        for actions in self.selection(modelroles.ContextMenuRole):
+            actionlist.extend(actions)
+
+        if not actionlist:
+            return
+
+        self.log.debug(f"Generating context menu with actions: {actionlist}")
+        menu = QtWidgets.QMenu(self)
+        menu.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        menu.addActions(actionlist)
+        menu.exec(self.criteria.mapToGlobal(pos))
+
     def _selection_changed(self, _selected: QtCore.QItemSelection,
                            _deselected: QtCore.QItemSelection) -> None:
         """Set the query attribute based on the entire widget selection."""
@@ -142,8 +159,7 @@ class ListCriteriaWidget(CriteriaWidget):
         model = self.criteria.model()
         selection_model.select(model.createIndex(0, 0), INVERT_SELECTION_FLAGS)
 
-    def selection(self,
-                  role: QtCore.Qt.ItemDataRole = QtCore.Qt.ItemDataRole.UserRole) -> "Iterable":
+    def selection(self, role: int = QtCore.Qt.ItemDataRole.UserRole) -> "Iterable":
         """
         Generator which returns the selection.
 

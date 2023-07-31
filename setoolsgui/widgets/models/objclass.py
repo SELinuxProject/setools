@@ -4,17 +4,40 @@
 #
 #
 from itertools import chain
+from typing import TYPE_CHECKING
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette, QTextCursor
-
+from PyQt5 import QtCore, QtWidgets
 from setools.exception import NoCommon
 
+from . import modelroles
+from .list import SEToolsListModel
 from .table import SEToolsTableModel
+from .. import details
+
+if TYPE_CHECKING:
+    from setools import ObjClass
 
 
+class ObjClassList(SEToolsListModel["ObjClass"]):
 
-class ObjClassTableModel(SEToolsTableModel):
+    """List-based model for object classes."""
+
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
+
+        row = index.row()
+        item = self.item_list[row]
+
+        if role == modelroles.ContextMenuRole:
+            return (details.objclass_detail_action(item), )
+        elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
+            return details.objclass_tooltip(item)
+
+        return super().data(index, role)
+
+
+class ObjClassTableModel(SEToolsTableModel["ObjClass"]):
 
     """Table-based model for object classes."""
 
@@ -26,7 +49,7 @@ class ObjClassTableModel(SEToolsTableModel):
             col = index.column()
             item = self.item_list[row]
 
-            if role == Qt.ItemDataRole.DisplayRole:
+            if role == QtCore.Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.name
                 elif col == 1:
@@ -37,5 +60,5 @@ class ObjClassTableModel(SEToolsTableModel):
 
                     return ", ".join(sorted(chain(com_perms, item.perms)))
 
-            elif role == Qt.ItemDataRole.UserRole:
+            elif role == QtCore.Qt.ItemDataRole.UserRole:
                 return item

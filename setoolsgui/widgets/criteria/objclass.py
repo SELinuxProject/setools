@@ -1,16 +1,12 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 import logging
-from typing import TYPE_CHECKING
+from typing import Optional
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .list import ListCriteriaWidget
-from ..models.list import SEToolsListModel
-
-if TYPE_CHECKING:
-    from typing import Optional
-    from setools import ObjClass
+from ..models.objclass import ObjClassList
 
 
 class ObjClassCriteriaWidget(ListCriteriaWidget):
@@ -19,9 +15,9 @@ class ObjClassCriteriaWidget(ListCriteriaWidget):
 
     def __init__(self, title: str, query, attrname: str,
                  enable_equal: bool = False, enable_subset: bool = False,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: Optional[QtWidgets.QWidget] = None) -> None:
 
-        model: SEToolsListModel["ObjClass"] = SEToolsListModel()
+        model: ObjClassList = ObjClassList()
         model.item_list = sorted(query.policy.classes())
 
         super().__init__(title, query, attrname, model, enable_equal=enable_equal,
