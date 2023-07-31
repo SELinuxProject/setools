@@ -7,11 +7,10 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .list import ListCriteriaWidget
 from .name import NameCriteriaWidget
-from ..models.list import SEToolsListModel
+from ..models.boolean import BooleanList
 
 if TYPE_CHECKING:
     from typing import List, Optional
-    from setools import Boolean
 
 # Regex for exact matches to types/attrs
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
@@ -24,7 +23,7 @@ class BooleanListCriteriaWidget(ListCriteriaWidget):
     def __init__(self, title: str, query, attrname: str, enable_equal: bool = True,
                  parent: "Optional[QtWidgets.QWidget]" = None) -> None:
 
-        model: SEToolsListModel["Boolean"] = SEToolsListModel()
+        model: BooleanList = BooleanList()
         model.item_list = sorted(query.policy.bools())
 
         super().__init__(title, query, attrname, model, enable_equal=enable_equal, parent=parent)

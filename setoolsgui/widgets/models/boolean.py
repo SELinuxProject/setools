@@ -3,27 +3,36 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette, QTextCursor
+from typing import TYPE_CHECKING
 
-from .details import DetailsPopup
+from PyQt5 import QtCore, QtWidgets
+
+from . import modelroles
+from .list import SEToolsListModel
 from .table import SEToolsTableModel
+from .. import details
+
+if TYPE_CHECKING:
+    from setools import Boolean
 
 
-def boolean_detail(parent, boolean):
-    """
-    Create a dialog box for Booleanean details.
+class BooleanList(SEToolsListModel["Boolean"]):
 
-    Parameters:
-    parent      The parent Qt Widget
-    bool        The boolean
-    """
+    """List-based model for Booleans."""
 
-    detail = DetailsPopup(parent, "Boolean detail: {0}".format(boolean))
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-    detail.append_header("Default State: {0}".format(boolean.state))
+        row = index.row()
+        item = self.item_list[row]
 
-    detail.show()
+        if role == modelroles.ContextMenuRole:
+            return (details.boolean_detail_action(item), )
+        elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
+            return details.boolean_tooltip(item)
+
+        return super().data(index, role)
 
 
 class BooleanTableModel(SEToolsTableModel):
@@ -38,12 +47,12 @@ class BooleanTableModel(SEToolsTableModel):
             col = index.column()
             boolean = self.item_list[row]
 
-            if role == Qt.ItemDataRole.DisplayRole:
+            if role == QtCore.Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return boolean.name
                 elif col == 1:
                     return str(boolean.state)
 
-            elif role == Qt.ItemDataRole.UserRole:
+            elif role == QtCore.Qt.ItemDataRole.UserRole:
                 # get the whole rule for boolean boolean
                 return boolean

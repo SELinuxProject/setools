@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
+from .boolean import boolean_detail, boolean_detail_action, boolean_tooltip
 from .objclass import objclass_detail, objclass_detail_action, objclass_tooltip
 from .role import role_detail, role_detail_action, role_tooltip
 from .typeattr import typeattr_detail, typeattr_tooltip
