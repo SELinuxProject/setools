@@ -10,40 +10,8 @@ from PyQt5.QtGui import QPalette, QTextCursor
 
 from setools.exception import NoCommon
 
-from .details import DetailsPopup
 from .table import SEToolsTableModel
 
-
-def class_detail(parent, class_):
-    """
-    Create a dialog box for object class details.
-
-    Parameters:
-    parent      The parent Qt Widget
-    class_      The type
-    """
-
-    detail = DetailsPopup(parent, "Object class detail: {0}".format(class_))
-
-    try:
-        common = class_.common
-    except NoCommon:
-        pass
-    else:
-        detail.append_header("Inherits: {0}\n".format(common))
-
-        detail.append_header("Inherited permissions ({0}):".format(len(common.perms)))
-
-        for p in sorted(common.perms):
-            detail.append("    {0}".format(p))
-
-        detail.append("\n")
-
-    detail.append_header("Permissions ({0}):".format(len(class_.perms)))
-    for p in sorted(class_.perms):
-        detail.append("    {0}".format(p))
-
-    detail.show()
 
 
 class ObjClassTableModel(SEToolsTableModel):

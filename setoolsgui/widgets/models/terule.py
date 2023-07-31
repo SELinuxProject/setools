@@ -11,7 +11,7 @@ from setools.exception import RuleNotConditional, RuleUseError
 
 from . import modelroles
 from .table import SEToolsTableModel
-from ..details import objclass_detail, type_detail, type_or_attr_detail
+from .. import details
 
 
 class TERuleTableModel(SEToolsTableModel[AnyTERule]):
@@ -57,43 +57,25 @@ class TERuleTableModel(SEToolsTableModel[AnyTERule]):
 
         elif role == modelroles.ContextMenuRole:
             if col == 1:
-                a = QtWidgets.QAction(f"Properties of {rule.source}")
-                a.triggered.connect(lambda x: type_or_attr_detail(rule.source))
-                return (a, )
+                return (details.type_or_attr_detail_action(rule.source), )
             elif col == 2:
-                a = QtWidgets.QAction(f"Properties of {rule.target}")
-                a.triggered.connect(lambda x: type_or_attr_detail(rule.target))
-                return (a, )
+                return (details.type_or_attr_detail_action(rule.target), )
             elif col == 3:
-                a = QtWidgets.QAction(f"Properties of {rule.tclass}")
-                a.triggered.connect(lambda x: objclass_detail(rule.tclass))
-                return (a, )
+                return (details.objclass_detail_action(rule.tclass), )
             elif col == 4:
                 with suppress(RuleUseError):
-                    a = QtWidgets.QAction(f"Properties of {rule.default}")
-                    a.triggered.connect(lambda x: type_detail(rule.default))
-                    return (a, )
+                    return (details.type_detail_action(rule.default), )
 
             return ()
 
         elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
             if col in (1, 2):
                 if col == 1:
-                    obj = rule.source
+                    return details.type_or_attr_tooltip(rule.source)
                 else:
-                    obj = rule.target
-
-                if isinstance(obj, TypeAttribute):
-                    n_types = len(obj)
-                    if n_types == 0:
-                        return f"{obj.name} is an empty attribute."
-                    elif n_types > 5:
-                        return f"{obj.name} is an attribute consisting of {n_types} types."
-                    else:
-                        return f"{obj.name} is an attribute consisting of: " \
-                               f"{', '.join(t.name for t in obj.expand())}"
-                else:
-                    return f"{obj.name} is a type."
+                    return details.type_or_attr_tooltip(rule.target)
+            elif col == 3:
+                return details.objclass_tooltip(rule.tclass)
 
             return None
 

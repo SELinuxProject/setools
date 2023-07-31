@@ -8,7 +8,7 @@ from setools import MLSRuletype
 
 from . import modelroles
 from .table import SEToolsTableModel
-from ..details import objclass_detail, type_or_attr_detail
+from .. import details
 
 
 class MLSRuleTableModel(SEToolsTableModel):
@@ -39,19 +39,24 @@ class MLSRuleTableModel(SEToolsTableModel):
 
         elif role == modelroles.ContextMenuRole:
             if col == 1:
-                a = QtWidgets.QAction(f"Properties of {rule.source}")
-                a.triggered.connect(lambda x: type_or_attr_detail(rule.source))
-                return (a, )
+                return (details.type_or_attr_detail_action(rule.source), )
             elif col == 2:
-                a = QtWidgets.QAction(f"Properties of {rule.target}")
-                a.triggered.connect(lambda x: type_or_attr_detail(rule.target))
-                return (a, )
+                return (details.type_or_attr_detail_action(rule.target), )
             elif col == 3:
-                a = QtWidgets.QAction(f"Properties of {rule.tclass}")
-                a.triggered.connect(lambda x: objclass_detail(rule.tclass))
-                return (a, )
+                return (details.objclass_detail_action(rule.tclass), )
 
             return ()
+
+        elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
+            if col in (1, 2):
+                if col == 1:
+                    return details.type_or_attr_tooltip(rule.source)
+                else:
+                    return details.type_or_attr_tooltip(rule.target)
+            elif col == 3:
+                return details.objclass_tooltip(rule.tclass)
+
+            return None
 
         elif role == QtCore.Qt.ItemDataRole.WhatsThisRole:
             if col == 0:

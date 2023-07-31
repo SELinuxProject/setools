@@ -28,3 +28,15 @@ def typeattr_detail(attr: "TypeAttribute", parent: "Optional[QtWidgets.QWidget]"
         </ul>
         """,
         parent)
+
+
+def typeattr_tooltip(attr: "TypeAttribute") -> str:
+    """Return tooltip text for this type attribute."""
+    n_types = len(attr)
+    if n_types == 0:
+        return f"{attr.name} is an empty attribute."
+    elif n_types > 5:
+        return f"{attr.name} is an attribute consisting of {n_types} types."
+    else:
+        return f"{attr.name} is an attribute consisting of: " \
+                f"{', '.join(t.name for t in attr.expand())}"

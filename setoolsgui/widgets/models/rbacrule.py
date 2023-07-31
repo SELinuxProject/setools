@@ -9,7 +9,7 @@ from setools.exception import RuleUseError
 
 from . import modelroles
 from .table import SEToolsTableModel
-from ..details import objclass_detail, role_detail, type_or_attr_detail
+from .. import details
 
 
 class RBACRuleTableModel(SEToolsTableModel[AnyRBACRule]):
@@ -58,18 +58,14 @@ class RBACRuleTableModel(SEToolsTableModel[AnyRBACRule]):
                     except RuleUseError:
                         return ()
 
-                a = QtWidgets.QAction(f"Properties of {obj}")
-                if isinstance(rule.target, Role):
-                    a.triggered.connect(lambda x: role_detail(obj))
+                if isinstance(obj, Role):
+                    return (details.role_detail_action(obj), )
                 else:
-                    a.triggered.connect(lambda x: type_or_attr_detail(obj))
-                return (a, )
+                    return (details.type_or_attr_detail_action(obj), )
 
             elif col == 3:
                 try:
-                    a = QtWidgets.QAction(f"Properties of {rule.tclass}")
-                    a.triggered.connect(lambda x: objclass_detail(rule.tclass))
-                    return (a, )
+                    return (details.objclass_detail_action(rule.tclass), )
                 except RuleUseError:
                     pass
 
@@ -88,27 +84,11 @@ class RBACRuleTableModel(SEToolsTableModel[AnyRBACRule]):
                         return None
 
                 if isinstance(obj, Role):
-                    n_types = len(list(obj.types()))
-                    if n_types == 0:
-                        return f"{obj.name} is a role with no type associations."
-                    elif n_types > 5:
-                        return f"{obj.name} is a role associated with {n_types} types."
-                    else:
-                        return f"{obj.name} is a role associated with types: " \
-                               f"{', '.join(t.name for t in obj.expand())}"
-
-                elif isinstance(obj, Type):
-                    return f"{obj.name} is a type."
-
+                    return details.role_tooltip(obj)
                 else:
-                    n_types = len(obj)
-                    if n_types == 0:
-                        return f"{obj.name} is an empty type attribute."
-                    elif n_types > 5:
-                        return f"{obj.name} is a type attribute consisting of {n_types} types."
-                    else:
-                        return f"{obj.name} is a type attribute consisting of: " \
-                               f"{', '.join(t.name for t in obj.expand())}"
+                    return details.type_or_attr_tooltip(obj)
+            elif col == 3:
+                return details.objclass_tooltip(rule.tclass)
 
             return None
 
