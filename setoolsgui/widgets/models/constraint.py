@@ -3,36 +3,40 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
-from setools.exception import ConstraintUseError
+from PyQt5 import QtCore
+import setools
 
 from .table import SEToolsTableModel
 
 
-class ConstraintTableModel(SEToolsTableModel):
+class ConstraintTable(SEToolsTableModel[setools.Constraint]):
 
     """A table-based model for constraints."""
 
     headers = ["Rule Type", "Class", "Permissions", "Expression"]
 
-    def data(self, index, role):
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            rule = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-            if role == Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    return rule.ruletype.name
-                elif col == 1:
-                    return rule.tclass.name
-                elif col == 2:
-                    try:
-                        return ", ".join(sorted(rule.perms))
-                    except ConstraintUseError:
-                        return None
-                elif col == 3:
-                    return str(rule.expression)
+        row = index.row()
+        col = index.column()
+        rule = self.item_list[row]
 
-            elif role == Qt.ItemDataRole.UserRole:
-                return rule
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return rule.ruletype.name
+                    case 1:
+                        return rule.tclass.name
+                    case 2:
+                        if rule.ruletype in (setools.ConstraintRuletype.constrain,
+                                             setools.ConstraintRuletype.mlsconstrain):
+                            return ", ".join(sorted(rule.perms))
+                        else:
+                            return None
+                    case 3:
+                        return str(rule.expression)
+
+        return super().data(index, role)

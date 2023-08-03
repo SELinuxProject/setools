@@ -3,16 +3,15 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5 import QtCore, QtWidgets
-from setools import AnyRBACRule, Role, Type
-from setools.exception import RuleUseError
+from PyQt5 import QtCore
+import setools
 
 from . import modelroles
 from .table import SEToolsTableModel
 from .. import details
 
 
-class RBACRuleTableModel(SEToolsTableModel[AnyRBACRule]):
+class RBACRuleTable(SEToolsTableModel[setools.AnyRBACRule]):
 
     """A table-based model for RBAC rules."""
 
@@ -26,105 +25,97 @@ class RBACRuleTableModel(SEToolsTableModel[AnyRBACRule]):
         col = index.column()
         rule = self.item_list[row]
 
-        if role == QtCore.Qt.ItemDataRole.DisplayRole:
-            if col == 0:
-                return rule.ruletype.name
-            elif col == 1:
-                return rule.source.name
-            elif col == 2:
-                return rule.target.name
-            elif col == 3:
-                try:
-                    return rule.tclass.name
-                except RuleUseError:
-                    # role allow
-                    return None
-            elif col == 4:
-                try:
-                    return rule.default.name
-                except RuleUseError:
-                    # role allow
-                    return None
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return rule.ruletype.name
+                    case 1:
+                        return rule.source.name
+                    case 2:
+                        return rule.target.name
+                    case 3:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            return rule.tclass.name
+                    case 4:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            return rule.default.name
 
-        elif role == modelroles.ContextMenuRole:
-            if col in (1, 2, 4):
-                if col == 1:
-                    obj = rule.source
-                elif col == 2:
-                    obj = rule.target
-                else:
-                    try:
-                        obj = rule.default
-                    except RuleUseError:
-                        return ()
+                return None
 
-                if isinstance(obj, Role):
-                    return (details.role_detail_action(obj), )
-                else:
-                    return (details.type_or_attr_detail_action(obj), )
+            case modelroles.ContextMenuRole:
+                match col:
+                    case 1:
+                        return (details.role_detail_action(rule.source), )
+                    case 2:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            return (details.type_or_attr_detail_action(rule.target), )
+                        return (details.role_detail_action(rule.target), )
+                    case 3:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            return (details.objclass_detail_action(rule.tclass), )
+                    case 4:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            return (details.role_detail_action(rule.default), )
 
-            elif col == 3:
-                try:
-                    return (details.objclass_detail_action(rule.tclass), )
-                except RuleUseError:
-                    pass
+            case QtCore.Qt.ItemDataRole.ToolTipRole:
+                match col:
+                    case 1:
+                        return details.role_tooltip(rule.source)
+                    case 2:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            return details.type_or_attr_tooltip(rule.target)
+                        return details.role_tooltip(rule.target)
+                    case 3:
+                        return details.objclass_tooltip(rule.tclass)
+                    case 4:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            return details.role_tooltip(rule.default)
 
-            return ()
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = f"<p>{rule.ruletype} is the type of the rule.</p>"
+                    case 1:
+                        column_whatsthis = \
+                            f"<p>{rule.source} is the source role (subject) in the rule.</p>"
+                    case 2:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            column_whatsthis = \
+                                f"""
+                                <p>{rule.target} is the target type/attribute (object) in the rule.
+                                </p>"""
+                        else:
+                            column_whatsthis = \
+                                f"<p>{rule.target} is the target role (object) in the rule.</p>"
+                    case 3:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            column_whatsthis = \
+                                f"<p>{rule.tclass} is the object class of the rule.</p>"
+                        else:
+                            column_whatsthis = \
+                                f"""
+                                <p>The object class column does not apply to {rule.ruletype} rules.
+                                </p>"""
+                    case 4:
+                        if rule.ruletype == setools.RBACRuletype.role_transition:
+                            column_whatsthis = \
+                                f"<p>{rule.default} is the default role in the rule.<p>"
+                        else:
+                            column_whatsthis = \
+                                f"""
+                                <p>The default role column does not apply to {rule.ruletype} rules.
+                                </p>"""
+                    case _:
+                        column_whatsthis = ""
 
-        elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
-            if col in (1, 2):
-                if col == 1:
-                    obj = rule.source
-                elif col == 2:
-                    obj = rule.target
-                else:
-                    try:
-                        obj = rule.default
-                    except RuleUseError:
-                        return None
+                return \
+                    f"""
+                    <b><p>Table Representation of Role-based Access Control (RBAC) Rules</p></b>
 
-                if isinstance(obj, Role):
-                    return details.role_tooltip(obj)
-                else:
-                    return details.type_or_attr_tooltip(obj)
-            elif col == 3:
-                return details.objclass_tooltip(rule.tclass)
+                    <p>Each part of the rule is represented as a column in the table.</p>
 
-            return None
-
-        elif role == QtCore.Qt.ItemDataRole.WhatsThisRole:
-            if col == 0:
-                column_whatsthis = f"<p>{rule.ruletype} is the type of the rule.</p>"
-            elif col == 1:
-                column_whatsthis = \
-                    f"<p>{rule.source} is the source role (subject) in the rule.</p>"
-            elif col == 2:
-                if isinstance(rule.target, Role):
-                    column_whatsthis = \
-                        f"<p>{rule.target} is the target role (object) in the rule.</p>"
-                else:
-                    column_whatsthis = \
-                        f"<p>{rule.target} is the target type/attribute (object) in the rule.</p>"
-            elif col == 3:
-                try:
-                    column_whatsthis = f"<p>{rule.tclass} is the object class of the rule.</p>"
-                except RuleUseError:
-                    column_whatsthis = \
-                        f"<p>The object class column does not apply to {rule.ruletype} rules.</p>"
-            elif col == 4:
-                try:
-                    column_whatsthis = f"<p>{rule.default} is the default role in the rule.<p>"
-                except RuleUseError:
-                    column_whatsthis = \
-                       f"<p>The default role column does not apply to {rule.ruletype} rules.</p>"
-
-            return \
-                f"""
-                <b><p>Table Representation of Role-based Access Control (RBAC) Rules</p></b>
-
-                <p>Each part of the rule is represented as a column in the table.</p>
-
-                {column_whatsthis}
-                """
+                    {column_whatsthis}
+                    """
 
         return super().data(index, role)

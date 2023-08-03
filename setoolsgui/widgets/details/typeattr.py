@@ -30,6 +30,16 @@ def typeattr_detail(attr: "TypeAttribute", parent: "Optional[QtWidgets.QWidget]"
         parent)
 
 
+def typeattr_detail_action(attr: "TypeAttribute",
+                           parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
+
+    """Return a QAction that, when triggered, opens an detail popup for the attr."""
+
+    a = QtWidgets.QAction(f"Properties of {attr}")
+    a.triggered.connect(lambda _: typeattr_detail(attr, parent))
+    return a
+
+
 def typeattr_tooltip(attr: "TypeAttribute") -> str:
     """Return tooltip text for this type attribute."""
     n_types = len(attr)

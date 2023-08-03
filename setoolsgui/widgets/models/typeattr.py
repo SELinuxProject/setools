@@ -3,31 +3,57 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette, QTextCursor
+from PyQt5 import QtCore
+import setools
 
-from setools.exception import MLSDisabled
-
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 
-class TypeAttributeTableModel(SEToolsTableModel):
+class TypeAttributeTable(SEToolsTableModel[setools.TypeAttribute]):
 
     """Table-based model for roles."""
 
     headers = ["Name", "Types"]
 
-    def data(self, index, role):
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            item = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-            if role == Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    return item.name
-                elif col == 1:
-                    return ", ".join(sorted(t.name for t in item.expand()))
+        row = index.row()
+        col = index.column()
+        attr = self.item_list[row]
 
-            elif role == Qt.ItemDataRole.UserRole:
-                return item
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return attr.name
+                    case 1:
+                        return ", ".join(sorted(a.name for a in sorted(attr.expand())))
+
+            case modelroles.ContextMenuRole:
+                if col == 1:
+                    return (details.type_detail_action(t) for t in sorted(attr.expand()))
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = "<p>This is the name of the type attribute.</p>"
+                    case 1:
+                        column_whatsthis = \
+                            "<p>This is the list of types associated with the attribute.</p>"
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>Table Representation of SELinux users</p></b>
+
+                    <p>Each part of the declaration is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
+
+        return super().data(index, role)

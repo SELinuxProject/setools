@@ -3,30 +3,34 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
+import setools
 
 from .table import SEToolsTableModel
 
 
-class NetifconTableModel(SEToolsTableModel):
+class NetifconTable(SEToolsTableModel[setools.Netifcon]):
 
     """Table-based model for netifcons."""
 
     headers = ["Device", "Device Context", "Packet Context"]
 
-    def data(self, index, role):
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            rule = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-            if role == Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    return rule.netif
-                elif col == 1:
-                    return str(rule.context)
-                elif col == 2:
-                    return str(rule.packet)
+        row = index.row()
+        col = index.column()
+        rule = self.item_list[row]
 
-            elif role == Qt.ItemDataRole.UserRole:
-                return rule
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return rule.netif
+                    case 1:
+                        return str(rule.context)
+                    case 2:
+                        return str(rule.packet)
+
+        return super().data(index, role)

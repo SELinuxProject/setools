@@ -49,4 +49,4 @@ def role_tooltip(role: "Role") -> str:
         return f"{role} is a role associated with {n_types} types."
     else:
         return f"{role} is a role associated with types: " \
-                f"{', '.join(t.name for t in role.expand())}"
+                f"{', '.join(t.name for t in role.types())}"

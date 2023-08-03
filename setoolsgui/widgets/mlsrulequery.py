@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 from PyQt5 import QtCore, QtGui, QtWidgets
 import setools
 
-from . import criteria, tab
-from .models.mlsrule import MLSRuleTableModel
+from . import criteria, models, tab
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -130,7 +129,7 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
         self.criteria = (rt, src, dst, tclass, dflt)
 
         # Set result table's model
-        self.table_results_model = MLSRuleTableModel(self.table_results)
+        self.table_results_model = models.MLSRuleTable(self.table_results)
 
 
 if __name__ == '__main__':

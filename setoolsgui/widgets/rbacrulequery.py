@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 from PyQt5 import QtCore, QtGui, QtWidgets
 import setools
 
-from . import criteria, tab
-from .models.rbacrule import RBACRuleTableModel
+from . import criteria, models, tab
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -118,7 +117,7 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
         self.criteria = (rt, src, dst, tclass, dflt)
 
         # Set result table's model
-        self.table_results_model = RBACRuleTableModel(self.table_results)
+        self.table_results_model = models.RBACRuleTable(self.table_results)
 
 
 if __name__ == '__main__':

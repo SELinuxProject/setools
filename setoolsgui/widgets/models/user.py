@@ -3,78 +3,74 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt, QModelIndex
-from setools.exception import MLSDisabled
+import typing
 
-from .details import DetailsPopup
+from PyQt5 import QtCore
+import setools
+
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 
-def user_detail(parent, user):
-    """
-    Create a dialog box for user details.
-
-    Parameters:
-    parent      The parent Qt Widget
-    user        The user
-    """
-
-    detail = DetailsPopup(parent, "User detail: {0}".format(user))
-
-    roles = sorted(user.roles)
-    detail.append_header("Roles ({0}):".format(len(roles)))
-
-    for role in roles:
-        detail.append("    {0}".format(role))
-
-    try:
-        level = user.mls_level
-        range_ = user.mls_range
-    except MLSDisabled:
-        pass
-    else:
-        detail.append_header("\nDefault MLS Level:")
-        detail.append("    {0}".format(level))
-        detail.append_header("\nMLS Range:")
-        detail.append("    {0}".format(range_))
-
-    detail.show()
-
-
-class UserTableModel(SEToolsTableModel):
+class UserTable(SEToolsTableModel[setools.User]):
 
     """Table-based model for users."""
 
     headers = ["Name", "Roles", "Default Level", "Range"]
 
-    def __init__(self, parent, mls):
-        super(UserTableModel, self).__init__(parent)
-        self.col_count = 4 if mls else 2
+    def __init__(self, mls: bool = False, parent: QtCore.QObject | None = None):
+        super().__init__(parent)
+        self.mls: typing.Final[bool] = mls
 
-    def columnCount(self, parent=QModelIndex()):
-        return self.col_count
+    def columnCount(self, parent=QtCore.QModelIndex()) -> int:
+        return 4 if self.mls else 2
 
-    def data(self, index, role):
-        if self.resultlist and index.isValid():
-            if role == Qt.ItemDataRole.DisplayRole:
-                row = index.row()
-                col = index.column()
-                user = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-                if col == 0:
-                    return user.name
-                elif col == 1:
-                    return ", ".join(sorted(r.name for r in user.roles))
-                elif col == 2:
-                    try:
+        row = index.row()
+        col = index.column()
+        user = self.item_list[row]
+
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return user.name
+                    case 1:
+                        return ", ".join(sorted(r.name for r in user.roles))
+                    case 2:
                         return str(user.mls_level)
-                    except MLSDisabled:
-                        return None
-                elif col == 3:
-                    try:
+                    case 3:
                         return str(user.mls_range)
-                    except MLSDisabled:
-                        return None
 
-            elif role == Qt.ItemDataRole.UserRole:
-                return user
+            case modelroles.ContextMenuRole:
+                if col == 1:
+                    return (details.role_detail_action(r) for r in sorted(user.roles))
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = "<p>This is the name of the user.</p>"
+                    case 1:
+                        column_whatsthis = \
+                            "<p>This is the list of roles associated with the user.</p>"
+                    case 2:
+                        column_whatsthis = "<p>This is the default MLS level of the user.</p>"
+                    case 3:
+                        column_whatsthis = "<p>This is allowed range for the user.</p>"
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>Table Representation of SELinux users</p></b>
+
+                    <p>Each part of the declaration is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
+
+        return super().data(index, role)

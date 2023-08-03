@@ -3,20 +3,16 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from typing import TYPE_CHECKING
-
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore
+import setools
 
 from . import modelroles
 from .list import SEToolsListModel
 from .table import SEToolsTableModel
 from .. import details
 
-if TYPE_CHECKING:
-    from setools import Boolean
 
-
-class BooleanList(SEToolsListModel["Boolean"]):
+class BooleanList(SEToolsListModel[setools.Boolean]):
 
     """List-based model for Booleans."""
 
@@ -27,32 +23,35 @@ class BooleanList(SEToolsListModel["Boolean"]):
         row = index.row()
         item = self.item_list[row]
 
-        if role == modelroles.ContextMenuRole:
-            return (details.boolean_detail_action(item), )
-        elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
-            return details.boolean_tooltip(item)
+        match role:
+            case modelroles.ContextMenuRole:
+                return (details.boolean_detail_action(item), )
+            case QtCore.Qt.ItemDataRole.ToolTipRole:
+                return details.boolean_tooltip(item)
 
         return super().data(index, role)
 
 
-class BooleanTableModel(SEToolsTableModel):
+class BooleanTable(SEToolsTableModel):
 
     """Table-based model for booleans."""
 
     headers = ["Name", "Default State"]
 
-    def data(self, index, role):
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            boolean = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-            if role == QtCore.Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    return boolean.name
-                elif col == 1:
-                    return str(boolean.state)
+        row = index.row()
+        col = index.column()
+        boolean = self.item_list[row]
 
-            elif role == QtCore.Qt.ItemDataRole.UserRole:
-                # get the whole rule for boolean boolean
-                return boolean
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return boolean.name
+                    case 1:
+                        return str(boolean.state)
+
+        return super().data(index, role)

@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 from PyQt5 import QtCore, QtGui, QtWidgets
 import setools
 
-from . import criteria, tab
-from .models.terule import TERuleTableModel
+from . import criteria, models, tab
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -165,7 +164,7 @@ class TERuleQueryTab(tab.TableResultTabWidget):
         self.criteria = (rt, src, dst, tclass, perms, dflt, bools)
 
         # Set result table's model
-        self.table_results_model = TERuleTableModel(self.table_results)
+        self.table_results_model = models.TERuleTable(self.table_results)
 
         # Connect signals
         tclass.selectionChanged.connect(perms.set_classes)

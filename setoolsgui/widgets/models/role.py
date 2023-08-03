@@ -3,34 +3,60 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPalette, QTextCursor
+from PyQt5 import QtCore
+import setools
 
-from setools.exception import MLSDisabled
-
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 
-class RoleTableModel(SEToolsTableModel):
+class RoleTable(SEToolsTableModel[setools.Role]):
 
     """Table-based model for roles."""
 
     headers = ["Name", "Types"]
 
-    def data(self, index, role):
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
+
         # There are two roles here.
         # The parameter, role, is the Qt role
         # The below item is a role in the list.
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            item = self.item_list[row]
+        row = index.row()
+        col = index.column()
+        item = self.item_list[row]
 
-            if role == Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    return item.name
-                elif col == 1:
-                    return ", ".join(sorted(t.name for t in item.types()))
-            elif role == Qt.ItemDataRole.UserRole:
-                # get the whole object
-                return item
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return item.name
+                    case 1:
+                        return ", ".join(sorted(t.name for t in item.types()))
+
+            case modelroles.ContextMenuRole:
+                if col == 1:
+                    return (details.type_detail_action(t) for t in sorted(item.types()))
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = "<p>This is the name of the role.</p>"
+                    case 1:
+                        column_whatsthis = \
+                            "<p>This is the list of types associated with this role.</p>"
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>Table Representation of Roles</p></b>
+
+                    <p>Each part of the declaration is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
+
+        return super().data(index, role)

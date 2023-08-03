@@ -3,34 +3,37 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
+import setools
 
 from .table import SEToolsTableModel
 
 
-class PortconTableModel(SEToolsTableModel):
+class PortconTable(SEToolsTableModel[setools.Portcon]):
 
     """Table-based model for portcons."""
 
     headers = ["Port/Port Range", "Protocol", "Context"]
 
-    def data(self, index, role):
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            rule = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-            if role == Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    low, high = rule.ports
-                    if low == high:
-                        return str(low)
-                    else:
-                        return "{0}-{1}".format(low, high)
-                elif col == 1:
-                    return rule.protocol.name
-                elif col == 2:
-                    return str(rule.context)
+        row = index.row()
+        col = index.column()
+        rule = self.item_list[row]
 
-            elif role == Qt.ItemDataRole.UserRole:
-                return rule
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        low, high = rule.ports
+                        if low == high:
+                            return str(low)
+                        return f"{low}-{high}"
+                    case 1:
+                        return rule.protocol.name
+                    case 2:
+                        return str(rule.context)
+
+        return super().data(index, role)

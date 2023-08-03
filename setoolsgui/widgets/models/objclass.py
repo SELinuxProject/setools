@@ -4,21 +4,17 @@
 #
 #
 from itertools import chain
-from typing import TYPE_CHECKING
 
-from PyQt5 import QtCore, QtWidgets
-from setools.exception import NoCommon
+from PyQt5 import QtCore
+import setools
 
 from . import modelroles
 from .list import SEToolsListModel
 from .table import SEToolsTableModel
 from .. import details
 
-if TYPE_CHECKING:
-    from setools import ObjClass
 
-
-class ObjClassList(SEToolsListModel["ObjClass"]):
+class ObjClassList(SEToolsListModel[setools.ObjClass]):
 
     """List-based model for object classes."""
 
@@ -29,36 +25,39 @@ class ObjClassList(SEToolsListModel["ObjClass"]):
         row = index.row()
         item = self.item_list[row]
 
-        if role == modelroles.ContextMenuRole:
-            return (details.objclass_detail_action(item), )
-        elif role == QtCore.Qt.ItemDataRole.ToolTipRole:
-            return details.objclass_tooltip(item)
+        match role:
+            case modelroles.ContextMenuRole:
+                return (details.objclass_detail_action(item), )
+
+            case QtCore.Qt.ItemDataRole.ToolTipRole:
+                return details.objclass_tooltip(item)
 
         return super().data(index, role)
 
 
-class ObjClassTableModel(SEToolsTableModel["ObjClass"]):
+class ObjClassTable(SEToolsTableModel[setools.ObjClass]):
 
     """Table-based model for object classes."""
 
     headers = ["Name", "Permissions"]
 
-    def data(self, index, role):
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            item = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-            if role == QtCore.Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    return item.name
-                elif col == 1:
-                    try:
-                        com_perms = item.common.perms
-                    except NoCommon:
-                        com_perms = []
+        row = index.row()
+        col = index.column()
+        item = self.item_list[row]
 
-                    return ", ".join(sorted(chain(com_perms, item.perms)))
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return item.name
+                    case 1:
+                        try:
+                            return ", ".join(sorted(chain(item.common.perms, item.perms)))
+                        except setools.exception.NoCommon:
+                            return ", ".join(sorted(item.perms))
 
-            elif role == QtCore.Qt.ItemDataRole.UserRole:
-                return item
+        return super().data(index, role)

@@ -5,12 +5,13 @@
 #
 import stat
 
-from PyQt5.QtCore import Qt
+from PyQt5 import QtCore
+import setools
 
 from .table import SEToolsTableModel
 
 
-class GenfsconTableModel(SEToolsTableModel):
+class GenfsconTable(SEToolsTableModel[setools.Genfscon]):
 
     """Table-based model for genfscons."""
 
@@ -26,21 +27,24 @@ class GenfsconTableModel(SEToolsTableModel):
         stat.S_IFLNK: "Symbolic Link",
         stat.S_IFSOCK: "Socket"}
 
-    def data(self, index, role):
-        if self.item_list and index.isValid():
-            row = index.row()
-            col = index.column()
-            rule = self.item_list[row]
+    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+        if not self.item_list or not index.isValid():
+            return None
 
-            if role == Qt.ItemDataRole.DisplayRole:
-                if col == 0:
-                    return rule.fs
-                elif col == 1:
-                    return rule.path
-                elif col == 2:
-                    return self._filetype_to_text[rule.filetype]
-                elif col == 3:
-                    return str(rule.context)
+        row = index.row()
+        col = index.column()
+        rule = self.item_list[row]
 
-            elif role == Qt.ItemDataRole.UserRole:
-                return rule
+        match role:
+            case QtCore.Qt.ItemDataRole.DisplayRole:
+                match col:
+                    case 0:
+                        return rule.fs
+                    case 1:
+                        return rule.path
+                    case 2:
+                        return self._filetype_to_text[rule.filetype]
+                    case 3:
+                        return str(rule.context)
+
+        return super().data(index, role)

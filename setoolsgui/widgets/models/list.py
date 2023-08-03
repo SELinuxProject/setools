@@ -14,6 +14,7 @@ from .typing import MetaclassFix
 T = typing.TypeVar("T")
 
 
+# pylint: disable=invalid-metaclass
 class SEToolsListModel(QtCore.QAbstractListModel, typing.Generic[T], metaclass=MetaclassFix):
 
     """

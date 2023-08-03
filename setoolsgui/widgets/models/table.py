@@ -14,6 +14,7 @@ from .typing import MetaclassFix
 T = typing.TypeVar("T")
 
 
+# pylint: disable=invalid-metaclass
 class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass=MetaclassFix):
 
     """Base class for SETools table models, modeling a list in a tabular form."""
