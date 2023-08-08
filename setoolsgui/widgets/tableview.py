@@ -34,7 +34,7 @@ class SEToolsTableView(QtWidgets.QTableView):
         save_csv_action = QtWidgets.QAction("Save table to CSV...", self)
         save_csv_action.triggered.connect(self.choose_csv_save_location)
         menu.addAction(save_csv_action)
-        menu.popup(event.globalPos())
+        menu.exec(event.globalPos())
 
     def copy(self) -> None:
         datamodel = self.model()
