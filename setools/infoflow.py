@@ -104,7 +104,8 @@ class InfoFlowAnalysis:
 
         self.rebuildsubgraph = True
 
-    def shortest_path(self, source: Type, target: Type) -> Iterable[InfoFlowPath]:
+    def shortest_path(self, source: Union[Type, str], target: Union[Type, str]) \
+            -> Iterable[InfoFlowPath]:
         """
         Generator which yields one shortest path between the source
         and target types (there may be more).
