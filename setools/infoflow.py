@@ -18,13 +18,14 @@ from .descriptors import EdgeAttrIntMax, EdgeAttrList
 from .mixins import NetworkXGraphEdge
 from .permmap import PermissionMap
 from .policyrep import AVRule, SELinuxPolicy, TERuletype, Type
+from .query import DirectedGraphAnalysis
 
 __all__ = ['InfoFlowAnalysis']
 
 InfoFlowPath = Iterable['InfoFlowStep']
 
 
-class InfoFlowAnalysis:
+class InfoFlowAnalysis(DirectedGraphAnalysis):
 
     """Information flow analysis."""
 

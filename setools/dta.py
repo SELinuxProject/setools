@@ -20,6 +20,7 @@ except ImportError:
 from .descriptors import EdgeAttrDict, EdgeAttrList
 from .mixins import NetworkXGraphEdge
 from .policyrep import AnyTERule, SELinuxPolicy, TERuletype, Type
+from .query import DirectedGraphAnalysis
 
 __all__ = ['DomainTransitionAnalysis', 'DomainTransition', 'DomainEntrypoint', 'DTAPath']
 
@@ -56,7 +57,7 @@ DTAPath = Iterable[DomainTransition]
 RuleHash = DefaultDict[Type, List[AnyTERule]]
 
 
-class DomainTransitionAnalysis:
+class DomainTransitionAnalysis(DirectedGraphAnalysis):
 
     """Domain transition analysis."""
 
