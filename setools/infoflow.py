@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
+import enum
 import itertools
 import logging
 from contextlib import suppress
 from dataclasses import dataclass, InitVar
 from typing import cast, Iterable, List, Mapping, Optional, Union
+import warnings
 
 try:
     import networkx as nx
@@ -14,45 +16,72 @@ try:
 except ImportError:
     logging.getLogger(__name__).debug("NetworkX failed to import.")
 
-from .descriptors import EdgeAttrIntMax, EdgeAttrList
+from .descriptors import CriteriaDescriptor, EdgeAttrIntMax, EdgeAttrList
 from .mixins import NetworkXGraphEdge
 from .permmap import PermissionMap
 from .policyrep import AVRule, SELinuxPolicy, TERuletype, Type
 from .query import DirectedGraphAnalysis
 
-__all__ = ['InfoFlowAnalysis']
+__all__ = ['InfoFlowAnalysis', 'InfoFlowStep', 'InfoFlowPath']
 
 InfoFlowPath = Iterable['InfoFlowStep']
 
 
 class InfoFlowAnalysis(DirectedGraphAnalysis):
 
-    """Information flow analysis."""
+    """
+    Information flow analysis.
 
-    _exclude: List[Type]
-    _min_weight: int
-    _perm_map: PermissionMap
+    Parameters:
+    policy      The policy to analyze.
+    perm_map    The permission map or path to the permission map file.
+
+    Keyword Parameters
+    source      The source type of the analysis.
+    target      The target type of the analysis.
+    mode        The analysis mode (see InfoFlowAnalysisMode)
+    min_weight  The minimum permission weight to include in the analysis.
+                (default is 1)
+    exclude     The types excluded from the information flow analysis.
+                (default is none)
+    booleans    If None, all rules will be added to the analysis (default).
+                otherwise it should be set to a dict with keys corresponding
+                to boolean names and values of True/False. Any unspecified
+                booleans will use the policy's default values.
+
+    """
+
+    class Mode(enum.Enum):
+
+        """Information flow analysis modes"""
+
+        ShortestPath = "All shortest paths"
+        AllPaths = "All paths up to"  # N steps
+        FlowsIn = "Flows into the target type."
+        FlowsOut = "Flows out of the source type."
+
+    source = CriteriaDescriptor(lookup_function="lookup_type")
+    target = CriteriaDescriptor(lookup_function="lookup_type")
+    mode = Mode.ShortestPath
 
     def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, min_weight: int = 1,
+                 source: Optional[Union[Type, str]] = None,
+                 target: Optional[Union[Type, str]] = None,
+                 mode: Mode = Mode.ShortestPath,
+                 all_paths_step_limit: int = 3,
                  exclude: Optional[Iterable[Union[Type, str]]] = None,
                  booleans: Optional[Mapping[str, bool]] = None) -> None:
-        """
-        Parameters:
-        policy      The policy to analyze.
-        perm_map    The permission map or path to the permission map file.
-        minweight   The minimum permission weight to include in the analysis.
-                    (default is 1)
-        exclude     The types excluded from the information flow analysis.
-                    (default is none)
-        booleans    If None, all rules will be added to the analysis (default).
-                    otherwise it should be set to a dict with keys corresponding
-                    to boolean names and values of True/False. Any unspecified
-                    booleans will use the policy's default values.
-        """
+
         self.log = logging.getLogger(__name__)
-
         self.policy = policy
+        self._min_weight: int
+        self._perm_map: PermissionMap
+        self._all_paths_max_steps: int
 
+        self.source = source
+        self.target = target
+        self.mode = mode
+        self.all_paths_max_steps = all_paths_step_limit
         self.min_weight = min_weight
         self.perm_map = perm_map
         self.exclude = exclude  # type: ignore # https://github.com/python/mypy/issues/220
@@ -68,6 +97,18 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                               "requried for Information Flow Analysis.")
             self.log.critical("This is typically in the python3-networkx package.")
             raise
+
+    @property
+    def all_paths_max_steps(self) -> int:
+        return self._all_paths_max_steps
+
+    @all_paths_max_steps.setter
+    def all_paths_max_steps(self, value: int) -> None:
+        if value < 1:
+            raise ValueError("All paths max steps must be positive.")
+
+        self._all_paths_max_steps = value
+        # no subgraph rebuild needed.
 
     @property
     def min_weight(self) -> int:
@@ -105,6 +146,63 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
         self.rebuildsubgraph = True
 
+    def results(self) -> Iterable[InfoFlowPath] | Iterable["InfoFlowStep"]:
+        if self.rebuildsubgraph:
+            self._build_subgraph()
+
+        self.log.info(f"Generating information flow results from {self.policy}")
+        self.log.debug(f"{self.source=}")
+        self.log.debug(f"{self.target=}")
+        self.log.debug(f"{self.mode=}, {self.all_paths_max_steps=}")
+
+        with suppress(NetworkXNoPath, NodeNotFound, NetworkXError):
+            match self.mode:
+                case InfoFlowAnalysis.Mode.ShortestPath:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info("Generating all shortest information flow paths from "
+                                  f"{self.source} to {self.target}...")
+
+                    for path in nx.all_shortest_paths(self.subG,
+                                                      self.source,
+                                                      self.target):
+                        yield self.__generate_steps(path)
+
+                case InfoFlowAnalysis.Mode.AllPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info("Generating all information flow paths from "
+                                  f"{self.source} to {self.target}, "
+                                  f"max length {self.all_paths_max_steps}...")
+
+                    for path in nx.all_simple_paths(self.subG,
+                                                    self.source,
+                                                    self.target,
+                                                    self.all_paths_max_steps):
+
+                        yield self.__generate_steps(path)
+
+                case InfoFlowAnalysis.Mode.FlowsOut:
+                    if not self.source:
+                        raise ValueError("Source target type must be specified.")
+
+                    self.log.info(f"Generating all information flows out of {self.source}")
+                    for source, target in self.subG.out_edges(self.source):
+                        yield InfoFlowStep(self.subG, source, target)
+
+                case InfoFlowAnalysis.Mode.FlowsIn:
+                    if not self.target:
+                        raise ValueError("Target type must be specified.")
+
+                    self.log.info(f"Generating all information flows into {self.target}")
+                    for source, target in self.subG.in_edges(self.target):
+                        yield InfoFlowStep(self.subG, source, target)
+
+                case _:
+                    raise ValueError(f"Unknown analysis mode: {self.mode}")
+
     def shortest_path(self, source: Union[Type, str], target: Union[Type, str]) \
             -> Iterable[InfoFlowPath]:
         """
@@ -123,6 +221,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         target   The target type for this step of the information flow.
         rules    The list of rules creating this information flow step.
         """
+        warnings.warn("InfoFlowAnalysis.shortest_path() is deprecated. "
+                      "It will be removed in SETools 4.6.")
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
@@ -161,6 +261,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         target    The target type for this step of the information flow.
         rules     The list of rules creating this information flow step.
         """
+        warnings.warn("InfoFlowAnalysis.all_paths() is deprecated, replaced with the results() "
+                      "method. It will be removed in SETools 4.6.")
         if maxlen < 1:
             raise ValueError("Maximum path length must be positive.")
 
@@ -199,6 +301,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         target   The target type for this step of the information flow.
         rules    The list of rules creating this information flow step.
         """
+        warnings.warn("InfoFlowAnalysis.all_shorted_paths() is deprecated, replaced with the "
+                      "results() method. It will be removed in SETools 4.6.")
         s = self.policy.lookup_type(source)
         t = self.policy.lookup_type(target)
 
@@ -235,6 +339,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                 source, target, and rules for each
                 information flow.
         """
+        warnings.warn("InfoFlowAnalysis.infoflows() is deprecated, replaced with the results() "
+                      "method. It will be removed in SETools 4.6.")
         s = self.policy.lookup_type(type_)
 
         if self.rebuildsubgraph:
@@ -310,6 +416,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         self.perm_map.map_policy(self.policy)
 
         self.log.info("Building information flow graph from {0}...".format(self.policy))
+        self.log.debug(f"{self.perm_map=}")
 
         for rule in self.policy.terules():
             if rule.ruletype != TERuletype.allow:

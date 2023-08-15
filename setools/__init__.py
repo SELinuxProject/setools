@@ -77,7 +77,7 @@ from .pcideviceconquery import PcideviceconQuery
 from .devicetreeconquery import DevicetreeconQuery
 
 # Information Flow Analysis
-from .infoflow import InfoFlowAnalysis
+from .infoflow import *
 from .permmap import PermissionMap, RuleWeight, Mapping
 
 # Domain Transition Analysis
