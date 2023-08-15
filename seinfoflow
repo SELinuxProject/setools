@@ -43,7 +43,7 @@ alg.add_argument("-A", "--all_paths", type=int, metavar="MAX_STEPS",
                  help="Calculate all paths, with the specified maximum path length. (Expensive)")
 
 opts = parser.add_argument_group("Analysis options")
-opts.add_argument("-r", "--reverse", action="store_false",
+opts.add_argument("-r", "--reverse", action="store_true",
                   help="Display information flows into the source type. "
                   "No effect if a target type is specified.")
 opts.add_argument("-w", "--min_weight", default=3, type=int,
@@ -105,13 +105,16 @@ try:
                                  booleans=booleans)
 
     if args.shortest_path or args.all_paths:
+        g.source = args.source
+        g.target = args.target
         if args.shortest_path:
-            paths = g.all_shortest_paths(args.source, args.target)
+            g.mode = setools.InfoFlowAnalysis.Mode.ShortestPath
         else:
-            paths = g.all_paths(args.source, args.target, args.all_paths)
+            g.mode = setools.InfoFlowAnalysis.Mode.AllPaths
+            g.all_paths_max_steps = args.all_paths
 
         flownum = 0
-        for flownum, path in enumerate(paths, start=1):
+        for flownum, path in enumerate(g.results(), start=1):
             print("Flow {0}:".format(flownum))
             for stepnum, step in enumerate(path, start=1):
                 print("  Step {0}: {1} -> {2}".format(stepnum, step.source, step.target))
@@ -128,8 +131,15 @@ try:
             print()
 
     else:  # single direct info flow
+        if args.reverse:
+            g.mode = setools.InfoFlowAnalysis.Mode.FlowsIn
+            g.target = args.source
+        else:
+            g.mode = setools.InfoFlowAnalysis.Mode.FlowsOut
+            g.source = args.source
+
         flownum = 0
-        for flownum, flow in enumerate(g.infoflows(args.source, out=args.reverse), start=1):
+        for flownum, flow in enumerate(g.results(), start=1):
             print("Flow {0}: {1} -> {2}".format(flownum, flow.source, flow.target))
 
             if args.full:
