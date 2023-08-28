@@ -45,7 +45,7 @@ class SEToolsTableView(QTableView):
             elif prev_col is not None and current_col != prev_col:
                 selected_text.append('\t')
 
-            selected_text.append(datamodel.data(index, Qt.DisplayRole))
+            selected_text.append(datamodel.data(index, Qt.ItemDataRole.DisplayRole))
 
             prev_row = current_row
             prev_col = current_col
@@ -76,7 +76,7 @@ class SEToolsTableView(QTableView):
             # write headers
             csv_row = []
             for col in range(col_count):
-                csv_row.append(datamodel.headerData(col, Qt.Horizontal, Qt.DisplayRole))
+                csv_row.append(datamodel.headerData(col, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole))
 
             writer.writerow(csv_row)
 
@@ -86,6 +86,6 @@ class SEToolsTableView(QTableView):
 
                 for col in range(col_count):
                     index = datamodel.index(row, col)
-                    csv_row.append(datamodel.data(index, Qt.DisplayRole))
+                    csv_row.append(datamodel.data(index, Qt.ItemDataRole.DisplayRole))
 
                 writer.writerow(csv_row)

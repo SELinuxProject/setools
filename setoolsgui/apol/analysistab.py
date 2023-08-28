@@ -100,7 +100,7 @@ class AnalysisTab(SEToolsWidget, QScrollArea, metaclass=TabRegistry):
         self._check_query()
 
     def _check_query(self):
-        button = self.buttonBox.button(QDialogButtonBox.Apply)
+        button = self.buttonBox.button(QDialogButtonBox.StandardButton.Apply)
         enabled = not self.errors
         button.setEnabled(enabled)
         button.setToolTip("Run the analysis." if enabled else "There are errors in the tab.")

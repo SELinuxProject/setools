@@ -20,7 +20,7 @@ class IbpkeyconTableModel(SEToolsTableModel):
             col = index.column()
             rule = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return str(rule.subnet_prefix)
                 elif col == 1:
@@ -32,5 +32,5 @@ class IbpkeyconTableModel(SEToolsTableModel):
                 elif col == 2:
                     return str(rule.context)
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return rule

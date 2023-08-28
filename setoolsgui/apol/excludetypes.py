@@ -40,14 +40,14 @@ class ExcludeTypes(SEToolsWidget, QDialog):
                                          if t not in self.initial_excluded_list]
         self.included_sort = FilterByAttributeProxy(self)
         self.included_sort.setSourceModel(self.included_model)
-        self.included_sort.sort(0, Qt.AscendingOrder)
+        self.included_sort.sort(0, Qt.SortOrder.AscendingOrder)
         self.included_types.setModel(self.included_sort)
 
         self.excluded_model = SEToolsListModel(self)
         self.excluded_model.item_list = self.initial_excluded_list
         self.excluded_sort = FilterByAttributeProxy(self)
         self.excluded_sort.setSourceModel(self.excluded_model)
-        self.excluded_sort.sort(0, Qt.AscendingOrder)
+        self.excluded_sort.sort(0, Qt.SortOrder.AscendingOrder)
         self.excluded_types.setModel(self.excluded_sort)
 
         # connect signals
@@ -62,7 +62,7 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         selected_types = []
         for index in self.excluded_types.selectionModel().selectedIndexes():
             source_index = self.excluded_sort.mapToSource(index)
-            item = self.excluded_model.data(source_index, Qt.UserRole)
+            item = self.excluded_model.data(source_index, Qt.ItemDataRole.UserRole)
             self.included_model.append(item)
             selected_types.append(item)
 
@@ -81,7 +81,7 @@ class ExcludeTypes(SEToolsWidget, QDialog):
         selected_types = []
         for index in self.included_types.selectionModel().selectedIndexes():
             source_index = self.included_sort.mapToSource(index)
-            item = self.included_model.data(source_index, Qt.UserRole)
+            item = self.included_model.data(source_index, Qt.ItemDataRole.UserRole)
             self.excluded_model.append(item)
             selected_types.append(item)
 
@@ -95,7 +95,7 @@ class ExcludeTypes(SEToolsWidget, QDialog):
 
     def set_attr_filter(self, row):
         index = self.attr_model.index(row)
-        attr = self.attr_model.data(index, Qt.UserRole)
+        attr = self.attr_model.data(index, Qt.ItemDataRole.UserRole)
         self.log.debug("Attribute set to {0!r}".format(attr))
         self.included_sort.attr = attr
         self.excluded_sort.attr = attr
@@ -126,7 +126,7 @@ class FilterByAttributeProxy(QSortFilterProxyModel):
         if self.attr:
             source = self.sourceModel()
             index = source.index(row)
-            item = source.data(index, Qt.UserRole)
+            item = source.data(index, Qt.ItemDataRole.UserRole)
             if item not in self.attr:
                 return False
 

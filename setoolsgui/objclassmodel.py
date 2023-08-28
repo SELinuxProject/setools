@@ -58,7 +58,7 @@ class ObjClassTableModel(SEToolsTableModel):
             col = index.column()
             item = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.name
                 elif col == 1:
@@ -69,5 +69,5 @@ class ObjClassTableModel(SEToolsTableModel):
 
                     return ", ".join(sorted(chain(com_perms, item.perms)))
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return item

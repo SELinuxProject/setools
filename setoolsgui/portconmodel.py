@@ -20,7 +20,7 @@ class PortconTableModel(SEToolsTableModel):
             col = index.column()
             rule = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     low, high = rule.ports
                     if low == high:
@@ -32,5 +32,5 @@ class PortconTableModel(SEToolsTableModel):
                 elif col == 2:
                     return str(rule.context)
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return rule

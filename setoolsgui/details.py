@@ -37,15 +37,15 @@ class DetailsPopup(SEToolsWidget, QDialog):
         self.setWindowTitle(text)
 
     def append(self, text):
-        self.contents.setFontWeight(QFont.Normal)
+        self.contents.setFontWeight(QFont.Weight.Normal)
         self.contents.setFontPointSize(9)
         self.contents.append(text)
 
     def append_header(self, text):
-        self.contents.setFontWeight(QFont.Black)
+        self.contents.setFontWeight(QFont.Weight.Black)
         self.contents.setFontPointSize(11)
         self.contents.append(text)
 
     def show(self):
-        self.contents.moveCursor(QTextCursor.Start)
+        self.contents.moveCursor(QTextCursor.MoveOperation.Start)
         super(DetailsPopup, self).show()

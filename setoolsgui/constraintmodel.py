@@ -21,7 +21,7 @@ class ConstraintTableModel(SEToolsTableModel):
             col = index.column()
             rule = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return rule.ruletype.name
                 elif col == 1:
@@ -34,5 +34,5 @@ class ConstraintTableModel(SEToolsTableModel):
                 elif col == 3:
                     return str(rule.expression)
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return rule

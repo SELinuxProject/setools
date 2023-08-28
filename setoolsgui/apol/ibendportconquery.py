@@ -74,7 +74,7 @@ class IbendportconQueryTab(AnalysisTab):
         self.errors = set()
         self.orig_palette = self.type_.palette()
         self.error_palette = self.type_.palette()
-        self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.error_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.red)
         self.clear_name_error()
         self.clear_port_error()
         self.clear_user_error()
@@ -87,7 +87,7 @@ class IbendportconQueryTab(AnalysisTab):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
-        self.table_results.sortByColumn(0, Qt.AscendingOrder)
+        self.table_results.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
         # set up processing thread
         self.thread = QThread()
@@ -304,6 +304,6 @@ class IbendportconQueryTab(AnalysisTab):
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
             self.busy.repaint()
-            self.raw_results.moveCursor(QTextCursor.Start)
+            self.raw_results.moveCursor(QTextCursor.MoveOperation.Start)
 
         self.busy.reset()

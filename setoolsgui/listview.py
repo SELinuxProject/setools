@@ -34,14 +34,14 @@ class SEToolsListView(QListView):
 
         for row in range(model.rowCount()):
             index = model.createIndex(row, 0)
-            selection_model.select(index, QItemSelectionModel.Toggle)
+            selection_model.select(index, QItemSelectionModel.SelectionFlag.Toggle)
 
-    def selection(self, qt_role=Qt.UserRole):
+    def selection(self, qt_role=Qt.ItemDataRole.UserRole):
         """
         Generator which returns the selection.
 
         Parameter:
-        qt_role     The Qt model role. Default is Qt.UserRole.
+        qt_role     The Qt model role. Default is Qt.ItemDataRole.UserRole.
 
         Yield: tuple(row, data)
         row         The row number of the selection.
