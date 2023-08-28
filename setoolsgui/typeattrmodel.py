@@ -44,11 +44,11 @@ class TypeAttributeTableModel(SEToolsTableModel):
             col = index.column()
             item = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.name
                 elif col == 1:
                     return ", ".join(sorted(t.name for t in item.expand()))
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return item

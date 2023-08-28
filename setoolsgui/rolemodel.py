@@ -47,11 +47,11 @@ class RoleTableModel(SEToolsTableModel):
             col = index.column()
             item = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.name
                 elif col == 1:
                     return ", ".join(sorted(t.name for t in item.types()))
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 # get the whole object
                 return item

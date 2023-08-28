@@ -69,7 +69,7 @@ class TERuleQueryTab(AnalysisTab):
         self.errors = set()
         self.orig_palette = self.source.palette()
         self.error_palette = self.source.palette()
-        self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.error_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.red)
         self.clear_source_error()
         self.clear_target_error()
         self.clear_default_error()
@@ -94,7 +94,7 @@ class TERuleQueryTab(AnalysisTab):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
-        self.table_results.sortByColumn(0, Qt.AscendingOrder)
+        self.table_results.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
         # set up processing thread
         self.thread = QThread()
@@ -221,7 +221,7 @@ class TERuleQueryTab(AnalysisTab):
     def set_tclass(self):
         selected_classes = []
         for index in self.tclass.selectionModel().selectedIndexes():
-            selected_classes.append(self.class_model.data(index, Qt.UserRole))
+            selected_classes.append(self.class_model.data(index, Qt.ItemDataRole.UserRole))
 
         self.query.tclass = selected_classes
         self.perms_model.set_classes(selected_classes)
@@ -236,7 +236,7 @@ class TERuleQueryTab(AnalysisTab):
     def set_perms(self):
         selected_perms = []
         for index in self.perms.selectionModel().selectedIndexes():
-            selected_perms.append(self.perms_model.data(index, Qt.UserRole))
+            selected_perms.append(self.perms_model.data(index, Qt.ItemDataRole.UserRole))
 
         self.query.perms = selected_perms
 
@@ -302,7 +302,7 @@ class TERuleQueryTab(AnalysisTab):
     def set_bools(self):
         selected_bools = []
         for index in self.bool_criteria.selectionModel().selectedIndexes():
-            selected_bools.append(self.bool_model.data(index, Qt.UserRole))
+            selected_bools.append(self.bool_model.data(index, Qt.ItemDataRole.UserRole))
 
         self.query.boolean = selected_bools
 
@@ -407,9 +407,9 @@ class TERuleQueryTab(AnalysisTab):
             reply = QMessageBox.question(
                 self, "Continue?",
                 "This is a broad query, estimated to return {0} results.  Continue?".
-                format(max_results), QMessageBox.Yes | QMessageBox.No)
+                format(max_results), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
-            if reply == QMessageBox.No:
+            if reply == QMessageBox.StandardButton.No:
                 return
 
         # start processing
@@ -440,6 +440,6 @@ class TERuleQueryTab(AnalysisTab):
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
             self.busy.repaint()
-            self.raw_results.moveCursor(QTextCursor.Start)
+            self.raw_results.moveCursor(QTextCursor.MoveOperation.Start)
 
         self.busy.reset()

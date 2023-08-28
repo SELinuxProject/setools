@@ -21,7 +21,7 @@ class RBACRuleTableModel(SEToolsTableModel):
             col = index.column()
             rule = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return rule.ruletype.name
                 elif col == 1:
@@ -41,5 +41,5 @@ class RBACRuleTableModel(SEToolsTableModel):
                     except RuleUseError:
                         return None
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return rule

@@ -86,7 +86,7 @@ class PermissionMapEditor(SEToolsWidget, QDialog):
     def class_selected(self):
         # the .ui is set to 1 selection
         for index in self.classes.selectionModel().selectedIndexes():
-            class_name = self.class_model.data(index, Qt.DisplayRole)
+            class_name = self.class_model.data(index, Qt.ItemDataRole.DisplayRole)
 
         self.log.debug("Setting class to {0}".format(class_name))
 
@@ -99,15 +99,15 @@ class PermissionMapEditor(SEToolsWidget, QDialog):
         for perm in sorted(self.perm_map.perms(class_name)):
             # create permission mapping
             mapping = PermissionMapping(self, perm, self.edit)
-            mapping.setAttribute(Qt.WA_DeleteOnClose)
+            mapping.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
             self.class_toggle.connect(mapping.enabled.setChecked)
             self.perm_mappings.addWidget(mapping)
             self.widgets.append(mapping)
 
             # add horizonal line
             line = QFrame(self)
-            line.setFrameShape(QFrame.HLine)
-            line.setFrameShadow(QFrame.Sunken)
+            line.setFrameShape(QFrame.Shape.HLine)
+            line.setFrameShadow(QFrame.Shadow.Sunken)
             self.perm_mappings.addWidget(line)
             self.widgets.append(line)
 
@@ -179,8 +179,8 @@ class PermissionMapping(SEToolsWidget, QWidget):
         # setup color palettes for direction
         self.orig_palette = self.direction.palette()
         self.error_palette = self.direction.palette()
-        self.error_palette.setColor(QPalette.Button, Qt.red)
-        self.error_palette.setColor(QPalette.ButtonText, Qt.white)
+        self.error_palette.setColor(QPalette.ColorRole.Button, Qt.GlobalColor.red)
+        self.error_palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
 
         # setup direction
         self.direction.insertItems(0, index_to_word)

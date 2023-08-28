@@ -19,7 +19,7 @@ def invert_list_selection(selection_model):
     rowcount = model.rowCount()
     for row in range(rowcount):
         index = model.createIndex(row, 0)
-        selection_model.select(index, QItemSelectionModel.Toggle)
+        selection_model.select(index, QItemSelectionModel.SelectionFlag.Toggle)
 
 
 class SEToolsListModel(QAbstractListModel):
@@ -27,8 +27,8 @@ class SEToolsListModel(QAbstractListModel):
     """
     The purpose of this model is to have the
     objects return their string representations
-    for Qt.DisplayRole and return the object
-    for Qt.UserRole.
+    for Qt.ItemDataRole.DisplayRole and return the object
+    for Qt.ItemDataRole.UserRole.
 
     Some Python list-like functions are provided
     for altering the model: append and remove
@@ -81,9 +81,9 @@ class SEToolsListModel(QAbstractListModel):
             row = index.row()
             item = self.item_list[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 return str(item)
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return item
 
 
@@ -133,7 +133,7 @@ class SEToolsTableModel(QAbstractTableModel):
         self.resultlist = []
 
     def headerData(self, section, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             return self.headers[section]
 
     def rowCount(self, parent=QModelIndex()):
