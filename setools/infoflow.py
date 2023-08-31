@@ -538,3 +538,15 @@ class InfoFlowStep(NetworkXGraphEdge):
                 self.weight = None
             else:
                 raise ValueError("InfoFlowStep does not exist in graph")
+
+    def __format__(self, spec: str) -> str:
+        if spec == "full":
+            rules = "\n".join(f"   {r}" for r in sorted(self.rules))
+            return f"{self.source} -> {self.target}\n{rules}"
+        elif not spec:
+            return f"{self.source} -> {self.target}"
+        else:
+            return super().__format__(spec)
+
+    def __str__(self):
+        return self.__format__("full")
