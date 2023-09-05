@@ -32,7 +32,7 @@ class GenfsconTableModel(SEToolsTableModel):
             col = index.column()
             rule = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return rule.fs
                 elif col == 1:
@@ -42,5 +42,5 @@ class GenfsconTableModel(SEToolsTableModel):
                 elif col == 3:
                     return str(rule.context)
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return rule

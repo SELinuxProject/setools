@@ -56,7 +56,7 @@ class UserTableModel(SEToolsTableModel):
 
     def data(self, index, role):
         if self.resultlist and index.isValid():
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 row = index.row()
                 col = index.column()
                 user = self.resultlist[row]
@@ -76,5 +76,5 @@ class UserTableModel(SEToolsTableModel):
                     except MLSDisabled:
                         return None
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return user

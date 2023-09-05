@@ -38,12 +38,12 @@ class BooleanTableModel(SEToolsTableModel):
             col = index.column()
             boolean = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return boolean.name
                 elif col == 1:
                     return str(boolean.state)
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 # get the whole rule for boolean boolean
                 return boolean

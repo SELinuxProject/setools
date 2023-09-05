@@ -141,7 +141,7 @@ def save_listviews(tab, settings, listviews):
 
         selections = []
         for index in listview.selectedIndexes():
-            item = datamodel.data(index, Qt.DisplayRole)
+            item = datamodel.data(index, Qt.ItemDataRole.DisplayRole)
             selections.append(item)
 
         settings[entry] = selections
@@ -181,10 +181,10 @@ def load_listviews(tab, settings, listviews):
 
         for row in range(datamodel.rowCount()):
             index = datamodel.createIndex(row, 0)
-            item = datamodel.data(index, Qt.DisplayRole)
+            item = datamodel.data(index, Qt.ItemDataRole.DisplayRole)
 
             if item in selections:
-                selectionmodel.select(index, QItemSelectionModel.Select)
+                selectionmodel.select(index, QItemSelectionModel.SelectionFlag.Select)
 
 
 def save_comboboxes(tab, settings, comboboxes):
@@ -199,7 +199,7 @@ def save_comboboxes(tab, settings, comboboxes):
 
     for entry in comboboxes:
         combobox = getattr(tab, entry)
-        settings[entry] = combobox.currentData(Qt.DisplayRole)
+        settings[entry] = combobox.currentData(Qt.ItemDataRole.DisplayRole)
 
 
 def load_comboboxes(tab, settings, comboboxes):
