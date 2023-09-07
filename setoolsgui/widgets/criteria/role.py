@@ -24,13 +24,13 @@ class RoleNameWidget(NameCriteriaWidget):
 
     def __init__(self, title: str, query, attrname: str,
                  parent: "Optional[QtWidgets.QWidget]" = None,
-                 enable_regex: bool = True):
+                 required: bool = False, enable_regex: bool = True):
 
         # Create completion list
         completion: "List[str]" = [r.name for r in query.policy.roles()]
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
-                         enable_regex=enable_regex, parent=parent)
+                         enable_regex=enable_regex, required=required, parent=parent)
 
 
 if __name__ == '__main__':

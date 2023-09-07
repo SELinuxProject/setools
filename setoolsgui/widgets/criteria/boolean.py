@@ -44,12 +44,12 @@ class BooleanNameCriteriaWidget(NameCriteriaWidget):
 
     def __init__(self, title: str, query, attrname: str,
                  parent: "Optional[QtWidgets.QWidget]" = None,
-                 enable_regex: bool = True):
+                 enable_regex: bool = True, required: bool = False):
 
         completion: "List[str]" = sorted(b.name for b in query.policy.bools())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
-                         enable_regex=enable_regex, parent=parent)
+                         enable_regex=enable_regex, required=required, parent=parent)
 
 
 if __name__ == '__main__':

@@ -21,17 +21,25 @@ class NameCriteriaWidget(CriteriaWidget):
     attributes of the specified query.
     """
 
+    # Is it required that this be filled out?
+    required: bool = False
+
     editingFinished = QtCore.pyqtSignal(object)
     # This signal is only emitted if the entered text is valid and
     # saved to the query.  The object saved in the query is provided.
 
     regex_toggled = QtCore.pyqtSignal(bool)
 
+    #
+    # Overridden methods
+    #
+
     def __init__(self, title: str, query, attrname: str, completion: "List[str]",
                  validation: str = "", enable_regex: bool = True,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 required: bool = False, parent: "Optional[QtWidgets.QWidget]" = None) -> None:
 
         super().__init__(title, query, attrname, parent=parent)
+        self.required = required
 
         # Create grid layout inside this groupbox
         self.top_layout = QtWidgets.QGridLayout(self)
@@ -102,6 +110,28 @@ class NameCriteriaWidget(CriteriaWidget):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
+    def setDisabled(self, value: bool) -> None:
+        super().setDisabled(value)
+        if value:
+            # clear error when disabling
+            self.clear_criteria_error()
+        else:
+            # reapply criteria when enabling.
+            self.set_criteria()
+
+    def setEnabled(self, value: bool) -> None:
+        super().setEnabled(value)
+        if value:
+            # reapply criteria when enabling.
+            self.set_criteria()
+        else:
+            # clear error when disabling
+            self.clear_criteria_error()
+
+    #
+    # Custom methods
+    #
+
     @property
     def has_errors(self) -> bool:
         """
@@ -109,7 +139,18 @@ class NameCriteriaWidget(CriteriaWidget):
 
         If the error text is set, there is an error.
         """
+        if self.required and self.isEnabled() and not self.criteria.text().strip() \
+                and not bool(self.error_text.pixmap()):
+
+            self.set_criteria_error(f"{self.attrname} is required.")
+
         return bool(self.error_text.pixmap())
+
+    def clear_criteria_error(self) -> None:
+        """Clear the error output from the criteria"""
+        self.error_text.clear()
+        self.error_text.setToolTip("")
+        self.setStatusTip("")
 
     def set_criteria(self) -> None:
         """Set the criteria field in the query."""
@@ -119,18 +160,16 @@ class NameCriteriaWidget(CriteriaWidget):
             setattr(self.query, name, self.criteria.text())
             self.editingFinished.emit(getattr(self.query, name))
         except Exception as e:
-            error_icon = QtGui.QIcon.fromTheme(
-                "messagebox-critical-icon",
-                self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MessageBoxCritical))
-            self.error_text.setPixmap(error_icon.pixmap(self.error_text.size()))
-            self.error_text.setToolTip(f"Error: {e}")
-            self.setStatusTip(f"{self.criteria.objectName()}: {e}")
+            self.set_criteria_error(str(e))
 
-    def clear_criteria_error(self) -> None:
-        """Clear the error output from the criteria"""
-        self.error_text.clear()
-        self.error_text.setToolTip("")
-        self.setStatusTip("")
+    def set_criteria_error(self, message: str) -> None:
+        """Set the error output from the criteria."""
+        error_icon = QtGui.QIcon.fromTheme(
+            "messagebox-critical-icon",
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MessageBoxCritical))
+        self.error_text.setPixmap(error_icon.pixmap(self.error_text.size()))
+        self.error_text.setToolTip(f"Error: {message}")
+        self.setStatusTip(f"{self.criteria.objectName()}: {message}")
 
     def set_regex(self, state: bool) -> None:
         """Set the regex boolean value."""

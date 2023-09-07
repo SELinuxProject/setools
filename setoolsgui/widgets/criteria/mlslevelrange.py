@@ -17,12 +17,12 @@ class MLSLevelRangeWidget(NameCriteriaWidget):
     of the specified query.  This supports inputs of MLS levels and ranges.
     """
 
-    def __init__(self, title: str, query, attrname: str,
+    def __init__(self, title: str, query, attrname: str, required: bool = False,
                  parent: "Optional[QtWidgets.QWidget]" = None):
 
         # Not much we can do here. Leave all validation to the query.
-        super().__init__(title, query, attrname, [], "",
-                         enable_regex=False, parent=parent)
+        super().__init__(title, query, attrname, [], "", enable_regex=False,
+                         required=required, parent=parent)
 
 
 if __name__ == '__main__':

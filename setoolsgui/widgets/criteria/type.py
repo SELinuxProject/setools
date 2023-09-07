@@ -39,7 +39,8 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
     def __init__(self, title: str, query, attrname: str,
                  parent: "Optional[QtWidgets.QWidget]" = None,
                  mode: TypeOrAttrNameMode = TypeOrAttrNameMode.type_only,
-                 enable_indirect: bool = False, enable_regex: bool = False):
+                 enable_indirect: bool = False, enable_regex: bool = False,
+                 required: bool = False):
 
         # Create completion list
         completion: "List[str]" = []
@@ -49,7 +50,7 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
             completion.extend(a.name for a in query.policy.typeattributes())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
-                         enable_regex=enable_regex, parent=parent)
+                         enable_regex=enable_regex, required=required, parent=parent)
 
         if enable_indirect:
             self.criteria_indirect = QtWidgets.QCheckBox(self)
