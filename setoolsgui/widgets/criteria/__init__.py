@@ -5,6 +5,7 @@ from .mlslevelrange import MLSLevelRangeWidget
 from .mlsruletype import MLSRuleTypeCriteriaWidget
 from .objclass import ObjClassCriteriaWidget
 from .permission import PermissionCriteriaWidget
+from .radioenum import RadioEnumCriteria
 from .rbacruletype import RBACRuleTypeCriteriaWidget
 from .role import RoleNameWidget
 from .teruletype import TERuleTypeCriteriaWidget
