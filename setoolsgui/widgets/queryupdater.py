@@ -4,16 +4,21 @@
 #
 #
 import logging
-from typing import TYPE_CHECKING
+import typing
 
 from PyQt5 import QtCore
+import setools
 
-if TYPE_CHECKING:
-    from setools.query import PolicyQuery
-    from .models.table import SEToolsTableModel
+from . import models
+
+Q = typing.TypeVar("Q", bound=setools.PolicyQuery)
+
+# The first parameter is the result counter and second parameter
+# is a single result to render.
+RenderFunction = typing.Callable[[int, typing.Any], str]
 
 
-class QueryResultsUpdater(QtCore.QObject):
+class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
 
     """
     Thread for processing basic queries and updating result widgets.
@@ -21,6 +26,11 @@ class QueryResultsUpdater(QtCore.QObject):
     Parameters:
     query       The query object
     model       The model for the results
+
+    Keyword Parameters:
+    render      A two parameter function that renders each item returned
+                from the query to a string.  This is added to the raw output
+                widgets.  The default is equivalent to str().
 
     Qt signals:
     failed      (str) The updated failed, with an error message.
@@ -32,22 +42,26 @@ class QueryResultsUpdater(QtCore.QObject):
     finished = QtCore.pyqtSignal(int)
     raw_line = QtCore.pyqtSignal(str)
 
-    def __init__(self, query: "PolicyQuery", model: "SEToolsTableModel") -> None:
+    def __init__(self, query: Q,
+                 model: models.SEToolsTableModel | None = None,
+                 render: RenderFunction = lambda _, x: str(x)) -> None:
+
         super().__init__()
-        self.query = query
+        self.log: typing.Final = logging.getLogger(query.__module__)
+        self.query: typing.Final[Q] = query
         self.model = model
-        self.log = logging.getLogger(self.query.__module__)
+        self.render = render
 
     def update(self) -> None:
         """Run the query and update results."""
-        results = []
+        results: typing.List = []
         counter = 0
 
         try:
             for counter, item in enumerate(self.query.results(), start=1):
                 results.append(item)
 
-                self.raw_line.emit(str(item))
+                self.raw_line.emit(self.render(counter, item))
 
                 if QtCore.QThread.currentThread().isInterruptionRequested():
                     break
@@ -64,5 +78,6 @@ class QueryResultsUpdater(QtCore.QObject):
             self.failed.emit(str(e))
 
         else:
-            self.model.item_list = results
+            if self.model:
+                self.model.item_list = results
             self.finished.emit(counter)
