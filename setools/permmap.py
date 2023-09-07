@@ -7,7 +7,7 @@ import copy
 from collections import OrderedDict
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import cast, Dict, Iterable, Optional, Union
+from typing import cast, Dict, Final, Iterable, Optional, Union
 
 import pkg_resources
 
@@ -16,9 +16,9 @@ from .descriptors import PermissionMapDescriptor
 from .mixins import TupleCompat
 from .policyrep import AVRule, SELinuxPolicy, TERuletype
 
-INFOFLOW_DIRECTIONS = ("r", "w", "b", "n", "u")
-MIN_WEIGHT = 1
-MAX_WEIGHT = 10
+INFOFLOW_DIRECTIONS: Final = ("r", "w", "b", "n", "u")
+MIN_WEIGHT: Final[int] = 1
+MAX_WEIGHT: Final[int] = 10
 
 
 @dataclass
@@ -94,6 +94,9 @@ class Mapping:
 class PermissionMap:
 
     """Permission Map for information flow analysis."""
+
+    MIN_WEIGHT: Final[int] = MIN_WEIGHT
+    MAX_WEIGHT: Final[int] = MAX_WEIGHT
 
     def __init__(self, permmapfile: Optional[str] = None) -> None:
         """
