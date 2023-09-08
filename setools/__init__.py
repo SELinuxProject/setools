@@ -81,7 +81,7 @@ from .infoflow import *
 from .permmap import PermissionMap, RuleWeight, Mapping
 
 # Domain Transition Analysis
-from .dta import DomainTransitionAnalysis, DomainEntrypoint, DomainTransition
+from .dta import *
 
 # Policy difference
 from .diff import PolicyDifference
