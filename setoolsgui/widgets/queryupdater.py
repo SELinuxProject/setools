@@ -44,13 +44,15 @@ class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
 
     def __init__(self, query: Q,
                  model: models.SEToolsTableModel | None = None,
-                 render: RenderFunction = lambda _, x: str(x)) -> None:
+                 render: RenderFunction = lambda _, x: str(x),
+                 result_limit: int = 0) -> None:
 
         super().__init__()
         self.log: typing.Final = logging.getLogger(query.__module__)
         self.query: typing.Final[Q] = query
         self.model = model
         self.render = render
+        self.result_limit = result_limit
 
     def update(self) -> None:
         """Run the query and update results."""
@@ -72,12 +74,16 @@ class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
                 if counter % 1000 == 0:
                     self.log.info(f"Generated {counter} results so far.")
 
+                if self.result_limit and counter >= self.result_limit:
+                    break
+
             self.log.info(f"Generated {counter} total results.")
 
-        except Exception as e:
-            self.failed.emit(str(e))
-
-        else:
             if self.model:
                 self.model.item_list = results
             self.finished.emit(counter)
+
+        except Exception as e:
+            msg = f"Unexpected exception during processing: {e}"
+            self.failed.emit(msg)
+            self.log.exception(msg)
