@@ -21,6 +21,15 @@ ChooseAnalysis {
     height: 420px;
 }
 
+ExcludeTypes {
+    width: 620px;
+    height: 340px;
+}
+
+ExcludeTypes#header {
+    font-style: bold;
+}
+
 PermissionMapEditor {
     width: 750px;
     height: 450px;
