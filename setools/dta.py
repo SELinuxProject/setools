@@ -40,6 +40,24 @@ class DomainEntrypoint:
     execute: List[AnyTERule]
     type_transition: List[AnyTERule]
 
+    def __lt__(self, other: "DomainEntrypoint") -> bool:
+        # basic comparison for sorting
+        return self.name < other.name
+
+    def __str__(self) -> str:
+        lines: List[str] = [f"\nEntrypoint {self.name}:",
+                            "\tDomain entrypoint rule(s):"]
+        lines.extend(f"\t{e}" for e in sorted(self.entrypoint))
+
+        lines.append("\n\tFile execute rule(s):")
+        lines.extend(f"\t{e}" for e in sorted(self.execute))
+
+        if self.type_transition:
+            lines.append("\n\tType transition rule(s):")
+            lines.extend(f"\t{t}" for t in sorted(self.type_transition))
+
+        return "\n".join(lines)
+
 
 @dataclass
 class DomainTransition:
@@ -53,6 +71,38 @@ class DomainTransition:
     setexec: List[AnyTERule]
     dyntransition: List[AnyTERule]
     setcurrent: List[AnyTERule]
+
+    def __format__(self, spec: str) -> str:
+        lines: List[str] = [f"{self.source} -> {self.target}\n"]
+        if spec == "full":
+            if self.transition:
+                lines.append("Domain transition rule(s):")
+                lines.extend(str(t) for t in sorted(self.transition))
+
+                if self.setexec:
+                    lines.append("\nSet execution context rule(s):")
+                    lines.extend(str(s) for s in sorted(self.setexec))
+
+                lines.extend(f"{e}\n" for e in sorted(self.entrypoints))
+
+            if self.dyntransition:
+                lines.append("Dynamic transition rule(s):")
+                lines.extend(str(d) for d in sorted(self.dyntransition))
+
+                lines.append("\nSet current process context rule(s):")
+                lines.extend(str(s) for s in sorted(self.setcurrent))
+
+                lines.append("")
+
+            return "\n".join(lines)
+
+        if not spec:
+            return lines[0]
+
+        return super().__format__(spec)
+
+    def __str__(self) -> str:
+        return self.__format__("full")
 
 
 #
