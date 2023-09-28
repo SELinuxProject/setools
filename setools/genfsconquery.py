@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from typing import Iterable, Optional
 
 from .descriptors import CriteriaDescriptor
@@ -53,10 +51,6 @@ class GenfsconQuery(MatchContext, PolicyQuery):
     fs_regex: bool = False
     path = CriteriaDescriptor("path_regex")
     path_regex: bool = False
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(GenfsconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Genfscon]:
         """Generator which yields all matching genfscons."""

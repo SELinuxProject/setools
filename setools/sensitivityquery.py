@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable
 
 from .descriptors import CriteriaDescriptor
@@ -37,10 +36,6 @@ class SensitivityQuery(MatchAlias, MatchName, PolicyQuery):
     sens = CriteriaDescriptor(lookup_function="lookup_sensitivity")
     sens_dom: bool = False
     sens_domby: bool = False
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(SensitivityQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Sensitivity]:
         """Generator which yields all matching sensitivities."""

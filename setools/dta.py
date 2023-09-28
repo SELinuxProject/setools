@@ -148,14 +148,9 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
                  all_paths_step_limit: int = 3,
                  exclude: Optional[Iterable[Union[Type, str]]] = None) -> None:
 
-        self.log = logging.getLogger(__name__)
-        self.policy = policy
-        self.source = source
-        self.target = target
-        self.mode = mode
-        self.all_paths_max_steps = all_paths_step_limit
-        self.exclude = exclude  # type: ignore # https://github.com/python/mypy/issues/220
-        self.reverse = reverse
+        super().__init__(policy, reverse=reverse, source=source, target=target, mode=mode,
+                         all_paths_step_limit=all_paths_step_limit, exclude=exclude)
+
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 

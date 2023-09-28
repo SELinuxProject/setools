@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable
 
 from .mixins import MatchContext, MatchName
@@ -42,10 +41,6 @@ class NetifconQuery(MatchContext, MatchName, PolicyQuery):
     range_proper    If true, use proper superset/subset operations.
                     No effect if not using set operations.
     """
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(NetifconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Netifcon]:
         """Generator which yields all matching netifcons."""

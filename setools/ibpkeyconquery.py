@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from ipaddress import IPv6Address
-import logging
 from typing import Iterable, Optional, Tuple, Union
 
 from .mixins import MatchContext
@@ -58,10 +57,6 @@ class IbpkeyconQuery(MatchContext, PolicyQuery):
     pkeys_overlap: bool = False
     pkeys_superset: bool = False
     pkeys_proper: bool = False
-
-    def __init__(self, policy, **kwargs):
-        super(IbpkeyconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     @property
     def pkeys(self) -> Optional[IbpkeyconRange]:

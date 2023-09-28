@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
@@ -47,10 +46,6 @@ class MLSRuleQuery(MatchObjClass, PolicyQuery):
     default_subset: bool = False
     default_superset: bool = False
     default_proper: bool = False
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(MLSRuleQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[MLSRule]:
         """Generator which yields all matching MLS rules."""

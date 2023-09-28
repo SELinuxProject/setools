@@ -2,9 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
-from typing import Iterable, Set
+from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
 from .exception import ConstraintUseError
@@ -61,10 +59,6 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
     type_ = CriteriaDescriptor("type_regex", "lookup_type_or_attr")
     type_regex: bool = False
     type_indirect: bool = True
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(ConstraintQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def _match_expr(self, expr, criteria, indirect, regex):
         """

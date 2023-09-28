@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from contextlib import suppress
 from typing import Iterable
 
@@ -50,10 +48,6 @@ class ObjClassQuery(MatchName, PolicyQuery):
     perms_equal: bool = False
     perms_indirect: bool = True
     perms_regex: bool = False
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(ObjClassQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[ObjClass]:
         """Generator which yields all matching object classes."""

@@ -5,8 +5,6 @@
 #
 import ipaddress
 
-import logging
-from socket import AF_INET, AF_INET6
 from typing import Iterable, Optional, Union
 
 from .mixins import MatchContext
@@ -77,10 +75,6 @@ class NodeconQuery(MatchContext, PolicyQuery):
             self._network = ipaddress.ip_network(value)
         else:
             self._network = None
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(NodeconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Nodecon]:
         """Generator which yields all matching nodecons."""

@@ -2,10 +2,8 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable, Optional
 
-from .descriptors import CriteriaDescriptor
 from .mixins import MatchName
 from .policyrep import Boolean
 from .query import PolicyQuery
@@ -38,10 +36,6 @@ class BoolQuery(MatchName, PolicyQuery):
             self._default = None
         else:
             self._default = bool(value)
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(BoolQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Boolean]:
         """Generator which yields all Booleans matching the criteria."""

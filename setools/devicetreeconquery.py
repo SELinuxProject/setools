@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable, Optional
 
 from .mixins import MatchContext
@@ -45,10 +44,6 @@ class DevicetreeconQuery(MatchContext, PolicyQuery):
     """
 
     path: Optional[str] = None
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(DevicetreeconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Devicetreecon]:
         """Generator which yields all matching devicetreecons."""

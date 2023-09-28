@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from typing import cast, Iterable
 
 from .query import PolicyQuery
@@ -33,10 +31,6 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
     ruletype = CriteriaSetDescriptor(enum_class=DefaultRuletype)
     default = CriteriaDescriptor(enum_class=DefaultValue)
     default_range = CriteriaDescriptor(enum_class=DefaultRangeValue)
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(DefaultQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[AnyDefault]:
         """Generator which yields all matching default_* statements."""

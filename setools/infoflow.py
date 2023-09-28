@@ -63,6 +63,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
     source = CriteriaDescriptor(lookup_function="lookup_type")
     target = CriteriaDescriptor(lookup_function="lookup_type")
     mode = Mode.ShortestPath
+    booleans: Optional[Mapping[str, bool]]
 
     def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, min_weight: int = 1,
                  source: Optional[Union[Type, str]] = None,
@@ -72,20 +73,14 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                  exclude: Optional[Iterable[Union[Type, str]]] = None,
                  booleans: Optional[Mapping[str, bool]] = None) -> None:
 
-        self.log = logging.getLogger(__name__)
-        self.policy = policy
+        super().__init__(policy, perm_map=perm_map, min_weight=min_weight, source=source,
+                         target=target, mode=mode, all_paths_step_limit=all_paths_step_limit,
+                         exclude=exclude, booleans=booleans)
+
         self._min_weight: int
         self._perm_map: PermissionMap
         self._all_paths_max_steps: int
 
-        self.source = source
-        self.target = target
-        self.mode = mode
-        self.all_paths_max_steps = all_paths_step_limit
-        self.min_weight = min_weight
-        self.perm_map = perm_map
-        self.exclude = exclude  # type: ignore # https://github.com/python/mypy/issues/220
-        self.booleans = booleans
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 

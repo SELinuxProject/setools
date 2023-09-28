@@ -4,11 +4,10 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+import logging
+import typing
 
-if TYPE_CHECKING:
-    from logging import Logger
-    from typing import Iterable
+if typing.TYPE_CHECKING:
     from networkx import DiGraph
     from .policyrep import SELinuxPolicy
 
@@ -17,11 +16,9 @@ class PolicyQuery(ABC):
 
     """Abstract base class for all SELinux policy analyses."""
 
-    log: "Logger"
-    policy: "SELinuxPolicy"
-
     def __init__(self, policy: "SELinuxPolicy", **kwargs) -> None:
         self.policy: "SELinuxPolicy" = policy
+        self.log: typing.Final = logging.getLogger(self.__module__)
 
         # keys are sorted in reverse order so regex settings
         # are set before the criteria, e.g. name_regex
@@ -31,17 +28,16 @@ class PolicyQuery(ABC):
         for name in sorted(kwargs.keys(), reverse=True):
             attr = getattr(self, name, None)  # None is not callable
             if callable(attr):
-                raise ValueError("Keyword parameter {0} conflicts with a callable.".format(name))
+                raise ValueError(f"Keyword parameter {name} conflicts with a callable.")
 
             setattr(self, name, kwargs[name])
 
     @abstractmethod
-    def results(self) -> "Iterable":
+    def results(self) -> typing.Iterable:
         """
         Generator which returns the matches for the query.  This method
         should be overridden by subclasses.
         """
-        pass
 
 
 class DirectedGraphAnalysis(PolicyQuery):

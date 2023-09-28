@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-from socket import IPPROTO_TCP, IPPROTO_UDP
 from typing import Iterable, Optional, Tuple, Union
 
 from .mixins import MatchContext
@@ -98,10 +96,6 @@ class PortconQuery(MatchContext, PolicyQuery):
             self._protocol = PortconProtocol.lookup(value)
         else:
             self._protocol = None
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(PortconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Portcon]:
         """Generator which yields all matching portcons."""
