@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 from contextlib import suppress
-from enum import Enum
+import enum
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import Generic, TYPE_CHECKING, TypeVar, cast
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -11,11 +11,12 @@ from .exception import TabFieldError
 from .models.typing import QObjectType
 from .queryupdater import QueryResultsUpdater
 from .tableview import SEToolsTableView
+from .treeview import SEToolsTreeWidget
 
 if TYPE_CHECKING:
     from typing import Dict, Final, List, Optional, Tuple, Type, Union
     from setools import PermissionMap
-    from setools.query import PolicyQuery
+    from setools.query import DirectedGraphAnalysis, PolicyQuery
     from .criteria.criteria import CriteriaWidget
     from .models.table import SEToolsTableModel
 
@@ -29,8 +30,11 @@ CRITERIA_DEFAULT_CHECKED = True
 # Show notes default setting (unchecked)
 NOTES_DEFAULT_CHECKED = False
 
+TAB_REQUIRED_CLASSVARS = ("section", "tab_title", "mlsonly")
+TAB_REGISTRY: "Dict[str, Type[BaseAnalysisTabWidget]]" = {}
 
-class AnalysisSection(Enum):
+
+class AnalysisSection(enum.Enum):
 
     """Groupings of analysis tabs"""
 
@@ -40,10 +44,6 @@ class AnalysisSection(Enum):
     Labeling = 4
     Other = 5
     Rules = 6
-
-
-TAB_REQUIRED_CLASSVARS = ("section", "tab_title", "mlsonly")
-TAB_REGISTRY: "Dict[str, Type[BaseAnalysisTabWidget]]" = {}
 
 
 class TabRegistry(QObjectType):
@@ -452,6 +452,173 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
             self, "Error", message, QtWidgets.QMessageBox.StandardButton.Ok)
 
 
+DGA = TypeVar("DGA", bound="DirectedGraphAnalysis")
+
+
+class DirectedGraphResultTab(BaseAnalysisTabWidget, Generic[DGA]):
+
+    """
+    Application top-level analysis tab that provides a QTabWidget with tabs for results
+    in a graph and in raw text form.
+    """
+
+    # TODO get signals to disable the run button if there are criteria errors.
+
+    class ResultTab(enum.IntEnum):
+
+        """
+        Enumeration of result tabs.
+
+        0-indexed to match the tab widget indexing.
+        """
+
+        Graph = 0
+        Tree = 1
+        Raw = 2
+
+    def __init__(self, query: DGA, enable_criteria: bool = True,
+                 parent: QtWidgets.QWidget | None = None) -> None:
+
+        super().__init__(enable_criteria=enable_criteria, parent=parent)
+        self.query: "Final[DGA]" = query
+
+        # Create tab widget
+        self.results = QtWidgets.QTabWidget(self.top_widget)
+        tw_sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+                                              QtWidgets.QSizePolicy.Policy.MinimumExpanding)
+        tw_sizePolicy.setHorizontalStretch(0)
+        tw_sizePolicy.setVerticalStretch(2)
+        tw_sizePolicy.setHeightForWidth(self.results.sizePolicy().hasHeightForWidth())
+        self.results.setSizePolicy(tw_sizePolicy)
+
+        #
+        # Create size policy for tabs
+        #
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+                                           QtWidgets.QSizePolicy.Policy.MinimumExpanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.results.sizePolicy().hasHeightForWidth())
+
+        #
+        # Create placeholder future graphical tab
+        #
+        self.graphical_results = QtWidgets.QWidget(self.results)
+        self.graphical_results.setObjectName("graphical_results")
+        self.graphical_results.setSizePolicy(sizePolicy)
+        self.results.addTab(self.graphical_results, "Graphical Results")
+        self.results.setTabEnabled(DirectedGraphResultTab.ResultTab.Graph, False)
+        self.results.setTabWhatsThis(DirectedGraphResultTab.ResultTab.Graph,
+                                     "Future graphical results feature.")
+        self.results.setTabToolTip(DirectedGraphResultTab.ResultTab.Graph,
+                                   "Future graphical results feature.")
+
+        #
+        # Create tree browser tab
+        #
+        self.tree_results = SEToolsTreeWidget(self.results)
+        self.tree_results.setObjectName("tree_results")
+        self.tree_results.setSizePolicy(sizePolicy)
+        self.tree_results.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        self.tree_results.setAlternatingRowColors(True)
+        self.tree_results.setSortingEnabled(True)
+        self.tree_results.setWhatsThis(
+            "<b>This tab has the tree-based results of the query.</b>")
+        self.results.addTab(self.tree_results, "Tree Results")
+        self.results.setTabWhatsThis(
+            DirectedGraphResultTab.ResultTab.Tree,
+            "<b>This tab has the tree-based results of the query.</b>")
+
+        #
+        # Create raw result tab
+        #
+        self.raw_results = QtWidgets.QPlainTextEdit(self.results)
+        self.raw_results.setObjectName("raw_results")
+        self.raw_results.setSizePolicy(sizePolicy)
+        self.raw_results.setDocumentTitle("")
+        self.raw_results.setLineWrapMode(QtWidgets.QPlainTextEdit.LineWrapMode.NoWrap)
+        self.raw_results.setReadOnly(True)
+        self.raw_results.setWhatsThis("<b>This tab has plain text results of the query.</b>")
+        self.results.addTab(self.raw_results, "Raw Results")
+        self.results.setTabWhatsThis(DirectedGraphResultTab.ResultTab.Raw,
+                                     "<b>This tab has plain text results of the query.</b>")
+
+        # set initial tab
+        self.results.setCurrentIndex(DirectedGraphResultTab.ResultTab.Tree)
+
+        # set up processing thread
+        self.processing_thread = QtCore.QThread(self.top_widget)
+
+        # create a "busy, please wait" dialog
+        self.busy = QtWidgets.QProgressDialog(self.top_widget)
+        self.busy.setModal(True)
+        self.busy.setRange(0, 0)
+        self.busy.setMinimumDuration(0)
+        self.busy.canceled.connect(self.processing_thread.requestInterruption)
+        self.busy.reset()
+
+        # set up results worker
+        self.worker = QueryResultsUpdater[DGA](self.query)
+        self.worker.moveToThread(self.processing_thread)
+        self.worker.raw_line.connect(self.raw_results.appendPlainText)
+        self.worker.finished.connect(self.query_completed)
+        self.worker.finished.connect(self.processing_thread.quit)
+        self.worker.failed.connect(self.query_failed)
+        self.worker.failed.connect(self.processing_thread.quit)
+        self.processing_thread.started.connect(self.worker.update)
+
+    def __del__(self):
+        with suppress(RuntimeError):
+            self.processing_thread.quit()
+            self.processing_thread.wait(5000)
+
+    @property
+    def tree_results_model(self) -> "SEToolsTableModel":
+        return cast("SEToolsTableModel", self.tree_results.model())
+
+    @tree_results_model.setter
+    def tree_results_model(self, model: "SEToolsTableModel") -> None:
+        self.tree_results.setModel(model)
+        self.worker.model = model
+
+    #
+    # Start/end of processing
+    #
+
+    def run(self) -> None:
+        """Start processing query."""
+        errors = [c for c in self.criteria if c.has_errors]
+        if errors:
+            QtWidgets.QMessageBox.critical(
+                self, "Address criteria errors",
+                "Cannot run due to errors in the criteria.",
+                QtWidgets.QMessageBox.StandardButton.Ok)
+            return
+
+        self.busy.setLabelText("Processing query...")
+        self.busy.show()
+        self.raw_results.clear()
+        self.processing_thread.start()
+
+    def query_completed(self, count: int) -> None:
+        """Query completed."""
+        self.log.debug(f"{count} result(s) found.")
+        self.setStatusTip(f"{count} result(s) found.")
+        if not self.busy.wasCanceled():
+            self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
+            self.busy.repaint()
+            self.raw_results.moveCursor(QtGui.QTextCursor.MoveOperation.Start)
+
+        self.busy.reset()
+
+    def query_failed(self, message: str) -> None:
+        self.busy.reset()
+        self.setStatusTip(f"Error: {message}.")
+
+        QtWidgets.QMessageBox.critical(
+            self, "Error", message, QtWidgets.QMessageBox.StandardButton.Ok)
+
+
 if __name__ == '__main__':
     import sys
     import warnings
@@ -461,14 +628,29 @@ if __name__ == '__main__':
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
     warnings.simplefilter("default")
 
-    q = setools.TERuleQuery(setools.SELinuxPolicy())
+    p = setools.SELinuxPolicy()
+    q = setools.TERuleQuery(p)
+    pmap = setools.PermissionMap()
+    a = setools.InfoFlowAnalysis(p, pmap)
 
     app = QtWidgets.QApplication(sys.argv)
-    widget1 = BaseAnalysisTabWidget()
-    widget1.show()
-    widget2 = BaseAnalysisTabWidget(enable_criteria=False)
-    widget2.show()
-    widget3 = TableResultTabWidget(q)
-    widget3.show()
+    mw = QtWidgets.QMainWindow()
+    whatsthis = QtWidgets.QWhatsThis.createAction(mw)
+    mw.menuBar().addAction(whatsthis)
+    mw.setStatusBar(QtWidgets.QStatusBar(mw))
+
+    tw = QtWidgets.QTabWidget(mw)
+    mw.setCentralWidget(tw)
+    widget1 = BaseAnalysisTabWidget(parent=tw)
+    tw.addTab(widget1, "BaseAnalysisTabWidget w/criteria")
+    widget2 = BaseAnalysisTabWidget(enable_criteria=False, parent=tw)
+    tw.addTab(widget2, "BaseAnalysisTabWidget w/o criteria")
+    widget3 = TableResultTabWidget(q, parent=tw)
+    tw.addTab(widget3, "TableResultTabWidget")
+    widget4 = DirectedGraphResultTab(a, parent=tw)
+    tw.addTab(widget4, "GraphResultTabWidget w/criteria")
+
+    mw.resize(1024, 768)
+    mw.show()
     rc = app.exec_()
     sys.exit(rc)
