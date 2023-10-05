@@ -793,6 +793,10 @@ cdef extern from "<sepol/policydb/policydb.h>":
     cdef int SYM_CATS
     cdef int SYM_NUM
 
+    cdef int FILENAME_TRANS_MATCH_EXACT
+    cdef int FILENAME_TRANS_MATCH_PREFIX
+    cdef int FILENAME_TRANS_MATCH_SUFFIX
+
     cdef struct policydb:
         uint32_t policy_type
         char *name
@@ -819,7 +823,7 @@ cdef extern from "<sepol/policydb/policydb.h>":
         ocontext_t *ocontexts[9]  # TODO: OCON_NUM=9
         genfs_t *genfs
         hashtab_t range_tr
-        hashtab_t filename_trans
+        hashtab_t filename_trans[3]
         ebitmap_t *type_attr_map
         ebitmap_t *attr_type_map	# not saved in the binary policy
         ebitmap_t policycaps
