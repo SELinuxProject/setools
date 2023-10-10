@@ -1,20 +1,22 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import Dict, Final, List, Union
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.list import (EQUAL_DEFAULT_CHECKED, ListCriteriaWidget,
                                               SUBSET_DEFAULT_CHECKED)
-from setoolsgui.widgets.models.list import SEToolsListModel
+from setoolsgui.widgets.models.table import SEToolsTableModel
 
 from .util import _build_mock_query
 
 
-def _create_model() -> SEToolsListModel[str]:
+def _create_model() -> SEToolsTableModel[str]:
     """Create an appropriate model with data for ListCriteriaWidget tests."""
-    model: SEToolsListModel[str] = SEToolsListModel()
+    model: SEToolsTableModel[str] = SEToolsTableModel()
     model.item_list = ["item1", "item2", "item3"]
+    # Set headers since we're using the base class. Headers are set by subclasses.
+    model.headers = ["Name"]
     return model
 
 

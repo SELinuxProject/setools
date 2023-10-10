@@ -10,6 +10,8 @@ from . import modelroles
 from .table import SEToolsTableModel
 from .. import details
 
+__all__ = ("RBACRuleTable",)
+
 
 class RBACRuleTable(SEToolsTableModel[setools.AnyRBACRule]):
 

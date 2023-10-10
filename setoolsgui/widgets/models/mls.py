@@ -7,6 +7,8 @@ from PyQt5 import QtCore
 
 from .table import SEToolsTableModel
 
+__all__ = ("MLSComponentTable",)
+
 
 class MLSComponentTable(SEToolsTableModel):
 

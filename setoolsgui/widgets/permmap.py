@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from PyQt5 import QtCore, QtGui, QtWidgets
 from setools import PermissionMap
 
-from .models.list import SEToolsListModel
+from .models import StringList
 
 if TYPE_CHECKING:
     from typing import List, Optional
@@ -77,9 +77,7 @@ class PermissionMapEditor(QtWidgets.QDialog):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.classes.sizePolicy().hasHeightForWidth())
         self.classes.setSizePolicy(sizePolicy)
-        model = SEToolsListModel[str](self)
-        model.item_list = sorted(self.perm_map.classes())
-        self.classes.setModel(model)
+        self.classes.setModel(StringList(data=sorted(self.perm_map.classes()), parent=self))
         self.classes.selectionModel().selectionChanged.connect(self.class_selected)
         frame_layout.addWidget(self.classes, 0, 1, 1, 1)
 

@@ -9,7 +9,7 @@ from .criteria import CriteriaWidget
 from ..models import modelroles
 
 if TYPE_CHECKING:
-    from ..models.list import SEToolsListModel
+    from ..models.table import SEToolsTableModel
     from typing import Dict, Iterable, List, Optional
 
 # equal/subset default setting.  At most one can be True
@@ -28,7 +28,7 @@ class ListCriteriaWidget(CriteriaWidget):
     selectionChanged = QtCore.pyqtSignal(list)
     subset_toggled = QtCore.pyqtSignal(bool)
 
-    def __init__(self, title: str, query, attrname: str, model: "SEToolsListModel",
+    def __init__(self, title: str, query, attrname: str, model: "SEToolsTableModel",
                  enable_equal: bool = False, enable_subset: bool = False,
                  parent: "Optional[QtWidgets.QWidget]" = None) -> None:
 

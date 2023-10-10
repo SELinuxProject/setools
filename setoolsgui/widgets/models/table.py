@@ -13,19 +13,29 @@ from .typing import MetaclassFix
 
 T = typing.TypeVar("T")
 
+__all__ = ("SEToolsTableModel", "StringList")
+
 
 # pylint: disable=invalid-metaclass
 class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass=MetaclassFix):
 
     """Base class for SETools table models, modeling a list in a tabular form."""
 
-    headers: typing.List[str] = []
+    headers: typing.List[str]
 
-    def __init__(self, parent: QtCore.QObject | None = None):
+    def __init__(self, /, parent: QtCore.QObject | None = None, *,
+                 data: typing.Iterable[T] | None = None):
+
         super().__init__(parent)
         self.log = logging.getLogger(self.__module__)
-        self._item_list: typing.List[T] = []
+        if data is not None:
+            self._item_list = list(data)
+        else:
+            self._item_list = []
 
+    #
+    # Add/remove/set model data
+    #
     @property
     def item_list(self) -> typing.List[T]:
         """The list of items in the model."""
@@ -37,6 +47,26 @@ class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass
         self._item_list = item_list
         self.endResetModel()
 
+    def append(self, item: T) -> None:
+        """Append the item to the list."""
+        index = self.rowCount()
+        self.beginInsertRows(QtCore.QModelIndex(), index, index)
+        self.item_list.append(item)
+        self.endInsertRows()
+
+    def remove(self, item: T) -> None:
+        """Remove the first instance of the specified item from the list."""
+        try:
+            row = self.item_list.index(item)
+            self.beginRemoveRows(QtCore.QModelIndex(), row, row)
+            del self.item_list[row]
+            self.endRemoveRows()
+        except ValueError:
+            self.log.debug(f"Attempted to remove item {item!r} but it is not in the list")
+
+    #
+    # Qt API implementation
+    #
     def headerData(self, section: int, orientation: QtCore.Qt.Orientation,
                    role: int = QtCore.Qt.ItemDataRole.DisplayRole):
 
@@ -62,7 +92,7 @@ class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass
 
         match role:
             case QtCore.Qt.ItemDataRole.DisplayRole:
-                raise NotImplementedError
+                return str(self.item_list[row])
             case modelroles.PolicyObjRole:
                 return self.item_list[row]
             case modelroles.ContextMenuRole:
@@ -76,3 +106,10 @@ class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass
             QtCore.Qt.ItemFlag.ItemIsEnabled | \
             QtCore.Qt.ItemFlag.ItemIsSelectable | \
             QtCore.Qt.ItemFlag.ItemNeverHasChildren
+
+
+class StringList(SEToolsTableModel[str]):
+
+    """Convenience class for a list of strings using the table API."""
+
+    headers = ["String"]

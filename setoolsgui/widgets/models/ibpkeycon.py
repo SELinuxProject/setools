@@ -8,6 +8,8 @@ import setools
 
 from .table import SEToolsTableModel
 
+__all__ = ("IbpkeyconTable",)
+
 
 class IbpkeyconTable(SEToolsTableModel[setools.Ibpkeycon]):
 

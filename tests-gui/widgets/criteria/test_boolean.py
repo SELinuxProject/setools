@@ -1,12 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0-only
-from typing import cast
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.boolean import (BooleanListCriteriaWidget,
                                                  BooleanNameCriteriaWidget)
-from setoolsgui.widgets.models.list import SEToolsListModel
+from setoolsgui.widgets.models.table import SEToolsTableModel
 
 from .util import _build_mock_query
 
@@ -18,8 +16,8 @@ def test_bool_list(qtbot: QtBot) -> None:
     qtbot.addWidget(widget)
 
     model = widget.criteria.model()
-    assert isinstance(model, SEToolsListModel)
-    assert sorted(b for b in mock_query.policy.bools()) == model.item_list
+    assert isinstance(model, SEToolsTableModel)
+    assert sorted(mock_query.policy.bools()) == model.item_list
 
 
 def test_bool_name(qtbot: QtBot) -> None:

@@ -7,7 +7,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .list import ListCriteriaWidget
 from .name import NameCriteriaWidget
-from ..models.boolean import BooleanList
+from ..models.boolean import BooleanTable
 
 if TYPE_CHECKING:
     from typing import List, Optional
@@ -23,8 +23,7 @@ class BooleanListCriteriaWidget(ListCriteriaWidget):
     def __init__(self, title: str, query, attrname: str, enable_equal: bool = True,
                  parent: "Optional[QtWidgets.QWidget]" = None) -> None:
 
-        model: BooleanList = BooleanList()
-        model.item_list = sorted(query.policy.bools())
+        model = BooleanTable(data=sorted(query.policy.bools()))
 
         super().__init__(title, query, attrname, model, enable_equal=enable_equal, parent=parent)
 

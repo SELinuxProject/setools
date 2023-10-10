@@ -9,30 +9,10 @@ from PyQt5 import QtCore
 import setools
 
 from . import modelroles
-from .list import SEToolsListModel
 from .table import SEToolsTableModel
 from .. import details
 
-
-class ObjClassList(SEToolsListModel[setools.ObjClass]):
-
-    """List-based model for object classes."""
-
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
-        if not self.item_list or not index.isValid():
-            return None
-
-        row = index.row()
-        item = self.item_list[row]
-
-        match role:
-            case modelroles.ContextMenuRole:
-                return (details.objclass_detail_action(item), )
-
-            case QtCore.Qt.ItemDataRole.ToolTipRole:
-                return details.objclass_tooltip(item)
-
-        return super().data(index, role)
+__all__ = ("ObjClassTable",)
 
 
 class ObjClassTable(SEToolsTableModel[setools.ObjClass]):
@@ -59,5 +39,11 @@ class ObjClassTable(SEToolsTableModel[setools.ObjClass]):
                             return ", ".join(sorted(chain(item.common.perms, item.perms)))
                         except setools.exception.NoCommon:
                             return ", ".join(sorted(item.perms))
+
+            case modelroles.ContextMenuRole:
+                return (details.objclass_detail_action(item), )
+
+            case QtCore.Qt.ItemDataRole.ToolTipRole:
+                return details.objclass_tooltip(item)
 
         return super().data(index, role)

@@ -12,6 +12,8 @@ from .. import details
 from . import modelroles
 from .table import SEToolsTableModel
 
+__all__ = ("UserTable",)
+
 
 class UserTable(SEToolsTableModel[setools.User]):
 
@@ -19,8 +21,10 @@ class UserTable(SEToolsTableModel[setools.User]):
 
     headers = ["Name", "Roles", "Default Level", "Range"]
 
-    def __init__(self, mls: bool = False, parent: QtCore.QObject | None = None):
-        super().__init__(parent)
+    def __init__(self, data: typing.Iterable[setools.User] | None = None, mls: bool = False,
+                 parent: QtCore.QObject | None = None):
+
+        super().__init__(data=data, parent=parent)
         self.mls: typing.Final[bool] = mls
 
     def columnCount(self, parent=QtCore.QModelIndex()) -> int:

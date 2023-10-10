@@ -4,11 +4,11 @@ import logging
 from contextlib import suppress
 from typing import TYPE_CHECKING
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from setools.exception import NoCommon
 
 from .list import ListCriteriaWidget
-from ..models.list import SEToolsListModel
+from ..models.table import StringList
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional
@@ -27,7 +27,7 @@ class PermissionCriteriaWidget(ListCriteriaWidget):
     def __init__(self, title: str, query, attrname: str, enable_equal: bool = True,
                  enable_subset: bool = False, parent: "Optional[QtWidgets.QWidget]" = None) -> None:
 
-        self.perm_model: SEToolsListModel[str] = SEToolsListModel()
+        self.perm_model = StringList()
 
         super().__init__(title, query, attrname, self.perm_model, enable_equal=enable_equal,
                          enable_subset=enable_subset, parent=parent)

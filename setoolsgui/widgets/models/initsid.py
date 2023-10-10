@@ -8,6 +8,8 @@ import setools
 
 from .table import SEToolsTableModel
 
+__all__ = ("InitialSIDTable",)
+
 
 class InitialSIDTable(SEToolsTableModel[setools.InitialSID]):
 

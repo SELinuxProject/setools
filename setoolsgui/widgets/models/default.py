@@ -10,6 +10,8 @@ import setools
 
 from .table import SEToolsTableModel
 
+__all__ = ("DefaultTable",)
+
 
 class DefaultTable(SEToolsTableModel[setools.Default]):
 

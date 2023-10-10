@@ -10,6 +10,8 @@ import setools
 
 from .table import SEToolsTableModel
 
+__all__ = ("GenfsconTable",)
+
 
 class GenfsconTable(SEToolsTableModel[setools.Genfscon]):
 

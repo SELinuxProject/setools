@@ -3,10 +3,10 @@
 import logging
 from typing import Optional
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 
+from .. import models
 from .list import ListCriteriaWidget
-from ..models.objclass import ObjClassList
 
 
 class ObjClassCriteriaWidget(ListCriteriaWidget):
@@ -17,8 +17,7 @@ class ObjClassCriteriaWidget(ListCriteriaWidget):
                  enable_equal: bool = False, enable_subset: bool = False,
                  parent: Optional[QtWidgets.QWidget] = None) -> None:
 
-        model: ObjClassList = ObjClassList()
-        model.item_list = sorted(query.policy.classes())
+        model = models.ObjClassTable(data=sorted(query.policy.classes()))
 
         super().__init__(title, query, attrname, model, enable_equal=enable_equal,
                          enable_subset=enable_subset, parent=parent)

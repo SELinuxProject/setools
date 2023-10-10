@@ -3,9 +3,8 @@ from typing import cast
 
 from pytestqt.qtbot import QtBot
 
-from setools.policyrep import ObjClass
 from setoolsgui.widgets.criteria.objclass import ObjClassCriteriaWidget
-from setoolsgui.widgets.models.list import SEToolsListModel
+from setoolsgui.widgets.models import ObjClassTable
 
 from .util import _build_mock_query
 
@@ -16,5 +15,5 @@ def test_base_settings(qtbot: QtBot) -> None:
     widget = ObjClassCriteriaWidget("test_base_settings", mock_query, "name")
     qtbot.addWidget(widget)
 
-    model = cast(SEToolsListModel[ObjClass], widget.criteria.model())
+    model = cast(ObjClassTable, widget.criteria.model())
     assert model.item_list == sorted(mock_query.policy.classes())

@@ -13,6 +13,8 @@ from . import modelroles
 from .table import SEToolsTableModel
 from .. import details
 
+__all__ = ("TERuleTable",)
+
 
 class TERuleTable(SEToolsTableModel[setools.AnyTERule]):
 

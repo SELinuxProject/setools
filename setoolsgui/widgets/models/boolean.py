@@ -7,32 +7,13 @@ from PyQt5 import QtCore
 import setools
 
 from . import modelroles
-from .list import SEToolsListModel
 from .table import SEToolsTableModel
 from .. import details
 
-
-class BooleanList(SEToolsListModel[setools.Boolean]):
-
-    """List-based model for Booleans."""
-
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
-        if not self.item_list or not index.isValid():
-            return None
-
-        row = index.row()
-        item = self.item_list[row]
-
-        match role:
-            case modelroles.ContextMenuRole:
-                return (details.boolean_detail_action(item), )
-            case QtCore.Qt.ItemDataRole.ToolTipRole:
-                return details.boolean_tooltip(item)
-
-        return super().data(index, role)
+__all__ = ("BooleanTable",)
 
 
-class BooleanTable(SEToolsTableModel):
+class BooleanTable(SEToolsTableModel[setools.Boolean]):
 
     """Table-based model for booleans."""
 
@@ -53,5 +34,11 @@ class BooleanTable(SEToolsTableModel):
                         return boolean.name
                     case 1:
                         return str(boolean.state)
+
+            case modelroles.ContextMenuRole:
+                return (details.boolean_detail_action(boolean), )
+
+            case QtCore.Qt.ItemDataRole.ToolTipRole:
+                return details.boolean_tooltip(boolean)
 
         return super().data(index, role)

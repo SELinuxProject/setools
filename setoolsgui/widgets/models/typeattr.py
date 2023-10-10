@@ -10,6 +10,8 @@ from .. import details
 from . import modelroles
 from .table import SEToolsTableModel
 
+__all__ = ("TypeAttributeTable",)
+
 
 class TypeAttributeTable(SEToolsTableModel[setools.TypeAttribute]):
 
