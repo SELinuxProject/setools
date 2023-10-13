@@ -1,17 +1,13 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from typing import TYPE_CHECKING
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from setools import MLSRuletype
+from PyQt5 import QtWidgets
+import setools
 
 from .checkboxset import CheckboxSetCriteriaWidget
 
-if TYPE_CHECKING:
-    from typing import Optional
-
-# Checked by default:
 DEFAULT_CHECKED = ("range_transition",)
+
+__all__ = ('MLSRuleTypeCriteriaWidget',)
 
 
 class MLSRuleTypeCriteriaWidget(CheckboxSetCriteriaWidget):
@@ -23,10 +19,10 @@ class MLSRuleTypeCriteriaWidget(CheckboxSetCriteriaWidget):
     specified attribute.
     """
 
-    def __init__(self, title: str, query, attrname: str = "ruletype",
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str = "ruletype",
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(title, query, attrname, (rt.name for rt in MLSRuletype),
+        super().__init__(title, query, attrname, (rt.name for rt in setools.MLSRuletype),
                          num_cols=1, parent=parent)
 
         for name, widget in self.criteria.items():
@@ -45,7 +41,6 @@ if __name__ == '__main__':
     import logging
     import pprint
     import warnings
-    import setools
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
@@ -55,16 +50,16 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = MLSRuleTypeCriteriaWidget("Test MLS ruletypes", q, parent=mw)
-    widget.setToolTip("test tooltip")
-    widget.setWhatsThis("test whats this")
-    mw.setCentralWidget(widget)
-    mw.resize(widget.size())
+    w = MLSRuleTypeCriteriaWidget("Test MLS ruletypes", q, parent=mw)
+    w.setToolTip("test tooltip")
+    w.setWhatsThis("test whats this")
+    mw.setCentralWidget(w)
+    mw.resize(w.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
     mw.menuBar().addAction(whatsthis)
     mw.show()
     rc = app.exec_()
     print("Ruletypes set in query:")
     pprint.pprint(q.ruletype)
-    print("range_trans enabled?", widget.criteria["range_transition"].isEnabled())
+    print("range_trans enabled?", w.criteria["range_transition"].isEnabled())
     sys.exit(rc)

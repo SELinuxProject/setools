@@ -5,6 +5,8 @@
 #
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+__all__ = ("SEToolsTreeWidget",)
+
 
 class SEToolsTreeWidget(QtWidgets.QTreeWidget):
 

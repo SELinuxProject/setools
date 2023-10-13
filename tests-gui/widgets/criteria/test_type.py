@@ -4,7 +4,7 @@ from typing import Dict, Union
 from PyQt5 import QtGui
 from pytestqt.qtbot import QtBot
 
-from setoolsgui.widgets.criteria.type import (TypeOrAttrNameWidget, TypeOrAttrNameMode,
+from setoolsgui.widgets.criteria.type import (TypeOrAttrNameWidget,
                                               INDIRECT_DEFAULT_CHECKED)
 
 from .util import _build_mock_query
@@ -14,7 +14,7 @@ def test_base_settings(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_disabled_layout", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameMode.type_or_attribute)
+        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
     qtbot.addWidget(widget)
 
     assert widget.criteria_indirect.toolTip()
@@ -26,7 +26,7 @@ def test_indirect_disabled_layout(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_disabled_layout", mock_query, "name",
-        enable_indirect=False, mode=TypeOrAttrNameMode.type_only)
+        enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_only)
     qtbot.addWidget(widget)
 
     # validate widget item positions
@@ -38,7 +38,7 @@ def test_indirect_enabled_layout(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_enabled_layout", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameMode.type_or_attribute)
+        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
     qtbot.addWidget(widget)
 
     assert widget.criteria_indirect.objectName() == "name_indirect"
@@ -51,7 +51,7 @@ def test_indirect_toggling(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameMode.type_or_attribute)
+        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
     qtbot.addWidget(widget)
 
     # test toggling based on the initial state
@@ -73,7 +73,7 @@ def test_noindirect_save(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
-        enable_indirect=False, mode=TypeOrAttrNameMode.type_or_attribute,
+        enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
         enable_regex=False)
     qtbot.addWidget(widget)
 
@@ -95,7 +95,7 @@ def test_indirect_save(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameMode.type_or_attribute,
+        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
         enable_regex=False)
     qtbot.addWidget(widget)
 
@@ -119,7 +119,7 @@ def test_noindirect_load(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
-        enable_indirect=False, mode=TypeOrAttrNameMode.type_or_attribute,
+        enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
         enable_regex=False)
     qtbot.addWidget(widget)
 
@@ -137,7 +137,7 @@ def test_indirect_load(qtbot: QtBot) -> None:
     mock_query = _build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameMode.type_or_attribute,
+        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
         enable_regex=False)
     qtbot.addWidget(widget)
 

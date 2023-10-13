@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from collections import OrderedDict
+import collections
 from contextlib import suppress
 import enum
+import setools
 import typing
 
 from PyQt5 import QtCore, QtWidgets
@@ -10,6 +11,8 @@ from PyQt5 import QtCore, QtWidgets
 from .criteria import CriteriaWidget
 
 E = typing.TypeVar("E", bound=enum.Enum)
+
+__all__ = ('RadioEnumCriteria',)
 
 
 class RadioEnumCriteria(CriteriaWidget, typing.Generic[E]):
@@ -21,17 +24,17 @@ class RadioEnumCriteria(CriteriaWidget, typing.Generic[E]):
 
     selectionChanged = QtCore.pyqtSignal(enum.Enum)
 
-    def __init__(self, title: str, query, attrname: str, enum_class: typing.Type[E],
-                 colspan: int = 1, parent: typing.Optional[QtWidgets.QWidget] = None) -> None:
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str, enum_class: type[E],
+                 colspan: int = 1, parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(title, query, attrname, parent=parent)
 
-        self.enum_class: typing.Final[typing.Type[E]] = enum_class
+        self.enum_class: typing.Final[type[E]] = enum_class
         self.top_layout = QtWidgets.QGridLayout(self)
 
         count: int
         enu: E
-        self.criteria: OrderedDict[E, QtWidgets.QRadioButton] = OrderedDict()
+        self.criteria = collections.OrderedDict[E, QtWidgets.QRadioButton]()
         for count, enu in enumerate(enum_class):
             w = QtWidgets.QRadioButton(enu.value, parent=self)
             w.toggled.connect(self._update_query)
@@ -78,10 +81,10 @@ class RadioEnumCriteria(CriteriaWidget, typing.Generic[E]):
     # Workspace methods
     #
 
-    def save(self, settings: typing.Dict) -> None:
+    def save(self, settings: dict) -> None:
         settings[self.attrname] = self.selection().name
 
-    def load(self, settings: typing.Dict) -> None:
+    def load(self, settings: dict) -> None:
         with suppress(AttributeError, KeyError):
             self.set_selection(self.enum_class[settings[self.attrname]])
 
@@ -91,9 +94,9 @@ if __name__ == '__main__':
     import logging
     import pprint
     import warnings
-    import setools
 
-    class enum_class(enum.Enum):
+    class local_enum_class(enum.Enum):
+        """Enum for local testing"""
         Val1 = "Value 1"
         Val2 = "Value 2"
         Val3 = "Value 3"
@@ -107,7 +110,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = RadioEnumCriteria("Test radio enum", q, "radioattrname", enum_class, parent=mw)
+    widget = RadioEnumCriteria("Test radio enum", q, "radioattrname", local_enum_class, parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)
@@ -116,7 +119,7 @@ if __name__ == '__main__':
     mw.menuBar().addAction(whatsthis)
     mw.show()
     rc = app.exec_()
-    settings: typing.Dict[str, str] = {}
-    widget.save(settings)
-    pprint.pprint(settings)
+    local_settings: typing.Dict[str, str] = {}
+    widget.save(local_settings)
+    pprint.pprint(local_settings)
     sys.exit(rc)

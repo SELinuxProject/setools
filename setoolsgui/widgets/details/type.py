@@ -1,24 +1,22 @@
 # SPDX-License-Identifier: LGPL-2.1-only
-from typing import TYPE_CHECKING
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
+import setools
 
-from .typeattr import typeattr_detail, typeattr_tooltip
-from .util import display_object_details
+from . import typeattr, util
 
-if TYPE_CHECKING:
-    from typing import List, Optional, Union
-    from setools.policyrep import Type, TypeAttribute
+__all__ = ("type_detail", "type_detail_action", "type_tooltip",
+           "type_or_attr_detail", "type_or_attr_detail_action", "type_or_attr_tooltip")
 
 
-def type_detail(type_: "Type", parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+def type_detail(type_: setools.Type, parent: QtWidgets.QWidget | None = None) -> None:
 
     """Display a dialog with type details."""
 
-    attrs: "List[TypeAttribute]" = sorted(type_.attributes())
-    aliases: "List[str]" = sorted(type_.aliases())
+    attrs = list[setools.TypeAttribute](sorted(type_.attributes()))
+    aliases = list[str](sorted(type_.aliases()))
 
-    display_object_details(
+    util.display_object_details(
         f"{type_} Details",
         f"""
         <h1>Type Name</h1>
@@ -40,8 +38,8 @@ def type_detail(type_: "Type", parent: "Optional[QtWidgets.QWidget]" = None) -> 
         parent)
 
 
-def type_detail_action(type_: "Type",
-                       parent: "Optional[QtWidgets.QWidget]" = None) -> QtWidgets.QAction:
+def type_detail_action(type_: setools.Type,
+                       parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for the role."""
 
@@ -50,19 +48,19 @@ def type_detail_action(type_: "Type",
     return a
 
 
-def type_or_attr_detail(type_: "Union[Type, TypeAttribute]",
-                        parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+def type_or_attr_detail(type_: setools.Type | setools.TypeAttribute,
+                        parent: QtWidgets.QWidget | None = None) -> None:
 
     """Display a dialog with type or type attribute details."""
 
     try:
         type_detail(type_, parent)  # type: ignore
     except Exception:
-        typeattr_detail(type_, parent)  # type: ignore
+        typeattr.typeattr_detail(type_, parent)  # type: ignore
 
 
-def type_or_attr_detail_action(type_: "Union[Type, TypeAttribute]",
-                               parent: "Optional[QtWidgets.QWidget]" = None) -> QtWidgets.QAction:
+def type_or_attr_detail_action(type_: setools.Type | setools.TypeAttribute,
+                               parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for the type/attr."""
 
@@ -71,7 +69,7 @@ def type_or_attr_detail_action(type_: "Union[Type, TypeAttribute]",
     return a
 
 
-def type_tooltip(type_: "Type") -> str:
+def type_tooltip(type_: setools.Type) -> str:
     """Return tooltip text for this type."""
     n_attrs = len(list(type_.attributes()))
     if n_attrs == 0:
@@ -83,9 +81,9 @@ def type_tooltip(type_: "Type") -> str:
                 f"{', '.join(t.name for t in type_.attributes())}"
 
 
-def type_or_attr_tooltip(type_: "Union[Type, TypeAttribute]") -> str:
+def type_or_attr_tooltip(type_: setools.Type | setools.TypeAttribute) -> str:
     """Return tooltip text for this type or attribute."""
     try:
-        return typeattr_tooltip(type_)  # type: ignore
+        return typeattr.typeattr_tooltip(type_)  # type: ignore
     except Exception:
         return type_tooltip(type_)  # type: ignore

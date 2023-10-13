@@ -1,13 +1,11 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from typing import TYPE_CHECKING
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
+import setools
 
 from .name import NameCriteriaWidget
 
-if TYPE_CHECKING:
-    from typing import Optional
+__all__ = ("MLSLevelRangeWidget",)
 
 
 class MLSLevelRangeWidget(NameCriteriaWidget):
@@ -17,8 +15,8 @@ class MLSLevelRangeWidget(NameCriteriaWidget):
     of the specified query.  This supports inputs of MLS levels and ranges.
     """
 
-    def __init__(self, title: str, query, attrname: str, required: bool = False,
-                 parent: "Optional[QtWidgets.QWidget]" = None):
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+                 required: bool = False, parent: QtWidgets.QWidget | None = None):
 
         # Not much we can do here. Leave all validation to the query.
         super().__init__(title, query, attrname, [], "", enable_regex=False,
@@ -29,7 +27,6 @@ if __name__ == '__main__':
     import sys
     import logging
     import warnings
-    import setools
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')

@@ -1,17 +1,15 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 from contextlib import suppress
-from typing import TYPE_CHECKING, cast
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .criteria import CriteriaWidget
 
-if TYPE_CHECKING:
-    from typing import Dict, List, Optional
-
 # regex default setting (unchecked)
 REGEX_DEFAULT_CHECKED = False
+
+__all__ = ('NameCriteriaWidget',)
 
 
 class NameCriteriaWidget(CriteriaWidget):
@@ -34,9 +32,9 @@ class NameCriteriaWidget(CriteriaWidget):
     # Overridden methods
     #
 
-    def __init__(self, title: str, query, attrname: str, completion: "List[str]",
+    def __init__(self, title: str, query, attrname: str, completion: list[str],
                  validation: str = "", enable_regex: bool = True,
-                 required: bool = False, parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 required: bool = False, parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(title, query, attrname, parent=parent)
         self.required = required
@@ -182,7 +180,7 @@ class NameCriteriaWidget(CriteriaWidget):
 
         # change line edit validator
         if state:
-            self.criteria.setValidator(cast(QtGui.QValidator, None))  # need validator for regexes
+            self.criteria.setValidator(None)  # type: ignore
         else:
             self.criteria.setValidator(self.exact_validator)
 
@@ -190,12 +188,12 @@ class NameCriteriaWidget(CriteriaWidget):
     # Workspace methods
     #
 
-    def save(self, settings: "Dict") -> None:
+    def save(self, settings: dict) -> None:
         settings[self.criteria.objectName()] = self.criteria.text()
         with suppress(AttributeError):
             settings[self.criteria_regex.objectName()] = self.criteria_regex.isChecked()
 
-    def load(self, settings: "Dict") -> None:
+    def load(self, settings: dict) -> None:
         with suppress(AttributeError, KeyError):
             self.criteria_regex.setChecked(settings[self.criteria_regex.objectName()])
         self.criteria.setText(settings[self.criteria.objectName()])

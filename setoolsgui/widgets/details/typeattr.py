@@ -1,22 +1,20 @@
 # SPDX-License-Identifier: LGPL-2.1-only
-from typing import TYPE_CHECKING
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
+import setools
 
-from .util import display_object_details
+from . import util
 
-if TYPE_CHECKING:
-    from typing import List, Optional
-    from setools.policyrep import Type, TypeAttribute
+__all__ = ('typeattr_detail', 'typeattr_detail_action', 'typeattr_tooltip')
 
 
-def typeattr_detail(attr: "TypeAttribute", parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+def typeattr_detail(attr: setools.TypeAttribute, parent: QtWidgets.QWidget | None = None) -> None:
 
     """Display a dialog with type attribute details."""
 
-    types: "List[Type]" = sorted(attr.expand())
+    types = list[setools.Type](sorted(attr.expand()))
 
-    display_object_details(
+    util.display_object_details(
         f"{attr} Details",
         f"""
         <h1>Type Attribute Name</h1>
@@ -30,7 +28,7 @@ def typeattr_detail(attr: "TypeAttribute", parent: "Optional[QtWidgets.QWidget]"
         parent)
 
 
-def typeattr_detail_action(attr: "TypeAttribute",
+def typeattr_detail_action(attr: setools.TypeAttribute,
                            parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for the attr."""
@@ -40,7 +38,7 @@ def typeattr_detail_action(attr: "TypeAttribute",
     return a
 
 
-def typeattr_tooltip(attr: "TypeAttribute") -> str:
+def typeattr_tooltip(attr: setools.TypeAttribute) -> str:
     """Return tooltip text for this type attribute."""
     n_types = len(attr)
     if n_types == 0:

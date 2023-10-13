@@ -8,54 +8,46 @@ import json
 import logging
 import os
 import sys
-from typing import cast, TYPE_CHECKING
+import typing
 
 import pkg_resources
 from PyQt5 import QtCore, QtGui, QtWidgets
 from setools import __version__, PermissionMap, SELinuxPolicy
 
-from .config import ApolConfig
-from .widgets import exception
-from .widgets.permmap import PermissionMapEditor
-from .widgets.summary import SummaryTab
-from .widgets.tab import TAB_REGISTRY
+from . import config, widgets
 
 # Supported analyses.  These are not directly used here, but
 # will init the tab registry in widgets.tab for apol's analyses.
-from .widgets import (mlsrulequery, rbacrulequery, terulequery)
+from .widgets import (mlsrulequery, rbacrulequery, summary, terulequery)
 
-if TYPE_CHECKING:
-    from typing import Dict, Final, Optional
-    from .widgets.tab import BaseAnalysisTabWidget
-
-STYLESHEET: "Final" = "apol.css"
+STYLESHEET: typing.Final = "apol.css"
 
 # Class of the tab that opens automatically when a policy is loaded.
-INITIAL_TAB: "Final" = SummaryTab
+INITIAL_TAB: typing.Final = summary.SummaryTab
 
 # keys for workspace save file
-SETTINGS_POLICY: "Final" = "__policy__"
-SETTINGS_PERMMAP: "Final" = "__permmap__"
-SETTINGS_TABS_LIST: "Final" = "__tabs__"
-SETTINGS_TAB_TITLE: "Final" = "__title__"
-SETTINGS_TAB_CLASS: "Final" = "__tab__"
+SETTINGS_POLICY: typing.Final = "__policy__"
+SETTINGS_PERMMAP: typing.Final = "__permmap__"
+SETTINGS_TABS_LIST: typing.Final = "__tabs__"
+SETTINGS_TAB_TITLE: typing.Final = "__title__"
+SETTINGS_TAB_CLASS: typing.Final = "__tab__"
 
 
 class ApolWorkspace(QtWidgets.QTabWidget):
 
-    policy: "Optional[SELinuxPolicy]"
-    permmap: "Optional[PermissionMap]"
+    policy: SELinuxPolicy | None
+    permmap: PermissionMap | None
 
     policy_changed = QtCore.pyqtSignal(SELinuxPolicy)
     permmap_changed = QtCore.pyqtSignal(PermissionMap)
 
-    def __init__(self, parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+    def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         # __init__ here to type narrow the parent to the Apol main window
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
         self.permmap = None
         self.policy = None
-        self.config: "Final" = ApolConfig()
+        self.config: typing.Final = config.ApolConfig()
 
         self.setAutoFillBackground(True)
         self.setTabPosition(QtWidgets.QTabWidget.TabPosition.North)
@@ -262,13 +254,16 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     #
     # Reimplemented methods for typing purposes
     #
-    def widget(self, index: int) -> "BaseAnalysisTabWidget":
-        return cast("BaseAnalysisTabWidget", super().widget(index))
+    # @typing.override
+    def widget(self, index: int) -> widgets.tab.BaseAnalysisTabWidget:
+        """Returnt the widget at the specified tab index."""
+        return typing.cast(widgets.tab.BaseAnalysisTabWidget, super().widget(index))
 
     #
     # Main window handling
     #
     def update_window_title(self) -> None:
+        """Update window title based on opened policy path."""
         with suppress(Exception):
             if self.policy:
                 self.parentWidget().setWindowTitle(f"{self.policy} - apol")
@@ -279,6 +274,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     # Policy handling
     #
     def select_policy(self):
+        """Open a file chooser to select a policy file."""
         if self.policy and self.count() > 0:
             reply = QtWidgets.QMessageBox.question(
                 self,
@@ -302,6 +298,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             self.load_policy(filename)
 
     def load_policy(self, filename) -> None:
+        """Load a policy file."""
         try:
             self.policy = SELinuxPolicy(filename)
             self.policy_changed.emit(self.policy)
@@ -312,10 +309,12 @@ class ApolWorkspace(QtWidgets.QTabWidget):
                     self.permmap_changed.emit(self.permmap)
 
         except Exception as ex:
-            self.log.critical("Failed to load policy \"{0}\"".format(filename))
+            self.log.critical(f"Failed to load policy \"{filename}\"")
+            self.log.debug("Backtrace", exc_info=True)
             QtWidgets.QMessageBox().critical(self, "Policy loading error", str(ex))
 
     def close_policy(self):
+        """Close the current policy."""
         if self.count() > 0:
             reply = QtWidgets.QMessageBox.question(
                 self, "Continue?",
@@ -334,11 +333,13 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     # Permission map handling
     #
     def select_permmap(self):
+        """Open a file chooser to select a permission map file."""
         filename = QtWidgets.QFileDialog.getOpenFileName(self, "Open permission map file", ".")[0]
         if filename:
             self.load_permmap(filename)
 
     def load_permmap(self, filename=None):
+        """Load a permission map file."""
         try:
             self.permmap = PermissionMap(filename)
 
@@ -349,13 +350,15 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             self.permmap_changed.emit(self.permmap)
 
         except Exception as ex:
-            self.log.critical("Failed to load default permission map: {0}".format(ex))
+            self.log.critical(f"Failed to load default permission map: {ex}")
+            self.log.debug("Backtrace", exc_info=True)
             QtWidgets.QMessageBox().critical(
                 self,
                 "Permission map loading error",
                 str(ex))
 
     def edit_permmap(self):
+        """Open the permission map editor."""
         if not self.permmap:
             QtWidgets.QMessageBox().critical(
                 self,
@@ -366,25 +369,28 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
         # in case user cancels out of choosing a permmap, recheck
         if self.permmap:
-            editor = PermissionMapEditor(self.permmap, edit=True, parent=self)
+            editor = widgets.permmap.PermissionMapEditor(self.permmap, edit=True, parent=self)
             editor.apply_permmap.connect(self.permmap_changed)
             editor.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
             editor.show()
 
     def save_permmap(self):
+        """Save the permission map to a file."""
         path = str(self.permmap) if self.permmap else "perm_map"
         filename = QtWidgets.QFileDialog.getSaveFileName(self, "Save permission map file", path)[0]
         if filename:
             try:
                 self.permmap.save(filename)
             except Exception as ex:
-                self.log.critical("Failed to save permission map: {0}".format(ex))
+                self.log.critical(f"Failed to save permission map: {ex}")
+                self.log.debug("Backtrace", exc_info=True)
                 QtWidgets.QMessageBox().critical(self, "Permission map saving error", str(ex))
 
     #
     # Tab handling
     #
     def choose_analysis(self):
+        """Open a dialog to choose an analysis."""
         if not self.policy:
             QtWidgets.QMessageBox().critical(
                 self,
@@ -400,9 +406,10 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             # error opening the policy file.
             ChooseAnalysis(self.policy.mls, parent=self)
 
-    def create_new_analysis(self, tab_class: "BaseAnalysisTabWidget") -> int:
+    def create_new_analysis(self, tab_class: widgets.tab.BaseAnalysisTabWidget) -> int:
+        """Create a new analysis tab with the selected widget."""
         self.tab_counter += 1
-        counted_name = "{0}: {1}".format(self.tab_counter, tab_class.tab_title)
+        counted_name = f"{self.tab_counter}: {tab_class.tab_title}"
 
         assert self.policy
         assert self.permmap
@@ -449,7 +456,8 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         menu.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
         menu.popup(tab_bar.mapToGlobal(pos))
 
-    def tab_name_editor(self, index: "Optional[int]" = None) -> None:
+    def tab_name_editor(self, index: int | None = None) -> None:
+        """Open the tab name editor for the specified tab index."""
         if index is None:
             index = self.currentIndex()
 
@@ -463,8 +471,10 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         self.tab_editor.show()
         self.tab_editor.setFocus()
 
-    def dupe_tab(self, index: "Optional[int]" = None) -> None:
-        """Duplicate the active tab"""
+    def dupe_tab(self, index: int | None = None) -> None:
+        """
+        Duplicate a tab specified by index.  If no index is specified, the active one is used.
+        """
         if index is None:
             index = self.currentIndex()
 
@@ -475,7 +485,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         new_index = self.create_new_analysis(type(self.widget(index)))
         self._put_settings(settings, new_index)
 
-    def close_tab(self, index: "Optional[int]" = None) -> None:
+    def close_tab(self, index: int | None = None) -> None:
         """Close a tab specified by index."""
         if index is None:
             index = self.currentIndex()
@@ -489,8 +499,10 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         self.toggle_workspace_actions()
 
     def rename_tab(self) -> None:
+        """Rename the active tab."""
         # this should never be negative since the editor is modal
         index = self.currentIndex()
+        assert index >= 0, "Tab index is negative in rename_tab.  This is an SETools bug."
         tab = self.widget(index)
         title = self.tab_editor.text()
 
@@ -502,12 +514,14 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     #
     # Workspace actions
     #
+    # @typing.override
     def clear(self) -> None:
         """Close all tabs."""
         super().clear()
         self.toggle_workspace_actions()
 
     def handle_policy_change(self, policy: SELinuxPolicy) -> None:
+        """Handle a policy change.  Close all tabs and create new initial tab."""
         self.log.debug(f"Received policy change signal to {policy}.")
         self.clear()
 
@@ -526,10 +540,9 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         open_tabs = self.count() > 0
         open_policy = self.policy is not None
 
-        self.log.debug("{0} actions requiring an open policy.".
-                       format("Enabling" if open_policy else "Disabling"))
-        self.log.debug("{0} actions requiring open tabs.".
-                       format("Enabling" if open_tabs else "Disabling"))
+        self.log.debug(f"{'Enabling' if open_policy else 'Disabling'} actions requiring "
+                       "an open policy.")
+        self.log.debug(f"{'Enabling' if open_tabs else 'Disabling'} actions requiring open tabs.")
 
         self.save_settings_action.setEnabled(open_tabs)
         self.save_workspace_action.setEnabled(open_tabs)
@@ -538,7 +551,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         self.load_settings_action.setEnabled(open_tabs)
         self.close_policy_action.setEnabled(open_policy)
 
-    def _get_settings(self, index: "Optional[int]" = None) -> "Dict":
+    def _get_settings(self, index: int | None = None) -> dict:
         """Return a dictionary with the settings of the tab at the specified index."""
         if index is None:
             index = self.currentIndex()
@@ -554,9 +567,8 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
         return settings
 
-    def _put_settings(self, settings, index=None):
+    def _put_settings(self, settings: dict, index: int | None = None):
         """Load the settings into the specified tab."""
-
         if index is None:
             index = self.currentIndex()
 
@@ -564,8 +576,8 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         tab = self.widget(index)
 
         if settings[SETTINGS_TAB_CLASS] != type(tab).__name__:
-            raise TypeError("The current tab ({0}) does not match the tab in the settings file "
-                            "({1}).".format(type(tab).__name__, settings[SETTINGS_TAB_CLASS]))
+            raise TypeError(f"The current tab ({type(tab).__name__}) does not match the tab in "
+                            f"the settings file ({settings[SETTINGS_TAB_CLASS]}).")
 
         try:
             self.setTabText(index, str(settings[SETTINGS_TAB_TITLE]))
@@ -574,7 +586,8 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
         tab.load(settings)
 
-    def load_settings(self, new=False):
+    def load_settings(self, new: bool = False):
+        """Open a file chooser and load settings from the chosen file."""
         filename = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Open settings file",
@@ -587,12 +600,13 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         try:
             with open(filename, "r") as fd:
                 settings = json.load(fd)
-        except ValueError as ex:
-            self.log.critical("Invalid settings file \"{filename}\"")
+        except ValueError:
+            self.log.critical(f"Invalid settings file \"{filename}\"")
+            self.log.debug("Backtrace", exc_info=True)
             QtWidgets.QMessageBox().critical(
                 self,
                 "Failed to load settings",
-                "Invalid settings file: \"{filename}\"")
+                f"Invalid settings file: \"{filename}\"")
             return
         except OSError as ex:
             self.log.critical(f"Unable to load settings file \"{ex.filename}\": {ex.strerror}")
@@ -613,7 +627,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
         if new:
             try:
-                tabclass = TAB_REGISTRY[settings[SETTINGS_TAB_CLASS]]
+                tabclass = widgets.tab.TAB_REGISTRY[settings[SETTINGS_TAB_CLASS]]
             except KeyError:
                 self.log.critical(f"Missing analysis type in \"{filename}\"")
                 QtWidgets.QMessageBox().critical(
@@ -630,22 +644,25 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         try:
             self._put_settings(settings, index)
         except Exception as ex:
-            self.log.critical("Error loading settings file \"{0}\": {1}".format(filename, ex))
+            self.log.critical(f"Error loading settings file \"{filename}\": {ex}")
+            self.log.debug("Backtrace", exc_info=True)
             QtWidgets.QMessageBox().critical(
                 self,
                 "Failed to load settings",
                 f"Error loading settings file \"{filename}\":\n\n{ex}")
         else:
-            self.log.info("Successfully loaded analysis settings from \"{0}\"".format(filename))
+            self.log.info(f"Successfully loaded analysis settings from \"{filename}\"")
 
     def new_analysis_from_config(self):
+        """Create a new analysis tab from the settings in the config file."""
         self.load_settings(new=True)
 
     def save_settings(self):
+        """Open a file chooser and save settings to the chosen file."""
         try:
             settings = self._get_settings()
 
-        except exception.TabFieldError as ex:
+        except widgets.exception.TabFieldError as ex:
             self.log.critical(f"Errors in the query prevent saving the settings. {ex}")
             QtWidgets.QMessageBox().critical(
                 self,
@@ -682,6 +699,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             self.log.info(f"Successfully saved settings file \"{filename}\"")
 
     def load_workspace(self):
+        """Open a file chooser and load a workspace from the chosen file."""
         # 1. if number of tabs > 0, check if we really want to do this
         if self.count() > 0:
             reply = QtWidgets.QMessageBox.question(
@@ -707,8 +725,9 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         try:
             with open(filename, "r") as fd:
                 workspace = json.load(fd)
-        except ValueError as ex:
+        except ValueError:
             self.log.critical(f"Invalid workspace file \"{filename}\"")
+            self.log.debug("Backtrace", exc_info=True)
             QtWidgets.QMessageBox().critical(
                 self,
                 "Failed to load workspace",
@@ -723,6 +742,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             return
         except Exception as ex:
             self.log.critical(f"Unable to load workspace file \"{filename}\": {ex}")
+            self.log.debug("Backtrace", exc_info=True)
             QtWidgets.QMessageBox().critical(self, "Failed to load workspace", str(ex))
             return
 
@@ -791,7 +811,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         loading_errors = []
         for i, settings in enumerate(tab_list):
             try:
-                tabclass = TAB_REGISTRY[settings[SETTINGS_TAB_CLASS]]
+                tabclass = widgets.tab.TAB_REGISTRY[settings[SETTINGS_TAB_CLASS]]
             except KeyError:
                 error_str = f"Missing analysis type for tab {i}. Skipping this tab."
                 self.log.error(error_str)
@@ -804,11 +824,12 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             try:
                 self._put_settings(settings, index)
             except Exception as ex:
-                error_str = "Error loading settings for tab {0}: {1}".format(i, ex)
+                error_str = f"Error loading settings for tab {i}: {ex}"
                 self.log.error(error_str)
+                self.log.debug("Backtrace", exc_info=True)
                 loading_errors.append(error_str)
 
-        self.log.info("Completed loading workspace from \"{0}\"".format(filename))
+        self.log.info(f"Completed loading workspace from \"{filename}\"")
 
         # 8. if there are any errors, open a dialog with the
         #    complete list of tab errors
@@ -820,6 +841,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
                 format("\n\n".join(loading_errors)))
 
     def save_workspace(self):
+        """Open a file chooser and save the workspace to the chosen file."""
         workspace = {}
         save_errors = []
 
@@ -832,10 +854,10 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
             try:
                 settings = tab.save()
-            except exception.TabFieldError as ex:
+            except widgets.exception.TabFieldError as ex:
                 tab_name = self.tabText(index)
                 save_errors.append(tab_name)
-                self.log.error("Error: tab \"{0}\": {1}".format(tab_name, str(ex)))
+                self.log.error(f"Error: tab \"{tab_name}\": {ex}")
             else:
                 # add the tab info to the settings.
                 settings[SETTINGS_TAB_TITLE] = self.tabText(index)
@@ -848,7 +870,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             QtWidgets.QMessageBox().critical(
                 self,
                 "Unable to save workspace",
-                f"Please resolve errors in the following tabs before saving the "
+                "Please resolve errors in the following tabs before saving the "
                 "workspace:\n\n{0}".format('\n'.join(save_errors)))
             return
 
@@ -868,16 +890,19 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     #
     # Edit actions
     #
+    # @typing.override
     def copy(self):
         """Copy text from the currently-focused widget."""
         with suppress(Exception):
             QtWidgets.QApplication.instance().focusWidget().copy()
 
+    # @typing.override
     def cut(self):
         """Cut text from the currently-focused widget."""
         with suppress(Exception):
             QtWidgets.QApplication.instance().focusWidget().cut()
 
+    # @typing.override
     def paste(self):
         """Paste text into the currently-focused widget."""
         with suppress(Exception):
@@ -887,6 +912,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     # Help actions
     #
     def about_apol(self):
+        """Display the about dialog."""
         QtWidgets.QMessageBox.about(
             self,
             "About Apol",
@@ -916,13 +942,11 @@ class ChooseAnalysis(QtWidgets.QDialog):
         super().__init__(parent)
 
         # populate the analysis choices tree:
-        self.analysis_choices: "Dict[str, Dict[str, BaseAnalysisTabWidget]]" = defaultdict(dict)
-        for clsobj in TAB_REGISTRY.values():
+        self.analysis_choices = \
+            defaultdict[str, dict[str, widgets.tab.BaseAnalysisTabWidget]](dict)
+        for clsobj in widgets.tab.TAB_REGISTRY.values():
             self.analysis_choices[clsobj.section.name][clsobj.tab_title] = clsobj
 
-        self.setupUi(mls)
-
-    def setupUi(self, mls: bool) -> None:
         self.setWindowTitle("New Analysis")
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
@@ -974,7 +998,9 @@ class ChooseAnalysis(QtWidgets.QDialog):
 
         self.show()
 
-    def accept(self, item: "Optional[QtWidgets.QTreeWidgetItem]" = None) -> None:
+    # @typing.override
+    def accept(self, item: QtWidgets.QTreeWidgetItem | None = None) -> None:
+        """Accept the dialog and create a new analysis."""
         parent = self.parent()
         assert isinstance(parent, ApolWorkspace)  # type narrowing for mypy
         try:
@@ -982,8 +1008,8 @@ class ChooseAnalysis(QtWidgets.QDialog):
                 # tree widget is set for single item selection.
                 item = self.analysisTypes.selectedItems()[0]
 
-            tab_class = cast("BaseAnalysisTabWidget",
-                             item.data(0, QtCore.Qt.ItemDataRole.UserRole))
+            tab_class = typing.cast(widgets.tab.BaseAnalysisTabWidget,
+                                    item.data(0, QtCore.Qt.ItemDataRole.UserRole))
             parent.create_new_analysis(tab_class)
         except (IndexError, AttributeError):
             # IndexError: nothing is selected
@@ -993,7 +1019,7 @@ class ChooseAnalysis(QtWidgets.QDialog):
             super().accept()
 
 
-def run_apol(policy: "Optional[str]" = None) -> int:
+def run_apol(policy: str | None = None) -> int:
     """Library entrypoint for apol"""
     app = QtWidgets.QApplication(sys.argv)
 

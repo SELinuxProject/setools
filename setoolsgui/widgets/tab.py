@@ -3,35 +3,32 @@
 from contextlib import suppress
 import enum
 import logging
-from typing import Generic, TYPE_CHECKING, TypeVar, cast
+import typing
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+import setools
 
-from .exception import TabFieldError
+from . import criteria, exception, models
 from .models.typing import QObjectType
 from .queryupdater import QueryResultsUpdater
 from .tableview import SEToolsTableView
 from .treeview import SEToolsTreeWidget
 
-if TYPE_CHECKING:
-    from typing import Dict, Final, List, Optional, Tuple, Type, Union
-    from setools import PermissionMap
-    from setools.query import DirectedGraphAnalysis, PolicyQuery
-    from .criteria.criteria import CriteriaWidget
-    from .models.table import SEToolsTableModel
-
 # workspace settings keys
-SETTINGS_NOTES = "notes"
-SETTINGS_SHOW_NOTES = "show_notes"
-SETTINGS_SHOW_CRITERIA = "show_criteria"
+SETTINGS_NOTES: typing.Final[str] = "notes"
+SETTINGS_SHOW_NOTES: typing.Final[str] = "show_notes"
+SETTINGS_SHOW_CRITERIA: typing.Final[str] = "show_criteria"
 
 # Show criteria default setting (checked)
-CRITERIA_DEFAULT_CHECKED = True
+CRITERIA_DEFAULT_CHECKED: typing.Final[bool] = True
 # Show notes default setting (unchecked)
-NOTES_DEFAULT_CHECKED = False
+NOTES_DEFAULT_CHECKED: typing.Final[bool] = False
 
-TAB_REQUIRED_CLASSVARS = ("section", "tab_title", "mlsonly")
-TAB_REGISTRY: "Dict[str, Type[BaseAnalysisTabWidget]]" = {}
+TAB_REQUIRED_CLASSVARS: typing.Final[tuple[str, ...]] = ("section", "tab_title", "mlsonly")
+TAB_REGISTRY: typing.Final[dict[str, type["BaseAnalysisTabWidget"]]] = {}
+
+__all__ = ("AnalysisSection", "BaseAnalysisTabWidget", "TableResultTabWidget",
+           "DirectedGraphResultTab", "TAB_REGISTRY")
 
 
 class AnalysisSection(enum.Enum):
@@ -81,17 +78,18 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
     the "results" attribute and it is added to the layout correctly.
     """
 
-    criteria: "Tuple[CriteriaWidget, ...]"
-    mlsonly: bool
-    perm_map: "PermissionMap"
-    section: AnalysisSection
-    tab_title = "Title not set!"
+    tab_title: typing.ClassVar[str] = "Title not set!"
+    section: typing.ClassVar[AnalysisSection]
+    mlsonly: typing.ClassVar[bool]
+
+    criteria: tuple[criteria.criteria.CriteriaWidget, ...]
+    perm_map: setools.PermissionMap
 
     def __init__(self, enable_criteria: bool = True,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(parent)
-        self.log: "Final" = logging.getLogger(self.__module__)
+        self.log: typing.Final = logging.getLogger(self.__module__)
 
         #
         # configure scroll area
@@ -249,28 +247,32 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         self._results_widget = widget
 
     def run(self) -> None:
+        """Run the query."""
         raise NotImplementedError
 
     def query_completed(self, count: int) -> None:
+        """Handle successful query completion."""
         raise NotImplementedError
 
     def query_failed(self, message: str) -> None:
+        """Handle query failure."""
         raise NotImplementedError
 
     #
     # Workspace methods
     #
-    def handle_permmap_change(self, permmap: "PermissionMap") -> None:
+    def handle_permmap_change(self, permmap: setools.PermissionMap) -> None:
+        """Handle permission map changes."""
         pass
 
-    def save(self) -> "Dict":
+    def save(self) -> dict:
         """Return a dictionary of settings for this tab."""
         with suppress(AttributeError):  # handle criteria-less tabs
             errors = [c for c in self.criteria if c.has_errors]
             if errors:
-                raise TabFieldError("Cannot save due to errors in the criteria.")
+                raise exception.TabFieldError("Cannot save due to errors in the criteria.")
 
-        settings: "Dict[str, Union[str, bool, List[str]]]" = {}
+        settings = dict[str, str | bool | list[str]]()
         settings[SETTINGS_SHOW_NOTES] = self.notes_expander.isChecked()
         settings[SETTINGS_NOTES] = self.notes.toPlainText()
 
@@ -283,7 +285,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
 
         return settings
 
-    def load(self, settings: "Dict") -> None:
+    def load(self, settings: dict) -> None:
         """Load a dictionary of settings."""
         with suppress(AttributeError):  # handle criteria-less tabs
             for w in self.criteria:
@@ -308,11 +310,22 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
 
     # TODO get signals to disable the run button if there are criteria errors.
 
-    def __init__(self, query: "PolicyQuery", enable_criteria: bool = True,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+    class ResultTab(enum.IntEnum):
+
+        """
+        Enumeration of result tabs.
+
+        0-indexed to match the tab widget indexing.
+        """
+
+        Table = 0
+        Text = 1
+
+    def __init__(self, query: setools.PolicyQuery, enable_criteria: bool = True,
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(enable_criteria=enable_criteria, parent=parent)
-        self.query: "Final[PolicyQuery]" = query
+        self.query: typing.Final = query
 
         # results as 2 tab
         self.results = QtWidgets.QTabWidget(self.top_widget)
@@ -338,7 +351,7 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
             "<b>This tab has the table-based results of the query.</b>")
         self.results.addTab(self.table_results, "Results")
         self.results.setTabWhatsThis(
-            0,
+            TableResultTabWidget.ResultTab.Table,
             "<b>This tab has the table-based results of the query.</b>")
 
         # Set up filter proxy. Subclasses must set the table_results_model
@@ -361,8 +374,10 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         self.raw_results.setReadOnly(True)
         self.raw_results.setWhatsThis("<b>This tab has plain text results of the query.</b>")
         self.results.addTab(self.raw_results, "Raw Results")
-        self.results.setTabWhatsThis(1, "<b>This tab has plain text results of the query.</b>")
-        self.results.setCurrentIndex(0)
+        self.results.setTabWhatsThis(TableResultTabWidget.ResultTab.Text,
+                                     "<b>This tab has plain text results of the query.</b>")
+
+        self.results.setCurrentIndex(TableResultTabWidget.ResultTab.Table)
 
         # set up processing thread
         self.processing_thread = QtCore.QThread(self.top_widget)
@@ -381,11 +396,13 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
             self.processing_thread.wait(5000)
 
     @property
-    def table_results_model(self) -> "SEToolsTableModel":
-        return cast("SEToolsTableModel", self.sort_proxy.sourceModel())
+    def table_results_model(self) -> models.SEToolsTableModel:
+        """Return the table results model for this tab."""
+        return typing.cast(models.SEToolsTableModel, self.sort_proxy.sourceModel())
 
     @table_results_model.setter
-    def table_results_model(self, model: "SEToolsTableModel") -> None:
+    def table_results_model(self, model: models.SEToolsTableModel) -> None:
+        """Set the table results model for this tab and set up the processing thread for it."""
         self.sort_proxy.setSourceModel(model)
 
         self.worker = QueryResultsUpdater(self.query, model)
@@ -452,10 +469,10 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
             self, "Error", message, QtWidgets.QMessageBox.StandardButton.Ok)
 
 
-DGA = TypeVar("DGA", bound="DirectedGraphAnalysis")
+DGA = typing.TypeVar("DGA", bound=setools.query.DirectedGraphAnalysis)
 
 
-class DirectedGraphResultTab(BaseAnalysisTabWidget, Generic[DGA]):
+class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
 
     """
     Application top-level analysis tab that provides a QTabWidget with tabs for results
@@ -474,13 +491,13 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, Generic[DGA]):
 
         Graph = 0
         Tree = 1
-        Raw = 2
+        Text = 2
 
     def __init__(self, query: DGA, enable_criteria: bool = True,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(enable_criteria=enable_criteria, parent=parent)
-        self.query: "Final[DGA]" = query
+        self.query: typing.Final = query
 
         # Create tab widget
         self.results = QtWidgets.QTabWidget(self.top_widget)
@@ -530,17 +547,17 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, Generic[DGA]):
             "<b>This tab has the tree-based results of the query.</b>")
 
         #
-        # Create raw result tab
+        # Create text result tab
         #
         self.raw_results = QtWidgets.QPlainTextEdit(self.results)
         self.raw_results.setObjectName("raw_results")
         self.raw_results.setSizePolicy(sizePolicy)
-        self.raw_results.setDocumentTitle("")
+        self.raw_results.setDocumentTitle(f"{self.tab_title} Text Results")
         self.raw_results.setLineWrapMode(QtWidgets.QPlainTextEdit.LineWrapMode.NoWrap)
         self.raw_results.setReadOnly(True)
         self.raw_results.setWhatsThis("<b>This tab has plain text results of the query.</b>")
         self.results.addTab(self.raw_results, "Raw Results")
-        self.results.setTabWhatsThis(DirectedGraphResultTab.ResultTab.Raw,
+        self.results.setTabWhatsThis(DirectedGraphResultTab.ResultTab.Text,
                                      "<b>This tab has plain text results of the query.</b>")
 
         # set initial tab
@@ -573,11 +590,11 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, Generic[DGA]):
             self.processing_thread.wait(5000)
 
     @property
-    def tree_results_model(self) -> "SEToolsTableModel":
-        return cast("SEToolsTableModel", self.tree_results.model())
+    def tree_results_model(self) -> models.SEToolsTableModel:
+        return typing.cast(models.SEToolsTableModel, self.tree_results.model())
 
     @tree_results_model.setter
-    def tree_results_model(self, model: "SEToolsTableModel") -> None:
+    def tree_results_model(self, model: models.SEToolsTableModel) -> None:
         self.tree_results.setModel(model)
         self.worker.model = model
 
@@ -622,7 +639,6 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, Generic[DGA]):
 if __name__ == '__main__':
     import sys
     import warnings
-    import setools
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')

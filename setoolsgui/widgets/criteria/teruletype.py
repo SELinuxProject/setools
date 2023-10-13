@@ -1,20 +1,16 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-import logging
-from typing import TYPE_CHECKING
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from setools import TERuletype
+from PyQt5 import QtWidgets
+import setools
 
 from .checkboxset import CheckboxSetCriteriaWidget
-
-if TYPE_CHECKING:
-    from typing import Optional
 
 # Checked by default:
 DEFAULT_CHECKED = ("allow", "allowxperm")
 # Not supported in binary policy:
 NOT_IN_BINPOL = ("neverallow", "neverallowxperm")
+
+__all__ = ('TERuleTypeCriteriaWidget',)
 
 
 class TERuleTypeCriteriaWidget(CheckboxSetCriteriaWidget):
@@ -26,10 +22,10 @@ class TERuleTypeCriteriaWidget(CheckboxSetCriteriaWidget):
     specified attribute.
     """
 
-    def __init__(self, title: str, query, attrname: str = "ruletype",
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str = "ruletype",
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(title, query, attrname, (rt.name for rt in TERuletype),
+        super().__init__(title, query, attrname, (rt.name for rt in setools.TERuletype),
                          parent=parent)
 
         for name, widget in self.criteria.items():
@@ -62,6 +58,7 @@ if __name__ == '__main__':
     import warnings
     import setools
     import pprint
+    import logging
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
@@ -71,11 +68,11 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = TERuleTypeCriteriaWidget("Test TE ruletypes", q, parent=mw)
-    widget.setToolTip("test tooltip")
-    widget.setWhatsThis("test whats this")
-    mw.setCentralWidget(widget)
-    mw.resize(widget.size())
+    w = TERuleTypeCriteriaWidget("Test TE ruletypes", q, parent=mw)
+    w.setToolTip("test tooltip")
+    w.setWhatsThis("test whats this")
+    mw.setCentralWidget(w)
+    mw.resize(w.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
     mw.menuBar().addAction(whatsthis)
     mw.show()
@@ -85,12 +82,12 @@ if __name__ == '__main__':
 
     # basic test of save/load
     settings: dict = {}
-    widget.save(settings)
+    w.save(settings)
     print("Widget save:")
     pprint.pprint(settings)
     settings["type_member"] = True
     settings["neverallow"] = True
-    widget.load(settings)
+    w.load(settings)
     print("Final query settings:")
     pprint.pprint(q.ruletype)
     sys.exit(rc)

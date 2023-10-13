@@ -1,16 +1,12 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
+import collections
 from contextlib import suppress
-from typing import TYPE_CHECKING
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
+from .. import models
 from .criteria import CriteriaWidget
-from ..models import modelroles
-
-if TYPE_CHECKING:
-    from ..models.table import SEToolsTableModel
-    from typing import Dict, Iterable, List, Optional
 
 # equal/subset default setting.  At most one can be True
 # as these are radio buttons.
@@ -21,6 +17,8 @@ INVERT_SELECTION_FLAGS = QtCore.QItemSelectionModel.SelectionFlags(
         QtCore.QItemSelectionModel.SelectionFlag.Toggle) | \
         QtCore.QItemSelectionModel.SelectionFlag.Columns
 
+__all__ = ('ListCriteriaWidget',)
+
 
 class ListCriteriaWidget(CriteriaWidget):
 
@@ -28,9 +26,9 @@ class ListCriteriaWidget(CriteriaWidget):
     selectionChanged = QtCore.pyqtSignal(list)
     subset_toggled = QtCore.pyqtSignal(bool)
 
-    def __init__(self, title: str, query, attrname: str, model: "SEToolsTableModel",
+    def __init__(self, title: str, query, attrname: str, model: models.SEToolsTableModel,
                  enable_equal: bool = False, enable_subset: bool = False,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(title, query, attrname, parent=parent)
 
@@ -117,7 +115,7 @@ class ListCriteriaWidget(CriteriaWidget):
     def _criteria_context_menu(self, pos: QtCore.QPoint) -> None:
         """Collect actions from the model and display a context menu if there are any actions."""
         actionlist = []
-        for actions in self.selection(modelroles.ContextMenuRole):
+        for actions in self.selection(models.modelroles.ContextMenuRole):
             actionlist.extend(actions)
 
         if not actionlist:
@@ -137,7 +135,7 @@ class ListCriteriaWidget(CriteriaWidget):
         setattr(self.query, self.criteria.objectName(), selection)
         self.selectionChanged.emit(selection)
 
-    def set_selection(self, selections: "List[str]") -> None:
+    def set_selection(self, selections: list[str]) -> None:
         """Set the selection."""
         selectionmodel = self.criteria.selectionModel()
         datamodel = self.criteria.selectionModel().model()
@@ -159,7 +157,7 @@ class ListCriteriaWidget(CriteriaWidget):
         model = self.criteria.model()
         selection_model.select(model.createIndex(0, 0), INVERT_SELECTION_FLAGS)
 
-    def selection(self, role: int = QtCore.Qt.ItemDataRole.UserRole) -> "Iterable":
+    def selection(self, role: int = QtCore.Qt.ItemDataRole.UserRole) -> collections.abc.Iterable:
         """
         Generator which returns the selection.
 
@@ -184,7 +182,7 @@ class ListCriteriaWidget(CriteriaWidget):
     #
     # Workspace methods
     #
-    def save(self, settings: "Dict") -> None:
+    def save(self, settings: dict) -> None:
         settings[self.criteria.objectName()] = list(
             self.selection(QtCore.Qt.ItemDataRole.DisplayRole))
 
@@ -194,7 +192,7 @@ class ListCriteriaWidget(CriteriaWidget):
         with suppress(AttributeError):
             settings[self.criteria_subset.objectName()] = self.criteria_subset.isChecked()
 
-    def load(self, settings: "Dict") -> None:
+    def load(self, settings: dict) -> None:
         with suppress(KeyError):
             self.set_selection(settings[self.criteria.objectName()])
 

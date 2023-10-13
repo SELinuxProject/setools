@@ -8,14 +8,15 @@ import os
 import logging
 import configparser
 import threading
+import typing
 
 #
 # Configfile constants
 #
-APOLCONFIG = "~/.config/setools/apol.conf"
-HELP_SECTION = "Help"
-HELP_PGM = "assistant"
-DEFAULT_HELP_PGM = ("/usr/bin/assistant")
+APOLCONFIG: typing.Final[str] = "~/.config/setools/apol.conf"
+HELP_SECTION: typing.Final[str] = "Help"
+HELP_PGM: typing.Final[str] = "assistant"
+DEFAULT_HELP_PGM: typing.Final[tuple[str, ...]] = ("/usr/bin/assistant",)
 
 
 class ApolConfig:
@@ -23,9 +24,9 @@ class ApolConfig:
     """Apol configuration file."""
 
     def __init__(self):
-        self.log = logging.getLogger(__name__)
+        self.log: typing.Final = logging.getLogger(__name__)
         self._lock = threading.Lock()
-        self.path = os.path.expanduser(APOLCONFIG)
+        self.path: typing.Final = os.path.expanduser(APOLCONFIG)
 
         self._config = configparser.ConfigParser()
         save = False
@@ -50,11 +51,13 @@ class ApolConfig:
                 with open(self.path, "w") as fd:
                     self._config.write(fd)
 
-            except Exception as ex:
-                self.log.critical("Failed to save configuration file \"{0}\"".format(self.path))
+            except Exception:
+                self.log.critical(f"Failed to save configuration file \"{self.path}\"")
+                self.log.debug("Backtrace", exc_info=True)
 
     @property
     def assistant(self):
+        """Return the help program executable path."""
         with self._lock:
             return self._config.get(HELP_SECTION, HELP_PGM, fallback=DEFAULT_HELP_PGM)
 

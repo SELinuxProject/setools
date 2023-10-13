@@ -1,17 +1,13 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from collections import OrderedDict
+import collections
 from contextlib import suppress
-import logging
-from typing import TYPE_CHECKING
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 
 from .criteria import CriteriaWidget
 
-if TYPE_CHECKING:
-    from typing import Dict, Final, Iterable, List, Optional, OrderedDict
-    import logging
+__all__ = ("CheckboxSetCriteriaWidget",)
 
 
 class CheckboxSetCriteriaWidget(CriteriaWidget):
@@ -36,15 +32,15 @@ class CheckboxSetCriteriaWidget(CriteriaWidget):
         """
         return False
 
-    def __init__(self, title: str, query, attrname: str, items: "Iterable[str]",
-                 num_cols: int = 4, parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+    def __init__(self, title: str, query, attrname: str, items: collections.abc.Iterable[str],
+                 num_cols: int = 4, parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(title, query, attrname, parent=parent)
 
         assert items, "Checkbox criteria items are empty, this is an SETools bug."
         self.top_layout = QtWidgets.QGridLayout(self)
 
-        self.criteria: "OrderedDict[str, QtWidgets.QCheckBox]" = OrderedDict()
+        self.criteria = collections.OrderedDict[str, QtWidgets.QCheckBox]()
         for count, name in enumerate(items):
             w = QtWidgets.QCheckBox(self)
             w.setObjectName(name)
@@ -84,11 +80,11 @@ class CheckboxSetCriteriaWidget(CriteriaWidget):
         setattr(self.query, self.attrname, items)
         self.selectionChanged.emit(items)
 
-    def selection(self) -> "List[str]":
+    def selection(self) -> list[str]:
         """Return a list with the names of the checked boxes."""
         return [n for n, w in self.criteria.items() if w.isChecked()]
 
-    def set_selection(self, items: "List[str]") -> None:
+    def set_selection(self, items: list[str]) -> None:
         """Set selected checkboxes."""
         self.clear_selection()
         for name, widget in self.criteria.items():
@@ -113,10 +109,10 @@ class CheckboxSetCriteriaWidget(CriteriaWidget):
     # Workspace methods
     #
 
-    def save(self, settings: "Dict") -> None:
+    def save(self, settings: dict) -> None:
         settings[self.attrname] = self.selection()
 
-    def load(self, settings: "Dict") -> None:
+    def load(self, settings: dict) -> None:
         try:
             # for compat for pre 4.5 configs
             for name, widget in self.criteria.items():

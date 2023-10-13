@@ -3,14 +3,11 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from typing import TYPE_CHECKING
+import typing
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from . import tab
-
-if TYPE_CHECKING:
-    from typing import Final, Optional
 
 
 class SummaryTab(tab.BaseAnalysisTabWidget):
@@ -22,10 +19,10 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
     mlsonly = False
 
     def __init__(self, policy: "setools.SELinuxPolicy", _,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(enable_criteria=False, parent=parent)
-        self.policy: "Final" = policy
+        self.policy: typing.Final = policy
 
         # font for labels
         font = QtGui.QFont()
@@ -230,6 +227,21 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
 
         # Fill policy capabilities list
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    #
+    # Unused abstract methods
+    #
+    def run(self) -> None:
+        """Run the query."""
+        pass
+
+    def query_completed(self, count: int) -> None:
+        """Handle successful query completion."""
+        pass
+
+    def query_failed(self, message: str) -> None:
+        """Handle query failure."""
+        pass
 
 
 if __name__ == '__main__':

@@ -1,18 +1,14 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-import logging
 from contextlib import suppress
-from typing import TYPE_CHECKING
 
 from PyQt5 import QtWidgets
-from setools.exception import NoCommon
+import setools
 
+from .. import models
 from .list import ListCriteriaWidget
-from ..models.table import StringList
 
-if TYPE_CHECKING:
-    from typing import Dict, List, Optional
-    from setools import ObjClass
+__all__ = ('PermissionCriteriaWidget',)
 
 
 class PermissionCriteriaWidget(ListCriteriaWidget):
@@ -24,10 +20,11 @@ class PermissionCriteriaWidget(ListCriteriaWidget):
     classes using the set_classes() method.
     """
 
-    def __init__(self, title: str, query, attrname: str, enable_equal: bool = True,
-                 enable_subset: bool = False, parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+                 enable_equal: bool = True, enable_subset: bool = False,
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
-        self.perm_model = StringList()
+        self.perm_model = models.StringList()
 
         super().__init__(title, query, attrname, self.perm_model, enable_equal=enable_equal,
                          enable_subset=enable_subset, parent=parent)
@@ -46,7 +43,7 @@ class PermissionCriteriaWidget(ListCriteriaWidget):
             self.criteria_subset.setWhatsThis(
                 "<b>The selected permissions must be a subset to match.</b>")
 
-    def set_classes(self, classes: "Optional[List[ObjClass]]" = None) -> None:
+    def set_classes(self, classes: list[setools.ObjClass] | None = None) -> None:
         """
         Set classes.  The widget will show the intersection of all selected
         classes.
@@ -59,14 +56,14 @@ class PermissionCriteriaWidget(ListCriteriaWidget):
         for cls in self.query.policy.classes():
             permlist.update(cls.perms)
 
-            with suppress(NoCommon):
+            with suppress(setools.exception.NoCommon):
                 permlist.update(cls.common.perms)
 
         # create intersection
         for cls in classes:
             cls_perms = set(cls.perms)
 
-            with suppress(NoCommon):
+            with suppress(setools.exception.NoCommon):
                 cls_perms.update(cls.common.perms)
 
             permlist.intersection_update(cls_perms)
@@ -80,12 +77,12 @@ class PermissionCriteriaWidget(ListCriteriaWidget):
     # Workspace methods
     #
 
-    def save(self, settings: "Dict") -> None:
+    def save(self, settings: dict) -> None:
         super().save(settings)
         with suppress(AttributeError):
             settings[self.criteria_equal.objectName()] = self.criteria_equal.isChecked()
 
-    def load(self, settings: "Dict") -> None:
+    def load(self, settings: dict) -> None:
         with suppress(AttributeError, KeyError):
             self.criteria_equal.setChecked(settings[self.criteria_equal.objectName()])
         super().load(settings)
@@ -97,8 +94,8 @@ class PermissionCriteriaWidget(ListCriteriaWidget):
 if __name__ == '__main__':
     import sys
     import warnings
-    import setools
     import pprint
+    import logging
 
     from .objclass import ObjClassCriteriaWidget
 

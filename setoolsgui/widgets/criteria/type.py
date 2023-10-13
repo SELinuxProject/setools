@@ -1,16 +1,12 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 from contextlib import suppress
-from enum import Enum
-import logging
-from typing import TYPE_CHECKING
+import enum
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
+import setools
 
 from .name import NameCriteriaWidget
-
-if TYPE_CHECKING:
-    from typing import Dict, List, Optional
 
 # Regex for exact matches to types/attrs
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
@@ -18,12 +14,7 @@ VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 # indirect default setting (checked)
 INDIRECT_DEFAULT_CHECKED = True
 
-
-class TypeOrAttrNameMode(Enum):
-
-    type_only = 1
-    attribute_only = 2
-    type_or_attribute = 3
+__all__ = ('TypeOrAttrNameWidget',)
 
 
 class TypeOrAttrNameWidget(NameCriteriaWidget):
@@ -36,17 +27,27 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
 
     indirect_toggled = QtCore.pyqtSignal(bool)
 
-    def __init__(self, title: str, query, attrname: str,
-                 parent: "Optional[QtWidgets.QWidget]" = None,
-                 mode: TypeOrAttrNameMode = TypeOrAttrNameMode.type_only,
+    class Mode(enum.Enum):
+
+        """Enumeration of widget modes."""
+
+        type_only = 1
+        attribute_only = 2
+        type_or_attribute = 3
+
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+                 parent: QtWidgets.QWidget | None = None,
+                 mode: Mode = Mode.type_only,
                  enable_indirect: bool = False, enable_regex: bool = False,
                  required: bool = False):
 
         # Create completion list
-        completion: "List[str]" = []
-        if mode in (TypeOrAttrNameMode.type_only, TypeOrAttrNameMode.type_or_attribute):
+        completion = list[str]()
+        if mode in (TypeOrAttrNameWidget.Mode.type_only,
+                    TypeOrAttrNameWidget.Mode.type_or_attribute):
             completion.extend(t.name for t in query.policy.types())
-        if mode in (TypeOrAttrNameMode.attribute_only, TypeOrAttrNameMode.type_or_attribute):
+        if mode in (TypeOrAttrNameWidget.Mode.attribute_only,
+                    TypeOrAttrNameWidget.Mode.type_or_attribute):
             completion.extend(a.name for a in query.policy.typeattributes())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
@@ -81,12 +82,12 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
     # Workspace methods
     #
 
-    def save(self, settings: "Dict") -> None:
+    def save(self, settings: dict) -> None:
         super().save(settings)
         with suppress(AttributeError):
             settings[self.criteria_indirect.objectName()] = self.criteria_indirect.isChecked()
 
-    def load(self, settings: "Dict") -> None:
+    def load(self, settings: dict) -> None:
         with suppress(AttributeError, KeyError):
             self.criteria_indirect.setChecked(settings[self.criteria_indirect.objectName()])
         super().load(settings)
@@ -95,8 +96,8 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
 if __name__ == '__main__':
     import sys
     import warnings
-    import setools
     import pprint
+    import logging
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
@@ -107,7 +108,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
     widget = TypeOrAttrNameWidget("Test Type/Attribute", q, "source", mw,
-                                  TypeOrAttrNameMode.type_or_attribute, True, True)
+                                  TypeOrAttrNameWidget.Mode.type_or_attribute, True, True)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)
@@ -123,11 +124,11 @@ if __name__ == '__main__':
     print("Errors?", widget.has_errors)
 
     # basic test of save/load
-    settings: dict = {}
-    widget.save(settings)
-    pprint.pprint(settings)
-    settings["source"] = "user_t"
-    widget.load(settings)
+    saved_settings: dict = {}
+    widget.save(saved_settings)
+    pprint.pprint(saved_settings)
+    saved_settings["source"] = "user_t"
+    widget.load(saved_settings)
 
     print("Query final state")
     print("source:", q.source)

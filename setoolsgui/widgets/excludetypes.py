@@ -15,16 +15,29 @@ from . import models
 # "" to handle unset
 AttrFilter = typing.Union[setools.TypeAttribute, typing.Literal[""]]
 
+__all__ = ("ExcludeTypes",)
+
+E = typing.TypeVar("E")
+
+
+class ExcludeProtocol(typing.Protocol[E]):
+
+    """Protocol for exclusion lists."""
+
+    exclude: list[E]
+    policy: setools.SELinuxPolicy
+
 
 class ExcludeTypes(QtWidgets.QDialog):
 
     """Dialog for choosing excluded types."""
 
-    def __init__(self, query, parent: typing.Optional[QtWidgets.QWidget] = None):
+    def __init__(self, query: ExcludeProtocol[setools.Type],
+                 parent: QtWidgets.QWidget | None = None):
 
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
-        self.query = query
+        self.query: typing.Final = query
 
         self.setWindowTitle("Exclude Types From Analysis")
         self.gridLayout = QtWidgets.QGridLayout(self)
@@ -224,9 +237,7 @@ class FilterByAttributeProxy(QtCore.QSortFilterProxyModel):
 
 if __name__ == '__main__':
     import sys
-    import logging
     import warnings
-    import setools
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')

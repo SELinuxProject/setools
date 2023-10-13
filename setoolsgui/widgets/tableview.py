@@ -9,6 +9,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from .models import modelroles
 
+__all__ = ("SEToolsTableView",)
+
 
 class SEToolsTableView(QtWidgets.QTableView):
 

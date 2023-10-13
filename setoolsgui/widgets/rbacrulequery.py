@@ -1,15 +1,9 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-import logging
-from typing import TYPE_CHECKING
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 import setools
 
 from . import criteria, models, tab
-
-if TYPE_CHECKING:
-    from typing import Optional
 
 
 class RBACRuleQueryTab(tab.TableResultTabWidget):
@@ -21,7 +15,7 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
     mlsonly = False
 
     def __init__(self, policy: "setools.SELinuxPolicy", _,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(setools.RBACRuleQuery(policy), enable_criteria=True, parent=parent)
 
@@ -58,7 +52,8 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
         dst = criteria.TypeOrAttrNameWidget("Target Role/Type",
                                             self.query,
                                             "target",
-                                            mode=criteria.TypeOrAttrNameMode.type_or_attribute,
+                                            mode=criteria.TypeOrAttrNameWidget.Mode.
+                                            type_or_attribute,
                                             enable_regex=True,
                                             enable_indirect=True,
                                             parent=self.criteria_frame)
@@ -124,6 +119,7 @@ if __name__ == '__main__':
     import sys
     import warnings
     import pprint
+    import logging
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')

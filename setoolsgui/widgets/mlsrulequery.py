@@ -1,14 +1,9 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from typing import TYPE_CHECKING
-
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 import setools
 
 from . import criteria, models, tab
-
-if TYPE_CHECKING:
-    from typing import Optional
 
 
 class MLSRuleQueryTab(tab.TableResultTabWidget):
@@ -20,7 +15,7 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
     mlsonly = True
 
     def __init__(self, policy: "setools.SELinuxPolicy", _,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(setools.MLSRuleQuery(policy), enable_criteria=True, parent=parent)
 
@@ -43,7 +38,8 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
         src = criteria.TypeOrAttrNameWidget("Source Type/Attribute",
                                             self.query,
                                             "source",
-                                            mode=criteria.TypeOrAttrNameMode.type_or_attribute,
+                                            mode=criteria.TypeOrAttrNameWidget.Mode.
+                                            type_or_attribute,
                                             enable_regex=True,
                                             enable_indirect=True,
                                             parent=self.criteria_frame)
@@ -69,7 +65,8 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
         dst = criteria.TypeOrAttrNameWidget("Target Type/Attribute",
                                             self.query,
                                             "target",
-                                            mode=criteria.TypeOrAttrNameMode.type_or_attribute,
+                                            mode=criteria.TypeOrAttrNameWidget.Mode.
+                                            type_or_attribute,
                                             enable_regex=True,
                                             enable_indirect=True,
                                             parent=self.criteria_frame)

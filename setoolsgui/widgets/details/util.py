@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from typing import Optional
-
 from PyQt5 import QtCore, QtWidgets
+
+__all__ = ("display_object_details", )
 
 
 def display_object_details(title: str, html_text: str,
-                           parent: Optional[QtWidgets.QWidget] = None) -> None:
+                           parent: QtWidgets.QWidget | None = None) -> None:
 
     """Display a non-modal dialog box with information in HTML."""
 

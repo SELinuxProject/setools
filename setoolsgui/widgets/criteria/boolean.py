@@ -1,19 +1,15 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from contextlib import suppress
-from typing import TYPE_CHECKING
+from PyQt5 import QtWidgets
 
-from PyQt5 import QtCore, QtGui, QtWidgets
-
+from .. import models
 from .list import ListCriteriaWidget
 from .name import NameCriteriaWidget
-from ..models.boolean import BooleanTable
-
-if TYPE_CHECKING:
-    from typing import List, Optional
 
 # Regex for exact matches to types/attrs
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
+
+__all__ = ("BooleanListCriteriaWidget", "BooleanNameCriteriaWidget",)
 
 
 class BooleanListCriteriaWidget(ListCriteriaWidget):
@@ -21,9 +17,9 @@ class BooleanListCriteriaWidget(ListCriteriaWidget):
     """A widget providing a QListView widget for selecting zero or more Booleans."""
 
     def __init__(self, title: str, query, attrname: str, enable_equal: bool = True,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
-        model = BooleanTable(data=sorted(query.policy.bools()))
+        model = models.BooleanTable(data=sorted(query.policy.bools()))
 
         super().__init__(title, query, attrname, model, enable_equal=enable_equal, parent=parent)
 
@@ -43,10 +39,10 @@ class BooleanNameCriteriaWidget(NameCriteriaWidget):
     """
 
     def __init__(self, title: str, query, attrname: str,
-                 parent: "Optional[QtWidgets.QWidget]" = None,
+                 parent: QtWidgets.QWidget | None = None,
                  enable_regex: bool = True, required: bool = False):
 
-        completion: "List[str]" = sorted(b.name for b in query.policy.bools())
+        completion: list[str] = sorted(b.name for b in query.policy.bools())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
                          enable_regex=enable_regex, required=required, parent=parent)

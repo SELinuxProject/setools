@@ -3,15 +3,11 @@
 
 import copy
 import logging
-from typing import TYPE_CHECKING
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from setools import PermissionMap
 
 from .models import StringList
-
-if TYPE_CHECKING:
-    from typing import List, Optional
 
 
 class PermissionMapEditor(QtWidgets.QDialog):
@@ -33,7 +29,7 @@ class PermissionMapEditor(QtWidgets.QDialog):
     class_toggle = QtCore.pyqtSignal(bool)
 
     def __init__(self, perm_map: PermissionMap, edit: bool = False,
-                 parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
         self.edit = edit
@@ -42,9 +38,6 @@ class PermissionMapEditor(QtWidgets.QDialog):
         # and this dialog may be canceled after some edits.
         self.perm_map = copy.deepcopy(perm_map)
 
-        self.setupUi()
-
-    def setupUi(self) -> None:
         if self.edit:
             self.setWindowTitle(f"{self.perm_map} - Permission Map Editor - apol")
         else:
@@ -92,7 +85,7 @@ class PermissionMapEditor(QtWidgets.QDialog):
         frame_layout.addWidget(self.disable_all, 1, 3, 1, 1)
 
         # permission widgets
-        self.widgets: "List[PermissionMapping]" = []
+        self.widgets = list[PermissionMapping]()
         scrollArea = QtWidgets.QScrollArea(frame)
         scrollArea.setWidgetResizable(True)
         scrollArea.setAlignment(
@@ -126,18 +119,20 @@ class PermissionMapEditor(QtWidgets.QDialog):
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def accept(self) -> None:
+        """Accept the dialog and emit the perm_map signal."""
         self.apply_permmap.emit(self.perm_map)
         super().accept()
 
     def class_selected(self) -> None:
+        """Handle a class being selected."""
         # the .ui is set to 1 selection
         for index in self.classes.selectionModel().selectedIndexes():
             class_name = self.classes.model().data(index, QtCore.Qt.ItemDataRole.DisplayRole)
 
-        self.log.debug("Setting class to {0}".format(class_name))
+        self.log.debug(f"Setting class to {class_name}")
 
-        self.enable_all.setToolTip("Include all permissions in the {0} class.".format(class_name))
-        self.disable_all.setToolTip("Exclude all permissions in the {0} class.".format(class_name))
+        self.enable_all.setToolTip(f"Include all permissions in the {class_name} class.")
+        self.disable_all.setToolTip(f"Exclude all permissions in the {class_name} class.")
 
         self._clear_mappings()
 
@@ -158,9 +153,11 @@ class PermissionMapEditor(QtWidgets.QDialog):
             self.widgets.append(line)
 
     def enable_all_perms(self) -> None:
+        """Enable all permissions in the current class."""
         self.class_toggle.emit(True)
 
     def disable_all_perms(self) -> None:
+        """Disable all permissions in the current class."""
         self.class_toggle.emit(False)
 
     #
@@ -194,14 +191,12 @@ class PermissionMapping(QtWidgets.QWidget):
                 behavior.
     """
 
-    def __init__(self, mapping, edit: bool = False, parent: "Optional[PermissionMapEditor]" = None):
+    def __init__(self, mapping, edit: bool = False, parent: PermissionMapEditor | None = None):
         super().__init__(parent)
         self.log = logging.getLogger(__name__)
         self.mapping = mapping
         self.edit = edit
-        self.setupUi()
 
-    def setupUi(self):
         self.resize(457, 41)
         self.horizontalLayout = QtWidgets.QHBoxLayout(self)
         self.permission = QtWidgets.QLabel(self)
@@ -259,7 +254,8 @@ class PermissionMapping(QtWidgets.QWidget):
         self.enabled.toggled.connect(self.set_enabled)
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    def set_direction(self, value):
+    def set_direction(self, value) -> None:
+        """Set the direction for the mapping."""
         if self.unmapped:
             if value == "Unmapped":
                 return
@@ -270,22 +266,23 @@ class PermissionMapping(QtWidgets.QWidget):
             self.unmapped = False
 
         dir_ = index_to_setting[value]
-        self.log.debug("Setting {0.class_}:{0.perm} direction to {1}".format(self.mapping, dir_))
+        self.log.debug(f"Setting {self.mapping.class_}:{self.mapping.perm} direction to {dir_}")
         self.mapping.direction = dir_
 
-    def set_weight(self, value):
-        self.log.debug("Setting {0.class_}:{0.perm} weight to {1}".format(self.mapping, value))
+    def set_weight(self, value: str | int) -> None:
+        """Set the weight for the mapping."""
+        self.log.debug(f"Setting {self.mapping.class_}:{self.mapping.perm} weight to {value}")
         self.mapping.weight = int(value)
 
-    def set_enabled(self, value):
-        self.log.debug("Setting {0.class_}:{0.perm} enabled to {1}".format(self.mapping, value))
+    def set_enabled(self, value: bool) -> None:
+        """Set the enabled value for the mapping."""
+        self.log.debug(f"Setting {self.mapping.class_}:{self.mapping.perm} enabled to {value}")
         self.mapping.enabled = value
 
 
 if __name__ == '__main__':
     import sys
     import warnings
-    import logging
     import setools
 
     logging.basicConfig(level=logging.DEBUG,

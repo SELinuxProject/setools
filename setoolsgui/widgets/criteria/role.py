@@ -1,16 +1,14 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from typing import TYPE_CHECKING
-
 from PyQt5 import QtCore, QtWidgets
+import setools
 
 from .name import NameCriteriaWidget
 
-if TYPE_CHECKING:
-    from typing import List, Optional
-
-# Regex for exact matches to types/attrs
+# Regex for exact matches to roles
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
+
+__all__ = ("RoleNameWidget",)
 
 
 class RoleNameWidget(NameCriteriaWidget):
@@ -22,12 +20,12 @@ class RoleNameWidget(NameCriteriaWidget):
 
     indirect_toggled = QtCore.pyqtSignal(bool)
 
-    def __init__(self, title: str, query, attrname: str,
-                 parent: "Optional[QtWidgets.QWidget]" = None,
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+                 parent: QtWidgets.QWidget | None = None,
                  required: bool = False, enable_regex: bool = True):
 
         # Create completion list
-        completion: "List[str]" = [r.name for r in query.policy.roles()]
+        completion = list[str](r.name for r in query.policy.roles())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
                          enable_regex=enable_regex, required=required, parent=parent)
@@ -37,7 +35,6 @@ if __name__ == '__main__':
     import sys
     import logging
     import warnings
-    import setools
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')

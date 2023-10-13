@@ -4,13 +4,15 @@ import typing
 
 from PyQt5 import QtWidgets
 
+__all__ = ('CriteriaWidget',)
+
 
 class CriteriaWidget(QtWidgets.QGroupBox):
 
     """Base class for criteria widgets."""
 
     def __init__(self, title: str, query, attrname: str,
-                 parent: typing.Optional[QtWidgets.QWidget] = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(parent=parent)
         self.log: typing.Final = logging.getLogger(self.__module__)
@@ -32,10 +34,10 @@ class CriteriaWidget(QtWidgets.QGroupBox):
     # Save/Load field
     #
 
-    def save(self, settings: typing.Dict) -> None:
+    def save(self, settings: dict) -> None:
         """Save the widget settings to the settings dictionary."""
         raise NotImplementedError
 
-    def load(self, settings: typing.Dict) -> None:
+    def load(self, settings: dict) -> None:
         """Load the widget settings from the settings dictionary."""
         raise NotImplementedError

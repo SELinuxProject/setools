@@ -1,21 +1,21 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-import logging
-from typing import Optional
-
 from PyQt5 import QtWidgets
+import setools
 
 from .. import models
 from .list import ListCriteriaWidget
+
+__all__ = ('ObjClassCriteriaWidget',)
 
 
 class ObjClassCriteriaWidget(ListCriteriaWidget):
 
     """A widget providing a QListView widget for selecting the object class."""
 
-    def __init__(self, title: str, query, attrname: str,
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
                  enable_equal: bool = False, enable_subset: bool = False,
-                 parent: Optional[QtWidgets.QWidget] = None) -> None:
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         model = models.ObjClassTable(data=sorted(query.policy.classes()))
 
@@ -29,8 +29,8 @@ class ObjClassCriteriaWidget(ListCriteriaWidget):
 if __name__ == '__main__':
     import sys
     import warnings
-    import setools
     import pprint
+    import logging
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')

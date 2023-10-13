@@ -1,22 +1,20 @@
 # SPDX-License-Identifier: LGPL-2.1-only
-from typing import TYPE_CHECKING
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
+import setools
 
-from .util import display_object_details
+from . import util
 
-if TYPE_CHECKING:
-    from typing import List, Optional
-    from setools.policyrep import Role, Type
+__all__ = ("role_detail", "role_detail_action", "role_tooltip")
 
 
-def role_detail(role: "Role", parent: "Optional[QtWidgets.QWidget]" = None) -> None:
+def role_detail(role: setools.Role, parent: QtWidgets.QWidget | None = None) -> None:
 
     """Display a dialog with role details."""
 
-    types: "List[Type]" = sorted(role.types())
+    types = list[setools.Type](sorted(role.types()))
 
-    display_object_details(
+    util.display_object_details(
         f"{role} Details",
         f"""
         <h1>Role Name</h1>
@@ -30,8 +28,8 @@ def role_detail(role: "Role", parent: "Optional[QtWidgets.QWidget]" = None) -> N
         parent)
 
 
-def role_detail_action(role: "Role",
-                       parent: "Optional[QtWidgets.QWidget]" = None) -> QtWidgets.QAction:
+def role_detail_action(role: setools.Role,
+                       parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for role."""
 
@@ -40,7 +38,7 @@ def role_detail_action(role: "Role",
     return a
 
 
-def role_tooltip(role: "Role") -> str:
+def role_tooltip(role: setools.Role) -> str:
     """Return tooltip text for this role."""
     n_types = len(list(role.types()))
     if n_types == 0:
