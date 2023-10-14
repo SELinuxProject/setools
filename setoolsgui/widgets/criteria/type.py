@@ -55,7 +55,8 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
 
         if enable_indirect:
             self.criteria_indirect = QtWidgets.QCheckBox(self)
-            self.criteria_indirect.setObjectName(f"{attrname}_indirect")
+            # the rstrip("_") is to avoid names like "type__indirect"
+            self.criteria_indirect.setObjectName(f"{attrname.rstrip('_')}_indirect")
             self.criteria_indirect.setText("Indirect")
             self.criteria_indirect.setToolTip("Enables indirect matching.")
             self.criteria_indirect.setWhatsThis(

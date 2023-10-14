@@ -79,9 +79,10 @@ class ListCriteriaWidget(CriteriaWidget):
         self.criteria_any.setChecked(not any((EQUAL_DEFAULT_CHECKED, SUBSET_DEFAULT_CHECKED)))
         self.top_layout.addWidget(self.criteria_any, 0, 2, 1, 1)
 
+        # the rstrip("_") below is to aviod names like "name__equal"
         if enable_equal:
             self.criteria_equal = QtWidgets.QRadioButton(self)
-            self.criteria_equal.setObjectName(f"{self.attrname}_equal")
+            self.criteria_equal.setObjectName(f"{self.attrname.rstrip('_')}_equal")
             self.criteria_equal.setText("Match exact")
             self.top_layout.addWidget(self.criteria_equal, 1, 2, 1, 1)
             self.criteria_equal.toggled.connect(self._set_equal)
@@ -92,7 +93,7 @@ class ListCriteriaWidget(CriteriaWidget):
 
         if enable_subset:
             self.criteria_subset = QtWidgets.QRadioButton(self)
-            self.criteria_subset.setObjectName(f"{self.attrname}_subset")
+            self.criteria_subset.setObjectName(f"{self.attrname.rstrip('_')}_subset")
             self.criteria_subset.setText("Match subset")
             self.top_layout.addWidget(self.criteria_subset, 2, 2, 1, 1)
             self.criteria_subset.toggled.connect(self._set_subset)

@@ -1,9 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from unittest.mock import Mock
 
-from setools import SELinuxPolicy
-from setools.policyrep import (Boolean, Common, ObjClass, Role, Type, TypeAttribute)
-from setools.query import PolicyQuery
+import setools
 
 
 class SortableMock(Mock):
@@ -17,50 +15,56 @@ class SortableMock(Mock):
 
 def _build_mock_policy() -> Mock:
     """Build a mock policy."""
-    foo_bool = SortableMock(Boolean)
+    foo_bool = SortableMock(setools.Boolean)
     foo_bool.name = "foo_bool"
-    bar_bool = SortableMock(Boolean)
+    bar_bool = SortableMock(setools.Boolean)
     bar_bool.name = "bar_bool"
 
-    common = SortableMock(Common)
+    common = SortableMock(setools.Common)
     common.name = "common_perm_set"
     common.perms = frozenset(("common_perm",))
 
-    foo_class = SortableMock(ObjClass)
+    foo_class = SortableMock(setools.ObjClass)
     foo_class.name = "foo_class"
     foo_class.perms = frozenset(("foo_perm1", "foo_perm2"))
     foo_class.common = common
-    bar_class = SortableMock(ObjClass)
+    bar_class = SortableMock(setools.ObjClass)
     bar_class.name = "bar_class"
     bar_class.perms = frozenset(("bar_perm1", "bar_perm2"))
     bar_class.common = common
 
-    foo_t = SortableMock(Type)
+    foo_t = SortableMock(setools.Type)
     foo_t.name = "foo_t"
-    bar_t = SortableMock(Type)
+    bar_t = SortableMock(setools.Type)
     bar_t.name = "bar_t"
 
-    fooattr = SortableMock(TypeAttribute)
+    fooattr = SortableMock(setools.TypeAttribute)
     fooattr.name = "foo_type"
-    barattr = SortableMock(TypeAttribute)
+    barattr = SortableMock(setools.TypeAttribute)
     barattr.name = "bar_type"
 
-    foo_r = SortableMock(Role)
+    foo_r = SortableMock(setools.Role)
     foo_r.name = "foo_r"
-    bar_r = SortableMock(Role)
+    bar_r = SortableMock(setools.Role)
     bar_r.name = "bar_r"
 
-    policy = Mock(SELinuxPolicy)
+    foo_u = SortableMock(setools.User)
+    foo_u.name = "foo_u"
+    bar_u = SortableMock(setools.User)
+    bar_u.name = "bar_u"
+
+    policy = Mock(setools.SELinuxPolicy)
     policy.bools.return_value = (foo_bool, bar_bool)
     policy.classes.return_value = (foo_class, bar_class)
     policy.roles.return_value = (foo_r, bar_r)
     policy.types.return_value = (foo_t, bar_t)
     policy.typeattributes.return_value = (fooattr, barattr)
+    policy.users.return_value = (foo_u, bar_u)
     return policy
 
 
 def _build_mock_query() -> Mock:
     """Build a mock query with mocked policy."""
-    mock_query = Mock(PolicyQuery)
+    mock_query = Mock(setools.PolicyQuery)
     mock_query.policy = _build_mock_policy()
     return mock_query

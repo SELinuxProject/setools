@@ -88,7 +88,8 @@ class NameCriteriaWidget(CriteriaWidget):
         # Enable configured checkboxes
         if enable_regex:
             self.criteria_regex = QtWidgets.QCheckBox(self)
-            self.criteria_regex.setObjectName(f"{self.attrname}_regex")
+            # the rstrip(_) is to avoid names like "type__regex"
+            self.criteria_regex.setObjectName(f"{self.attrname.rstrip('_')}_regex")
             self.criteria_regex.setText("Regex")
             self.criteria_regex.setToolTip("Enables regular expression matching.")
             self.criteria_regex.setToolTip("Enables regular expression matching.")
@@ -159,6 +160,7 @@ class NameCriteriaWidget(CriteriaWidget):
             self.editingFinished.emit(getattr(self.query, name))
         except Exception as e:
             self.set_criteria_error(str(e))
+            self.log.debug(f"Error setting {name}: {e}", exc_info=True)
 
     def set_criteria_error(self, message: str) -> None:
         """Set the error output from the criteria."""

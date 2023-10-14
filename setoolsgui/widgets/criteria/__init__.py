@@ -10,3 +10,4 @@ from .rbacruletype import *
 from .role import *
 from .teruletype import *
 from .type import *
+from .user import *
