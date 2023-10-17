@@ -27,8 +27,9 @@ jobs:
 
       matrix:
         build-opts:
-          - {python: '3.10', tox: python3.10}
-          - {python: '3.11', tox: python3.11}
+          - {python: '3.10', tox: python3}
+          - {python: '3.11', tox: python3}
+          - {python: '3.12', tox: python3}
           - {python: '3.11', tox: pep8}
           - {python: '3.11', tox: lint}
           - {python: '3.11', tox: mypy}
@@ -57,8 +58,13 @@ jobs:
             xvfb \
             x11-xserver-utils
 
-        sudo python -m pip install -U \
+        python -m pip install -U --user \
             tox
+
+    # This is a curated list of packages to get Qt to work with xvfb in
+    # GitHub actions.  https://github.com/tlambert03/setup-qt-libs
+    - name: Install Qt dependencies
+      uses: tlambert03/setup-qt-libs@v1
 
     - name: Cache SELinux userspace
       uses: actions/cache@v3
@@ -79,6 +85,9 @@ jobs:
         make CFLAGS="-O2 -pipe -fPIC -Wall -I${{env.SEPOL_SRC}}/include" -C ${{env.CHECKPOLICY_SRC}}
 
     - name: Run test
-      run: tox -e ${{ matrix.build-opts.tox }}
+      run: |
+        # confirm python version
+        python --version
+        python -m tox -e ${{ matrix.build-opts.tox }}
       env:
         LD_LIBRARY_PATH: "${{env.SEPOL_SRC}}/src:${{env.SELINUX_SRC}}/src:${LD_LIBRARY_PATH}"
