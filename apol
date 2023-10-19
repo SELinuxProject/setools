@@ -52,6 +52,10 @@ logging.getLogger().addHandler(console_handler)
 try:
     sys.exit(setoolsgui.run_apol(args.policy))
 
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
+
 except Exception as err:
     if args.debug:
         raise

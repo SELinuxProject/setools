@@ -121,6 +121,10 @@ try:
         print("\nGraph statistics:")
         print(g.get_stats())
 
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
+
 except Exception as err:
     if args.debug:
         raise

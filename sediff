@@ -1498,6 +1498,10 @@ try:
             del diff.added_typebounds
             del diff.removed_typebounds
 
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
+
 except Exception as err:
     if args.debug:
         raise
