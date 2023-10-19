@@ -1,19 +1,18 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import Dict, List, Final
 
-from PyQt5 import QtCore, QtGui, QtWidgets
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.checkboxset import CheckboxSetCriteriaWidget
 
-from .util import _build_mock_query
+from .util import build_mock_query
 
 CHECKBOXES = ("cb1", "cb2", "cb3")
 
 
 def test_base_settings(qtbot: QtBot) -> None:
     """Test base properties of widget."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES)
     qtbot.addWidget(widget)
 
@@ -23,7 +22,7 @@ def test_base_settings(qtbot: QtBot) -> None:
 
 def test_3across_layout(qtbot: QtBot) -> None:
     """Test three checkboxes all in one row layout."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=3)
     qtbot.addWidget(widget)
@@ -41,7 +40,7 @@ def test_3across_layout(qtbot: QtBot) -> None:
 
 def test_2across_layout(qtbot: QtBot) -> None:
     """Test two columns of checkboxes layout."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=2)
     qtbot.addWidget(widget)
@@ -57,7 +56,7 @@ def test_2across_layout(qtbot: QtBot) -> None:
 
 def test_1across_layout(qtbot: QtBot) -> None:
     """Test one column of checkboxes layout."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -73,7 +72,7 @@ def test_1across_layout(qtbot: QtBot) -> None:
 
 def test_selection(qtbot: QtBot) -> None:
     """Test checked boxes are reflected in the query."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -92,7 +91,7 @@ def test_selection(qtbot: QtBot) -> None:
 
 def test_set_selection(qtbot: QtBot) -> None:
     """Test set_selection method."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -111,7 +110,7 @@ def test_set_selection(qtbot: QtBot) -> None:
 
 def test_clear_selection(qtbot: QtBot) -> None:
     """Test clear selection button."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -128,7 +127,7 @@ def test_clear_selection(qtbot: QtBot) -> None:
 
 def test_invert_selection(qtbot: QtBot) -> None:
     """Test clear selection button."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -145,7 +144,7 @@ def test_invert_selection(qtbot: QtBot) -> None:
 
 def test_save(qtbot: QtBot) -> None:
     """Test save."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -163,7 +162,7 @@ def test_save(qtbot: QtBot) -> None:
 
 def test_load(qtbot: QtBot) -> None:
     """Test load."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -178,7 +177,7 @@ def test_load(qtbot: QtBot) -> None:
 
 def test_set_selection_disabled(qtbot: QtBot) -> None:
     """Test set_selection method, ignoring disabled boxes."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -196,7 +195,7 @@ def test_set_selection_disabled(qtbot: QtBot) -> None:
 
 def test_clear_selection_disabled(qtbot: QtBot) -> None:
     """Test clear selection button, ignoring disabled boxes."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)
@@ -215,7 +214,7 @@ def test_clear_selection_disabled(qtbot: QtBot) -> None:
 
 def test_invert_selection_disabled(qtbot: QtBot) -> None:
     """Test clear selection button, ignoring disabled boxes."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = CheckboxSetCriteriaWidget("title", mock_query, "checkboxes", CHECKBOXES,
                                        num_cols=1)
     qtbot.addWidget(widget)

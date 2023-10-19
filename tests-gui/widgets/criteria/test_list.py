@@ -6,26 +6,22 @@ from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.list import (EQUAL_DEFAULT_CHECKED, ListCriteriaWidget,
                                               SUBSET_DEFAULT_CHECKED)
-from setoolsgui.widgets.models.table import SEToolsTableModel
+from setoolsgui.widgets.models.table import StringList
 
-from .util import _build_mock_query
+from . import util
 
 
-def _create_model() -> SEToolsTableModel[str]:
-    """Create an appropriate model with data for ListCriteriaWidget tests."""
-    model: SEToolsTableModel[str] = SEToolsTableModel()
-    model.item_list = ["item1", "item2", "item3"]
-    # Set headers since we're using the base class. Headers are set by subclasses.
-    model.headers = ["Name"]
-    return model
+def _setup_widget(testname: str, **kwargs) -> tuple[ListCriteriaWidget, StringList]:
+    """Set up widget for testing."""
+    model = StringList(data=["item1", "item2", "item3"])
+    widget = ListCriteriaWidget(testname, util.build_mock_query(), "name", model, **kwargs)
+    model.setParent(widget)
+    return widget, model
 
 
 def test_base_settings(qtbot: QtBot) -> None:
     """Test base properties of widget."""
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_base_settings", mock_query, "name", _create_model(),
-                                enable_equal=True, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, _ = _setup_widget("test_base_settings", enable_equal=True, enable_subset=True)
     qtbot.addWidget(widget)
 
     assert widget.clear_criteria.toolTip()
@@ -41,10 +37,8 @@ def test_base_settings(qtbot: QtBot) -> None:
 
 def test_equal_subset_disabled_layout(qtbot: QtBot) -> None:
     """Test layout for no equal and subset options."""
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_subset_disabled_layout", mock_query, "name",
-                                _create_model(), enable_equal=False, enable_subset=False)
-    widget.criteria.model().setParent(widget)
+    widget, _ = _setup_widget("test_equal_subset_disabled_layout", enable_equal=False,
+                              enable_subset=False)
     qtbot.addWidget(widget)
 
     # validate widget item positions
@@ -61,10 +55,8 @@ def test_equal_subset_disabled_layout(qtbot: QtBot) -> None:
 
 def test_equal_enabled_subset_disabled_layout(qtbot: QtBot) -> None:
     """Test layout for equal enabled and subset disabled options."""
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_enabled_subset_disabled_layout", mock_query, "name",
-                                _create_model(), enable_equal=True, enable_subset=False)
-    widget.criteria.model().setParent(widget)
+    widget, _ = _setup_widget("test_equal_enabled_subset_disabled_layout", enable_equal=True,
+                              enable_subset=False)
     qtbot.addWidget(widget)
 
     # validate widget item positions
@@ -81,10 +73,8 @@ def test_equal_enabled_subset_disabled_layout(qtbot: QtBot) -> None:
 
 def test_equal_disabled_subset_enabled_layout(qtbot: QtBot) -> None:
     """Test layout for equal disabled and subset enabled options."""
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_disabled_subset_enabled_layout", mock_query, "name",
-                                _create_model(), enable_equal=False, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, _ = _setup_widget("test_equal_disabled_subset_enabled_layout", enable_equal=False,
+                              enable_subset=True)
     qtbot.addWidget(widget)
 
     # validate widget item positions
@@ -101,10 +91,8 @@ def test_equal_disabled_subset_enabled_layout(qtbot: QtBot) -> None:
 
 def test_equal_subset_enabled_layout(qtbot: QtBot) -> None:
     """Test layout for equal and subset enabled options."""
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_subset_enabled_layout", mock_query, "name",
-                                _create_model(), enable_equal=True, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, _ = _setup_widget("test_equal_subset_enabled_layout", enable_equal=True,
+                              enable_subset=True)
     qtbot.addWidget(widget)
 
     # validate widget item positions
@@ -121,106 +109,86 @@ def test_equal_subset_enabled_layout(qtbot: QtBot) -> None:
 
 def test_set_selection(qtbot: QtBot) -> None:
     """Test setting a selection."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_set_selection", mock_query, "name", model)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_set_selection")
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
-    widget.set_selection(test_selection)
-    assert list(widget.selection()) == test_selection
+    widget.criteria.set_selection(test_selection)
+    assert list(widget.criteria.selection()) == test_selection
     assert widget.query.name == test_selection
     assert not widget.has_errors
 
 
 def test_invert_selection(qtbot: QtBot) -> None:
     """Test inverting a selection."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_invert_selection", mock_query, "name", model)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_invert_selection")
     qtbot.addWidget(widget)
 
     inverted_selection = [model.item_list[1]]
-    widget.set_selection([model.item_list[0], model.item_list[2]])
+    widget.criteria.set_selection([model.item_list[0], model.item_list[2]])
     qtbot.mouseClick(widget.invert_criteria, QtCore.Qt.MouseButton.LeftButton)
-    assert list(widget.selection()) == inverted_selection
+    assert list(widget.criteria.selection()) == inverted_selection
     assert widget.query.name == inverted_selection
     assert not widget.has_errors
 
 
 def test_clear_selection(qtbot: QtBot) -> None:
     """Test clearing a selection."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_clear_selection", mock_query, "name", model)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_clear_selection")
     qtbot.addWidget(widget)
 
-    widget.set_selection([model.item_list[0], model.item_list[2]])
-    assert list(widget.selection())
+    widget.criteria.set_selection([model.item_list[0], model.item_list[2]])
+    assert list(widget.criteria.selection())
     qtbot.mouseClick(widget.clear_criteria, QtCore.Qt.MouseButton.LeftButton)
-    assert not list(widget.selection())
+    assert not list(widget.criteria.selection())
     assert not widget.query.name
     assert not widget.has_errors
 
 
 def test_equal_toggling(qtbot: QtBot) -> None:
     """Test equal match toggling is reflected in the query."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_toggling", mock_query, "name", model,
-                                enable_equal=True, enable_subset=False)
-    widget.criteria.model().setParent(widget)
+    widget, _ = _setup_widget("test_equal_toggling", enable_equal=True, enable_subset=False)
     qtbot.addWidget(widget)
 
     # test radio button toggling based on the initial state
     if EQUAL_DEFAULT_CHECKED:
         widget.criteria_any.setChecked(True)
-        assert mock_query.name_equal is False
+        assert widget.query.name_equal is False
         widget.criteria_equal.setChecked(True)
-        assert mock_query.name_equal is True
+        assert widget.query.name_equal is True
     else:
         widget.criteria_equal.setChecked(True)
-        assert mock_query.name_equal is True
+        assert widget.query.name_equal is True
         widget.criteria_any.setChecked(True)
-        assert mock_query.name_equal is False
+        assert widget.query.name_equal is False
 
 
 def test_subset_toggling(qtbot: QtBot) -> None:
     """Test subset match toggling is reflected in the query."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_subset_toggling", mock_query, "name", model,
-                                enable_equal=False, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, _ = _setup_widget("test_subset_toggling", enable_equal=False, enable_subset=True)
     qtbot.addWidget(widget)
 
     # test radio button toggling based on the initial state
     if SUBSET_DEFAULT_CHECKED:
         widget.criteria_any.setChecked(True)
-        assert mock_query.name_subset is False
+        assert widget.query.name_subset is False
         widget.criteria_subset.setChecked(True)
-        assert mock_query.name_subset is True
+        assert widget.query.name_subset is True
     else:
         widget.criteria_subset.setChecked(True)
-        assert mock_query.name_subset is True
+        assert widget.query.name_subset is True
         widget.criteria_any.setChecked(True)
-        assert mock_query.name_subset is False
+        assert widget.query.name_subset is False
 
 
 def test_equal_subset_disabled_save(qtbot: QtBot) -> None:
     """Test save settings with no options."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_subset_disabled_save", mock_query, "name", model,
-                                enable_equal=False, enable_subset=False)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_subset_disabled_save", enable_equal=False,
+                                  enable_subset=False)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     expected_settings: Final = {
         "name": test_selection
@@ -232,16 +200,13 @@ def test_equal_subset_disabled_save(qtbot: QtBot) -> None:
 
 def test_equal_enabled_subset_disabled_save(qtbot: QtBot) -> None:
     """Test save settings with equal enabled."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_enabled_subset_disabled_save", mock_query, "name",
-                                model, enable_equal=True, enable_subset=False)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_enabled_subset_disabled_save", enable_equal=True,
+                                  enable_subset=False)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_equal.setChecked(not EQUAL_DEFAULT_CHECKED)
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     expected_settings: Final = {
         "name": test_selection,
@@ -254,16 +219,13 @@ def test_equal_enabled_subset_disabled_save(qtbot: QtBot) -> None:
 
 def test_equal_disabled_subset_enabled_save(qtbot: QtBot) -> None:
     """Test save settings with subset enabled."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_disabled_subset_enabled_save", mock_query, "name",
-                                model, enable_equal=False, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_disabled_subset_enabled_save", enable_equal=False,
+                                  enable_subset=True)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(not SUBSET_DEFAULT_CHECKED)
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     expected_settings: Final = {
         "name": test_selection,
@@ -276,16 +238,13 @@ def test_equal_disabled_subset_enabled_save(qtbot: QtBot) -> None:
 
 def test_equal_subset_enabled_save(qtbot: QtBot) -> None:
     """Test save settings with equal and subset enabled."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_subset_enabled_save", mock_query, "name", model,
-                                enable_equal=True, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_subset_enabled_save", enable_equal=True,
+                                  enable_subset=True)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(True)
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     expected_settings: Final = {
         "name": test_selection,
@@ -299,84 +258,72 @@ def test_equal_subset_enabled_save(qtbot: QtBot) -> None:
 
 def test_equal_subset_disabled_load(qtbot: QtBot) -> None:
     """Test load settings with no options."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_subset_disabled_load", mock_query, "name", model,
-                                enable_equal=False, enable_subset=False)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_subset_disabled_load", enable_equal=False,
+                                  enable_subset=False)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     settings: Final = {
         "name": test_selection
     }
     widget.load(settings)
-    assert list(widget.selection()) == test_selection
-    assert mock_query.name == test_selection
+    assert list(widget.criteria.selection()) == test_selection
+    assert widget.query.name == test_selection
 
 
 def test_equal_enabled_subset_disabled_load(qtbot: QtBot) -> None:
     """Test load settings with equal enabled."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_enabled_subset_disabled_load", mock_query, "name",
-                                model, enable_equal=True, enable_subset=False)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_enabled_subset_disabled_load", enable_equal=True,
+                                  enable_subset=False)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_equal.setChecked(not EQUAL_DEFAULT_CHECKED)
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     settings: Final = {
         "name": test_selection,
         "name_equal": True
     }
     widget.load(settings)
-    assert list(widget.selection()) == test_selection
-    assert mock_query.name == test_selection
+    assert list(widget.criteria.selection()) == test_selection
+    assert widget.query.name == test_selection
     assert widget.criteria_equal.isChecked() is True
-    assert mock_query.name_equal is True
+    assert widget.query.name_equal is True
 
 
 def test_equal_disabled_subset_enabled_load(qtbot: QtBot) -> None:
     """Test load settings with subset enabled."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_disabled_subset_enabled_load", mock_query, "name",
-                                model, enable_equal=False, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_disabled_subset_enabled_load", enable_equal=False,
+                                  enable_subset=True)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(not SUBSET_DEFAULT_CHECKED)
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     settings: Final = {
         "name": test_selection,
         "name_subset": True
     }
     widget.load(settings)
-    assert list(widget.selection()) == test_selection
+    assert list(widget.criteria.selection()) == test_selection
     assert widget.criteria_subset.isChecked() is True
-    assert mock_query.name == test_selection
-    assert mock_query.name_subset is True
+    assert widget.query.name == test_selection
+    assert widget.query.name_subset is True
 
 
 def test_equal_subset_enabled_load(qtbot: QtBot) -> None:
     """Test load settings with equal and subset enabled."""
-    model = _create_model()
-    mock_query = _build_mock_query()
-    widget = ListCriteriaWidget("test_equal_subset_enabled_load", mock_query, "name", model,
-                                enable_equal=True, enable_subset=True)
-    widget.criteria.model().setParent(widget)
+    widget, model = _setup_widget("test_equal_subset_enabled_load", enable_equal=True,
+                                  enable_subset=True)
     qtbot.addWidget(widget)
 
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(True)
-    widget.set_selection(test_selection)
+    widget.criteria.set_selection(test_selection)
 
     settings: Final = {
         "name": test_selection,
@@ -384,9 +331,9 @@ def test_equal_subset_enabled_load(qtbot: QtBot) -> None:
         "name_subset": True
     }
     widget.load(settings)
-    assert list(widget.selection()) == test_selection
+    assert list(widget.criteria.selection()) == test_selection
     assert widget.criteria_equal.isChecked() is False
     assert widget.criteria_subset.isChecked() is True
-    assert mock_query.name == test_selection
-    assert mock_query.name_equal is False
-    assert mock_query.name_subset is True
+    assert widget.query.name == test_selection
+    assert widget.query.name_equal is False
+    assert widget.query.name_subset is True

@@ -58,7 +58,9 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
                                             enable_indirect=True,
                                             parent=self.criteria_frame)
         # add roles to completion
-        model = dst.criteria.completer().model()
+        completer = dst.criteria.completer()
+        assert completer, "No completer set, this is an SETools bug"  # type narrowing
+        model = completer.model()
         assert isinstance(model, QtCore.QStringListModel)
         completion = model.stringList()
         completion.extend(r.name for r in policy.roles())
@@ -131,7 +133,7 @@ if __name__ == '__main__':
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
-    mw.menuBar().addAction(whatsthis)
+    mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
     mw.show()
     rc = app.exec_()

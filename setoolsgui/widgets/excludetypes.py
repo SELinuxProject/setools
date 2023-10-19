@@ -10,7 +10,7 @@ import typing
 from PyQt5 import QtCore, QtGui, QtWidgets
 import setools
 
-from . import models
+from . import models, views
 
 # "" to handle unset
 AttrFilter = typing.Union[setools.TypeAttribute, typing.Literal[""]]
@@ -58,7 +58,7 @@ class ExcludeTypes(QtWidgets.QDialog):
         included_label.setSizePolicy(header_sizePolicy)
         self.gridLayout.addWidget(included_label, 0, 0, 1, 1)
 
-        self.included_types = QtWidgets.QListView(self)
+        self.included_types = views.SEToolsListView(self)
         self.included_types.setObjectName("Included types list")
         self.included_types.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.included_model = models.TypeTable(self)
@@ -113,7 +113,7 @@ class ExcludeTypes(QtWidgets.QDialog):
         excluded_label.setSizePolicy(header_sizePolicy)
         self.gridLayout.addWidget(excluded_label, 0, 2, 1, 1)
 
-        self.excluded_types = QtWidgets.QListView(self)
+        self.excluded_types = views.SEToolsListView(self)
         self.excluded_types.setObjectName("Excluded types list")
         self.excluded_types.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.excluded_model = models.TypeTable(self)
@@ -163,10 +163,11 @@ class ExcludeTypes(QtWidgets.QDialog):
         self.attr.currentIndexChanged.connect(self.set_attr_filter)
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    def _move_selected_types(self, source: QtWidgets.QListView, dest: QtWidgets.QListView) -> None:
-        """Move types from one QListView to another."""
+    def _move_selected_types(self, source: views.SEToolsListView,
+                             dest: views.SEToolsListView) -> None:
+        """Move types from one SEToolsListView to another."""
         source_scroll_pos = source.verticalScrollBar().value()
-        dest_scroll_pos = source.verticalScrollBar().value()
+        dest_scroll_pos = dest.verticalScrollBar().value()
 
         source_proxy = typing.cast(FilterByAttributeProxy, source.model())
         source_model = typing.cast(models.TypeTable, source_proxy.sourceModel())
@@ -190,10 +191,12 @@ class ExcludeTypes(QtWidgets.QDialog):
         self.log.debug(
             f"Moved selection from {source.objectName()} to {dest.objectName()}: {selected_types}")
 
-    def accept(self):
+    # @typing.override
+    def accept(self) -> None:
+        """Accept excluded types seelection and save to query."""
         self.log.debug(f"Chosen for exclusion: {self.excluded_model.item_list!r}")
         self.query.exclude = self.excluded_model.item_list
-        super().accept()
+        return super().accept()
 
     def exclude_clicked(self) -> None:
         self._move_selected_types(self.included_types, self.excluded_types)
@@ -207,6 +210,17 @@ class ExcludeTypes(QtWidgets.QDialog):
         self.log.debug(f"Attribute set to {attr!r}")
         self.included_sort.attr = attr
         self.excluded_sort.attr = attr
+
+    #
+    # Overridden methods for typing purposes
+    #
+
+    # @typing.override
+    def style(self) -> QtWidgets.QStyle:
+        """Type-narrowed style() method.  Always returns a QStyle."""
+        style = super().style()
+        assert style, "No style set, this is an SETools bug"  # type narrowing
+        return style
 
 
 class FilterByAttributeProxy(QtCore.QSortFilterProxyModel):
@@ -227,6 +241,7 @@ class FilterByAttributeProxy(QtCore.QSortFilterProxyModel):
     def filterAcceptsRow(self, row: int, parent: QtCore.QModelIndex) -> bool:
         if self.attr:
             model = self.sourceModel()
+            assert model, "No source model, this is an SETools bug"  # type narrowing
             index = model.index(row, 0)
             type_ = model.data(index, models.modelroles.PolicyObjRole)
             if type_ not in self.attr:

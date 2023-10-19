@@ -7,7 +7,7 @@ import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 from setools import PermissionMap
 
-from .models import StringList
+from . import models, views
 
 
 class PermissionMapEditor(QtWidgets.QDialog):
@@ -63,14 +63,14 @@ class PermissionMapEditor(QtWidgets.QDialog):
         frame_layout = QtWidgets.QGridLayout(frame)
 
         # set up class list
-        self.classes = QtWidgets.QListView(frame)
+        self.classes = views.SEToolsListView(frame)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Maximum,
                                            QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.classes.sizePolicy().hasHeightForWidth())
         self.classes.setSizePolicy(sizePolicy)
-        self.classes.setModel(StringList(data=sorted(self.perm_map.classes()), parent=self))
+        self.classes.setModel(models.StringList(data=sorted(self.perm_map.classes()), parent=self))
         self.classes.selectionModel().selectionChanged.connect(self.class_selected)
         frame_layout.addWidget(self.classes, 0, 1, 1, 1)
 
@@ -125,9 +125,13 @@ class PermissionMapEditor(QtWidgets.QDialog):
 
     def class_selected(self) -> None:
         """Handle a class being selected."""
-        # the .ui is set to 1 selection
-        for index in self.classes.selectionModel().selectedIndexes():
-            class_name = self.classes.model().data(index, QtCore.Qt.ItemDataRole.DisplayRole)
+        # the widget is set to 1 selection
+        selection_model = self.classes.selectionModel()
+        assert selection_model, "No selection model set, this is an SETools bug."  # type narrowing
+        data_model = self.classes.model()
+        assert data_model, "No data model set, this is an SETools bug."  # type narrowing
+        for index in selection_model.selectedIndexes():
+            class_name = data_model.data(index, QtCore.Qt.ItemDataRole.DisplayRole)
 
         self.log.debug(f"Setting class to {class_name}")
 

@@ -1,17 +1,16 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import Dict, Union
 
-from PyQt5 import QtGui
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.type import (TypeOrAttrNameWidget,
                                               INDIRECT_DEFAULT_CHECKED)
 
-from .util import _build_mock_query
+from .util import build_mock_query
 
 
 def test_base_settings(qtbot: QtBot) -> None:
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_disabled_layout", mock_query, "name",
         enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
@@ -23,7 +22,7 @@ def test_base_settings(qtbot: QtBot) -> None:
 
 def test_indirect_disabled_layout(qtbot: QtBot) -> None:
     """Test layout for no indirect option."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_disabled_layout", mock_query, "name",
         enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_only)
@@ -35,7 +34,7 @@ def test_indirect_disabled_layout(qtbot: QtBot) -> None:
 
 def test_indirect_enabled_layout(qtbot: QtBot) -> None:
     """Test layout for indirect option."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_enabled_layout", mock_query, "name",
         enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
@@ -48,7 +47,7 @@ def test_indirect_enabled_layout(qtbot: QtBot) -> None:
 
 def test_indirect_toggling(qtbot: QtBot) -> None:
     """Test indirect toggling is reflected in the query."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
         enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
@@ -70,7 +69,7 @@ def test_indirect_toggling(qtbot: QtBot) -> None:
 
 def test_noindirect_save(qtbot: QtBot) -> None:
     """Test settings save with indirect disabled."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
         enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
@@ -92,7 +91,7 @@ def test_noindirect_save(qtbot: QtBot) -> None:
 
 def test_indirect_save(qtbot: QtBot) -> None:
     """Test settings save with indirect enabled."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
         enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
@@ -116,7 +115,7 @@ def test_indirect_save(qtbot: QtBot) -> None:
 
 def test_noindirect_load(qtbot: QtBot) -> None:
     """Test settings load with indirect disabled."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
         enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
@@ -134,7 +133,7 @@ def test_noindirect_load(qtbot: QtBot) -> None:
 
 def test_indirect_load(qtbot: QtBot) -> None:
     """Test settings load with indirect enabled."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = TypeOrAttrNameWidget(
         "test_indirect_toggling", mock_query, "name",
         enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,

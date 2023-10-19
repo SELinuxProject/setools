@@ -255,8 +255,23 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     # Reimplemented methods for typing purposes
     #
     # @typing.override
+    def style(self) -> QtWidgets.QStyle:
+        """Type-narrowed style() method."""
+        style = super().style()
+        assert style, "No style set, this is an SETools bug"
+        return style
+
+    # @typing.override
+    def tabBar(self) -> QtWidgets.QTabBar:
+        """Type-narrowed tabBar() method."""
+        tab_bar = super().tabBar()
+        # seems to be a PyQt 5 bug that "assert tab_bar" fails on QTabBar objects
+        assert tab_bar is not None, "No tab bar set, this is an SETools bug"
+        return tab_bar
+
+    # @typing.override
     def widget(self, index: int) -> widgets.tab.BaseAnalysisTabWidget:
-        """Returnt the widget at the specified tab index."""
+        """Return the widget at the specified tab index."""
         return typing.cast(widgets.tab.BaseAnalysisTabWidget, super().widget(index))
 
     #
@@ -264,11 +279,13 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     #
     def update_window_title(self) -> None:
         """Update window title based on opened policy path."""
-        with suppress(Exception):
+        with suppress(AssertionError):
+            parent = self.parentWidget()
+            assert isinstance(parent, QtWidgets.QMainWindow)  # type narrowing
             if self.policy:
-                self.parentWidget().setWindowTitle(f"{self.policy} - apol")
+                parent.setWindowTitle(f"{self.policy} - apol")
             else:
-                self.parentWidget().setWindowTitle("apol")
+                parent.setWindowTitle("apol")
 
     #
     # Policy handling
@@ -962,8 +979,6 @@ class ChooseAnalysis(QtWidgets.QDialog):
         self.analysisTypes.setHeaderHidden(True)
         self.analysisTypes.setExpandsOnDoubleClick(True)
         self.analysisTypes.setColumnCount(1)
-        self.analysisTypes.header().setVisible(False)
-        self.analysisTypes.headerItem().setText(0, "Analyses")
         self.analysisTypes.itemDoubleClicked['QTreeWidgetItem*', 'int'].connect(self.accept)
         verticalLayout.addWidget(self.analysisTypes)
 
@@ -1041,7 +1056,7 @@ def run_apol(policy: str | None = None) -> int:
     AnalysisTabs = ApolWorkspace(mw)
     mw.setCentralWidget(AnalysisTabs)
     # Add actions from the central widget to the menu bar.
-    mw.menuBar().addActions(AnalysisTabs.actions())
+    mw.menuBar().addActions(AnalysisTabs.actions())  # type: ignore[union-attr]
 
     #
     # Configure top-level toolbar

@@ -7,12 +7,12 @@ from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.name import NameCriteriaWidget, REGEX_DEFAULT_CHECKED
 
-from .util import _build_mock_query
+from .util import build_mock_query
 
 
 def test_base_settings(qtbot: QtBot) -> None:
     """Test base properties of widget."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_base_settings", mock_query, "name", [], "[a-z]*")
     qtbot.addWidget(widget)
 
@@ -25,7 +25,7 @@ def test_base_settings(qtbot: QtBot) -> None:
 
 def test_completer(qtbot: QtBot) -> None:
     """Test completer is correctly set up."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_base_settings", mock_query, "name", ["foo", "bar"], "[a-z]*")
     qtbot.addWidget(widget)
 
@@ -37,7 +37,7 @@ def test_completer(qtbot: QtBot) -> None:
 
 def test_valid_text_entry(qtbot: QtBot) -> None:
     """Test successful text entry."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_valid_text_entry", mock_query, "name", [], "[a-z]*")
     qtbot.addWidget(widget)
 
@@ -53,7 +53,7 @@ def test_valid_text_entry(qtbot: QtBot) -> None:
 
 def test_query_exception_text_entry(qtbot: QtBot) -> None:
     """Test error text entry from query exception."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_query_exception_text_entry", mock_query, "name", [],
                                 "[a-z]*")
     qtbot.addWidget(widget)
@@ -72,7 +72,7 @@ def test_query_exception_text_entry(qtbot: QtBot) -> None:
 
 def test_invalid_text_entry(qtbot: QtBot) -> None:
     """Test invalid text entry stopped by validator."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_invalid_text_entry", mock_query, "name", [], "[a-z]*")
     qtbot.addWidget(widget)
 
@@ -92,7 +92,7 @@ def test_invalid_text_entry(qtbot: QtBot) -> None:
 
 def test_regex_disabled_layout(qtbot: QtBot) -> None:
     """Test layout for no regex option."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_regex_disabled_layout", mock_query, "name", [], "[a-z]*",
                                 enable_regex=False)
     qtbot.addWidget(widget)
@@ -105,7 +105,7 @@ def test_regex_disabled_layout(qtbot: QtBot) -> None:
 
 def test_regex_enabled_layout(qtbot: QtBot) -> None:
     """Test layout for regex option."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_regex_enabled_layout", mock_query, "name", [], "[a-z]*",
                                 enable_regex=True)
     qtbot.addWidget(widget)
@@ -119,7 +119,7 @@ def test_regex_enabled_layout(qtbot: QtBot) -> None:
 
 def test_regex_toggling(qtbot: QtBot) -> None:
     """Test regex toggling is reflected in the query."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_regex_toggling", mock_query, "name", [], "[a-z]*",
                                 enable_regex=True)
     qtbot.addWidget(widget)
@@ -139,7 +139,7 @@ def test_regex_toggling(qtbot: QtBot) -> None:
 
 
 def test_noregex_save(qtbot: QtBot) -> None:
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_noregex_save", mock_query, "name", [], "[a-z]*",
                                 enable_regex=False)
     qtbot.addWidget(widget)
@@ -158,7 +158,7 @@ def test_noregex_save(qtbot: QtBot) -> None:
 
 
 def test_regex_save(qtbot: QtBot) -> None:
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_regex_save", mock_query, "name", [], "[a-z]*",
                                 enable_regex=True)
     qtbot.addWidget(widget)
@@ -179,7 +179,7 @@ def test_regex_save(qtbot: QtBot) -> None:
 
 
 def test_noregex_load(qtbot: QtBot) -> None:
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_noregex_load", mock_query, "name", [], "[a-z]*",
                                 enable_regex=False)
     qtbot.addWidget(widget)
@@ -194,7 +194,7 @@ def test_noregex_load(qtbot: QtBot) -> None:
 
 
 def test_regex_load(qtbot: QtBot) -> None:
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_regex_load", mock_query, "name", [], "[a-z]*",
                                 enable_regex=True)
     qtbot.addWidget(widget)

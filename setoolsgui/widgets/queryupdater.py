@@ -65,9 +65,13 @@ class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
 
                 self.raw_line.emit(self.render(counter, item))
 
-                if QtCore.QThread.currentThread().isInterruptionRequested():
+                this_thread = QtCore.QThread.currentThread()
+                # type narrowing:
+                assert this_thread, "Unable to get curre thread, this is an SETools bug"
+                if this_thread.isInterruptionRequested():
                     break
-                elif counter % 10 == 0:
+
+                if counter % 10 == 0:
                     # yield execution every 10 rules
                     QtCore.QThread.yieldCurrentThread()
 

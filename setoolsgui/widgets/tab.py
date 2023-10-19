@@ -8,11 +8,9 @@ import typing
 from PyQt5 import QtCore, QtGui, QtWidgets
 import setools
 
-from . import criteria, exception, models
+from . import criteria, exception, models, views
 from .models.typing import QObjectType
 from .queryupdater import QueryResultsUpdater
-from .tableview import SEToolsTableView
-from .treeview import SEToolsTreeWidget
 
 # workspace settings keys
 SETTINGS_NOTES: typing.Final[str] = "notes"
@@ -258,6 +256,13 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         """Handle query failure."""
         raise NotImplementedError
 
+    # @typing.override
+    def style(self) -> QtWidgets.QStyle:
+        """Type-narrowed style() method.  Always returns a QStyle."""
+        style = super().style()
+        assert style, "No style set, this is an SETools bug"  # type narrowing
+        return style
+
     #
     # Workspace methods
     #
@@ -337,7 +342,7 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         self.results.setSizePolicy(sizePolicy)
 
         # create result tab 1
-        self.table_results = SEToolsTableView(self.results)
+        self.table_results = views.SEToolsTableView(self.results)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
@@ -446,6 +451,7 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
             # If the permissions column width is too long, pull back
             # to a reasonable size
             header = self.table_results.horizontalHeader()
+            assert header, "No header set, this is an SETools bug"  # type narrowing
             if header.sectionSize(4) > 400:
                 header.resizeSection(4, 400)
 
@@ -533,7 +539,7 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         #
         # Create tree browser tab
         #
-        self.tree_results = SEToolsTreeWidget(self.results)
+        self.tree_results = views.SEToolsTreeWidget(self.results)
         self.tree_results.setObjectName("tree_results")
         self.tree_results.setSizePolicy(sizePolicy)
         self.tree_results.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
@@ -652,7 +658,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
-    mw.menuBar().addAction(whatsthis)
+    mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
 
     tw = QtWidgets.QTabWidget(mw)

@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-import collections
 from contextlib import suppress
 
 from PyQt5 import QtCore, QtWidgets
 
-from .. import models
+from .. import models, views
 from .criteria import CriteriaWidget
 
 # equal/subset default setting.  At most one can be True
@@ -13,14 +12,12 @@ from .criteria import CriteriaWidget
 EQUAL_DEFAULT_CHECKED = False
 SUBSET_DEFAULT_CHECKED = False
 
-INVERT_SELECTION_FLAGS = QtCore.QItemSelectionModel.SelectionFlags(
-        QtCore.QItemSelectionModel.SelectionFlag.Toggle) | \
-        QtCore.QItemSelectionModel.SelectionFlag.Columns
-
 __all__ = ('ListCriteriaWidget',)
 
 
 class ListCriteriaWidget(CriteriaWidget):
+
+    """Base class for QListView criteria widgets."""
 
     equal_toggled = QtCore.pyqtSignal(bool)
     selectionChanged = QtCore.pyqtSignal(list)
@@ -33,7 +30,7 @@ class ListCriteriaWidget(CriteriaWidget):
         super().__init__(title, query, attrname, parent=parent)
 
         self.top_layout = QtWidgets.QGridLayout(self)
-        self.criteria = QtWidgets.QListView(self)
+        self.criteria = views.SEToolsListView(self)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
                                            QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -65,7 +62,7 @@ class ListCriteriaWidget(CriteriaWidget):
         self.invert_criteria.setText("Invert")
         self.invert_criteria.setToolTip("Invert selection.")
         self.invert_criteria.setWhatsThis("<b>Invert the list selection.</b>")
-        self.invert_criteria.clicked.connect(self.invert_selection)
+        self.invert_criteria.clicked.connect(self.criteria.invert_selection)
         self.top_layout.addWidget(self.invert_criteria, 1, 1, 1, 1)
 
         spacerItem1 = QtWidgets.QSpacerItem(20, 28, QtWidgets.QSizePolicy.Minimum,
@@ -131,42 +128,10 @@ class ListCriteriaWidget(CriteriaWidget):
     def _selection_changed(self, _selected: QtCore.QItemSelection,
                            _deselected: QtCore.QItemSelection) -> None:
         """Set the query attribute based on the entire widget selection."""
-        selection = list(self.selection())
+        selection = list(self.criteria.selection())
         self.log.debug(f"Setting {self.criteria.objectName()} to {selection}.")
         setattr(self.query, self.criteria.objectName(), selection)
         self.selectionChanged.emit(selection)
-
-    def set_selection(self, selections: list[str]) -> None:
-        """Set the selection."""
-        selectionmodel = self.criteria.selectionModel()
-        datamodel = self.criteria.selectionModel().model()
-
-        new_selection = QtCore.QItemSelection()
-        for row in range(datamodel.rowCount()):
-            index = datamodel.createIndex(row, 0)
-            item = datamodel.data(index, QtCore.Qt.ItemDataRole.DisplayRole)
-            if item in selections:
-                new_selection.select(index, index)
-
-        selectionmodel.select(new_selection,
-                              QtCore.QItemSelectionModel.SelectionFlag.ClearAndSelect)
-
-    def invert_selection(self) -> None:
-        """Invert the selection."""
-        self.log.debug(f"Inverting {self.criteria.objectName()} selection.")
-        selection_model = self.criteria.selectionModel()
-        model = self.criteria.model()
-        selection_model.select(model.createIndex(0, 0), INVERT_SELECTION_FLAGS)
-
-    def selection(self, role: int = QtCore.Qt.ItemDataRole.UserRole) -> collections.abc.Iterable:
-        """
-        Generator which returns the selection.
-
-        By default this is the Qt.ItemDataRole.UserRole (returns SETools objects)
-        """
-        model = self.criteria.model()
-        for index in self.criteria.selectionModel().selectedIndexes():
-            yield model.data(index, role)
 
     def _set_equal(self, state: bool) -> None:
         """Set the equal boolean value."""
@@ -185,7 +150,7 @@ class ListCriteriaWidget(CriteriaWidget):
     #
     def save(self, settings: dict) -> None:
         settings[self.criteria.objectName()] = list(
-            self.selection(QtCore.Qt.ItemDataRole.DisplayRole))
+            self.criteria.selection(QtCore.Qt.ItemDataRole.DisplayRole))
 
         with suppress(AttributeError):
             settings[self.criteria_equal.objectName()] = self.criteria_equal.isChecked()
@@ -195,7 +160,7 @@ class ListCriteriaWidget(CriteriaWidget):
 
     def load(self, settings: dict) -> None:
         with suppress(KeyError):
-            self.set_selection(settings[self.criteria.objectName()])
+            self.criteria.set_selection(settings[self.criteria.objectName()])
 
         with suppress(KeyError, AttributeError):
             self.criteria_equal.setChecked(settings[self.criteria_equal.objectName()])

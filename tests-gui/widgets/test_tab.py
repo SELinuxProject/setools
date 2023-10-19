@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import cast
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets import tab
 
-from .criteria.util import _build_mock_query
+from .criteria.util import build_mock_query
 
 
 def test_basetab_layout(qtbot: QtBot) -> None:
@@ -79,7 +79,7 @@ def test_basetab_notes_expander(qtbot: QtBot) -> None:
 
 def test_tableresulttab_layout(qtbot: QtBot) -> None:
     """Test TableResultTabWidget layout."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = tab.TableResultTabWidget(mock_query, enable_criteria=True)
     qtbot.addWidget(widget)
 

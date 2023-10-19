@@ -76,7 +76,7 @@ if __name__ == '__main__':
     mw.setCentralWidget(window)
     mw.resize(window.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
-    mw.menuBar().addAction(whatsthis)
+    mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.show()
     rc = app.exec_()
     print("Query settings:")

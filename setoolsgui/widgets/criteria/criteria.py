@@ -31,6 +31,16 @@ class CriteriaWidget(QtWidgets.QGroupBox):
         raise NotImplementedError
 
     #
+    # Overridden methods for typing purposes
+    #
+    # @typing.override
+    def style(self) -> QtWidgets.QStyle:
+        """Type-narrowed style() method.  Always returns a QStyle."""
+        style = super().style()
+        assert style, "No style set, this is an SETools bug"  # type narrowing
+        return style
+
+    #
     # Save/Load field
     #
 

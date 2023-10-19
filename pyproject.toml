@@ -29,6 +29,12 @@ module = ['networkx.*',
           'pytestqt.*']
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = ['tests-gui.*']
+# PyQt has many Optional[] returns since Qt doesn't throw exceptions.  Fixing
+# this with type narrowing asserts in the code would add no value as the
+# test case would fail either way.
+disable_error_code = ["union-attr"]
 
 #
 # Pylint config

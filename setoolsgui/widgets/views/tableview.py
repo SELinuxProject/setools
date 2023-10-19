@@ -7,7 +7,7 @@ import csv
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .models import modelroles
+from ..models import modelroles
 
 __all__ = ("SEToolsTableView",)
 
@@ -20,6 +20,7 @@ class SEToolsTableView(QtWidgets.QTableView):
     """
 
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+        """Handle the context menu event."""
         menu = QtWidgets.QMenu(self)
         menu.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
@@ -37,6 +38,7 @@ class SEToolsTableView(QtWidgets.QTableView):
         save_csv_action.triggered.connect(self.choose_csv_save_location)
         menu.addAction(save_csv_action)
         menu.exec(event.globalPos())
+        return
 
     def copy(self) -> None:
         datamodel = self.model()
@@ -60,7 +62,9 @@ class SEToolsTableView(QtWidgets.QTableView):
             prev_row = current_row
             prev_col = current_col
 
-        QtWidgets.QApplication.clipboard().setText("".join(selected_text))
+        cb = QtWidgets.QApplication.clipboard()
+        assert cb, "No clipboard available, this is an SETools bug"  # type narrowing
+        cb.setText("".join(selected_text))
 
     def cut(self) -> None:
         self.copy()
@@ -104,3 +108,23 @@ class SEToolsTableView(QtWidgets.QTableView):
                     csv_row.append(datamodel.data(index, QtCore.Qt.ItemDataRole.DisplayRole))
 
                 writer.writerow(csv_row)
+
+    #
+    # Overridden methods for typing purposes
+    #
+
+    # @typing.override
+    def model(self) -> QtCore.QAbstractItemModel:
+        """Type-narrowed model() method.  See QTableView.model() for more info."""
+        model = super().model()
+        assert model, "No model set, this is an SETools bug"
+        return model
+
+    # @typing.override
+    def selectionModel(self) -> QtCore.QItemSelectionModel:
+        """
+        Type-narrowed selectionModel() method.  See QTableView.selectionModel() for more info.
+        """
+        selection_model = super().selectionModel()
+        assert selection_model, "No selection model set, this is an SETools bug"
+        return selection_model

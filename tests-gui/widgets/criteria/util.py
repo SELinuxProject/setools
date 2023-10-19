@@ -13,7 +13,7 @@ class SortableMock(Mock):
         return f"<{self.__class__} name={self.name}>"
 
 
-def _build_mock_policy() -> Mock:
+def build_mock_policy() -> Mock:
     """Build a mock policy."""
     foo_bool = SortableMock(setools.Boolean)
     foo_bool.name = "foo_bool"
@@ -63,8 +63,8 @@ def _build_mock_policy() -> Mock:
     return policy
 
 
-def _build_mock_query() -> Mock:
+def build_mock_query() -> Mock:
     """Build a mock query with mocked policy."""
     mock_query = Mock(setools.PolicyQuery)
-    mock_query.policy = _build_mock_policy()
+    mock_query.policy = build_mock_policy()
     return mock_query

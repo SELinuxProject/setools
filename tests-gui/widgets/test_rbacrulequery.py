@@ -1,17 +1,17 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import cast
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.rbacrulequery import RBACRuleQueryTab
 
-from .criteria.util import _build_mock_policy
+from .criteria.util import build_mock_policy
 
 
 def test_docs(qtbot: QtBot) -> None:
     """Check that docs are provided for the widget."""
-    mock_policy = _build_mock_policy()
+    mock_policy = build_mock_policy()
     widget = RBACRuleQueryTab(mock_policy, None)
     qtbot.addWidget(widget)
 
@@ -30,7 +30,7 @@ def test_docs(qtbot: QtBot) -> None:
 
 def test_layout(qtbot: QtBot) -> None:
     """Test the layout of the criteria frame."""
-    mock_policy = _build_mock_policy()
+    mock_policy = build_mock_policy()
     widget = RBACRuleQueryTab(mock_policy, None)
     qtbot.addWidget(widget)
 
@@ -50,7 +50,7 @@ def test_layout(qtbot: QtBot) -> None:
 
 def test_criteria_mapping(qtbot: QtBot) -> None:
     """Test that widgets save to the correct query fields."""
-    mock_policy = _build_mock_policy()
+    mock_policy = build_mock_policy()
     widget = RBACRuleQueryTab(mock_policy, None)
     qtbot.addWidget(widget)
 

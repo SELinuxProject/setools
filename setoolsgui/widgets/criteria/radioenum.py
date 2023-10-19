@@ -116,7 +116,7 @@ if __name__ == '__main__':
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
-    mw.menuBar().addAction(whatsthis)
+    mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.show()
     rc = app.exec_()
     local_settings: typing.Dict[str, str] = {}

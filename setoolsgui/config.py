@@ -16,14 +16,14 @@ import typing
 APOLCONFIG: typing.Final[str] = "~/.config/setools/apol.conf"
 HELP_SECTION: typing.Final[str] = "Help"
 HELP_PGM: typing.Final[str] = "assistant"
-DEFAULT_HELP_PGM: typing.Final[tuple[str, ...]] = ("/usr/bin/assistant",)
+DEFAULT_HELP_PGM: typing.Final[str] = "/usr/bin/assistant"
 
 
 class ApolConfig:
 
     """Apol configuration file."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.log: typing.Final = logging.getLogger(__name__)
         self._lock = threading.Lock()
         self.path: typing.Final = os.path.expanduser(APOLCONFIG)
@@ -42,7 +42,7 @@ class ApolConfig:
         if save:
             self.save()
 
-    def save(self):
+    def save(self) -> None:
         """Save configuration file."""
         with self._lock:
             try:
@@ -56,12 +56,12 @@ class ApolConfig:
                 self.log.debug("Backtrace", exc_info=True)
 
     @property
-    def assistant(self):
+    def assistant(self) -> str:
         """Return the help program executable path."""
         with self._lock:
             return self._config.get(HELP_SECTION, HELP_PGM, fallback=DEFAULT_HELP_PGM)
 
     @assistant.setter
-    def assistant(self, value):
+    def assistant(self, value: str) -> None:
         with self._lock:
             self._config.set(HELP_SECTION, HELP_PGM, value)

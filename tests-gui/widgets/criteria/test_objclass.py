@@ -6,12 +6,12 @@ from pytestqt.qtbot import QtBot
 from setoolsgui.widgets.criteria.objclass import ObjClassCriteriaWidget
 from setoolsgui.widgets.models import ObjClassTable
 
-from .util import _build_mock_query
+from .util import build_mock_query
 
 
 def test_base_settings(qtbot: QtBot) -> None:
     """Test base properties of widget."""
-    mock_query = _build_mock_query()
+    mock_query = build_mock_query()
     widget = ObjClassCriteriaWidget("test_base_settings", mock_query, "name")
     qtbot.addWidget(widget)
 
