@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from .boolean import *
 from .criteria import *
+
+from .boolean import *
+from .comboenum import *
+from .context import *
 from .mlslevelrange import *
 from .mlsruletype import *
 from .objclass import *
