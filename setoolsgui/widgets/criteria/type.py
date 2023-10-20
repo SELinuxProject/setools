@@ -6,6 +6,7 @@ import enum
 from PyQt5 import QtCore, QtWidgets
 import setools
 
+from .criteria import OptionsPlacement
 from .name import NameCriteriaWidget
 
 # Regex for exact matches to types/attrs
@@ -35,8 +36,9 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
         attribute_only = 2
         type_or_attribute = 3
 
-    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str, /, *,
                  parent: QtWidgets.QWidget | None = None,
+                 options_placement: OptionsPlacement = OptionsPlacement.RIGHT,
                  mode: Mode = Mode.type_only,
                  enable_indirect: bool = False, enable_regex: bool = False,
                  required: bool = False):
@@ -51,7 +53,8 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
             completion.extend(a.name for a in query.policy.typeattributes())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
-                         enable_regex=enable_regex, required=required, parent=parent)
+                         enable_regex=enable_regex, required=required,
+                         options_placement=options_placement, parent=parent)
 
         if enable_indirect:
             self.criteria_indirect = QtWidgets.QCheckBox(self)
@@ -73,6 +76,14 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
             # set initial state:
             self.criteria_indirect.setChecked(INDIRECT_DEFAULT_CHECKED)
             self.set_indirect(INDIRECT_DEFAULT_CHECKED)
+
+            # place widget.
+            match options_placement:
+                case OptionsPlacement.RIGHT | OptionsPlacement.BELOW:
+                    self.top_layout.addWidget(self.criteria_indirect, 1, 1, 1, 1)
+                case _:
+                    raise AssertionError(
+                        f"Invalid options placement {options_placement}, this is an SETools bug.")
 
     def set_indirect(self, state: bool) -> None:
         """Set the indirect boolean value."""
@@ -108,8 +119,9 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = TypeOrAttrNameWidget("Test Type/Attribute", q, "source", mw,
-                                  TypeOrAttrNameWidget.Mode.type_or_attribute, True, True)
+    widget = TypeOrAttrNameWidget("Test Type/Attribute", q, "source", parent=mw,
+                                  mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
+                                  enable_regex=True, enable_indirect=True)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

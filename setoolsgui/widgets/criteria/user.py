@@ -3,6 +3,7 @@
 from PyQt5 import QtCore, QtWidgets
 import setools
 
+from .criteria import OptionsPlacement
 from .name import NameCriteriaWidget
 
 # Regex for exact matches to roles
@@ -20,15 +21,17 @@ class UserNameWidget(NameCriteriaWidget):
 
     indirect_toggled = QtCore.pyqtSignal(bool)
 
-    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str, /, *,
                  parent: QtWidgets.QWidget | None = None,
+                 options_placement: OptionsPlacement = OptionsPlacement.RIGHT,
                  required: bool = False, enable_regex: bool = True):
 
         # Create completion list
         completion = list[str](u.name for u in query.policy.users())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
-                         enable_regex=enable_regex, required=required, parent=parent)
+                         enable_regex=enable_regex, required=required,
+                         options_placement=options_placement, parent=parent)
 
 
 if __name__ == '__main__':
@@ -44,7 +47,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = UserNameWidget("Test user", q, "user", mw)
+    widget = UserNameWidget("Test user", q, "user", parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

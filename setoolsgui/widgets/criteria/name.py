@@ -4,7 +4,7 @@ from contextlib import suppress
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-from .criteria import CriteriaWidget
+from .criteria import CriteriaWidget, OptionsPlacement
 
 # regex default setting (unchecked)
 REGEX_DEFAULT_CHECKED = False
@@ -34,7 +34,9 @@ class NameCriteriaWidget(CriteriaWidget):
 
     def __init__(self, title: str, query, attrname: str, completion: list[str],
                  validation: str = "", enable_regex: bool = True,
-                 required: bool = False, parent: QtWidgets.QWidget | None = None) -> None:
+                 required: bool = False,
+                 options_placement: OptionsPlacement = OptionsPlacement.RIGHT,
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(title, query, attrname, parent=parent)
         self.required = required
@@ -83,7 +85,16 @@ class NameCriteriaWidget(CriteriaWidget):
         self.error_text.setObjectName("error_message")
         self.error_text.setFixedHeight(self.criteria.size().height())
         self.error_text.setFixedWidth(self.criteria.size().height())
-        self.top_layout.addWidget(self.error_text, 0, 2, 1, 1)
+
+        # place error message widget
+        match options_placement:
+            case OptionsPlacement.BELOW:
+                self.top_layout.addWidget(self.error_text, 0, 1, 1, 1)
+            case OptionsPlacement.RIGHT:
+                self.top_layout.addWidget(self.error_text, 1, 0, 1, 1)
+            case _:
+                raise AssertionError(
+                    f"Invalid options placement {options_placement}, this is an SETools bug.")
 
         # Enable configured checkboxes
         if enable_regex:
@@ -100,12 +111,21 @@ class NameCriteriaWidget(CriteriaWidget):
                 <p>This will enable matching using regular expressions instead
                 of direct string comparisons.</p>
                 """)
-            self.top_layout.addWidget(self.criteria_regex, 0, 1, 1, 1)
             self.criteria_regex.toggled.connect(self.set_regex)
             self.criteria_regex.toggled.connect(self.regex_toggled)
             # set initial state:
             self.criteria_regex.setChecked(REGEX_DEFAULT_CHECKED)
             self.set_regex(REGEX_DEFAULT_CHECKED)
+
+            # place widget
+            match options_placement:
+                case OptionsPlacement.RIGHT:
+                    self.top_layout.addWidget(self.criteria_regex, 0, 1, 1, 1)
+                case OptionsPlacement.BELOW:
+                    self.top_layout.addWidget(self.criteria_regex, 1, 0, 1, 1)
+                case _:
+                    raise AssertionError(
+                        f"Invalid options placement {options_placement}, this is an SETools bug.")
 
         QtCore.QMetaObject.connectSlotsByName(self)
 

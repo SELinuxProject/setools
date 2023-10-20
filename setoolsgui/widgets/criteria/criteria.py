@@ -1,10 +1,20 @@
 # SPDX-License-Identifier: LGPL-2.1-only
+
+import enum
 import logging
 import typing
 
 from PyQt5 import QtWidgets
 
-__all__ = ('CriteriaWidget',)
+__all__ = ('CriteriaWidget', 'OptionsPlacement')
+
+
+class OptionsPlacement(enum.Enum):
+
+    """Enumeration of options placement relative to the primary criteria widget (eg line edit)."""
+
+    RIGHT = enum.auto()
+    BELOW = enum.auto()
 
 
 class CriteriaWidget(QtWidgets.QGroupBox):

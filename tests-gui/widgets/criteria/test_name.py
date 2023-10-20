@@ -5,6 +5,7 @@ from unittest.mock import PropertyMock
 from PyQt5 import QtGui
 from pytestqt.qtbot import QtBot
 
+from setoolsgui.widgets.criteria.criteria import OptionsPlacement
 from setoolsgui.widgets.criteria.name import NameCriteriaWidget, REGEX_DEFAULT_CHECKED
 
 from .util import build_mock_query
@@ -90,31 +91,62 @@ def test_invalid_text_entry(qtbot: QtBot) -> None:
     # invalid characters
 
 
-def test_regex_disabled_layout(qtbot: QtBot) -> None:
-    """Test layout for no regex option."""
+def test_regex_disabled_layout_opt_right(qtbot: QtBot) -> None:
+    """Test layout for no regex option, options placement right."""
     mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_regex_disabled_layout", mock_query, "name", [], "[a-z]*",
-                                enable_regex=False)
+                                options_placement=OptionsPlacement.RIGHT, enable_regex=False)
     qtbot.addWidget(widget)
 
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
-    assert not widget.top_layout.itemAtPosition(0, 1)
-    assert widget.top_layout.itemAtPosition(0, 2).widget() == widget.error_text
+    assert widget.top_layout.itemAtPosition(0, 1) is None
+    assert widget.top_layout.itemAtPosition(1, 0).widget() == widget.error_text
+    assert widget.top_layout.itemAtPosition(1, 1) is None
 
 
-def test_regex_enabled_layout(qtbot: QtBot) -> None:
-    """Test layout for regex option."""
+def test_regex_disabled_layout_opt_below(qtbot: QtBot) -> None:
+    """Test layout for no regex option, options placement below."""
+    mock_query = build_mock_query()
+    widget = NameCriteriaWidget("test_regex_disabled_layout", mock_query, "name", [], "[a-z]*",
+                                options_placement=OptionsPlacement.BELOW, enable_regex=False)
+    qtbot.addWidget(widget)
+
+    # validate widget item positions
+    assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
+    assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.error_text
+    assert widget.top_layout.itemAtPosition(1, 0) is None
+    assert widget.top_layout.itemAtPosition(1, 1) is None
+
+
+def test_regex_enabled_layout_opt_right(qtbot: QtBot) -> None:
+    """Test layout for regex option placed on right."""
     mock_query = build_mock_query()
     widget = NameCriteriaWidget("test_regex_enabled_layout", mock_query, "name", [], "[a-z]*",
-                                enable_regex=True)
+                                options_placement=OptionsPlacement.RIGHT, enable_regex=True)
     qtbot.addWidget(widget)
 
     assert widget.criteria_regex.objectName() == "name_regex"
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
     assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.criteria_regex
-    assert widget.top_layout.itemAtPosition(0, 2).widget() == widget.error_text
+    assert widget.top_layout.itemAtPosition(1, 0).widget() == widget.error_text
+    assert widget.top_layout.itemAtPosition(1, 1) is None
+
+
+def test_regex_enabled_layout_opt_below(qtbot: QtBot) -> None:
+    """Test layout for regex option placed below."""
+    mock_query = build_mock_query()
+    widget = NameCriteriaWidget("test_regex_enabled_layout", mock_query, "name", [], "[a-z]*",
+                                options_placement=OptionsPlacement.BELOW, enable_regex=True)
+    qtbot.addWidget(widget)
+
+    assert widget.criteria_regex.objectName() == "name_regex"
+    # validate widget item positions
+    assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
+    assert widget.top_layout.itemAtPosition(1, 0).widget() == widget.criteria_regex
+    assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.error_text
+    assert widget.top_layout.itemAtPosition(1, 1) is None
 
 
 def test_regex_toggling(qtbot: QtBot) -> None:

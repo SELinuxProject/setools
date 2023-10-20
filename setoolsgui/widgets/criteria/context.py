@@ -40,6 +40,7 @@ class ContextMatch(criteria.CriteriaWidget):
                                        self.query,
                                        user_attrname,
                                        enable_regex=True,
+                                       options_placement=criteria.OptionsPlacement.BELOW,
                                        parent=self)
         user.setToolTip("The user for context matching.")
         user.setWhatsThis(
@@ -54,6 +55,7 @@ class ContextMatch(criteria.CriteriaWidget):
                                        self.query,
                                        role_attrname,
                                        enable_regex=True,
+                                       options_placement=criteria.OptionsPlacement.BELOW,
                                        parent=self)
         role.setToolTip("The role for context matching.")
         role.setWhatsThis(
@@ -71,6 +73,7 @@ class ContextMatch(criteria.CriteriaWidget):
                                               enable_regex=True,
                                               enable_indirect=False,
                                               required=False,
+                                              options_placement=criteria.OptionsPlacement.BELOW,
                                               parent=self)
         type_.setToolTip("The type for context matching.")
         type_.setWhatsThis(
