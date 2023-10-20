@@ -84,11 +84,12 @@ class ContextMatch(criteria.CriteriaWidget):
             the type name instead of direct string comparison.</p>
             """)
 
-        rng = criteria.MLSLevelRangeWidget("Context MLS Range",
-                                           self.query,
-                                           range_attrname,
-                                           enable_range_opts=True,
-                                           parent=self)
+        rng = criteria.MLSRangeName("Context MLS Range",
+                                    self.query,
+                                    range_attrname,
+                                    enable_range_opts=True,
+                                    options_placement=criteria.OptionsPlacement.BELOW,
+                                    parent=self)
         if query.policy.mls:
             rng.setToolTip("The MLS range for context matching.")
             rng.setWhatsThis(

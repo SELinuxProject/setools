@@ -102,10 +102,10 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
             classes</p>
             """)
 
-        dflt = criteria.MLSLevelRangeWidget("Default Range",
-                                            self.query,
-                                            "default",
-                                            parent=self.criteria_frame)
+        dflt = criteria.MLSRangeName("Default Range",
+                                     self.query,
+                                     "default",
+                                     parent=self.criteria_frame)
         dflt.setToolTip("The default range for rule matching.")
         dflt.setWhatsThis(
             """
