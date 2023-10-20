@@ -6,6 +6,8 @@
 from PyQt5 import QtCore
 import setools
 
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 __all__ = ("PortconTable",)
@@ -37,5 +39,38 @@ class PortconTable(SEToolsTableModel[setools.Portcon]):
                         return rule.protocol.name
                     case 2:
                         return str(rule.context)
+
+            case modelroles.ContextMenuRole:
+                if col == 2:
+                    return details.context_detail_action(rule.context)
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = \
+                            """
+                            <p>This is the port number or port number range of the portcon.</p>
+                            """
+                    case 1:
+                        column_whatsthis = \
+                            """
+                            <p>This is the protocol of the portcon.</p>
+                            """
+                    case 2:
+                        column_whatsthis = \
+                            """
+                            <p>This is the context of the portcon.</p>
+                            """
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>Table Representation of Network Port Contexts (portcon)</p></b>
+
+                    <p>Each part of the rule is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
 
         return super().data(index, role)

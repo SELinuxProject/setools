@@ -18,7 +18,8 @@ from . import config, widgets
 
 # Supported analyses.  These are not directly used here, but
 # will init the tab registry in widgets.tab for apol's analyses.
-from .widgets import (infoflow, mlsrulequery, rbacrulequery, summary, terulequery)
+from .widgets import (infoflow, mlsrulequery, portconquery, rbacrulequery,
+                      summary, terulequery)
 
 STYLESHEET: typing.Final = "apol.css"
 

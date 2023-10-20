@@ -9,6 +9,7 @@ from .mlslevelrange import *
 from .mlsruletype import *
 from .objclass import *
 from .permission import *
+from .ports import *
 from .radioenum import *
 from .rbacruletype import *
 from .role import *
