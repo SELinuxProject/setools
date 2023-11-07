@@ -5,7 +5,7 @@
 #
 import csv
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from ..models import modelroles
 
@@ -34,7 +34,7 @@ class SEToolsTableView(QtWidgets.QTableView):
             menu.addSeparator()
 
         # Add the save to CSV action
-        save_csv_action = QtWidgets.QAction("Save table to CSV...", self)
+        save_csv_action = QtGui.QAction("Save table to CSV...", self)
         save_csv_action.triggered.connect(self.choose_csv_save_location)
         menu.addAction(save_csv_action)
         menu.exec(event.globalPos())

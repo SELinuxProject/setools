@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 import setools
 
 from . import criteria, models, tab
@@ -184,11 +184,10 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             reply = QtWidgets.QMessageBox.question(
                 self, "Continue?",
                 f"This is a broad query, estimated to return {max_results} results.  Continue?",
-                QtWidgets.QMessageBox.StandardButtons() |
                 QtWidgets.QMessageBox.StandardButton.Yes |
                 QtWidgets.QMessageBox.StandardButton.No)
 
-            if reply == QtWidgets.QMessageBox.No:
+            if reply == QtWidgets.QMessageBox.StandardButton.No:
                 return
 
         super().run()
@@ -213,6 +212,6 @@ if __name__ == '__main__':
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     pprint.pprint(widget.save())
     sys.exit(rc)

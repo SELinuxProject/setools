@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 
 from .. import models, views
 from .criteria import CriteriaWidget
@@ -31,8 +31,8 @@ class ListCriteriaWidget(CriteriaWidget):
 
         self.top_layout = QtWidgets.QGridLayout(self)
         self.criteria = views.SEToolsListView(self)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding,
-                                           QtWidgets.QSizePolicy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding,
+                                           QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.criteria.sizePolicy().hasHeightForWidth())
@@ -53,8 +53,8 @@ class ListCriteriaWidget(CriteriaWidget):
         self.top_layout.addWidget(self.clear_criteria, 0, 1, 1, 1)
         self.clear_criteria.clicked.connect(self.criteria.clearSelection)
 
-        spacerItem = QtWidgets.QSpacerItem(4, 20, QtWidgets.QSizePolicy.Expanding,
-                                           QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(4, 20, QtWidgets.QSizePolicy.Policy.Expanding,
+                                           QtWidgets.QSizePolicy.Policy.Minimum)
         self.top_layout.addItem(spacerItem, 0, 3, 1, 1)
 
         # Invert button
@@ -65,8 +65,8 @@ class ListCriteriaWidget(CriteriaWidget):
         self.invert_criteria.clicked.connect(self.criteria.invert_selection)
         self.top_layout.addWidget(self.invert_criteria, 1, 1, 1, 1)
 
-        spacerItem1 = QtWidgets.QSpacerItem(20, 28, QtWidgets.QSizePolicy.Minimum,
-                                            QtWidgets.QSizePolicy.Expanding)
+        spacerItem1 = QtWidgets.QSpacerItem(20, 28, QtWidgets.QSizePolicy.Policy.Minimum,
+                                            QtWidgets.QSizePolicy.Policy.Expanding)
         self.top_layout.addItem(spacerItem1, 3, 1, 1, 1)
 
         # Match any radio button.  This doesn't do anything by itself, as

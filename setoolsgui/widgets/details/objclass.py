@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 from itertools import chain
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtGui, QtWidgets
 import setools
 
 from . import util
@@ -41,9 +41,9 @@ def objclass_detail(class_: setools.ObjClass, parent: QtWidgets.QWidget | None =
 
 
 def objclass_detail_action(class_: setools.ObjClass,
-                           parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
+                           parent: QtWidgets.QWidget | None = None) -> QtGui.QAction:
     """Return a QAction that, when triggered, opens an object class detail popup."""
-    a = QtWidgets.QAction(f"Properties of {class_}")
+    a = QtGui.QAction(f"Properties of {class_}")
     a.triggered.connect(lambda x: objclass_detail(class_, parent))
     return a
 

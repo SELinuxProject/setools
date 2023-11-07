@@ -4,7 +4,7 @@ from contextlib import suppress
 import enum
 import typing
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 import setools
 
 from .criteria import CriteriaWidget
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     local_settings: typing.Dict[str, str] = {}
     widget.save(local_settings)
     pprint.pprint(local_settings)

@@ -2,7 +2,7 @@
 
 from contextlib import suppress
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from .criteria import CriteriaWidget, OptionsPlacement
 
@@ -163,7 +163,7 @@ class NameCriteriaWidget(CriteriaWidget):
 
             self.set_criteria_error(f"{self.attrname} is required.")
 
-        return bool(self.error_text.pixmap())
+        return bool(not self.error_text.pixmap().isNull())
 
     def clear_criteria_error(self) -> None:
         """Clear the error output from the criteria"""

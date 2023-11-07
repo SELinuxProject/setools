@@ -3,7 +3,7 @@
 from contextlib import suppress
 import typing
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 import setools
 
 from . import criteria, tab
@@ -330,6 +330,6 @@ if __name__ == '__main__':
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
     mw.resize(1024, 768)
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     pprint.pprint(widget.save())
     sys.exit(rc)

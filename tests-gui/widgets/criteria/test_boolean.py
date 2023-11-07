@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.boolean import (BooleanListCriteriaWidget,

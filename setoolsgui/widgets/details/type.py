@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtGui, QtWidgets
 import setools
 
 from . import typeattr, util
@@ -39,11 +39,11 @@ def type_detail(type_: setools.Type, parent: QtWidgets.QWidget | None = None) ->
 
 
 def type_detail_action(type_: setools.Type,
-                       parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
+                       parent: QtWidgets.QWidget | None = None) -> QtGui.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for the role."""
 
-    a = QtWidgets.QAction(f"Properties of {type_}")
+    a = QtGui.QAction(f"Properties of {type_}")
     a.triggered.connect(lambda x: type_detail(type_, parent))
     return a
 
@@ -60,11 +60,11 @@ def type_or_attr_detail(type_: setools.Type | setools.TypeAttribute,
 
 
 def type_or_attr_detail_action(type_: setools.Type | setools.TypeAttribute,
-                               parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
+                               parent: QtWidgets.QWidget | None = None) -> QtGui.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for the type/attr."""
 
-    a = QtWidgets.QAction(f"Properties of {type_}")
+    a = QtGui.QAction(f"Properties of {type_}")
     a.triggered.connect(lambda x: type_or_attr_detail(type_, parent))
     return a
 

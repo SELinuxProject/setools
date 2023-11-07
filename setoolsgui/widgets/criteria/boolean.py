@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 
 from .. import models
 from .list import ListCriteriaWidget
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     print("Query settings:")
     pprint.pprint(q1.boolean)
     sys.exit(rc)

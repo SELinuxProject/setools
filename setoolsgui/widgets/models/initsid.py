@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 import setools
 
 from .table import SEToolsTableModel

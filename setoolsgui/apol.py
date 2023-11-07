@@ -11,7 +11,7 @@ import sys
 import typing
 
 import pkg_resources
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 from setools import __version__, PermissionMap, SELinuxPolicy
 
 from . import config, widgets
@@ -71,7 +71,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         # main window and added to the workspace menu.
         #
 
-        self.open_policy_action = QtWidgets.QAction(self)
+        self.open_policy_action = QtGui.QAction(self)
         self.open_policy_action.setIcon(
             QtGui.QIcon.fromTheme("dialog-open",
                                   self.style().standardIcon(
@@ -82,7 +82,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         self.open_policy_action.setShortcut("Ctrl+O")
         self.open_policy_action.triggered.connect(self.select_policy)
 
-        self.exit_apol_action = QtWidgets.QAction(self)
+        self.exit_apol_action = QtGui.QAction(self)
         self.exit_apol_action.setText("E&xit")
         self.exit_apol_action.setShortcut("Ctrl+Q")
         self.exit_apol_action.setIcon(
@@ -91,7 +91,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
                                     QtWidgets.QStyle.StandardPixmap.SP_DialogCloseButton)))
         self.exit_apol_action.triggered.connect(self.parent().close)  # type: ignore
 
-        self.new_analysis_action = QtWidgets.QAction(self)
+        self.new_analysis_action = QtGui.QAction(self)
         self.new_analysis_action.setIcon(
             QtGui.QIcon.fromTheme("file-icon",
                                   self.style().standardIcon(
@@ -102,43 +102,43 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         self.new_analysis_action.setShortcut("Ctrl+N")
         self.new_analysis_action.triggered.connect(self.choose_analysis)
 
-        self.new_from_settings_action = QtWidgets.QAction(self)
+        self.new_from_settings_action = QtGui.QAction(self)
         self.new_from_settings_action.setText("New Analysis From Settings")
         self.new_from_settings_action.setToolTip("Start a new analysis using settings from a file.")
         self.new_from_settings_action.setShortcut("Ctrl+Shift+N")
         self.new_from_settings_action.triggered.connect(self.new_analysis_from_config)
 
-        self.save_settings_action = QtWidgets.QAction(self)
+        self.save_settings_action = QtGui.QAction(self)
         self.save_settings_action.setText("Save Tab Settings")
         self.save_settings_action.setToolTip("Save the current tab\'s settings to file.")
         self.save_settings_action.setShortcut("Ctrl+S")
         self.save_settings_action.triggered.connect(self.save_settings)
 
-        self.load_settings_action = QtWidgets.QAction(self)
+        self.load_settings_action = QtGui.QAction(self)
         self.load_settings_action.setText("Load Tab Settings")
         self.load_settings_action.setToolTip("Load settings for the current tab.")
         self.load_settings_action.setShortcut("Ctrl+L")
         self.load_settings_action.triggered.connect(self.load_settings)
 
-        self.dupe_tab_action = QtWidgets.QAction(self)
+        self.dupe_tab_action = QtGui.QAction(self)
         self.dupe_tab_action.setText("&Duplicate Tab")
         self.dupe_tab_action.setToolTip("Duplicate the active tab.")
         self.dupe_tab_action.setShortcut("Ctrl+Shift+K")
         self.dupe_tab_action.triggered.connect(self.dupe_tab)
 
-        self.close_tab_action = QtWidgets.QAction(self)
+        self.close_tab_action = QtGui.QAction(self)
         self.close_tab_action.setText("&Close Tab")
         self.close_tab_action.setToolTip("Close the active tab.")
         self.close_tab_action.setShortcut("Ctrl+W")
         self.close_tab_action.triggered.connect(self.close_tab)
 
-        self.load_workspace_action = QtWidgets.QAction(self)
+        self.load_workspace_action = QtGui.QAction(self)
         self.load_workspace_action.setText("Load Workspace")
         self.load_workspace_action.setToolTip("Load workspace from file.")
         self.load_workspace_action.setShortcut("Ctrl+Shift+L")
         self.load_workspace_action.triggered.connect(self.load_workspace)
 
-        self.save_workspace_action = QtWidgets.QAction(self)
+        self.save_workspace_action = QtGui.QAction(self)
         self.save_workspace_action.setText("Save Workspace")
         self.save_workspace_action.setToolTip("Save workspace to file.")
         self.save_workspace_action.setShortcut("Ctrl+Shift+S")
@@ -146,26 +146,26 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
         self.help_action = QtWidgets.QWhatsThis.createAction(self)
 
-        self.about_apol_action = QtWidgets.QAction(self)
+        self.about_apol_action = QtGui.QAction(self)
         self.about_apol_action.setText("About Apol")
         self.about_apol_action.triggered.connect(self.about_apol)
 
-        self.cut_action = QtWidgets.QAction(self)
+        self.cut_action = QtGui.QAction(self)
         self.cut_action.setText("Cut")
         self.cut_action.setShortcut("Ctrl+X")
         self.cut_action.triggered.connect(self.cut)
 
-        self.copy_action = QtWidgets.QAction(self)
+        self.copy_action = QtGui.QAction(self)
         self.copy_action.setText("Copy")
         self.copy_action.setShortcut("Ctrl+C")
         self.copy_action.triggered.connect(self.copy)
 
-        self.paste_action = QtWidgets.QAction(self)
+        self.paste_action = QtGui.QAction(self)
         self.paste_action.setText("Paste")
         self.paste_action.setShortcut("Ctrl+V")
         self.paste_action.triggered.connect(self.paste)
 
-        self.open_permmap = QtWidgets.QAction(self)
+        self.open_permmap = QtGui.QAction(self)
         self.open_permmap.setText("Open Permission Map")
         self.open_permmap.setToolTip("Open permission map used for information flow analysis")
         self.open_permmap.triggered.connect(self.select_permmap)
@@ -173,16 +173,16 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         # these two tab actions are to have a global shortcut and
         # entries in the workspace menu.
 
-        self.close_policy_action = QtWidgets.QAction(self)
+        self.close_policy_action = QtGui.QAction(self)
         self.close_policy_action.setText("Close Policy")
         self.close_policy_action.setToolTip("Close the current policy. Closes all analyses too.")
         self.close_policy_action.triggered.connect(self.close_policy)
 
-        self.edit_permmap_action = QtWidgets.QAction(self)
+        self.edit_permmap_action = QtGui.QAction(self)
         self.edit_permmap_action.setText("Edit Permission Map")
         self.edit_permmap_action.triggered.connect(self.edit_permmap)
 
-        self.save_permmap_action = QtWidgets.QAction(self)
+        self.save_permmap_action = QtGui.QAction(self)
         self.save_permmap_action.setText("Save Permission Map")
         self.save_permmap_action.triggered.connect(self.save_permmap)
 
@@ -298,7 +298,6 @@ class ApolWorkspace(QtWidgets.QTabWidget):
                 self,
                 "Continue?",
                 "Loading a policy will close all existing analyses.  Continue?",
-                QtWidgets.QMessageBox.StandardButtons() |
                 QtWidgets.QMessageBox.StandardButton.Yes |
                 QtWidgets.QMessageBox.StandardButton.No)
 
@@ -452,17 +451,17 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         # Generate context menu for this specific tab index, which may not
         # be the active tab.
         #
-        rename_tab_action = QtWidgets.QAction(self)
+        rename_tab_action = QtGui.QAction(self)
         rename_tab_action.setText("&Rename Tab")
         rename_tab_action.setToolTip("Rename this tab.")
         rename_tab_action.triggered.connect(partial(self.tab_name_editor, index))
 
-        dupe_tab_action = QtWidgets.QAction(self)
+        dupe_tab_action = QtGui.QAction(self)
         dupe_tab_action.setText("&Duplicate Tab")
         dupe_tab_action.setToolTip("Duplicate this tab.")
         dupe_tab_action.triggered.connect(partial(self.dupe_tab, index))
 
-        close_tab_action = QtWidgets.QAction(self)
+        close_tab_action = QtGui.QAction(self)
         close_tab_action.setText("&Close Tab")
         close_tab_action.setToolTip("Close this tab.")
         close_tab_action.triggered.connect(partial(self.close_tab, index))
@@ -976,7 +975,8 @@ class ChooseAnalysis(QtWidgets.QDialog):
 
         # Create tree widget for analysis selection
         self.analysisTypes = QtWidgets.QTreeWidget(self)
-        self.analysisTypes.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.analysisTypes.setSelectionMode(
+            QtWidgets.QAbstractItemView.SelectionMode.SingleSelection)
         self.analysisTypes.setHeaderHidden(True)
         self.analysisTypes.setExpandsOnDoubleClick(True)
         self.analysisTypes.setColumnCount(1)
@@ -1003,8 +1003,8 @@ class ChooseAnalysis(QtWidgets.QDialog):
         buttonBox = QtWidgets.QDialogButtonBox(self)
         buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
         buttonBox.setStandardButtons(
-            QtWidgets.QDialogButtonBox.Cancel |
-            QtWidgets.QDialogButtonBox.Ok)
+            QtWidgets.QDialogButtonBox.StandardButton.Cancel |
+            QtWidgets.QDialogButtonBox.StandardButton.Ok)
         verticalLayout.addWidget(buttonBox)
 
         buttonBox.rejected.connect(self.reject)
@@ -1081,4 +1081,4 @@ def run_apol(policy: str | None = None) -> int:
 
     mw.show()
 
-    return app.exec_()
+    return app.exec()

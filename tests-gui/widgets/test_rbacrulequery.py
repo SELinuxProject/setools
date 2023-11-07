@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import cast
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.rbacrulequery import RBACRuleQueryTab

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import Dict, Final, List, Union
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.list import (EQUAL_DEFAULT_CHECKED, ListCriteriaWidget,

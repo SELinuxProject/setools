@@ -7,7 +7,7 @@ import copy
 import logging
 import typing
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 import setools
 
 from . import models, views
@@ -50,8 +50,8 @@ class ExcludeTypes(QtWidgets.QDialog):
         included_label = QtWidgets.QLabel(self)
         included_label.setObjectName("header")
         included_label.setText("Included Types")
-        header_sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred,
-                                                  QtWidgets.QSizePolicy.Fixed)
+        header_sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+                                                  QtWidgets.QSizePolicy.Policy.Fixed)
         header_sizePolicy.setHorizontalStretch(0)
         header_sizePolicy.setVerticalStretch(0)
         header_sizePolicy.setHeightForWidth(included_label.sizePolicy().hasHeightForWidth())
@@ -60,7 +60,8 @@ class ExcludeTypes(QtWidgets.QDialog):
 
         self.included_types = views.SEToolsListView(self)
         self.included_types.setObjectName("Included types list")
-        self.included_types.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.included_types.setSelectionMode(
+            QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.included_model = models.TypeTable(self)
         self.included_model.item_list = [t for t in self.query.policy.types()
                                          if t not in self.query.exclude]
@@ -76,8 +77,8 @@ class ExcludeTypes(QtWidgets.QDialog):
 
         # spacer above exclude button
         spacerItem = QtWidgets.QSpacerItem(20, 40,
-                                           QtWidgets.QSizePolicy.Minimum,
-                                           QtWidgets.QSizePolicy.Expanding)
+                                           QtWidgets.QSizePolicy.Policy.Minimum,
+                                           QtWidgets.QSizePolicy.Policy.Expanding)
         self.gridLayout.addItem(spacerItem, 1, 1, 1, 1)
 
         # exclude button
@@ -100,8 +101,8 @@ class ExcludeTypes(QtWidgets.QDialog):
 
         # spacer below include btton
         spacerItem1 = QtWidgets.QSpacerItem(20, 40,
-                                            QtWidgets.QSizePolicy.Minimum,
-                                            QtWidgets.QSizePolicy.Expanding)
+                                            QtWidgets.QSizePolicy.Policy.Minimum,
+                                            QtWidgets.QSizePolicy.Policy.Expanding)
         self.gridLayout.addItem(spacerItem1, 4, 1, 1, 1)
 
         #
@@ -115,7 +116,8 @@ class ExcludeTypes(QtWidgets.QDialog):
 
         self.excluded_types = views.SEToolsListView(self)
         self.excluded_types.setObjectName("Excluded types list")
-        self.excluded_types.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.excluded_types.setSelectionMode(
+            QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
         self.excluded_model = models.TypeTable(self)
         self.excluded_model.item_list = copy.copy(self.query.exclude)
         self.excluded_sort = FilterByAttributeProxy(self)
@@ -130,8 +132,7 @@ class ExcludeTypes(QtWidgets.QDialog):
 
         attribute_label = QtWidgets.QLabel(self)
         attribute_label.setText("Filter types by attribute:")
-        attribute_label.setAlignment(QtCore.Qt.Alignment() |
-                                     QtCore.Qt.AlignmentFlag.AlignRight |
+        attribute_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight |
                                      QtCore.Qt.AlignmentFlag.AlignVCenter)
         attribute_label.setSizePolicy(header_sizePolicy)
         self.gridLayout.addWidget(attribute_label, 5, 0, 1, 1)
@@ -149,8 +150,8 @@ class ExcludeTypes(QtWidgets.QDialog):
         #
         self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel |
-                                          QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Cancel |
+                                          QtWidgets.QDialogButtonBox.StandardButton.Ok)
         self.gridLayout.addWidget(self.buttonBox, 6, 2, 1, 1)
 
         #
@@ -265,4 +266,4 @@ if __name__ == '__main__':
     widget.setWhatsThis("test whats this")
     widget.resize(620, 340)
     widget.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

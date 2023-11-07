@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtGui, QtWidgets
 import setools
 
 from . import util
@@ -42,11 +42,11 @@ def user_detail(user: setools.User, parent: QtWidgets.QWidget | None = None) -> 
 
 
 def user_detail_action(user: setools.User,
-                       parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
+                       parent: QtWidgets.QWidget | None = None) -> QtGui.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for user."""
 
-    a = QtWidgets.QAction(f"Properties of {user}")
+    a = QtGui.QAction(f"Properties of {user}")
     a.triggered.connect(lambda x: user_detail(user, parent))
     return a
 

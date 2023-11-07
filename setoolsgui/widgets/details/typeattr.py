@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtGui, QtWidgets
 import setools
 
 from . import util
@@ -29,11 +29,11 @@ def typeattr_detail(attr: setools.TypeAttribute, parent: QtWidgets.QWidget | Non
 
 
 def typeattr_detail_action(attr: setools.TypeAttribute,
-                           parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
+                           parent: QtWidgets.QWidget | None = None) -> QtGui.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for the attr."""
 
-    a = QtWidgets.QAction(f"Properties of {attr}")
+    a = QtGui.QAction(f"Properties of {attr}")
     a.triggered.connect(lambda _: typeattr_detail(attr, parent))
     return a
 

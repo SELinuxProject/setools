@@ -3,7 +3,7 @@
 from contextlib import suppress
 import enum
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
@@ -130,7 +130,7 @@ if __name__ == '__main__':
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     print("source:", q.source)
     print("regex:", q.source_regex)
     print("indirect:", q.source_indirect)

@@ -4,7 +4,7 @@
 import copy
 import logging
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 from setools import PermissionMap
 
 from . import models, views
@@ -89,7 +89,6 @@ class PermissionMapEditor(QtWidgets.QDialog):
         scrollArea = QtWidgets.QScrollArea(frame)
         scrollArea.setWidgetResizable(True)
         scrollArea.setAlignment(
-            QtCore.Qt.Alignment() |
             QtCore.Qt.AlignmentFlag.AlignLeft |
             QtCore.Qt.AlignmentFlag.AlignTop)
         scrollAreaWidgetContents = QtWidgets.QWidget()
@@ -102,7 +101,6 @@ class PermissionMapEditor(QtWidgets.QDialog):
         self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(
-            QtWidgets.QDialogButtonBox.StandardButtons() |
             QtWidgets.QDialogButtonBox.StandardButton.Cancel |
             QtWidgets.QDialogButtonBox.StandardButton.Ok)
         top_layout.addWidget(self.buttonBox)
@@ -151,8 +149,8 @@ class PermissionMapEditor(QtWidgets.QDialog):
 
             # add horizonal line
             line = QtWidgets.QFrame(self)
-            line.setFrameShape(QtWidgets.QFrame.HLine)
-            line.setFrameShadow(QtWidgets.QFrame.Sunken)
+            line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+            line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
             self.perm_mappings.addWidget(line)
             self.widgets.append(line)
 
@@ -301,6 +299,6 @@ if __name__ == '__main__':
     ped = PermissionMapEditor(m, edit=True)
     pview.show()
     ped.show()
-    rc = app.exec_()
+    rc = app.exec()
 
     sys.exit(rc)

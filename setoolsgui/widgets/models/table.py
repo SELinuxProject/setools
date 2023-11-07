@@ -6,7 +6,7 @@
 import logging
 import typing
 
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
 from . import modelroles
 from .typing import MetaclassFix
@@ -100,10 +100,9 @@ class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass
             case _:
                 return None
 
-    def flags(self, index: QtCore.QModelIndex = QtCore.QModelIndex()) -> QtCore.Qt.ItemFlags:
+    def flags(self, index: QtCore.QModelIndex = QtCore.QModelIndex()) -> QtCore.Qt.ItemFlag:
         """Get the flags for the specified index."""
-        return QtCore.Qt.ItemFlags() | \
-            QtCore.Qt.ItemFlag.ItemIsEnabled | \
+        return QtCore.Qt.ItemFlag.ItemIsEnabled | \
             QtCore.Qt.ItemFlag.ItemIsSelectable | \
             QtCore.Qt.ItemFlag.ItemNeverHasChildren
 

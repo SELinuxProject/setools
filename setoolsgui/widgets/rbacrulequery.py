@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 import setools
 
 from . import criteria, models, tab
@@ -136,6 +136,6 @@ if __name__ == '__main__':
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     pprint.pprint(widget.save())
     sys.exit(rc)

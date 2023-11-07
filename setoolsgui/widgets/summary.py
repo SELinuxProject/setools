@@ -5,7 +5,7 @@
 
 import typing
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from . import tab
 
@@ -264,6 +264,6 @@ if __name__ == '__main__':
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     pprint.pprint(widget.save())
     sys.exit(rc)

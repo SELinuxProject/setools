@@ -5,7 +5,7 @@ import enum
 import logging
 import typing
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 import setools
 
 from . import criteria, exception, models, views
@@ -92,7 +92,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         #
         # configure scroll area
         #
-        self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
+        self.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
         self.setWidgetResizable(True)
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
@@ -189,8 +189,8 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
             sizePolicy.setVerticalStretch(1)
             sizePolicy.setHeightForWidth(self.criteria_frame.sizePolicy().hasHeightForWidth())
             self.criteria_frame.setSizePolicy(sizePolicy)
-            self.criteria_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-            self.criteria_frame.setFrameShadow(QtWidgets.QFrame.Raised)
+            self.criteria_frame.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+            self.criteria_frame.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
             self.criteria_frame.setVisible(CRITERIA_DEFAULT_CHECKED)
             self.criteria_expander.toggled.connect(self.criteria_frame.setVisible)
 
@@ -208,7 +208,8 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
                 "Run",
                 self.buttonBox)
             self.run_button.clicked.connect(self.run)
-            self.buttonBox.addButton(self.run_button, QtWidgets.QDialogButtonBox.AcceptRole)
+            self.buttonBox.addButton(self.run_button,
+                                     QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
 
         # notes pane
         self.notes = QtWidgets.QTextEdit(self.top_widget)
@@ -349,7 +350,8 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.table_results.sizePolicy().hasHeightForWidth())
         self.table_results.setSizePolicy(sizePolicy)
-        self.table_results.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        self.table_results.setSizeAdjustPolicy(
+            QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored)
         self.table_results.setAlternatingRowColors(True)
         self.table_results.setSortingEnabled(True)
         self.table_results.setWhatsThis(
@@ -425,7 +427,7 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
 
     def run(self) -> None:
         """Start processing query."""
-        errors = [c for c in self.criteria if c.has_errors]
+        errors = [c.title() for c in self.criteria if c.has_errors]
         if errors:
             QtWidgets.QMessageBox.critical(
                 self, "Address criteria errors",
@@ -542,7 +544,8 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         self.tree_results = views.SEToolsTreeWidget(self.results)
         self.tree_results.setObjectName("tree_results")
         self.tree_results.setSizePolicy(sizePolicy)
-        self.tree_results.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustIgnored)
+        self.tree_results.setSizeAdjustPolicy(
+            QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored)
         self.tree_results.setAlternatingRowColors(True)
         self.tree_results.setSortingEnabled(True)
         self.tree_results.setWhatsThis(
@@ -674,5 +677,5 @@ if __name__ == '__main__':
 
     mw.resize(1024, 768)
     mw.show()
-    rc = app.exec_()
+    rc = app.exec()
     sys.exit(rc)

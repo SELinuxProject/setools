@@ -2,7 +2,7 @@
 from typing import Dict, Final, Union
 from unittest.mock import PropertyMock
 
-from PyQt5 import QtGui
+from PyQt6 import QtGui
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.criteria import OptionsPlacement
@@ -47,7 +47,7 @@ def test_valid_text_entry(qtbot: QtBot) -> None:
     widget.criteria.insert("textinput")
     widget.criteria.editingFinished.emit()
     assert mock_query.name == "textinput"
-    assert not widget.error_text.pixmap()
+    assert widget.error_text.pixmap().isNull()
     assert not widget.error_text.toolTip()
     assert not widget.has_errors
 
@@ -84,7 +84,7 @@ def test_invalid_text_entry(qtbot: QtBot) -> None:
     widget.criteria.insert("textinput&")
     widget.criteria.editingFinished.emit()
     assert not mock_query.name
-    assert not widget.error_text.pixmap()
+    assert widget.error_text.pixmap().isNull()
     assert not widget.error_text.toolTip()
     # not checking has_errors since it may not be set
     # depending on the UI state since the validator stops

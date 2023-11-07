@@ -2,16 +2,15 @@
 
 import collections
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 from ..models import modelroles
 
 __all__ = ("SEToolsListView",)
 
 
-INVERT_SELECTION_FLAGS = QtCore.QItemSelectionModel.SelectionFlags(
-        QtCore.QItemSelectionModel.SelectionFlag.Toggle) | \
-        QtCore.QItemSelectionModel.SelectionFlag.Columns
+INVERT_SELECTION_FLAGS = QtCore.QItemSelectionModel.SelectionFlag.Toggle | \
+                         QtCore.QItemSelectionModel.SelectionFlag.Columns
 
 
 class SEToolsListView(QtWidgets.QListView):

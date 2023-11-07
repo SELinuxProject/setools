@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 #
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt6 import QtCore, QtGui, QtWidgets
 
 __all__ = ("SEToolsTreeWidget",)
 
@@ -14,7 +14,7 @@ class SEToolsTreeWidget(QtWidgets.QTreeWidget):
 
     def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
         """Handle the context menu event."""
-        copy_tree_action = QtWidgets.QAction("Copy Tree...", self)
+        copy_tree_action = QtGui.QAction("Copy Tree...", self)
         copy_tree_action.triggered.connect(self.copy)
 
         menu = QtWidgets.QMenu(self)

@@ -3,7 +3,7 @@
 from collections import OrderedDict
 from contextlib import suppress
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 import setools
 
 from .criteria import OptionsPlacement

@@ -2,7 +2,7 @@
 
 import typing
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
@@ -91,4 +91,4 @@ if __name__ == '__main__':
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.setStatusBar(QtWidgets.QStatusBar(mw))
     mw.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

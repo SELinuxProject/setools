@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtGui, QtWidgets
 import setools
 
 from . import util
@@ -29,11 +29,11 @@ def role_detail(role: setools.Role, parent: QtWidgets.QWidget | None = None) -> 
 
 
 def role_detail_action(role: setools.Role,
-                       parent: QtWidgets.QWidget | None = None) -> QtWidgets.QAction:
+                       parent: QtWidgets.QWidget | None = None) -> QtGui.QAction:
 
     """Return a QAction that, when triggered, opens an detail popup for role."""
 
-    a = QtWidgets.QAction(f"Properties of {role}")
+    a = QtGui.QAction(f"Properties of {role}")
     a.triggered.connect(lambda x: role_detail(role, parent))
     return a
 

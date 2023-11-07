@@ -5,7 +5,7 @@
 #
 import stat
 
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 import setools
 
 from .table import SEToolsTableModel
