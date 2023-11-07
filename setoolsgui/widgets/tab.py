@@ -66,6 +66,37 @@ class TabRegistry(QObjectType):
         return classdef
 
 
+@typing.runtime_checkable
+class TabProtocol(typing.Protocol):
+
+    """Protocol for tab widgets, in addition to standard Qt widget methods."""
+
+    tab_title: str
+    section: AnalysisSection
+    mlsonly: bool
+
+    def __init__(self, policy: setools.SELinuxPolicy, perm_map: setools.PermissionMap, /, *,
+                 parent: QtWidgets.QWidget | None = None) -> None:
+        ...
+
+    def handle_permmap_change(self, permmap: setools.PermissionMap) -> None:
+        """Handle permission map changes."""
+        ...
+
+    def load(self, settings: dict) -> None:
+        """Load a dictionary of settings."""
+        ...
+
+    def save(self) -> dict:
+        """Return a dictionary of settings for this tab."""
+        ...
+
+
+#
+# The below base classes have unused __init__ arguments to match the
+# above protocol.
+#
+
 # pylint: disable=invalid-metaclass
 class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
 
@@ -83,7 +114,8 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
     criteria: tuple[criteria.criteria.CriteriaWidget, ...]
     perm_map: setools.PermissionMap
 
-    def __init__(self, enable_criteria: bool = True,
+    def __init__(self, _, __, /, *,
+                 enable_criteria: bool = True,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(parent)
@@ -327,10 +359,10 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         Table = 0
         Text = 1
 
-    def __init__(self, query: setools.PolicyQuery, enable_criteria: bool = True,
-                 parent: QtWidgets.QWidget | None = None) -> None:
+    def __init__(self, query: setools.PolicyQuery, _, /, *,
+                 enable_criteria: bool = True, parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(enable_criteria=enable_criteria, parent=parent)
+        super().__init__(query, None, enable_criteria=enable_criteria, parent=parent)
         self.query: typing.Final = query
 
         # results as 2 tab
@@ -501,10 +533,11 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         Tree = 1
         Text = 2
 
-    def __init__(self, query: DGA, enable_criteria: bool = True,
+    def __init__(self, query: DGA, _, /, *,
+                 enable_criteria: bool = True,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(enable_criteria=enable_criteria, parent=parent)
+        super().__init__(query, None, enable_criteria=enable_criteria, parent=parent)
         self.query: typing.Final = query
 
         # Create tab widget
@@ -666,13 +699,13 @@ if __name__ == '__main__':
 
     tw = QtWidgets.QTabWidget(mw)
     mw.setCentralWidget(tw)
-    widget1 = BaseAnalysisTabWidget(parent=tw)
+    widget1 = BaseAnalysisTabWidget(None, None, parent=tw)
     tw.addTab(widget1, "BaseAnalysisTabWidget w/criteria")
-    widget2 = BaseAnalysisTabWidget(enable_criteria=False, parent=tw)
+    widget2 = BaseAnalysisTabWidget(None, None, enable_criteria=False, parent=tw)
     tw.addTab(widget2, "BaseAnalysisTabWidget w/o criteria")
-    widget3 = TableResultTabWidget(q, parent=tw)
+    widget3 = TableResultTabWidget(q, None, parent=tw)
     tw.addTab(widget3, "TableResultTabWidget")
-    widget4 = DirectedGraphResultTab(a, parent=tw)
+    widget4 = DirectedGraphResultTab(a, None, parent=tw)
     tw.addTab(widget4, "GraphResultTabWidget w/criteria")
 
     mw.resize(1024, 768)

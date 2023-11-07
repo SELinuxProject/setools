@@ -14,10 +14,10 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
     tab_title = "Role-based Access Control (RBAC) Rules"
     mlsonly = False
 
-    def __init__(self, policy: "setools.SELinuxPolicy", _,
+    def __init__(self, policy: "setools.SELinuxPolicy", _, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.RBACRuleQuery(policy), enable_criteria=True, parent=parent)
+        super().__init__(setools.RBACRuleQuery(policy), None, enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search RBAC rules in a SELinux policy.</b>")
 

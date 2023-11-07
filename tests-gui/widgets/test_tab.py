@@ -11,7 +11,7 @@ from .criteria.util import build_mock_query
 
 def test_basetab_layout(qtbot: QtBot) -> None:
     """Test BaseAnalysisTabWidget with criteria."""
-    widget = tab.BaseAnalysisTabWidget(enable_criteria=True)
+    widget = tab.BaseAnalysisTabWidget(None, None, enable_criteria=True)
     qtbot.addWidget(widget)
 
     assert widget.top_layout.columnCount() == 5
@@ -25,7 +25,7 @@ def test_basetab_layout(qtbot: QtBot) -> None:
 
 def test_basetab_layout_nocriteria(qtbot: QtBot) -> None:
     """Test BaseAnalysisTabWidget without criteria."""
-    widget = tab.BaseAnalysisTabWidget(enable_criteria=False)
+    widget = tab.BaseAnalysisTabWidget(None, None, enable_criteria=False)
     qtbot.addWidget(widget)
 
     assert widget.top_layout.columnCount() == 5
@@ -39,7 +39,7 @@ def test_basetab_layout_nocriteria(qtbot: QtBot) -> None:
 
 def test_basetab_criteria_expander(qtbot: QtBot) -> None:
     """Test BaseAnalysisTabWidget criteria expander behavior."""
-    widget = tab.BaseAnalysisTabWidget(enable_criteria=True)
+    widget = tab.BaseAnalysisTabWidget(None, None, enable_criteria=True)
     qtbot.addWidget(widget)
     widget.show()
 
@@ -59,7 +59,7 @@ def test_basetab_criteria_expander(qtbot: QtBot) -> None:
 
 def test_basetab_notes_expander(qtbot: QtBot) -> None:
     """Test BaseAnalysisTabWidget notes expander behavior."""
-    widget = tab.BaseAnalysisTabWidget(enable_criteria=True)
+    widget = tab.BaseAnalysisTabWidget(None, None, enable_criteria=True)
     qtbot.addWidget(widget)
     widget.show()
 
@@ -80,7 +80,7 @@ def test_basetab_notes_expander(qtbot: QtBot) -> None:
 def test_tableresulttab_layout(qtbot: QtBot) -> None:
     """Test TableResultTabWidget layout."""
     mock_query = build_mock_query()
-    widget = tab.TableResultTabWidget(mock_query, enable_criteria=True)
+    widget = tab.TableResultTabWidget(mock_query, None, enable_criteria=True)
     qtbot.addWidget(widget)
 
     results_widget = cast(QtWidgets.QTabWidget, widget.results)

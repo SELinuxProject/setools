@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = ObjClassCriteriaWidget("Test Classes", q, "tclass", mw)
+    widget = ObjClassCriteriaWidget("Test Classes", q, "tclass", parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

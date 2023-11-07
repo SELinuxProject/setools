@@ -85,7 +85,7 @@ class PermissionMapEditor(QtWidgets.QDialog):
         frame_layout.addWidget(self.disable_all, 1, 3, 1, 1)
 
         # permission widgets
-        self.widgets = list[PermissionMapping]()
+        self.widgets = list[PermissionMapping | QtWidgets.QFrame]()
         scrollArea = QtWidgets.QScrollArea(frame)
         scrollArea.setWidgetResizable(True)
         scrollArea.setAlignment(

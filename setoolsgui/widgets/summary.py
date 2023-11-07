@@ -9,6 +9,8 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from . import tab
 
+__all__ = ("SummaryTab",)
+
 
 class SummaryTab(tab.BaseAnalysisTabWidget):
 
@@ -18,10 +20,10 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
     tab_title = "SELinux Policy Summary"
     mlsonly = False
 
-    def __init__(self, policy: "setools.SELinuxPolicy", _,
+    def __init__(self, policy: "setools.SELinuxPolicy", _, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(enable_criteria=False, parent=parent)
+        super().__init__(policy, None, enable_criteria=False, parent=parent)
         self.policy: typing.Final = policy
 
         # font for labels
@@ -45,16 +47,7 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
                                 ("Unknown Permissions:", "handle_unknown"),
                                 ("MLS:", "mls")):
 
-            label = QtWidgets.QLabel(properties_groupbox)
-            label.setFont(font)
-            label.setText(label_text)
-            value = QtWidgets.QLabel(properties_groupbox)
-            value.setText(str(getattr(self.policy, obj)))
-            properties_layout.addRow(label, value)
-            setattr(self, f"{obj}_label", label)
-            setattr(self, f"{obj}_value", value)
-
-        self.mls_value.setText("enabled" if self.policy.mls else "disabled")
+            self._add_row(properties_layout, label_text, obj)
 
         # Create policy capabilities list
         self.polcaps_label = QtWidgets.QLabel(properties_groupbox)
@@ -83,14 +76,7 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
                                 ("Defaults:", "default_count"),
                                 ("Typebounds:", "typebounds_count")):
 
-            label = QtWidgets.QLabel(other_groupbox)
-            label.setFont(font)
-            label.setText(label_text)
-            value = QtWidgets.QLabel(other_groupbox)
-            value.setText(str(getattr(self.policy, obj)))
-            other_layout.addRow(label, value)
-            setattr(self, f"{obj}_label", label)
-            setattr(self, f"{obj}_value", value)
+            self._add_row(other_layout, label_text, obj)
 
         #
         # Constraints
@@ -100,29 +86,12 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
         constraints_layout = QtWidgets.QFormLayout(constraints_groupbox)
         self.top_layout.addWidget(constraints_groupbox, 2, 3, 1, 1)
 
-        for label_text, obj in (("constrain:", "constraint_count"),
-                                ("validatetrans:", "validatetrans_count"),
-                                ("mlsconstrain:", "mlsconstraint_count"),
-                                ("mlsvalidatetrans:", "mlsvalidatetrans_count")):
+        for label_text, obj, req_mls in (("constrain:", "constraint_count", False),
+                                         ("validatetrans:", "validatetrans_count", False),
+                                         ("mlsconstrain:", "mlsconstraint_count", True),
+                                         ("mlsvalidatetrans:", "mlsvalidatetrans_count", True)):
 
-            label = QtWidgets.QLabel(constraints_groupbox)
-            label.setFont(font)
-            label.setText(label_text)
-            value = QtWidgets.QLabel(constraints_groupbox)
-            value.setText(str(getattr(self.policy, obj)))
-            constraints_layout.addRow(label, value)
-            setattr(self, f"{obj}_label", label)
-            setattr(self, f"{obj}_value", value)
-
-        if not self.policy.mls:
-            self.mlsconstraint_count_label.setEnabled(False)
-            self.mlsconstraint_count_label.setToolTip("MLS is disabled in this policy.")
-            self.mlsconstraint_count_value.setEnabled(False)
-            self.mlsconstraint_count_value.setToolTip("MLS is disabled in this policy.")
-            self.mlsvalidatetrans_count_label.setEnabled(False)
-            self.mlsvalidatetrans_count_label.setToolTip("MLS is disabled in this policy.")
-            self.mlsvalidatetrans_count_value.setEnabled(False)
-            self.mlsvalidatetrans_count_value.setToolTip("MLS is disabled in this policy.")
+            self._add_row(constraints_layout, label_text, obj, req_mls)
 
         #
         # Components
@@ -132,34 +101,17 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
         components_layout = QtWidgets.QFormLayout(components_groupbox)
         self.top_layout.addWidget(components_groupbox, 4, 0, 1, 2)
 
-        for label_text, obj in (("Classes:", "class_count"),
-                                ("Permissions:", "permission_count"),
-                                ("Types:", "type_count"),
-                                ("Attributes:", "type_attribute_count"),
-                                ("Roles:", "role_count"),
-                                ("Users:", "user_count"),
-                                ("Booleans:", "boolean_count"),
-                                ("Sensitivities:", "level_count"),
-                                ("Categories:", "category_count")):
+        for label_text, obj, req_mls in (("Classes:", "class_count", False),
+                                         ("Permissions:", "permission_count", False),
+                                         ("Types:", "type_count", False),
+                                         ("Attributes:", "type_attribute_count", False),
+                                         ("Roles:", "role_count", False),
+                                         ("Users:", "user_count", False),
+                                         ("Booleans:", "boolean_count", False),
+                                         ("Sensitivities:", "level_count", True),
+                                         ("Categories:", "category_count", True)):
 
-            label = QtWidgets.QLabel(components_groupbox)
-            label.setFont(font)
-            label.setText(label_text)
-            value = QtWidgets.QLabel(components_groupbox)
-            value.setText(str(getattr(self.policy, obj)))
-            components_layout.addRow(label, value)
-            setattr(self, f"{obj}_label", label)
-            setattr(self, f"{obj}_value", value)
-
-        if not self.policy.mls:
-            self.level_count_label.setEnabled(False)
-            self.level_count_label.setToolTip("MLS is disabled in this policy.")
-            self.level_count_value.setEnabled(False)
-            self.level_count_value.setToolTip("MLS is disabled in this policy.")
-            self.category_count_label.setEnabled(False)
-            self.category_count_label.setToolTip("MLS is disabled in this policy.")
-            self.category_count_value.setEnabled(False)
-            self.category_count_value.setToolTip("MLS is disabled in this policy.")
+            self._add_row(components_layout, label_text, obj, req_mls)
 
         #
         # Rules
@@ -169,35 +121,22 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
         rule_layout = QtWidgets.QFormLayout(rule_groupbox)
         self.top_layout.addWidget(rule_groupbox, 4, 2, 1, 1)
 
-        for label_text, obj in (("allow:", "allow_count"),
-                                ("allowxperm:", "allowxperm_count"),
-                                ("auditallow:", "auditallow_count"),
-                                ("auditallowxperm:", "auditallowxperm_count"),
-                                ("dontaudit:", "dontaudit_count"),
-                                ("dontauditxperm:", "dontauditxperm_count"),
-                                ("neverallow:", "neverallow_count"),
-                                ("neverallowxperm:", "neverallowxperm_count"),
-                                ("type_transition:", "type_transition_count"),
-                                ("type_change:", "type_change_count"),
-                                ("type_member:", "type_member_count"),
-                                ("allow (role):", "role_allow_count"),
-                                ("role_transition", "role_transition_count"),
-                                ("range_transition", "range_transition_count")):
+        for label_text, obj, req_mls in (("allow:", "allow_count", False),
+                                         ("allowxperm:", "allowxperm_count", False),
+                                         ("auditallow:", "auditallow_count", False),
+                                         ("auditallowxperm:", "auditallowxperm_count", False),
+                                         ("dontaudit:", "dontaudit_count", False),
+                                         ("dontauditxperm:", "dontauditxperm_count", False),
+                                         ("neverallow:", "neverallow_count", False),
+                                         ("neverallowxperm:", "neverallowxperm_count", False),
+                                         ("type_transition:", "type_transition_count", False),
+                                         ("type_change:", "type_change_count", False),
+                                         ("type_member:", "type_member_count", False),
+                                         ("allow (role):", "role_allow_count", False),
+                                         ("role_transition", "role_transition_count", False),
+                                         ("range_transition", "range_transition_count", True)):
 
-            label = QtWidgets.QLabel(rule_groupbox)
-            label.setFont(font)
-            label.setText(label_text)
-            value = QtWidgets.QLabel(rule_groupbox)
-            value.setText(str(getattr(self.policy, obj)))
-            rule_layout.addRow(label, value)
-            setattr(self, f"{obj}_label", label)
-            setattr(self, f"{obj}_value", value)
-
-        if not self.policy.mls:
-            self.range_transition_count_label.setEnabled(False)
-            self.range_transition_count_label.setToolTip("MLS is disabled in this policy.")
-            self.range_transition_count_value.setEnabled(False)
-            self.range_transition_count_value.setToolTip("MLS is disabled in this policy.")
+            self._add_row(rule_layout, label_text, obj, req_mls)
 
         #
         # Labeling
@@ -216,17 +155,31 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
                                 ("nodecon:", "nodecon_count"),
                                 ("portcon:", "portcon_count")):
 
-            label = QtWidgets.QLabel(labeling_groupbox)
-            label.setFont(font)
-            label.setText(label_text)
-            value = QtWidgets.QLabel(labeling_groupbox)
-            value.setText(str(getattr(self.policy, obj)))
-            labeling_layout.addRow(label, value)
-            setattr(self, f"{obj}_label", label)
-            setattr(self, f"{obj}_value", value)
+            self._add_row(labeling_layout, label_text, obj)
 
-        # Fill policy capabilities list
         QtCore.QMetaObject.connectSlotsByName(self)
+
+    def _add_row(self, layout: QtWidgets.QFormLayout, label_text: str, obj: str,
+                 req_mls: bool = False) -> None:
+        """Add a row a layout."""
+        font = QtGui.QFont()
+        font.setBold(True)
+
+        label = QtWidgets.QLabel(layout.parentWidget())
+        label.setFont(font)
+        label.setText(label_text)
+        value = QtWidgets.QLabel(layout.parentWidget())
+        value.setText(str(getattr(self.policy, obj)))
+        layout.addRow(label, value)
+
+        if req_mls and not self.policy.mls:
+            label.setEnabled(False)
+            label.setToolTip("MLS is disabled in this policy.")
+            value.setEnabled(False)
+            value.setToolTip("MLS is disabled in this policy.")
+
+        setattr(self, f"{obj}_label", label)
+        setattr(self, f"{obj}_value", value)
 
     #
     # Unused abstract methods
@@ -257,7 +210,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = SummaryTab(mw, setools.SELinuxPolicy(), None)
+    widget = SummaryTab(setools.SELinuxPolicy(), None, parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

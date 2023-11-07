@@ -423,7 +423,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             # error opening the policy file.
             ChooseAnalysis(self.policy.mls, parent=self)
 
-    def create_new_analysis(self, tab_class: widgets.tab.BaseAnalysisTabWidget) -> int:
+    def create_new_analysis(self, tab_class: type[widgets.tab.BaseAnalysisTabWidget]) -> int:
         """Create a new analysis tab with the selected widget."""
         self.tab_counter += 1
         counted_name = f"{self.tab_counter}: {tab_class.tab_title}"
@@ -1024,7 +1024,7 @@ class ChooseAnalysis(QtWidgets.QDialog):
                 # tree widget is set for single item selection.
                 item = self.analysisTypes.selectedItems()[0]
 
-            tab_class = typing.cast(widgets.tab.BaseAnalysisTabWidget,
+            tab_class = typing.cast(type[widgets.tab.BaseAnalysisTabWidget],
                                     item.data(0, QtCore.Qt.ItemDataRole.UserRole))
             parent.create_new_analysis(tab_class)
         except (IndexError, AttributeError):

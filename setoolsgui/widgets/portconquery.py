@@ -16,10 +16,10 @@ class PortconQueryTab(tab.TableResultTabWidget):
     tab_title = "Network Port Contexts"
     mlsonly = False
 
-    def __init__(self, policy: setools.SELinuxPolicy, _,
+    def __init__(self, policy: setools.SELinuxPolicy, _, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.PortconQuery(policy), enable_criteria=True, parent=parent)
+        super().__init__(setools.PortconQuery(policy), None, enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search portcon statements in a SELinux policy.</b>")
 

@@ -24,7 +24,7 @@ def test_docs(qtbot: QtBot) -> None:
         assert w.whatsThis()
 
     results = cast(QtWidgets.QTabWidget, widget.results)
-    for index in range(widget.results.count()):
+    for index in range(results.count()):
         assert results.tabWhatsThis(index)
 
 

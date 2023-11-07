@@ -37,10 +37,10 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
     tab_title = "Information Flow Analysis"
     mlsonly = False
 
-    def __init__(self, policy: setools.SELinuxPolicy, perm_map: setools.PermissionMap,
+    def __init__(self, policy: setools.SELinuxPolicy, perm_map: setools.PermissionMap, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.InfoFlowAnalysis(policy, perm_map),
+        super().__init__(setools.InfoFlowAnalysis(policy, perm_map), perm_map,
                          enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Information flow analysis of an SELinux policy.</b>")
@@ -137,11 +137,12 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         # Only enable tree browser for flows in/out mode.  Set the correct
         # renderer based on the mode.
         self.log.debug(f"Handling mode change to {mode}.")
+        results = typing.cast(QtWidgets.QTabWidget, self.results)
         if mode in (setools.InfoFlowAnalysis.Mode.FlowsIn, setools.InfoFlowAnalysis.Mode.FlowsOut):
-            self.results.setTabEnabled(tab.DirectedGraphResultTab.ResultTab.Tree, True)
+            results.setTabEnabled(tab.DirectedGraphResultTab.ResultTab.Tree, True)
             self.worker.render = InfoFlowAnalysisTab.render_direct_path
         else:
-            self.results.setTabEnabled(tab.DirectedGraphResultTab.ResultTab.Tree, False)
+            results.setTabEnabled(tab.DirectedGraphResultTab.ResultTab.Tree, False)
             self.worker.render = InfoFlowAnalysisTab.render_transitive_path
 
     def _apply_result_limit(self, value: int = DEFAULT_RESULT_LIMIT) -> None:

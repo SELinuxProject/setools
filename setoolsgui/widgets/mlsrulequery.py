@@ -14,10 +14,10 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
     tab_title = "Multi-Level Security (MLS) Rules"
     mlsonly = True
 
-    def __init__(self, policy: "setools.SELinuxPolicy", _,
+    def __init__(self, policy: "setools.SELinuxPolicy", _, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.MLSRuleQuery(policy), enable_criteria=True, parent=parent)
+        super().__init__(setools.MLSRuleQuery(policy), None, enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search Type Enforcement rules in a SELinux policy.</b>")
 
