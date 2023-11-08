@@ -6,6 +6,8 @@
 from PyQt6 import QtCore
 import setools
 
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 __all__ = ("NetifconTable",)
@@ -34,5 +36,41 @@ class NetifconTable(SEToolsTableModel[setools.Netifcon]):
                         return str(rule.context)
                     case 2:
                         return str(rule.packet)
+
+            case modelroles.ContextMenuRole:
+                match col:
+                    case 1:
+                        return details.context_detail_action(rule.context)
+                    case 2:
+                        return details.context_detail_action(rule.packet)
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = \
+                            """
+                            <p>This is the name of the netifcon.</p>
+                            """
+                    case 1:
+                        column_whatsthis = \
+                            """
+                            <p>This is the device context of the netifcon.</p>
+                            """
+                    case 2:
+                        column_whatsthis = \
+                            """
+                            <p>This is the packet context of the netifcon.</p>
+                            """
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>Table Representation of Network Interface Contexts (netifcon)</p></b>
+
+                    <p>Each part of the rule is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
 
         return super().data(index, role)

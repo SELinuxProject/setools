@@ -201,10 +201,11 @@ class NameCriteriaWidget(CriteriaWidget):
         self.set_criteria()
 
         # change line edit validator
-        if state:
-            self.criteria.setValidator(None)  # type: ignore
-        else:
-            self.criteria.setValidator(self.exact_validator)
+        with suppress(AttributeError):  # May not have a validator
+            if state:
+                self.criteria.setValidator(None)  # type: ignore
+            else:
+                self.criteria.setValidator(self.exact_validator)
 
     #
     # Workspace methods

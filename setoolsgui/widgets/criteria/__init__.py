@@ -7,6 +7,7 @@ from .comboenum import *
 from .context import *
 from .mlslevelrange import *
 from .mlsruletype import *
+from .name import *
 from .objclass import *
 from .permission import *
 from .ports import *
