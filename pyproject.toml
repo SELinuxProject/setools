@@ -14,7 +14,8 @@ plugins = ["Cython.Coverage"]
 exclude_lines = ["pragma: no cover",
                  "def __repr__",
                  "raise NotImplementedError",
-                 "return NotImplemented"]
+                 "return NotImplemented",
+                 "if __name__ == '__main__':"]
 
 
 #
