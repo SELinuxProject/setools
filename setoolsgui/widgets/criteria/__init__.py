@@ -5,6 +5,7 @@ from .criteria import *
 from .boolean import *
 from .comboenum import *
 from .context import *
+from .infiniband import *
 from .mlslevelrange import *
 from .mlsruletype import *
 from .name import *
