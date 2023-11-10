@@ -6,6 +6,8 @@
 from PyQt6 import QtCore
 import setools
 
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 __all__ = ("IbpkeyconTable",)
@@ -37,5 +39,40 @@ class IbpkeyconTable(SEToolsTableModel[setools.Ibpkeycon]):
                         return f"{low:#x}-{high:#x}"
                     case 2:
                         return str(rule.context)
+
+            case modelroles.ContextMenuRole:
+                if col == 2:
+                    return details.context_detail_action(rule.context)
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = \
+                            """
+                            <p>This is the subnet prefix if the ibpkeycon.</p>
+                            """
+                    case 1:
+                        column_whatsthis = \
+                            """
+                            <p>This is the partition key range of the ibpkeycon.</p>
+                            """
+                    case 2:
+                        column_whatsthis = \
+                            """
+                            <p>This is the context of the ibpkeycon.</p>
+                            """
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>
+                    Table Representation of Infiniband Partition Key Contexts (ipbkeycon)
+                    </p></b>
+
+                    <p>Each part of the rule is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
 
         return super().data(index, role)

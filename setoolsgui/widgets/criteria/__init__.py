@@ -6,6 +6,7 @@ from .boolean import *
 from .comboenum import *
 from .context import *
 from .infiniband import *
+from .ipnetwork import *
 from .mlslevelrange import *
 from .mlsruletype import *
 from .name import *
