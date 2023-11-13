@@ -8,6 +8,8 @@ import stat
 from PyQt6 import QtCore
 import setools
 
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 __all__ = ("GenfsconTable",)
@@ -48,5 +50,43 @@ class GenfsconTable(SEToolsTableModel[setools.Genfscon]):
                         return self._filetype_to_text[rule.filetype]
                     case 3:
                         return str(rule.context)
+
+            case modelroles.ContextMenuRole:
+                if col == 3:
+                    return details.context_detail_action(rule.context)
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = \
+                            """
+                            <p>This is the filesystem type/name of the genfscon.</p>
+                            """
+                    case 1:
+                        column_whatsthis = \
+                            """
+                            <p>This is the path of the genfscon.</p>
+                            """
+                    case 2:
+                        column_whatsthis = \
+                            """
+                            <p>This is the file type of the genfscon.</p>
+                            """
+                    case 3:
+                        column_whatsthis = \
+                            """
+                            <p>This is the context of the genfscon.</p>
+                            """
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>Table Representation of Genfscons</p></b>
+
+                    <p>Each part of the rule is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
 
         return super().data(index, role)
