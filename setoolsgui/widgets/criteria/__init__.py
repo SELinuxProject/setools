@@ -7,12 +7,12 @@ from .comboenum import *
 from .context import *
 from .infiniband import *
 from .ipnetwork import *
+from .ipports import *
 from .mlslevelrange import *
 from .mlsruletype import *
 from .name import *
 from .objclass import *
 from .permission import *
-from .ports import *
 from .radioenum import *
 from .rbacruletype import *
 from .role import *

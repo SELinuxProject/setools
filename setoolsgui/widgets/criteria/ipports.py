@@ -10,10 +10,10 @@ from .ranged import RangedCriteriaWidget
 
 VALIDATION = r"[0-9]+(-[0-9]+)?"
 
-__all__ = ("PortName",)
+__all__ = ("IP_PortName",)
 
 
-class PortName(RangedCriteriaWidget):
+class IP_PortName(RangedCriteriaWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = PortName("Test Range", q, "default", enable_range_opts=True, parent=mw)
+    widget = IP_PortName("Test Range", q, "default", enable_range_opts=True, parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

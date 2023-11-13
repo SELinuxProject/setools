@@ -26,12 +26,12 @@ class PortconQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        ports = criteria.PortName("Port/Port Range",
-                                  self.query,
-                                  "ports",
-                                  convert_range=True,
-                                  enable_range_opts=True,
-                                  parent=self.criteria_frame)
+        ports = criteria.IP_PortName("Port/Port Range",
+                                     self.query,
+                                     "ports",
+                                     convert_range=True,
+                                     enable_range_opts=True,
+                                     parent=self.criteria_frame)
         ports.setToolTip("The port number or port number range for portcon matching.")
         ports.setWhatsThis(
             """
