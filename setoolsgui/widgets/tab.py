@@ -22,7 +22,6 @@ CRITERIA_DEFAULT_CHECKED: typing.Final[bool] = True
 # Show notes default setting (unchecked)
 NOTES_DEFAULT_CHECKED: typing.Final[bool] = False
 
-TAB_REQUIRED_CLASSVARS: typing.Final[tuple[str, ...]] = ("section", "tab_title", "mlsonly")
 TAB_REGISTRY: typing.Final[dict[str, type["BaseAnalysisTabWidget"]]] = {}
 
 __all__ = ("AnalysisSection", "BaseAnalysisTabWidget", "TableResultTabWidget",
@@ -52,16 +51,10 @@ class TabRegistry(QObjectType):
     def __new__(cls, *args, **kwargs):
         classdef = super().__new__(cls, *args, **kwargs)
 
-        clsname = args[0]
-        attributedict = args[2]
-
-        # Only add concrete tabs with all required fields (skip base classes)
-        # to the tab registry
-        for k in TAB_REQUIRED_CLASSVARS:
-            if k not in attributedict:
-                return classdef
-
-        TAB_REGISTRY[clsname] = classdef
+        # Only add classes following the tab protocol to the tab registry.
+        if isinstance(classdef, TabProtocol):
+            clsname = args[0]
+            TAB_REGISTRY[clsname] = classdef
 
         return classdef
 
