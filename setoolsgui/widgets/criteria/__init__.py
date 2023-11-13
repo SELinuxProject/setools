@@ -5,6 +5,7 @@ from .criteria import *
 from .boolean import *
 from .comboenum import *
 from .context import *
+from .fsuseruletype import *
 from .infiniband import *
 from .ipnetwork import *
 from .ipports import *

@@ -18,7 +18,8 @@ from . import config, widgets
 
 # Supported analyses.  These are not directly used here, but
 # will init the tab registry in widgets.tab for apol's analyses.
-from .widgets import (genfsconquery,
+from .widgets import (fsusequery,
+                      genfsconquery,
                       ibendportconquery,
                       ibpkeyconquery,
                       infoflow,
