@@ -14,13 +14,13 @@ def test_basetab_layout(qtbot: QtBot) -> None:
     widget = tab.BaseAnalysisTabWidget(None, None, enable_criteria=True)
     qtbot.addWidget(widget)
 
-    assert widget.top_layout.columnCount() == 5
-    assert widget.top_layout.rowCount() == 4
-    assert widget.top_layout.itemAtPosition(0, 3).widget() == widget.criteria_expander
-    assert widget.top_layout.itemAtPosition(0, 4).widget() == widget.notes_expander
-    assert widget.top_layout.itemAtPosition(1, 0).widget() == widget.criteria_frame
-    assert not widget.top_layout.itemAtPosition(2, 0)  # result widget set by subclasses
-    assert widget.top_layout.itemAtPosition(3, 0).widget() == widget.notes
+    assert widget.analysis_layout.columnCount() == 5
+    assert widget.analysis_layout.rowCount() == 4
+    assert widget.analysis_layout.itemAtPosition(0, 3).widget() == widget.criteria_expander
+    assert widget.analysis_layout.itemAtPosition(0, 4).widget() == widget.notes_expander
+    assert widget.analysis_layout.itemAtPosition(1, 0).widget() == widget.criteria_frame
+    assert not widget.analysis_layout.itemAtPosition(2, 0)  # result widget set by subclasses
+    assert widget.analysis_layout.itemAtPosition(3, 0).widget() == widget.notes
 
 
 def test_basetab_layout_nocriteria(qtbot: QtBot) -> None:
@@ -28,13 +28,13 @@ def test_basetab_layout_nocriteria(qtbot: QtBot) -> None:
     widget = tab.BaseAnalysisTabWidget(None, None, enable_criteria=False)
     qtbot.addWidget(widget)
 
-    assert widget.top_layout.columnCount() == 5
-    assert widget.top_layout.rowCount() == 4
-    assert not widget.top_layout.itemAtPosition(0, 3)  # no criteria expander
-    assert widget.top_layout.itemAtPosition(0, 4).widget() == widget.notes_expander
-    assert not widget.top_layout.itemAtPosition(1, 0)  # no criteria pane
-    assert not widget.top_layout.itemAtPosition(2, 0)  # result widget set by subclasses
-    assert widget.top_layout.itemAtPosition(3, 0).widget() == widget.notes
+    assert widget.analysis_layout.columnCount() == 5
+    assert widget.analysis_layout.rowCount() == 4
+    assert not widget.analysis_layout.itemAtPosition(0, 3)  # no criteria expander
+    assert widget.analysis_layout.itemAtPosition(0, 4).widget() == widget.notes_expander
+    assert not widget.analysis_layout.itemAtPosition(1, 0)  # no criteria pane
+    assert not widget.analysis_layout.itemAtPosition(2, 0)  # result widget set by subclasses
+    assert widget.analysis_layout.itemAtPosition(3, 0).widget() == widget.notes
 
 
 def test_basetab_criteria_expander(qtbot: QtBot) -> None:
@@ -84,13 +84,13 @@ def test_tableresulttab_layout(qtbot: QtBot) -> None:
     qtbot.addWidget(widget)
 
     results_widget = cast(QtWidgets.QTabWidget, widget.results)
-    assert widget.top_layout.columnCount() == 5
-    assert widget.top_layout.rowCount() == 4
-    assert widget.top_layout.itemAtPosition(0, 3).widget() == widget.criteria_expander
-    assert widget.top_layout.itemAtPosition(0, 4).widget() == widget.notes_expander
-    assert widget.top_layout.itemAtPosition(1, 0).widget() == widget.criteria_frame
-    assert widget.top_layout.itemAtPosition(2, 0).widget() == results_widget
-    assert widget.top_layout.itemAtPosition(3, 0).widget() == widget.notes
+    assert widget.analysis_layout.columnCount() == 5
+    assert widget.analysis_layout.rowCount() == 4
+    assert widget.analysis_layout.itemAtPosition(0, 3).widget() == widget.criteria_expander
+    assert widget.analysis_layout.itemAtPosition(0, 4).widget() == widget.notes_expander
+    assert widget.analysis_layout.itemAtPosition(1, 0).widget() == widget.criteria_frame
+    assert widget.analysis_layout.itemAtPosition(2, 0).widget() == results_widget
+    assert widget.analysis_layout.itemAtPosition(3, 0).widget() == widget.notes
 
     assert results_widget.count() == 2
     assert results_widget.widget(0) == widget.table_results

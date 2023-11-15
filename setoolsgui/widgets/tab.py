@@ -108,7 +108,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
     perm_map: setools.PermissionMap
 
     def __init__(self, _, __, /, *,
-                 enable_criteria: bool = True,
+                 enable_criteria: bool = True, enable_browser: bool = False,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(parent)
@@ -124,27 +124,50 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         #
         # Create top-level widget for the scroll area
         #
-        self.top_widget = QtWidgets.QWidget(self)
-        self.top_widget.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
 
-        # size policy for tab contents
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum,
                                            QtWidgets.QSizePolicy.Policy.Minimum)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
 
+        # Create splitter
+        self.top_widget = QtWidgets.QSplitter(self)
+        self.top_widget.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self.top_widget.setSizePolicy(sizePolicy)
         self.setWidget(self.top_widget)
 
         #
-        # Create top level layout
+        # Build browser
         #
-        self.top_layout = QtWidgets.QGridLayout(self.top_widget)
-        self.top_layout.setContentsMargins(6, 6, 6, 6)
-        self.top_layout.setSpacing(3)
+        if enable_browser:
+            browser_sizing = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum,
+                                                   QtWidgets.QSizePolicy.Policy.Minimum)
+            browser_sizing.setHorizontalStretch(0)
+            browser_sizing.setVerticalStretch(0)
+
+            # create browser
+            self.browser = views.SEToolsListView(self.top_widget)
+            self.browser.setSizePolicy(browser_sizing)
+            self.top_widget.addWidget(self.browser)
+            self.top_widget.setCollapsible(self.top_widget.indexOf(self.browser), True)
+
+        #
+        # Build analysis widget
+        #
+        self.analysis_widget = QtWidgets.QWidget(self.top_widget)
+        self.analysis_widget.setSizePolicy(sizePolicy)
+        self.top_widget.addWidget(self.analysis_widget)
+        self.top_widget.setCollapsible(self.top_widget.indexOf(self.analysis_widget), False)
+
+        #
+        # Create analysis layout
+        #
+        self.analysis_layout = QtWidgets.QGridLayout(self.analysis_widget)
+        self.analysis_layout.setContentsMargins(6, 6, 6, 6)
+        self.analysis_layout.setSpacing(3)
 
         # title and "show" checkboxes
-        title = QtWidgets.QLabel(self.top_widget)
+        title = QtWidgets.QLabel(self.analysis_widget)
         title.setText(self.tab_title)
         title.setObjectName("title")
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
@@ -153,15 +176,15 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(title.sizePolicy().hasHeightForWidth())
         title.setSizePolicy(sizePolicy)
-        self.top_layout.addWidget(title, 0, 0)
+        self.analysis_layout.addWidget(title, 0, 0)
 
         # spacer between title and "show:"
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding,
                                            QtWidgets.QSizePolicy.Policy.Minimum)
-        self.top_layout.addItem(spacerItem, 0, 1)
+        self.analysis_layout.addItem(spacerItem, 0, 1)
 
         # "show" label
-        label_2 = QtWidgets.QLabel(self.top_widget)
+        label_2 = QtWidgets.QLabel(self.analysis_widget)
         label_2.setText("Show:")
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.Fixed)
@@ -169,11 +192,11 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(label_2.sizePolicy().hasHeightForWidth())
         label_2.setSizePolicy(sizePolicy)
-        self.top_layout.addWidget(label_2, 0, 2)
+        self.analysis_layout.addWidget(label_2, 0, 2)
 
         if enable_criteria:
             # criteria expander checkbox
-            self.criteria_expander = QtWidgets.QCheckBox(self.top_widget)
+            self.criteria_expander = QtWidgets.QCheckBox(self.analysis_widget)
             self.criteria_expander.setChecked(CRITERIA_DEFAULT_CHECKED)
             self.criteria_expander.setToolTip(
                 "Show or hide the search criteria (no settings are lost)")
@@ -184,10 +207,10 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
                 <p>No settings are lost if the criteria is hidden.</p>
                 """)
             self.criteria_expander.setText("Criteria")
-            self.top_layout.addWidget(self.criteria_expander, 0, 3)
+            self.analysis_layout.addWidget(self.criteria_expander, 0, 3)
 
         # notes expander checkbox
-        self.notes_expander = QtWidgets.QCheckBox(self.top_widget)
+        self.notes_expander = QtWidgets.QCheckBox(self.analysis_widget)
         self.notes_expander.setSizePolicy(sizePolicy)
         self.notes_expander.setToolTip("Show or hide the notes.")
         self.notes_expander.setWhatsThis(
@@ -203,11 +226,11 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.notes_expander.sizePolicy().hasHeightForWidth())
-        self.top_layout.addWidget(self.notes_expander, 0, 4)
+        self.analysis_layout.addWidget(self.notes_expander, 0, 4)
 
         if enable_criteria:
             # criteria frame
-            self.criteria_frame = QtWidgets.QFrame(self.top_widget)
+            self.criteria_frame = QtWidgets.QFrame(self.analysis_widget)
             sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                                QtWidgets.QSizePolicy.Policy.Preferred)
             sizePolicy.setHorizontalStretch(0)
@@ -222,7 +245,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
             self.criteria_frame_layout = QtWidgets.QGridLayout(self.criteria_frame)
             self.criteria_frame_layout.setContentsMargins(6, 6, 6, 6)
             self.criteria_frame_layout.setSpacing(3)
-            self.top_layout.addWidget(self.criteria_frame, 1, 0, 1, 5)
+            self.analysis_layout.addWidget(self.criteria_frame, 1, 0, 1, 5)
 
             # Button box at the bottom of the criteria frame.  This must be
             # added to self.criteria_frame_layout by the subclasses, as the
@@ -237,7 +260,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
                                      QtWidgets.QDialogButtonBox.ButtonRole.AcceptRole)
 
         # notes pane
-        self.notes = QtWidgets.QTextEdit(self.top_widget)
+        self.notes = QtWidgets.QTextEdit(self.analysis_widget)
         self.notes.setToolTip("Optionally enter notes here.")
         self.notes.setWhatsThis(
             """
@@ -255,10 +278,10 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
         sizePolicy.setVerticalStretch(1)
         sizePolicy.setHeightForWidth(self.notes.sizePolicy().hasHeightForWidth())
         self.notes.setSizePolicy(sizePolicy)
-        self.top_layout.addWidget(self.notes, 3, 0, 1, 5)
+        self.analysis_layout.addWidget(self.notes, 3, 0, 1, 5)
         self.notes_expander.toggled.connect(self.notes.setVisible)
 
-        QtCore.QMetaObject.connectSlotsByName(self.top_widget)
+        QtCore.QMetaObject.connectSlotsByName(self.analysis_widget)
         QtCore.QMetaObject.connectSlotsByName(self)
 
     @property
@@ -267,7 +290,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
 
     @results.setter
     def results(self, widget: QtWidgets.QWidget) -> None:
-        self.top_layout.addWidget(widget, 2, 0, 1, 5)
+        self.analysis_layout.addWidget(widget, 2, 0, 1, 5)
         self._results_widget = widget
 
     def run(self) -> None:
@@ -353,13 +376,15 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         Text = 1
 
     def __init__(self, query: setools.PolicyQuery, _, /, *,
-                 enable_criteria: bool = True, parent: QtWidgets.QWidget | None = None) -> None:
+                 enable_criteria: bool = True, enable_browser: bool = False,
+                 parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(query, None, enable_criteria=enable_criteria, parent=parent)
+        super().__init__(query, None, enable_criteria=enable_criteria,
+                         enable_browser=enable_browser, parent=parent)
         self.query: typing.Final = query
 
         # results as 2 tab
-        self.results = QtWidgets.QTabWidget(self.top_widget)
+        self.results = QtWidgets.QTabWidget(self.analysis_widget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                            QtWidgets.QSizePolicy.Policy.MinimumExpanding)
         sizePolicy.setHorizontalStretch(0)
@@ -412,10 +437,10 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         self.results.setCurrentIndex(TableResultTabWidget.ResultTab.Table)
 
         # set up processing thread
-        self.processing_thread = QtCore.QThread(self.top_widget)
+        self.processing_thread = QtCore.QThread(self.analysis_widget)
 
         # create a "busy, please wait" dialog
-        self.busy = QtWidgets.QProgressDialog(self.top_widget)
+        self.busy = QtWidgets.QProgressDialog(self.analysis_widget)
         self.busy.setModal(True)
         self.busy.setRange(0, 0)
         self.busy.setMinimumDuration(0)
@@ -530,11 +555,12 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
                  enable_criteria: bool = True,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(query, None, enable_criteria=enable_criteria, parent=parent)
+        super().__init__(query, None, enable_criteria=enable_criteria, enable_browser=False,
+                         parent=parent)
         self.query: typing.Final = query
 
         # Create tab widget
-        self.results = QtWidgets.QTabWidget(self.top_widget)
+        self.results = QtWidgets.QTabWidget(self.analysis_widget)
         tw_sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
                                               QtWidgets.QSizePolicy.Policy.MinimumExpanding)
         tw_sizePolicy.setHorizontalStretch(0)
@@ -599,10 +625,10 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         self.results.setCurrentIndex(DirectedGraphResultTab.ResultTab.Tree)
 
         # set up processing thread
-        self.processing_thread = QtCore.QThread(self.top_widget)
+        self.processing_thread = QtCore.QThread(self.analysis_widget)
 
         # create a "busy, please wait" dialog
-        self.busy = QtWidgets.QProgressDialog(self.top_widget)
+        self.busy = QtWidgets.QProgressDialog(self.analysis_widget)
         self.busy.setModal(True)
         self.busy.setRange(0, 0)
         self.busy.setMinimumDuration(0)
