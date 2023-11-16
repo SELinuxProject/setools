@@ -19,7 +19,8 @@ from . import config, widgets
 # Supported analyses.  These are not directly used here, but
 # will init the tab registry in widgets.tab for apol's analyses.
 # pylint: disable=unused-import
-from .widgets import (constraintquery,
+from .widgets import (boolquery,
+                      constraintquery,
                       fsusequery,
                       genfsconquery,
                       ibendportconquery,

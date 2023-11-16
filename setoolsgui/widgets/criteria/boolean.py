@@ -1,15 +1,17 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 from PyQt6 import QtWidgets
+import setools
 
 from .. import models
+from .combobox import ComboBoxWidget
 from .list import ListCriteriaWidget
 from .name import NameCriteriaWidget
 
 # Regex for exact matches to types/attrs
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 
-__all__ = ("BooleanListCriteriaWidget", "BooleanNameCriteriaWidget",)
+__all__ = ("BooleanListCriteriaWidget", "BooleanNameCriteriaWidget", "BooleanState")
 
 
 class BooleanListCriteriaWidget(ListCriteriaWidget):
@@ -48,12 +50,24 @@ class BooleanNameCriteriaWidget(NameCriteriaWidget):
                          enable_regex=enable_regex, required=required, parent=parent)
 
 
+class BooleanState(ComboBoxWidget):
+
+    """Criteria selection widget presenting possible Boolean states."""
+
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str, /, *,
+                 enable_any: bool = True, parent: QtWidgets.QWidget | None = None) -> None:
+
+        super().__init__(title, query, attrname, enable_any=enable_any, parent=parent)
+
+        self.criteria.addItem("False", False)
+        self.criteria.addItem("True", True)
+
+
 if __name__ == '__main__':
     import sys
     import logging
     import warnings
     import setools
-    import pprint
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
@@ -69,8 +83,10 @@ if __name__ == '__main__':
     layout = QtWidgets.QHBoxLayout(window)
     widget1 = BooleanListCriteriaWidget("Test Booleans list", q1, "boolean", parent=window)
     widget2 = BooleanNameCriteriaWidget("Test Booleans linedit", q2, "name", parent=window)
+    widget3 = BooleanState("Test Booleans State", q2, "default", enable_any=True, parent=window)
     layout.addWidget(widget1)
     layout.addWidget(widget2)
+    layout.addWidget(widget3)
     window.setToolTip("test tooltip")
     window.setWhatsThis("test whats this")
     mw.setCentralWidget(window)
@@ -79,6 +95,4 @@ if __name__ == '__main__':
     mw.menuBar().addAction(whatsthis)  # type: ignore[union-attr]
     mw.show()
     rc = app.exec()
-    print("Query settings:")
-    pprint.pprint(q1.boolean)
     sys.exit(rc)
