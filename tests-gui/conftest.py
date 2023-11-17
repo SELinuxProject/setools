@@ -1,10 +1,15 @@
 # SPDX-License-Identifier: GPL-2.0-only
+# pylint: disable=attribute-defined-outside-init
+
 from unittest.mock import Mock
 
+import pytest
 import setools
 
 
 class SortableMock(Mock):
+
+    """Mock class that can be sorted."""
 
     def __lt__(self, other):
         return self.name < other.name
@@ -13,7 +18,8 @@ class SortableMock(Mock):
         return f"<{self.__class__} name={self.name}>"
 
 
-def build_mock_policy() -> Mock:
+@pytest.fixture
+def mock_policy() -> Mock:
     """Build a mock policy."""
     foo_bool = SortableMock(setools.Boolean)
     foo_bool.name = "foo_bool"
@@ -63,8 +69,9 @@ def build_mock_policy() -> Mock:
     return policy
 
 
-def build_mock_query() -> Mock:
+@pytest.fixture
+def mock_query(mock_policy) -> Mock:
     """Build a mock query with mocked policy."""
-    mock_query = Mock(setools.PolicyQuery)
-    mock_query.policy = build_mock_policy()
-    return mock_query
+    query = Mock(setools.PolicyQuery)
+    query.policy = mock_policy
+    return query

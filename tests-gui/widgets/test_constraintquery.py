@@ -2,21 +2,27 @@
 import typing
 
 from PyQt6 import QtWidgets
+import pytest
 from pytestqt.qtbot import QtBot
 
 import setools
 from setoolsgui.widgets.constraintquery import ConstraintQueryTab
 from setoolsgui.widgets import models
 
-from .criteria.util import build_mock_policy
+
+@pytest.fixture
+def widget(mock_policy, request: pytest.FixtureRequest, qtbot: QtBot) -> ConstraintQueryTab:
+    """Pytest fixture to set up the widget."""
+    marker = request.node.get_closest_marker("obj_args")
+    kwargs = marker.kwargs if marker else {}
+    w = ConstraintQueryTab(mock_policy, None, **kwargs)
+    qtbot.addWidget(w)
+    w.show()
+    return w
 
 
-def test_docs(qtbot: QtBot) -> None:
+def test_docs(widget: ConstraintQueryTab) -> None:
     """Check that docs are provided for the widget."""
-    mock_policy = build_mock_policy()
-    widget = ConstraintQueryTab(mock_policy, None)
-    qtbot.addWidget(widget)
-
     assert widget.whatsThis()
     assert widget.table_results.whatsThis()
     assert widget.raw_results.whatsThis()
@@ -30,12 +36,8 @@ def test_docs(qtbot: QtBot) -> None:
         assert results.tabWhatsThis(index)
 
 
-def test_layout(qtbot: QtBot) -> None:
+def test_layout(widget: ConstraintQueryTab) -> None:
     """Test the layout of the criteria frame."""
-    mock_policy = build_mock_policy()
-    widget = ConstraintQueryTab(mock_policy, None)
-    qtbot.addWidget(widget)
-
     rt, user, role, type_, tclass, perms = widget.criteria
 
     assert widget.criteria_frame_layout.columnCount() == 2
@@ -50,12 +52,8 @@ def test_layout(qtbot: QtBot) -> None:
     assert widget.criteria_frame_layout.itemAtPosition(3, 1).widget() == widget.buttonBox
 
 
-def test_criteria_mapping(qtbot: QtBot) -> None:
+def test_criteria_mapping(widget: ConstraintQueryTab) -> None:
     """Test that widgets save to the correct query fields."""
-    mock_policy = build_mock_policy()
-    widget = ConstraintQueryTab(mock_policy, None)
-    qtbot.addWidget(widget)
-
     rt, user, role, type_, tclass, perms = widget.criteria
 
     assert isinstance(widget.query, setools.ConstraintQuery)

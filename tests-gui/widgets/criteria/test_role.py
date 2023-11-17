@@ -1,18 +1,25 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 from PyQt6 import QtCore
+import pytest
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.role import RoleNameWidget
 
-from .util import build_mock_query
+
+@pytest.fixture
+def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> RoleNameWidget:
+    """Pytest fixture to set up the widget."""
+    marker = request.node.get_closest_marker("obj_args")
+    kwargs = marker.kwargs if marker else {}
+    w = RoleNameWidget(request.node.name, mock_query, "name", **kwargs)
+    qtbot.addWidget(w)
+    w.show()
+    return w
 
 
-def test_base_settings(qtbot: QtBot) -> None:
-    mock_query = build_mock_query()
-    widget = RoleNameWidget("test_base_settings", mock_query, "name")
-    qtbot.addWidget(widget)
-
+def test_base_settings(widget: RoleNameWidget, mock_query) -> None:
+    """Test base properties of RoleNameWidget."""
     model = widget.criteria.completer().model()
     assert isinstance(model, QtCore.QStringListModel)
     assert sorted(r.name for r in mock_query.policy.roles()) == model.stringList()

@@ -1,58 +1,49 @@
 # SPDX-License-Identifier: GPL-2.0-only
 from typing import Dict, Union
 
+import pytest
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.type import (TypeOrAttrNameWidget,
                                               INDIRECT_DEFAULT_CHECKED)
 
-from .util import build_mock_query
+
+@pytest.fixture
+def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> TypeOrAttrNameWidget:
+    """Pytest fixture to set up the widget."""
+    marker = request.node.get_closest_marker("obj_args")
+    kwargs = marker.kwargs if marker else {}
+    w = TypeOrAttrNameWidget(request.node.name, mock_query, "name", **kwargs)
+    qtbot.addWidget(w)
+    w.show()
+    return w
 
 
-def test_base_settings(qtbot: QtBot) -> None:
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_disabled_layout", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
-    qtbot.addWidget(widget)
-
+@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
+def test_base_settings(widget: TypeOrAttrNameWidget) -> None:
+    """Test base properties of TypeOrAttrNameWidget."""
     assert widget.criteria_indirect.toolTip()
     assert widget.criteria_indirect.whatsThis()
 
 
-def test_indirect_disabled_layout(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_only)
+def test_indirect_disabled_layout(widget: TypeOrAttrNameWidget) -> None:
     """Test layout for no indirect option."""
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_disabled_layout", mock_query, "name",
-        enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_only)
-    qtbot.addWidget(widget)
-
     # validate widget item positions
     assert not widget.top_layout.itemAtPosition(1, 2)
 
 
-def test_indirect_enabled_layout(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
+def test_indirect_enabled_layout(widget: TypeOrAttrNameWidget) -> None:
     """Test layout for indirect option."""
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_enabled_layout", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
-    qtbot.addWidget(widget)
-
     assert widget.criteria_indirect.objectName() == "name_indirect"
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(1, 1).widget() == widget.criteria_indirect
 
 
-def test_indirect_toggling(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
+def test_indirect_toggling(widget: TypeOrAttrNameWidget, mock_query) -> None:
     """Test indirect toggling is reflected in the query."""
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_toggling", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute)
-    qtbot.addWidget(widget)
-
     # test toggling based on the initial state
     assert mock_query.name_indirect is INDIRECT_DEFAULT_CHECKED
     if INDIRECT_DEFAULT_CHECKED:
@@ -67,86 +58,68 @@ def test_indirect_toggling(qtbot: QtBot) -> None:
         assert mock_query.name_indirect is False
 
 
-def test_noindirect_save(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
+                      enable_regex=False)
+def test_noindirect_save(widget: TypeOrAttrNameWidget,  request: pytest.FixtureRequest) -> None:
     """Test settings save with indirect disabled."""
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_toggling", mock_query, "name",
-        enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
-        enable_regex=False)
-    qtbot.addWidget(widget)
-
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
-    widget.criteria.setText("test_noindirect_save")
+    widget.criteria.setText(request.node.name)
     widget.criteria.editingFinished.emit()
 
     settings: Dict[str, Union[str, bool]] = {}
     expected_settings = {
-        "name": "test_noindirect_save"
+        "name": request.node.name
     }
     widget.save(settings)
     assert settings == expected_settings
 
 
-def test_indirect_save(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
+                      enable_regex=False)
+def test_indirect_save(widget: TypeOrAttrNameWidget, request: pytest.FixtureRequest) -> None:
     """Test settings save with indirect enabled."""
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_toggling", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
-        enable_regex=False)
-    qtbot.addWidget(widget)
-
     widget.criteria_indirect.setChecked(not INDIRECT_DEFAULT_CHECKED)
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
-    widget.criteria.setText("test_indirect_save")
+    widget.criteria.setText(request.node.name)
     widget.criteria.editingFinished.emit()
 
     settings: Dict[str, Union[str, bool]] = {}
     expected_settings = {
-        "name": "test_indirect_save",
+        "name": request.node.name,
         "name_indirect": not INDIRECT_DEFAULT_CHECKED
     }
     widget.save(settings)
     assert settings == expected_settings
 
 
-def test_noindirect_load(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
+                      enable_regex=False)
+def test_noindirect_load(widget: TypeOrAttrNameWidget, mock_query,
+                         request: pytest.FixtureRequest) -> None:
     """Test settings load with indirect disabled."""
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_toggling", mock_query, "name",
-        enable_indirect=False, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
-        enable_regex=False)
-    qtbot.addWidget(widget)
-
     settings = {
-        "name": "test_noindirect_load"
+        "name": request.node.name
     }
     widget.load(settings)
 
-    assert widget.criteria.text() == "test_noindirect_load"
-    assert mock_query.name == "test_noindirect_load"
+    assert widget.criteria.text() == request.node.name
+    assert mock_query.name == request.node.name
 
 
-def test_indirect_load(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
+                      enable_regex=False)
+def test_indirect_load(widget: TypeOrAttrNameWidget, mock_query,
+                       request: pytest.FixtureRequest) -> None:
     """Test settings load with indirect enabled."""
-    mock_query = build_mock_query()
-    widget = TypeOrAttrNameWidget(
-        "test_indirect_toggling", mock_query, "name",
-        enable_indirect=True, mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
-        enable_regex=False)
-    qtbot.addWidget(widget)
-
     settings = {
-        "name": "test_indirect_load",
+        "name": request.node.name,
         "name_indirect": not INDIRECT_DEFAULT_CHECKED
     }
     widget.load(settings)
 
-    assert widget.criteria.text() == "test_indirect_load"
-    assert mock_query.name == "test_indirect_load"
+    assert widget.criteria.text() == request.node.name
+    assert mock_query.name == request.node.name
     assert widget.criteria_indirect.isChecked() == (not INDIRECT_DEFAULT_CHECKED)
     assert mock_query.name_indirect == (not INDIRECT_DEFAULT_CHECKED)

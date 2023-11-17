@@ -3,20 +3,31 @@ from typing import Dict, Final, Union
 from unittest.mock import PropertyMock
 
 from PyQt6 import QtGui
+import pytest
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.criteria import OptionsPlacement
 from setoolsgui.widgets.criteria.name import NameCriteriaWidget, REGEX_DEFAULT_CHECKED
 
-from .util import build_mock_query
+
+@pytest.fixture
+def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> NameCriteriaWidget:
+    """Pytest fixture to set up the widget."""
+    marker = request.node.get_closest_marker("obj_args")
+    kwargs = marker.kwargs if marker else {}
+    if "completion" not in kwargs:
+        kwargs["completion"] = []
+    if "validation" not in kwargs:
+        kwargs["validation"] = "[a-z]*"
+
+    w = NameCriteriaWidget(request.node.name, mock_query, "name", **kwargs)
+    qtbot.addWidget(w)
+    w.show()
+    return w
 
 
-def test_base_settings(qtbot: QtBot) -> None:
+def test_base_settings(widget: NameCriteriaWidget) -> None:
     """Test base properties of widget."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_base_settings", mock_query, "name", [], "[a-z]*")
-    qtbot.addWidget(widget)
-
     assert widget.criteria.objectName() == "name"
     assert widget.criteria.isClearButtonEnabled()
     assert not widget.criteria.isReadOnly()
@@ -24,24 +35,17 @@ def test_base_settings(qtbot: QtBot) -> None:
     assert widget.criteria_regex.whatsThis()
 
 
-def test_completer(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(completion=["foo", "bar"])
+def test_completer(widget: NameCriteriaWidget) -> None:
     """Test completer is correctly set up."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_base_settings", mock_query, "name", ["foo", "bar"], "[a-z]*")
-    qtbot.addWidget(widget)
-
     widget.criteria.completer().setCompletionPrefix("fo")
     assert widget.criteria.completer().currentCompletion() == "foo"
     widget.criteria.completer().setCompletionPrefix("b")
     assert widget.criteria.completer().currentCompletion() == "bar"
 
 
-def test_valid_text_entry(qtbot: QtBot) -> None:
+def test_valid_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
     """Test successful text entry."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_valid_text_entry", mock_query, "name", [], "[a-z]*")
-    qtbot.addWidget(widget)
-
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
     widget.criteria.insert("textinput")
@@ -52,13 +56,8 @@ def test_valid_text_entry(qtbot: QtBot) -> None:
     assert not widget.has_errors
 
 
-def test_query_exception_text_entry(qtbot: QtBot) -> None:
+def test_query_exception_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
     """Test error text entry from query exception."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_query_exception_text_entry", mock_query, "name", [],
-                                "[a-z]*")
-    qtbot.addWidget(widget)
-
     # exception from query
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
@@ -71,12 +70,8 @@ def test_query_exception_text_entry(qtbot: QtBot) -> None:
     assert widget.has_errors
 
 
-def test_invalid_text_entry(qtbot: QtBot) -> None:
+def test_invalid_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
     """Test invalid text entry stopped by validator."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_invalid_text_entry", mock_query, "name", [], "[a-z]*")
-    qtbot.addWidget(widget)
-
     # note regex doesn't have a validator.
     widget.criteria_regex.setChecked(False)
     widget.criteria.clear()
@@ -91,13 +86,9 @@ def test_invalid_text_entry(qtbot: QtBot) -> None:
     # invalid characters
 
 
-def test_regex_disabled_layout_opt_right(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(options_placement=OptionsPlacement.RIGHT, enable_regex=False)
+def test_regex_disabled_layout_opt_right(widget: NameCriteriaWidget) -> None:
     """Test layout for no regex option, options placement right."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_regex_disabled_layout", mock_query, "name", [], "[a-z]*",
-                                options_placement=OptionsPlacement.RIGHT, enable_regex=False)
-    qtbot.addWidget(widget)
-
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
     assert widget.top_layout.itemAtPosition(0, 1) is None
@@ -105,13 +96,9 @@ def test_regex_disabled_layout_opt_right(qtbot: QtBot) -> None:
     assert widget.top_layout.itemAtPosition(1, 1) is None
 
 
-def test_regex_disabled_layout_opt_below(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(options_placement=OptionsPlacement.BELOW, enable_regex=False)
+def test_regex_disabled_layout_opt_below(widget: NameCriteriaWidget) -> None:
     """Test layout for no regex option, options placement below."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_regex_disabled_layout", mock_query, "name", [], "[a-z]*",
-                                options_placement=OptionsPlacement.BELOW, enable_regex=False)
-    qtbot.addWidget(widget)
-
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
     assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.error_text
@@ -119,13 +106,9 @@ def test_regex_disabled_layout_opt_below(qtbot: QtBot) -> None:
     assert widget.top_layout.itemAtPosition(1, 1) is None
 
 
-def test_regex_enabled_layout_opt_right(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(options_placement=OptionsPlacement.RIGHT, enable_regex=True)
+def test_regex_enabled_layout_opt_right(widget: NameCriteriaWidget) -> None:
     """Test layout for regex option placed on right."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_regex_enabled_layout", mock_query, "name", [], "[a-z]*",
-                                options_placement=OptionsPlacement.RIGHT, enable_regex=True)
-    qtbot.addWidget(widget)
-
     assert widget.criteria_regex.objectName() == "name_regex"
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
@@ -134,13 +117,9 @@ def test_regex_enabled_layout_opt_right(qtbot: QtBot) -> None:
     assert widget.top_layout.itemAtPosition(1, 1) is None
 
 
-def test_regex_enabled_layout_opt_below(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(options_placement=OptionsPlacement.BELOW, enable_regex=True)
+def test_regex_enabled_layout_opt_below(widget: NameCriteriaWidget) -> None:
     """Test layout for regex option placed below."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_regex_enabled_layout", mock_query, "name", [], "[a-z]*",
-                                options_placement=OptionsPlacement.BELOW, enable_regex=True)
-    qtbot.addWidget(widget)
-
     assert widget.criteria_regex.objectName() == "name_regex"
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
@@ -149,13 +128,9 @@ def test_regex_enabled_layout_opt_below(qtbot: QtBot) -> None:
     assert widget.top_layout.itemAtPosition(1, 1) is None
 
 
-def test_regex_toggling(qtbot: QtBot) -> None:
+@pytest.mark.obj_args(enable_regex=True)
+def test_regex_toggling(widget: NameCriteriaWidget, mock_query) -> None:
     """Test regex toggling is reflected in the query."""
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_regex_toggling", mock_query, "name", [], "[a-z]*",
-                                enable_regex=True)
-    qtbot.addWidget(widget)
-
     # test toggling based on the initial state
     assert mock_query.name_regex is REGEX_DEFAULT_CHECKED
     if REGEX_DEFAULT_CHECKED:
@@ -170,74 +145,60 @@ def test_regex_toggling(qtbot: QtBot) -> None:
         assert mock_query.name_regex is False
 
 
-def test_noregex_save(qtbot: QtBot) -> None:
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_noregex_save", mock_query, "name", [], "[a-z]*",
-                                enable_regex=False)
-    qtbot.addWidget(widget)
-
+@pytest.mark.obj_args(enable_regex=False)
+def test_noregex_save(widget: NameCriteriaWidget, request: pytest.FixtureRequest) -> None:
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
-    widget.criteria.setText("test_noregex_save")
+    widget.criteria.setText(request.node.name)
     widget.criteria.editingFinished.emit()
 
     settings: Dict[str, Union[str, bool]] = {}
     expected_settings: Final = {
-        "name": "test_noregex_save"
+        "name": request.node.name
     }
     widget.save(settings)
     assert settings == expected_settings
 
 
-def test_regex_save(qtbot: QtBot) -> None:
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_regex_save", mock_query, "name", [], "[a-z]*",
-                                enable_regex=True)
-    qtbot.addWidget(widget)
-
+@pytest.mark.obj_args(enable_regex=True)
+def test_regex_save(widget: NameCriteriaWidget, request: pytest.FixtureRequest) -> None:
     widget.criteria_regex.setChecked(not REGEX_DEFAULT_CHECKED)
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
-    widget.criteria.setText("test_regex_save")
+    widget.criteria.setText(request.node.name)
     widget.criteria.editingFinished.emit()
 
     settings: Dict[str, Union[str, bool]] = {}
     expected_settings: Final = {
-        "name": "test_regex_save",
+        "name": request.node.name,
         "name_regex": not REGEX_DEFAULT_CHECKED
     }
     widget.save(settings)
     assert settings == expected_settings
 
 
-def test_noregex_load(qtbot: QtBot) -> None:
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_noregex_load", mock_query, "name", [], "[a-z]*",
-                                enable_regex=False)
-    qtbot.addWidget(widget)
-
+@pytest.mark.obj_args(enable_regex=False)
+def test_noregex_load(widget: NameCriteriaWidget, mock_query,
+                      request: pytest.FixtureRequest) -> None:
     settings: Final = {
-        "name": "test_noregex_load"
+        "name": request.node.name
     }
     widget.load(settings)
 
-    assert widget.criteria.text() == "test_noregex_load"
-    assert mock_query.name == "test_noregex_load"
+    assert widget.criteria.text() == request.node.name
+    assert mock_query.name == request.node.name
 
 
-def test_regex_load(qtbot: QtBot) -> None:
-    mock_query = build_mock_query()
-    widget = NameCriteriaWidget("test_regex_load", mock_query, "name", [], "[a-z]*",
-                                enable_regex=True)
-    qtbot.addWidget(widget)
-
+@pytest.mark.obj_args(enable_regex=True)
+def test_regex_load(widget: NameCriteriaWidget, mock_query,
+                    request: pytest.FixtureRequest) -> None:
     settings: Final = {
-        "name": "test_regex_load",
+        "name": request.node.name,
         "name_regex": not REGEX_DEFAULT_CHECKED
     }
     widget.load(settings)
 
-    assert widget.criteria.text() == "test_regex_load"
-    assert mock_query.name == "test_regex_load"
+    assert widget.criteria.text() == request.node.name
+    assert mock_query.name == request.node.name
     assert widget.criteria_regex.isChecked() == (not REGEX_DEFAULT_CHECKED)
     assert mock_query.name_regex == (not REGEX_DEFAULT_CHECKED)
