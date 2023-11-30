@@ -62,6 +62,7 @@ def mock_policy() -> Mock:
     policy = Mock(setools.SELinuxPolicy)
     policy.bools.return_value = (foo_bool, bar_bool)
     policy.classes.return_value = (foo_class, bar_class)
+    policy.commons.return_value = (common,)
     policy.roles.return_value = (foo_r, bar_r)
     policy.types.return_value = (foo_t, bar_t)
     policy.typeattributes.return_value = (fooattr, barattr)

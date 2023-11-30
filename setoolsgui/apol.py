@@ -20,6 +20,7 @@ from . import config, widgets
 # will init the tab registry in widgets.tab for apol's analyses.
 # pylint: disable=unused-import
 from .widgets import (boolquery,
+                      commonquery,
                       constraintquery,
                       fsusequery,
                       genfsconquery,

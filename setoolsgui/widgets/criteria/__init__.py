@@ -4,6 +4,7 @@ from .criteria import *
 
 from .boolean import *
 from .comboenum import *
+from .common import *
 from .constraintype import *
 from .context import *
 from .fsuseruletype import *
