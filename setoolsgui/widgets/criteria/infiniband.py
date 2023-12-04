@@ -7,8 +7,8 @@ import setools
 
 from .criteria import OptionsPlacement
 from .ipnetwork import IP_NetworkName
-from .name import NameCriteriaWidget
-from .ranged import RangedCriteriaWidget
+from .name import NameWidget
+from .ranged import RangedWidget
 
 ENDPORT_VALIDATION: typing.Final[str] = r"[0-9]+"
 PKEY_NUM_VALIDATION: typing.Final[str] = r"[0-9]+(-[0-9]+)?"
@@ -16,7 +16,7 @@ PKEY_NUM_VALIDATION: typing.Final[str] = r"[0-9]+(-[0-9]+)?"
 __all__ = ("IB_EndPortName", "IB_PKeyName", "IB_PKeySubnetPrefixName")
 
 
-class IB_EndPortName(NameCriteriaWidget):
+class IB_EndPortName(NameWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes
@@ -34,7 +34,7 @@ class IB_EndPortName(NameCriteriaWidget):
         self.setToolTip("The endport of the infiniband port range.")
 
 
-class IB_PKeyName(RangedCriteriaWidget):
+class IB_PKeyName(RangedWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes

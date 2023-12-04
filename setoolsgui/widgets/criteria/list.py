@@ -12,10 +12,10 @@ from .criteria import CriteriaWidget
 EQUAL_DEFAULT_CHECKED = False
 SUBSET_DEFAULT_CHECKED = False
 
-__all__ = ('ListCriteriaWidget',)
+__all__ = ('ListWidget',)
 
 
-class ListCriteriaWidget(CriteriaWidget):
+class ListWidget(CriteriaWidget):
 
     """Base class for QListView criteria widgets."""
 

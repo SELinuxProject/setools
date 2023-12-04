@@ -9,10 +9,10 @@ from .criteria import CriteriaWidget, OptionsPlacement
 # regex default setting (unchecked)
 REGEX_DEFAULT_CHECKED = False
 
-__all__ = ('NameCriteriaWidget',)
+__all__ = ('NameWidget',)
 
 
-class NameCriteriaWidget(CriteriaWidget):
+class NameWidget(CriteriaWidget):
 
     """
     Base class widget providing a QLineEdit that saves the input to the

@@ -10,10 +10,10 @@ from .combobox import ComboBoxWidget
 
 E = typing.TypeVar("E", bound=enum.Enum)
 
-__all__ = ('ComboEnumCriteria',)
+__all__ = ('ComboEnumWidget',)
 
 
-class ComboEnumCriteria(ComboBoxWidget, typing.Generic[E]):
+class ComboEnumWidget(ComboBoxWidget, typing.Generic[E]):
 
     """Criteria selection widget presenting possible options a QComboxBox."""
 
@@ -48,7 +48,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = ComboEnumCriteria("Test radio enum", q, "radioattrname", local_enum_class, parent=mw)
+    widget = ComboEnumWidget("Test radio enum", q, "radioattrname", local_enum_class, parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

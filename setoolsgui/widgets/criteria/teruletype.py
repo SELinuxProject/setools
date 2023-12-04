@@ -3,17 +3,17 @@
 from PyQt6 import QtWidgets
 import setools
 
-from .checkboxset import CheckboxSetCriteriaWidget
+from .checkboxset import CheckboxSetWidget
 
 # Checked by default:
 DEFAULT_CHECKED = ("allow", "allowxperm")
 # Not supported in binary policy:
 NOT_IN_BINPOL = ("neverallow", "neverallowxperm")
 
-__all__ = ('TERuleTypeCriteriaWidget',)
+__all__ = ('TERuleType',)
 
 
-class TERuleTypeCriteriaWidget(CheckboxSetCriteriaWidget):
+class TERuleType(CheckboxSetWidget):
 
     """
     Criteria selection widget presenting type enforcement rule types as a series
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    w = TERuleTypeCriteriaWidget("Test TE ruletypes", q, parent=mw)
+    w = TERuleType("Test TE ruletypes", q, parent=mw)
     w.setToolTip("test tooltip")
     w.setWhatsThis("test whats this")
     mw.setCentralWidget(w)

@@ -7,7 +7,7 @@ from PyQt6 import QtCore, QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
-from .name import NameCriteriaWidget
+from .name import NameWidget
 
 # Regex for exact matches to types/attrs
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
@@ -15,10 +15,10 @@ VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 # indirect default setting (checked)
 INDIRECT_DEFAULT_CHECKED = True
 
-__all__ = ('TypeOrAttrNameWidget',)
+__all__ = ('TypeOrAttrName',)
 
 
-class TypeOrAttrNameWidget(NameCriteriaWidget):
+class TypeOrAttrName(NameWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes
@@ -45,11 +45,11 @@ class TypeOrAttrNameWidget(NameCriteriaWidget):
 
         # Create completion list
         completion = list[str]()
-        if mode in (TypeOrAttrNameWidget.Mode.type_only,
-                    TypeOrAttrNameWidget.Mode.type_or_attribute):
+        if mode in (TypeOrAttrName.Mode.type_only,
+                    TypeOrAttrName.Mode.type_or_attribute):
             completion.extend(t.name for t in query.policy.types())
-        if mode in (TypeOrAttrNameWidget.Mode.attribute_only,
-                    TypeOrAttrNameWidget.Mode.type_or_attribute):
+        if mode in (TypeOrAttrName.Mode.attribute_only,
+                    TypeOrAttrName.Mode.type_or_attribute):
             completion.extend(a.name for a in query.policy.typeattributes())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
@@ -119,9 +119,9 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = TypeOrAttrNameWidget("Test Type/Attribute", q, "source", parent=mw,
-                                  mode=TypeOrAttrNameWidget.Mode.type_or_attribute,
-                                  enable_regex=True, enable_indirect=True)
+    widget = TypeOrAttrName("Test Type/Attribute", q, "source", parent=mw,
+                            mode=TypeOrAttrName.Mode.type_or_attribute,
+                            enable_regex=True, enable_indirect=True)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

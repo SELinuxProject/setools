@@ -7,11 +7,11 @@ import pytest
 from pytestqt.qtbot import QtBot
 
 from setoolsgui.widgets.criteria.criteria import OptionsPlacement
-from setoolsgui.widgets.criteria.name import NameCriteriaWidget, REGEX_DEFAULT_CHECKED
+from setoolsgui.widgets.criteria.name import NameWidget, REGEX_DEFAULT_CHECKED
 
 
 @pytest.fixture
-def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> NameCriteriaWidget:
+def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> NameWidget:
     """Pytest fixture to set up the widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
@@ -20,13 +20,13 @@ def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> NameCrit
     if "validation" not in kwargs:
         kwargs["validation"] = "[a-z]*"
 
-    w = NameCriteriaWidget(request.node.name, mock_query, "name", **kwargs)
+    w = NameWidget(request.node.name, mock_query, "name", **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w
 
 
-def test_base_settings(widget: NameCriteriaWidget) -> None:
+def test_base_settings(widget: NameWidget) -> None:
     """Test base properties of widget."""
     assert widget.criteria.objectName() == "name"
     assert widget.criteria.isClearButtonEnabled()
@@ -36,7 +36,7 @@ def test_base_settings(widget: NameCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(completion=["foo", "bar"])
-def test_completer(widget: NameCriteriaWidget) -> None:
+def test_completer(widget: NameWidget) -> None:
     """Test completer is correctly set up."""
     widget.criteria.completer().setCompletionPrefix("fo")
     assert widget.criteria.completer().currentCompletion() == "foo"
@@ -44,7 +44,7 @@ def test_completer(widget: NameCriteriaWidget) -> None:
     assert widget.criteria.completer().currentCompletion() == "bar"
 
 
-def test_valid_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
+def test_valid_text_entry(widget: NameWidget, mock_query) -> None:
     """Test successful text entry."""
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
@@ -56,7 +56,7 @@ def test_valid_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
     assert not widget.has_errors
 
 
-def test_query_exception_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
+def test_query_exception_text_entry(widget: NameWidget, mock_query) -> None:
     """Test error text entry from query exception."""
     # exception from query
     widget.criteria.clear()
@@ -70,7 +70,7 @@ def test_query_exception_text_entry(widget: NameCriteriaWidget, mock_query) -> N
     assert widget.has_errors
 
 
-def test_invalid_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
+def test_invalid_text_entry(widget: NameWidget, mock_query) -> None:
     """Test invalid text entry stopped by validator."""
     # note regex doesn't have a validator.
     widget.criteria_regex.setChecked(False)
@@ -87,7 +87,7 @@ def test_invalid_text_entry(widget: NameCriteriaWidget, mock_query) -> None:
 
 
 @pytest.mark.obj_args(options_placement=OptionsPlacement.RIGHT, enable_regex=False)
-def test_regex_disabled_layout_opt_right(widget: NameCriteriaWidget) -> None:
+def test_regex_disabled_layout_opt_right(widget: NameWidget) -> None:
     """Test layout for no regex option, options placement right."""
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
@@ -97,7 +97,7 @@ def test_regex_disabled_layout_opt_right(widget: NameCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(options_placement=OptionsPlacement.BELOW, enable_regex=False)
-def test_regex_disabled_layout_opt_below(widget: NameCriteriaWidget) -> None:
+def test_regex_disabled_layout_opt_below(widget: NameWidget) -> None:
     """Test layout for no regex option, options placement below."""
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
@@ -107,7 +107,7 @@ def test_regex_disabled_layout_opt_below(widget: NameCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(options_placement=OptionsPlacement.RIGHT, enable_regex=True)
-def test_regex_enabled_layout_opt_right(widget: NameCriteriaWidget) -> None:
+def test_regex_enabled_layout_opt_right(widget: NameWidget) -> None:
     """Test layout for regex option placed on right."""
     assert widget.criteria_regex.objectName() == "name_regex"
     # validate widget item positions
@@ -118,7 +118,7 @@ def test_regex_enabled_layout_opt_right(widget: NameCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(options_placement=OptionsPlacement.BELOW, enable_regex=True)
-def test_regex_enabled_layout_opt_below(widget: NameCriteriaWidget) -> None:
+def test_regex_enabled_layout_opt_below(widget: NameWidget) -> None:
     """Test layout for regex option placed below."""
     assert widget.criteria_regex.objectName() == "name_regex"
     # validate widget item positions
@@ -129,7 +129,7 @@ def test_regex_enabled_layout_opt_below(widget: NameCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(enable_regex=True)
-def test_regex_toggling(widget: NameCriteriaWidget, mock_query) -> None:
+def test_regex_toggling(widget: NameWidget, mock_query) -> None:
     """Test regex toggling is reflected in the query."""
     # test toggling based on the initial state
     assert mock_query.name_regex is REGEX_DEFAULT_CHECKED
@@ -146,7 +146,7 @@ def test_regex_toggling(widget: NameCriteriaWidget, mock_query) -> None:
 
 
 @pytest.mark.obj_args(enable_regex=False)
-def test_noregex_save(widget: NameCriteriaWidget, request: pytest.FixtureRequest) -> None:
+def test_noregex_save(widget: NameWidget, request: pytest.FixtureRequest) -> None:
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
     widget.criteria.setText(request.node.name)
@@ -161,7 +161,7 @@ def test_noregex_save(widget: NameCriteriaWidget, request: pytest.FixtureRequest
 
 
 @pytest.mark.obj_args(enable_regex=True)
-def test_regex_save(widget: NameCriteriaWidget, request: pytest.FixtureRequest) -> None:
+def test_regex_save(widget: NameWidget, request: pytest.FixtureRequest) -> None:
     widget.criteria_regex.setChecked(not REGEX_DEFAULT_CHECKED)
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
@@ -178,7 +178,7 @@ def test_regex_save(widget: NameCriteriaWidget, request: pytest.FixtureRequest) 
 
 
 @pytest.mark.obj_args(enable_regex=False)
-def test_noregex_load(widget: NameCriteriaWidget, mock_query,
+def test_noregex_load(widget: NameWidget, mock_query,
                       request: pytest.FixtureRequest) -> None:
     settings: Final = {
         "name": request.node.name
@@ -190,7 +190,7 @@ def test_noregex_load(widget: NameCriteriaWidget, mock_query,
 
 
 @pytest.mark.obj_args(enable_regex=True)
-def test_regex_load(widget: NameCriteriaWidget, mock_query,
+def test_regex_load(widget: NameWidget, mock_query,
                     request: pytest.FixtureRequest) -> None:
     settings: Final = {
         "name": request.node.name,

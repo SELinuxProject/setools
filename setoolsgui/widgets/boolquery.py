@@ -27,9 +27,9 @@ class BoolQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        name = criteria.BooleanNameCriteriaWidget("Name", self.query, "name",
-                                                  enable_regex=True,
-                                                  parent=self.criteria_frame)
+        name = criteria.BooleanName("Name", self.query, "name",
+                                    enable_regex=True,
+                                    parent=self.criteria_frame)
         name.setToolTip("Search for Booleans by name.")
         name.setWhatsThis("<p>Search for Booleans by name.</p>")
 

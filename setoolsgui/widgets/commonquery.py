@@ -32,8 +32,8 @@ class CommonQueryTab(tab.TableResultTabWidget):
         name.setToolTip("Search for common permission sets by name.")
         name.setWhatsThis("<p>Search for common permission set by name.</p>")
 
-        perms = criteria.PermissionCriteriaWidget("Permissions", self.query, "perms",
-                                                  enable_equal=True)
+        perms = criteria.PermissionList("Permissions", self.query, "perms",
+                                        enable_equal=True)
         perms.setToolTip("Search for common permission sets by permissions.")
         perms.setWhatsThis("<p>Search for common permission set by permissions.</p>")
 

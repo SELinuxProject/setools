@@ -24,9 +24,8 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        rt = criteria.RBACRuleTypeCriteriaWidget("Rule Type",
-                                                 self.query,
-                                                 parent=self.criteria_frame)
+        rt = criteria.RBACRuleType("Rule Type", self.query,
+                                   parent=self.criteria_frame)
         rt.setToolTip("The rule types for rule matching.")
         rt.setWhatsThis(
             """
@@ -35,11 +34,9 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
             <p>If a rule's has a one of the selected types, it will be returned.</p>
             """)
 
-        src = criteria.RoleNameWidget("Source Role",
-                                      self.query,
-                                      "source",
-                                      enable_regex=True,
-                                      parent=self.criteria_frame)
+        src = criteria.RoleName("Source Role", self.query, "source",
+                                enable_regex=True,
+                                parent=self.criteria_frame)
         src.setToolTip("The source role for rule matching.")
         src.setWhatsThis(
             """
@@ -49,14 +46,11 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
             the role name instead of direct string comparison.</p>
             """)
 
-        dst = criteria.TypeOrAttrNameWidget("Target Role/Type",
-                                            self.query,
-                                            "target",
-                                            mode=criteria.TypeOrAttrNameWidget.Mode.
-                                            type_or_attribute,
-                                            enable_regex=True,
-                                            enable_indirect=True,
-                                            parent=self.criteria_frame)
+        dst = criteria.TypeOrAttrName("Target Role/Type", self.query, "target",
+                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
+                                      enable_regex=True,
+                                      enable_indirect=True,
+                                      parent=self.criteria_frame)
         # add roles to completion
         completer = dst.criteria.completer()
         assert completer, "No completer set, this is an SETools bug"  # type narrowing
@@ -75,10 +69,8 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
             the role/type name instead of direct string comparison.</p>
             """)
 
-        tclass = criteria.ObjClassCriteriaWidget("Object Class",
-                                                 self.query,
-                                                 "tclass",
-                                                 parent=self.criteria_frame)
+        tclass = criteria.ObjClassList("Object Class", self.query, "tclass",
+                                       parent=self.criteria_frame)
         tclass.setToolTip("The object class(es) for rule matching.")
         tclass.setWhatsThis(
             """
@@ -88,11 +80,9 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
             classes</p>
             """)
 
-        dflt = criteria.RoleNameWidget("Default Role",
-                                       self.query,
-                                       "default",
-                                       enable_regex=True,
-                                       parent=self.criteria_frame)
+        dflt = criteria.RoleName("Default Role", self.query, "default",
+                                 enable_regex=True,
+                                 parent=self.criteria_frame)
         dflt.setToolTip("The default role for rule matching.")
         dflt.setWhatsThis(
             """

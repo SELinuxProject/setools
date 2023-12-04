@@ -4,7 +4,7 @@ from PyQt6 import QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
-from .name import NameCriteriaWidget
+from .name import NameWidget
 
 # Regex for exact matches to roles
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
@@ -12,7 +12,7 @@ VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 __all__ = ("CommonName",)
 
 
-class CommonName(NameCriteriaWidget):
+class CommonName(NameWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes

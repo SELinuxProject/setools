@@ -7,10 +7,10 @@ from PyQt6 import QtCore, QtWidgets
 
 from .criteria import CriteriaWidget
 
-__all__ = ("CheckboxSetCriteriaWidget",)
+__all__ = ("CheckboxSetWidget",)
 
 
-class CheckboxSetCriteriaWidget(CriteriaWidget):
+class CheckboxSetWidget(CriteriaWidget):
 
     """
     Criteria selection widget presenting possible options as a series of checkboxes.

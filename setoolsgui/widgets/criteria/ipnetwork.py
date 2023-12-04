@@ -9,7 +9,7 @@ from PyQt6 import QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
-from .name import NameCriteriaWidget
+from .name import NameWidget
 
 IPV4_VALIDATION: typing.Final[str] = r"([0-9]{1,3}\.){3}[0-9]{1,3}(/[0-9]+)?"
 IPV6_VALIDATION: typing.Final[str] = r"[0-9a-fA-F:/]+"
@@ -18,7 +18,7 @@ IPV4_OR_IPV6_VALIDATION: typing.Final[str] = f"({IPV4_VALIDATION}|{IPV6_VALIDATI
 __all__ = ("IP_NetworkName",)
 
 
-class IP_NetworkName(NameCriteriaWidget):
+class IP_NetworkName(NameWidget):
 
     """
     Base classs for widgets providing a QLineEdit that saves the input to the attributes

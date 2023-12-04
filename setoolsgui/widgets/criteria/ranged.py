@@ -7,10 +7,10 @@ from PyQt6 import QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
-from .name import NameCriteriaWidget
+from .name import NameWidget
 
 
-class RangedCriteriaWidget(NameCriteriaWidget):
+class RangedWidget(NameWidget):
 
     """
     Base classs for widgets providing a QLineEdit that saves the input to the attributes

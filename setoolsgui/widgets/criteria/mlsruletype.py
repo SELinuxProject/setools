@@ -3,14 +3,14 @@
 from PyQt6 import QtWidgets
 import setools
 
-from .checkboxset import CheckboxSetCriteriaWidget
+from .checkboxset import CheckboxSetWidget
 
 DEFAULT_CHECKED = ("range_transition",)
 
-__all__ = ('MLSRuleTypeCriteriaWidget',)
+__all__ = ('MLSRuleType',)
 
 
-class MLSRuleTypeCriteriaWidget(CheckboxSetCriteriaWidget):
+class MLSRuleType(CheckboxSetWidget):
 
     """
     Criteria selection widget presenting type enforcement rule types as a series
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    w = MLSRuleTypeCriteriaWidget("Test MLS ruletypes", q, parent=mw)
+    w = MLSRuleType("Test MLS ruletypes", q, parent=mw)
     w.setToolTip("test tooltip")
     w.setWhatsThis("test whats this")
     mw.setCentralWidget(w)

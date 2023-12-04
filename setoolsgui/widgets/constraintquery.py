@@ -36,11 +36,9 @@ class ConstraintQueryTab(tab.TableResultTabWidget):
             <p>If a rule's has a one of the selected types, it will be returned.</p>
             """)
 
-        user = criteria.UserNameWidget("User In Expression",
-                                       self.query,
-                                       "user",
-                                       enable_regex=True,
-                                       parent=self.criteria_frame)
+        user = criteria.UserName("User In Expression", self.query, "user",
+                                 enable_regex=True,
+                                 parent=self.criteria_frame)
         user.setToolTip("Search for a user in the expression.")
         user.setWhatsThis(
             """
@@ -50,11 +48,9 @@ class ConstraintQueryTab(tab.TableResultTabWidget):
             it will be returned.</p>
             """)
 
-        role = criteria.RoleNameWidget("Role In Expression",
-                                       self.query,
-                                       "role",
-                                       enable_regex=True,
-                                       parent=self.criteria_frame)
+        role = criteria.RoleName("Role In Expression", self.query, "role",
+                                 enable_regex=True,
+                                 parent=self.criteria_frame)
         role.setToolTip("Search for a role in the expression.")
         role.setWhatsThis(
             """
@@ -64,13 +60,11 @@ class ConstraintQueryTab(tab.TableResultTabWidget):
             it will be returned.</p>
             """)
 
-        type_ = criteria.TypeOrAttrNameWidget("Type In Expression",
-                                              self.query,
-                                              "type_",
-                                              mode=criteria.TypeOrAttrNameWidget.Mode.type_only,
-                                              enable_regex=True,
-                                              enable_indirect=False,
-                                              parent=self.criteria_frame)
+        type_ = criteria.TypeOrAttrName("Type In Expression", self.query, "type_",
+                                        mode=criteria.TypeOrAttrName.Mode.type_only,
+                                        enable_regex=True,
+                                        enable_indirect=False,
+                                        parent=self.criteria_frame)
         type_.setToolTip("Search for a type in the expression.")
         type_.setWhatsThis(
             """
@@ -80,10 +74,8 @@ class ConstraintQueryTab(tab.TableResultTabWidget):
             it will be returned.</p>
             """)
 
-        tclass = criteria.ObjClassCriteriaWidget("Object Class",
-                                                 self.query,
-                                                 "tclass",
-                                                 parent=self.criteria_frame)
+        tclass = criteria.ObjClassList("Object Class", self.query, "tclass",
+                                       parent=self.criteria_frame)
         tclass.setToolTip("The object class(es) for constraint matching.")
         tclass.setWhatsThis(
             """
@@ -93,12 +85,10 @@ class ConstraintQueryTab(tab.TableResultTabWidget):
             classes</p>
             """)
 
-        perms = criteria.PermissionCriteriaWidget("Permission Set",
-                                                  self.query,
-                                                  "perms",
-                                                  enable_equal=True,
-                                                  enable_subset=True,
-                                                  parent=self.criteria_frame)
+        perms = criteria.PermissionList("Permission Set", self.query, "perms",
+                                        enable_equal=True,
+                                        enable_subset=True,
+                                        parent=self.criteria_frame)
         perms.setToolTip("The permission(s) for constraint matching.")
         perms.setWhatsThis(
             """

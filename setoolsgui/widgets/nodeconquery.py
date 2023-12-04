@@ -33,9 +33,9 @@ class NodeconQueryTab(tab.TableResultTabWidget):
         name.setToolTip("The network to search for.")
         name.setWhatsThis("<p>This is the network to search for.</p>")
 
-        ip_version = criteria.ComboEnumCriteria("IP Version", self.query, "ip_version",
-                                                setools.NodeconIPVersion,
-                                                parent=self.criteria_frame)
+        ip_version = criteria.ComboEnumWidget("IP Version", self.query, "ip_version",
+                                              setools.NodeconIPVersion,
+                                              parent=self.criteria_frame)
         ip_version.setToolTip("The IP version to search for.")
         ip_version.setWhatsThis("<p>This is the IP version to search for.</p>")
 

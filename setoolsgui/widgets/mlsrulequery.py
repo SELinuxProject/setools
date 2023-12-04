@@ -24,9 +24,8 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        rt = criteria.MLSRuleTypeCriteriaWidget("Rule Type",
-                                                self.query,
-                                                parent=self.criteria_frame)
+        rt = criteria.MLSRuleType("Rule Type", self.query,
+                                  parent=self.criteria_frame)
         rt.setToolTip("The rule types for rule matching.")
         rt.setWhatsThis(
             """
@@ -35,14 +34,11 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
             <p>If a rule's has a one of the selected types, it will be returned.</p>
             """)
 
-        src = criteria.TypeOrAttrNameWidget("Source Type/Attribute",
-                                            self.query,
-                                            "source",
-                                            mode=criteria.TypeOrAttrNameWidget.Mode.
-                                            type_or_attribute,
-                                            enable_regex=True,
-                                            enable_indirect=True,
-                                            parent=self.criteria_frame)
+        src = criteria.TypeOrAttrName("Source Type/Attribute", self.query, "source",
+                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
+                                      enable_regex=True,
+                                      enable_indirect=True,
+                                      parent=self.criteria_frame)
         src.setToolTip("The source type/attribute for rule matching.")
         src.setWhatsThis(
             """
@@ -62,14 +58,11 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
             the type/attribute name instead of direct string comparison.</p>
             """)
 
-        dst = criteria.TypeOrAttrNameWidget("Target Type/Attribute",
-                                            self.query,
-                                            "target",
-                                            mode=criteria.TypeOrAttrNameWidget.Mode.
-                                            type_or_attribute,
-                                            enable_regex=True,
-                                            enable_indirect=True,
-                                            parent=self.criteria_frame)
+        dst = criteria.TypeOrAttrName("Target Type/Attribute", self.query, "target",
+                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
+                                      enable_regex=True,
+                                      enable_indirect=True,
+                                      parent=self.criteria_frame)
         dst.setToolTip("The target type/attribute for rule matching.")
         dst.setWhatsThis(
             """
@@ -89,10 +82,8 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
             the type/attribute name instead of direct string comparison.</p>
             """)
 
-        tclass = criteria.ObjClassCriteriaWidget("Object Class",
-                                                 self.query,
-                                                 "tclass",
-                                                 parent=self.criteria_frame)
+        tclass = criteria.ObjClassList("Object Class", self.query, "tclass",
+                                       parent=self.criteria_frame)
         tclass.setToolTip("The object class(es) for rule matching.")
         tclass.setWhatsThis(
             """

@@ -58,11 +58,11 @@ class PortconQueryTab(tab.TableResultTabWidget):
             portcon to match.</p>
             """)
 
-        proto = criteria.ComboEnumCriteria[setools.PortconProtocol]("Protocol",
-                                                                    self.query,
-                                                                    "protocol",
-                                                                    setools.PortconProtocol,
-                                                                    parent=self.criteria_frame)
+        proto = criteria.ComboEnumWidget[setools.PortconProtocol]("Protocol",
+                                                                  self.query,
+                                                                  "protocol",
+                                                                  setools.PortconProtocol,
+                                                                  parent=self.criteria_frame)
         proto.setToolTip("The protocol to use for portcon matching.")
         proto.setWhatsThis(
             """

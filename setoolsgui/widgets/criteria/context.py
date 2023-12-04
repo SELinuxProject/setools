@@ -36,12 +36,10 @@ class ContextMatch(criteria.CriteriaWidget):
         self.top_layout.setContentsMargins(6, 6, 6, 6)
         self.top_layout.setSpacing(3)
 
-        user = criteria.UserNameWidget("Context User",
-                                       self.query,
-                                       user_attrname,
-                                       enable_regex=True,
-                                       options_placement=criteria.OptionsPlacement.BELOW,
-                                       parent=self)
+        user = criteria.UserName("Context User", self.query, user_attrname,
+                                 enable_regex=True,
+                                 options_placement=criteria.OptionsPlacement.BELOW,
+                                 parent=self)
         user.setToolTip("The user for context matching.")
         user.setWhatsThis(
             """
@@ -51,12 +49,10 @@ class ContextMatch(criteria.CriteriaWidget):
             the user name instead of direct string comparison.</p>
             """)
 
-        role = criteria.RoleNameWidget("Context Role",
-                                       self.query,
-                                       role_attrname,
-                                       enable_regex=True,
-                                       options_placement=criteria.OptionsPlacement.BELOW,
-                                       parent=self)
+        role = criteria.RoleName("Context Role", self.query, role_attrname,
+                                 enable_regex=True,
+                                 options_placement=criteria.OptionsPlacement.BELOW,
+                                 parent=self)
         role.setToolTip("The role for context matching.")
         role.setWhatsThis(
             """
@@ -66,15 +62,13 @@ class ContextMatch(criteria.CriteriaWidget):
             the role name instead of direct string comparison.</p>
             """)
 
-        type_ = criteria.TypeOrAttrNameWidget("Context Type",
-                                              self.query,
-                                              type_attrname,
-                                              mode=criteria.TypeOrAttrNameWidget.Mode.type_only,
-                                              enable_regex=True,
-                                              enable_indirect=False,
-                                              required=False,
-                                              options_placement=criteria.OptionsPlacement.BELOW,
-                                              parent=self)
+        type_ = criteria.TypeOrAttrName("Context Type", self.query, type_attrname,
+                                        mode=criteria.TypeOrAttrName.Mode.type_only,
+                                        enable_regex=True,
+                                        enable_indirect=False,
+                                        required=False,
+                                        options_placement=criteria.OptionsPlacement.BELOW,
+                                        parent=self)
         type_.setToolTip("The type for context matching.")
         type_.setWhatsThis(
             """

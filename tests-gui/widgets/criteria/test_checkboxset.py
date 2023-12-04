@@ -4,31 +4,30 @@ from typing import Dict, List, Final
 import pytest
 from pytestqt.qtbot import QtBot
 
-from setoolsgui.widgets.criteria.checkboxset import CheckboxSetCriteriaWidget
+from setoolsgui.widgets.criteria.checkboxset import CheckboxSetWidget
 
 CHECKBOXES = ("cb1", "cb2", "cb3")
 
 
 @pytest.fixture
-def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> CheckboxSetCriteriaWidget:
+def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> CheckboxSetWidget:
     """Pytest fixture to set up the widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = CheckboxSetCriteriaWidget(request.node.name, mock_query, "checkboxes", CHECKBOXES,
-                                  **kwargs)
+    w = CheckboxSetWidget(request.node.name, mock_query, "checkboxes", CHECKBOXES, **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w
 
 
-def test_base_settings(widget: CheckboxSetCriteriaWidget) -> None:
+def test_base_settings(widget: CheckboxSetWidget) -> None:
     """Test base properties of CheckboxSetCriteriaWidget."""
     assert widget.attrname == "checkboxes"
     assert len(widget.criteria) == len(CHECKBOXES)
 
 
 @pytest.mark.obj_args(num_cols=3)
-def test_3across_layout(widget: CheckboxSetCriteriaWidget) -> None:
+def test_3across_layout(widget: CheckboxSetWidget) -> None:
     """Test three checkboxes all in one row layout."""
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria["cb1"]
@@ -42,7 +41,7 @@ def test_3across_layout(widget: CheckboxSetCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(num_cols=2)
-def test_2across_layout(widget: CheckboxSetCriteriaWidget) -> None:
+def test_2across_layout(widget: CheckboxSetWidget) -> None:
     """Test two columns of checkboxes layout."""
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria["cb1"]
@@ -54,7 +53,7 @@ def test_2across_layout(widget: CheckboxSetCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(num_cols=1)
-def test_1across_layout(widget: CheckboxSetCriteriaWidget) -> None:
+def test_1across_layout(widget: CheckboxSetWidget) -> None:
     """Test one column of checkboxes layout."""
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria["cb1"]
@@ -65,7 +64,7 @@ def test_1across_layout(widget: CheckboxSetCriteriaWidget) -> None:
     assert not widget.top_layout.itemAtPosition(2, 1)
 
 
-def test_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
+def test_selection(widget: CheckboxSetWidget, mock_query) -> None:
     """Test checked boxes are reflected in the query."""
     assert not widget.criteria["cb1"].isChecked()
     assert not widget.criteria["cb2"].isChecked()
@@ -79,7 +78,7 @@ def test_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
     assert mock_query.checkboxes == ["cb1", "cb3"]
 
 
-def test_set_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
+def test_set_selection(widget: CheckboxSetWidget, mock_query) -> None:
     """Test set_selection method."""
     # This to verify the current selection is cleared.
     widget.criteria["cb1"].setChecked(True)
@@ -93,7 +92,7 @@ def test_set_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
     assert mock_query.checkboxes == ["cb2", "cb3"]
 
 
-def test_clear_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
+def test_clear_selection(widget: CheckboxSetWidget, mock_query) -> None:
     """Test clear selection button."""
     widget.set_selection(["cb1", "cb2"])
     widget.clear_criteria.click()
@@ -105,7 +104,7 @@ def test_clear_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
     assert mock_query.checkboxes == []
 
 
-def test_invert_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
+def test_invert_selection(widget: CheckboxSetWidget, mock_query) -> None:
     """Test clear selection button."""
     widget.set_selection(["cb1", "cb2"])
     widget.invert_criteria.click()
@@ -117,7 +116,7 @@ def test_invert_selection(widget: CheckboxSetCriteriaWidget, mock_query) -> None
     assert mock_query.checkboxes == ["cb3"]
 
 
-def test_save(widget: CheckboxSetCriteriaWidget) -> None:
+def test_save(widget: CheckboxSetWidget) -> None:
     """Test save."""
     selection = ["cb2", "cb3"]
     expected: Final = {"checkboxes": selection}
@@ -130,7 +129,7 @@ def test_save(widget: CheckboxSetCriteriaWidget) -> None:
     assert expected == settings
 
 
-def test_load(widget: CheckboxSetCriteriaWidget) -> None:
+def test_load(widget: CheckboxSetWidget) -> None:
     """Test load."""
     selection = ["cb1", "cb3"]
     settings: Final = {"checkboxes": selection}
@@ -140,7 +139,7 @@ def test_load(widget: CheckboxSetCriteriaWidget) -> None:
     assert widget.selection() == selection
 
 
-def test_set_selection_disabled(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
+def test_set_selection_disabled(widget: CheckboxSetWidget, mock_query) -> None:
     """Test set_selection method, ignoring disabled boxes."""
     widget.criteria["cb2"].setDisabled(True)
 
@@ -153,7 +152,7 @@ def test_set_selection_disabled(widget: CheckboxSetCriteriaWidget, mock_query) -
     assert mock_query.checkboxes == ["cb3"]
 
 
-def test_clear_selection_disabled(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
+def test_clear_selection_disabled(widget: CheckboxSetWidget, mock_query) -> None:
     """Test clear selection button, ignoring disabled boxes."""
     widget.set_selection(["cb1", "cb2"])
     widget.criteria["cb2"].setDisabled(True)
@@ -167,7 +166,7 @@ def test_clear_selection_disabled(widget: CheckboxSetCriteriaWidget, mock_query)
     assert mock_query.checkboxes == ["cb2"]
 
 
-def test_invert_selection_disabled(widget: CheckboxSetCriteriaWidget, mock_query) -> None:
+def test_invert_selection_disabled(widget: CheckboxSetWidget, mock_query) -> None:
     """Test clear selection button, ignoring disabled boxes."""
     widget.set_selection(["cb1", "cb2"])
     widget.criteria["cb2"].setDisabled(True)

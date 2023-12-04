@@ -6,12 +6,12 @@ from PyQt6 import QtWidgets
 import setools
 
 from .. import models
-from .list import ListCriteriaWidget
+from .list import ListWidget
 
-__all__ = ('PermissionCriteriaWidget',)
+__all__ = ('PermissionList',)
 
 
-class PermissionCriteriaWidget(ListCriteriaWidget):
+class PermissionList(ListWidget):
 
     """
     A widget providing a QListView widget for selecting permissions.
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     import pprint
     import logging
 
-    from .objclass import ObjClassCriteriaWidget
+    from .objclass import ObjClassList
 
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
@@ -109,9 +109,9 @@ if __name__ == '__main__':
     mw = QtWidgets.QMainWindow()
     window = QtWidgets.QWidget()
     layout = QtWidgets.QHBoxLayout(window)
-    widget1 = ObjClassCriteriaWidget("Test Classes", q, "tclass", parent=window)
-    widget2 = PermissionCriteriaWidget("Test Permissions", q, "perms", parent=window,
-                                       enable_equal=True, enable_subset=True)
+    widget1 = ObjClassList("Test Classes", q, "tclass", parent=window)
+    widget2 = PermissionList("Test Permissions", q, "perms", parent=window,
+                             enable_equal=True, enable_subset=True)
     widget1.selectionChanged.connect(widget2.set_classes)
     layout.addWidget(widget1)
     layout.addWidget(widget2)

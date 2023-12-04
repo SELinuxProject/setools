@@ -6,14 +6,14 @@ from PyQt6 import QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
-from .ranged import RangedCriteriaWidget
+from .ranged import RangedWidget
 
 VALIDATION = r"[0-9]+(-[0-9]+)?"
 
 __all__ = ("IP_PortName",)
 
 
-class IP_PortName(RangedCriteriaWidget):
+class IP_PortName(RangedWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes

@@ -5,7 +5,7 @@ from PyQt6 import QtCore, QtWidgets
 import pytest
 from pytestqt.qtbot import QtBot
 
-from setoolsgui.widgets.criteria.list import (EQUAL_DEFAULT_CHECKED, ListCriteriaWidget,
+from setoolsgui.widgets.criteria.list import (EQUAL_DEFAULT_CHECKED, ListWidget,
                                               SUBSET_DEFAULT_CHECKED)
 from setoolsgui.widgets.models.table import StringList
 
@@ -18,11 +18,11 @@ def model() -> StringList:
 
 @pytest.fixture
 def widget(model: StringList, mock_query, request: pytest.FixtureRequest,
-           qtbot: QtBot) -> ListCriteriaWidget:
+           qtbot: QtBot) -> ListWidget:
     """Pytest fixture to set up the widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = ListCriteriaWidget(request.node.name, mock_query, "name", model, **kwargs)
+    w = ListWidget(request.node.name, mock_query, "name", model, **kwargs)
     model.setParent(w)
     qtbot.addWidget(w)
     w.show()
@@ -30,7 +30,7 @@ def widget(model: StringList, mock_query, request: pytest.FixtureRequest,
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=True)
-def test_base_settings(widget: ListCriteriaWidget) -> None:
+def test_base_settings(widget: ListWidget) -> None:
     """Test base properties of widget."""
     assert widget.clear_criteria.toolTip()
     assert widget.clear_criteria.whatsThis()
@@ -44,7 +44,7 @@ def test_base_settings(widget: ListCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(enable_equal=False, enable_subset=False)
-def test_equal_subset_disabled_layout(widget: ListCriteriaWidget) -> None:
+def test_equal_subset_disabled_layout(widget: ListWidget) -> None:
     """Test layout for no equal and subset options."""
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
     assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.clear_criteria
@@ -58,7 +58,7 @@ def test_equal_subset_disabled_layout(widget: ListCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=False)
-def test_equal_enabled_subset_disabled_layout(widget: ListCriteriaWidget) -> None:
+def test_equal_enabled_subset_disabled_layout(widget: ListWidget) -> None:
     """Test layout for equal enabled and subset disabled options."""
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
     assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.clear_criteria
@@ -72,7 +72,7 @@ def test_equal_enabled_subset_disabled_layout(widget: ListCriteriaWidget) -> Non
 
 
 @pytest.mark.obj_args(enable_equal=False, enable_subset=True)
-def test_equal_disabled_subset_enabled_layout(widget: ListCriteriaWidget) -> None:
+def test_equal_disabled_subset_enabled_layout(widget: ListWidget) -> None:
     """Test layout for equal disabled and subset enabled options."""
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
     assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.clear_criteria
@@ -86,7 +86,7 @@ def test_equal_disabled_subset_enabled_layout(widget: ListCriteriaWidget) -> Non
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=True)
-def test_equal_subset_enabled_layout(widget: ListCriteriaWidget) -> None:
+def test_equal_subset_enabled_layout(widget: ListWidget) -> None:
     """Test layout for equal and subset enabled options."""
     assert widget.top_layout.itemAtPosition(0, 0).widget() == widget.criteria
     assert widget.top_layout.itemAtPosition(0, 1).widget() == widget.clear_criteria
@@ -99,7 +99,7 @@ def test_equal_subset_enabled_layout(widget: ListCriteriaWidget) -> None:
     assert widget.top_layout.itemAtPosition(2, 2).widget() == widget.criteria_subset
 
 
-def test_set_selection(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_set_selection(widget: ListWidget, model: StringList) -> None:
     """Test setting a selection."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria.set_selection(test_selection)
@@ -108,7 +108,7 @@ def test_set_selection(widget: ListCriteriaWidget, model: StringList) -> None:
     assert not widget.has_errors
 
 
-def test_invert_selection(widget: ListCriteriaWidget, qtbot: QtBot, model: StringList) -> None:
+def test_invert_selection(widget: ListWidget, qtbot: QtBot, model: StringList) -> None:
     """Test inverting a selection."""
     inverted_selection = [model.item_list[1]]
     widget.criteria.set_selection([model.item_list[0], model.item_list[2]])
@@ -118,7 +118,7 @@ def test_invert_selection(widget: ListCriteriaWidget, qtbot: QtBot, model: Strin
     assert not widget.has_errors
 
 
-def test_clear_selection(widget: ListCriteriaWidget, qtbot: QtBot, model: StringList) -> None:
+def test_clear_selection(widget: ListWidget, qtbot: QtBot, model: StringList) -> None:
     """Test clearing a selection."""
     widget.criteria.set_selection([model.item_list[0], model.item_list[2]])
     assert list(widget.criteria.selection())
@@ -129,7 +129,7 @@ def test_clear_selection(widget: ListCriteriaWidget, qtbot: QtBot, model: String
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=False)
-def test_equal_toggling(widget: ListCriteriaWidget) -> None:
+def test_equal_toggling(widget: ListWidget) -> None:
     """Test equal match toggling is reflected in the query."""
     # test radio button toggling based on the initial state
     if EQUAL_DEFAULT_CHECKED:
@@ -145,7 +145,7 @@ def test_equal_toggling(widget: ListCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(enable_equal=False, enable_subset=True)
-def test_subset_toggling(widget: ListCriteriaWidget) -> None:
+def test_subset_toggling(widget: ListWidget) -> None:
     """Test subset match toggling is reflected in the query."""
     # test radio button toggling based on the initial state
     if SUBSET_DEFAULT_CHECKED:
@@ -161,7 +161,7 @@ def test_subset_toggling(widget: ListCriteriaWidget) -> None:
 
 
 @pytest.mark.obj_args(enable_equal=False, enable_subset=False)
-def test_equal_subset_disabled_save(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_subset_disabled_save(widget: ListWidget, model: StringList) -> None:
     """Test save settings with no options."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria.set_selection(test_selection)
@@ -175,7 +175,7 @@ def test_equal_subset_disabled_save(widget: ListCriteriaWidget, model: StringLis
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=False)
-def test_equal_enabled_subset_disabled_save(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_enabled_subset_disabled_save(widget: ListWidget, model: StringList) -> None:
     """Test save settings with equal enabled."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_equal.setChecked(not EQUAL_DEFAULT_CHECKED)
@@ -191,7 +191,7 @@ def test_equal_enabled_subset_disabled_save(widget: ListCriteriaWidget, model: S
 
 
 @pytest.mark.obj_args(enable_equal=False, enable_subset=True)
-def test_equal_disabled_subset_enabled_save(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_disabled_subset_enabled_save(widget: ListWidget, model: StringList) -> None:
     """Test save settings with subset enabled."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(not SUBSET_DEFAULT_CHECKED)
@@ -207,7 +207,7 @@ def test_equal_disabled_subset_enabled_save(widget: ListCriteriaWidget, model: S
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=True)
-def test_equal_subset_enabled_save(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_subset_enabled_save(widget: ListWidget, model: StringList) -> None:
     """Test save settings with equal and subset enabled."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(True)
@@ -224,7 +224,7 @@ def test_equal_subset_enabled_save(widget: ListCriteriaWidget, model: StringList
 
 
 @pytest.mark.obj_args(enable_equal=False, enable_subset=False)
-def test_equal_subset_disabled_load(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_subset_disabled_load(widget: ListWidget, model: StringList) -> None:
     """Test load settings with no options."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria.set_selection(test_selection)
@@ -238,7 +238,7 @@ def test_equal_subset_disabled_load(widget: ListCriteriaWidget, model: StringLis
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=False)
-def test_equal_enabled_subset_disabled_load(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_enabled_subset_disabled_load(widget: ListWidget, model: StringList) -> None:
     """Test load settings with equal enabled."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_equal.setChecked(not EQUAL_DEFAULT_CHECKED)
@@ -256,7 +256,7 @@ def test_equal_enabled_subset_disabled_load(widget: ListCriteriaWidget, model: S
 
 
 @pytest.mark.obj_args(enable_equal=False, enable_subset=True)
-def test_equal_disabled_subset_enabled_load(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_disabled_subset_enabled_load(widget: ListWidget, model: StringList) -> None:
     """Test load settings with subset enabled."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(not SUBSET_DEFAULT_CHECKED)
@@ -274,7 +274,7 @@ def test_equal_disabled_subset_enabled_load(widget: ListCriteriaWidget, model: S
 
 
 @pytest.mark.obj_args(enable_equal=True, enable_subset=True)
-def test_equal_subset_enabled_load(widget: ListCriteriaWidget, model: StringList) -> None:
+def test_equal_subset_enabled_load(widget: ListWidget, model: StringList) -> None:
     """Test load settings with equal and subset enabled."""
     test_selection = [model.item_list[0], model.item_list[2]]
     widget.criteria_subset.setChecked(True)

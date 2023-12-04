@@ -4,14 +4,14 @@ import typing
 from PyQt6 import QtWidgets
 import setools
 
-from .checkboxset import CheckboxSetCriteriaWidget
+from .checkboxset import CheckboxSetWidget
 
 DEFAULT_CHECKED: typing.Final[tuple[str, ...]] = ("fs_use_xattr",)
 
 __all__ = ('FSUseRuletype',)
 
 
-class FSUseRuletype(CheckboxSetCriteriaWidget):
+class FSUseRuletype(CheckboxSetWidget):
 
     """
     Criteria selection widget presenting type enforcement rule types as a series

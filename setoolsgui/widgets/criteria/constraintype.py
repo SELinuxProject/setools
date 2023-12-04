@@ -3,14 +3,14 @@
 from PyQt6 import QtWidgets
 import setools
 
-from .checkboxset import CheckboxSetCriteriaWidget
+from .checkboxset import CheckboxSetWidget
 
 DEFAULT_CHECKED = ("constrain",)
 
 __all__ = ('ConstrainType',)
 
 
-class ConstrainType(CheckboxSetCriteriaWidget):
+class ConstrainType(CheckboxSetWidget):
 
     """
     Criteria selection widget presenting type enforcement rule types as a series

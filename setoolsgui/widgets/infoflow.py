@@ -48,14 +48,12 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         #
         # Set up criteria widgets
         #
-        src = criteria.TypeOrAttrNameWidget("Source Type",
-                                            self.query,
-                                            SETTINGS_SOURCE,
-                                            mode=criteria.TypeOrAttrNameWidget.Mode.type_only,
-                                            enable_regex=False,
-                                            enable_indirect=False,
-                                            required=True,
-                                            parent=self.criteria_frame)
+        src = criteria.TypeOrAttrName("Source Type", self.query, SETTINGS_SOURCE,
+                                      mode=criteria.TypeOrAttrName.Mode.type_only,
+                                      enable_regex=False,
+                                      enable_indirect=False,
+                                      required=True,
+                                      parent=self.criteria_frame)
         src.setToolTip("The source type of the analysis.")
         src.setWhatsThis(
             """
@@ -77,14 +75,12 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         #
         # Configure target type
         #
-        dst = criteria.TypeOrAttrNameWidget("Target Type",
-                                            self.query,
-                                            SETTINGS_TARGET,
-                                            mode=criteria.TypeOrAttrNameWidget.Mode.type_only,
-                                            enable_regex=False,
-                                            enable_indirect=False,
-                                            required=True,
-                                            parent=self.criteria_frame)
+        dst = criteria.TypeOrAttrName("Target Type", self.query, SETTINGS_TARGET,
+                                      mode=criteria.TypeOrAttrName.Mode.type_only,
+                                      enable_regex=False,
+                                      enable_indirect=False,
+                                      required=True,
+                                      parent=self.criteria_frame)
         dst.setToolTip("The target type of the analysis.")
         dst.setWhatsThis(
             """
@@ -169,7 +165,7 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         return "\n".join(lines)
 
 
-class InfoFlowMode(criteria.RadioEnumCriteria[setools.InfoFlowAnalysis.Mode]):
+class InfoFlowMode(criteria.RadioEnumWidget[setools.InfoFlowAnalysis.Mode]):
 
     """Information flow analysis mode radio buttons."""
 

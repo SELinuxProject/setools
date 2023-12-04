@@ -6,7 +6,7 @@ from PyQt6 import QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
-from .ranged import RangedCriteriaWidget
+from .ranged import RangedWidget
 
 LEVEL_VALIDATION: typing.Final[str] = r"[A-Za-z0-9.,_:]+"
 RANGE_VALIDATION: typing.Final[str] = r"[A-Za-z0-9.,_:]+ ?(- ?[A-Za-z0-9.,_:]+)?"
@@ -14,7 +14,7 @@ RANGE_VALIDATION: typing.Final[str] = r"[A-Za-z0-9.,_:]+ ?(- ?[A-Za-z0-9.,_:]+)?
 __all__ = ("MLSLevelName", "MLSRangeName")
 
 
-class MLSLevelName(RangedCriteriaWidget):
+class MLSLevelName(RangedWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes
@@ -34,7 +34,7 @@ class MLSLevelName(RangedCriteriaWidget):
                          options_placement=options_placement, parent=parent)
 
 
-class MLSRangeName(RangedCriteriaWidget):
+class MLSRangeName(RangedWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes

@@ -4,12 +4,12 @@ from PyQt6 import QtWidgets
 import setools
 
 from .. import models
-from .list import ListCriteriaWidget
+from .list import ListWidget
 
-__all__ = ('ObjClassCriteriaWidget',)
+__all__ = ('ObjClassList',)
 
 
-class ObjClassCriteriaWidget(ListCriteriaWidget):
+class ObjClassList(ListWidget):
 
     """A widget providing a QListView widget for selecting the object class."""
 
@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = ObjClassCriteriaWidget("Test Classes", q, "tclass", parent=mw)
+    widget = ObjClassList("Test Classes", q, "tclass", parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

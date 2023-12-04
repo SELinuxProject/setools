@@ -12,10 +12,10 @@ from .criteria import CriteriaWidget
 
 E = typing.TypeVar("E", bound=enum.Enum)
 
-__all__ = ('RadioEnumCriteria',)
+__all__ = ('RadioEnumWidget',)
 
 
-class RadioEnumCriteria(CriteriaWidget, typing.Generic[E]):
+class RadioEnumWidget(CriteriaWidget, typing.Generic[E]):
 
     """
     Criteria selection widget presenting possible options as vertical list of
@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = RadioEnumCriteria("Test radio enum", q, "radioattrname", local_enum_class, parent=mw)
+    widget = RadioEnumWidget("Test radio enum", q, "radioattrname", local_enum_class, parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

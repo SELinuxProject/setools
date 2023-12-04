@@ -5,16 +5,16 @@ import setools
 
 from .. import models
 from .combobox import ComboBoxWidget
-from .list import ListCriteriaWidget
-from .name import NameCriteriaWidget
+from .list import ListWidget
+from .name import NameWidget
 
 # Regex for exact matches to types/attrs
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 
-__all__ = ("BooleanListCriteriaWidget", "BooleanNameCriteriaWidget", "BooleanState")
+__all__ = ("BooleanList", "BooleanName", "BooleanState")
 
 
-class BooleanListCriteriaWidget(ListCriteriaWidget):
+class BooleanList(ListWidget):
 
     """A widget providing a QListView widget for selecting zero or more Booleans."""
 
@@ -33,7 +33,7 @@ class BooleanListCriteriaWidget(ListCriteriaWidget):
             self.criteria_equal.setWhatsThis("<b>The selected Booleans must exactly match.</b>")
 
 
-class BooleanNameCriteriaWidget(NameCriteriaWidget):
+class BooleanName(NameWidget):
 
     """
     Widget providing a QLineEdit for the user to enter a Boolean name, with
@@ -81,8 +81,8 @@ if __name__ == '__main__':
     mw = QtWidgets.QMainWindow()
     window = QtWidgets.QWidget(mw)
     layout = QtWidgets.QHBoxLayout(window)
-    widget1 = BooleanListCriteriaWidget("Test Booleans list", q1, "boolean", parent=window)
-    widget2 = BooleanNameCriteriaWidget("Test Booleans linedit", q2, "name", parent=window)
+    widget1 = BooleanList("Test Booleans list", q1, "boolean", parent=window)
+    widget2 = BooleanName("Test Booleans linedit", q2, "name", parent=window)
     widget3 = BooleanState("Test Booleans State", q2, "default", enable_any=True, parent=window)
     layout.addWidget(widget1)
     layout.addWidget(widget2)

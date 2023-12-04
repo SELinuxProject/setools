@@ -26,13 +26,13 @@ class GenfsconQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        fs = criteria.NameCriteriaWidget("Filesystem Type", self.query, "fs", [],
-                                         enable_regex=True, parent=self.criteria_frame)
+        fs = criteria.NameWidget("Filesystem Type", self.query, "fs", [],
+                                 enable_regex=True, parent=self.criteria_frame)
         fs.setToolTip("The name of the filesystem to search for.")
         fs.setWhatsThis("<p>This is the filesystem name of the genfscon to search for.</p>")
 
-        path = criteria.NameCriteriaWidget("Path", self.query, "path", [],
-                                           enable_regex=True, parent=self.criteria_frame)
+        path = criteria.NameWidget("Path", self.query, "path", [],
+                                   enable_regex=True, parent=self.criteria_frame)
         path.setToolTip("The path to search for.")
         path.setWhatsThis("<p>This is the path of the genfscon to search for.</p>")
 

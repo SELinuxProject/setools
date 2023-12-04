@@ -3,15 +3,15 @@
 from PyQt6 import QtWidgets
 import setools
 
-from .checkboxset import CheckboxSetCriteriaWidget
+from .checkboxset import CheckboxSetWidget
 
 # Checked by default:
 DEFAULT_CHECKED = ("allow",)
 
-__all__ = ('RBACRuleTypeCriteriaWidget',)
+__all__ = ('RBACRuleType',)
 
 
-class RBACRuleTypeCriteriaWidget(CheckboxSetCriteriaWidget):
+class RBACRuleType(CheckboxSetWidget):
 
     """
     Criteria selection widget presenting type enforcement rule types as a series
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    w = RBACRuleTypeCriteriaWidget("Test RBAC ruletypes", q, parent=mw)
+    w = RBACRuleType("Test RBAC ruletypes", q, parent=mw)
     w.setToolTip("test tooltip")
     w.setWhatsThis("test whats this")
     mw.setCentralWidget(w)

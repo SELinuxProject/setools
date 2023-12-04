@@ -26,9 +26,8 @@ class TERuleQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        rt = criteria.TERuleTypeCriteriaWidget("Rule Type",
-                                               self.query,
-                                               parent=self.criteria_frame)
+        rt = criteria.TERuleType("Rule Type", self.query,
+                                 parent=self.criteria_frame)
         rt.setToolTip("The rule types for rule matching.")
         rt.setWhatsThis(
             """
@@ -37,14 +36,11 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             <p>If a rule's has a one of the selected types, it will be returned.</p>
             """)
 
-        src = criteria.TypeOrAttrNameWidget("Source Type/Attribute",
-                                            self.query,
-                                            "source",
-                                            mode=criteria.TypeOrAttrNameWidget.Mode.
-                                            type_or_attribute,
-                                            enable_regex=True,
-                                            enable_indirect=True,
-                                            parent=self.criteria_frame)
+        src = criteria.TypeOrAttrName("Source Type/Attribute", self.query, "source",
+                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
+                                      enable_regex=True,
+                                      enable_indirect=True,
+                                      parent=self.criteria_frame)
         src.setToolTip("The source type/attribute for rule matching.")
         src.setWhatsThis(
             """
@@ -64,14 +60,11 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             the type/attribute name instead of direct string comparison.</p>
             """)
 
-        dst = criteria.TypeOrAttrNameWidget("Target Type/Attribute",
-                                            self.query,
-                                            "target",
-                                            mode=criteria.TypeOrAttrNameWidget.Mode.
-                                            type_or_attribute,
-                                            enable_regex=True,
-                                            enable_indirect=True,
-                                            parent=self.criteria_frame)
+        dst = criteria.TypeOrAttrName("Target Type/Attribute", self.query, "target",
+                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
+                                      enable_regex=True,
+                                      enable_indirect=True,
+                                      parent=self.criteria_frame)
         dst.setToolTip("The target type/attribute for rule matching.")
         dst.setWhatsThis(
             """
@@ -91,10 +84,8 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             the type/attribute name instead of direct string comparison.</p>
             """)
 
-        tclass = criteria.ObjClassCriteriaWidget("Object Class",
-                                                 self.query,
-                                                 "tclass",
-                                                 parent=self.criteria_frame)
+        tclass = criteria.ObjClassList("Object Class", self.query, "tclass",
+                                       parent=self.criteria_frame)
         tclass.setToolTip("The object class(es) for rule matching.")
         tclass.setWhatsThis(
             """
@@ -104,12 +95,10 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             classes</p>
             """)
 
-        perms = criteria.PermissionCriteriaWidget("Permission Set",
-                                                  self.query,
-                                                  "perms",
-                                                  enable_equal=True,
-                                                  enable_subset=True,
-                                                  parent=self.criteria_frame)
+        perms = criteria.PermissionList("Permission Set", self.query, "perms",
+                                        enable_equal=True,
+                                        enable_subset=True,
+                                        parent=self.criteria_frame)
         perms.setToolTip("The permission(s) for rule matching.")
         perms.setWhatsThis(
             """
@@ -120,13 +109,11 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             available in all of the classes are available.</p>
             """)
 
-        dflt = criteria.TypeOrAttrNameWidget("Default Type",
-                                             self.query,
-                                             "default",
-                                             mode=criteria.TypeOrAttrNameWidget.Mode.type_only,
-                                             enable_regex=True,
-                                             enable_indirect=False,
-                                             parent=self.criteria_frame)
+        dflt = criteria.TypeOrAttrName("Default Type", self.query, "default",
+                                       mode=criteria.TypeOrAttrName.Mode.type_only,
+                                       enable_regex=True,
+                                       enable_indirect=False,
+                                       parent=self.criteria_frame)
         dflt.setToolTip("The default type for rule matching.")
         dflt.setWhatsThis(
             """
@@ -135,11 +122,9 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             <p>If a rule has this type as the default, it will be returned.</p>
             """)
 
-        bools = criteria.BooleanListCriteriaWidget("Booleans in Conditional Expression",
-                                                   self.query,
-                                                   "boolean",
-                                                   enable_equal=True,
-                                                   parent=self.criteria_frame)
+        bools = criteria.BooleanList("Booleans in Conditional Expression", self.query, "boolean",
+                                     enable_equal=True,
+                                     parent=self.criteria_frame)
         bools.setToolTip("The Boolean(s) for rule matching.")
         bools.setWhatsThis(
             """
@@ -171,7 +156,7 @@ class TERuleQueryTab(tab.TableResultTabWidget):
         # Check for potentially too many results
         max_results = 0
         ruletypes = self.criteria[0]
-        assert isinstance(ruletypes, criteria.TERuleTypeCriteriaWidget)  # mypy type narrowing
+        assert isinstance(ruletypes, criteria.TERuleType)  # mypy type narrowing
         for r in ruletypes.selection():
             max_results += getattr(self.query.policy, f"{r}_count")
 

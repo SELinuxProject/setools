@@ -26,8 +26,8 @@ class NetifconQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        name = criteria.NameCriteriaWidget("Device Name", self.query, "name", [],
-                                           enable_regex=True, parent=self.criteria_frame)
+        name = criteria.NameWidget("Device Name", self.query, "name", [],
+                                   enable_regex=True, parent=self.criteria_frame)
         name.setToolTip("The name of the network interface to search for.")
         name.setWhatsThis("<p>This is the name of the network interface to search for.</p>")
 

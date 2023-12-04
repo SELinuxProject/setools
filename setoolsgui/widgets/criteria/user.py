@@ -4,15 +4,15 @@ from PyQt6 import QtCore, QtWidgets
 import setools
 
 from .criteria import OptionsPlacement
-from .name import NameCriteriaWidget
+from .name import NameWidget
 
 # Regex for exact matches to roles
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 
-__all__ = ("UserNameWidget",)
+__all__ = ("UserName",)
 
 
-class UserNameWidget(NameCriteriaWidget):
+class UserName(NameWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = UserNameWidget("Test user", q, "user", parent=mw)
+    widget = UserName("Test user", q, "user", parent=mw)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")
     mw.setCentralWidget(widget)

@@ -31,8 +31,8 @@ class FSUseQueryTab(tab.TableResultTabWidget):
         ruletype.setToolTip("The type of fs_use rule to search for.")
         ruletype.setWhatsThis("<p>This is the rule type of the fs_use_* to search for.</p>")
 
-        fs = criteria.NameCriteriaWidget("Filesystem Type", self.query, "fs", [],
-                                         enable_regex=True, parent=self.criteria_frame)
+        fs = criteria.NameWidget("Filesystem Type", self.query, "fs", [],
+                                 enable_regex=True, parent=self.criteria_frame)
         fs.setToolTip("The name of the filesystem to search for.")
         fs.setWhatsThis("<p>This is the filesystem name of the fs_use_* to search for.</p>")
         fs.criteria.setPlaceholderText("e.g. ext4")

@@ -26,8 +26,8 @@ class InitialSIDQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        name = criteria.NameCriteriaWidget("Name", self.query, "name", [],
-                                           enable_regex=True, parent=self.criteria_frame)
+        name = criteria.NameWidget("Name", self.query, "name", [],
+                                   enable_regex=True, parent=self.criteria_frame)
         name.setToolTip("The name of the initial context to search for.")
         name.setWhatsThis("<p>This is the name of the initial context to search for.</p>")
 
