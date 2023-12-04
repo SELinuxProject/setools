@@ -333,7 +333,7 @@ cdef class ConditionalExprIterator(PolicyIterator):
 
         if self.curr.expr_type == sepol.COND_BOOL:
             item = Boolean.factory(self.policy,
-                                   self.policy.boolean_value_to_datum(self.curr.bool - 1))
+                                   self.policy.boolean_value_to_datum(self.curr.boolean - 1))
         else:
             item = ConditionalOperator.factory(self.policy, self.curr)
 
