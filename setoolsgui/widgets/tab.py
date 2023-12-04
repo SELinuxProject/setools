@@ -500,12 +500,17 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
             self.busy.setLabelText("Resizing the result table's columns; GUI may be unresponsive")
             self.busy.repaint()
             self.table_results.resizeColumnsToContents()
-            # If the permissions column width is too long, pull back
-            # to a reasonable size
-            header = self.table_results.horizontalHeader()
-            assert header, "No header set, this is an SETools bug"  # type narrowing
-            if header.sectionSize(4) > 400:
-                header.resizeSection(4, 400)
+
+        # If the column widths are too long, pull back to a reasonable size
+        header = self.table_results.horizontalHeader()
+        assert header, "No header set, this is an SETools bug"  # type narrowing
+        self.busy.setLabelText("Resizing very wide columns; GUI may be unresponsive")
+        for i in range(header.count()):
+            if header.sectionSize(i) > 400:
+                header.resizeSection(i, 400)
+
+            if self.busy.wasCanceled():
+                break
 
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Resizing the result table's rows; GUI may be unresponsive")
