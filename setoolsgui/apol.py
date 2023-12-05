@@ -446,8 +446,8 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         assert self.policy
         assert self.permmap
 
-        new_tab = tab_class(self.policy, self.permmap,
-                            parent=self)
+        new_tab = tab_class(self.policy, parent=self)
+        new_tab.handle_permmap_change(self.permmap)
         new_tab.setObjectName(counted_name)
         self.permmap_changed.connect(new_tab.handle_permmap_change)
         index = self.addTab(new_tab, counted_name)

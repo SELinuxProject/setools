@@ -16,10 +16,10 @@ class TERuleQueryTab(tab.TableResultTabWidget):
     tab_title = "Type Enforcement Rule Query"
     mlsonly = False
 
-    def __init__(self, policy: "setools.SELinuxPolicy", _, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.TERuleQuery(policy), None, enable_criteria=True, parent=parent)
+        super().__init__(setools.TERuleQuery(policy), enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search Type Enforcement rules in a SELinux policy.</b>")
 
@@ -190,7 +190,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = TERuleQueryTab(setools.SELinuxPolicy(), mw)
+    widget = TERuleQueryTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

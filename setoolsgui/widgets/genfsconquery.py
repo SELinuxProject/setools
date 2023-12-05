@@ -16,10 +16,10 @@ class GenfsconQueryTab(tab.TableResultTabWidget):
     tab_title = "Genfscons"
     mlsonly = False
 
-    def __init__(self, policy: setools.SELinuxPolicy, _, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.GenfsconQuery(policy), None, enable_criteria=True, parent=parent)
+        super().__init__(setools.GenfsconQuery(policy), enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search genfscon statements in a SELinux policy.</b>")
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = GenfsconQueryTab(setools.SELinuxPolicy(), mw)
+    widget = GenfsconQueryTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(1280, 1024)
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

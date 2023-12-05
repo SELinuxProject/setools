@@ -68,7 +68,7 @@ class TabProtocol(typing.Protocol):
     section: AnalysisSection
     mlsonly: bool
 
-    def __init__(self, policy: setools.SELinuxPolicy, perm_map: setools.PermissionMap, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
         ...
 
@@ -107,7 +107,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
     criteria: tuple[criteria.criteria.CriteriaWidget, ...]
     perm_map: setools.PermissionMap
 
-    def __init__(self, _, __, /, *,
+    def __init__(self, _, /, *,
                  enable_criteria: bool = True, enable_browser: bool = False,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
@@ -375,11 +375,11 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         Table = 0
         Text = 1
 
-    def __init__(self, query: setools.PolicyQuery, _, /, *,
+    def __init__(self, query: setools.PolicyQuery, /, *,
                  enable_criteria: bool = True, enable_browser: bool = False,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(query, None, enable_criteria=enable_criteria,
+        super().__init__(query, enable_criteria=enable_criteria,
                          enable_browser=enable_browser, parent=parent)
         self.query: typing.Final = query
 
@@ -556,11 +556,11 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         Tree = 1
         Text = 2
 
-    def __init__(self, query: DGA, _, /, *,
+    def __init__(self, query: DGA, /, *,
                  enable_criteria: bool = True,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(query, None, enable_criteria=enable_criteria, enable_browser=False,
+        super().__init__(query, enable_criteria=enable_criteria, enable_browser=False,
                          parent=parent)
         self.query: typing.Final = query
 
@@ -723,13 +723,13 @@ if __name__ == '__main__':
 
     tw = QtWidgets.QTabWidget(mw)
     mw.setCentralWidget(tw)
-    widget1 = BaseAnalysisTabWidget(None, None, parent=tw)
+    widget1 = BaseAnalysisTabWidget(None, parent=tw)
     tw.addTab(widget1, "BaseAnalysisTabWidget w/criteria")
-    widget2 = BaseAnalysisTabWidget(None, None, enable_criteria=False, parent=tw)
+    widget2 = BaseAnalysisTabWidget(None, enable_criteria=False, parent=tw)
     tw.addTab(widget2, "BaseAnalysisTabWidget w/o criteria")
-    widget3 = TableResultTabWidget(q, None, parent=tw)
+    widget3 = TableResultTabWidget(q, parent=tw)
     tw.addTab(widget3, "TableResultTabWidget")
-    widget4 = DirectedGraphResultTab(a, None, parent=tw)
+    widget4 = DirectedGraphResultTab(a, parent=tw)
     tw.addTab(widget4, "GraphResultTabWidget w/criteria")
 
     mw.resize(1024, 768)

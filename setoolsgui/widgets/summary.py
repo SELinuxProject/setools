@@ -3,9 +3,8 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 
-import typing
-
 from PyQt6 import QtCore, QtGui, QtWidgets
+import setools
 
 from . import tab
 
@@ -20,11 +19,11 @@ class SummaryTab(tab.BaseAnalysisTabWidget):
     tab_title = "SELinux Policy Summary"
     mlsonly = False
 
-    def __init__(self, policy: "setools.SELinuxPolicy", _, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(policy, None, enable_criteria=False, parent=parent)
-        self.policy: typing.Final = policy
+        super().__init__(policy, enable_criteria=False, parent=parent)
+        self.policy = policy
 
         # font for labels
         font = QtGui.QFont()
@@ -210,7 +209,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = SummaryTab(setools.SELinuxPolicy(), None, parent=mw)
+    widget = SummaryTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

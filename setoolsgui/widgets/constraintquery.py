@@ -16,11 +16,10 @@ class ConstraintQueryTab(tab.TableResultTabWidget):
     tab_title = "Constraints"
     mlsonly = False
 
-    def __init__(self, policy: "setools.SELinuxPolicy", _, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.ConstraintQuery(policy), None, enable_criteria=True,
-                         parent=parent)
+        super().__init__(setools.ConstraintQuery(policy), enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search constraints in a SELinux policy.</b>")
 
@@ -130,7 +129,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = ConstraintQueryTab(setools.SELinuxPolicy(), mw)
+    widget = ConstraintQueryTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

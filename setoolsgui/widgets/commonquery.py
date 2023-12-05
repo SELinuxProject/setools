@@ -16,10 +16,10 @@ class CommonQueryTab(tab.TableResultTabWidget):
     tab_title = "Common Permision Sets"
     mlsonly = False
 
-    def __init__(self, policy: setools.SELinuxPolicy, _, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.CommonQuery(policy), None, enable_criteria=True,
+        super().__init__(setools.CommonQuery(policy), enable_criteria=True,
                          enable_browser=True, parent=parent)
 
         self.setWhatsThis("<b>Search common permission sets in an SELinux policy.</b>")
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = CommonQueryTab(setools.SELinuxPolicy(), mw)
+    widget = CommonQueryTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(1280, 1024)
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

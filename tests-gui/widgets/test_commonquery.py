@@ -14,7 +14,7 @@ def widget(mock_policy, request: pytest.FixtureRequest, qtbot: QtBot) -> CommonQ
     """Pytest fixture to set up the widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = CommonQueryTab(mock_policy, None, **kwargs)
+    w = CommonQueryTab(mock_policy, **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w

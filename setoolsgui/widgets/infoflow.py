@@ -37,10 +37,13 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
     tab_title = "Information Flow Analysis"
     mlsonly = False
 
-    def __init__(self, policy: setools.SELinuxPolicy, perm_map: setools.PermissionMap, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.InfoFlowAnalysis(policy, perm_map), perm_map,
+        permmap = setools.PermissionMap()
+        permmap.map_policy(policy)
+
+        super().__init__(setools.InfoFlowAnalysis(policy, permmap),
                          enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Information flow analysis of an SELinux policy.</b>")
@@ -319,7 +322,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = InfoFlowAnalysisTab(setools.SELinuxPolicy(), setools.PermissionMap(), parent=mw)
+    widget = InfoFlowAnalysisTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

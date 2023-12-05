@@ -16,11 +16,10 @@ class IbpkeyconQueryTab(tab.TableResultTabWidget):
     tab_title = "Infiniband Partition Key Contexts"
     mlsonly = False
 
-    def __init__(self, policy: setools.SELinuxPolicy, _, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.IbpkeyconQuery(policy), None, enable_criteria=True,
-                         parent=parent)
+        super().__init__(setools.IbpkeyconQuery(policy), enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search ibpkeycon statements in a SELinux policy.</b>")
 
@@ -66,7 +65,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = IbpkeyconQueryTab(setools.SELinuxPolicy(), None, parent=mw)
+    widget = IbpkeyconQueryTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(1280, 1024)
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

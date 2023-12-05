@@ -16,10 +16,10 @@ class FSUseQueryTab(tab.TableResultTabWidget):
     tab_title = "Fs_use_*"
     mlsonly = False
 
-    def __init__(self, policy: setools.SELinuxPolicy, _, /, *,
+    def __init__(self, policy: setools.SELinuxPolicy, /, *,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
-        super().__init__(setools.FSUseQuery(policy), None, enable_criteria=True, parent=parent)
+        super().__init__(setools.FSUseQuery(policy), enable_criteria=True, parent=parent)
 
         self.setWhatsThis("<b>Search fs_use_* statements in a SELinux policy.</b>")
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
-    widget = FSUseQueryTab(setools.SELinuxPolicy(), mw)
+    widget = FSUseQueryTab(setools.SELinuxPolicy(), parent=mw)
     mw.setCentralWidget(widget)
     mw.resize(1280, 1024)
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

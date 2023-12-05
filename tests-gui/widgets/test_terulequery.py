@@ -13,7 +13,7 @@ def widget(mock_policy, request: pytest.FixtureRequest, qtbot: QtBot) -> TERuleQ
     """Pytest fixture to set up the widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = TERuleQueryTab(mock_policy, None, **kwargs)
+    w = TERuleQueryTab(mock_policy, **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w

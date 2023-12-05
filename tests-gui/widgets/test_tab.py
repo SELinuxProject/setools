@@ -14,7 +14,7 @@ def base_widget(mock_policy, request: pytest.FixtureRequest,
     """Pytest fixture to set up the BaseAnalysisTabWidget widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = tab.BaseAnalysisTabWidget(mock_policy, None, **kwargs)
+    w = tab.BaseAnalysisTabWidget(mock_policy, **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w
@@ -26,7 +26,7 @@ def table_widget(mock_policy, request: pytest.FixtureRequest,
     """Pytest fixture to set up the TableResultTabWidget widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = tab.TableResultTabWidget(mock_policy, None, **kwargs)
+    w = tab.TableResultTabWidget(mock_policy, **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w
