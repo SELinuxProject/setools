@@ -76,7 +76,9 @@ class SEToolsTableView(QTableView):
             # write headers
             csv_row = []
             for col in range(col_count):
-                csv_row.append(datamodel.headerData(col, Qt.Orientation.Horizontal, Qt.ItemDataRole.DisplayRole))
+                csv_row.append(datamodel.headerData(col,
+                                                    Qt.Orientation.Horizontal,
+                                                    Qt.ItemDataRole.DisplayRole))
 
             writer.writerow(csv_row)
 
