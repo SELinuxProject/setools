@@ -166,7 +166,8 @@ class DefaultQueryTab(AnalysisTab):
         self.query.default = self.default_value.currentData(Qt.ItemDataRole.UserRole)
 
         if self.default_range_value.isEnabled():
-            self.query.default_range = self.default_range_value.currentData(Qt.ItemDataRole.UserRole)
+            self.query.default_range = self.default_range_value.currentData(
+                Qt.ItemDataRole.UserRole)
         else:
             self.query.default_range = None
 

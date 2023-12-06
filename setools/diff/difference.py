@@ -137,8 +137,9 @@ class Wrapper(ABC, Generic[T]):
 
     __slots__ = ("origin", "key")
 
-    def __init__(self, symbol: T) -> None:
-        pass
+    def __init__(self, origin: T, key: int) -> None:
+        self.origin = origin
+        self.key = key
 
     def __repr__(self):
         # pylint: disable=no-member
@@ -176,9 +177,8 @@ class SymbolWrapper(Wrapper[S]):
     __slots__ = ("name",)
 
     def __init__(self, symbol: S) -> None:
-        self.origin = symbol
-        self.name = str(symbol)
-        self.key = hash(self.name)
+        super().__init__(symbol, hash(symbol.name))
+        self.name = symbol.name
 
     def __hash__(self):
         return self.key
