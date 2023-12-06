@@ -283,6 +283,14 @@ cdef extern from "<sepol/policydb/sidtab.h>":
 
 
 cdef extern from "<sepol/policydb/conditional.h>":
+    """
+    #if defined(COND_EXPR_T_RENAME_BOOL_BOOLEAN)
+      #define COND_EXPR_T_RENAME_BOOL_NAME boolean
+    #else
+      #define COND_EXPR_T_RENAME_BOOL_NAME bool
+    #endif
+    """
+
     cdef int COND_EXPR_MAXDEPTH
     cdef int COND_MAX_BOOLS
 
@@ -309,7 +317,7 @@ cdef extern from "<sepol/policydb/conditional.h>":
 
     cdef struct cond_expr:
         uint32_t expr_type
-        uint32_t bool
+        uint32_t boolean "COND_EXPR_T_RENAME_BOOL_NAME"
         cond_expr *next
 
     ctypedef cond_expr cond_expr_t
