@@ -27,17 +27,14 @@ jobs:
 
       matrix:
         build-opts:
-          - {python: '3.6', tox: python3.6}
-          - {python: '3.7', tox: python3.7}
-          - {python: '3.8', tox: python3.8}
           - {python: '3.9', tox: python3.9}
           - {python: '3.10', tox: python3.10}
           - {python: '3.11', tox: python3.11}
-          - {python: '3.6', tox: pep8}
-          - {python: '3.6', tox: lint}
-          - {python: '3.6', tox: mypy}
-          - {python: '3.6', tox: coverage}
-          - {python: '3.6', tox: install}
+          - {python: '3.11', tox: pep8}
+          - {python: '3.11', tox: lint}
+          - {python: '3.11', tox: mypy}
+          - {python: '3.11', tox: coverage}
+          - {python: '3.11', tox: install}
 
     steps:
     - uses: actions/checkout@v2
