@@ -63,11 +63,11 @@ class MLSComponentTableModel(SEToolsTableModel):
             col = index.column()
             item = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.name
                 elif col == 1:
                     return ", ".join(sorted(a for a in item.aliases()))
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return item

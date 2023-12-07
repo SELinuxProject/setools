@@ -52,7 +52,7 @@ class ChooseAnalysis(SEToolsWidget, QDialog):
                 groupitem.addChild(item)
 
         self.analysisTypes.expandAll()
-        self.analysisTypes.sortByColumn(0, Qt.AscendingOrder)
+        self.analysisTypes.sortByColumn(0, Qt.SortOrder.AscendingOrder)
         super(ChooseAnalysis, self).show()
 
     def accept(self, item=None):

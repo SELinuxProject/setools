@@ -22,7 +22,7 @@ class DefaultTableModel(SEToolsTableModel):
             col = index.column()
             item = self.resultlist[row]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 if col == 0:
                     return item.ruletype.name
                 elif col == 1:
@@ -33,5 +33,5 @@ class DefaultTableModel(SEToolsTableModel):
                     with suppress(AttributeError):
                         return item.default_range.name
 
-            elif role == Qt.UserRole:
+            elif role == Qt.ItemDataRole.UserRole:
                 return item

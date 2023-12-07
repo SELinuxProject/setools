@@ -65,13 +65,13 @@ class CommonQueryTab(AnalysisTab):
         self.sort_proxy = QSortFilterProxyModel(self)
         self.sort_proxy.setSourceModel(self.table_results_model)
         self.table_results.setModel(self.sort_proxy)
-        self.table_results.sortByColumn(0, Qt.AscendingOrder)
+        self.table_results.sortByColumn(0, Qt.SortOrder.AscendingOrder)
 
         # setup indications of errors
         self.errors = set()
         self.orig_palette = self.name.palette()
         self.error_palette = self.name.palette()
-        self.error_palette.setColor(QPalette.Base, Qt.red)
+        self.error_palette.setColor(QPalette.ColorRole.Base, Qt.GlobalColor.red)
         self.clear_name_error()
 
         # set up processing thread
@@ -116,7 +116,7 @@ class CommonQueryTab(AnalysisTab):
     def get_detail(self):
         # .ui is set for single item selection.
         index = self.commons.selectedIndexes()[0]
-        item = self.common_model.data(index, Qt.UserRole)
+        item = self.common_model.data(index, Qt.ItemDataRole.UserRole)
 
         self.log.debug("Generating detail window for {0}".format(item))
         common_detail(self, item)
@@ -146,7 +146,7 @@ class CommonQueryTab(AnalysisTab):
     def set_perms(self):
         selected_perms = []
         for index in self.perms.selectionModel().selectedIndexes():
-            selected_perms.append(self.perms_model.data(index, Qt.UserRole))
+            selected_perms.append(self.perms_model.data(index, Qt.ItemDataRole.UserRole))
 
         self.query.perms = selected_perms
 
@@ -212,6 +212,6 @@ class CommonQueryTab(AnalysisTab):
         if not self.busy.wasCanceled():
             self.busy.setLabelText("Moving the raw result to top; GUI may be unresponsive")
             self.busy.repaint()
-            self.raw_results.moveCursor(QTextCursor.Start)
+            self.raw_results.moveCursor(QTextCursor.MoveOperation.Start)
 
         self.busy.reset()

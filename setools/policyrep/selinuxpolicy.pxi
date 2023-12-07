@@ -935,8 +935,7 @@ cdef class SELinuxPolicy:
         """
 
         cdef:
-            size_t i, count
-            int bit
+            size_t bit, i, count
             sepol.ebitmap_node_t *node = NULL
             sepol.type_datum_t *tmp_type
             char *tmp_name
