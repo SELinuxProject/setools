@@ -1,12 +1,18 @@
 # SPDX-License-Identifier: LGPL-2.1-only
+import typing
 
 from PyQt6 import QtWidgets
 import setools
 
 from .. import models
+from .criteria import OptionsPlacement
 from .list import ListWidget
+from .name import NameWidget
 
-__all__ = ('ObjClassList',)
+# Regex for exact matches to roles
+VALIDATE_EXACT: typing.Final[str] = r"[A-Za-z0-9._-]*"
+
+__all__ = ('ObjClassList', 'ObjClassName')
 
 
 class ObjClassList(ListWidget):
@@ -24,6 +30,26 @@ class ObjClassList(ListWidget):
 
         self.criteria_any.setToolTip("Any selected object class will match.")
         self.criteria_any.setWhatsThis("<b>Any selected object class will match.</b>")
+
+
+class ObjClassName(NameWidget):
+
+    """
+    Widget providing a QLineEdit that saves the input to the attributes
+    of the specified query.  This supports inputs of object classes.
+    """
+
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str, /, *,
+                 parent: QtWidgets.QWidget | None = None,
+                 options_placement: OptionsPlacement = OptionsPlacement.RIGHT,
+                 required: bool = False, enable_regex: bool = True):
+
+        # Create completion list
+        completion = list[str](r.name for r in query.policy.classes())
+
+        super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
+                         enable_regex=enable_regex, required=required, parent=parent,
+                         options_placement=options_placement)
 
 
 if __name__ == '__main__':
