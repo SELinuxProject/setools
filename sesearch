@@ -120,7 +120,7 @@ if args.A:
     except AttributeError:
         args.tertypes = [setools.TERuletype.allow, setools.TERuletype.allowxperm]
 
-if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
+if not any((args.tertypes, args.mlsrtypes, args.rbacrtypes)):
     parser.error("At least one rule type must be specified.")
 
 if args.debug:
