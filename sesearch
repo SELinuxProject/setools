@@ -48,7 +48,7 @@ rtypes.add_argument("--dontauditxperm", action="append_const",
 # rtypes.add_argument("--neverallowxperm", action="append_const",
 #                    const=setools.TERuletype.neverallowxperm, dest="tertypes",
 #                    help="Search neverallowxperm rules.")
-rtypes.add_argument("-T", "--type_trans", action="append_const",
+rtypes.add_argument("-T", "--type_transition", action="append_const",
                     const=setools.TERuletype.type_transition, dest="tertypes",
                     help="Search type_transition rules.")
 rtypes.add_argument("--type_change", action="append_const",
@@ -61,12 +61,12 @@ rbacrtypes = parser.add_argument_group("RBAC Rule Types")
 rbacrtypes.add_argument("--role_allow", action="append_const",
                         const=setools.RBACRuletype.allow, dest="rbacrtypes",
                         help="Search role allow rules.")
-rbacrtypes.add_argument("--role_trans", action="append_const",
+rbacrtypes.add_argument("--role_transition", action="append_const",
                         const=setools.RBACRuletype.role_transition, dest="rbacrtypes",
                         help="Search role_transition rules.")
 
 mlsrtypes = parser.add_argument_group("MLS Rule Types")
-mlsrtypes.add_argument("--range_trans", action="append_const",
+mlsrtypes.add_argument("--range_transition", action="append_const",
                        const=setools.MLSRuletype.range_transition, dest="mlsrtypes",
                        help="Search range_transition rules.")
 
