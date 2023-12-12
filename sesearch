@@ -78,13 +78,14 @@ expr.add_argument("-t", "--target",
 expr.add_argument("-c", "--class", dest="tclass",
                   help="Comma separated list of object classes")
 expr.add_argument("-p", "--perms", metavar="PERMS",
-                  help="Comma separated list of permissions.")
+                  help="Comma separated list of permissions. (TE rule searches only.)")
 expr.add_argument("-x", "--xperms", metavar="XPERMS",
-                  help="Comma separated list of extended permissions.")
+                  help="Comma separated list of extended permissions.  (TE rule searches only.)")
 expr.add_argument("-D", "--default",
                   help="Default of the rule. (type/role/range transition rules)")
 expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL",
-                  help="Comma separated list of Booleans in the conditional expression.")
+                  help="Comma separated list of Booleans in the conditional expression.  "
+                  "(TE rule searches only.)")
 
 opts = parser.add_argument_group("Search options")
 opts.add_argument("-eb", action="store_true", dest="boolean_equal",
@@ -122,6 +123,10 @@ if args.A:
 
 if not any((args.tertypes, args.mlsrtypes, args.rbacrtypes)):
     parser.error("At least one rule type must be specified.")
+
+if any((args.perms, args.xperms, args.boolean)) and any((args.rbacrtypes, args.mlsrtypes)):
+    parser.error("-p/--perms, -x/--xperms, and -b/--bool options are only supported "
+                 "with TE rule searches.")
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
