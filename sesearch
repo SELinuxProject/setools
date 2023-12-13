@@ -48,7 +48,7 @@ rtypes.add_argument("--dontauditxperm", action="append_const",
 # rtypes.add_argument("--neverallowxperm", action="append_const",
 #                    const=setools.TERuletype.neverallowxperm, dest="tertypes",
 #                    help="Search neverallowxperm rules.")
-rtypes.add_argument("-T", "--type_trans", action="append_const",
+rtypes.add_argument("-T", "--type_transition", action="append_const",
                     const=setools.TERuletype.type_transition, dest="tertypes",
                     help="Search type_transition rules.")
 rtypes.add_argument("--type_change", action="append_const",
@@ -61,12 +61,12 @@ rbacrtypes = parser.add_argument_group("RBAC Rule Types")
 rbacrtypes.add_argument("--role_allow", action="append_const",
                         const=setools.RBACRuletype.allow, dest="rbacrtypes",
                         help="Search role allow rules.")
-rbacrtypes.add_argument("--role_trans", action="append_const",
+rbacrtypes.add_argument("--role_transition", action="append_const",
                         const=setools.RBACRuletype.role_transition, dest="rbacrtypes",
                         help="Search role_transition rules.")
 
 mlsrtypes = parser.add_argument_group("MLS Rule Types")
-mlsrtypes.add_argument("--range_trans", action="append_const",
+mlsrtypes.add_argument("--range_transition", action="append_const",
                        const=setools.MLSRuletype.range_transition, dest="mlsrtypes",
                        help="Search range_transition rules.")
 
@@ -78,13 +78,14 @@ expr.add_argument("-t", "--target",
 expr.add_argument("-c", "--class", dest="tclass",
                   help="Comma separated list of object classes")
 expr.add_argument("-p", "--perms", metavar="PERMS",
-                  help="Comma separated list of permissions.")
+                  help="Comma separated list of permissions. (TE rule searches only.)")
 expr.add_argument("-x", "--xperms", metavar="XPERMS",
-                  help="Comma separated list of extended permissions.")
+                  help="Comma separated list of extended permissions.  (TE rule searches only.)")
 expr.add_argument("-D", "--default",
                   help="Default of the rule. (type/role/range transition rules)")
 expr.add_argument("-b", "--bool", dest="boolean", metavar="BOOL",
-                  help="Comma separated list of Booleans in the conditional expression.")
+                  help="Comma separated list of Booleans in the conditional expression.  "
+                  "(TE rule searches only.)")
 
 opts = parser.add_argument_group("Search options")
 opts.add_argument("-eb", action="store_true", dest="boolean_equal",
@@ -120,8 +121,12 @@ if args.A:
     except AttributeError:
         args.tertypes = [setools.TERuletype.allow, setools.TERuletype.allowxperm]
 
-if not args.tertypes and not args.mlsrtypes and not args.rbacrtypes:
+if not any((args.tertypes, args.mlsrtypes, args.rbacrtypes)):
     parser.error("At least one rule type must be specified.")
+
+if any((args.perms, args.xperms, args.boolean)) and any((args.rbacrtypes, args.mlsrtypes)):
+    parser.error("-p/--perms, -x/--xperms, and -b/--bool options are only supported "
+                 "with TE rule searches.")
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
