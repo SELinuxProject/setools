@@ -36,8 +36,11 @@ class TypeAttributeTable(SEToolsTableModel[setools.TypeAttribute]):
                         return ", ".join(sorted(a.name for a in sorted(attr.expand())))
 
             case modelroles.ContextMenuRole:
-                if col == 1:
-                    return (details.type_detail_action(t) for t in sorted(attr.expand()))
+                match col:
+                    case 0:
+                        return (details.typeattr_detail_action(attr),)
+                    case 1:
+                        return (details.type_detail_action(t) for t in sorted(attr.expand()))
 
             case QtCore.Qt.ItemDataRole.WhatsThisRole:
                 match col:
