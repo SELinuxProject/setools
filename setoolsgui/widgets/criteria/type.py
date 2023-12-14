@@ -2,22 +2,71 @@
 
 from contextlib import suppress
 import enum
+import typing
 
 from PyQt6 import QtCore, QtWidgets
 import setools
 
 from .. import models
-from .criteria import OptionsPlacement
+from .criteria import CriteriaWidget, OptionsPlacement
 from .list import ListWidget
 from .name import NameWidget
 
+# permissive default setting (not checked)
+PERMISSIVE_DEFAULT_CHECKED: typing.Final[bool] = False
+
 # Regex for exact matches to types/attrs
-VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
+VALIDATE_EXACT: typing.Final[str] = r"[A-Za-z0-9._-]*"
 
 # indirect default setting (checked)
-INDIRECT_DEFAULT_CHECKED = True
+INDIRECT_DEFAULT_CHECKED: typing.Final[bool] = True
 
-__all__ = ('TypeList', 'TypeOrAttrName',)
+__all__ = ('PermissiveType', 'TypeList', 'TypeOrAttrName',)
+
+
+class PermissiveType(CriteriaWidget):
+
+    """A widget providing a QCheckBox widget for selecting permissive types."""
+
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+                 parent: QtWidgets.QWidget | None = None) -> None:
+
+        super().__init__(title, query, attrname, parent=parent)
+
+        self.top_layout = QtWidgets.QHBoxLayout(self)
+
+        self.criteria = QtWidgets.QCheckBox(self)
+        self.criteria.setText("Permissive")
+        self.criteria.setToolTip("Permissive types will match.")
+        self.criteria.setWhatsThis("<b>Permissive types will match.</b>")
+        self.criteria.toggled.connect(self._update_query)
+        self.top_layout.addWidget(self.criteria)
+
+        # set initial state:
+        self.criteria.setChecked(PERMISSIVE_DEFAULT_CHECKED)
+
+    @property
+    def has_errors(self) -> bool:
+        """Get error state of this widget."""
+        return False
+
+    def _update_query(self, state: bool) -> None:
+        """Set the permissive boolean value."""
+        self.log.debug(f"Setting {self.attrname} {state}")
+        setattr(self.query, self.attrname, state)
+
+    #
+    # Save/Load field
+    #
+
+    def save(self, settings: dict) -> None:
+        """Save the widget settings to the settings dictionary."""
+        settings[self.attrname] = self.criteria.isChecked()
+
+    def load(self, settings: dict) -> None:
+        """Load the widget settings from the settings dictionary."""
+        with suppress(KeyError):
+            self.criteria.setChecked(settings[self.attrname])
 
 
 class TypeList(ListWidget):

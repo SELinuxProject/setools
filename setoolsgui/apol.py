@@ -37,7 +37,8 @@ from .widgets import (boolquery,
                       rolequery,
                       summary,
                       terulequery,
-                      typeattrquery,)
+                      typeattrquery,
+                      typequery,)
 
 STYLESHEET: typing.Final = "apol.css"
 
