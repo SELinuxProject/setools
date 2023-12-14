@@ -40,8 +40,12 @@ class TypeTable(SEToolsTableModel[setools.Type]):
                         return "Permissive" if item.ispermissive else None
 
             case modelroles.ContextMenuRole:
-                if col == 1:
-                    return (details.typeattr_detail_action(ta) for ta in sorted(item.attributes()))
+                match col:
+                    case 0:
+                        return (details.type_detail_action(item),)
+                    case 1:
+                        return (details.typeattr_detail_action(ta) for ta in
+                                sorted(item.attributes()))
 
             case QtCore.Qt.ItemDataRole.WhatsThisRole:
                 match col:

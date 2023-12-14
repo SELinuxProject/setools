@@ -6,7 +6,9 @@ import enum
 from PyQt6 import QtCore, QtWidgets
 import setools
 
+from .. import models
 from .criteria import OptionsPlacement
+from .list import ListWidget
 from .name import NameWidget
 
 # Regex for exact matches to types/attrs
@@ -15,7 +17,24 @@ VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 # indirect default setting (checked)
 INDIRECT_DEFAULT_CHECKED = True
 
-__all__ = ('TypeOrAttrName',)
+__all__ = ('TypeList', 'TypeOrAttrName',)
+
+
+class TypeList(ListWidget):
+
+    """A widget providing a QListView widget for selecting the types."""
+
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+                 enable_equal: bool = False, enable_subset: bool = False,
+                 parent: QtWidgets.QWidget | None = None) -> None:
+
+        model = models.TypeTable(data=sorted(query.policy.types()))
+
+        super().__init__(title, query, attrname, model, enable_equal=enable_equal,
+                         enable_subset=enable_subset, parent=parent)
+
+        self.criteria_any.setToolTip("Any selected type will match.")
+        self.criteria_any.setWhatsThis("<b>Any selected type will match.</b>")
 
 
 class TypeOrAttrName(NameWidget):

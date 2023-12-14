@@ -34,6 +34,7 @@ from .widgets import (boolquery,
                       objclassquery,
                       portconquery,
                       rbacrulequery,
+                      rolequery,
                       summary,
                       terulequery)
 

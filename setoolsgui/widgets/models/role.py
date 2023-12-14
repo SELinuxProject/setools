@@ -39,8 +39,11 @@ class RoleTable(SEToolsTableModel[setools.Role]):
                         return ", ".join(sorted(t.name for t in item.types()))
 
             case modelroles.ContextMenuRole:
-                if col == 1:
-                    return (details.type_detail_action(t) for t in sorted(item.types()))
+                match col:
+                    case 0:
+                        return (details.role_detail_action(item),)
+                    case 1:
+                        return (details.type_detail_action(t) for t in sorted(item.types()))
 
             case QtCore.Qt.ItemDataRole.WhatsThisRole:
                 match col:
