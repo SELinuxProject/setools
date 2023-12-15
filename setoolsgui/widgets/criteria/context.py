@@ -62,13 +62,12 @@ class ContextMatch(criteria.CriteriaWidget):
             the role name instead of direct string comparison.</p>
             """)
 
-        type_ = criteria.TypeOrAttrName("Context Type", self.query, type_attrname,
-                                        mode=criteria.TypeOrAttrName.Mode.type_only,
-                                        enable_regex=True,
-                                        enable_indirect=False,
-                                        required=False,
-                                        options_placement=criteria.OptionsPlacement.BELOW,
-                                        parent=self)
+        type_ = criteria.TypeName("Context Type", self.query, type_attrname,
+                                  enable_regex=True,
+                                  enable_indirect=False,
+                                  required=False,
+                                  options_placement=criteria.OptionsPlacement.BELOW,
+                                  parent=self)
         type_.setToolTip("The type for context matching.")
         type_.setWhatsThis(
             """

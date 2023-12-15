@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 from contextlib import suppress
-import enum
+import itertools
 import typing
 
 from PyQt6 import QtCore, QtWidgets
@@ -21,7 +21,7 @@ VALIDATE_EXACT: typing.Final[str] = r"[A-Za-z0-9._-]*"
 # indirect default setting (checked)
 INDIRECT_DEFAULT_CHECKED: typing.Final[bool] = True
 
-__all__ = ('PermissiveType', 'TypeList', 'TypeOrAttrName',)
+__all__ = ('PermissiveType', 'TypeList', 'TypeName', 'TypeOrAttrName',)
 
 
 class PermissiveType(CriteriaWidget):
@@ -86,39 +86,23 @@ class TypeList(ListWidget):
         self.criteria_any.setWhatsThis("<b>Any selected type will match.</b>")
 
 
-class TypeOrAttrName(NameWidget):
+class TypeName(NameWidget):
 
     """
     Widget providing a QLineEdit that saves the input to the attributes
-    of the specified query.  This supports inputs of types, type attributes,
-    or both.
+    of the specified query.  This supports inputs of types.
     """
 
     indirect_toggled = QtCore.pyqtSignal(bool)
 
-    class Mode(enum.Enum):
-
-        """Enumeration of widget modes."""
-
-        type_only = 1
-        attribute_only = 2
-        type_or_attribute = 3
-
     def __init__(self, title: str, query: setools.PolicyQuery, attrname: str, /, *,
                  parent: QtWidgets.QWidget | None = None,
                  options_placement: OptionsPlacement = OptionsPlacement.RIGHT,
-                 mode: Mode = Mode.type_only,
                  enable_indirect: bool = False, enable_regex: bool = False,
                  required: bool = False):
 
         # Create completion list
-        completion = list[str]()
-        if mode in (TypeOrAttrName.Mode.type_only,
-                    TypeOrAttrName.Mode.type_or_attribute):
-            completion.extend(t.name for t in query.policy.types())
-        if mode in (TypeOrAttrName.Mode.attribute_only,
-                    TypeOrAttrName.Mode.type_or_attribute):
-            completion.extend(a.name for a in query.policy.typeattributes())
+        completion = list[str](t.name for t in query.policy.types())
 
         super().__init__(title, query, attrname, completion, VALIDATE_EXACT,
                          enable_regex=enable_regex, required=required,
@@ -173,6 +157,34 @@ class TypeOrAttrName(NameWidget):
         super().load(settings)
 
 
+class TypeOrAttrName(TypeName):
+
+    """
+    Widget providing a QLineEdit that saves the input to the attributes
+    of the specified query.  This supports inputs of types or attributes.
+    """
+
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str, /, *,
+                 parent: QtWidgets.QWidget | None = None,
+                 options_placement: OptionsPlacement = OptionsPlacement.RIGHT,
+                 enable_indirect: bool = False, enable_regex: bool = False,
+                 required: bool = False):
+
+        super().__init__(title, query, attrname, options_placement=options_placement,
+                         enable_indirect=enable_indirect, enable_regex=enable_regex,
+                         required=required, parent=parent)
+
+        # add attributes to completion list
+        completer = self.criteria.completer()
+        assert completer, "Completer not set, this is an SETools bug."
+        model = typing.cast(QtCore.QStringListModel, completer.model())
+        assert model, "Model not set, this is an SETools bug."
+        model.setStringList(sorted(itertools.chain(
+            (a.name for a in query.policy.typeattributes()),
+            (t.name for t in query.policy.types())
+        )))
+
+
 if __name__ == '__main__':
     import sys
     import warnings
@@ -188,7 +200,6 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     mw = QtWidgets.QMainWindow()
     widget = TypeOrAttrName("Test Type/Attribute", q, "source", parent=mw,
-                            mode=TypeOrAttrName.Mode.type_or_attribute,
                             enable_regex=True, enable_indirect=True)
     widget.setToolTip("test tooltip")
     widget.setWhatsThis("test whats this")

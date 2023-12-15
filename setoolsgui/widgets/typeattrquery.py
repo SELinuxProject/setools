@@ -27,8 +27,8 @@ class TypeAttributeQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        name = criteria.RoleName("Name", self.query, "name", enable_regex=True,
-                                 parent=self.criteria_frame)
+        name = criteria.TypeAttributeName("Name", self.query, "name", enable_regex=True,
+                                          parent=self.criteria_frame)
         name.setToolTip("Search for type attributes by name.")
         name.setWhatsThis("<p>Search for type attributes by name.</p>")
 

@@ -47,7 +47,6 @@ class RBACRuleQueryTab(tab.TableResultTabWidget):
             """)
 
         dst = criteria.TypeOrAttrName("Target Role/Type", self.query, "target",
-                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
                                       enable_regex=True,
                                       enable_indirect=True,
                                       parent=self.criteria_frame)

@@ -4,45 +4,45 @@ from typing import Dict, Union
 import pytest
 from pytestqt.qtbot import QtBot
 
-from setoolsgui.widgets.criteria.type import (TypeOrAttrName,
+from setoolsgui.widgets.criteria.type import (TypeName,
                                               INDIRECT_DEFAULT_CHECKED)
 
 
 @pytest.fixture
-def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> TypeOrAttrName:
+def widget(mock_query, request: pytest.FixtureRequest, qtbot: QtBot) -> TypeName:
     """Pytest fixture to set up the widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = TypeOrAttrName(request.node.name, mock_query, "name", **kwargs)
+    w = TypeName(request.node.name, mock_query, "name", **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w
 
 
-@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrName.Mode.type_or_attribute)
-def test_base_settings(widget: TypeOrAttrName) -> None:
-    """Test base properties of TypeOrAttrNameWidget."""
+@pytest.mark.obj_args(enable_indirect=True)
+def test_base_settings(widget: TypeName) -> None:
+    """Test base properties of TypeName."""
     assert widget.criteria_indirect.toolTip()
     assert widget.criteria_indirect.whatsThis()
 
 
-@pytest.mark.obj_args(enable_indirect=False, mode=TypeOrAttrName.Mode.type_only)
-def test_indirect_disabled_layout(widget: TypeOrAttrName) -> None:
+@pytest.mark.obj_args(enable_indirect=False)
+def test_indirect_disabled_layout(widget: TypeName) -> None:
     """Test layout for no indirect option."""
     # validate widget item positions
     assert not widget.top_layout.itemAtPosition(1, 2)
 
 
-@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrName.Mode.type_or_attribute)
-def test_indirect_enabled_layout(widget: TypeOrAttrName) -> None:
+@pytest.mark.obj_args(enable_indirect=True)
+def test_indirect_enabled_layout(widget: TypeName) -> None:
     """Test layout for indirect option."""
     assert widget.criteria_indirect.objectName() == "name_indirect"
     # validate widget item positions
     assert widget.top_layout.itemAtPosition(1, 1).widget() == widget.criteria_indirect
 
 
-@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrName.Mode.type_or_attribute)
-def test_indirect_toggling(widget: TypeOrAttrName, mock_query) -> None:
+@pytest.mark.obj_args(enable_indirect=True)
+def test_indirect_toggling(widget: TypeName, mock_query) -> None:
     """Test indirect toggling is reflected in the query."""
     # test toggling based on the initial state
     assert mock_query.name_indirect is INDIRECT_DEFAULT_CHECKED
@@ -58,9 +58,8 @@ def test_indirect_toggling(widget: TypeOrAttrName, mock_query) -> None:
         assert mock_query.name_indirect is False
 
 
-@pytest.mark.obj_args(enable_indirect=False, mode=TypeOrAttrName.Mode.type_or_attribute,
-                      enable_regex=False)
-def test_noindirect_save(widget: TypeOrAttrName,  request: pytest.FixtureRequest) -> None:
+@pytest.mark.obj_args(enable_indirect=False, enable_regex=False)
+def test_noindirect_save(widget: TypeName,  request: pytest.FixtureRequest) -> None:
     """Test settings save with indirect disabled."""
     widget.criteria.clear()
     widget.criteria.editingFinished.emit()
@@ -75,9 +74,8 @@ def test_noindirect_save(widget: TypeOrAttrName,  request: pytest.FixtureRequest
     assert settings == expected_settings
 
 
-@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrName.Mode.type_or_attribute,
-                      enable_regex=False)
-def test_indirect_save(widget: TypeOrAttrName, request: pytest.FixtureRequest) -> None:
+@pytest.mark.obj_args(enable_indirect=True, enable_regex=False)
+def test_indirect_save(widget: TypeName, request: pytest.FixtureRequest) -> None:
     """Test settings save with indirect enabled."""
     widget.criteria_indirect.setChecked(not INDIRECT_DEFAULT_CHECKED)
     widget.criteria.clear()
@@ -94,9 +92,8 @@ def test_indirect_save(widget: TypeOrAttrName, request: pytest.FixtureRequest) -
     assert settings == expected_settings
 
 
-@pytest.mark.obj_args(enable_indirect=False, mode=TypeOrAttrName.Mode.type_or_attribute,
-                      enable_regex=False)
-def test_noindirect_load(widget: TypeOrAttrName, mock_query,
+@pytest.mark.obj_args(enable_indirect=False, enable_regex=False)
+def test_noindirect_load(widget: TypeName, mock_query,
                          request: pytest.FixtureRequest) -> None:
     """Test settings load with indirect disabled."""
     settings = {
@@ -108,9 +105,8 @@ def test_noindirect_load(widget: TypeOrAttrName, mock_query,
     assert mock_query.name == request.node.name
 
 
-@pytest.mark.obj_args(enable_indirect=True, mode=TypeOrAttrName.Mode.type_or_attribute,
-                      enable_regex=False)
-def test_indirect_load(widget: TypeOrAttrName, mock_query,
+@pytest.mark.obj_args(enable_indirect=True, enable_regex=False)
+def test_indirect_load(widget: TypeName, mock_query,
                        request: pytest.FixtureRequest) -> None:
     """Test settings load with indirect enabled."""
     settings = {

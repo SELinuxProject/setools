@@ -27,10 +27,9 @@ class TypeQueryTab(tab.TableResultTabWidget):
         #
         # Set up criteria widgets
         #
-        name = criteria.TypeOrAttrName("Name", self.query, "name",
-                                       enable_regex=True,
-                                       mode=criteria.TypeOrAttrName.Mode.attribute_only,
-                                       parent=self.criteria_frame)
+        name = criteria.TypeName("Name", self.query, "name",
+                                 enable_regex=True,
+                                 parent=self.criteria_frame)
         name.setToolTip("Search for types by name.")
         name.setWhatsThis("<p>Search for types by name.</p>")
 

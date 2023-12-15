@@ -59,11 +59,10 @@ class ConstraintQueryTab(tab.TableResultTabWidget):
             it will be returned.</p>
             """)
 
-        type_ = criteria.TypeOrAttrName("Type In Expression", self.query, "type_",
-                                        mode=criteria.TypeOrAttrName.Mode.type_only,
-                                        enable_regex=True,
-                                        enable_indirect=False,
-                                        parent=self.criteria_frame)
+        type_ = criteria.TypeName("Type In Expression", self.query, "type_",
+                                  enable_regex=True,
+                                  enable_indirect=False,
+                                  parent=self.criteria_frame)
         type_.setToolTip("Search for a type in the expression.")
         type_.setWhatsThis(
             """

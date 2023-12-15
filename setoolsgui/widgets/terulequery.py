@@ -37,7 +37,6 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             """)
 
         src = criteria.TypeOrAttrName("Source Type/Attribute", self.query, "source",
-                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
                                       enable_regex=True,
                                       enable_indirect=True,
                                       parent=self.criteria_frame)
@@ -61,7 +60,6 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             """)
 
         dst = criteria.TypeOrAttrName("Target Type/Attribute", self.query, "target",
-                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
                                       enable_regex=True,
                                       enable_indirect=True,
                                       parent=self.criteria_frame)
@@ -109,11 +107,10 @@ class TERuleQueryTab(tab.TableResultTabWidget):
             available in all of the classes are available.</p>
             """)
 
-        dflt = criteria.TypeOrAttrName("Default Type", self.query, "default",
-                                       mode=criteria.TypeOrAttrName.Mode.type_only,
-                                       enable_regex=True,
-                                       enable_indirect=False,
-                                       parent=self.criteria_frame)
+        dflt = criteria.TypeName("Default Type", self.query, "default",
+                                 enable_regex=True,
+                                 enable_indirect=False,
+                                 parent=self.criteria_frame)
         dflt.setToolTip("The default type for rule matching.")
         dflt.setWhatsThis(
             """

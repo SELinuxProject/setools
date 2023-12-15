@@ -51,12 +51,11 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         #
         # Set up criteria widgets
         #
-        src = criteria.TypeOrAttrName("Source Type", self.query, SETTINGS_SOURCE,
-                                      mode=criteria.TypeOrAttrName.Mode.type_only,
-                                      enable_regex=False,
-                                      enable_indirect=False,
-                                      required=True,
-                                      parent=self.criteria_frame)
+        src = criteria.TypeName("Source Type", self.query, SETTINGS_SOURCE,
+                                enable_regex=False,
+                                enable_indirect=False,
+                                required=True,
+                                parent=self.criteria_frame)
         src.setToolTip("The source type of the analysis.")
         src.setWhatsThis(
             """
@@ -78,12 +77,11 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         #
         # Configure target type
         #
-        dst = criteria.TypeOrAttrName("Target Type", self.query, SETTINGS_TARGET,
-                                      mode=criteria.TypeOrAttrName.Mode.type_only,
-                                      enable_regex=False,
-                                      enable_indirect=False,
-                                      required=True,
-                                      parent=self.criteria_frame)
+        dst = criteria.TypeName("Target Type", self.query, SETTINGS_TARGET,
+                                enable_regex=False,
+                                enable_indirect=False,
+                                required=True,
+                                parent=self.criteria_frame)
         dst.setToolTip("The target type of the analysis.")
         dst.setWhatsThis(
             """

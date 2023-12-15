@@ -35,7 +35,6 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
             """)
 
         src = criteria.TypeOrAttrName("Source Type/Attribute", self.query, "source",
-                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
                                       enable_regex=True,
                                       enable_indirect=True,
                                       parent=self.criteria_frame)
@@ -59,7 +58,6 @@ class MLSRuleQueryTab(tab.TableResultTabWidget):
             """)
 
         dst = criteria.TypeOrAttrName("Target Type/Attribute", self.query, "target",
-                                      mode=criteria.TypeOrAttrName.Mode.type_or_attribute,
                                       enable_regex=True,
                                       enable_indirect=True,
                                       parent=self.criteria_frame)
