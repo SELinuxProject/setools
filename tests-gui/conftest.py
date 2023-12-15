@@ -39,27 +39,36 @@ def mock_policy() -> Mock:
     bar_class.perms = frozenset(("bar_perm1", "bar_perm2"))
     bar_class.common = common
 
-    foo_t = SortableMock(setools.Type)
-    foo_t.name = "foo_t"
-    bar_t = SortableMock(setools.Type)
-    bar_t.name = "bar_t"
-
     fooattr = SortableMock(setools.TypeAttribute)
     fooattr.name = "foo_type"
     barattr = SortableMock(setools.TypeAttribute)
     barattr.name = "bar_type"
 
+    foo_t = SortableMock(setools.Type)
+    foo_t.name = "foo_t"
+    foo_t.attributes.return_value = (fooattr,)
+    fooattr.expand.return_value = (foo_t,)
+    bar_t = SortableMock(setools.Type)
+    bar_t.name = "bar_t"
+    bar_t.attributes.return_value = (barattr,)
+    barattr.expand.return_value = (bar_t,)
+
     foo_r = SortableMock(setools.Role)
     foo_r.name = "foo_r"
+    foo_r.types.return_value = (foo_t,)
     bar_r = SortableMock(setools.Role)
     bar_r.name = "bar_r"
+    bar_r.types.return_value = (bar_t,)
 
     foo_u = SortableMock(setools.User)
     foo_u.name = "foo_u"
+    foo_u.roles.return_value = (foo_r,)
     bar_u = SortableMock(setools.User)
     bar_u.name = "bar_u"
+    bar_u.roles.return_value = (bar_r,)
 
     policy = Mock(setools.SELinuxPolicy)
+    policy.mls = False
     policy.bools.return_value = (foo_bool, bar_bool)
     policy.classes.return_value = (foo_class, bar_class)
     policy.commons.return_value = (common,)

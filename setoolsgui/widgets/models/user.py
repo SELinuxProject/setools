@@ -21,8 +21,9 @@ class UserTable(SEToolsTableModel[setools.User]):
 
     headers = ["Name", "Roles", "Default Level", "Range"]
 
-    def __init__(self, data: typing.Iterable[setools.User] | None = None, mls: bool = False,
-                 parent: QtCore.QObject | None = None):
+    def __init__(self, /, parent: QtCore.QObject | None = None, *,
+                 data: typing.Iterable[setools.User] | None = None,
+                 mls: bool = False):
 
         super().__init__(data=data, parent=parent)
         self.mls: typing.Final[bool] = mls
@@ -51,8 +52,11 @@ class UserTable(SEToolsTableModel[setools.User]):
                         return str(user.mls_range)
 
             case modelroles.ContextMenuRole:
-                if col == 1:
-                    return (details.role_detail_action(r) for r in sorted(user.roles))
+                match col:
+                    case 0:
+                        return (details.user_detail_action(user),)
+                    case 1:
+                        return (details.role_detail_action(r) for r in sorted(user.roles))
 
             case QtCore.Qt.ItemDataRole.WhatsThisRole:
                 match col:

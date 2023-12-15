@@ -3,13 +3,32 @@
 from PyQt6 import QtCore, QtWidgets
 import setools
 
+from .. import models
 from .criteria import OptionsPlacement
+from .list import ListWidget
 from .name import NameWidget
 
 # Regex for exact matches to roles
 VALIDATE_EXACT = r"[A-Za-z0-9._-]*"
 
-__all__ = ("RoleName",)
+__all__ = ("RoleList", "RoleName",)
+
+
+class RoleList(ListWidget):
+
+    """A widget providing a QListView widget for selecting the roles."""
+
+    def __init__(self, title: str, query: setools.PolicyQuery, attrname: str,
+                 enable_equal: bool = False, enable_subset: bool = False,
+                 parent: QtWidgets.QWidget | None = None) -> None:
+
+        model = models.RoleTable(data=sorted(query.policy.roles()))
+
+        super().__init__(title, query, attrname, model, enable_equal=enable_equal,
+                         enable_subset=enable_subset, parent=parent)
+
+        self.criteria_any.setToolTip("Any selected role will match.")
+        self.criteria_any.setWhatsThis("<b>Any selected role will match.</b>")
 
 
 class RoleName(NameWidget):
