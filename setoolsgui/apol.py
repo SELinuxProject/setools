@@ -22,6 +22,7 @@ from . import config, widgets
 from .widgets import (boolquery,
                       commonquery,
                       constraintquery,
+                      dta,
                       fsusequery,
                       genfsconquery,
                       ibendportconquery,
