@@ -7,6 +7,7 @@ from .comboenum import *
 from .common import *
 from .constraintype import *
 from .context import *
+from .defaultruletype import *
 from .fsuseruletype import *
 from .infiniband import *
 from .ipnetwork import *
