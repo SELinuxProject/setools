@@ -6,6 +6,8 @@
 from PyQt6 import QtCore
 import setools
 
+from .. import details
+from . import modelroles
 from .table import SEToolsTableModel
 
 __all__ = ("BoundsTable",)
@@ -34,5 +36,32 @@ class BoundsTable(SEToolsTableModel[setools.Bounds]):
                         return item.parent.name
                     case 2:
                         return item.child.name
+
+            case modelroles.ContextMenuRole:
+                match col:
+                    case 1:
+                        return (details.type_detail_action(item.parent),)
+                    case 2:
+                        return (details.type_detail_action(item.child),)
+
+            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+                match col:
+                    case 0:
+                        column_whatsthis = "<p>This is the rule type.</p>"
+                    case 1:
+                        column_whatsthis = "<p>This is the parent/bounding type.</p>"
+                    case 2:
+                        column_whatsthis = "<p>This is the child/bounded type.</p>"
+                    case _:
+                        column_whatsthis = ""
+
+                return \
+                    f"""
+                    <b><p>Table Representation of bounds rules</p></b>
+
+                    <p>Each part of the declaration is represented as a column in the table.</p>
+
+                    {column_whatsthis}
+                    """
 
         return super().data(index, role)
