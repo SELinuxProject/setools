@@ -3,6 +3,7 @@
 from .criteria import *
 
 from .boolean import *
+from .boundsruletype import *
 from .comboenum import *
 from .common import *
 from .constraintype import *
