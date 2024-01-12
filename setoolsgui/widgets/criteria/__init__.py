@@ -14,6 +14,7 @@ from .fsuseruletype import *
 from .infiniband import *
 from .ipnetwork import *
 from .ipports import *
+from .mls import *
 from .mlslevelrange import *
 from .mlsruletype import *
 from .name import *

@@ -67,12 +67,28 @@ def mock_policy() -> Mock:
     bar_u.name = "bar_u"
     bar_u.roles.return_value = (bar_r,)
 
+    foo_cat = SortableMock(setools.Category)
+    foo_cat.name = "foo_cat"
+    foo_cat.aliases.return_value = ("foo_cat_alias",)
+    bar_cat = SortableMock(setools.Category)
+    bar_cat.name = "bar_cat"
+    bar_cat.aliases.return_value = ("bar_cat_alias",)
+
+    foo_sen = SortableMock(setools.Sensitivity)
+    foo_sen.name = "foo_sen"
+    foo_sen.aliases.return_value = ("foo_sen_alias",)
+    bar_sen = SortableMock(setools.Sensitivity)
+    bar_sen.name = "bar_sen"
+    bar_sen.aliases.return_value = ("bar_sen_alias",)
+
     policy = Mock(setools.SELinuxPolicy)
     policy.mls = False
     policy.bools.return_value = (foo_bool, bar_bool)
+    policy.categories.return_value = (foo_cat, bar_cat)
     policy.classes.return_value = (foo_class, bar_class)
     policy.commons.return_value = (common,)
     policy.roles.return_value = (foo_r, bar_r)
+    policy.sensitivities.return_value = (foo_sen, bar_sen)
     policy.types.return_value = (foo_t, bar_t)
     policy.typeattributes.return_value = (fooattr, barattr)
     policy.users.return_value = (foo_u, bar_u)
