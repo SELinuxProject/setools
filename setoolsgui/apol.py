@@ -12,7 +12,7 @@ import typing
 
 import pkg_resources
 from PyQt6 import QtCore, QtGui, QtWidgets
-from setools import __version__, PermissionMap, SELinuxPolicy
+import setools
 
 from . import config, widgets
 
@@ -46,26 +46,28 @@ from .widgets import (boolquery,
                       typequery,
                       userquery,)
 
-STYLESHEET: typing.Final = "apol.css"
+STYLESHEET: typing.Final[str] = "apol.css"
 
 # Class of the tab that opens automatically when a policy is loaded.
-INITIAL_TAB: typing.Final = summary.SummaryTab
+INITIAL_TAB: typing.Final[type[widgets.tab.BaseAnalysisTabWidget]] = summary.SummaryTab
 
 # keys for workspace save file
-SETTINGS_POLICY: typing.Final = "__policy__"
-SETTINGS_PERMMAP: typing.Final = "__permmap__"
-SETTINGS_TABS_LIST: typing.Final = "__tabs__"
-SETTINGS_TAB_TITLE: typing.Final = "__title__"
-SETTINGS_TAB_CLASS: typing.Final = "__tab__"
+SETTINGS_POLICY: typing.Final[str] = "__policy__"
+SETTINGS_PERMMAP: typing.Final[str] = "__permmap__"
+SETTINGS_TABS_LIST: typing.Final[str] = "__tabs__"
+SETTINGS_TAB_TITLE: typing.Final[str] = "__title__"
+SETTINGS_TAB_CLASS: typing.Final[str] = "__tab__"
 
 
 class ApolWorkspace(QtWidgets.QTabWidget):
 
-    policy: SELinuxPolicy | None
-    permmap: PermissionMap | None
+    """The main widget for apol."""
 
-    policy_changed = QtCore.pyqtSignal(SELinuxPolicy)
-    permmap_changed = QtCore.pyqtSignal(PermissionMap)
+    policy: setools.SELinuxPolicy | None
+    permmap: setools.PermissionMap | None
+
+    policy_changed = QtCore.pyqtSignal(setools.SELinuxPolicy)
+    permmap_changed = QtCore.pyqtSignal(setools.PermissionMap)
 
     def __init__(self, parent: QtWidgets.QWidget | None = None) -> None:
         # __init__ here to type narrow the parent to the Apol main window
@@ -73,7 +75,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         self.log = logging.getLogger(__name__)
         self.permmap = None
         self.policy = None
-        self.config: typing.Final = config.ApolConfig()
+        self.config: typing.Final[config.ApolConfig] = config.ApolConfig()
 
         self.setAutoFillBackground(True)
         self.setTabPosition(QtWidgets.QTabWidget.TabPosition.North)
@@ -342,7 +344,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     def load_policy(self, filename) -> None:
         """Load a policy file."""
         try:
-            self.policy = SELinuxPolicy(filename)
+            self.policy = setools.SELinuxPolicy(filename)
             self.policy_changed.emit(self.policy)
 
             if self.permmap:
@@ -383,7 +385,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     def load_permmap(self, filename=None):
         """Load a permission map file."""
         try:
-            self.permmap = PermissionMap(filename)
+            self.permmap = setools.PermissionMap(filename)
 
             if self.policy:
                 with suppress(Exception):
@@ -562,7 +564,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         super().clear()
         self.toggle_workspace_actions()
 
-    def handle_policy_change(self, policy: SELinuxPolicy) -> None:
+    def handle_policy_change(self, policy: setools.SELinuxPolicy) -> None:
         """Handle a policy change.  Close all tabs and create new initial tab."""
         self.log.debug(f"Received policy change signal to {policy}.")
         self.clear()
@@ -640,7 +642,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             return
 
         try:
-            with open(filename, "r") as fd:
+            with open(filename, "r", encoding="utf-8") as fd:
                 settings = json.load(fd)
         except ValueError:
             self.log.critical(f"Invalid settings file \"{filename}\"")
@@ -723,7 +725,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             return
 
         try:
-            with open(filename, "w") as fd:
+            with open(filename, "w", encoding="utf-8") as fd:
                 json.dump(settings, fd, indent=1)
         except OSError as ex:
             self.log.critical(f"Unable to save settings file \"{ex.filename}\": {ex.strerror}")
@@ -765,7 +767,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             return
 
         try:
-            with open(filename, "r") as fd:
+            with open(filename, "r", encoding="utf-8") as fd:
                 workspace = json.load(fd)
         except ValueError:
             self.log.critical(f"Invalid workspace file \"{filename}\"")
@@ -926,7 +928,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         if not filename:
             return
 
-        with open(filename, "w") as fd:
+        with open(filename, "w", encoding="utf-8") as fd:
             json.dump(workspace, fd, indent=1)
 
     #
@@ -959,7 +961,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             self,
             "About Apol",
             f"""
-            <h1><b>Apol {__version__}</b></h1>
+            <h1><b>Apol {setools.__version__}</b></h1>
 
             <p>Apol is a graphical SELinux policy analysis tool and part of
             <a href="https://github.com/SELinuxProject/setools/wiki"> SETools</a>.</p>
@@ -980,7 +982,7 @@ class ChooseAnalysis(QtWidgets.QDialog):
     tab widget class for the analysis.
     """
 
-    def __init__(self, mls: bool, parent: "ApolWorkspace"):
+    def __init__(self, mls: bool, parent: ApolWorkspace):
         super().__init__(parent)
 
         # populate the analysis choices tree:
@@ -1066,7 +1068,7 @@ def run_apol(policy: str | None = None) -> int:
 
     # load apol stylesheet
     distro = pkg_resources.get_distribution("setools")
-    with open(f"{distro.location}/setoolsgui/{STYLESHEET}") as fd:
+    with open(f"{distro.location}/setoolsgui/{STYLESHEET}", "r", encoding="utf-8") as fd:
         app.setStyleSheet(fd.read())
 
     #
