@@ -2,80 +2,13 @@
 
 import glob
 from setuptools import setup
-import distutils.log as log
 from distutils.core import Extension
-from distutils.cmd import Command
-from distutils.command.clean import clean
-import subprocess
 import sys
 import os
-import shutil
 from os.path import join
-from itertools import chain
 from contextlib import suppress
 from Cython.Build import cythonize
 import os.path
-
-
-class CleanCommand(clean):
-    """
-    Extend the clean command to clean cython and Qt files.
-
-    This will clean the .c intermediate file, and if --all is
-    specified, will remove __pycache__ and Qt help files.
-    """
-
-    def run(self):
-        extensions_to_remove = [".so", ".c"]
-        files_to_remove = []
-        dirs_to_remove = ["setools.egg-info"]
-
-        if self.all:
-            # --all includes Qt help files
-            self.announce("Cleaning __pycache__ dirs and Qt help files", level=log.INFO)
-            extensions_to_remove.extend((".qhc", ".qch"))
-
-        # collect files and dirs to delete
-        for root, dirs, files in chain(os.walk("setools"),
-                                       os.walk("setoolsgui"),
-                                       os.walk("tests"),
-                                       os.walk("qhc")):
-            for f in files:
-                if os.path.splitext(f)[-1] in extensions_to_remove:
-                    files_to_remove.append(join(root, f))
-
-            for d in dirs:
-                if d == "__pycache__" and self.all:
-                    dirs_to_remove.append(join(root, d))
-
-        for file in files_to_remove:
-            with suppress(Exception):
-                os.unlink(file)
-
-        for dir_ in dirs_to_remove:
-            with suppress(Exception):
-                shutil.rmtree(dir_, ignore_errors=True)
-
-        clean.run(self)
-
-class QtHelpCommand(Command):
-    description = "Build Qt help files."
-    user_options = []
-
-    def initialize_options(self):
-        pass
-
-    def finalize_options(self):
-        pass
-
-    def run(self):
-        command = ['qcollectiongenerator', 'qhc/apol.qhcp']
-        self.announce("Building Qt help files", level=log.INFO)
-        self.announce(' '.join(command), level=log.INFO)
-        subprocess.check_call(command)
-        self.announce("Moving Qt help files to setoolsgui/apol")
-        os.rename('qhc/apol.qhc', 'setoolsgui/apol/apol.qhc')
-        os.rename('qhc/apol.qch', 'setoolsgui/apol/apol.qch')
 
 
 # Library linkage
@@ -138,13 +71,13 @@ setup(name='setools',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
       url='https://github.com/SELinuxProject/setools',
-      cmdclass={'build_qhc': QtHelpCommand, 'clean': CleanCommand},
-      packages=['setools', 'setools.checker', 'setools.diff', 'setoolsgui', 'setoolsgui.apol'],
+      packages=['setools', 'setools.checker', 'setools.diff', 'setoolsgui', 'setoolsgui.widgets',
+                'setoolsgui.widgets.criteria', 'setoolsgui.widgets.details',
+                'setoolsgui.widgets.models', 'setoolsgui.widgets.views'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta', 'sechecker'],
       data_files=installed_data,
-      package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map',
-                                                                'policyrep.pyi',
-                                                                'py.typed']},
+      package_data={'': ['*.html'],
+                    'setools': ['perm_map', 'policyrep.pyi', 'py.typed']},
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
                             compiler_directives={"language_level": 3,
