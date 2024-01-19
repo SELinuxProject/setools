@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 import glob
-from setuptools import setup
-from distutils.core import Extension
+from setuptools import Extension, setup
 import sys
 import os
 from os.path import join
