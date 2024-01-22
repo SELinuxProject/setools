@@ -5,9 +5,9 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 try:
-    import pkg_resources
+    from importlib.metadata import distribution
     # pylint: disable=no-member
-    __version__ = pkg_resources.get_distribution("setools").version
+    __version__ = distribution("setools").version
 except ImportError:  # pragma: no cover
     __version__ = "unknown"
 

@@ -4,13 +4,13 @@
 from collections import defaultdict
 from contextlib import suppress
 from functools import partial
+from importlib import resources as pkg_resources
 import json
 import logging
 import os
 import sys
 import typing
 
-import pkg_resources
 from PyQt6 import QtCore, QtGui, QtWidgets
 import setools
 
@@ -1067,9 +1067,10 @@ def run_apol(policy: str | None = None) -> int:
     app = QtWidgets.QApplication(sys.argv)
 
     # load apol stylesheet
-    distro = pkg_resources.get_distribution("setools")
-    with open(f"{distro.location}/setoolsgui/{STYLESHEET}", "r", encoding="utf-8") as fd:
-        app.setStyleSheet(fd.read())
+    package_location = pkg_resources.files("setoolsgui")
+    with pkg_resources.as_file(package_location / STYLESHEET) as path:
+        with open(path, "r", encoding="utf-8") as fd:
+            app.setStyleSheet(fd.read())
 
     #
     # Create main window
