@@ -198,7 +198,7 @@ class DTAMode(criteria.RadioEnumWidget[setools.DomainTransitionAnalysis.Mode]):
         """Apply the value of the all paths spinbox to the query."""
         assert isinstance(self.query, setools.DomainTransitionAnalysis)  # type narrowing
         self.log.debug(f"All paths max steps to {value} steps.")
-        self.query.all_paths_max_steps = value
+        self.query.depth_limit = value
 
     def save(self, settings: dict) -> None:
         super().save(settings)

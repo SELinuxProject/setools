@@ -65,21 +65,22 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
     mode = Mode.ShortestPath
     booleans: Optional[Mapping[str, bool]]
 
-    def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, min_weight: int = 1,
+    def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, /, *,
+                 min_weight: int = 1,
                  source: Optional[Union[Type, str]] = None,
                  target: Optional[Union[Type, str]] = None,
                  mode: Mode = Mode.ShortestPath,
-                 all_paths_step_limit: int = 3,
+                 depth_limit: int | None = 1,
                  exclude: Optional[Iterable[Union[Type, str]]] = None,
                  booleans: Optional[Mapping[str, bool]] = None) -> None:
 
         super().__init__(policy, perm_map=perm_map, min_weight=min_weight, source=source,
-                         target=target, mode=mode, all_paths_step_limit=all_paths_step_limit,
+                         target=target, mode=mode, depth_limit=depth_limit,
                          exclude=exclude, booleans=booleans)
 
         self._min_weight: int
         self._perm_map: PermissionMap
-        self._all_paths_max_steps: int
+        self._depth_limit: int | None
 
         self.rebuildgraph = True
         self.rebuildsubgraph = True
@@ -94,15 +95,15 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
             raise
 
     @property
-    def all_paths_max_steps(self) -> int:
-        return self._all_paths_max_steps
+    def depth_limit(self) -> int | None:
+        return self._depth_limit
 
-    @all_paths_max_steps.setter
-    def all_paths_max_steps(self, value: int) -> None:
-        if value < 1:
-            raise ValueError("All paths max steps must be positive.")
+    @depth_limit.setter
+    def depth_limit(self, value: int | None) -> None:
+        if value is not None and value < 1:
+            raise ValueError("Information flow max depth must be positive.")
 
-        self._all_paths_max_steps = value
+        self._depth_limit = value
         # no subgraph rebuild needed.
 
     @property
@@ -148,7 +149,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         self.log.info(f"Generating information flow results from {self.policy}")
         self.log.debug(f"{self.source=}")
         self.log.debug(f"{self.target=}")
-        self.log.debug(f"{self.mode=}, {self.all_paths_max_steps=}")
+        self.log.debug(f"{self.mode=}, {self.depth_limit=}")
 
         with suppress(NetworkXNoPath, NodeNotFound, NetworkXError):
             match self.mode:
@@ -170,29 +171,34 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
                     self.log.info("Generating all information flow paths from "
                                   f"{self.source} to {self.target}, "
-                                  f"max length {self.all_paths_max_steps}...")
+                                  f"max length {self.depth_limit}...")
 
                     for path in nx.all_simple_paths(self.subG,
                                                     self.source,
                                                     self.target,
-                                                    self.all_paths_max_steps):
+                                                    cutoff=self.depth_limit):
 
                         yield self.__generate_steps(path)
 
                 case InfoFlowAnalysis.Mode.FlowsOut:
                     if not self.source:
-                        raise ValueError("Source target type must be specified.")
+                        raise ValueError("Source type must be specified.")
 
-                    self.log.info(f"Generating all information flows out of {self.source}")
-                    for source, target in self.subG.out_edges(self.source):
+                    self.log.info(f"Generating all information flows out of {self.source}, "
+                                  f"max depth {self.depth_limit}")
+                    for source, target in nx.bfs_edges(self.subG, self.source,
+                                                       depth_limit=self.depth_limit):
                         yield InfoFlowStep(self.subG, source, target)
 
                 case InfoFlowAnalysis.Mode.FlowsIn:
                     if not self.target:
                         raise ValueError("Target type must be specified.")
 
-                    self.log.info(f"Generating all information flows into {self.target}")
-                    for source, target in self.subG.in_edges(self.target):
+                    self.log.info(f"Generating all information flows into {self.target} ",
+                                  f"max depth {self.depth_limit}")
+                    # swap source and target since bfs_edges is reversed.
+                    for target, source in nx.bfs_edges(self.subG, self.target, reverse=True,
+                                                       depth_limit=self.depth_limit):
                         yield InfoFlowStep(self.subG, source, target)
 
                 case _:
@@ -365,8 +371,9 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         if self.rebuildgraph:
             self._build_graph()
 
-        return f"Graph nodes: {nx.number_of_nodes(self.G)}\n" \
-               f"Graph edges: {nx.number_of_edges(self.G)}"
+        return f"{nx.number_of_nodes(self.G)=}\n" \
+               f"{nx.number_of_edges(self.G)=}\n" \
+               f"{len(self.G)=}\n"
 
     #
     # Internal functions follow

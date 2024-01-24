@@ -141,15 +141,19 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
     target = CriteriaDescriptor(lookup_function="lookup_type")
     mode = Mode.ShortestPaths
 
-    def __init__(self, policy: SELinuxPolicy, reverse: bool = False,
+    def __init__(self, policy: SELinuxPolicy, /, *,
+                 reverse: bool = False,
                  source: Optional[Union[Type, str]] = None,
                  target: Optional[Union[Type, str]] = None,
                  mode: Mode = Mode.ShortestPaths,
-                 all_paths_step_limit: int = 3,
+                 depth_limit: int | None = 1,
                  exclude: Optional[Iterable[Union[Type, str]]] = None) -> None:
 
         super().__init__(policy, reverse=reverse, source=source, target=target, mode=mode,
-                         all_paths_step_limit=all_paths_step_limit, exclude=exclude)
+                         depth_limit=depth_limit, exclude=exclude)
+
+        self._min_weight: int
+        self._depth_limit: int | None
 
         self.rebuildgraph = True
         self.rebuildsubgraph = True
@@ -164,15 +168,15 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
             raise
 
     @property
-    def all_paths_max_steps(self) -> int:
-        return self._all_paths_max_steps
+    def depth_limit(self) -> int | None:
+        return self._depth_limit
 
-    @all_paths_max_steps.setter
-    def all_paths_max_steps(self, value: int) -> None:
-        if value < 1:
-            raise ValueError("All paths max steps must be positive.")
+    @depth_limit.setter
+    def depth_limit(self, value: int | None) -> None:
+        if value is not None and value < 1:
+            raise ValueError("Domain transition max depth must be positive.")
 
-        self._all_paths_max_steps = value
+        self._depth_limit = value
         # no subgraph rebuild needed.
 
     @property
@@ -201,9 +205,17 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
+        self.log.info(f"Generating domain transition results from {self.policy}")
+        self.log.debug(f"{self.source=}")
+        self.log.debug(f"{self.target=}")
+        self.log.debug(f"{self.mode=}, {self.depth_limit=}")
+
         with suppress(NetworkXNoPath, NodeNotFound, NetworkXError):
             match self.mode:
                 case DomainTransitionAnalysis.Mode.ShortestPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
                     self.log.info("Generating all shortest domain transition paths from "
                                   f"{self.source} to {self.target}...")
 
@@ -214,19 +226,26 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
                         yield self.__generate_steps(path)
 
                 case DomainTransitionAnalysis.Mode.AllPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
                     self.log.info(f"Generating all domain transition paths from {self.source} "
-                                  f"to {self.target}, max length {self.all_paths_max_steps}...")
+                                  f"to {self.target}, max length {self.depth_limit}...")
 
                     for path in nx.all_simple_paths(self.subG,
                                                     self.source,
                                                     self.target,
-                                                    self.all_paths_max_steps):
+                                                    cutoff=self.depth_limit):
 
                         yield self.__generate_steps(path)
 
                 case DomainTransitionAnalysis.Mode.TransitionsOut:
+                    if not self.source:
+                        raise ValueError("Source type must be specified.")
+
                     self.log.info(f"Generating all domain transitions out of {self.source}")
-                    for source, target in self.subG.out_edges(self.source):
+                    for source, target in nx.bfs_edges(self.subG, self.source,
+                                                       depth_limit=self.depth_limit):
                         edge = Edge(self.subG, source, target)
 
                         yield DomainTransition(source,
@@ -238,8 +257,13 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
                                                edge.setcurrent)
 
                 case DomainTransitionAnalysis.Mode.TransitionsIn:
+                    if not self.target:
+                        raise ValueError("Target type must be specified.")
+
                     self.log.info(f"Generating all domain transitions into {self.target}")
-                    for source, target in self.subG.in_edges(self.target):
+                    # swap source and target since bfs_edges is reversed.
+                    for target, source in nx.bfs_edges(self.subG, self.target, reverse=True,
+                                                       depth_limit=self.depth_limit):
                         edge = Edge(self.subG, source, target)
 
                         yield DomainTransition(source,
@@ -410,8 +434,9 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
         if self.rebuildgraph:
             self._build_graph()
 
-        return f"Graph nodes: {nx.number_of_nodes(self.G)}\n" \
-               f"Graph edges: {nx.number_of_edges(self.G)}"
+        return f"{nx.number_of_nodes(self.G)=}\n" \
+               f"{nx.number_of_edges(self.G)=}\n" \
+               f"{len(self.G)=}\n"
 
     #
     # Internal functions follow

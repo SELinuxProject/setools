@@ -198,7 +198,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.source = "node1"
         self.a.target = "node4"
         self.a.mode = InfoFlowAnalysis.Mode.AllPaths
-        self.a.all_paths_max_steps = 3
+        self.a.depth_limit = 3
 
         paths = list(self.a.results())
         self.assertEqual(1, len(paths))
@@ -257,6 +257,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.exclude = None
         self.a.min_weight = 1
         self.a.mode = InfoFlowAnalysis.Mode.FlowsOut
+        self.a.depth_limit = 1
         self.a.source = "node6"
 
         for flow in self.a.results():
@@ -271,6 +272,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.exclude = None
         self.a.min_weight = 1
         self.a.mode = InfoFlowAnalysis.Mode.FlowsIn
+        self.a.depth_limit = 1
         self.a.target = "node8"
 
         for flow in self.a.results():
@@ -319,7 +321,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.mode = InfoFlowAnalysis.Mode.AllPaths
 
         with self.assertRaises(ValueError):
-            self.a.all_paths_max_steps = -2
+            self.a.depth_limit = -2
 
     def test_913_all_paths_source_excluded(self):
         """Information flow analysis: all paths with excluded source type."""

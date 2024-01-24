@@ -490,7 +490,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.exclude = None
         self.a.source = "start"
         self.a.target = "bothtrans200"
-        self.a.all_paths_max_steps = 3
+        self.a.depth_limit = 3
         self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
 
         expected_path = ["start", "dyntrans100", "bothtrans200"]
@@ -578,6 +578,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.reverse = False
         self.a.exclude = None
         self.a.source = "start"
+        self.a.depth_limit = 1
         self.a.mode = DomainTransitionAnalysis.Mode.TransitionsOut
 
         transitions = list(self.a.results())
@@ -618,7 +619,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.exclude = None
         self.a.source = "bothtrans200"
         self.a.target = "start"
-        self.a.all_paths_max_steps = 3
+        self.a.depth_limit = 3
         self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
 
         expected_path = ["bothtrans200", "dyntrans100", "start"]
@@ -706,6 +707,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.reverse = False
         self.a.exclude = None
         self.a.target = "bothtrans200"
+        self.a.depth_limit = 1
         self.a.mode = DomainTransitionAnalysis.Mode.TransitionsIn
 
         transitions = list(self.a.results())
@@ -769,7 +771,7 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.exclude = None
         self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
         with self.assertRaises(ValueError):
-            self.a.all_paths_max_steps = -2
+            self.a.depth_limit = -2
 
     def test_913_all_paths_source_excluded(self):
         """DTA: all paths with excluded source type."""
