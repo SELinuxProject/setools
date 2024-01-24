@@ -176,6 +176,10 @@ class DTAMode(criteria.RadioEnumWidget[setools.DomainTransitionAnalysis.Mode]):
         self.depth_limit.setSuffix(" steps")
         self.depth_limit.setMinimum(MIN_DEPTH_LIMIT)
         self.depth_limit.setValue(DEFAULT_DEPTH_LIMIT)
+        # when switching between modes, the depth limit is forced to 1 if not
+        # using all paths.  This is the previous depth limit value that is
+        # restored when going back to all paths mode.
+        self.last_depth_limit: int = DEFAULT_DEPTH_LIMIT
 
         # get layout location of all paths option
         all_path_index = self.top_layout.indexOf(
@@ -190,15 +194,25 @@ class DTAMode(criteria.RadioEnumWidget[setools.DomainTransitionAnalysis.Mode]):
 
         # set path steps to enable only if the corresponding mode is selected.
         # it starts disabled since shortest paths is the default option.
-        self.depth_limit.setEnabled(False)
+        self._apply_depth_limit_from_mode_change(False)
         self.criteria[setools.DomainTransitionAnalysis.Mode.AllPaths].toggled.connect(
-            self.depth_limit.setEnabled)
+            self._apply_depth_limit_from_mode_change)
 
     def _apply_depth_limit(self, value: int = DEFAULT_DEPTH_LIMIT) -> None:
         """Apply the value of the all paths spinbox to the query."""
         assert isinstance(self.query, setools.DomainTransitionAnalysis)  # type narrowing
         self.log.debug(f"All paths max steps to {value} steps.")
         self.query.depth_limit = value
+
+    def _apply_depth_limit_from_mode_change(self, value: bool) -> None:
+        """After a mode change, force the depth limit to 1 if not using all flows."""
+        if value:  # All paths mode is enabled
+            self.depth_limit.setValue(self.last_depth_limit)
+            self.depth_limit.setEnabled(True)
+        else:  # Another mode is selected
+            self.last_depth_limit = self.depth_limit.value()
+            self.depth_limit.setValue(MIN_DEPTH_LIMIT)
+            self.depth_limit.setEnabled(False)
 
     def save(self, settings: dict) -> None:
         super().save(settings)
