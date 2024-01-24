@@ -9,8 +9,8 @@ import setools
 from . import criteria, tab
 from .excludetypes import ExcludeTypes
 
-DEFAULT_ALL_PATHS_STEPS: typing.Final[int] = 3
-MIN_ALL_PATHS_STEPS: typing.Final[int] = 1
+DEFAULT_DEPTH_LIMIT: typing.Final[int] = 3
+MIN_DEPTH_LIMIT: typing.Final[int] = 1
 
 DEFAULT_RESULT_LIMIT: typing.Final[int] = 20
 MIN_RESULT_LIMIT: typing.Final[int] = 1
@@ -22,7 +22,7 @@ SETTINGS_TARGET: typing.Final[str] = "target"
 SETTINGS_MODE: typing.Final[str] = "mode"
 SETTINGS_REVERSE: typing.Final[str] = "reverse"
 SETTINGS_RESULT_LIMIT: typing.Final[str] = "result_limit"
-SETTINGS_ALL_PATHS_STEPS: typing.Final[str] = "all_paths_steps"
+SETTINGS_DEPTH_LIMIT: typing.Final[str] = "depth_limit"
 SETTINGS_EXCLUDE_TYPES: typing.Final[str] = "exclude_types"
 
 
@@ -171,11 +171,11 @@ class DTAMode(criteria.RadioEnumWidget[setools.DomainTransitionAnalysis.Mode]):
                          setools.DomainTransitionAnalysis.Mode, colspan=2, parent=parent)
 
         # Add all paths steps to mode widget.
-        self.all_path_steps = QtWidgets.QSpinBox(self)
-        self.all_path_steps.valueChanged.connect(self._apply_all_path_steps)
-        self.all_path_steps.setSuffix(" steps")
-        self.all_path_steps.setMinimum(MIN_ALL_PATHS_STEPS)
-        self.all_path_steps.setValue(DEFAULT_ALL_PATHS_STEPS)
+        self.depth_limit = QtWidgets.QSpinBox(self)
+        self.depth_limit.valueChanged.connect(self._apply_depth_limit)
+        self.depth_limit.setSuffix(" steps")
+        self.depth_limit.setMinimum(MIN_DEPTH_LIMIT)
+        self.depth_limit.setValue(DEFAULT_DEPTH_LIMIT)
 
         # get layout location of all paths option
         all_path_index = self.top_layout.indexOf(
@@ -186,15 +186,15 @@ class DTAMode(criteria.RadioEnumWidget[setools.DomainTransitionAnalysis.Mode]):
         assert row >= 0 and col >= 0, \
             f"Invalid layout position, this is an SETools bug. ({row},{col})"
         # add steps spin box in the next column of the radio button
-        self.top_layout.addWidget(self.all_path_steps, row, col + 1, 1, 1)
+        self.top_layout.addWidget(self.depth_limit, row, col + 1, 1, 1)
 
         # set path steps to enable only if the corresponding mode is selected.
         # it starts disabled since shortest paths is the default option.
-        self.all_path_steps.setEnabled(False)
+        self.depth_limit.setEnabled(False)
         self.criteria[setools.DomainTransitionAnalysis.Mode.AllPaths].toggled.connect(
-            self.all_path_steps.setEnabled)
+            self.depth_limit.setEnabled)
 
-    def _apply_all_path_steps(self, value: int = DEFAULT_ALL_PATHS_STEPS) -> None:
+    def _apply_depth_limit(self, value: int = DEFAULT_DEPTH_LIMIT) -> None:
         """Apply the value of the all paths spinbox to the query."""
         assert isinstance(self.query, setools.DomainTransitionAnalysis)  # type narrowing
         self.log.debug(f"All paths max steps to {value} steps.")
@@ -202,11 +202,11 @@ class DTAMode(criteria.RadioEnumWidget[setools.DomainTransitionAnalysis.Mode]):
 
     def save(self, settings: dict) -> None:
         super().save(settings)
-        settings[SETTINGS_ALL_PATHS_STEPS] = self.all_path_steps.value()
+        settings[SETTINGS_DEPTH_LIMIT] = self.depth_limit.value()
 
     def load(self, settings: dict) -> None:
         with suppress(KeyError):
-            self.all_path_steps.setValue(settings[SETTINGS_ALL_PATHS_STEPS])
+            self.depth_limit.setValue(settings[SETTINGS_DEPTH_LIMIT])
 
         super().load(settings)
 

@@ -115,7 +115,7 @@ try:
             g.mode = setools.InfoFlowAnalysis.Mode.ShortestPath
         else:
             g.mode = setools.InfoFlowAnalysis.Mode.AllPaths
-            g.all_paths_max_steps = args.all_paths
+            g.depth_limit = args.all_paths
 
         for flownum, flow in enumerate(g.results(), start=1):  # type: ignore
             print(f"Flow {flownum}:")
