@@ -16,9 +16,11 @@ import warnings
 try:
     import networkx as nx
     from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
-except ImportError:
-    logging.getLogger(__name__).debug("NetworkX failed to import.")
 
+except ImportError as iex:
+    logging.getLogger(__name__).debug(f"{iex.name} failed to import.")
+
+from . import exception
 from .descriptors import CriteriaDescriptor, EdgeAttrDict, EdgeAttrList
 from .mixins import NetworkXGraphEdge
 from .policyrep import AnyTERule, SELinuxPolicy, TERuletype, Type
@@ -277,6 +279,79 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
                 case _:
                     raise ValueError(f"Unknown analysis mode: {self.mode}")
 
+    def graphical_results(self) -> nx.DiGraph:
+
+        """
+        Return the results of the analysis as a NetworkX directed graph.
+        Caller has the responsibility of converting the graph to a
+        visualization.
+
+        For example, to convert to a pygraphviz graph:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.layout(prog="dot")
+        """
+
+        if self.rebuildsubgraph:
+            self._build_subgraph()
+
+        self.log.info(f"Generating graphical domain transition results from {self.policy}")
+        self.log.debug(f"{self.source=}")
+        self.log.debug(f"{self.target=}")
+        self.log.debug(f"{self.mode=}, {self.depth_limit=}")
+
+        try:
+            match self.mode:
+                case DomainTransitionAnalysis.Mode.ShortestPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info("Generating graphical all shortest domain transition paths from "
+                                  f"{self.source} to {self.target}...")
+                    paths = nx.all_shortest_paths(self.subG, self.source, self.target)
+                    edges = [pair for path in paths for pair in nx.utils.misc.pairwise(path)]
+
+                    out = nx.DiGraph()
+                    out.add_edges_from(edges)
+                    return out
+
+                case DomainTransitionAnalysis.Mode.AllPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info(f"Generating all domain transition paths from {self.source} "
+                                  f"to {self.target}, max length {self.depth_limit}...")
+                    paths = nx.all_simple_paths(self.subG, self.source, self.target,
+                                                cutoff=self.depth_limit)
+                    edges = [pair for path in paths for pair in nx.utils.misc.pairwise(path)]
+
+                    out = nx.DiGraph()
+                    out.add_edges_from(edges)
+                    return out
+
+                case DomainTransitionAnalysis.Mode.TransitionsOut:
+                    if not self.source:
+                        raise ValueError("Source type must be specified.")
+
+                    self.log.info(f"Generating all domain transitions out of {self.source}.")
+                    return nx.bfs_tree(self.subG, self.source, depth_limit=self.depth_limit)
+
+                case DomainTransitionAnalysis.Mode.TransitionsIn:
+                    if not self.target:
+                        raise ValueError("Target type must be specified.")
+
+                    self.log.info(f"Generating all domain transitions into {self.target}.")
+                    out = nx.bfs_tree(self.subG, self.target, reverse=True,
+                                      depth_limit=self.depth_limit)
+                    # output is reversed, un-reverse it
+                    return nx.reverse(out, copy=False)
+
+                case _:
+                    raise ValueError(f"Unknown analysis mode: {self.mode}")
+
+        except Exception as ex:
+            raise exception.AnalysisException(
+                f"Unable to generate graphical results: {ex}") from ex
+
     def shortest_path(self, source: Union[Type, str], target: Union[Type, str]) \
             -> Iterable[DTAPath]:
         """
@@ -480,9 +555,7 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
         setcurrent      The list of setcurrent rules.
         """
 
-        for s in range(1, len(path)):
-            source: Type = path[s - 1]
-            target: Type = path[s]
+        for source, target in nx.utils.misc.pairwise(path):
             edge = Edge(self.subG, source, target)
 
             # Yield the actual source and target.

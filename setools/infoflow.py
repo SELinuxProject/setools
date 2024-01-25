@@ -13,9 +13,11 @@ import warnings
 try:
     import networkx as nx
     from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
-except ImportError:
-    logging.getLogger(__name__).debug("NetworkX failed to import.")
 
+except ImportError as iex:
+    logging.getLogger(__name__).debug(f"{iex.name} failed to import.")
+
+from . import exception
 from .descriptors import CriteriaDescriptor, EdgeAttrIntMax, EdgeAttrList
 from .mixins import NetworkXGraphEdge
 from .permmap import PermissionMap
@@ -160,10 +162,9 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                     self.log.info("Generating all shortest information flow paths from "
                                   f"{self.source} to {self.target}...")
 
-                    for path in nx.all_shortest_paths(self.subG,
-                                                      self.source,
-                                                      self.target):
-                        yield self.__generate_steps(path)
+                    for path in nx.all_shortest_paths(self.subG, self.source, self.target):
+                        yield (InfoFlowStep(self.subG, source, target)
+                               for source, target in nx.utils.misc.pairwise(path))
 
                 case InfoFlowAnalysis.Mode.AllPaths:
                     if not all((self.source, self.target)):
@@ -173,12 +174,10 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                                   f"{self.source} to {self.target}, "
                                   f"max length {self.depth_limit}...")
 
-                    for path in nx.all_simple_paths(self.subG,
-                                                    self.source,
-                                                    self.target,
+                    for path in nx.all_simple_paths(self.subG, self.source, self.target,
                                                     cutoff=self.depth_limit):
-
-                        yield self.__generate_steps(path)
+                        yield (InfoFlowStep(self.subG, source, target)
+                               for source, target in nx.utils.misc.pairwise(path))
 
                 case InfoFlowAnalysis.Mode.FlowsOut:
                     if not self.source:
@@ -203,6 +202,82 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
                 case _:
                     raise ValueError(f"Unknown analysis mode: {self.mode}")
+
+    def graphical_results(self) -> nx.DiGraph:
+
+        """
+        Return the results of the analysis as a NetworkX directed graph.
+        Caller has the responsibility of converting the graph to a
+        visualization.
+
+        For example, to convert to a pygraphviz graph:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.layout(prog="dot")
+        """
+
+        if self.rebuildsubgraph:
+            self._build_subgraph()
+
+        self.log.info(f"Generating graphical information flow results from {self.policy}")
+        self.log.debug(f"{self.source=}")
+        self.log.debug(f"{self.target=}")
+        self.log.debug(f"{self.mode=}, {self.depth_limit=}")
+
+        try:
+            match self.mode:
+                case InfoFlowAnalysis.Mode.ShortestPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info("Generating all shortest information flow paths from "
+                                  f"{self.source} to {self.target}...")
+                    paths = nx.all_shortest_paths(self.subG, self.source, self.target)
+                    edges = [pair for path in paths for pair in nx.utils.misc.pairwise(path)]
+
+                    out = nx.DiGraph()
+                    out.add_edges_from(edges)
+                    return out
+
+                case InfoFlowAnalysis.Mode.AllPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info("Generating all information flow paths from "
+                                  f"{self.source} to {self.target}, "
+                                  f"max length {self.depth_limit}...")
+                    paths = nx.all_simple_paths(self.subG, self.source, self.target,
+                                                cutoff=self.depth_limit)
+                    edges = [pair for path in paths for pair in nx.utils.misc.pairwise(path)]
+
+                    out = nx.DiGraph()
+                    out.add_edges_from(edges)
+                    return out
+
+                case InfoFlowAnalysis.Mode.FlowsOut:
+                    if not self.source:
+                        raise ValueError("Source type must be specified.")
+
+                    self.log.info(f"Generating all information flows out of {self.source}, "
+                                  f"max depth {self.depth_limit}")
+                    return nx.bfs_tree(self.subG, self.source, depth_limit=self.depth_limit)
+
+                case InfoFlowAnalysis.Mode.FlowsIn:
+                    if not self.target:
+                        raise ValueError("Target type must be specified.")
+
+                    self.log.info(f"Generating all information flows into {self.target} ",
+                                  f"max depth {self.depth_limit}")
+                    out = nx.bfs_tree(self.subG, self.target, reverse=True,
+                                      depth_limit=self.depth_limit)
+                    # output is reversed, un-reverse it
+                    return nx.reverse(out, copy=False)
+
+                case _:
+                    raise ValueError(f"Unknown analysis mode: {self.mode}")
+
+        except Exception as ex:
+            raise exception.AnalysisException(
+                f"Unable to generate graphical results: {ex}") from ex
 
     def shortest_path(self, source: Union[Type, str], target: Union[Type, str]) \
             -> Iterable[InfoFlowPath]:
@@ -393,8 +468,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         target  The target type for this step of the information flow.
         rules   The list of rules creating this information flow step.
         """
-        for s in range(1, len(path)):
-            yield InfoFlowStep(self.subG, path[s - 1], path[s])
+        for source, target in nx.utils.misc.pairwise(path):
+            yield InfoFlowStep(self.subG, source, target)
 
     #
     #

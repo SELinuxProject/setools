@@ -45,3 +45,7 @@ class DirectedGraphAnalysis(PolicyQuery):
     """Abstract base class for graph-basded SELinux policy analysis."""
 
     G: "DiGraph"
+
+    @abstractmethod
+    def graphical_results(self) -> "DiGraph":
+        """Return the results of the analysis as a NetworkX directed graph."""

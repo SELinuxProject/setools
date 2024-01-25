@@ -349,3 +349,12 @@ class UnmappedPermission(PermissionMapException):
 
     """Exception for permissions that are unmapped"""
     pass
+
+
+#
+# Analysis exceptions
+#
+class AnalysisException(SEToolsException):
+
+    """Base class for all analysis exceptions."""
+    pass
