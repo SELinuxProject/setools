@@ -228,7 +228,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.min_weight = 1
         self.a.source = "node1"
         self.a.target = "node4"
-        self.a.mode = InfoFlowAnalysis.Mode.ShortestPath
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
 
         paths = list(self.a.results())
         self.assertEqual(1, len(paths))
@@ -367,7 +367,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """Information flow analysis: all shortest paths with excluded source type."""
         self.a.exclude = ["node1"]
         self.a.min_weight = 1
-        self.a.mode = InfoFlowAnalysis.Mode.ShortestPath
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
         self.a.source = "node1"
         self.a.target = "node2"
         paths = list(self.a.results())
@@ -377,7 +377,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """Information flow analysis: all shortest paths with excluded target type."""
         self.a.exclude = ["node2"]
         self.a.min_weight = 1
-        self.a.mode = InfoFlowAnalysis.Mode.ShortestPath
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
         self.a.source = "node1"
         self.a.target = "node2"
         paths = list(self.a.results())
@@ -387,7 +387,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """Information flow analysis: all shortest paths with disconnected source type."""
         self.a.exclude = None
         self.a.min_weight = 1
-        self.a.mode = InfoFlowAnalysis.Mode.ShortestPath
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
         self.a.source = "disconnected1"
         self.a.target = "node2"
         paths = list(self.a.results())
@@ -399,7 +399,7 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         self.a.min_weight = 1
         self.source = "node2"
         self.target = "disconnected1"
-        self.a.mode = InfoFlowAnalysis.Mode.ShortestPath
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
         paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 

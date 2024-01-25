@@ -55,21 +55,21 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
         """Information flow analysis modes"""
 
-        ShortestPath = "All shortest paths"
+        ShortestPaths = "All shortest paths"
         AllPaths = "All paths up to"  # N steps
         FlowsIn = "Flows into the target type."
         FlowsOut = "Flows out of the source type."
 
     source = CriteriaDescriptor(lookup_function="lookup_type")
     target = CriteriaDescriptor(lookup_function="lookup_type")
-    mode = Mode.ShortestPath
+    mode = Mode.ShortestPaths
     booleans: Optional[Mapping[str, bool]]
 
     def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, /, *,
                  min_weight: int = 1,
                  source: Optional[Union[Type, str]] = None,
                  target: Optional[Union[Type, str]] = None,
-                 mode: Mode = Mode.ShortestPath,
+                 mode: Mode = Mode.ShortestPaths,
                  depth_limit: int | None = 1,
                  exclude: Optional[Iterable[Union[Type, str]]] = None,
                  booleans: Optional[Mapping[str, bool]] = None) -> None:
@@ -153,7 +153,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
         with suppress(NetworkXNoPath, NodeNotFound, NetworkXError):
             match self.mode:
-                case InfoFlowAnalysis.Mode.ShortestPath:
+                case InfoFlowAnalysis.Mode.ShortestPaths:
                     if not all((self.source, self.target)):
                         raise ValueError("Source and target types must be specified.")
 

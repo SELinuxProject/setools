@@ -112,7 +112,7 @@ try:
         g.source = args.source
         g.target = args.target
         if args.shortest_path:
-            g.mode = setools.InfoFlowAnalysis.Mode.ShortestPath
+            g.mode = setools.InfoFlowAnalysis.Mode.ShortestPaths
         else:
             g.mode = setools.InfoFlowAnalysis.Mode.AllPaths
             g.depth_limit = args.all_paths
