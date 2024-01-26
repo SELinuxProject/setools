@@ -4,13 +4,15 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
 
-import setools
 import argparse
 import sys
 import logging
 import signal
 import warnings
 from typing import Dict, Optional
+
+import networkx as nx
+import setools
 
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
@@ -53,6 +55,7 @@ opts.add_argument("-l", "--limit_flows", default=0, type=int,
 opts.add_argument("-b", "--booleans", default=None,
                   help="Specify the boolean values to use."
                   " Options are default, or \"foo:true,bar:false...\"")
+opts.add_argument("-o", "--output_file", help="Output file for graphical results, PNG format.")
 opts.add_argument("exclude", nargs="*",
                   help="List of excluded types in the analysis.")
 
@@ -117,18 +120,22 @@ try:
             g.mode = setools.InfoFlowAnalysis.Mode.AllPaths
             g.depth_limit = args.all_paths
 
-        for flownum, flow in enumerate(g.results(), start=1):  # type: ignore
-            print(f"Flow {flownum}:")
-            for stepnum, step in enumerate(flow, start=1):
-                if args.full:
-                    print(f"  Step {stepnum}: {step:full}\n")
-                else:
-                    print(f"  Step {stepnum}: {step}")
+        if args.output_file:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.draw(path=args.output_file, prog="dot", format="png")
+        else:
+            for flownum, flow in enumerate(g.results(), start=1):  # type: ignore
+                print(f"Flow {flownum}:")
+                for stepnum, step in enumerate(flow, start=1):
+                    if args.full:
+                        print(f"  Step {stepnum}: {step:full}\n")
+                    else:
+                        print(f"  Step {stepnum}: {step}")
 
-            if args.limit_flows and flownum >= args.limit_flows:
-                break
+                if args.limit_flows and flownum >= args.limit_flows:
+                    break
 
-            print()
+            print(f"\n{flownum} information flow(s) found.")
 
     else:  # single step, direct info flow
         if args.reverse:
@@ -138,16 +145,20 @@ try:
             g.mode = setools.InfoFlowAnalysis.Mode.FlowsOut
             g.source = args.source
 
-        for flownum, step in enumerate(g.results(), start=1):  # type: ignore
-            if args.full:
-                print(f"Flow {flownum}: {step:full}\n")
-            else:
-                print(f"Flow {flownum}: {step}")
+        if args.output_file:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.draw(path=args.output_file, prog="dot", format="png")
+        else:
+            for flownum, step in enumerate(g.results(), start=1):  # type: ignore
+                if args.full:
+                    print(f"Flow {flownum}: {step:full}\n")
+                else:
+                    print(f"Flow {flownum}: {step}")
 
-            if args.limit_flows and flownum >= args.limit_flows:
-                break
+                if args.limit_flows and flownum >= args.limit_flows:
+                    break
 
-    print(f"\n{flownum} information flow(s) found.")
+            print(f"\n{flownum} information flow(s) found.")
 
     if args.stats:
         print("\nGraph statistics:")

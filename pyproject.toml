@@ -27,6 +27,7 @@ pretty = true
 
 [[tool.mypy.overrides]]
 module = ['networkx.*',
+          'pygraphviz.*',
           'pytestqt.*']
 ignore_missing_imports = true
 

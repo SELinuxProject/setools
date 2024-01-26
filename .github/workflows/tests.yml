@@ -54,6 +54,7 @@ jobs:
             gettext \
             libaudit-dev \
             libbz2-dev \
+            libgraphviz-dev \
             libpcre3-dev \
             xvfb \
             x11-xserver-utils

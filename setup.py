@@ -99,7 +99,7 @@ setup(name='setools',
       setup_requires=['setuptools', 'Cython>=0.29.14'],
       install_requires=['setuptools'],
       extras_require={
-          "analysis": "networkx>=2.6",
+          "analysis": ["networkx>=2.6", "pygraphviz"],
           "test": "tox"
       }
       )

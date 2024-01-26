@@ -10,6 +10,7 @@ import logging
 import signal
 import warnings
 
+import networkx as nx
 import setools
 
 
@@ -40,6 +41,7 @@ opts.add_argument("-r", "--reverse", action="store_true", default=False,
                   help="Perform a reverse DTA.")
 opts.add_argument("-l", "--limit_trans", default=0, type=int,
                   help="Limit to the specified number of transitions.  Default is unlimited.")
+opts.add_argument("-o", "--output_file", help="Output file for graphical results, PNG format.")
 opts.add_argument("exclude", help="List of excluded types in the analysis.", nargs="*")
 
 args = parser.parse_args()
@@ -82,21 +84,25 @@ try:
             g.mode = setools.DomainTransitionAnalysis.Mode.AllPaths
             g.depth_limit = args.all_paths
 
-        for pathnum, path in enumerate(g.results(), start=1):  # type: ignore
-            print(f"Domain transition path {pathnum}:")
+        if args.output_file:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.draw(path=args.output_file, prog="dot", format="png")
+        else:
+            for pathnum, path in enumerate(g.results(), start=1):  # type: ignore
+                print(f"Domain transition path {pathnum}:")
 
-            for stepnum, step in enumerate(path, start=1):
-                if args.full:
-                    print(f"Step {stepnum}: {step:full}\n")
-                else:
-                    print(f"Step {stepnum}: {step}")
+                for stepnum, step in enumerate(path, start=1):
+                    if args.full:
+                        print(f"Step {stepnum}: {step:full}\n")
+                    else:
+                        print(f"Step {stepnum}: {step}")
 
-            if args.limit_trans and pathnum >= args.limit_trans:
-                break
+                if args.limit_trans and pathnum >= args.limit_trans:
+                    break
 
-            print()
+                print()
 
-        print(f"\n{pathnum} domain transition path(s) found.")
+            print(f"\n{pathnum} domain transition path(s) found.")
 
     else:  # single transition
         if args.reverse:
@@ -106,16 +112,20 @@ try:
             g.mode = setools.DomainTransitionAnalysis.Mode.TransitionsOut
             g.source = args.source
 
-        for pathnum, step in enumerate(g.results(), start=1):  # type: ignore
-            if args.full:
-                print(f"Transition {pathnum}: {step:full}\n")
-            else:
-                print(f"Transition {pathnum}: {step}")
+        if args.output_file:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.draw(path=args.output_file, prog="dot", format="png")
+        else:
+            for pathnum, step in enumerate(g.results(), start=1):  # type: ignore
+                if args.full:
+                    print(f"Transition {pathnum}: {step:full}\n")
+                else:
+                    print(f"Transition {pathnum}: {step}")
 
-            if args.limit_trans and pathnum >= args.limit_trans:
-                break
+                if args.limit_trans and pathnum >= args.limit_trans:
+                    break
 
-        print(f"\n{pathnum} domain transition(s) found.")
+            print(f"\n{pathnum} domain transition(s) found.")
 
     if args.stats:
         print("\nGraph statistics:")
