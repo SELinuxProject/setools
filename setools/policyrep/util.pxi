@@ -75,7 +75,7 @@ class WeakKeyDefaultDict(weakref.WeakKeyDictionary):
 #
 # Functions
 #
-cdef void sepol_logging_callback(void *varg, sepol.sepol_handle_t * sh, const char *fmt, ...):
+cdef void sepol_logging_callback(void *varg, sepol.sepol_handle_t * sh, const char *fmt, ...) noexcept:
     """Python logging for sepol log callback."""
     cdef:
         va_list args
