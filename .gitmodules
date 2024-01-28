@@ -1,0 +1,6 @@
+[submodule "external/aosp_selinux"]
+	path = external/aosp_selinux
+	url = https://android.googlesource.com/platform/external/selinux
+[submodule "external/base_selinux"]
+	path = external/base_selinux
+	url = https://github.com/SELinuxProject/selinux.git
