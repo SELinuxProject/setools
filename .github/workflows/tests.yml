@@ -11,8 +11,6 @@ env:
   USERSPACE_SRC: /tmp/selinux-src
   #SEPOL_SRC: ${USERSPACE_SRC}/libsepol
   SEPOL_SRC: /tmp/selinux-src/libsepol
-  #LIBSEPOLA: ${SEPOL_SRC}/src/libsepol.a
-  LIBSEPOLA: /tmp/selinux-src/libsepol/src/libsepol.a
   #SELINUX_SRC: ${USERSPACE_SRC}/libselinux
   SELINUX_SRC: /tmp/selinux-src/libselinux
   #CHECKPOLICY_SRC: ${USERSPACE_SRC}/checkpolicy
@@ -38,6 +36,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Git patch libsepol
+      run: git -C external/aosp_selinux apply ../aosp_selinux.diff
+
+    - name: Build selinux libraries
+      run: |
+        make -C ./external/libsepol/ -j
+        CFLAGS=-I`realpath external/libsepol/include/` make -C ./external/libselinux/ -j
+        LDFLAGS="$(realpath external/libsepol/src/libsepol.a)" CFLAGS=-I`realpath external/libsepol/include/` make -C ./external/aosp_selinux/checkpolicy/ checkpolicy -j
+        cp ./external/libsepol/src/libsepol.so.2 ./setools
+        cp ./external/libselinux/src/libselinux.so.1 ./setools
 
     # This should be the minimum required Python version to build refpolicy.
     - name: Set up Python ${{ matrix.build-opts.python }}
@@ -59,25 +70,12 @@ jobs:
         sudo python -m pip install -U \
             tox
 
-    - name: Cache SELinux userspace
-      uses: actions/cache@v3
-      id: cache-userspace
-      with:
-        path: ${{ env.USERSPACE_SRC }}
-        key: ${{ runner.os }}-selinux-userspace-${{ env.SELINUX_USERSPACE_VERSION }}
-
-    - name: Build SELinux userspace
-      if: ${{ steps.cache-userspace.outputs.cache-hit != 'true' }}
+    - name: Setup SELinux sources for tox
       run: |
-        # Download current SELinux userspace tools and libraries
-        git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
-
-        # Compile SELinux userspace
-        make -C ${SEPOL_SRC}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" LDFLAGS="-L${SEPOL_SRC}/src" -C ${SELINUX_SRC}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" -C ${CHECKPOLICY_SRC}
+        mkdir -p ${USERSPACE_SRC}
+        ln -s `realpath external/libsepol` ${SEPOL_SRC}
+        ln -s `realpath external/libselinux` ${SELINUX_SRC}
+        cp -r `realpath external/aosp_selinux/checkpolicy` ${USERSPACE_SRC}
 
     - name: Run test
-      run: |
-        export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src:${LD_LIBRARY_PATH}"
-        tox -e ${{ matrix.build-opts.tox }}
+      run: tox -e ${{ matrix.build-opts.tox }}
