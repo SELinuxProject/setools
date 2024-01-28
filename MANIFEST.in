@@ -12,3 +12,4 @@ include setoolsgui/apol/apol.qhc
 include tests/*.conf
 include tests/*.py
 include tests/perm_map
+include setools/*so.*

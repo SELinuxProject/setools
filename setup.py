@@ -28,7 +28,7 @@ class CleanCommand(clean):
     def run(self):
         extensions_to_remove = [".so", ".c"]
         files_to_remove = []
-        dirs_to_remove = ["setools.egg-info"]
+        dirs_to_remove = ["android-setools.egg-info"]
 
         if self.all:
             # --all includes Qt help files
@@ -106,6 +106,7 @@ ext_py_mods = [Extension('setools.policyrep', ['setools/policyrep.pyx'],
                          libraries=['selinux', 'sepol'],
                          library_dirs=lib_dirs,
                          define_macros=macros,
+                         extra_link_args=['-Wl,-rpath,.'],
                          extra_compile_args=['-Wextra',
                                              '-Waggregate-return',
                                              '-Wfloat-equal',
@@ -132,19 +133,19 @@ for lang in linguas:
     if lang and os.path.exists(join("man", lang)):
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
-setup(name='setools',
+setup(name='android-setools',
       version='4.5.0-dev',
-      description='SELinux policy analysis tools.',
-      author='Chris PeBenito',
-      author_email='pebenito@ieee.org',
-      url='https://github.com/SELinuxProject/setools',
+      description='Android SELinux policy analysis tools.',
+      author='Meir Komet',
+      author_email='mskomet1@gmail.com',
+      url='https://github.com/mkomet/setools',
       cmdclass={'build_qhc': QtHelpCommand, 'clean': CleanCommand},
       packages=['setools', 'setools.checker', 'setools.diff', 'setoolsgui', 'setoolsgui.apol'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta', 'sechecker'],
       data_files=installed_data,
-      package_data={'': ['*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map',
-                                                                'policyrep.pyi',
-                                                                'py.typed']},
+      package_data={'': ['*.so.*', '*.ui', '*.qhc', '*.qch'], 'setools': ['perm_map',
+                                                                          'policyrep.pyi',
+                                                                          'py.typed']},
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
                             compiler_directives={"language_level": 3,
@@ -165,7 +166,7 @@ setup(name='setools',
       # setup also requires libsepol and libselinux
       # C libraries and headers to compile.
       setup_requires=['setuptools', 'Cython>=0.27'],
-      install_requires=['setuptools'],
+      install_requires=['setuptools', 'PyQt5', 'networkx>=2.0'],
       extras_require={
           "analysis": "networkx>=2.0",
           "test": "tox"

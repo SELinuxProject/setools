@@ -4,10 +4,12 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
+from . import _monkeypatch
+
 try:
     import pkg_resources
     # pylint: disable=no-member
-    __version__ = pkg_resources.get_distribution("setools").version
+    __version__ = pkg_resources.get_distribution("android-setools").version
 except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
