@@ -318,7 +318,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     #
     # Policy handling
     #
-    def select_policy(self):
+    def select_policy(self) -> None:
         """Open a file chooser to select a policy file."""
         if self.policy and self.count() > 0:
             reply = QtWidgets.QMessageBox.question(
@@ -331,19 +331,23 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             if reply == QtWidgets.QMessageBox.StandardButton.No:
                 return
 
-        filename = QtWidgets.QFileDialog.getOpenFileName(
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Open policy file",
             ".",
             "SELinux Policies (policy.* sepolicy);;"
-            "All Files (*)")[0]
+            "All Files (*)")
 
         if filename:
             self.load_policy(filename)
 
     def load_policy(self, filename) -> None:
         """Load a policy file."""
-        try:
+        with widgets.util.QMessageOnException("Error",
+                                              "<b>Failed to load policy.</b>",
+                                              log=self.log,
+                                              parent=self):
+
             self.policy = setools.SELinuxPolicy(filename)
             self.policy_changed.emit(self.policy)
 
@@ -352,18 +356,12 @@ class ApolWorkspace(QtWidgets.QTabWidget):
                     self.permmap.map_policy(self.policy)
                     self.permmap_changed.emit(self.permmap)
 
-        except Exception as ex:
-            self.log.critical(f"Failed to load policy \"{filename}\"")
-            self.log.debug("Backtrace", exc_info=True)
-            QtWidgets.QMessageBox().critical(self, "Policy loading error", str(ex))
-
-    def close_policy(self):
+    def close_policy(self) -> None:
         """Close the current policy."""
         if self.count() > 0:
             reply = QtWidgets.QMessageBox.question(
                 self, "Continue?",
                 "Closing a policy will close all existing analyses.  Continue?",
-                QtWidgets.QMessageBox.StandardButtons() |
                 QtWidgets.QMessageBox.StandardButton.Yes |
                 QtWidgets.QMessageBox.StandardButton.No)
 
@@ -376,15 +374,19 @@ class ApolWorkspace(QtWidgets.QTabWidget):
     #
     # Permission map handling
     #
-    def select_permmap(self):
+    def select_permmap(self) -> None:
         """Open a file chooser to select a permission map file."""
-        filename = QtWidgets.QFileDialog.getOpenFileName(self, "Open permission map file", ".")[0]
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open permission map file", ".")
         if filename:
             self.load_permmap(filename)
 
-    def load_permmap(self, filename=None):
+    def load_permmap(self, filename=None) -> None:
         """Load a permission map file."""
-        try:
+        with widgets.util.QMessageOnException("Error",
+                                              "<b>Failed to load permission map.</b>",
+                                              log=self.log,
+                                              parent=self):
+
             self.permmap = setools.PermissionMap(filename)
 
             if self.policy:
@@ -393,15 +395,7 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
             self.permmap_changed.emit(self.permmap)
 
-        except Exception as ex:
-            self.log.critical(f"Failed to load default permission map: {ex}")
-            self.log.debug("Backtrace", exc_info=True)
-            QtWidgets.QMessageBox().critical(
-                self,
-                "Permission map loading error",
-                str(ex))
-
-    def edit_permmap(self):
+    def edit_permmap(self) -> None:
         """Open the permission map editor."""
         if not self.permmap:
             QtWidgets.QMessageBox().critical(
@@ -418,17 +412,26 @@ class ApolWorkspace(QtWidgets.QTabWidget):
             editor.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
             editor.show()
 
-    def save_permmap(self):
+    def save_permmap(self) -> None:
         """Save the permission map to a file."""
-        path = str(self.permmap) if self.permmap else "perm_map"
-        filename = QtWidgets.QFileDialog.getSaveFileName(self, "Save permission map file", path)[0]
-        if filename:
-            try:
+        if not self.permmap:
+            QtWidgets.QMessageBox().critical(
+                self,
+                "No open permission map",
+                "Cannot save permission map; there is no open permission map.")
+            return
+
+        with widgets.util.QMessageOnException("Error",
+                                              "<b>Failed to save permission map.</b>",
+                                              log=self.log,
+                                              parent=self):
+
+            path = str(self.permmap) if self.permmap else "perm_map"
+            filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save permission map file", path)
+
+            if filename:
                 self.permmap.save(filename)
-            except Exception as ex:
-                self.log.critical(f"Failed to save permission map: {ex}")
-                self.log.debug("Backtrace", exc_info=True)
-                QtWidgets.QMessageBox().critical(self, "Permission map saving error", str(ex))
 
     #
     # Tab handling
@@ -581,12 +584,15 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         This is a slot for the QTabWidget.currentChanged()
         signal, though index is ignored.
         """
-        open_tabs = self.count() > 0
-        open_policy = self.policy is not None
+        open_tabs: typing.Final[bool] = self.count() > 0
+        open_policy: typing.Final[bool] = self.policy is not None
+        open_permmap: typing.Final[bool] = self.permmap is not None
 
-        self.log.debug(f"{'Enabling' if open_policy else 'Disabling'} actions requiring "
-                       "an open policy.")
+        self.log.debug(
+            f"{'Enabling' if open_policy else 'Disabling'} actions requiring an open policy.")
         self.log.debug(f"{'Enabling' if open_tabs else 'Disabling'} actions requiring open tabs.")
+        self.log.debug(
+            f"{'Enabling' if open_permmap else 'Disabling'} actions requiring an open perm map.")
 
         self.save_settings_action.setEnabled(open_tabs)
         self.save_workspace_action.setEnabled(open_tabs)
@@ -594,6 +600,8 @@ class ApolWorkspace(QtWidgets.QTabWidget):
         self.new_from_settings_action.setEnabled(open_policy)
         self.load_settings_action.setEnabled(open_tabs)
         self.close_policy_action.setEnabled(open_policy)
+        self.edit_permmap_action.setEnabled(open_permmap)
+        self.save_permmap_action.setEnabled(open_permmap)
 
     def _get_settings(self, index: int | None = None) -> dict:
         """Return a dictionary with the settings of the tab at the specified index."""
@@ -630,138 +638,86 @@ class ApolWorkspace(QtWidgets.QTabWidget):
 
         tab.load(settings)
 
-    def load_settings(self, new: bool = False):
+    def load_settings(self, new: bool = False) -> None:
         """Open a file chooser and load settings from the chosen file."""
-        filename = QtWidgets.QFileDialog.getOpenFileName(
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Open settings file",
             ".",
             "Apol Tab Settings File (*.apolt);;"
-            "All Files (*)")[0]
+            "All Files (*)")
+
         if not filename:
             return
 
-        try:
+        with widgets.util.QMessageOnException("Error",
+                                              f"Failed to load settings file \"{filename}\".",
+                                              log=self.log,
+                                              parent=self):
+
             with open(filename, "r", encoding="utf-8") as fd:
                 settings = json.load(fd)
-        except ValueError:
-            self.log.critical(f"Invalid settings file \"{filename}\"")
-            self.log.debug("Backtrace", exc_info=True)
-            QtWidgets.QMessageBox().critical(
-                self,
-                "Failed to load settings",
-                f"Invalid settings file: \"{filename}\"")
-            return
-        except OSError as ex:
-            self.log.critical(f"Unable to load settings file \"{ex.filename}\": {ex.strerror}")
-            QtWidgets.QMessageBox().critical(
-                self,
-                "Failed to load settings",
-                f"Failed to load \"{ex.filename}\": {ex.strerror}")
-            return
-        except Exception as ex:
-            self.log.critical("Unable to load settings file \"{filename}\": {ex}")
-            QtWidgets.QMessageBox().critical(
-                self,
-                "Failed to load settings",
-                str(ex))
-            return
 
-        self.log.info(f"Loading analysis settings from \"{filename}\"")
+            self.log.info(f"Loading analysis settings from \"{filename}\"")
 
-        if new:
-            try:
+            if new:
                 tabclass = widgets.tab.TAB_REGISTRY[settings[SETTINGS_TAB_CLASS]]
-            except KeyError:
-                self.log.critical(f"Missing analysis type in \"{filename}\"")
-                QtWidgets.QMessageBox().critical(
-                    self,
-                    "Failed to load settings",
-                    "The type of analysis is missing in the settings file.")
-                return
+                # The tab title will be set by _put_settings.
+                index = self.create_new_analysis(tabclass)
+            else:
+                index = None
 
-            # The tab title will be set by _put_settings.
-            index = self.create_new_analysis(tabclass)
-        else:
-            index = None
-
-        try:
             self._put_settings(settings, index)
-        except Exception as ex:
-            self.log.critical(f"Error loading settings file \"{filename}\": {ex}")
-            self.log.debug("Backtrace", exc_info=True)
-            QtWidgets.QMessageBox().critical(
-                self,
-                "Failed to load settings",
-                f"Error loading settings file \"{filename}\":\n\n{ex}")
-        else:
             self.log.info(f"Successfully loaded analysis settings from \"{filename}\"")
 
-    def new_analysis_from_config(self):
+    def new_analysis_from_config(self) -> None:
         """Create a new analysis tab from the settings in the config file."""
         self.load_settings(new=True)
 
-    def save_settings(self):
+    def save_settings(self) -> None:
         """Open a file chooser and save settings to the chosen file."""
-        try:
+        with widgets.util.QMessageOnException("Error",
+                                              "<b>Failed to save tab settings.</b>",
+                                              log=self.log,
+                                              parent=self):
+
             settings = self._get_settings()
 
-        except widgets.exception.TabFieldError as ex:
-            self.log.critical(f"Errors in the query prevent saving the settings. {ex}")
-            QtWidgets.QMessageBox().critical(
+            filename, _ = QtWidgets.QFileDialog.getSaveFileName(
                 self,
-                "Unable to save settings",
-                "Please resolve errors in the tab before saving the settings.")
-            return
+                "Save analysis tab settings",
+                "analysis.apolt",
+                "Apol Tab Settings File (*.apolt);;"
+                "All Files (*)")
 
-        filename = QtWidgets.QFileDialog.getSaveFileName(
-            self,
-            "Save analysis tab settings",
-            "analysis.apolt",
-            "Apol Tab Settings File (*.apolt);;"
-            "All Files (*)")[0]
+            if not filename:
+                return
 
-        if not filename:
-            return
-
-        try:
             with open(filename, "w", encoding="utf-8") as fd:
                 json.dump(settings, fd, indent=1)
-        except OSError as ex:
-            self.log.critical(f"Unable to save settings file \"{ex.filename}\": {ex.strerror}")
-            QtWidgets.QMessageBox().critical(
-                self,
-                "Failed to save settings",
-                f"Failed to save \"{ex.filename}\": {ex.strerror}")
-        except Exception as ex:
-            self.log.critical(f"Unable to save settings file \"{filename}\": {ex}")
-            QtWidgets.QMessageBox().critical(
-                self,
-                "Failed to save settings",
-                str(ex))
-        else:
-            self.log.info(f"Successfully saved settings file \"{filename}\"")
 
-    def load_workspace(self):
+            self.log.info(f"Successfully saved tab settings file \"{filename}\"")
+
+    def load_workspace(self) -> None:
         """Open a file chooser and load a workspace from the chosen file."""
         # 1. if number of tabs > 0, check if we really want to do this
         if self.count() > 0:
             reply = QtWidgets.QMessageBox.question(
                 self, "Continue?",
                 "Loading a workspace will close all existing analyses.  Continue?",
-                QtWidgets.QMessageBox.StandardButtons(QtWidgets.QMessageBox.StandardButton.Yes) |
+                QtWidgets.QMessageBox.StandardButton.Yes |
                 QtWidgets.QMessageBox.StandardButton.No)
 
             if reply == QtWidgets.QMessageBox.StandardButton.No:
                 return
 
         # 2. try to load the workspace file, if we fail, bail
-        filename = QtWidgets.QFileDialog.getOpenFileName(
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Open workspace file",
             ".",
             "Apol Workspace Files (*.apolw);;"
-            "All Files (*)")[0]
+            "All Files (*)")
 
         if not filename:
             return
@@ -918,12 +874,12 @@ class ApolWorkspace(QtWidgets.QTabWidget):
                 "workspace:\n\n{0}".format('\n'.join(save_errors)))
             return
 
-        filename = QtWidgets.QFileDialog.getSaveFileName(
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
             "Save analysis workspace",
             "workspace.apolw",
             "Apol Workspace Files (*.apolw);;"
-            "All Files (*)")[0]
+            "All Files (*)")
 
         if not filename:
             return
