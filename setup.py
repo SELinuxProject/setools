@@ -138,7 +138,7 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(name='android-setools',
-      version='4.5.0-dev',
+      version='4.5.0-dev1',
       description='Android SELinux policy analysis tools.',
       author='Meir Komet',
       author_email='mskomet1@gmail.com',
