@@ -8,7 +8,7 @@ import typing
 from PyQt6 import QtCore, QtGui, QtWidgets
 import setools
 
-from . import criteria, exception, models, views
+from . import criteria, exception, models, util, views
 from .models.typing import QObjectType
 from .queryupdater import QueryResultsUpdater
 
@@ -462,7 +462,7 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         """Set the table results model for this tab and set up the processing thread for it."""
         self.sort_proxy.setSourceModel(model)
 
-        self.worker = QueryResultsUpdater(self.query, model)
+        self.worker = QueryResultsUpdater(self.query, table_model=model)
         self.worker.moveToThread(self.processing_thread)
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
         self.worker.finished.connect(self.query_completed)
@@ -583,17 +583,27 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         sizePolicy.setHeightForWidth(self.results.sizePolicy().hasHeightForWidth())
 
         #
-        # Create placeholder future graphical tab
+        # Create graphical tab
         #
-        self.graphical_results = QtWidgets.QWidget(self.results)
+        self.graphical_scroll = QtWidgets.QScrollArea(self.results)
+        self.graphical_scroll.setSizeAdjustPolicy(
+            QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustToContents)
+        self.graphical_scroll.setWidgetResizable(True)
+        self.results.addTab(self.graphical_scroll, "Graphical Results")
+
+        image_size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.MinimumExpanding,
+                                                  QtWidgets.QSizePolicy.Policy.MinimumExpanding)
+        image_size_policy.setHorizontalStretch(1)
+        image_size_policy.setVerticalStretch(1)
+        image_size_policy.setHeightForWidth(True)
+
+        self.graphical_results = QtWidgets.QLabel(self.graphical_scroll)
         self.graphical_results.setObjectName("graphical_results")
-        self.graphical_results.setSizePolicy(sizePolicy)
-        self.results.addTab(self.graphical_results, "Graphical Results")
-        self.results.setTabEnabled(DirectedGraphResultTab.ResultTab.Graph, False)
-        self.results.setTabWhatsThis(DirectedGraphResultTab.ResultTab.Graph,
-                                     "Future graphical results feature.")
-        self.results.setTabToolTip(DirectedGraphResultTab.ResultTab.Graph,
-                                   "Future graphical results feature.")
+        self.graphical_results.setSizePolicy(image_size_policy)
+        self.graphical_results.setContextMenuPolicy(QtCore.Qt.ContextMenuPolicy.CustomContextMenu)
+        self.graphical_results.customContextMenuRequested.connect(
+            self._graphical_results_context_menu)
+        self.graphical_scroll.setWidget(self.graphical_results)
 
         #
         # Create tree browser tab
@@ -627,7 +637,7 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
                                      "<b>This tab has plain text results of the query.</b>")
 
         # set initial tab
-        self.results.setCurrentIndex(DirectedGraphResultTab.ResultTab.Tree)
+        self.results.setCurrentIndex(DirectedGraphResultTab.ResultTab.Graph)
 
         # set up processing thread
         self.processing_thread = QtCore.QThread(self.analysis_widget)
@@ -641,7 +651,7 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         self.busy.reset()
 
         # set up results worker
-        self.worker = QueryResultsUpdater[DGA](self.query)
+        self.worker = QueryResultsUpdater[DGA](self.query, graphics_buffer=self.graphical_results)
         self.worker.moveToThread(self.processing_thread)
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
         self.worker.finished.connect(self.query_completed)
@@ -662,7 +672,33 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
     @tree_results_model.setter
     def tree_results_model(self, model: models.SEToolsTableModel) -> None:
         self.tree_results.setModel(model)
-        self.worker.model = model
+        self.worker.table_model = model
+
+    def _graphical_results_context_menu(self, pos: QtCore.QPoint) -> None:
+        """Generate context menu for graphical results widget."""
+        save_action = QtGui.QAction("Save As...", self.graphical_results)
+        save_action.triggered.connect(self._save_graphical_results)
+
+        menu = QtWidgets.QMenu(self.graphical_results)
+        menu.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)
+        menu.addActions((save_action,))
+        menu.exec(self.graphical_results.mapToGlobal(pos))
+
+    def _save_graphical_results(self) -> None:
+        """Save the graphical results to a file."""
+        with util.QMessageOnException("Error",
+                                      "<b>Failed to save graphical results.</b>",
+                                      log=self.log,
+                                      parent=self):
+
+            filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save graphical results", "", "PNG files (*.png);;All files (*)")
+
+            if filename:
+                if not self.graphical_results.pixmap().save(filename, format="PNG"):
+                    # The save method does not raise an exception, so unfortunately
+                    # there is no additional info to share with the user.
+                    raise RuntimeError(f"Failed to save graphical results to {filename}.")
 
     #
     # Start/end of processing

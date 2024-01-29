@@ -6,7 +6,8 @@
 import logging
 import typing
 
-from PyQt6 import QtCore
+import networkx as nx
+from PyQt6 import QtCore, QtGui, QtWidgets
 import setools
 
 from . import models
@@ -42,17 +43,19 @@ class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
     finished = QtCore.pyqtSignal(int)
     raw_line = QtCore.pyqtSignal(str)
 
-    def __init__(self, query: Q,
-                 model: models.SEToolsTableModel | None = None,
+    def __init__(self, query: Q, /, *,
+                 table_model: models.SEToolsTableModel | None = None,
+                 graphics_buffer: QtWidgets.QLabel | None = None,
                  render: RenderFunction = lambda _, x: str(x),
                  result_limit: int = 0) -> None:
 
         super().__init__()
         self.log: typing.Final = logging.getLogger(query.__module__)
         self.query: typing.Final[Q] = query
-        self.model = model
+        self.table_model = table_model
         self.render = render
         self.result_limit = result_limit
+        self.graphics_buffer = graphics_buffer
 
     def update(self) -> None:
         """Run the query and update results."""
@@ -83,8 +86,19 @@ class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
 
             self.log.info(f"Generated {counter} total results.")
 
-            if self.model:
-                self.model.item_list = results
+            if self.table_model:
+                self.log.info("Updating results in table model.")
+                self.table_model.item_list = results
+
+            if self.graphics_buffer:
+                assert isinstance(self.query, setools.query.DirectedGraphAnalysis)
+                self.log.info("Generating graphical results.")
+                self.graphics_buffer.clear()
+                pgv = nx.nx_agraph.to_agraph(self.query.graphical_results())
+                pic = QtGui.QPixmap()
+                pic.loadFromData(pgv.draw(prog="dot", format="png"), "PNG")
+                self.graphics_buffer.setPixmap(pic)
+
             self.finished.emit(counter)
 
         except Exception as e:
