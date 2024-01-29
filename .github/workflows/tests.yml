@@ -45,10 +45,8 @@ jobs:
     - name: Build selinux libraries
       run: |
         make -C ./external/libsepol/ -j
-        CFLAGS=-I`realpath external/libsepol/include/` make -C ./external/libselinux/ -j
+        CFLAGS="-I$(realpath external/libsepol/include/) -fPIC -pie" make -C ./external/libselinux/ -j
         LDFLAGS="$(realpath external/libsepol/src/libsepol.a)" CFLAGS=-I`realpath external/libsepol/include/` make -C ./external/aosp_selinux/checkpolicy/ checkpolicy -j
-        cp ./external/libsepol/src/libsepol.so.2 ./setools
-        cp ./external/libselinux/src/libselinux.so.1 ./setools
 
     # This should be the minimum required Python version to build refpolicy.
     - name: Set up Python ${{ matrix.build-opts.python }}

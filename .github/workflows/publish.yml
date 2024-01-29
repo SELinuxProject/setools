@@ -10,7 +10,7 @@ permissions:
 jobs:
   deploy:
 
-    runs-on: ubuntu-latest
+    runs-on:  ubuntu-20.04
     strategy:
       matrix:
         include:
@@ -31,9 +31,7 @@ jobs:
     - name: Build selinux libraries
       run: |
         make -C ./external/libsepol/ -j
-        CFLAGS=-I`realpath external/aosp_selinux/libsepol/include/` make -C ./external/libselinux/ -j
-        cp ./external/libsepol/src/libsepol.so.2 ./setools
-        cp ./external/libselinux/src/libselinux.so.1 ./setools
+        CFLAGS="-I$(realpath external/libsepol/include/) -fPIC -pie" make -C ./external/libselinux/ -j
 
     - name: Set up Python
       uses: actions/setup-python@v3
