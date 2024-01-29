@@ -803,6 +803,8 @@ cdef extern from "<sepol/policydb/policydb.h>":
         int unsupported_format
 
         int mls
+        int android_netlink_route
+        int android_netlink_getneigh
 
         symtab_t symtab[8]  # TODO: SYM_NUM=8
         char **sym_val_to_name[8]  # TODO: SYM_NUM=8

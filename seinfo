@@ -378,6 +378,9 @@ try:
                 p.genfscon_count, p.portcon_count))
             print("  Netifcon:        {0:7}    Nodecon:         {1:7}".format(
                 p.netifcon_count, p.nodecon_count))
+            print("Android:")
+            print("  NetlinkRoute     {0:7}    NetlinkNeigh:    {1:7}".format(
+                p.android_netlink_route, p.android_netlink_getneigh))
         elif p.target_platform == setools.PolicyTarget.xen:
             print("  Initial SIDs:    {0:7}    Devicetreecon:   {1:7}".format(
                 p.initialsids_count, p.devicetreecon_count))

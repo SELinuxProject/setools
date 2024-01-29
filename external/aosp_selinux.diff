@@ -10,6 +10,23 @@ index 710c3a01..1bee09f3 100644
          "src/assertion.c",
          "src/avrule_block.c",
          "src/avtab.c",
+diff --git a/libsepol/include/sepol/policydb/policydb.h b/libsepol/include/sepol/policydb/policydb.h
+index 8be43875..23fb4117 100644
+--- a/libsepol/include/sepol/policydb/policydb.h
++++ b/libsepol/include/sepol/policydb/policydb.h
+@@ -520,6 +520,12 @@ typedef struct policydb {
+ 	/* Whether this policydb is mls, should always be set */
+ 	int mls;
+ 
++	/* RTM_GETLINK is not allowed on netlink route sockets */
++	int android_netlink_route;
++
++	/* RTM_GETNEIGH is not allowed on netlink route sockets */
++	int android_netlink_getneigh;
++
+ 	/* symbol tables */
+ 	symtab_t symtab[SYM_NUM];
+ #define p_commons symtab[SYM_COMMONS]
 diff --git a/libsepol/src/android_m_compat.c b/libsepol/src/android_m_compat.c
 new file mode 100644
 index 00000000..555be662
@@ -140,3 +157,16 @@ index 7728d04b..45d15feb 100644
  };
  
  #endif
+diff --git a/libsepol/src/policydb.c b/libsepol/src/policydb.c
+index b79c19b9..62aee48d 100644
+--- a/libsepol/src/policydb.c
++++ b/libsepol/src/policydb.c
+@@ -4360,6 +4360,8 @@ int policydb_read(policydb_t * p, struct policy_file *fp, unsigned verbose)
+ 		p->mls = 0;
+ 	}
+ 
++	p->android_netlink_route = buf[bufindex] & POLICYDB_CONFIG_ANDROID_NETLINK_ROUTE;
++	p->android_netlink_getneigh = buf[bufindex] & POLICYDB_CONFIG_ANDROID_NETLINK_GETNEIGH;
+ 	p->handle_unknown = buf[bufindex] & POLICYDB_CONFIG_UNKNOWN_MASK;
+ 
+ 	bufindex++;

@@ -43,6 +43,8 @@ cdef class SELinuxPolicy:
         readonly object target_platform
         readonly unsigned int version
         readonly bint mls
+        readonly bint android_netlink_route
+        readonly bint android_netlink_getneigh
 
     def __cinit__(self, policyfile=None):
         """
@@ -699,6 +701,8 @@ cdef class SELinuxPolicy:
         self.target_platform = PolicyTarget(self.handle.p.target_platform)
         self.version = self.handle.p.policyvers
         self.mls = <bint>self.handle.p.mls
+        self.android_netlink_route = <bint>self.handle.p.android_netlink_route
+        self.android_netlink_getneigh = <bint>self.handle.p.android_netlink_getneigh
 
         #
         # (Re)create data structures

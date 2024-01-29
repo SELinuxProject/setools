@@ -171,6 +171,46 @@
          </property>
         </widget>
        </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_42">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Android Netlink Route:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLabel" name="android_netlink_route">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_43">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Android Netlink GetNeighbor:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="android_netlink_getneigh">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
