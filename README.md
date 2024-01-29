@@ -1,4 +1,9 @@
-# SETools: Policy analysis tools for SELinux
+# Android SETools: Policy analysis tools for SELinux
+
+## Android-SETools
+
+Open-source fork from the SELinux Project SETools framework, with emphasis
+on support of analyzing Android SELinux policy files.
 
 ## Overview
 
@@ -44,16 +49,16 @@ SELinux, such as Fedora, Red Hat Enterprise Linux, Gentoo,
 and Debian.
 
 Official releases of SETools may be freely downloaded from the
-[GitHub releases page](https://github.com/SELinuxProject/setools/releases).
+[GitHub releases page](https://github.com/mkomet/setools/releases).
 
 SETools source code is maintained within a GitHub repository.
 From the command line do:
 
 ```bash
-  $ git clone https://github.com/SELinuxProject/setools.git
+  $ git clone https://github.com/mkomet/setools.git
 ```
 
-You may also browse the [GitHub repository](https://github.com/SELinuxProject/setools).
+You may also browse the [GitHub repository](https://github.com/mkomet/setools).
 The master branch has development code that may not be stable.  Each release
 series is considered stable, and has its own branch, e.g. "4.0" for all
 4.0.* releases.  To checkout a stable branch, do:
@@ -178,7 +183,7 @@ do our best to maintain API stability.
 
 ### Reporting bugs
 
-Bugs can be reported in the [SETools GitHub issues tracker](https://github.com/SELinuxProject/setools/issues).
+Bugs can be reported in the [SETools GitHub issues tracker](https://github.com/mkomet/setools/issues).
 
 ### Copyright license
 

@@ -133,6 +133,10 @@ for lang in linguas:
     if lang and os.path.exists(join("man", lang)):
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
+from pathlib import Path
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(name='android-setools',
       version='4.5.0-dev',
       description='Android SELinux policy analysis tools.',
@@ -170,5 +174,7 @@ setup(name='android-setools',
       extras_require={
           "analysis": "networkx>=2.0",
           "test": "tox"
-      }
+      },
+      long_description=long_description,
+      long_description_content_type='text/markdown',
       )
