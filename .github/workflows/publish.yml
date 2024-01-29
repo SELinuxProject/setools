@@ -34,7 +34,7 @@ jobs:
         CFLAGS=-I`realpath external/aosp_selinux/libsepol/include/` make -C ./external/libselinux/ -j
         cp ./external/libsepol/src/libsepol.so.2 ./setools
         cp ./external/libselinux/src/libselinux.so.1 ./setools
-  
+
     - name: Set up Python
       uses: actions/setup-python@v3
       with:
@@ -49,6 +49,12 @@ jobs:
       run: |
         USERSPACE_SRC=./external python setup.py build_ext
         USERSPACE_SRC=./external python setup.py build bdist_wheel
+
+    - name: Upload built artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-setools-${{ matrix.python-version }}.whl
+        path: dist/*.whl
 
     - name: Publish package
       uses: pypa/gh-action-pypi-publish@release/v1
