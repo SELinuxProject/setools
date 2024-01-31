@@ -8,6 +8,7 @@ import setools
 
 from . import criteria, tab
 from .excludetypes import ExcludeTypes
+from .helpdialog import HtmlHelpDialog
 from .permmap import PermissionMapEditor
 
 DEFAULT_DEPTH_LIMIT: typing.Final[int] = 3
@@ -27,6 +28,8 @@ SETTINGS_MIN_WEIGHT: typing.Final[str] = "min_weight"
 SETTINGS_RESULT_LIMIT: typing.Final[str] = "result_limit"
 SETTINGS_DEPTH_LIMIT: typing.Final[str] = "depth_limit"
 SETTINGS_EXCLUDE_TYPES: typing.Final[str] = "exclude_types"
+
+HELP_PAGE: typing.Final[str] = "widgets/infoflow.html"
 
 
 class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
@@ -110,6 +113,12 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         modeframe.criteria[setools.InfoFlowAnalysis.Mode.FlowsIn].toggled.connect(src.setDisabled)
 
         #
+        # Add help button
+        #
+        self.buttonBox.addButton("Help", QtWidgets.QDialogButtonBox.ButtonRole.HelpRole)
+        self.buttonBox.helpRequested.connect(self._show_help)
+
+        #
         # Final setup
         #
 
@@ -147,6 +156,12 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         assert isinstance(self.query, setools.InfoFlowAnalysis)  # type narrowing
         self.log.debug(f"Setting result limit to {value} flows.")
         self.worker.result_limit = value
+
+    def _show_help(self) -> None:
+        """Show help dialog."""
+        HtmlHelpDialog.from_package_file("Information Flow Analysis Help",
+                                         HELP_PAGE,
+                                         parent=self).open()
 
     def handle_permmap_change(self, permmap: setools.PermissionMap) -> None:
         self.log.debug(f"Applying updated permission map {permmap}")

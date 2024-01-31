@@ -8,6 +8,7 @@ import setools
 
 from . import criteria, tab
 from .excludetypes import ExcludeTypes
+from .helpdialog import HtmlHelpDialog
 
 DEFAULT_DEPTH_LIMIT: typing.Final[int] = 3
 MIN_DEPTH_LIMIT: typing.Final[int] = 1
@@ -24,6 +25,8 @@ SETTINGS_REVERSE: typing.Final[str] = "reverse"
 SETTINGS_RESULT_LIMIT: typing.Final[str] = "result_limit"
 SETTINGS_DEPTH_LIMIT: typing.Final[str] = "depth_limit"
 SETTINGS_EXCLUDE_TYPES: typing.Final[str] = "exclude_types"
+
+HELP_PAGE: typing.Final[str] = "widgets/dta.html"
 
 
 class DomainTransitionAnalysisTab(tab.DirectedGraphResultTab[setools.DomainTransitionAnalysis]):
@@ -106,6 +109,12 @@ class DomainTransitionAnalysisTab(tab.DirectedGraphResultTab[setools.DomainTrans
             src.setDisabled)
 
         #
+        # Add help button
+        #
+        self.buttonBox.addButton("Help", QtWidgets.QDialogButtonBox.ButtonRole.HelpRole)
+        self.buttonBox.helpRequested.connect(self._show_help)
+
+        #
         # Final setup
         #
 
@@ -144,6 +153,12 @@ class DomainTransitionAnalysisTab(tab.DirectedGraphResultTab[setools.DomainTrans
         assert isinstance(self.query, setools.DomainTransitionAnalysis)  # type narrowing
         self.log.debug(f"Setting result limit to {value} flows.")
         self.worker.result_limit = value
+
+    def _show_help(self) -> None:
+        """Show help dialog."""
+        HtmlHelpDialog.from_package_file("Domain Transition Analysis Help",
+                                         HELP_PAGE,
+                                         parent=self).open()
 
     @staticmethod
     def render_direct_path(count: int, step: setools.DomainTransition) -> str:
