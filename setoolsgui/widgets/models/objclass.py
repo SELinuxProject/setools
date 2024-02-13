@@ -8,7 +8,7 @@ from itertools import chain
 from PyQt6 import QtCore
 import setools
 
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 from .. import details
 
@@ -21,7 +21,7 @@ class ObjClassTable(SEToolsTableModel[setools.ObjClass]):
 
     headers = ["Name", "Permissions"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -30,7 +30,7 @@ class ObjClassTable(SEToolsTableModel[setools.ObjClass]):
         item = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return item.name
@@ -40,10 +40,10 @@ class ObjClassTable(SEToolsTableModel[setools.ObjClass]):
                         except setools.exception.NoCommon:
                             return ", ".join(sorted(item.perms))
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 return (details.objclass_detail_action(item), )
 
-            case QtCore.Qt.ItemDataRole.ToolTipRole:
+            case ModelRoles.ToolTipRole:
                 return details.objclass_tooltip(item)
 
         return super().data(index, role)

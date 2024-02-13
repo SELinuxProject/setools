@@ -7,7 +7,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("PortconTable",)
@@ -19,7 +19,7 @@ class PortconTable(SEToolsTableModel[setools.Portcon]):
 
     headers = ["Port/Port Range", "Protocol", "Context"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -28,7 +28,7 @@ class PortconTable(SEToolsTableModel[setools.Portcon]):
         rule = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         low, high = rule.ports
@@ -40,11 +40,11 @@ class PortconTable(SEToolsTableModel[setools.Portcon]):
                     case 2:
                         return str(rule.context)
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 if col == 2:
                     return details.context_detail_action(rule.context)
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = \

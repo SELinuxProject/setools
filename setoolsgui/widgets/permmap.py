@@ -129,7 +129,7 @@ class PermissionMapEditor(QtWidgets.QDialog):
         data_model = self.classes.model()
         assert data_model, "No data model set, this is an SETools bug."  # type narrowing
         for index in selection_model.selectedIndexes():
-            class_name = data_model.data(index, QtCore.Qt.ItemDataRole.DisplayRole)
+            class_name = data_model.data(index, models.ModelRoles.DisplayRole)
 
         self.log.debug(f"Setting class to {class_name}")
 

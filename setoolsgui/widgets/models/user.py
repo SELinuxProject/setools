@@ -9,7 +9,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("UserTable",)
@@ -31,7 +31,7 @@ class UserTable(SEToolsTableModel[setools.User]):
     def columnCount(self, parent=QtCore.QModelIndex()) -> int:
         return 4 if self.mls else 2
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -40,7 +40,7 @@ class UserTable(SEToolsTableModel[setools.User]):
         user = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return user.name
@@ -51,14 +51,14 @@ class UserTable(SEToolsTableModel[setools.User]):
                     case 3:
                         return str(user.mls_range)
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 match col:
                     case 0:
                         return (details.user_detail_action(user),)
                     case 1:
                         return (details.role_detail_action(r) for r in sorted(user.roles))
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = "<p>This is the name of the user.</p>"

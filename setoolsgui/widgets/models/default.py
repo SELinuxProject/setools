@@ -9,7 +9,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("DefaultTable",)
@@ -21,7 +21,7 @@ class DefaultTable(SEToolsTableModel[setools.Default]):
 
     headers = ["Rule Type", "Class", "Default", "Default Range"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -30,7 +30,7 @@ class DefaultTable(SEToolsTableModel[setools.Default]):
         item = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return item.ruletype.name
@@ -43,11 +43,11 @@ class DefaultTable(SEToolsTableModel[setools.Default]):
                             return item.default_range.name  # type: ignore
                         return None
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 if col == 1:
                     return (details.objclass_detail_action(item.tclass),)
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = "<p>This is the rule type.</p>"

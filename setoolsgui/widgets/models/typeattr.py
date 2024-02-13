@@ -7,7 +7,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("TypeAttributeTable",)
@@ -19,7 +19,7 @@ class TypeAttributeTable(SEToolsTableModel[setools.TypeAttribute]):
 
     headers = ["Name", "Types"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -28,21 +28,21 @@ class TypeAttributeTable(SEToolsTableModel[setools.TypeAttribute]):
         attr = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return attr.name
                     case 1:
                         return ", ".join(sorted(a.name for a in sorted(attr.expand())))
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 match col:
                     case 0:
                         return (details.typeattr_detail_action(attr),)
                     case 1:
                         return (details.type_detail_action(t) for t in sorted(attr.expand()))
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = "<p>This is the name of the type attribute.</p>"

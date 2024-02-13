@@ -7,7 +7,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("NetifconTable",)
@@ -19,7 +19,7 @@ class NetifconTable(SEToolsTableModel[setools.Netifcon]):
 
     headers = ["Device", "Device Context", "Packet Context"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -28,7 +28,7 @@ class NetifconTable(SEToolsTableModel[setools.Netifcon]):
         rule = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return rule.netif
@@ -37,14 +37,14 @@ class NetifconTable(SEToolsTableModel[setools.Netifcon]):
                     case 2:
                         return str(rule.packet)
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 match col:
                     case 1:
                         return details.context_detail_action(rule.context)
                     case 2:
                         return details.context_detail_action(rule.packet)
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = \

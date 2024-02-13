@@ -177,7 +177,7 @@ class ExcludeTypes(QtWidgets.QDialog):
         selected_types: typing.List[setools.Type] = []
         for index in source.selectionModel().selectedIndexes():
             source_index = source_proxy.mapToSource(index)
-            item = source_model.data(source_index, models.modelroles.PolicyObjRole)
+            item = source_model.data(source_index, models.ModelRoles.PolicyObjRole)
             assert item, f"Selection error: {item}. This is an SETools bug."
             dest_model.append(item)
             selected_types.append(item)
@@ -207,7 +207,7 @@ class ExcludeTypes(QtWidgets.QDialog):
 
     def set_attr_filter(self, row):
         index = self.attr_model.index(row, 0)
-        attr = self.attr_model.data(index, models.modelroles.PolicyObjRole)
+        attr = self.attr_model.data(index, models.ModelRoles.PolicyObjRole)
         self.log.debug(f"Attribute set to {attr!r}")
         self.included_sort.attr = attr
         self.excluded_sort.attr = attr
@@ -244,7 +244,7 @@ class FilterByAttributeProxy(QtCore.QSortFilterProxyModel):
             model = self.sourceModel()
             assert model, "No source model, this is an SETools bug"  # type narrowing
             index = model.index(row, 0)
-            type_ = model.data(index, models.modelroles.PolicyObjRole)
+            type_ = model.data(index, models.ModelRoles.PolicyObjRole)
             if type_ not in self.attr:
                 return False
 

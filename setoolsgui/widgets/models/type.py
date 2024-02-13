@@ -7,7 +7,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("TypeTable",)
@@ -19,7 +19,7 @@ class TypeTable(SEToolsTableModel[setools.Type]):
 
     headers = ["Name", "Attributes", "Aliases", "Permissive"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -28,7 +28,7 @@ class TypeTable(SEToolsTableModel[setools.Type]):
         item = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return item.name
@@ -39,7 +39,7 @@ class TypeTable(SEToolsTableModel[setools.Type]):
                     case 3:
                         return "Permissive" if item.ispermissive else None
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 match col:
                     case 0:
                         return (details.type_detail_action(item),)
@@ -47,7 +47,7 @@ class TypeTable(SEToolsTableModel[setools.Type]):
                         return (details.typeattr_detail_action(ta) for ta in
                                 sorted(item.attributes()))
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = "<p>This is the name of the type.</p>"

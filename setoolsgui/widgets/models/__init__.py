@@ -12,6 +12,7 @@ from .ibpkeycon import *
 from .initsid import *
 from .mls import *
 from .mlsrule import *
+from .modelroles import *
 from .netifcon import *
 from .nodecon import *
 from .objclass import *

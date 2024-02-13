@@ -8,8 +8,8 @@ import typing
 
 from PyQt6 import QtCore
 
-from . import modelroles
-from .typing import MetaclassFix
+from .modelroles import ModelRoles
+from .typing import AllStdDataTypes, ContextMenuType, MetaclassFix
 
 T = typing.TypeVar("T")
 
@@ -68,9 +68,9 @@ class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass
     # Qt API implementation
     #
     def headerData(self, section: int, orientation: QtCore.Qt.Orientation,
-                   role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+                   role: int = ModelRoles.DisplayRole):
 
-        if role == QtCore.Qt.ItemDataRole.DisplayRole and \
+        if role == ModelRoles.DisplayRole and \
                 orientation == QtCore.Qt.Orientation.Horizontal:
 
             return self.headers[section]
@@ -83,7 +83,8 @@ class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass
         """The number of columns in the model."""
         return len(self.headers)
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole
+             ) -> AllStdDataTypes | T | ContextMenuType:
         """Get the data at the specified index for the specified role."""
         if not self.item_list or not index.isValid():
             return None
@@ -91,11 +92,11 @@ class SEToolsTableModel(QtCore.QAbstractTableModel, typing.Generic[T], metaclass
         row = index.row()
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 return str(self.item_list[row])
-            case modelroles.PolicyObjRole:
+            case ModelRoles.PolicyObjRole:
                 return self.item_list[row]
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 return ()
             case _:
                 return None

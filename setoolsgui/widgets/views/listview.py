@@ -4,7 +4,7 @@ import collections
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from ..models import modelroles
+from .. import models
 
 __all__ = ("SEToolsListView",)
 
@@ -41,7 +41,7 @@ class SEToolsListView(QtWidgets.QListView):
         new_selection = QtCore.QItemSelection()
         for row in range(data_model.rowCount()):
             index = data_model.createIndex(row, 0)
-            item = data_model.data(index, QtCore.Qt.ItemDataRole.DisplayRole)
+            item = data_model.data(index, models.ModelRoles.DisplayRole)
             if item in selections:
                 new_selection.select(index, index)
 
@@ -59,7 +59,7 @@ class SEToolsListView(QtWidgets.QListView):
         # Add any actions provided by the model.
         index = self.indexAt(event.pos())
         if index.isValid():
-            for action in self.model().data(index, modelroles.ContextMenuRole):
+            for action in self.model().data(index, models.ModelRoles.ContextMenuRole):
                 action.setParent(menu)
                 menu.addAction(action)
 

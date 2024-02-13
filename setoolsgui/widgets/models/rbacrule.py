@@ -6,7 +6,7 @@
 from PyQt6 import QtCore
 import setools
 
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 from .. import details
 
@@ -19,7 +19,7 @@ class RBACRuleTable(SEToolsTableModel[setools.AnyRBACRule]):
 
     headers = ["Rule Type", "Source Role", "Target Role/Type", "Object Class", "Default Role"]
 
-    def data(self, index, role):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -28,7 +28,7 @@ class RBACRuleTable(SEToolsTableModel[setools.AnyRBACRule]):
         rule = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return rule.ruletype.name
@@ -45,13 +45,19 @@ class RBACRuleTable(SEToolsTableModel[setools.AnyRBACRule]):
 
                 return None
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 match col:
                     case 1:
                         return (details.role_detail_action(rule.source), )
                     case 2:
                         if rule.ruletype == setools.RBACRuletype.role_transition:
+                            assert isinstance(rule.target,
+                                              setools.Type | setools.TypeAttribute), \
+                                             "Invalid rule target, this is an SETools bug."
                             return (details.type_or_attr_detail_action(rule.target), )
+
+                        assert isinstance(rule.target, setools.Role), \
+                            "Invalid rule target, this is an SETools bug."
                         return (details.role_detail_action(rule.target), )
                     case 3:
                         if rule.ruletype == setools.RBACRuletype.role_transition:
@@ -60,13 +66,19 @@ class RBACRuleTable(SEToolsTableModel[setools.AnyRBACRule]):
                         if rule.ruletype == setools.RBACRuletype.role_transition:
                             return (details.role_detail_action(rule.default), )
 
-            case QtCore.Qt.ItemDataRole.ToolTipRole:
+            case ModelRoles.ToolTipRole:
                 match col:
                     case 1:
                         return details.role_tooltip(rule.source)
                     case 2:
                         if rule.ruletype == setools.RBACRuletype.role_transition:
+                            assert isinstance(rule.target,
+                                              setools.Type | setools.TypeAttribute), \
+                                             "Invalid rule target, this is an SETools bug."
                             return details.type_or_attr_tooltip(rule.target)
+
+                        assert isinstance(rule.target, setools.Role), \
+                            "Invalid rule target, this is an SETools bug."
                         return details.role_tooltip(rule.target)
                     case 3:
                         return details.objclass_tooltip(rule.tclass)
@@ -74,7 +86,7 @@ class RBACRuleTable(SEToolsTableModel[setools.AnyRBACRule]):
                         if rule.ruletype == setools.RBACRuletype.role_transition:
                             return details.role_tooltip(rule.default)
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = f"<p>{rule.ruletype} is the type of the rule.</p>"

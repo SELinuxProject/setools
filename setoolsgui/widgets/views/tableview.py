@@ -7,7 +7,7 @@ import csv
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from ..models import modelroles
+from .. import models
 
 __all__ = ("SEToolsTableView",)
 
@@ -27,7 +27,7 @@ class SEToolsTableView(QtWidgets.QTableView):
         # Add any actions provided by the model.
         index = self.indexAt(event.pos())
         if index.isValid():
-            for action in self.model().data(index, modelroles.ContextMenuRole):
+            for action in self.model().data(index, models.ModelRoles.ContextMenuRole):
                 action.setParent(menu)
                 menu.addAction(action)
 
@@ -57,7 +57,7 @@ class SEToolsTableView(QtWidgets.QTableView):
             elif prev_col is not None and current_col != prev_col:
                 selected_text.append('\t')
 
-            selected_text.append(datamodel.data(index, QtCore.Qt.ItemDataRole.DisplayRole))
+            selected_text.append(datamodel.data(index, models.ModelRoles.DisplayRole))
 
             prev_row = current_row
             prev_col = current_col
@@ -95,7 +95,7 @@ class SEToolsTableView(QtWidgets.QTableView):
             for col in range(col_count):
                 csv_row.append(datamodel.headerData(col,
                                                     QtCore.Qt.Orientation.Horizontal,
-                                                    QtCore.Qt.ItemDataRole.DisplayRole))
+                                                    models.ModelRoles.DisplayRole))
 
             writer.writerow(csv_row)
 
@@ -105,7 +105,7 @@ class SEToolsTableView(QtWidgets.QTableView):
 
                 for col in range(col_count):
                     index = datamodel.index(row, col)
-                    csv_row.append(datamodel.data(index, QtCore.Qt.ItemDataRole.DisplayRole))
+                    csv_row.append(datamodel.data(index, models.ModelRoles.DisplayRole))
 
                 writer.writerow(csv_row)
 

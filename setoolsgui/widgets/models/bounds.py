@@ -7,7 +7,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("BoundsTable",)
@@ -19,7 +19,7 @@ class BoundsTable(SEToolsTableModel[setools.Bounds]):
 
     headers = ["Rule Type", "Parent", "Child"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -28,7 +28,7 @@ class BoundsTable(SEToolsTableModel[setools.Bounds]):
         item = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return item.ruletype.name
@@ -37,14 +37,14 @@ class BoundsTable(SEToolsTableModel[setools.Bounds]):
                     case 2:
                         return item.child.name
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 match col:
                     case 1:
                         return (details.type_detail_action(item.parent),)
                     case 2:
                         return (details.type_detail_action(item.child),)
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = "<p>This is the rule type.</p>"

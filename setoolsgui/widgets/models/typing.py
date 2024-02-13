@@ -2,7 +2,16 @@
 
 import abc
 
-from PyQt6 import QtCore
+from PyQt6 import QtCore, QtGui
+
+# These are all of the return types for the standard QtCore.Qt.ItemDataRole roles
+# for the data method in the models.
+AllStdDataTypes = str | QtGui.QColor | QtGui.QIcon | QtGui.QPixmap | QtCore.QSize | \
+    QtGui.QFont | QtCore.Qt.AlignmentFlag | QtGui.QBrush | QtCore.Qt.CheckState | \
+    QtCore.Qt.SortOrder | None
+
+# This is the return type for the ModelRoles.ContextMenuRole role
+ContextMenuType = tuple[QtGui.QAction, ...]
 
 QObjectType: type = type(QtCore.QObject)
 

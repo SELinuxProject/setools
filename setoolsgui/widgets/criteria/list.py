@@ -113,7 +113,7 @@ class ListWidget(CriteriaWidget):
     def _criteria_context_menu(self, pos: QtCore.QPoint) -> None:
         """Collect actions from the model and display a context menu if there are any actions."""
         actionlist = []
-        for actions in self.criteria.selection(models.modelroles.ContextMenuRole):
+        for actions in self.criteria.selection(models.ModelRoles.ContextMenuRole):
             actionlist.extend(actions)
 
         if not actionlist:
@@ -150,7 +150,7 @@ class ListWidget(CriteriaWidget):
     #
     def save(self, settings: dict) -> None:
         settings[self.criteria.objectName()] = list(
-            self.criteria.selection(QtCore.Qt.ItemDataRole.DisplayRole))
+            self.criteria.selection(models.ModelRoles.DisplayRole))
 
         with suppress(AttributeError):
             settings[self.criteria_equal.objectName()] = self.criteria_equal.isChecked()

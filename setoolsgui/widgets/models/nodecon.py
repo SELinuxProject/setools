@@ -7,7 +7,7 @@ from PyQt6 import QtCore
 import setools
 
 from .. import details
-from . import modelroles
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__ = ("NodeconTable",)
@@ -19,7 +19,7 @@ class NodeconTable(SEToolsTableModel[setools.Nodecon]):
 
     headers = ["Network", "Context"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -28,18 +28,18 @@ class NodeconTable(SEToolsTableModel[setools.Nodecon]):
         rule = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return str(rule.network.with_netmask)
                     case 1:
                         return str(rule.context)
 
-            case modelroles.ContextMenuRole:
+            case ModelRoles.ContextMenuRole:
                 if col == 1:
                     return details.context_detail_action(rule.context)
 
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = \

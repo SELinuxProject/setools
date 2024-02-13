@@ -7,6 +7,7 @@ import typing
 
 from PyQt6 import QtCore
 
+from .modelroles import ModelRoles
 from .table import SEToolsTableModel
 
 __all__: typing.Final[tuple[str, ...]] = ("CategoryTable", "SensitivityTable")
@@ -18,7 +19,7 @@ class MLSComponentTable(SEToolsTableModel):
 
     headers = ["Name", "Aliases"]
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
@@ -27,7 +28,7 @@ class MLSComponentTable(SEToolsTableModel):
         item = self.item_list[row]
 
         match role:
-            case QtCore.Qt.ItemDataRole.DisplayRole:
+            case ModelRoles.DisplayRole:
                 match col:
                     case 0:
                         return item.name
@@ -41,14 +42,14 @@ class CategoryTable(MLSComponentTable):
 
     """Table-based model for categories."""
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
         col = index.column()
 
         match role:
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = "<p>This is the name of the category.</p>"
@@ -73,14 +74,14 @@ class SensitivityTable(MLSComponentTable):
 
     """Table-based model for sensitivities."""
 
-    def data(self, index: QtCore.QModelIndex, role: int = QtCore.Qt.ItemDataRole.DisplayRole):
+    def data(self, index: QtCore.QModelIndex, role: int = ModelRoles.DisplayRole):
         if not self.item_list or not index.isValid():
             return None
 
         col = index.column()
 
         match role:
-            case QtCore.Qt.ItemDataRole.WhatsThisRole:
+            case ModelRoles.WhatsThisRole:
                 match col:
                     case 0:
                         column_whatsthis = "<p>This is the name of the sensitivity.</p>"
