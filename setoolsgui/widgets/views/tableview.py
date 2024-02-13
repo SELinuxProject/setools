@@ -19,7 +19,7 @@ class SEToolsTableView(QtWidgets.QTableView):
     provided by the model.
     """
 
-    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:  # type: ignore[override]
         """Handle the context menu event."""
         menu = QtWidgets.QMenu(self)
         menu.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose)

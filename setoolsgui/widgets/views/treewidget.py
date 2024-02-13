@@ -12,7 +12,7 @@ class SEToolsTreeWidget(QtWidgets.QTreeWidget):
 
     """QTreeWidget class extended for SETools use."""
 
-    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:
+    def contextMenuEvent(self, event: QtGui.QContextMenuEvent) -> None:  # type: ignore[override]
         """Handle the context menu event."""
         copy_tree_action = QtGui.QAction("Copy Tree...", self)
         copy_tree_action.triggered.connect(self.copy)
