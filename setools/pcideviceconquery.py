@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable, Optional
 
 from .mixins import MatchContext
@@ -59,10 +58,6 @@ class PcideviceconQuery(MatchContext, PolicyQuery):
             self._device = value
         else:
             self._device = None
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(PcideviceconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Pcidevicecon]:
         """Generator which yields all matching pcidevicecons."""

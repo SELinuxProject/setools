@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
@@ -29,10 +27,6 @@ class BoundsQuery(PolicyQuery):
     parent_regex: bool = False
     child = CriteriaDescriptor("child_regex")
     child_regex: bool = False
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(BoundsQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Bounds]:
         """Generator which yields all matching *bounds statements."""

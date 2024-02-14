@@ -7,18 +7,21 @@ import copy
 from collections import OrderedDict
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import cast, Dict, Iterable, Optional, Union
-
-import pkg_resources
+from importlib import resources as pkg_resources
+import pathlib
+from typing import cast, Dict, Final, Iterable, Union
 
 from . import exception
 from .descriptors import PermissionMapDescriptor
 from .mixins import TupleCompat
 from .policyrep import AVRule, SELinuxPolicy, TERuletype
 
-INFOFLOW_DIRECTIONS = ("r", "w", "b", "n", "u")
-MIN_WEIGHT = 1
-MAX_WEIGHT = 10
+# This is the filename in the Python package
+DEFAULT_PERM_MAP: Final[str] = "perm_map"
+
+INFOFLOW_DIRECTIONS: Final = ("r", "w", "b", "n", "u")
+MIN_WEIGHT: Final[int] = 1
+MAX_WEIGHT: Final[int] = 10
 
 
 @dataclass
@@ -95,25 +98,27 @@ class PermissionMap:
 
     """Permission Map for information flow analysis."""
 
-    def __init__(self, permmapfile: Optional[str] = None) -> None:
+    MIN_WEIGHT: Final[int] = MIN_WEIGHT
+    MAX_WEIGHT: Final[int] = MAX_WEIGHT
+
+    def __init__(self, permmapfile: str | pathlib.Path | None = None) -> None:
         """
         Parameter:
         permmapfile     The path to the permission map to load.
         """
         self.log = logging.getLogger(__name__)
         self._permmap: MapStruct = OrderedDict()
-        self._permmapfile: str
+        self._permmapfile: pathlib.Path
 
         if permmapfile:
             self.load(permmapfile)
         else:
-            distro = pkg_resources.get_distribution("setools")
-            # pylint: disable=no-member
-            path = "{0}/setools/perm_map".format(distro.location)
-            self.load(path)
+            package_location = pkg_resources.files("setools")
+            with pkg_resources.as_file(package_location / DEFAULT_PERM_MAP) as path:
+                self.load(path)
 
     def __str__(self) -> str:
-        return self._permmapfile
+        return str(self._permmapfile)
 
     def __deepcopy__(self, memo) -> 'PermissionMap':
         newobj = PermissionMap.__new__(PermissionMap)
@@ -128,7 +133,7 @@ class PermissionMap:
             for mapping in self.perms(cls):
                 yield mapping
 
-    def load(self, permmapfile: str) -> None:
+    def load(self, permmapfile: str | pathlib.Path) -> None:
         """
         Parameter:
         permmapfile     The path to the permission map to load.
@@ -236,7 +241,7 @@ class PermissionMap:
                     if perm_count >= num_perms:
                         state = 2
 
-        self._permmapfile = permmapfile
+        self._permmapfile = pathlib.Path(permmapfile)
         self.log.info("Successfully opened permission map \"{0}\"".format(permmapfile))
         self.log.debug("Read {0} classes and {1} total permissions.".format(
                        class_count, total_perms))

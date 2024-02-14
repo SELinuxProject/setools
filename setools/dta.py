@@ -4,24 +4,32 @@
 #
 # pylint: disable=unsubscriptable-object
 
+import enum
 import itertools
 import logging
 from collections import defaultdict
 from contextlib import suppress
 from dataclasses import dataclass, InitVar
 from typing import DefaultDict, Iterable, List, Optional, Union
+import warnings
 
 try:
     import networkx as nx
     from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
-except ImportError:
-    logging.getLogger(__name__).debug("NetworkX failed to import.")
 
-from .descriptors import EdgeAttrDict, EdgeAttrList
+except ImportError as iex:
+    logging.getLogger(__name__).debug(f"{iex.name} failed to import.")
+
+from . import exception
+from .descriptors import CriteriaDescriptor, EdgeAttrDict, EdgeAttrList
 from .mixins import NetworkXGraphEdge
 from .policyrep import AnyTERule, SELinuxPolicy, TERuletype, Type
+from .query import DirectedGraphAnalysis
 
-__all__ = ['DomainTransitionAnalysis', 'DomainTransition', 'DomainEntrypoint', 'DTAPath']
+__all__ = ['DomainTransitionAnalysis',
+           'DomainTransition',
+           'DomainEntrypoint',
+           'DTAPath']
 
 
 @dataclass
@@ -33,6 +41,24 @@ class DomainEntrypoint:
     entrypoint: List[AnyTERule]
     execute: List[AnyTERule]
     type_transition: List[AnyTERule]
+
+    def __lt__(self, other: "DomainEntrypoint") -> bool:
+        # basic comparison for sorting
+        return self.name < other.name
+
+    def __str__(self) -> str:
+        lines: List[str] = [f"\nEntrypoint {self.name}:",
+                            "\tDomain entrypoint rule(s):"]
+        lines.extend(f"\t{e}" for e in sorted(self.entrypoint))
+
+        lines.append("\n\tFile execute rule(s):")
+        lines.extend(f"\t{e}" for e in sorted(self.execute))
+
+        if self.type_transition:
+            lines.append("\n\tType transition rule(s):")
+            lines.extend(f"\t{t}" for t in sorted(self.type_transition))
+
+        return "\n".join(lines)
 
 
 @dataclass
@@ -48,6 +74,38 @@ class DomainTransition:
     dyntransition: List[AnyTERule]
     setcurrent: List[AnyTERule]
 
+    def __format__(self, spec: str) -> str:
+        lines: List[str] = [f"{self.source} -> {self.target}\n"]
+        if spec == "full":
+            if self.transition:
+                lines.append("Domain transition rule(s):")
+                lines.extend(str(t) for t in sorted(self.transition))
+
+                if self.setexec:
+                    lines.append("\nSet execution context rule(s):")
+                    lines.extend(str(s) for s in sorted(self.setexec))
+
+                lines.extend(f"{e}\n" for e in sorted(self.entrypoints))
+
+            if self.dyntransition:
+                lines.append("Dynamic transition rule(s):")
+                lines.extend(str(d) for d in sorted(self.dyntransition))
+
+                lines.append("\nSet current process context rule(s):")
+                lines.extend(str(s) for s in sorted(self.setcurrent))
+
+                lines.append("")
+
+            return "\n".join(lines)
+
+        if not spec:
+            return lines[0]
+
+        return super().__format__(spec)
+
+    def __str__(self) -> str:
+        return self.__format__("full")
+
 
 #
 # Typing
@@ -56,28 +114,49 @@ DTAPath = Iterable[DomainTransition]
 RuleHash = DefaultDict[Type, List[AnyTERule]]
 
 
-class DomainTransitionAnalysis:
+class DomainTransitionAnalysis(DirectedGraphAnalysis):
 
-    """Domain transition analysis."""
+    """
+    Domain transition analysis.
 
-    _exclude: List[Type]
-    _reverse: bool
+    Parameters:
+    policy      The policy to analyze.
 
-    def __init__(self, policy: SELinuxPolicy, reverse: bool = False,
+    Keyword Parameters
+    source      The source type of the analysis.
+    target      The target type of the analysis.
+    mode        The analysis mode (see DomainTransitionAnalysis.Mode)
+    exclude     The types excluded from the domain transition analysis.
+                (default is none)
+    """
+
+    class Mode(enum.Enum):
+
+        """Domain transition analysis modes"""
+
+        ShortestPaths = "All shortest paths"
+        AllPaths = "All paths up to"  # N steps
+        TransitionsOut = "Transitions out of the source domain."
+        TransitionsIn = "Transitions into the target domain."
+
+    source = CriteriaDescriptor(lookup_function="lookup_type")
+    target = CriteriaDescriptor(lookup_function="lookup_type")
+    mode = Mode.ShortestPaths
+
+    def __init__(self, policy: SELinuxPolicy, /, *,
+                 reverse: bool = False,
+                 source: Optional[Union[Type, str]] = None,
+                 target: Optional[Union[Type, str]] = None,
+                 mode: Mode = Mode.ShortestPaths,
+                 depth_limit: int | None = 1,
                  exclude: Optional[Iterable[Union[Type, str]]] = None) -> None:
-        """
-        Parameter:
-        policy   The policy to analyze.
 
-        Keyword Parameters:
-        reverse  True means reverse the direction of the analysis (find parent domains).
-        exclude  An iterable of types to exclude from the analysis.
-        """
-        self.log = logging.getLogger(__name__)
+        super().__init__(policy, reverse=reverse, source=source, target=target, mode=mode,
+                         depth_limit=depth_limit, exclude=exclude)
 
-        self.policy = policy
-        self.exclude = exclude  # type: ignore # https://github.com/python/mypy/issues/220
-        self.reverse = reverse
+        self._min_weight: int
+        self._depth_limit: int | None
+
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
@@ -89,6 +168,18 @@ class DomainTransitionAnalysis:
                               "requried for Domain Transition Analysis.")
             self.log.critical("This is typically in the python3-networkx package.")
             raise
+
+    @property
+    def depth_limit(self) -> int | None:
+        return self._depth_limit
+
+    @depth_limit.setter
+    def depth_limit(self, value: int | None) -> None:
+        if value is not None and value < 1:
+            raise ValueError("Domain transition max depth must be positive.")
+
+        self._depth_limit = value
+        # no subgraph rebuild needed.
 
     @property
     def reverse(self) -> bool:
@@ -112,6 +203,155 @@ class DomainTransitionAnalysis:
 
         self.rebuildsubgraph = True
 
+    def results(self) -> Iterable[DTAPath] | Iterable[DomainTransition]:
+        if self.rebuildsubgraph:
+            self._build_subgraph()
+
+        self.log.info(f"Generating domain transition results from {self.policy}")
+        self.log.debug(f"{self.source=}")
+        self.log.debug(f"{self.target=}")
+        self.log.debug(f"{self.mode=}, {self.depth_limit=}")
+
+        with suppress(NetworkXNoPath, NodeNotFound, NetworkXError):
+            match self.mode:
+                case DomainTransitionAnalysis.Mode.ShortestPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info("Generating all shortest domain transition paths from "
+                                  f"{self.source} to {self.target}...")
+
+                    for path in nx.all_shortest_paths(self.subG,
+                                                      self.source,
+                                                      self.target):
+
+                        yield self.__generate_steps(path)
+
+                case DomainTransitionAnalysis.Mode.AllPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info(f"Generating all domain transition paths from {self.source} "
+                                  f"to {self.target}, max length {self.depth_limit}...")
+
+                    for path in nx.all_simple_paths(self.subG,
+                                                    self.source,
+                                                    self.target,
+                                                    cutoff=self.depth_limit):
+
+                        yield self.__generate_steps(path)
+
+                case DomainTransitionAnalysis.Mode.TransitionsOut:
+                    if not self.source:
+                        raise ValueError("Source type must be specified.")
+
+                    self.log.info(f"Generating all domain transitions out of {self.source}")
+                    for source, target in nx.bfs_edges(self.subG, self.source,
+                                                       depth_limit=self.depth_limit):
+                        edge = Edge(self.subG, source, target)
+
+                        yield DomainTransition(source,
+                                               target,
+                                               edge.transition,
+                                               self.__generate_entrypoints(edge),
+                                               edge.setexec,
+                                               edge.dyntransition,
+                                               edge.setcurrent)
+
+                case DomainTransitionAnalysis.Mode.TransitionsIn:
+                    if not self.target:
+                        raise ValueError("Target type must be specified.")
+
+                    self.log.info(f"Generating all domain transitions into {self.target}")
+                    # swap source and target since bfs_edges is reversed.
+                    for target, source in nx.bfs_edges(self.subG, self.target, reverse=True,
+                                                       depth_limit=self.depth_limit):
+                        edge = Edge(self.subG, source, target)
+
+                        yield DomainTransition(source,
+                                               target,
+                                               edge.transition,
+                                               self.__generate_entrypoints(edge),
+                                               edge.setexec,
+                                               edge.dyntransition,
+                                               edge.setcurrent)
+
+                case _:
+                    raise ValueError(f"Unknown analysis mode: {self.mode}")
+
+    def graphical_results(self) -> nx.DiGraph:
+
+        """
+        Return the results of the analysis as a NetworkX directed graph.
+        Caller has the responsibility of converting the graph to a
+        visualization.
+
+        For example, to convert to a pygraphviz graph:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.layout(prog="dot")
+        """
+
+        if self.rebuildsubgraph:
+            self._build_subgraph()
+
+        self.log.info(f"Generating graphical domain transition results from {self.policy}")
+        self.log.debug(f"{self.source=}")
+        self.log.debug(f"{self.target=}")
+        self.log.debug(f"{self.mode=}, {self.depth_limit=}")
+
+        try:
+            match self.mode:
+                case DomainTransitionAnalysis.Mode.ShortestPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info("Generating graphical all shortest domain transition paths from "
+                                  f"{self.source} to {self.target}...")
+                    paths = nx.all_shortest_paths(self.subG, self.source, self.target)
+                    edges = [pair for path in paths for pair in nx.utils.misc.pairwise(path)]
+
+                    out = nx.DiGraph()
+                    out.add_edges_from(edges)
+                    return out
+
+                case DomainTransitionAnalysis.Mode.AllPaths:
+                    if not all((self.source, self.target)):
+                        raise ValueError("Source and target types must be specified.")
+
+                    self.log.info(f"Generating all domain transition paths from {self.source} "
+                                  f"to {self.target}, max length {self.depth_limit}...")
+                    paths = nx.all_simple_paths(self.subG, self.source, self.target,
+                                                cutoff=self.depth_limit)
+                    edges = [pair for path in paths for pair in nx.utils.misc.pairwise(path)]
+
+                    out = nx.DiGraph()
+                    out.add_edges_from(edges)
+                    return out
+
+                case DomainTransitionAnalysis.Mode.TransitionsOut:
+                    if not self.source:
+                        raise ValueError("Source type must be specified.")
+
+                    self.log.info(f"Generating all domain transitions out of {self.source}.")
+                    return nx.bfs_tree(self.subG, self.source, depth_limit=self.depth_limit)
+
+                case DomainTransitionAnalysis.Mode.TransitionsIn:
+                    if not self.target:
+                        raise ValueError("Target type must be specified.")
+
+                    self.log.info(f"Generating all domain transitions into {self.target}.")
+                    out = nx.bfs_tree(self.subG, self.target, reverse=True,
+                                      depth_limit=self.depth_limit)
+                    # output is reversed, un-reverse it
+                    return nx.reverse(out, copy=False)
+
+                case _:
+                    raise ValueError(f"Unknown analysis mode: {self.mode}")
+
+        except Exception as ex:
+            raise exception.AnalysisException(
+                f"Unable to generate graphical results: {ex}") from ex
+
     def shortest_path(self, source: Union[Type, str], target: Union[Type, str]) \
             -> Iterable[DTAPath]:
         """
@@ -128,6 +368,8 @@ class DomainTransitionAnalysis:
                 source, target, and rules for each
                 domain transition.
         """
+        warnings.warn("DomainTransitionAnalysis.shortest_path() is deprecated. "
+                      "It will be removed in SETools 4.6.")
         s: Type = self.policy.lookup_type(source)
         t: Type = self.policy.lookup_type(target)
 
@@ -161,6 +403,8 @@ class DomainTransitionAnalysis:
                  source, target, and rules for each
                  domain transition.
         """
+        warnings.warn("DomainTransitionAnalysis.all_paths() is deprecated. "
+                      "It will be removed in SETools 4.6.")
         if maxlen < 1:
             raise ValueError("Maximum path length must be positive.")
 
@@ -196,6 +440,8 @@ class DomainTransitionAnalysis:
                  source, target, and rules for each
                  domain transition.
         """
+        warnings.warn("DomainTransitionAnalysis.all_shortest_paths() is deprecated. "
+                      "It will be removed in SETools 4.6.")
         s: Type = self.policy.lookup_type(source)
         t: Type = self.policy.lookup_type(target)
 
@@ -226,6 +472,8 @@ class DomainTransitionAnalysis:
                 source, target, and rules for each
                 domain transition.
         """
+        warnings.warn("DomainTransitionAnalysis.transitions() is deprecated. "
+                      "It will be removed in SETools 4.6.")
         s: Type = self.policy.lookup_type(type_)
 
         if self.rebuildsubgraph:
@@ -261,8 +509,9 @@ class DomainTransitionAnalysis:
         if self.rebuildgraph:
             self._build_graph()
 
-        return f"Graph nodes: {nx.number_of_nodes(self.G)}\n" \
-               f"Graph edges: {nx.number_of_edges(self.G)}"
+        return f"{nx.number_of_nodes(self.G)=}\n" \
+               f"{nx.number_of_edges(self.G)=}\n" \
+               f"{len(self.G)=}\n"
 
     #
     # Internal functions follow
@@ -306,9 +555,7 @@ class DomainTransitionAnalysis:
         setcurrent      The list of setcurrent rules.
         """
 
-        for s in range(1, len(path)):
-            source: Type = path[s - 1]
-            target: Type = path[s]
+        for source, target in nx.utils.misc.pairwise(path):
             edge = Edge(self.subG, source, target)
 
             # Yield the actual source and target.

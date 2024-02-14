@@ -488,10 +488,14 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """DTA: all paths output"""
         self.a.reverse = False
         self.a.exclude = None
+        self.a.source = "start"
+        self.a.target = "bothtrans200"
+        self.a.depth_limit = 3
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
 
         expected_path = ["start", "dyntrans100", "bothtrans200"]
 
-        paths = list(self.a.all_paths("start", "bothtrans200", 3))
+        paths = list(self.a.results())
         self.assertEqual(1, len(paths))
 
         for path in paths:
@@ -529,51 +533,13 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """DTA: all shortest paths output"""
         self.a.reverse = False
         self.a.exclude = None
+        self.a.source = "start"
+        self.a.target = "bothtrans200"
+        self.a.mode = DomainTransitionAnalysis.Mode.ShortestPaths
 
         expected_path = ["start", "dyntrans100", "bothtrans200"]
 
-        paths = list(self.a.all_shortest_paths("start", "bothtrans200"))
-        self.assertEqual(1, len(paths))
-
-        for path in paths:
-            for stepnum, step in enumerate(path):
-                self.assertIsInstance(step.source, Type)
-                self.assertIsInstance(step.target, Type)
-                self.assertEqual(expected_path[stepnum], step.source)
-                self.assertEqual(expected_path[stepnum + 1], step.target)
-
-                for r in step.transition:
-                    self.assertIn("transition", r.perms)
-
-                for e in step.entrypoints:
-                    self.assertIsInstance(e.name, Type)
-
-                    for r in e.entrypoint:
-                        self.assertIn("entrypoint", r.perms)
-
-                    for r in e.execute:
-                        self.assertIn("execute", r.perms)
-
-                    for r in e.type_transition:
-                        self.assertEqual(TERT.type_transition, r.ruletype)
-
-                for r in step.setexec:
-                    self.assertIn("setexec", r.perms)
-
-                for r in step.dyntransition:
-                    self.assertIn("dyntransition", r.perms)
-
-                for r in step.setcurrent:
-                    self.assertIn("setcurrent", r.perms)
-
-    def test_302_shortest_path(self):
-        """DTA: shortest path output"""
-        self.a.reverse = False
-        self.a.exclude = None
-
-        expected_path = ["start", "dyntrans100", "bothtrans200"]
-
-        paths = list(self.a.shortest_path("start", "bothtrans200"))
+        paths = list(self.a.results())
         self.assertEqual(1, len(paths))
 
         for path in paths:
@@ -611,8 +577,11 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """DTA: transitions output"""
         self.a.reverse = False
         self.a.exclude = None
+        self.a.source = "start"
+        self.a.depth_limit = 1
+        self.a.mode = DomainTransitionAnalysis.Mode.TransitionsOut
 
-        transitions = list(self.a.transitions("start"))
+        transitions = list(self.a.results())
         self.assertEqual(2, len(transitions))
 
         for step in transitions:
@@ -648,10 +617,14 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """DTA: all paths output reverse DTA"""
         self.a.reverse = True
         self.a.exclude = None
+        self.a.source = "bothtrans200"
+        self.a.target = "start"
+        self.a.depth_limit = 3
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
 
         expected_path = ["bothtrans200", "dyntrans100", "start"]
 
-        paths = list(self.a.all_paths("bothtrans200", "start", 3))
+        paths = list(self.a.results())
         self.assertEqual(1, len(paths))
 
         for path in paths:
@@ -689,10 +662,13 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """DTA: all shortest paths output reverse DTA"""
         self.a.reverse = True
         self.a.exclude = None
+        self.a.source = "bothtrans200"
+        self.a.target = "start"
+        self.a.mode = DomainTransitionAnalysis.Mode.ShortestPaths
 
         expected_path = ["bothtrans200", "dyntrans100", "start"]
 
-        paths = list(self.a.all_shortest_paths("bothtrans200", "start"))
+        paths = list(self.a.results())
         self.assertEqual(1, len(paths))
 
         for path in paths:
@@ -726,53 +702,15 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
                 for r in step.setcurrent:
                     self.assertIn("setcurrent", r.perms)
 
-    def test_312_shortest_path_reversed(self):
-        """DTA: shortest path output reverse DTA"""
-        self.a.reverse = True
-        self.a.exclude = None
-
-        expected_path = ["bothtrans200", "dyntrans100", "start"]
-
-        paths = list(self.a.shortest_path("bothtrans200", "start"))
-        self.assertEqual(1, len(paths))
-
-        for path in paths:
-            for stepnum, step in enumerate(path):
-                self.assertIsInstance(step.source, Type)
-                self.assertIsInstance(step.target, Type)
-                self.assertEqual(expected_path[stepnum + 1], step.source)
-                self.assertEqual(expected_path[stepnum], step.target)
-
-                for r in step.transition:
-                    self.assertIn("transition", r.perms)
-
-                for e in step.entrypoints:
-                    self.assertIsInstance(e.name, Type)
-
-                    for r in e.entrypoint:
-                        self.assertIn("entrypoint", r.perms)
-
-                    for r in e.execute:
-                        self.assertIn("execute", r.perms)
-
-                    for r in e.type_transition:
-                        self.assertEqual(TERT.type_transition, r.ruletype)
-
-                for r in step.setexec:
-                    self.assertIn("setexec", r.perms)
-
-                for r in step.dyntransition:
-                    self.assertIn("dyntransition", r.perms)
-
-                for r in step.setcurrent:
-                    self.assertIn("setcurrent", r.perms)
-
     def test_313_transitions_reversed(self):
         """DTA: transitions output reverse DTA"""
-        self.a.reverse = True
+        self.a.reverse = False
         self.a.exclude = None
+        self.a.target = "bothtrans200"
+        self.a.depth_limit = 1
+        self.a.mode = DomainTransitionAnalysis.Mode.TransitionsIn
 
-        transitions = list(self.a.transitions("bothtrans200"))
+        transitions = list(self.a.results())
         self.assertEqual(1, len(transitions))
 
         for step in transitions:
@@ -815,152 +753,130 @@ class DomainTransitionAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """DTA: all paths with invalid source type."""
         self.a.reverse = False
         self.a.exclude = None
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
         with self.assertRaises(InvalidType):
-            list(self.a.all_paths("invalid_type", "trans1"))
+            self.a.source = "invalid_type"
 
     def test_911_all_paths_invalid_target(self):
         """DTA: all paths with invalid target type."""
         self.a.reverse = False
         self.a.exclude = None
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
         with self.assertRaises(InvalidType):
-            list(self.a.all_paths("trans1", "invalid_type"))
+            self.a.target = "invalid_type"
 
     def test_912_all_paths_invalid_maxlen(self):
         """DTA: all paths with invalid max path length."""
         self.a.reverse = False
         self.a.exclude = None
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
         with self.assertRaises(ValueError):
-            list(self.a.all_paths("trans1", "trans2", maxlen=-2))
+            self.a.depth_limit = -2
 
     def test_913_all_paths_source_excluded(self):
         """DTA: all paths with excluded source type."""
         self.a.reverse = False
         self.a.exclude = ["trans1"]
-        paths = list(self.a.all_paths("trans1", "trans2"))
+        self.a.source = "trans1"
+        self.a.target = "trans2"
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_914_all_paths_target_excluded(self):
         """DTA: all paths with excluded target type."""
         self.a.reverse = False
         self.a.exclude = ["trans2"]
-        paths = list(self.a.all_paths("trans1", "trans2"))
+        self.a.source = "trans1"
+        self.a.target = "trans2"
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_915_all_paths_source_disconnected(self):
         """DTA: all paths with disconnected source type."""
         self.a.reverse = False
         self.a.exclude = None
-        paths = list(self.a.all_paths("trans5", "trans2"))
+        self.a.source = "trans5"
+        self.a.target = "trans2"
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_916_all_paths_target_disconnected(self):
         """DTA: all paths with disconnected target type."""
         self.a.reverse = False
         self.a.exclude = ["trans3"]
-        paths = list(self.a.all_paths("trans2", "trans5"))
-        self.assertEqual(0, len(paths))
-
-    def test_920_shortest_path_invalid_source(self):
-        """DTA: shortest path with invalid source type."""
-        self.a.reverse = False
-        self.a.exclude = None
-        with self.assertRaises(InvalidType):
-            list(self.a.shortest_path("invalid_type", "trans1"))
-
-    def test_921_shortest_path_invalid_target(self):
-        """DTA: shortest path with invalid target type."""
-        self.a.reverse = False
-        self.a.exclude = None
-        with self.assertRaises(InvalidType):
-            list(self.a.shortest_path("trans1", "invalid_type"))
-
-    def test_922_shortest_path_source_excluded(self):
-        """DTA: shortest path with excluded source type."""
-        self.a.reverse = False
-        self.a.exclude = ["trans1"]
-        paths = list(self.a.shortest_path("trans1", "trans2"))
-        self.assertEqual(0, len(paths))
-
-    def test_923_shortest_path_target_excluded(self):
-        """DTA: shortest path with excluded target type."""
-        self.a.reverse = False
-        self.a.exclude = ["trans2"]
-        paths = list(self.a.shortest_path("trans1", "trans2"))
-        self.assertEqual(0, len(paths))
-
-    def test_924_shortest_path_source_disconnected(self):
-        """DTA: shortest path with disconnected source type."""
-        self.a.reverse = False
-        self.a.exclude = None
-        paths = list(self.a.shortest_path("trans5", "trans2"))
+        self.a.source = "trans2"
+        self.a.target = "trans5"
+        self.a.mode = DomainTransitionAnalysis.Mode.AllPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_925_shortest_path_target_disconnected(self):
         """DTA: shortest path with disconnected target type."""
         self.a.reverse = False
         self.a.exclude = ["trans3"]
-        paths = list(self.a.shortest_path("trans2", "trans5"))
+        self.a.source = "trans2"
+        self.a.target = "trans5"
+        self.a.mode = DomainTransitionAnalysis.Mode.ShortestPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
-
-    def test_930_all_shortest_paths_invalid_source(self):
-        """DTA: all shortest paths with invalid source type."""
-        self.a.reverse = False
-        self.a.exclude = None
-        with self.assertRaises(InvalidType):
-            list(self.a.all_shortest_paths("invalid_type", "trans1"))
-
-    def test_931_all_shortest_paths_invalid_target(self):
-        """DTA: all shortest paths with invalid target type."""
-        self.a.reverse = False
-        self.a.exclude = None
-        with self.assertRaises(InvalidType):
-            list(self.a.all_shortest_paths("trans1", "invalid_type"))
 
     def test_932_all_shortest_paths_source_excluded(self):
         """DTA: all shortest paths with excluded source type."""
         self.a.reverse = False
         self.a.exclude = ["trans1"]
-        paths = list(self.a.all_shortest_paths("trans1", "trans2"))
+        self.a.source = "trans1"
+        self.a.target = "trans2"
+        self.a.mode = DomainTransitionAnalysis.Mode.ShortestPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_933_all_shortest_paths_target_excluded(self):
         """DTA: all shortest paths with excluded target type."""
         self.a.reverse = False
         self.a.exclude = ["trans2"]
-        paths = list(self.a.all_shortest_paths("trans1", "trans2"))
+        self.a.source = "trans1"
+        self.a.target = "trans2"
+        self.a.mode = DomainTransitionAnalysis.Mode.ShortestPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_934_all_shortest_paths_source_disconnected(self):
         """DTA: all shortest paths with disconnected source type."""
         self.a.reverse = False
         self.a.exclude = None
-        paths = list(self.a.all_shortest_paths("trans5", "trans2"))
+        self.a.source = "trans5"
+        self.a.target = "trans2"
+        self.a.mode = DomainTransitionAnalysis.Mode.ShortestPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_935_all_shortest_paths_target_disconnected(self):
         """DTA: all shortest paths with disconnected target type."""
         self.a.reverse = False
         self.a.exclude = ["trans3"]
-        paths = list(self.a.all_shortest_paths("trans2", "trans5"))
+        self.a.source = "trans2"
+        self.a.target = "trans5"
+        self.a.mode = DomainTransitionAnalysis.Mode.ShortestPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
-
-    def test_940_transitions_invalid_source(self):
-        """DTA: transitions with invalid source type."""
-        self.a.reverse = False
-        self.a.exclude = None
-        with self.assertRaises(InvalidType):
-            list(self.a.transitions("invalid_type"))
 
     def test_941_transitions_source_excluded(self):
         """DTA: transitions with excluded source type."""
         self.a.reverse = False
         self.a.exclude = ["trans1"]
-        paths = list(self.a.transitions("trans1"))
+        self.a.mode = DomainTransitionAnalysis.Mode.TransitionsOut
+        self.a.source = "trans1"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_942_transitions_source_disconnected(self):
         """DTA: transitions with disconnected source type."""
         self.a.reverse = False
         self.a.exclude = ["trans3"]
-        paths = list(self.a.transitions("trans5"))
+        self.a.source = "trans5"
+        self.a.mode = DomainTransitionAnalysis.Mode.TransitionsOut
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))

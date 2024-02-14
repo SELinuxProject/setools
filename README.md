@@ -13,24 +13,22 @@ As such it contains a setup.py script that will install the tools.
 
 To run SETools command line tools, the following packages are required:
 
-* Python 3.6+
-* NetworkX 2.0+ (2.6+ for Python 3.9+)
+* Python 3.10+
+* NetworkX 2.6+
+* pygraphviz
 * setuptools
-* dataclasses (Python 3.6 only)
 * libselinux
 * libsepol 3.2+
 
 To run SETools graphical tools, the following packages are also required:
 
-* PyQt5
-* qt5-assistant
-* qt-devel (only if rebuilding the help file)
+* PyQt6
 
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
 
 * gcc
-* cython 0.27+ (0.29.14+ for Python 3.8+)
+* cython 0.29.14
 
 To run SETools unit tests, the following packages are required, in
 addition to the above dependencies:

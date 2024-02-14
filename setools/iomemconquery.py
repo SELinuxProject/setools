@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable, Optional, Tuple
 
 from .mixins import MatchContext
@@ -81,10 +80,6 @@ class IomemconQuery(MatchContext, PolicyQuery):
             self._addr = pending_addr
         else:
             self._addr = None
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(IomemconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Iomemcon]:
         """Generator which yields all matching iomemcons."""

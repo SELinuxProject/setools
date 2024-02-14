@@ -195,8 +195,12 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """Information flow analysis: all paths output"""
         self.a.exclude = None
         self.a.min_weight = 1
+        self.a.source = "node1"
+        self.a.target = "node4"
+        self.a.mode = InfoFlowAnalysis.Mode.AllPaths
+        self.a.depth_limit = 3
 
-        paths = list(self.a.all_paths("node1", "node4", 3))
+        paths = list(self.a.results())
         self.assertEqual(1, len(paths))
 
         steps = list(paths[0])
@@ -222,35 +226,11 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """Information flow analysis: all shortest paths output"""
         self.a.exclude = None
         self.a.min_weight = 1
+        self.a.source = "node1"
+        self.a.target = "node4"
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
 
-        paths = list(self.a.all_shortest_paths("node1", "node4"))
-        self.assertEqual(1, len(paths))
-
-        steps = list(paths[0])
-        self.assertEqual(2, len(steps))
-
-        step = steps[0]
-        self.assertIsInstance(step.source, Type)
-        self.assertIsInstance(step.target, Type)
-        self.assertEqual(step.source, "node1")
-        self.assertEqual(step.target, "node2")
-        for r in steps[0].rules:
-            self.assertEqual(TERT.allow, r.ruletype)
-
-        step = steps[1]
-        self.assertIsInstance(step.source, Type)
-        self.assertIsInstance(step.target, Type)
-        self.assertEqual(step.source, "node2")
-        self.assertEqual(step.target, "node4")
-        for r in step.rules:
-            self.assertEqual(TERT.allow, r.ruletype)
-
-    def test_302_shortest_path(self):
-        """Information flow analysis: shortest path output"""
-        self.a.exclude = None
-        self.a.min_weight = 1
-
-        paths = list(self.a.shortest_path("node1", "node4"))
+        paths = list(self.a.results())
         self.assertEqual(1, len(paths))
 
         steps = list(paths[0])
@@ -276,8 +256,11 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """Information flow analysis: flows out of a type"""
         self.a.exclude = None
         self.a.min_weight = 1
+        self.a.mode = InfoFlowAnalysis.Mode.FlowsOut
+        self.a.depth_limit = 1
+        self.a.source = "node6"
 
-        for flow in self.a.infoflows("node6"):
+        for flow in self.a.results():
             self.assertIsInstance(flow.source, Type)
             self.assertIsInstance(flow.target, Type)
             self.assertEqual(flow.source, "node6")
@@ -288,8 +271,11 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         """Information flow analysis: flows in to a type"""
         self.a.exclude = None
         self.a.min_weight = 1
+        self.a.mode = InfoFlowAnalysis.Mode.FlowsIn
+        self.a.depth_limit = 1
+        self.a.target = "node8"
 
-        for flow in self.a.infoflows("node8", out=False):
+        for flow in self.a.results():
             self.assertIsInstance(flow.source, Type)
             self.assertIsInstance(flow.target, Type)
             self.assertEqual(flow.target, "node8")
@@ -318,156 +304,119 @@ class InfoFlowAnalysisTest(mixins.ValidateRule, unittest.TestCase):
         with self.assertRaises(ValueError):
             self.a.min_weight = 50
 
-    def test_910_all_paths_invalid_source(self):
-        """Information flow analysis: all paths with invalid source type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
+    def test_910_invalid_source(self):
+        """Information flow analysis: invalid source type."""
         with self.assertRaises(InvalidType):
-            list(self.a.all_paths("invalid_type", "node1"))
+            self.a.source = "invalid_type"
 
-    def test_911_all_paths_invalid_target(self):
-        """Information flow analysis: all paths with invalid target type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
+    def test_911_invalid_target(self):
+        """Information flow analysis: invalid target type."""
         with self.assertRaises(InvalidType):
-            list(self.a.all_paths("node1", "invalid_type"))
+            self.a.target = "invalid_type"
 
     def test_912_all_paths_invalid_maxlen(self):
         """Information flow analysis: all paths with invalid max path length."""
         self.a.exclude = None
         self.a.min_weight = 1
+        self.a.mode = InfoFlowAnalysis.Mode.AllPaths
+
         with self.assertRaises(ValueError):
-            list(self.a.all_paths("node1", "node2", maxlen=-2))
+            self.a.depth_limit = -2
 
     def test_913_all_paths_source_excluded(self):
         """Information flow analysis: all paths with excluded source type."""
         self.a.exclude = ["node1"]
         self.a.min_weight = 1
-        paths = list(self.a.all_paths("node1", "node2"))
+        self.a.mode = InfoFlowAnalysis.Mode.AllPaths
+        self.a.source = "node1"
+        self.a.target = "node2"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_914_all_paths_target_excluded(self):
         """Information flow analysis: all paths with excluded target type."""
         self.a.exclude = ["node2"]
         self.a.min_weight = 1
-        paths = list(self.a.all_paths("node1", "node2"))
+        self.a.mode = InfoFlowAnalysis.Mode.AllPaths
+        self.a.source = "node1"
+        self.a.target = "node2"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_915_all_paths_source_disconnected(self):
         """Information flow analysis: all paths with disconnected source type."""
         self.a.exclude = None
         self.a.min_weight = 1
-        paths = list(self.a.all_paths("disconnected1", "node2"))
+        self.a.mode = InfoFlowAnalysis.Mode.AllPaths
+        self.a.source = "disconnected1"
+        self.a.target = "node2"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_916_all_paths_target_disconnected(self):
         """Information flow analysis: all paths with disconnected target type."""
         self.a.exclude = None
         self.a.min_weight = 1
-        paths = list(self.a.all_paths("node2", "disconnected1"))
+        self.a.source = "node2"
+        self.a.target = "disconnected1"
+        self.a.mode = InfoFlowAnalysis.Mode.AllPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
-
-    def test_920_shortest_path_invalid_source(self):
-        """Information flow analysis: shortest path with invalid source type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
-        with self.assertRaises(InvalidType):
-            list(self.a.shortest_path("invalid_type", "node1"))
-
-    def test_921_shortest_path_invalid_target(self):
-        """Information flow analysis: shortest path with invalid target type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
-        with self.assertRaises(InvalidType):
-            list(self.a.shortest_path("node1", "invalid_type"))
-
-    def test_922_shortest_path_source_excluded(self):
-        """Information flow analysis: shortest path with excluded source type."""
-        self.a.exclude = ["node1"]
-        self.a.min_weight = 1
-        paths = list(self.a.shortest_path("node1", "node2"))
-        self.assertEqual(0, len(paths))
-
-    def test_923_shortest_path_target_excluded(self):
-        """Information flow analysis: shortest path with excluded target type."""
-        self.a.exclude = ["node2"]
-        self.a.min_weight = 1
-        paths = list(self.a.shortest_path("node1", "node2"))
-        self.assertEqual(0, len(paths))
-
-    def test_924_shortest_path_source_disconnected(self):
-        """Information flow analysis: shortest path with disconnected source type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
-        paths = list(self.a.shortest_path("disconnected1", "node2"))
-        self.assertEqual(0, len(paths))
-
-    def test_925_shortest_path_target_disconnected(self):
-        """Information flow analysis: shortest path with disconnected target type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
-        paths = list(self.a.shortest_path("node2", "disconnected1"))
-        self.assertEqual(0, len(paths))
-
-    def test_930_all_shortest_paths_invalid_source(self):
-        """Information flow analysis: all shortest paths with invalid source type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
-        with self.assertRaises(InvalidType):
-            list(self.a.all_shortest_paths("invalid_type", "node1"))
-
-    def test_931_all_shortest_paths_invalid_target(self):
-        """Information flow analysis: all shortest paths with invalid target type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
-        with self.assertRaises(InvalidType):
-            list(self.a.all_shortest_paths("node1", "invalid_type"))
 
     def test_932_all_shortest_paths_source_excluded(self):
         """Information flow analysis: all shortest paths with excluded source type."""
         self.a.exclude = ["node1"]
         self.a.min_weight = 1
-        paths = list(self.a.all_shortest_paths("node1", "node2"))
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
+        self.a.source = "node1"
+        self.a.target = "node2"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_933_all_shortest_paths_target_excluded(self):
         """Information flow analysis: all shortest paths with excluded target type."""
         self.a.exclude = ["node2"]
         self.a.min_weight = 1
-        paths = list(self.a.all_shortest_paths("node1", "node2"))
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
+        self.a.source = "node1"
+        self.a.target = "node2"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_934_all_shortest_paths_source_disconnected(self):
         """Information flow analysis: all shortest paths with disconnected source type."""
         self.a.exclude = None
         self.a.min_weight = 1
-        paths = list(self.a.all_shortest_paths("disconnected1", "node2"))
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
+        self.a.source = "disconnected1"
+        self.a.target = "node2"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_935_all_shortest_paths_target_disconnected(self):
         """Information flow analysis: all shortest paths with disconnected target type."""
         self.a.exclude = None
         self.a.min_weight = 1
-        paths = list(self.a.all_shortest_paths("node2", "disconnected1"))
+        self.source = "node2"
+        self.target = "disconnected1"
+        self.a.mode = InfoFlowAnalysis.Mode.ShortestPaths
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
-
-    def test_940_infoflows_invalid_source(self):
-        """Information flow analysis: infoflows with invalid source type."""
-        self.a.exclude = None
-        self.a.min_weight = 1
-        with self.assertRaises(InvalidType):
-            list(self.a.infoflows("invalid_type"))
 
     def test_941_infoflows_source_excluded(self):
         """Information flow analysis: infoflows with excluded source type."""
         self.a.exclude = ["node1"]
         self.a.min_weight = 1
-        paths = list(self.a.infoflows("node1"))
+        self.a.mode = InfoFlowAnalysis.Mode.FlowsOut
+        self.a.source = "node1"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))
 
     def test_942_infoflows_source_disconnected(self):
         """Information flow analysis: infoflows with disconnected source type."""
         self.a.exclude = ["disconnected2"]
         self.a.min_weight = 1
-        paths = list(self.a.infoflows("disconnected1"))
+        self.a.mode = InfoFlowAnalysis.Mode.FlowsOut
+        self.a.source = "disconnected1"
+        paths = list(self.a.results())
         self.assertEqual(0, len(paths))

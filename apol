@@ -9,7 +9,6 @@ import argparse
 import logging
 import warnings
 
-from PyQt5.QtWidgets import QApplication
 import setools
 import setoolsgui
 
@@ -51,9 +50,11 @@ else:
 logging.getLogger().addHandler(console_handler)
 
 try:
-    app = QApplication(sys.argv)
-    mainwindow = setoolsgui.ApolMainWindow(args.policy)
-    sys.exit(app.exec_())
+    sys.exit(setoolsgui.run_apol(args.policy))
+
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
 
 except Exception as err:
     if args.debug:

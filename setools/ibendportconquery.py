@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable, Optional
 
 from .mixins import MatchContext, MatchName
@@ -60,10 +59,6 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
             self._port = pending_value
         else:
             self._port = None
-
-    def __init__(self, policy, **kwargs):
-        super(IbendportconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Ibendportcon]:
         """Generator which yields all matching ibendportcons."""

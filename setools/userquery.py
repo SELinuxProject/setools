@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
@@ -63,10 +61,6 @@ class UserQuery(MatchName, PolicyQuery):
     roles = CriteriaSetDescriptor("roles_regex", "lookup_role")
     roles_equal: bool = False
     roles_regex: bool = False
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(UserQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[User]:
         """Generator which yields all matching users."""

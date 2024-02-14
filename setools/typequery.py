@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from typing import Iterable, Optional
 
 from .descriptors import CriteriaSetDescriptor
@@ -55,10 +53,6 @@ class TypeQuery(MatchAlias, MatchName, PolicyQuery):
             self._permissive = None
         else:
             self._permissive = bool(value)
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(TypeQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Type]:
         """Generator which yields all matching types."""

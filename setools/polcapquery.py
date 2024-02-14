@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable
 
 from .mixins import MatchName
@@ -23,10 +22,6 @@ class PolCapQuery(MatchName, PolicyQuery):
     name_regex  If true, regular expression matching will
                 be used for matching the name.
     """
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(PolCapQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[PolicyCapability]:
         """Generator which yields all matching policy capabilities."""

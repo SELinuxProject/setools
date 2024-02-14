@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 import re
 from typing import cast, Iterable, Optional, Pattern, Union
 
@@ -70,10 +69,6 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
                 self._target = self.policy.lookup_type_or_attr(cast(Union[str, TypeOrAttr], value))
             except InvalidType:
                 self._target = self.policy.lookup_role(cast(Union[str, Role], value))
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(RBACRuleQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[AnyRBACRule]:
         """Generator which yields all matching RBAC rules."""

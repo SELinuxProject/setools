@@ -239,6 +239,10 @@ try:
         for mls_result in sorted(mlsrq.results()):
             print(mls_result)
 
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
+
 except Exception as err:
     if args.debug:
         raise

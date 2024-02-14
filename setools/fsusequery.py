@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from typing import Iterable
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
@@ -49,10 +47,6 @@ class FSUseQuery(MatchContext, PolicyQuery):
     ruletype = CriteriaSetDescriptor(enum_class=FSUseRuletype)
     fs = CriteriaDescriptor("fs_regex")
     fs_regex: bool = False
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(FSUseQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[FSUse]:
         """Generator which yields all matching fs_use_* statements."""

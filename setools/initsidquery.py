@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable
 
 from .mixins import MatchContext, MatchName
@@ -41,10 +40,6 @@ class InitialSIDQuery(MatchName, MatchContext, PolicyQuery):
     range_proper    If true, use proper superset/subset operations.
                     No effect if not using set operations.
     """
-
-    def __init__(self, policy, **kwargs):
-        super(InitialSIDQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[InitialSID]:
         """Generator which yields all matching initial SIDs."""

@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable
 
 from .mixins import MatchAlias, MatchName
@@ -26,10 +25,6 @@ class CategoryQuery(MatchAlias, MatchName, PolicyQuery):
     alias_regex  If true, regular expression matching
                  will be used on the alias names.
     """
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(CategoryQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Category]:
         """Generator which yields all matching categories."""

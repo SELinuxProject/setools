@@ -395,6 +395,10 @@ try:
             strfmt = "   {0}" if not args.flat else "{0}"
             print(strfmt.format(result))
 
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
+
 except Exception as err:
     if args.debug:
         raise

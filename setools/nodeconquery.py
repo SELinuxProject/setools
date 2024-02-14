@@ -5,8 +5,6 @@
 #
 import ipaddress
 
-import logging
-from socket import AF_INET, AF_INET6
 from typing import Iterable, Optional, Union
 
 from .mixins import MatchContext
@@ -78,10 +76,6 @@ class NodeconQuery(MatchContext, PolicyQuery):
         else:
             self._network = None
 
-    def __init__(self, policy, **kwargs) -> None:
-        super(NodeconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
-
     def results(self) -> Iterable[Nodecon]:
         """Generator which yields all matching nodecons."""
         self.log.info("Generating nodecon results from {0.policy}".format(self))
@@ -93,7 +87,7 @@ class NodeconQuery(MatchContext, PolicyQuery):
 
             if self.network:
                 if self.network_overlap:
-                    if not self.network.overlaps(nodecon.network):  # type: ignore
+                    if not self.network.overlaps(nodecon.network):
                         continue
                 else:
                     if not nodecon.network == self.network:

@@ -5,9 +5,9 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 try:
-    import pkg_resources
+    from importlib.metadata import distribution
     # pylint: disable=no-member
-    __version__ = pkg_resources.get_distribution("setools").version
+    __version__ = distribution("setools").version
 except ImportError:  # pragma: no cover
     __version__ = "unknown"
 
@@ -77,11 +77,11 @@ from .pcideviceconquery import PcideviceconQuery
 from .devicetreeconquery import DevicetreeconQuery
 
 # Information Flow Analysis
-from .infoflow import InfoFlowAnalysis
+from .infoflow import *
 from .permmap import PermissionMap, RuleWeight, Mapping
 
 # Domain Transition Analysis
-from .dta import DomainTransitionAnalysis, DomainEntrypoint, DomainTransition
+from .dta import *
 
 # Policy difference
 from .diff import PolicyDifference

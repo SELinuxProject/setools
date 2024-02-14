@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import cast, Iterable, Optional, Set, Tuple
 
 from . import mixins, query
@@ -107,10 +106,6 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             self._xperms = IoctlSet(pending_xperms)
         else:
             self._xperms = None
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(TERuleQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[AnyTERule]:
         """Generator which yields all matching TE rules."""

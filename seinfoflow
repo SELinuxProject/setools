@@ -4,13 +4,15 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
 
-import setools
 import argparse
 import sys
 import logging
 import signal
 import warnings
 from typing import Dict, Optional
+
+import networkx as nx
+import setools
 
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
 
@@ -43,7 +45,7 @@ alg.add_argument("-A", "--all_paths", type=int, metavar="MAX_STEPS",
                  help="Calculate all paths, with the specified maximum path length. (Expensive)")
 
 opts = parser.add_argument_group("Analysis options")
-opts.add_argument("-r", "--reverse", action="store_false",
+opts.add_argument("-r", "--reverse", action="store_true",
                   help="Display information flows into the source type. "
                   "No effect if a target type is specified.")
 opts.add_argument("-w", "--min_weight", default=3, type=int,
@@ -53,6 +55,7 @@ opts.add_argument("-l", "--limit_flows", default=0, type=int,
 opts.add_argument("-b", "--booleans", default=None,
                   help="Specify the boolean values to use."
                   " Options are default, or \"foo:true,bar:false...\"")
+opts.add_argument("-o", "--output_file", help="Output file for graphical results, PNG format.")
 opts.add_argument("exclude", nargs="*",
                   help="List of excluded types in the analysis.")
 
@@ -104,48 +107,66 @@ try:
     g = setools.InfoFlowAnalysis(p, m, min_weight=args.min_weight, exclude=args.exclude,
                                  booleans=booleans)
 
+    flownum: int = 0
+    flow: setools.InfoFlowPath
+    stepnum: int = 0
+    step: setools.InfoFlowStep
     if args.shortest_path or args.all_paths:
+        g.source = args.source
+        g.target = args.target
         if args.shortest_path:
-            paths = g.all_shortest_paths(args.source, args.target)
+            g.mode = setools.InfoFlowAnalysis.Mode.ShortestPaths
         else:
-            paths = g.all_paths(args.source, args.target, args.all_paths)
+            g.mode = setools.InfoFlowAnalysis.Mode.AllPaths
+            g.depth_limit = args.all_paths
 
-        flownum = 0
-        for flownum, path in enumerate(paths, start=1):
-            print("Flow {0}:".format(flownum))
-            for stepnum, step in enumerate(path, start=1):
-                print("  Step {0}: {1} -> {2}".format(stepnum, step.source, step.target))
+        if args.output_file:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.draw(path=args.output_file, prog="dot", format="png")
+        else:
+            for flownum, flow in enumerate(g.results(), start=1):  # type: ignore
+                print(f"Flow {flownum}:")
+                for stepnum, step in enumerate(flow, start=1):
+                    if args.full:
+                        print(f"  Step {stepnum}: {step:full}\n")
+                    else:
+                        print(f"  Step {stepnum}: {step}")
 
+                if args.limit_flows and flownum >= args.limit_flows:
+                    break
+
+            print(f"\n{flownum} information flow(s) found.")
+
+    else:  # single step, direct info flow
+        if args.reverse:
+            g.mode = setools.InfoFlowAnalysis.Mode.FlowsIn
+            g.target = args.source
+        else:
+            g.mode = setools.InfoFlowAnalysis.Mode.FlowsOut
+            g.source = args.source
+
+        if args.output_file:
+            pgv = nx.nx_agraph.to_agraph(g.graphical_results())
+            pgv.draw(path=args.output_file, prog="dot", format="png")
+        else:
+            for flownum, step in enumerate(g.results(), start=1):  # type: ignore
                 if args.full:
-                    for rule in sorted(step.rules):
-                        print("   ", rule)
+                    print(f"Flow {flownum}: {step:full}\n")
+                else:
+                    print(f"Flow {flownum}: {step}")
 
-                    print()
+                if args.limit_flows and flownum >= args.limit_flows:
+                    break
 
-            if args.limit_flows and flownum >= args.limit_flows:
-                break
-
-            print()
-
-    else:  # single direct info flow
-        flownum = 0
-        for flownum, flow in enumerate(g.infoflows(args.source, out=args.reverse), start=1):
-            print("Flow {0}: {1} -> {2}".format(flownum, flow.source, flow.target))
-
-            if args.full:
-                for rule in sorted(flow.rules):
-                    print("   ", rule)
-
-                print()
-
-            if args.limit_flows and flownum >= args.limit_flows:
-                break
-
-    print("\n{} information flow(s) found.".format(flownum))
+            print(f"\n{flownum} information flow(s) found.")
 
     if args.stats:
         print("\nGraph statistics:")
         print(g.get_stats())
+
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
 
 except Exception as err:
     if args.debug:

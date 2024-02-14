@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
 from typing import Iterable, Optional, Tuple
 
 from .mixins import MatchContext
@@ -80,10 +79,6 @@ class IoportconQuery(MatchContext, PolicyQuery):
             self._ports = pending_ports
         else:
             self._ports = None
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(IoportconQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Ioportcon]:
         """Generator which yields all matching ioportcons."""

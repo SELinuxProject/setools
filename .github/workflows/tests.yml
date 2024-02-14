@@ -27,9 +27,9 @@ jobs:
 
       matrix:
         build-opts:
-          - {python: '3.9', tox: python3.9}
-          - {python: '3.10', tox: python3.10}
-          - {python: '3.11', tox: python3.11}
+          - {python: '3.10', tox: python3}
+          - {python: '3.11', tox: python3}
+          - {python: '3.12', tox: python3}
           - {python: '3.11', tox: pep8}
           - {python: '3.11', tox: lint}
           - {python: '3.11', tox: mypy}
@@ -54,10 +54,18 @@ jobs:
             gettext \
             libaudit-dev \
             libbz2-dev \
-            libpcre3-dev
+            libgraphviz-dev \
+            libpcre3-dev \
+            xvfb \
+            x11-xserver-utils
 
-        sudo python -m pip install -U \
+        python -m pip install -U --user \
             tox
+
+    # This is a curated list of packages to get Qt to work with xvfb in
+    # GitHub actions.  https://github.com/tlambert03/setup-qt-libs
+    - name: Install Qt dependencies
+      uses: tlambert03/setup-qt-libs@v1
 
     - name: Cache SELinux userspace
       uses: actions/cache@v3
@@ -70,14 +78,17 @@ jobs:
       if: ${{ steps.cache-userspace.outputs.cache-hit != 'true' }}
       run: |
         # Download current SELinux userspace tools and libraries
-        git clone https://github.com/SELinuxProject/selinux.git ${USERSPACE_SRC} -b ${SELINUX_USERSPACE_VERSION}
+        git clone https://github.com/SELinuxProject/selinux.git ${{env.USERSPACE_SRC}} -b ${{env.SELINUX_USERSPACE_VERSION}}
 
         # Compile SELinux userspace
-        make -C ${SEPOL_SRC}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" LDFLAGS="-L${SEPOL_SRC}/src" -C ${SELINUX_SRC}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${SEPOL_SRC}/include" -C ${CHECKPOLICY_SRC}
+        make -C ${{env.SEPOL_SRC}}
+        make CFLAGS="-O2 -pipe -fPIC -Wall -I${{env.SEPOL_SRC}}/include" LDFLAGS="-L${{env.SEPOL_SRC}}/src" -C ${{env.SELINUX_SRC}}
+        make CFLAGS="-O2 -pipe -fPIC -Wall -I${{env.SEPOL_SRC}}/include" -C ${{env.CHECKPOLICY_SRC}}
 
     - name: Run test
       run: |
-        export LD_LIBRARY_PATH="${SEPOL_SRC}/src:${SELINUX_SRC}/src:${LD_LIBRARY_PATH}"
-        tox -e ${{ matrix.build-opts.tox }}
+        # confirm python version
+        python --version
+        python -m tox -e ${{ matrix.build-opts.tox }}
+      env:
+        LD_LIBRARY_PATH: "${{env.SEPOL_SRC}}/src:${{env.SELINUX_SRC}}/src:${LD_LIBRARY_PATH}"

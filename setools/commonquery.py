@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import logging
-import re
 from typing import Iterable
 
 from .mixins import MatchName, MatchPermission
@@ -31,10 +29,6 @@ class CommonQuery(MatchPermission, MatchName, PolicyQuery):
     perms_regex  If true, regular expression matching will be used
                  on the permission names instead of set logic.
     """
-
-    def __init__(self, policy, **kwargs) -> None:
-        super(CommonQuery, self).__init__(policy, **kwargs)
-        self.log = logging.getLogger(__name__)
 
     def results(self) -> Iterable[Common]:
         """Generator which yields all matching commons."""
