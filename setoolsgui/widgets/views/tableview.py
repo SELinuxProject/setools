@@ -44,10 +44,10 @@ class SEToolsTableView(QtWidgets.QTableView):
         datamodel = self.model()
 
         selected_text = []
-        current_row = None
-        current_col = None
-        prev_row = None
-        prev_col = None
+        current_row: int = -1
+        current_col: int = -1
+        prev_row: int = -1
+        prev_col: int = -1
         for index in sorted(self.selectionModel().selectedIndexes()):
             current_row = index.row()
             current_col = index.column()

@@ -31,7 +31,7 @@ def display_object_details(title: str, html_text: str,
     buttonBox = QtWidgets.QDialogButtonBox(popup)
     buttonBox.setOrientation(QtCore.Qt.Orientation.Horizontal)
     buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.StandardButton.Close)
-    buttonBox.clicked.connect(popup.close)  # type: ignore
+    buttonBox.clicked.connect(popup.close)
     layout.addWidget(buttonBox)
 
     QtCore.QMetaObject.connectSlotsByName(popup)

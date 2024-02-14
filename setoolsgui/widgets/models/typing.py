@@ -13,10 +13,8 @@ AllStdDataTypes = str | QtGui.QColor | QtGui.QIcon | QtGui.QPixmap | QtCore.QSiz
 # This is the return type for the ModelRoles.ContextMenuRole role
 ContextMenuType = tuple[QtGui.QAction, ...]
 
-QObjectType: type = type(QtCore.QObject)
 
-
-class MetaclassFix(QObjectType, abc.ABC):
+class MetaclassFix(type(QtCore.QObject), abc.ABC):  # type: ignore[misc]
 
     """
     Fix metaclass issues.

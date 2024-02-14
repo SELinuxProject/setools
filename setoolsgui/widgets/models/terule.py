@@ -49,7 +49,7 @@ class TERuleTable(SEToolsTableModel[setools.AnyTERule]):
                             else:
                                 return ", ".join(sorted(rule.perms))  # type: ignore
                         except RuleUseError:
-                            return rule.default.name  # type: ignore
+                            return rule.default.name
                     case 5:
                         with suppress(RuleNotConditional):
                             return str(rule.conditional)

@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
+from . import typing
+
 from .boolean import *
 from .bounds import *
 from .common import *

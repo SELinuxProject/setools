@@ -9,7 +9,6 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import setools
 
 from . import criteria, exception, models, util, views
-from .models.typing import QObjectType
 from .queryupdater import QueryResultsUpdater
 
 # workspace settings keys
@@ -40,7 +39,7 @@ class AnalysisSection(enum.Enum):
     Rules = 6
 
 
-class TabRegistry(QObjectType):
+class TabRegistry(models.typing.MetaclassFix):
 
     """
     Analysis tab registry metaclass.  This registers tabs to be used both for

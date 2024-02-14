@@ -943,7 +943,7 @@ class ChooseAnalysis(QtWidgets.QDialog):
 
         # populate the analysis choices tree:
         self.analysis_choices = \
-            defaultdict[str, dict[str, widgets.tab.BaseAnalysisTabWidget]](dict)
+            defaultdict[str, dict[str, type[widgets.tab.BaseAnalysisTabWidget]]](dict)
         for clsobj in widgets.tab.TAB_REGISTRY.values():
             self.analysis_choices[clsobj.section.name][clsobj.tab_title] = clsobj
 

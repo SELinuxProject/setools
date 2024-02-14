@@ -203,7 +203,7 @@ class NameWidget(CriteriaWidget):
         # change line edit validator
         with suppress(AttributeError):  # May not have a validator
             if state:
-                self.criteria.setValidator(None)  # type: ignore
+                self.criteria.setValidator(None)
             else:
                 self.criteria.setValidator(self.exact_validator)
 

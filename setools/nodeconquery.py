@@ -87,7 +87,7 @@ class NodeconQuery(MatchContext, PolicyQuery):
 
             if self.network:
                 if self.network_overlap:
-                    if not self.network.overlaps(nodecon.network):  # type: ignore
+                    if not self.network.overlaps(nodecon.network):
                         continue
                 else:
                     if not nodecon.network == self.network:

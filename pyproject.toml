@@ -22,8 +22,25 @@ exclude_lines = ["pragma: no cover",
 # Mypy config
 #
 [tool.mypy]
-no_implicit_optional = true
+allow_redefinition = false
+allow_untyped_globals = false
+disallow_any_decorated = false
+disallow_any_explicit = false
+disallow_any_expr = false
+disallow_any_generics = false
+disallow_any_unimported = false
+disallow_subclassing_any = true
+implicit_optional = false
+local_partial_types = false
+strict_concatenate = true
+strict_equality = false
+strict_optional = true
 pretty = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = false
+warn_unreachable = true
 
 [[tool.mypy.overrides]]
 module = ['networkx.*',
