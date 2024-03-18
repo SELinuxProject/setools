@@ -63,6 +63,9 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         FlowsIn = "Flows into the target type."
         FlowsOut = "Flows out of the source type."
 
+    DIRECT_MODES: typing.Final[tuple[Mode, ...]] = (Mode.FlowsIn, Mode.FlowsOut)
+    TRANSITIVE_MODES: typing.Final[tuple[Mode, ...]] = (Mode.ShortestPaths, Mode.AllPaths)
+
     source = CriteriaDescriptor(lookup_function="lookup_type")
     target = CriteriaDescriptor(lookup_function="lookup_type")
     mode = Mode.ShortestPaths

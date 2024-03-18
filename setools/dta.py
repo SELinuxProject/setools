@@ -139,6 +139,9 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
         TransitionsOut = "Transitions out of the source domain."
         TransitionsIn = "Transitions into the target domain."
 
+    DIRECT_MODES: typing.Final[tuple[Mode, ...]] = (Mode.TransitionsIn, Mode.TransitionsOut)
+    TRANSITIVE_MODES: typing.Final[tuple[Mode, ...]] = (Mode.ShortestPaths, Mode.AllPaths)
+
     source = CriteriaDescriptor(lookup_function="lookup_type")
     target = CriteriaDescriptor(lookup_function="lookup_type")
     mode = Mode.ShortestPaths

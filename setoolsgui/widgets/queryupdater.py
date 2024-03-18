@@ -13,13 +13,14 @@ import setools
 from . import models
 
 Q = typing.TypeVar("Q", bound=setools.PolicyQuery)
+R = typing.TypeVar("R")  # type of result from query
 
 # The first parameter is the result counter and second parameter
 # is a single result to render.
 RenderFunction = typing.Callable[[int, typing.Any], str]
 
 
-class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
+class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q, R]):
 
     """
     Thread for processing basic queries and updating result widgets.
@@ -103,5 +104,56 @@ class QueryResultsUpdater(QtCore.QObject, typing.Generic[Q]):
 
         except Exception as e:
             msg = f"Unexpected exception during processing: {e}"
-            self.failed.emit(msg)
             self.log.exception(msg)
+            self.failed.emit(msg)
+
+
+A = typing.TypeVar("A", bound=setools.query.DirectedGraphAnalysis)
+N = typing.TypeVar("N")  # type of object for browser (graph node)
+ChildData = tuple[N, R]
+ChildrenData = list[ChildData]
+BrowserRenderFunction = typing.Callable[[A, R], ChildData]
+
+
+class BrowserUpdater(QtCore.QObject, typing.Generic[A, R, N]):
+
+    """Thread for processing additional analysis for the browser."""
+
+    failed = QtCore.pyqtSignal(str)
+    result = QtCore.pyqtSignal(list)
+
+    query: A
+    render: BrowserRenderFunction
+
+    def run(self) -> None:
+        try:
+            assert hasattr(self, "query"), "query attribute not set, this is an SETools bug"
+            assert hasattr(self, "render"), "render attribute not set, this is an SETools bug"
+            log = logging.getLogger(self.query.__module__)
+            log.debug(f"Starting browser update for {self.query=}")
+
+            this_thread = QtCore.QThread.currentThread()
+            # type narrowing:
+            assert this_thread, "Unable to get current thread, this is an SETools bug"
+
+            count: int = 0
+            child: list[R]
+            children: ChildrenData = []
+            for count, child in enumerate(self.query.results(), start=1):
+                # Generate results for flow browser
+                children.append(self.render(self.query, child))
+
+                if this_thread.isInterruptionRequested():
+                    break
+
+                if count % 10 == 0:
+                    # yield execution every 10 rules
+                    this_thread.yieldCurrentThread()
+
+            self.result.emit(children)
+            log.debug(f"Generated {count} total results for browser.")
+
+        except Exception as e:
+            msg = f"Unexpected exception during processing: {e}"
+            log.exception(msg)
+            self.failed.emit(msg)
