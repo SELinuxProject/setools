@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("PortconQueryTab",)
 
 
-class PortconQueryTab(tab.TableResultTabWidget):
+class PortconQueryTab(tab.TableResultTabWidget[setools.PortconQuery, setools.Portcon]):
 
     """A portcon query."""
 

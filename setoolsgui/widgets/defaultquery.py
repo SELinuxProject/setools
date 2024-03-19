@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("DefaultQueryTab",)
 
 
-class DefaultQueryTab(tab.TableResultTabWidget):
+class DefaultQueryTab(tab.TableResultTabWidget[setools.DefaultQuery, setools.Default]):
 
     """A default_* query."""
 

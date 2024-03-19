@@ -8,7 +8,8 @@ from . import criteria, models, tab
 __all__ = ("TypeAttributeQueryTab",)
 
 
-class TypeAttributeQueryTab(tab.TableResultTabWidget):
+class TypeAttributeQueryTab(tab.TableResultTabWidget[setools.TypeAttributeQuery,
+                                                     setools.TypeAttribute]):
 
     """A type attribute query."""
 

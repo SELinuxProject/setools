@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("UserQueryTab",)
 
 
-class UserQueryTab(tab.TableResultTabWidget):
+class UserQueryTab(tab.TableResultTabWidget[setools.UserQuery, setools.User]):
 
     """A user query."""
 

@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("CommonQueryTab",)
 
 
-class CommonQueryTab(tab.TableResultTabWidget):
+class CommonQueryTab(tab.TableResultTabWidget[setools.CommonQuery, setools.Common]):
 
     """A common permission set query."""
 

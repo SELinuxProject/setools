@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("ObjClassQueryTab",)
 
 
-class ObjClassQueryTab(tab.TableResultTabWidget):
+class ObjClassQueryTab(tab.TableResultTabWidget[setools.ObjClassQuery, setools.ObjClass]):
 
     """An object class query."""
 

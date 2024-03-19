@@ -6,7 +6,7 @@ import setools
 from . import criteria, models, tab
 
 
-class RBACRuleQueryTab(tab.TableResultTabWidget):
+class RBACRuleQueryTab(tab.TableResultTabWidget[setools.RBACRuleQuery, setools.AnyRBACRule]):
 
     """An RBAC rule query."""
 

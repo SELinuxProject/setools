@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("InitialSIDQueryTab",)
 
 
-class InitialSIDQueryTab(tab.TableResultTabWidget):
+class InitialSIDQueryTab(tab.TableResultTabWidget[setools.InitialSIDQuery, setools.InitialSID]):
 
     """An initial context (SID) query."""
 

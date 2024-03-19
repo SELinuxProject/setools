@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("RoleQueryTab",)
 
 
-class RoleQueryTab(tab.TableResultTabWidget):
+class RoleQueryTab(tab.TableResultTabWidget[setools.RoleQuery, setools.Role]):
 
     """A role query."""
 

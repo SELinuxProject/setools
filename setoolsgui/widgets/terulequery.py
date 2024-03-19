@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("TERuleQueryTab",)
 
 
-class TERuleQueryTab(tab.TableResultTabWidget):
+class TERuleQueryTab(tab.TableResultTabWidget[setools.TERuleQuery, setools.AnyTERule]):
 
     """A Type Enforcement rule query."""
 

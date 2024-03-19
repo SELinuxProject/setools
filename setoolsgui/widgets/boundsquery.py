@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("BoundsQueryTab",)
 
 
-class BoundsQueryTab(tab.TableResultTabWidget):
+class BoundsQueryTab(tab.TableResultTabWidget[setools.BoundsQuery, setools.Bounds]):
 
     """A bounds query."""
 

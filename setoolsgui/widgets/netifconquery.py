@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("NetifconQueryTab",)
 
 
-class NetifconQueryTab(tab.TableResultTabWidget):
+class NetifconQueryTab(tab.TableResultTabWidget[setools.NetifconQuery, setools.Netifcon]):
 
     """A netifcon query."""
 
