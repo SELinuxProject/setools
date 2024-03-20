@@ -196,7 +196,7 @@ try:
                 parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
 
             if len(pkeys) == 2:
-                ibpkq.pkeys = setools.IbpkeyconRange(pkeys)
+                ibpkq.pkeys = setools.IbpkeyconRange(*pkeys)
             elif len(pkeys) == 1:
                 ibpkq.pkeys = setools.IbpkeyconRange(pkeys[0], pkeys[0])
             else:
@@ -248,7 +248,7 @@ try:
                 parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
 
             if len(ports) == 2:
-                pcq.ports = setools.PortconRange(ports)
+                pcq.ports = setools.PortconRange(*ports)
             elif len(ports) == 1:
                 pcq.ports = setools.PortconRange(ports[0], ports[0])
             else:
