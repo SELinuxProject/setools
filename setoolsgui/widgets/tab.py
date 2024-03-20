@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
 from contextlib import suppress
+import copy
 import enum
 import logging
 import typing
@@ -9,7 +10,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 import setools
 
 from . import criteria, exception, models, util, views
-from .queryupdater import QueryResultsUpdater
+from .queryupdater import BrowserUpdater, ChildrenData, QueryResultsUpdater
 
 # workspace settings keys
 SETTINGS_NOTES: typing.Final[str] = "notes"
@@ -22,6 +23,9 @@ CRITERIA_DEFAULT_CHECKED: typing.Final[bool] = True
 NOTES_DEFAULT_CHECKED: typing.Final[bool] = False
 
 TAB_REGISTRY: typing.Final[dict[str, type["BaseAnalysisTabWidget"]]] = {}
+
+Q = typing.TypeVar("Q", bound=setools.PolicyQuery)
+R = typing.TypeVar("R")  # type of results from the query
 
 __all__ = ("AnalysisSection", "BaseAnalysisTabWidget", "TableResultTabWidget",
            "DirectedGraphResultTab", "TAB_REGISTRY")
@@ -354,7 +358,7 @@ class BaseAnalysisTabWidget(QtWidgets.QScrollArea, metaclass=TabRegistry):
             self.criteria_expander.setChecked(settings[SETTINGS_SHOW_CRITERIA])
 
 
-class TableResultTabWidget(BaseAnalysisTabWidget):
+class TableResultTabWidget(BaseAnalysisTabWidget, typing.Generic[Q, R]):
 
     """
     Application top-level analysis tab that provides a QTabWidget with tabs for results
@@ -374,13 +378,13 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         Table = 0
         Text = 1
 
-    def __init__(self, query: setools.PolicyQuery, /, *,
+    def __init__(self, query: Q, /, *,
                  enable_criteria: bool = True, enable_browser: bool = False,
                  parent: QtWidgets.QWidget | None = None) -> None:
 
         super().__init__(query, enable_criteria=enable_criteria,
                          enable_browser=enable_browser, parent=parent)
-        self.query: typing.Final = query
+        self.query: typing.Final[Q] = query
 
         # results as 2 tab
         self.results = QtWidgets.QTabWidget(self.analysis_widget)
@@ -461,7 +465,7 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
         """Set the table results model for this tab and set up the processing thread for it."""
         self.sort_proxy.setSourceModel(model)
 
-        self.worker = QueryResultsUpdater(self.query, table_model=model)
+        self.worker = QueryResultsUpdater[Q, R](self.query, table_model=model)
         self.worker.moveToThread(self.processing_thread)
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
         self.worker.finished.connect(self.query_completed)
@@ -532,9 +536,10 @@ class TableResultTabWidget(BaseAnalysisTabWidget):
 
 
 DGA = typing.TypeVar("DGA", bound=setools.query.DirectedGraphAnalysis)
+N = typing.TypeVar("N", bound=setools.policyrep.PolicyObject)  # type of nodes in the graph
 
 
-class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
+class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA, R, N]):
 
     """
     Application top-level analysis tab that provides a QTabWidget with tabs for results
@@ -607,19 +612,51 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         #
         # Create tree browser tab
         #
-        self.tree_results = views.SEToolsTreeWidget(self.results)
+        self.tree_widget = QtWidgets.QWidget(self.results)
+        self.results.addTab(self.tree_widget, "Tree Results")
+        self.results.setTabWhatsThis(
+            DirectedGraphResultTab.ResultTab.Tree,
+            "<b>This tab has the tree-based results of the query.</b>")
+        self.tree_layout = QtWidgets.QHBoxLayout(self.tree_widget)
+        self.tree_widget.setLayout(self.tree_layout)
+
+        # tree widget
+        self.tree_results = views.SEToolsTreeWidget(self.tree_widget)
         self.tree_results.setObjectName("tree_results")
-        self.tree_results.setSizePolicy(sizePolicy)
         self.tree_results.setSizeAdjustPolicy(
             QtWidgets.QAbstractScrollArea.SizeAdjustPolicy.AdjustIgnored)
         self.tree_results.setAlternatingRowColors(True)
         self.tree_results.setSortingEnabled(True)
+        self.tree_results.setItemsExpandable(True)
+        self.tree_results.sortItems(0, QtCore.Qt.SortOrder.AscendingOrder)
         self.tree_results.setWhatsThis(
             "<b>This tab has the tree-based results of the query.</b>")
-        self.results.addTab(self.tree_results, "Tree Results")
-        self.results.setTabWhatsThis(
-            DirectedGraphResultTab.ResultTab.Tree,
-            "<b>This tab has the tree-based results of the query.</b>")
+        self.tree_results.currentItemChanged.connect(self._selection_changed)
+        self.tree_layout.addWidget(self.tree_results)
+
+        tree_results_sp = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+                                                QtWidgets.QSizePolicy.Policy.Preferred)
+        tree_results_sp.setHorizontalStretch(1)
+        tree_results_sp.setVerticalStretch(0)
+        tree_results_sp.setHeightForWidth(self.tree_results.sizePolicy().hasHeightForWidth())
+        self.tree_results.setSizePolicy(sizePolicy)
+
+        # tree raw results
+        self.tree_raw_results = QtWidgets.QPlainTextEdit(self.results)
+        self.tree_raw_results.setObjectName("raw_results")
+        self.tree_raw_results.setDocumentTitle("")
+        self.tree_raw_results.setLineWrapMode(QtWidgets.QPlainTextEdit.LineWrapMode.NoWrap)
+        self.tree_raw_results.setReadOnly(True)
+        self.tree_raw_results.setWhatsThis("<b>This tab has plain text results of the query.</b>")
+        self.tree_layout.addWidget(self.tree_raw_results)
+
+        tree_raw_results_sp = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred,
+                                                    QtWidgets.QSizePolicy.Policy.MinimumExpanding)
+        tree_raw_results_sp.setHorizontalStretch(2)
+        tree_raw_results_sp.setVerticalStretch(0)
+        tree_raw_results_sp.setHeightForWidth(
+            self.tree_raw_results.sizePolicy().hasHeightForWidth())
+        self.tree_raw_results.setSizePolicy(tree_raw_results_sp)
 
         #
         # Create text result tab
@@ -638,8 +675,9 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         # set initial tab
         self.results.setCurrentIndex(DirectedGraphResultTab.ResultTab.Graph)
 
-        # set up processing thread
+        # set up processing threads
         self.processing_thread = QtCore.QThread(self.analysis_widget)
+        self.browser_thread = QtCore.QThread(self.analysis_widget)
 
         # create a "busy, please wait" dialog
         self.busy = QtWidgets.QProgressDialog(self.analysis_widget)
@@ -650,7 +688,8 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         self.busy.reset()
 
         # set up results worker
-        self.worker = QueryResultsUpdater[DGA](self.query, graphics_buffer=self.graphical_results)
+        self.worker = QueryResultsUpdater[DGA, R](self.query,
+                                                  graphics_buffer=self.graphical_results)
         self.worker.moveToThread(self.processing_thread)
         self.worker.raw_line.connect(self.raw_results.appendPlainText)
         self.worker.finished.connect(self.query_completed)
@@ -659,20 +698,23 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
         self.worker.failed.connect(self.processing_thread.quit)
         self.processing_thread.started.connect(self.worker.update)
 
+        # set up browser worker
+        self.browser_worker = BrowserUpdater[DGA, R, N]()
+        self.browser_worker.moveToThread(self.browser_thread)
+        self.browser_worker.result.connect(self._add_browser_children)
+        self.browser_worker.result.connect(self.browser_thread.quit)
+        self.browser_worker.failed.connect(self._browser_worker_failed)
+        self.browser_worker.failed.connect(self.browser_thread.quit)
+        self.browser_thread.started.connect(self.browser_worker.run)
+
     def __del__(self):
         with suppress(RuntimeError):
             self.processing_thread.quit()
             self.processing_thread.wait(5000)
 
-    @property
-    def tree_results_model(self) -> models.SEToolsTableModel:
-        return typing.cast(models.SEToolsTableModel, self.tree_results.model())
-
-    @tree_results_model.setter
-    def tree_results_model(self, model: models.SEToolsTableModel) -> None:
-        self.tree_results.setModel(model)
-        self.worker.table_model = model
-
+    #
+    # Graphical results methods
+    #
     def _graphical_results_context_menu(self, pos: QtCore.QPoint) -> None:
         """Generate context menu for graphical results widget."""
         save_action = QtGui.QAction("Save As...", self.graphical_results)
@@ -700,6 +742,104 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
                     raise RuntimeError(f"Failed to save graphical results to {filename}.")
 
     #
+    # Tree browser methods
+    #
+    class ItemData(enum.IntEnum):
+
+        """
+        User data enumeration for the QTreeWidgetItems.  This is to cleanly store
+        relevant info for the browser.  Only the policy object (typically type)
+        will be visible to the user.
+        """
+
+        PolicyObject = models.ModelRoles.PolicyObjRole
+        Rules = len(models.ModelRoles) + 1
+        ChildrenPopulated = len(models.ModelRoles) + 2
+        Children = len(models.ModelRoles) + 3
+
+    def _add_browser_children(self, children: list[tuple[N, list[R]]]) -> None:
+        item = self.tree_results.currentItem()
+        assert item, "No item selected, this is an SETools bug"  # type narrowing
+        item.setData(0, self.ItemData.Children, children)
+
+        for child_type, child_rules in children:
+            child_item = self._create_browser_item(child_type, item, rules=child_rules)
+            item.addChild(child_item)
+
+        item.setData(0, self.ItemData.ChildrenPopulated, True)
+        self.busy.reset()
+
+    def _add_root_item(self) -> QtWidgets.QTreeWidgetItem | None:
+        """
+        Add the root item to the tree widget, if applicable.
+
+        The implementation must:
+        1. Create the root item in the tree browser when applicable
+        """
+        raise NotImplementedError
+
+    def _browser_worker_failed(self, message: str) -> None:
+        self.busy.reset()
+        self.setStatusTip(f"Error: {message}.")
+
+        QtWidgets.QMessageBox.critical(
+            self, "Error", message, QtWidgets.QMessageBox.StandardButton.Ok)
+
+    def _create_browser_item(self, obj: N, /,
+                             parent_item: QtWidgets.QTreeWidgetItem | None = None, *,
+                             rules: list[R] | None = None,
+                             children: ChildrenData | None = None) -> QtWidgets.QTreeWidgetItem:
+
+        item = QtWidgets.QTreeWidgetItem(parent_item if parent_item else None)
+        item.setText(0, str(obj))
+        item.setData(0, self.ItemData.PolicyObject, obj)
+
+        rules = rules if rules else []
+        item.setData(0, self.ItemData.Rules, rules)
+
+        item.setData(0, self.ItemData.ChildrenPopulated, children is not None)
+
+        children = children if children else []
+        item.setData(0, self.ItemData.Children, children)
+
+        # add child items
+        child_obj: N
+        child_rules: list[R]
+        for child_obj, child_rules in children:
+            item.addChild(self._create_browser_item(child_obj, item, rules=child_rules))
+
+        item.setExpanded(children is not None)
+
+        self.log.debug(f"Built item for {obj} with {len(children)} children.")
+
+        return item
+
+    def _populate_children(self, item: QtWidgets.QTreeWidgetItem) -> None:
+        """Populate the children of the selected item."""
+        raise NotImplementedError
+
+    def _selection_changed(self, current_item: QtWidgets.QTreeWidgetItem,
+                           previous_item: QtWidgets.QTreeWidgetItem) -> None:
+        """Display the analysis data for the selected index."""
+        if not current_item:
+            # browser is being reset
+            return
+
+        self.log.debug(f"Selection changed: {current_item=} {previous_item=}")
+        current_obj: N = current_item.data(0, self.ItemData.PolicyObject)
+        self.log.debug(f"{current_obj} selected in browser.")
+        self.tree_raw_results.clear()
+
+        parent_item = current_item.parent()
+        if parent_item:
+            rules: list[R] = current_item.data(0, self.ItemData.Rules)
+            self.tree_raw_results.appendPlainText(str(rules))
+            self.tree_raw_results.moveCursor(QtGui.QTextCursor.MoveOperation.Start)
+
+        if not current_item.data(0, self.ItemData.ChildrenPopulated):
+            self._populate_children(current_item)
+
+    #
     # Start/end of processing
     #
 
@@ -715,6 +855,8 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
 
         self.busy.setLabelText("Processing query...")
         self.busy.show()
+        self.tree_results.clear()
+        self.tree_raw_results.clear()
         self.raw_results.clear()
         self.processing_thread.start()
 
@@ -728,6 +870,12 @@ class DirectedGraphResultTab(BaseAnalysisTabWidget, typing.Generic[DGA]):
             self.raw_results.moveCursor(QtGui.QTextCursor.MoveOperation.Start)
 
         self.busy.reset()
+
+        # copy query to the worker now in case the user reconfigures the query
+        # but has not run it yet.  The most recent query run should continue to
+        # be used in the browser.
+        self.browser_worker.query = copy.copy(self.query)
+        self._add_root_item()
 
     def query_failed(self, message: str) -> None:
         self.busy.reset()
@@ -762,9 +910,12 @@ if __name__ == '__main__':
     tw.addTab(widget1, "BaseAnalysisTabWidget w/criteria")
     widget2 = BaseAnalysisTabWidget(None, enable_criteria=False, parent=tw)
     tw.addTab(widget2, "BaseAnalysisTabWidget w/o criteria")
-    widget3 = TableResultTabWidget(q, parent=tw)
+    widget3 = TableResultTabWidget[setools.TERuleQuery,
+                                   setools.AnyTERule](q, parent=tw)
     tw.addTab(widget3, "TableResultTabWidget")
-    widget4 = DirectedGraphResultTab(a, parent=tw)
+    widget4 = DirectedGraphResultTab[setools.InfoFlowAnalysis,
+                                     setools.Type,
+                                     setools.AVRule](a, parent=tw)
     tw.addTab(widget4, "GraphResultTabWidget w/criteria")
 
     mw.resize(1024, 768)

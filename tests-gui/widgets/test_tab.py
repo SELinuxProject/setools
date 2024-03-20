@@ -5,6 +5,7 @@ from PyQt6 import QtWidgets
 import pytest
 from pytestqt.qtbot import QtBot
 
+import setools
 from setoolsgui.widgets import tab
 
 
@@ -26,7 +27,7 @@ def table_widget(mock_policy, request: pytest.FixtureRequest,
     """Pytest fixture to set up the TableResultTabWidget widget."""
     marker = request.node.get_closest_marker("obj_args")
     kwargs = marker.kwargs if marker else {}
-    w = tab.TableResultTabWidget(mock_policy, **kwargs)
+    w = tab.TableResultTabWidget[setools.TERuleQuery, setools.AnyTERule](mock_policy, **kwargs)
     qtbot.addWidget(w)
     w.show()
     return w

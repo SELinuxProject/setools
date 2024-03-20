@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("ConstraintQueryTab",)
 
 
-class ConstraintQueryTab(tab.TableResultTabWidget):
+class ConstraintQueryTab(tab.TableResultTabWidget[setools.ConstraintQuery, setools.AnyConstraint]):
 
     """A constraint query."""
 

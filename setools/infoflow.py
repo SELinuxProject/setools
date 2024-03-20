@@ -5,9 +5,10 @@
 import enum
 import itertools
 import logging
+from collections.abc import Iterable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass, InitVar
-from typing import cast, Iterable, List, Mapping, Optional, Union
+import typing
 import warnings
 
 try:
@@ -59,22 +60,25 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
         ShortestPaths = "All shortest paths"
         AllPaths = "All paths up to"  # N steps
-        FlowsIn = "Flows into the target type."
         FlowsOut = "Flows out of the source type."
+        FlowsIn = "Flows into the target type."
+
+    DIRECT_MODES: typing.Final[tuple[Mode, ...]] = (Mode.FlowsIn, Mode.FlowsOut)
+    TRANSITIVE_MODES: typing.Final[tuple[Mode, ...]] = (Mode.ShortestPaths, Mode.AllPaths)
 
     source = CriteriaDescriptor(lookup_function="lookup_type")
     target = CriteriaDescriptor(lookup_function="lookup_type")
     mode = Mode.ShortestPaths
-    booleans: Optional[Mapping[str, bool]]
+    booleans: Mapping[str, bool] | None
 
     def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, /, *,
                  min_weight: int = 1,
-                 source: Optional[Union[Type, str]] = None,
-                 target: Optional[Union[Type, str]] = None,
+                 source: Type | str | None = None,
+                 target: Type | str | None = None,
                  mode: Mode = Mode.ShortestPaths,
                  depth_limit: int | None = 1,
-                 exclude: Optional[Iterable[Union[Type, str]]] = None,
-                 booleans: Optional[Mapping[str, bool]] = None) -> None:
+                 exclude: Iterable[Type | str] | None = None,
+                 booleans: Mapping[str, bool] | None = None) -> None:
 
         super().__init__(policy, perm_map=perm_map, min_weight=min_weight, source=source,
                          target=target, mode=mode, depth_limit=depth_limit,
@@ -132,13 +136,13 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         self.rebuildsubgraph = True
 
     @property
-    def exclude(self) -> List[Type]:
+    def exclude(self) -> list[Type]:
         return self._exclude
 
     @exclude.setter
-    def exclude(self, types: Optional[Iterable[Union[Type, str]]]) -> None:
+    def exclude(self, types: Iterable[Type | str] | None) -> None:
         if types:
-            self._exclude: List[Type] = [self.policy.lookup_type(t) for t in types]
+            self._exclude: list[Type] = [self.policy.lookup_type(t) for t in types]
         else:
             self._exclude = []
 
@@ -279,8 +283,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
             raise exception.AnalysisException(
                 f"Unable to generate graphical results: {ex}") from ex
 
-    def shortest_path(self, source: Union[Type, str], target: Union[Type, str]) \
-            -> Iterable[InfoFlowPath]:
+    def shortest_path(self, source: Type | str, target: Type | str) -> InfoFlowPath:
         """
         Generator which yields one shortest path between the source
         and target types (there may be more).
@@ -305,8 +308,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating one shortest information flow path from {0} to {1}...".
-                      format(s, t))
+        self.log.info(f"Generating one shortest information flow path from {s} to {t}...")
 
         with suppress(NetworkXNoPath, NodeNotFound):
             # NodeNotFound: the type is valid but not in graph, e.g.
@@ -314,9 +316,9 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
             # pylint: disable=unexpected-keyword-arg, no-value-for-parameter
-            yield self.__generate_steps(nx.shortest_path(self.subG, source=s, target=t))
+            yield from self._generate_steps(nx.shortest_path(self.subG, source=s, target=t))
 
-    def all_paths(self, source: Union[Type, str], target: Union[Type, str], maxlen: int = 2) \
+    def all_paths(self, source: Type | str, target: Type | str, maxlen: int = 2) \
             -> Iterable[InfoFlowPath]:
         """
         Generator which yields all paths between the source and target
@@ -348,8 +350,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all information flow paths from {0} to {1}, max length {2}...".
-                      format(s, t, maxlen))
+        self.log.info(
+            f"Generating all information flow paths from {s} to {t}, max length {maxlen}...")
 
         with suppress(NetworkXNoPath, NodeNotFound):
             # NodeNotFound: the type is valid but not in graph, e.g.
@@ -357,10 +359,9 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
             for path in nx.all_simple_paths(self.subG, s, t, maxlen):
-                yield self.__generate_steps(path)
+                yield self._generate_steps(path)
 
-    def all_shortest_paths(self, source: Union[Type, str], target: Union[Type, str]) \
-            -> Iterable[InfoFlowPath]:
+    def all_shortest_paths(self, source: Type | str, target: Type | str) -> Iterable[InfoFlowPath]:
         """
         Generator which yields all shortest paths between the source
         and target types.
@@ -385,8 +386,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all shortest information flow paths from {0} to {1}...".
-                      format(s, t))
+        self.log.info(f"Generating all shortest information flow paths from {s} to {t}...")
 
         with suppress(NetworkXNoPath, NodeNotFound):
             # NodeNotFound: the type is valid but not in graph, e.g.
@@ -394,9 +394,9 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
             # NetworkXNoPath: no paths or the target type is
             # not in the graph
             for path in nx.all_shortest_paths(self.subG, s, t):
-                yield self.__generate_steps(path)
+                yield self._generate_steps(path)
 
-    def infoflows(self, type_: Union[Type, str], out: bool = True) -> Iterable['InfoFlowStep']:
+    def infoflows(self, type_: Type | str, out: bool = True) -> Iterable['InfoFlowStep']:
         """
         Generator which yields all information flows in/out of a
         specified source type.
@@ -422,8 +422,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         if self.rebuildsubgraph:
             self._build_subgraph()
 
-        self.log.info("Generating all information flows {0} {1}".
-                      format("out of" if out else "into", s))
+        self.log.info(f"Generating all information flows {'out of' if out else 'into'} {s}")
 
         with suppress(NetworkXError):
             # NetworkXError: the type is valid but not in graph, e.g.
@@ -454,7 +453,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
     # Internal functions follow
     #
 
-    def __generate_steps(self, path: List[Type]) -> InfoFlowPath:
+    def _generate_steps(self, path: list[Type]) -> InfoFlowPath:
         """
         Generator which returns the source, target, and associated rules
         for each information flow step.
@@ -488,18 +487,18 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
     def _build_graph(self) -> None:
         self.G.clear()
-        self.G.name = "Information flow graph for {0}.".format(self.policy)
+        self.G.name = f"Information flow graph for {self.policy}."
 
         self.perm_map.map_policy(self.policy)
 
-        self.log.info("Building information flow graph from {0}...".format(self.policy))
+        self.log.info(f"Building information flow graph from {self.policy}...")
         self.log.debug(f"{self.perm_map=}")
 
         for rule in self.policy.terules():
             if rule.ruletype != TERuletype.allow:
                 continue
 
-            weight = self.perm_map.rule_weight(cast(AVRule, rule))
+            weight = self.perm_map.rule_weight(typing.cast(AVRule, rule))
 
             for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                 # only add flows if they actually flow
@@ -518,19 +517,17 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         self.rebuildgraph = False
         self.rebuildsubgraph = True
         self.log.info("Completed building information flow graph.")
-        self.log.debug("Graph stats: nodes: {0}, edges: {1}.".format(
-            nx.number_of_nodes(self.G),
-            nx.number_of_edges(self.G)))
+        self.log.debug(f"Graph stats: nodes: {nx.number_of_nodes(self.G)}, "
+                       f"edges: {nx.number_of_edges(self.G)}.")
 
     def _build_subgraph(self) -> None:
         if self.rebuildgraph:
             self._build_graph()
 
         self.log.info("Building information flow subgraph...")
-        self.log.debug("Excluding {0!r}".format(self.exclude))
-        self.log.debug("Min weight {0}".format(self.min_weight))
-        self.log.debug("Exclude disabled conditional policy: {0}".format(
-            self.booleans is not None))
+        self.log.debug(f"{self.min_weight=}")
+        self.log.debug(f"{self.exclude=}")
+        self.log.debug(f"{self.booleans=}")
 
         # delete excluded types from subgraph
         nodes = [n for n in self.G.nodes() if n not in self.exclude]
@@ -560,7 +557,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                     if not rule.enabled(**self.booleans):
                         rule_list.append(rule)
 
-                deleted_rules: List[AVRule] = []
+                deleted_rules: list[AVRule] = []
                 for rule in rule_list:
                     if rule not in deleted_rules:
                         edge.rules.remove(rule)
@@ -573,9 +570,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
         self.rebuildsubgraph = False
         self.log.info("Completed building information flow subgraph.")
-        self.log.debug("Subgraph stats: nodes: {0}, edges: {1}.".format(
-            nx.number_of_nodes(self.subG),
-            nx.number_of_edges(self.subG)))
+        self.log.debug(f"Subgraph stats: nodes: {nx.number_of_nodes(self.subG)}, "
+                       f"edges: {nx.number_of_edges(self.subG)}.")
 
 
 @dataclass

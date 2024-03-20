@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("IbpkeyconQueryTab",)
 
 
-class IbpkeyconQueryTab(tab.TableResultTabWidget):
+class IbpkeyconQueryTab(tab.TableResultTabWidget[setools.IbpkeyconQuery, setools.Ibpkeycon]):
 
     """A ibpkeycon query."""
 

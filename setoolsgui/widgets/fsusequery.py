@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("FSUseQueryTab",)
 
 
-class FSUseQueryTab(tab.TableResultTabWidget):
+class FSUseQueryTab(tab.TableResultTabWidget[setools.FSUseQuery, setools.FSUse]):
 
     """An fs_use_* query."""
 

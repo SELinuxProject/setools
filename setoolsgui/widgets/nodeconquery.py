@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("NodeconQueryTab",)
 
 
-class NodeconQueryTab(tab.TableResultTabWidget):
+class NodeconQueryTab(tab.TableResultTabWidget[setools.NodeconQuery, setools.Nodecon]):
 
     """A nodecon query."""
 

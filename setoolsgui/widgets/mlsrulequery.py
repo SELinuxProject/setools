@@ -6,7 +6,7 @@ import setools
 from . import criteria, models, tab
 
 
-class MLSRuleQueryTab(tab.TableResultTabWidget):
+class MLSRuleQueryTab(tab.TableResultTabWidget[setools.MLSRuleQuery, setools.MLSRule]):
 
     """An MLS rule query."""
 

@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("BoolQueryTab",)
 
 
-class BoolQueryTab(tab.TableResultTabWidget):
+class BoolQueryTab(tab.TableResultTabWidget[setools.BoolQuery, setools.Boolean]):
 
     """A boolean query."""
 

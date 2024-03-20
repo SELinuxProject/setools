@@ -32,7 +32,9 @@ SETTINGS_EXCLUDE_TYPES: typing.Final[str] = "exclude_types"
 HELP_PAGE: typing.Final[str] = "widgets/infoflow.html"
 
 
-class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
+class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis,
+                                                     setools.InfoFlowStep | setools.InfoFlowPath,
+                                                     setools.Type]):
 
     """An information flow analysis."""
 
@@ -135,8 +137,36 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         # Save widget references
         self.criteria = (src, dst, modeframe, optframe)
 
-        # Set result table's model
-        # self.tree_results_model = models.MLSRuleTable(self.table_results)
+        # final config for DirectedGraphResultTab widgets
+        self.tree_results.setHeaderLabel("Type")
+        self.browser_worker.render = InfoFlowAnalysisTab._browser_entry_prep
+
+    def _add_root_item(self) -> QtWidgets.QTreeWidgetItem | None:
+        """Results completed, add top level item if applicable."""
+        root: setools.Type | None
+        query = self.browser_worker.query
+        match query.mode:
+            case setools.InfoFlowAnalysis.Mode.FlowsIn:
+                root = query.target
+            case setools.InfoFlowAnalysis.Mode.FlowsOut:
+                root = query.source
+            case _:
+                root = None
+
+        item: QtWidgets.QTreeWidgetItem | None = None
+        if root:
+            self.log.debug(f"Adding tree root item {root}")
+            item = self._create_browser_item(root)
+            self.tree_results.addTopLevelItem(item)
+            self.tree_results.setCurrentItem(item)
+            self.tree_results.expandItem(item)
+        else:
+            assert query.mode not in self.query.DIRECT_MODES, \
+                f"No tree root item to add for {query.mode=}, " \
+                "this is an SETools bug."
+            self.log.debug("No tree root item to add.")
+
+        return item
 
     def _apply_mode_change(self, mode: setools.InfoFlowAnalysis.Mode) -> None:
         """Reconfigure after an analysis mode change."""
@@ -144,7 +174,7 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         # renderer based on the mode.
         self.log.debug(f"Handling mode change to {mode}.")
         results = typing.cast(QtWidgets.QTabWidget, self.results)
-        if mode in (setools.InfoFlowAnalysis.Mode.FlowsIn, setools.InfoFlowAnalysis.Mode.FlowsOut):
+        if mode in self.query.DIRECT_MODES:
             results.setTabEnabled(tab.DirectedGraphResultTab.ResultTab.Tree, True)
             self.worker.render = InfoFlowAnalysisTab.render_direct_path
         else:
@@ -156,6 +186,38 @@ class InfoFlowAnalysisTab(tab.DirectedGraphResultTab[setools.InfoFlowAnalysis]):
         assert isinstance(self.query, setools.InfoFlowAnalysis)  # type narrowing
         self.log.debug(f"Setting result limit to {value} flows.")
         self.worker.result_limit = value
+
+    @staticmethod
+    def _browser_entry_prep(query: setools.InfoFlowAnalysis,
+                            flow: setools.InfoFlowStep,
+                            ) -> tuple[setools.Type, setools.InfoFlowStep]:
+        """Prepare the browser worker for the query."""
+        child: setools.Type
+        match query.mode:
+            case setools.InfoFlowAnalysis.Mode.FlowsIn:
+                child = flow.source
+            case setools.InfoFlowAnalysis.Mode.FlowsOut:
+                child = flow.target
+            case _:
+                raise ValueError(f"Invalid mode {query.mode=}, this is an SETools bug.")
+
+        return child, flow
+
+    def _populate_children(self, item: QtWidgets.QTreeWidgetItem) -> None:
+        obj: setools.Type = item.data(0, self.ItemData.PolicyObject)
+        query = self.browser_worker.query
+        assert query.mode in query.DIRECT_MODES, \
+            f"Invalid browser mode {query.mode=}, this is an SETools bug."
+        self.log.debug(f"Populating children of {obj}")
+
+        # reconfigure browser worker's query for this item
+        match query.mode:
+            case setools.InfoFlowAnalysis.Mode.FlowsIn:
+                query.target = obj
+            case setools.InfoFlowAnalysis.Mode.FlowsOut:
+                query.source = obj
+
+        self.browser_thread.start()
 
     def _show_help(self) -> None:
         """Show help dialog."""

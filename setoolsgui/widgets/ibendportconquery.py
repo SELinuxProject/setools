@@ -8,7 +8,8 @@ from . import criteria, models, tab
 __all__ = ("IbendportconQueryTab",)
 
 
-class IbendportconQueryTab(tab.TableResultTabWidget):
+class IbendportconQueryTab(tab.TableResultTabWidget[setools.IbendportconQuery,
+                                                    setools.Ibendportcon]):
 
     """A ibendportcon query."""
 

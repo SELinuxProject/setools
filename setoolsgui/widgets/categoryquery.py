@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("CategoryQueryTab",)
 
 
-class CategoryQueryTab(tab.TableResultTabWidget):
+class CategoryQueryTab(tab.TableResultTabWidget[setools.CategoryQuery, setools.Category]):
 
     """A category query."""
 

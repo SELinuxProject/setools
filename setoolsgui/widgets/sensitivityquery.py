@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("SensitivityQueryTab",)
 
 
-class SensitivityQueryTab(tab.TableResultTabWidget):
+class SensitivityQueryTab(tab.TableResultTabWidget[setools.SensitivityQuery, setools.Sensitivity]):
 
     """A sensitivity query."""
 

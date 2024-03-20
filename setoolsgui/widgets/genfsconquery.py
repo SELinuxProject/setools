@@ -8,7 +8,7 @@ from . import criteria, models, tab
 __all__ = ("GenfsconQueryTab",)
 
 
-class GenfsconQueryTab(tab.TableResultTabWidget):
+class GenfsconQueryTab(tab.TableResultTabWidget[setools.GenfsconQuery, setools.Genfscon]):
 
     """An genfscon query."""
 
