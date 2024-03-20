@@ -60,8 +60,8 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
         ShortestPaths = "All shortest paths"
         AllPaths = "All paths up to"  # N steps
-        FlowsIn = "Flows into the target type."
         FlowsOut = "Flows out of the source type."
+        FlowsIn = "Flows into the target type."
 
     DIRECT_MODES: typing.Final[tuple[Mode, ...]] = (Mode.FlowsIn, Mode.FlowsOut)
     TRANSITIVE_MODES: typing.Final[tuple[Mode, ...]] = (Mode.ShortestPaths, Mode.AllPaths)
