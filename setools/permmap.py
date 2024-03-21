@@ -13,7 +13,6 @@ from typing import cast, Dict, Final, Iterable, Union
 
 from . import exception
 from .descriptors import PermissionMapDescriptor
-from .mixins import TupleCompat
 from .policyrep import AVRule, SELinuxPolicy, TERuletype
 
 # This is the filename in the Python package
@@ -25,7 +24,7 @@ MAX_WEIGHT: Final[int] = 10
 
 
 @dataclass
-class RuleWeight(TupleCompat):
+class RuleWeight:
 
     """The read and write weights for a rule, given all of its permissions."""
 
