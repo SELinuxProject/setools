@@ -1,9 +1,23 @@
+*setools-4.5.0 (21 Mar 2024)
+
+  * Rework apol to fully generate the UI programmatically.
+  * Update apol to PyQt6
+  * Add graphical results for information flow analysis and domain
+    transition analysis, available in apol, sedta, and seinfoflow.
+  * Replace deprecated uses of pkg_resources and distutils.
+  * Add tooltips, What's This?, and detail popups in apol to help
+    cross-referencing query and analysis results along with
+    context-sensitive help.
+  * Begin adding unit tests for apol UI.
+
 *setools-4-4.4 (07 Dec 2023)
+
   * Update for compiling with libsepol 3.6.
   * Update apol to use fully specified PyQt enums.
   * Correct minor code lint issues.
 
 *setools-4-4.3 (27 Jul 2023)
+
   * Fix compilation with Cython 3.0.0.
   * Improve man pages.
   * Remove neverallow options in sediff.
