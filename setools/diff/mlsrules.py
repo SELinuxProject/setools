@@ -45,8 +45,8 @@ class MLSRulesDifference(Difference):
         """Generate the difference in range_transition rules between the policies."""
 
         self.log.info(
-            "Generating range_transition differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating range_transition differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         if self._left_mls_rules is None or self._right_mls_rules is None:
             self._create_mls_rule_lists()
@@ -82,12 +82,12 @@ class MLSRulesDifference(Difference):
         # do not expand yet, to keep memory
         # use down as long as possible
         self._left_mls_rules = defaultdict(list)
-        self.log.debug("Building MLS rule lists from {0.left_policy}".format(self))
+        self.log.debug(f"Building MLS rule lists from {self.left_policy}")
         for rule in self.left_policy.mlsrules():
             self._left_mls_rules[rule.ruletype].append(rule)
 
         self._right_mls_rules = defaultdict(list)
-        self.log.debug("Building MLS rule lists from {0.right_policy}".format(self))
+        self.log.debug(f"Building MLS rule lists from {self.right_policy}")
         for rule in self.right_policy.mlsrules():
             self._right_mls_rules[rule.ruletype].append(rule)
 

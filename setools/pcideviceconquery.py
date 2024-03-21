@@ -53,7 +53,7 @@ class PcideviceconQuery(MatchContext, PolicyQuery):
     def device(self, value: Optional[int]) -> None:
         if value:
             if value < 1:
-                raise ValueError("PCI device ID must be positive: {0}".format(value))
+                raise ValueError(f"PCI device ID must be positive: {value}")
 
             self._device = value
         else:
@@ -61,8 +61,8 @@ class PcideviceconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Pcidevicecon]:
         """Generator which yields all matching pcidevicecons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Device ID: {0.device!r}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.device=}")
         self._match_context_debug(self.log)
 
         for pcidevicecon in self.policy.pcidevicecons():

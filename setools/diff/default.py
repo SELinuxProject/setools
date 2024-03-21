@@ -38,8 +38,7 @@ class DefaultsDifference(Difference):
         """Generate the difference in type defaults between the policies."""
 
         self.log.info(
-            "Generating default_* differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating default_* differences from {self.left_policy} to {self.right_policy}")
 
         self.added_defaults, self.removed_defaults, matched_defaults = self._set_diff(
             (DefaultWrapper(d) for d in self.left_policy.defaults()),

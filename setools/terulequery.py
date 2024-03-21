@@ -93,10 +93,10 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
 
             for low, high in value:
                 if not (0 <= low <= 0xffff):
-                    raise ValueError("{0:#07x} is not a valid ioctl.".format(low))
+                    raise ValueError(f"{low:#07x} is not a valid ioctl.")
 
                 if not (0 <= high <= 0xffff):
-                    raise ValueError("{0:#07x} is not a valid ioctl.".format(high))
+                    raise ValueError(f"{high:#07x} is not a valid ioctl.")
 
                 if high < low:
                     high, low = low, high
@@ -109,18 +109,15 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
 
     def results(self) -> Iterable[AnyTERule]:
         """Generator which yields all matching TE rules."""
-        self.log.info("Generating TE rule results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Source: {0.source!r}, indirect: {0.source_indirect}, "
-                       "regex: {0.source_regex}".format(self))
-        self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
-                       "regex: {0.target_regex}".format(self))
+        self.log.info(f"Generating TE rule results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
+        self.log.debug(f"{self.source=}, {self.source_indirect=}, {self.source_regex=}")
+        self.log.debug(f"{self.target=}, {self.target_indirect=}, {self.target_regex=}")
         self._match_object_class_debug(self.log)
         self._match_perms_debug(self.log)
-        self.log.debug("Xperms: {0.xperms!r}, eq: {0.xperms_equal}".format(self))
-        self.log.debug("Default: {0.default!r}, regex: {0.default_regex}".format(self))
-        self.log.debug("Boolean: {0.boolean!r}, eq: {0.boolean_equal}, "
-                       "regex: {0.boolean_regex}".format(self))
+        self.log.debug(f"{self.xperms=}, {self.xperms_equal=}")
+        self.log.debug(f"{self.default=}, {self.default_regex=}")
+        self.log.debug(f"{self.boolean=}, {self.boolean_equal=}, {self.boolean_regex=}")
 
         for rule in self.policy.terules():
             #

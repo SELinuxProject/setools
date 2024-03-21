@@ -51,11 +51,11 @@ class ObjClassQuery(MatchName, PolicyQuery):
 
     def results(self) -> Iterable[ObjClass]:
         """Generator which yields all matching object classes."""
-        self.log.info("Generating object class results from {0.policy}".format(self))
+        self.log.info(f"Generating object class results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Common: {0.common!r}, regex: {0.common_regex}".format(self))
-        self.log.debug("Perms: {0.perms}, regex: {0.perms_regex}, "
-                       "eq: {0.perms_equal}, indirect: {0.perms_indirect}".format(self))
+        self.log.debug(f"{self.common=}, {self.common_regex=}")
+        self.log.debug(f"{self.perms=}, {self.perms_regex=}, {self.perms_equal=}, "
+                       f"{self.perms_indirect=}")
 
         for class_ in self.policy.classes():
             if not self._match_name(class_):

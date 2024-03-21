@@ -36,8 +36,7 @@ class GenfsconsDifference(Difference):
         """Generate the difference in genfscon rules between the policies."""
 
         self.log.info(
-            "Generating genfscon differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating genfscon differences from {self.left_policy} to {self.right_policy}")
 
         self.added_genfscons, self.removed_genfscons, matched = self._set_diff(
             (GenfsconWrapper(fs) for fs in self.left_policy.genfscons()),

@@ -72,14 +72,12 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
 
     def results(self) -> Iterable[AnyRBACRule]:
         """Generator which yields all matching RBAC rules."""
-        self.log.info("Generating RBAC rule results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Source: {0.source!r}, indirect: {0.source_indirect}, "
-                       "regex: {0.source_regex}".format(self))
-        self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
-                       "regex: {0.target_regex}".format(self))
+        self.log.info(f"Generating RBAC rule results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
+        self.log.debug(f"{self.source=}, {self.source_indirect=}, {self.source_regex=}")
+        self.log.debug(f"{self.target=}, {self.target_indirect=}, {self.target_regex=}")
         self._match_object_class_debug(self.log)
-        self.log.debug("Default: {0.default!r}, regex: {0.default_regex}".format(self))
+        self.log.debug(f"{self.default=}, {self.default_regex=}")
 
         for rule in self.policy.rbacrules():
             #

@@ -30,10 +30,10 @@ class BoundsQuery(PolicyQuery):
 
     def results(self) -> Iterable[Bounds]:
         """Generator which yields all matching *bounds statements."""
-        self.log.info("Generating bounds results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Parent: {0.parent!r}, regex: {0.parent_regex}".format(self))
-        self.log.debug("Child: {0.child!r}, regex: {0.child_regex}".format(self))
+        self.log.info(f"Generating bounds results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
+        self.log.debug(f"{self.parent=}, {self.parent_regex=}")
+        self.log.debug(f"{self.child=}, {self.child_regex=}")
 
         for b in self.policy.bounds():
             if self.ruletype and b.ruletype not in self.ruletype:

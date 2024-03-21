@@ -25,7 +25,7 @@ class PolCapQuery(MatchName, PolicyQuery):
 
     def results(self) -> Iterable[PolicyCapability]:
         """Generator which yields all matching policy capabilities."""
-        self.log.info("Generating policy capability results from {0.policy}".format(self))
+        self.log.info(f"Generating policy capability results from {self.policy}")
         self._match_name_debug(self.log)
 
         for cap in self.policy.polcaps():

@@ -41,8 +41,8 @@ class BoundsDifference(Difference):
     def diff_typebounds(self) -> None:
         """Generate the difference in typebound rules between the policies."""
 
-        self.log.info("Generating typebounds differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating typebounds differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_typebounds is None or self._right_typebounds is None:
             self._create_typebound_lists()
@@ -69,16 +69,14 @@ class BoundsDifference(Difference):
             if rule.ruletype == BoundsRuletype.typebounds:
                 self._left_typebounds.append(rule)
             else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
+                self.log.error(f"Unknown rule type: {rule.ruletype} (This is an SETools bug)")
 
         self._right_typebounds = []
         for rule in self.right_policy.bounds():
             if rule.ruletype == BoundsRuletype.typebounds:
                 self._right_typebounds.append(rule)
             else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
+                self.log.error(f"Unknown rule type: {rule.ruletype} (This is an SETools bug)")
 
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""

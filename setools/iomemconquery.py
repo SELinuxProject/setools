@@ -69,13 +69,13 @@ class IomemconQuery(MatchContext, PolicyQuery):
             pending_addr = IomemconRange(*value)
 
             if pending_addr.low < 1 or pending_addr.high < 1:
-                raise ValueError("Memory address must be positive: {0.low}-{0.high}".
-                                 format(pending_addr))
+                raise ValueError(
+                    f"Memory address must be positive: {pending_addr.low}-{pending_addr.high}")
 
             if pending_addr.low > pending_addr.high:
                 raise ValueError(
-                    "The low mem addr must be smaller than the high mem addr: {0.low}-{0.high}".
-                    format(pending_addr))
+                    "The low mem addr must be smaller than the high mem addr: "
+                    f"{pending_addr.low}-{pending_addr.high}")
 
             self._addr = pending_addr
         else:
@@ -83,10 +83,9 @@ class IomemconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Iomemcon]:
         """Generator which yields all matching iomemcons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Address: {0.addr!r}, overlap: {0.addr_overlap}, "
-                       "subset: {0.addr_subset}, superset: {0.addr_superset}, "
-                       "proper: {0.addr_proper}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.addr=}, {self.addr_overlap=}, {self.addr_subset=}, "
+                       f"{self.addr_superset=}, {self.addr_proper=}")
         self._match_context_debug(self.log)
 
         for iomemcon in self.policy.iomemcons():

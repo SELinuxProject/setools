@@ -50,9 +50,9 @@ class FSUseQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[FSUse]:
         """Generator which yields all matching fs_use_* statements."""
-        self.log.info("Generating fs_use_* results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("FS: {0.fs!r}, regex: {0.fs_regex}".format(self))
+        self.log.info(f"Generating fs_use_* results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
+        self.log.debug(f"{self.fs=}, {self.fs_regex=}")
         self._match_context_debug(self.log)
 
         for fsu in self.policy.fs_uses():

@@ -36,8 +36,7 @@ class FSUsesDifference(Difference):
         """Generate the difference in fs_use rules between the policies."""
 
         self.log.info(
-            "Generating fs_use_* differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating fs_use_* differences from {self.left_policy} to {self.right_policy}")
 
         self.added_fs_uses, self.removed_fs_uses, matched = self._set_diff(
             (FSUseWrapper(fs) for fs in self.left_policy.fs_uses()),

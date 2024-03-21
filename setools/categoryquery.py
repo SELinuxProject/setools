@@ -28,7 +28,7 @@ class CategoryQuery(MatchAlias, MatchName, PolicyQuery):
 
     def results(self) -> Iterable[Category]:
         """Generator which yields all matching categories."""
-        self.log.info("Generating category results from {0.policy}".format(self))
+        self.log.info(f"Generating category results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_alias_debug(self.log)
 

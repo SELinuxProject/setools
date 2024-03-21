@@ -39,9 +39,9 @@ class BoolQuery(MatchName, PolicyQuery):
 
     def results(self) -> Iterable[Boolean]:
         """Generator which yields all Booleans matching the criteria."""
-        self.log.info("Generating Boolean results from {0.policy}".format(self))
+        self.log.info(f"Generating Boolean results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Default: {0.default}".format(self))
+        self.log.debug(f"{self.default=}")
 
         for boolean in self.policy.bools():
             if not self._match_name(boolean):

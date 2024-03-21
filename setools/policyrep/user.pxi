@@ -61,16 +61,16 @@ cdef class User(PolicySymbol):
     def statement(self):
         cdef:
             list roles = list(str(r) for r in self.roles)
-            str stmt = "user {0} roles ".format(self.name)
+            str stmt = f"user {self.name} roles "
             size_t count = len(roles)
 
         if count == 1:
             stmt += roles[0]
         else:
-            stmt += "{{ {0} }}".format(' '.join(sorted(roles)))
+            stmt += f"{{ {' '.join(sorted(roles))} }}"
 
         if self._level:
-            stmt += " level {0.mls_level} range {0.mls_range};".format(self)
+            stmt += f" level {self.mls_level} range {self.mls_range};"
         else:
             stmt += ";"
 

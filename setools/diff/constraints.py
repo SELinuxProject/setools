@@ -50,8 +50,8 @@ class ConstraintsDifference(Difference):
     def diff_constrains(self) -> None:
         """Generate the difference in constraint rules between the policies."""
 
-        self.log.info("Generating constraint differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating constraint differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
@@ -67,8 +67,8 @@ class ConstraintsDifference(Difference):
         """Generate the difference in MLS constraint rules between the policies."""
 
         self.log.info(
-            "Generating MLS constraint differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating MLS constraint differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
@@ -86,8 +86,7 @@ class ConstraintsDifference(Difference):
         """Generate the difference in validatetrans rules between the policies."""
 
         self.log.info(
-            "Generating validatetrans differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating validatetrans differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
@@ -105,8 +104,8 @@ class ConstraintsDifference(Difference):
         """Generate the difference in MLS validatetrans rules between the policies."""
 
         self.log.info(
-            "Generating mlsvalidatetrans differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating mlsvalidatetrans differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         if self._left_constraints is None or self._right_constraints is None:
             self._create_constrain_lists()
@@ -126,20 +125,20 @@ class ConstraintsDifference(Difference):
     def _create_constrain_lists(self) -> None:
         """Create rule lists for both policies."""
         self._left_constraints = defaultdict(list)
-        self.log.debug("Building constraint lists from {0.left_policy}".format(self))
+        self.log.debug(f"Building constraint lists from {self.left_policy}")
         for rule in self.left_policy.constraints():
             self._left_constraints[rule.ruletype].append(rule)
 
         for ruletype, rules in self._left_constraints.items():
-            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+            self.log.debug(f"Loaded {len(rules)} {ruletype} rules.")
 
         self._right_constraints = defaultdict(list)
-        self.log.debug("Building constraint lists from {0.right_policy}".format(self))
+        self.log.debug(f"Building constraint lists from {self.right_policy}")
         for rule in self.right_policy.constraints():
             self._right_constraints[rule.ruletype].append(rule)
 
         for ruletype, rules in self._right_constraints.items():
-            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+            self.log.debug(f"Loaded {len(rules)} {ruletype} rules.")
 
         self.log.debug("Completed building constraint rule lists.")
 

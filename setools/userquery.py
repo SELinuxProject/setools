@@ -64,14 +64,13 @@ class UserQuery(MatchName, PolicyQuery):
 
     def results(self) -> Iterable[User]:
         """Generator which yields all matching users."""
-        self.log.info("Generating user results from {0.policy}".format(self))
+        self.log.info(f"Generating user results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Roles: {0.roles!r}, regex: {0.roles_regex}, "
-                       "eq: {0.roles_equal}".format(self))
-        self.log.debug("Level: {0.level!r}, dom: {0.level_dom}, domby: {0.level_domby}, "
-                       "incomp: {0.level_incomp}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self.log.debug(f"{self.roles=}, {self.roles_regex=}, {self.roles_equal=}")
+        self.log.debug(f"{self.level=}, {self.level_dom=}, {self.level_domby=}, "
+                       f"{self.level_incomp=}")
+        self.log.debug(f"{self.range_=}, {self.range_subset=}, {self.range_overlap=}, "
+                       f"{self.range_superset=}, {self.range_proper=}")
 
         for user in self.policy.users():
             if not self._match_name(user):

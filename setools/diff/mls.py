@@ -93,7 +93,7 @@ class CategoriesDifference(Difference):
         """Generate the difference in categories between the policies."""
 
         self.log.info(
-            "Generating category differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating category differences from {self.left_policy} to {self.right_policy}")
 
         self.added_categories, self.removed_categories, matched_categories = self._set_diff(
             (category_wrapper_factory(c) for c in self.left_policy.categories()),
@@ -135,8 +135,7 @@ class SensitivitiesDifference(Difference):
         """Generate the difference in sensitivities between the policies."""
 
         self.log.info(
-            "Generating sensitivity differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating sensitivity differences from {self.left_policy} to {self.right_policy}")
 
         self.added_sensitivities, self.removed_sensitivities, matched_sensitivities = \
             self._set_diff(
@@ -179,8 +178,7 @@ class LevelDeclsDifference(Difference):
         """Generate the difference in levels between the policies."""
 
         self.log.info(
-            "Generating level decl differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating level decl differences from {self.left_policy} to {self.right_policy}")
 
         self.added_levels, self.removed_levels, matched_levels = \
             self._set_diff(

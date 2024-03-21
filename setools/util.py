@@ -203,12 +203,10 @@ def validate_perms_any(perms: Iterable[str], tclass: Optional[Iterable[ObjClass]
     else:
         if tclass:
             raise InvalidPermission(
-                "Permission(s) do not exist in the specified classes: {}"
-                .format(", ".join(invalid)))
+                f"Permission(s) do not exist in the specified classes: {', '.join(invalid)}")
         else:
             raise InvalidPermission(
-                "Permission(s) do not exist any class: {}"
-                .format(", ".join(invalid)))
+                f"Permission(s) do not exist any class: {', '.join(invalid)}")
 
 
 def xperm_str_to_tuple_ranges(perms: str, separator: str = ",") -> List[Tuple[int, int]]:
@@ -235,6 +233,6 @@ def xperm_str_to_tuple_ranges(perms: str, separator: str = ",") -> List[Tuple[in
         elif len(rng) == 1:
             xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
         else:
-            raise ValueError("Unable to parse \"{}\" for xperms.".format(item))
+            raise ValueError(f"Unable to parse \"{item}\" for xperms.")
 
     return xperms

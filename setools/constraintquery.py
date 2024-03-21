@@ -83,13 +83,13 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
 
     def results(self) -> Iterable[AnyConstraint]:
         """Generator which yields all matching constraints rules."""
-        self.log.info("Generating constraint results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.info(f"Generating constraint results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
         self._match_object_class_debug(self.log)
         self._match_perms_debug(self.log)
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
+        self.log.debug(f"{self.user=}, {self.user_regex=}")
+        self.log.debug(f"{self.role=}, {self.role_regex=}")
+        self.log.debug(f"{self.type_=}, {self.type_regex=}")
 
         for c in self.policy.constraints():
             if self.ruletype:

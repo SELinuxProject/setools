@@ -36,8 +36,7 @@ class IbendportconsDifference(Difference):
         """Generate the difference in ibendportcons between the policies."""
 
         self.log.info(
-            "Generating ibendportcon differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating ibendportcon differences from {self.left_policy} to {self.right_policy}")
 
         self.added_ibendportcons, self.removed_ibendportcons, matched_ibendportcons = \
             self._set_diff(

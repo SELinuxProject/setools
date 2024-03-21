@@ -34,11 +34,11 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
 
     def results(self) -> Iterable[AnyDefault]:
         """Generator which yields all matching default_* statements."""
-        self.log.info("Generating default_* results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype!r}".format(self))
+        self.log.info(f"Generating default_* results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
         self._match_object_class_debug(self.log)
-        self.log.debug("Default: {0.default!r}".format(self))
-        self.log.debug("Range: {0.default_range!r}".format(self))
+        self.log.debug(f"{self.default=}")
+        self.log.debug(f"{self.default_range=}")
 
         for d in self.policy.defaults():
             if self.ruletype and d.ruletype not in self.ruletype:

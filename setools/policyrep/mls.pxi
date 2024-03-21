@@ -73,11 +73,11 @@ cdef class Category(PolicySymbol):
 
         count = len(self._aliases)
 
-        stmt = "category {0}".format(self.name)
+        stmt = f"category {self.name}"
         if count > 1:
-            stmt += " alias {{ {0} }}".format(' '.join(self._aliases))
+            stmt += f" alias {{ {' '.join(self._aliases)} }}"
         elif count == 1:
-            stmt += " alias {0}".format(self._aliases[0])
+            stmt += f" alias {self._aliases[0]}"
         stmt += ";"
         return stmt
 
@@ -144,11 +144,11 @@ cdef class Sensitivity(PolicySymbol):
 
         count = len(self._aliases)
 
-        stmt = "sensitivity {0}".format(self.name)
+        stmt = f"sensitivity {self.name}"
         if count > 1:
-            stmt += " alias {{ {0} }}".format(' '.join(self._aliases))
+            stmt += f" alias {{ {' '.join(self._aliases)} }}"
         elif count == 1:
-            stmt += " alias {0}".format(self._aliases[0])
+            stmt += f" alias {self._aliases[0]}"
         stmt += ";"
         return stmt
 
@@ -174,7 +174,7 @@ cdef class BaseMLSLevel(PolicyObject):
                                           c=itertools.count(): k._value - next(c)):
                 group = list(i)
                 if len(group) > 1:
-                    shortlist.append("{0}.{1}".format(group[0], group[-1]))
+                    shortlist.append(f"{group[0]}.{group[-1]}")
                 else:
                     shortlist.append(str(group[0]))
 
@@ -251,7 +251,7 @@ cdef class LevelDecl(BaseMLSLevel):
         return self.sensitivity < other.sensitivity
 
     def statement(self):
-        return "level {0};".format(self)
+        return f"level {self};"
 
 
 cdef class Level(BaseMLSLevel):
@@ -296,8 +296,8 @@ cdef class Level(BaseMLSLevel):
         try:
             l.sensitivity = policy.lookup_sensitivity(sens)
         except InvalidSensitivity as ex:
-            raise InvalidLevel("{0} is not a valid level ({1} is not a valid sensitivity)". \
-                               format(name, sens)) from ex
+            raise InvalidLevel(
+                f"{name} is not a valid level ({sens} is not a valid sensitivity)") from ex
 
         l._categories = set()
 
@@ -315,24 +315,25 @@ cdef class Level(BaseMLSLevel):
                                                               policy.lookup_category(catrange[1])))
                     except InvalidCategory as ex:
                         raise InvalidLevel(
-                            "{0} is not a valid level ({1} is not a valid category range)".
-                            format(name, group)) from ex
+                            f"{name} is not a valid level ({group} is not a valid category range)"
+                            ) from ex
 
                 elif len(catrange) == 1:
                     try:
                         l._categories.add(policy.lookup_category(catrange[0]))
                     except InvalidCategory as ex:
-                        raise InvalidLevel("{0} is not a valid level ({1} is not a valid category)".
-                                           format(name, group)) from ex
+                        raise InvalidLevel(
+                            f"{name} is not a valid level ({group} is not a valid category)"
+                            ) from ex
 
                 else:
-                    raise InvalidLevel("{0} is not a valid level (level parsing error)".format(name))
+                    raise InvalidLevel(f"{name} is not a valid level (level parsing error)")
 
         # verify level is valid
         if not l <= l.sensitivity.level_decl():
             raise InvalidLevel(
-                "{0} is not a valid level (one or more categories are not associated with the "
-                "sensitivity)".format(name))
+                f"{name} is not a valid level (one or more categories are not associated with the "
+                "sensitivity)")
 
         return l
 
@@ -412,26 +413,26 @@ cdef class Range(PolicyObject):
         try:
             r.low  = Level.factory_from_string(policy, levels[0].strip())
         except InvalidLevel as ex:
-            raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
+            raise InvalidRange(f"{name} is not a valid range ({ex}).") from ex
 
         try:
             r.high = Level.factory_from_string(policy, levels[1].strip())
         except InvalidLevel as ex:
-            raise InvalidRange("{0} is not a valid range ({1}).".format(name, ex)) from ex
+            raise InvalidRange(f"{name} is not a valid range ({ex}).") from ex
         except IndexError:
             r.high = r.low
 
         # verify high level dominates low range
         if not r.high >= r.low:
-            raise InvalidRange("{0} is not a valid range ({1.low} is not dominated by {1.high})".
-                               format(name, r))
+            raise InvalidRange(
+                f"{name} is not a valid range ({r.low} is not dominated by {r.high})")
         return r
 
     def __str__(self):
         if self.high == self.low:
             return str(self.low)
 
-        return "{0.low} - {0.high}".format(self)
+        return f"{self.low} - {self.high}"
 
     def __hash__(self):
         return hash(str(self))

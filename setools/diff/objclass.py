@@ -59,7 +59,7 @@ class ObjClassDifference(Difference):
         """Generate the difference in object classes between the policies."""
 
         self.log.info(
-            "Generating class differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating class differences from {self.left_policy} to {self.right_policy}")
 
         self.added_classes, self.removed_classes, matched_classes = self._set_diff(
             (SymbolWrapper(c) for c in self.left_policy.classes()),

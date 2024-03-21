@@ -31,8 +31,8 @@ class InitialSIDsDifference(Difference):
     def diff_initialsids(self) -> None:
         """Generate the difference in initial SIDs between the policies."""
 
-        self.log.info("Generating initial SID differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating initial SID differences from {self.left_policy} to {self.right_policy}")
 
         self.added_initialsids, self.removed_initialsids, matched_initialsids = self._set_diff(
             (SymbolWrapper(i) for i in self.left_policy.initialsids()),

@@ -38,8 +38,8 @@ class NetifconsDifference(Difference):
     def diff_netifcons(self) -> None:
         """Generate the difference in netifcons between the policies."""
 
-        self.log.info("Generating netifcon differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating netifcon differences from {self.left_policy} to {self.right_policy}")
 
         self.added_netifcons, self.removed_netifcons, matched_netifcons = self._set_diff(
             (NetifconWrapper(n) for n in self.left_policy.netifcons()),

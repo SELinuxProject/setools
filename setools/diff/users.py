@@ -60,7 +60,7 @@ class UsersDifference(Difference):
         """Generate the difference in users between the policies."""
 
         self.log.info(
-            "Generating user differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating user differences from {self.left_policy} to {self.right_policy}")
 
         self.added_users, self.removed_users, matched_users = self._set_diff(
             (user_wrapper_factory(r) for r in self.left_policy.users()),

@@ -32,7 +32,7 @@ class CommonQuery(MatchPermission, MatchName, PolicyQuery):
 
     def results(self) -> Iterable[Common]:
         """Generator which yields all matching commons."""
-        self.log.info("Generating common results from {0.policy}".format(self))
+        self.log.info(f"Generating common results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_perms_debug(self.log)
 

@@ -105,7 +105,7 @@ cdef void ebitmap_set_bit(sepol.ebitmap_t * e, unsigned int bit, int value):
         uint32_t highbit = startbit + sepol.MAPSIZE
 
     if highbit == 0:
-        raise LowLevelPolicyError("Bitmap overflow, bit {0:#06x}".format(bit))
+        raise LowLevelPolicyError(f"Bitmap overflow, bit {bit:#06x}")
 
     prev = NULL
     n = e.node;

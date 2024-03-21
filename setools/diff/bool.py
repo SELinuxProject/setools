@@ -51,8 +51,8 @@ class BooleansDifference(Difference):
     def diff_booleans(self) -> None:
         """Generate the difference in type attributes between the policies."""
 
-        self.log.info("Generating Boolean differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating Boolean differences from {self.left_policy} to {self.right_policy}")
 
         self.added_booleans, self.removed_booleans, matched_booleans = \
             self._set_diff(

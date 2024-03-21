@@ -37,14 +37,14 @@ class RuleWeight:
 #
 def validate_weight(weight: int) -> int:
     if not MIN_WEIGHT <= weight <= MAX_WEIGHT:
-        raise ValueError("Permission weights must be 1-10: {0}".format(weight))
+        raise ValueError(f"Permission weights must be 1-10: {weight}")
 
     return weight
 
 
 def validate_direction(direction: str) -> str:
     if direction not in INFOFLOW_DIRECTIONS:
-        raise ValueError("Invalid information flow direction: {0}".format(direction))
+        raise ValueError(f"Invalid information flow direction: {direction}")
 
     return direction
 
@@ -80,11 +80,10 @@ class Mapping:
 
         else:
             if classname not in self._perm_map:
-                raise exception.UnmappedClass("{0} is not mapped.".format(classname))
+                raise exception.UnmappedClass(f"{classname} is not mapped.")
 
             if permission not in self._perm_map[classname]:
-                raise exception.UnmappedPermission("{0}:{1} is not mapped.".
-                                                   format(classname, permission))
+                raise exception.UnmappedPermission(f"{classname}:{permission} is not mapped.")
 
     def __lt__(self, other) -> bool:
         if self.class_ == other.class_:
@@ -137,7 +136,7 @@ class PermissionMap:
         Parameter:
         permmapfile     The path to the permission map to load.
         """
-        self.log.info("Opening permission map \"{0}\"".format(permmapfile))
+        self.log.info(f"Opening permission map \"{permmapfile}\"")
 
         # state machine
         # 1 = read number of classes
@@ -162,21 +161,20 @@ class PermissionMap:
                         num_classes = int(entry[0])
                     except ValueError as ex:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Invalid number of classes: {2}".
-                            format(permmapfile, line_num, entry[0])) from ex
+                            f"{permmapfile}:{line_num}:Invalid number of classes: "
+                            f"{entry[0]}") from ex
 
                     if num_classes < 1:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Number of classes must be positive: {2}".
-                            format(permmapfile, line_num, entry[0]))
+                            f"{permmapfile}:{line_num}:Number of classes must be positive: "
+                            f"{num_classes}")
 
                     state = 2
 
                 elif state == 2:
                     if len(entry) != 3 or entry[0] != "class":
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Invalid class declaration: {2}".
-                            format(permmapfile, line_num, entry))
+                            f"{permmapfile}:{line_num}:Invalid class declaration: {entry}")
 
                     class_name = str(entry[1])
 
@@ -184,19 +182,18 @@ class PermissionMap:
                         num_perms = int(entry[2])
                     except ValueError as ex:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Invalid number of permissions: {2}".
-                            format(permmapfile, line_num, entry[2])) from ex
+                            f"{permmapfile}:{line_num}:Invalid number of permissions: "
+                            f"{entry[2]}") from ex
 
                     if num_perms < 1:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Number of permissions must be positive: {2}".
-                            format(permmapfile, line_num, entry[2]))
+                            f"{permmapfile}:{line_num}:Number of permissions must be positive: "
+                            f"{num_perms}")
 
                     class_count += 1
                     if class_count > num_classes:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Extra class found: {2}".
-                            format(permmapfile, line_num, class_name))
+                            f"{permmapfile}:{line_num}:Extra class found: {class_name}")
 
                     self._permmap[class_name] = OrderedDict()
                     perm_count = 0
@@ -208,28 +205,25 @@ class PermissionMap:
                     flow_direction = str(entry[1])
                     if flow_direction not in INFOFLOW_DIRECTIONS:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Invalid information flow direction: {2}".
-                            format(permmapfile, line_num, entry[1]))
+                            f"{permmapfile}:{line_num}:Invalid information flow direction: "
+                            f"{flow_direction}")
 
                     try:
                         weight = int(entry[2])
                     except ValueError as ex:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Invalid permission weight: {2}".
-                            format(permmapfile, line_num, entry[2])) from ex
+                            f"{permmapfile}:{line_num}:Invalid permission weight: "
+                            f"{entry[2]}") from ex
 
                     if not MIN_WEIGHT <= weight <= MAX_WEIGHT:
                         raise exception.PermissionMapParseError(
-                            "{0}:{1}:Permission weight must be {3}-{4}: {2}".
-                            format(permmapfile, line_num, entry[2],
-                                   MIN_WEIGHT, MAX_WEIGHT))
+                            f"{permmapfile}:{line_num}:Permission weight must be "
+                            f"{MIN_WEIGHT}-{MAX_WEIGHT}: {weight}")
 
-                    self.log.debug("Read {0}:{1} {2} {3}".format(
-                                   class_name, perm_name, flow_direction, weight))
+                    self.log.debug(f"Read {class_name}:{perm_name} {flow_direction} {weight}")
 
                     if flow_direction == 'u':
-                        self.log.info("Permission {0}:{1} is unmapped.".format(
-                                      class_name, perm_name))
+                        self.log.info(f"Permission {class_name}:{perm_name} is unmapped.")
 
                     mapping = Mapping(self._permmap, class_name, perm_name, create=True)
                     mapping.direction = flow_direction
@@ -241,9 +235,8 @@ class PermissionMap:
                         state = 2
 
         self._permmapfile = pathlib.Path(permmapfile)
-        self.log.info("Successfully opened permission map \"{0}\"".format(permmapfile))
-        self.log.debug("Read {0} classes and {1} total permissions.".format(
-                       class_count, total_perms))
+        self.log.info(f"Successfully opened permission map \"{permmapfile}\"")
+        self.log.debug(f"Read {class_count} classes and {total_perms} total permissions.")
 
     def save(self, permmapfile: str) -> None:
         """
@@ -254,33 +247,33 @@ class PermissionMap:
         permmapfile         The path to write the permission map.
         """
         with open(permmapfile, "w") as mapfile:
-            self.log.info("Writing permission map to \"{0}\"".format(permmapfile))
-            mapfile.write("{0}\n\n".format(len(self._permmap)))
+            self.log.info(f"Writing permission map to \"{permmapfile}\"")
+            mapfile.write(f"{len(self._permmap)}\n\n")
 
             for classname, perms in self._permmap.items():
-                mapfile.write("class {0} {1}\n".format(classname, len(perms)))
+                mapfile.write(f"class {classname} {len(perms)}\n")
 
                 for permname, settings in perms.items():
                     direction = cast(str, settings['direction'])
                     weight = cast(int, settings['weight'])
 
                     assert MIN_WEIGHT <= weight <= MAX_WEIGHT, \
-                        "{0}:{1} weight is out of range ({2}). This is an SETools bug.".format(
-                            classname, permname, weight)
+                        f"{classname}:{permname} weight is out of range ({weight}). " \
+                        "This is an SETools bug."
 
                     assert direction in INFOFLOW_DIRECTIONS, \
-                        "{0}:{1} flow direction ({2}) is invalid. This is an SETools bug.".format(
-                            classname, permname, direction)
+                        f"{classname}:{permname} flow direction ({direction}) is invalid. " \
+                        "This is an SETools bug."
 
                     if direction == 'u':
-                        self.log.warning("Warning: permission {0} in class {1} is unmapped.".format(
-                                         permname, classname))
+                        self.log.warning(
+                            f"Warning: permission {permname} in class {classname} is unmapped.")
 
-                    mapfile.write("{0:>20} {1:>9} {2:>9}\n".format(permname, direction, weight))
+                    mapfile.write(f"{permname:>20} {direction:>9} {weight:>9}\n")
 
                 mapfile.write("\n")
 
-            self.log.info("Successfully wrote permission map to \"{0}\"".format(permmapfile))
+            self.log.info(f"Successfully wrote permission map to \"{permmapfile}\"")
 
     def classes(self) -> Iterable[str]:
         """
@@ -305,7 +298,7 @@ class PermissionMap:
             for perm in self._permmap[class_].keys():
                 yield Mapping(self._permmap, class_, perm)
         except KeyError as ex:
-            raise exception.UnmappedClass("{0} is not mapped.".format(class_)) from ex
+            raise exception.UnmappedClass(f"{class_} is not mapped.") from ex
 
     def mapping(self, class_: str, perm: str) -> Mapping:
         """Retrieve a specific permission's mapping."""
@@ -373,7 +366,7 @@ class PermissionMap:
             class_name = str(class_)
 
             if class_name not in self._permmap:
-                self.log.debug("Adding unmapped class {0} from {1}".format(class_name, policy))
+                self.log.debug(f"Adding unmapped class {class_name} from {policy}")
                 self._permmap[class_name] = OrderedDict()
 
             perms = class_.perms
@@ -383,8 +376,8 @@ class PermissionMap:
 
             for perm_name in perms:
                 if perm_name not in self._permmap[class_name]:
-                    self.log.debug("Adding unmapped permission {0} in {1} from {2}".
-                                   format(perm_name, class_name, policy))
+                    self.log.debug(
+                        f"Adding unmapped permission {perm_name} in {class_name} from {policy}")
                     Mapping(self._permmap, class_name, perm_name, create=True)
 
     def rule_weight(self, rule: AVRule) -> RuleWeight:
@@ -404,8 +397,8 @@ class PermissionMap:
         class_name = str(rule.tclass)
 
         if rule.ruletype != TERuletype.allow:
-            raise exception.RuleTypeError("{0} rules cannot be used for calculating a weight".
-                                          format(rule.ruletype))
+            raise exception.RuleTypeError(
+                f"{rule.ruletype} rules cannot be used for calculating a weight")
 
         # iterate over the permissions and determine the
         # weight of the rule in each direction. The result

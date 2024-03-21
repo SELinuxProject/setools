@@ -218,8 +218,7 @@ class EdgeAttrDict(NetworkXGraphEdgeDescriptor):
         if value is None:
             obj.G[obj.source][obj.target][self.name] = defaultdict(list)
         else:
-            raise AttributeError("{0} dictionaries should not be assigned directly".
-                                 format(self.name))
+            raise AttributeError(f"{self.name} dictionaries should not be assigned directly")
 
     def __delete__(self, obj):
         obj.G[obj.source][obj.target][self.name].clear()
@@ -253,7 +252,7 @@ class EdgeAttrList(NetworkXGraphEdgeDescriptor):
         if value is None:
             obj.G[obj.source][obj.target][self.name] = []
         else:
-            raise ValueError("{0} lists should not be assigned directly".format(self.name))
+            raise ValueError(f"{self.name} lists should not be assigned directly")
 
     def __delete__(self, obj):
         obj.G[obj.source][obj.target][self.name].clear()

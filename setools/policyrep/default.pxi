@@ -41,7 +41,7 @@ class DefaultValue(PolicyEnum):
         try:
             return cls(default_map[range_])
         except KeyError as e:
-            raise LowLevelPolicyError("Unsupported default value: {}".format(e)) from e
+            raise LowLevelPolicyError(f"Unsupported default value: {e}") from e
 
 
 class DefaultRangeValue(PolicyEnum):
@@ -66,7 +66,7 @@ class DefaultRangeValue(PolicyEnum):
             value = default_map[range_]
             return None if value is None else cls(value)
         except KeyError as e:
-            raise LowLevelPolicyError("Unsupported default_range value: {}".format(e)) from e
+            raise LowLevelPolicyError(f"Unsupported default_range value: {e}") from e
 
 
 #
@@ -132,7 +132,7 @@ cdef class Default(PolicyObject):
                 and self.default == other.default
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.tclass}".format(self))
+        return hash(f"{self.ruletype}|{self.tclass}")
 
     def __lt__(self, other):
         # this is used by Python sorting functions
@@ -143,7 +143,7 @@ cdef class Default(PolicyObject):
         return self._default
 
     def statement(self):
-        return "{0.ruletype} {0.tclass} {0.default};".format(self)
+        return f"{self.ruletype} {self.tclass} {self.default};"
 
 
 cdef class DefaultRange(Default):
@@ -159,7 +159,7 @@ cdef class DefaultRange(Default):
                 and self.default_range == other.default_range
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.tclass}".format(self))
+        return hash(f"{self.ruletype}|{self.tclass}")
 
     def __lt__(self, other):
         # this is used by Python sorting functions
@@ -167,6 +167,6 @@ cdef class DefaultRange(Default):
 
     def statement(self):
         if self.default_range:
-            return "{0.ruletype} {0.tclass} {0.default} {0.default_range};".format(self)
+            return f"{self.ruletype} {self.tclass} {self.default} {self.default_range};"
         else:
-            return "{0.ruletype} {0.tclass} {0.default};".format(self)
+            return f"{self.ruletype} {self.tclass} {self.default};"

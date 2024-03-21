@@ -54,7 +54,7 @@ class RolesDifference(Difference):
         """Generate the difference in roles between the policies."""
 
         self.log.info(
-            "Generating role differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating role differences from {self.left_policy} to {self.right_policy}")
 
         self.added_roles, self.removed_roles, matched_roles = self._set_diff(
             (role_wrapper_factory(r) for r in self.left_policy.roles()),

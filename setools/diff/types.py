@@ -74,7 +74,7 @@ class TypesDifference(Difference):
         """Generate the difference in types between the policies."""
 
         self.log.info(
-            "Generating type differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating type differences from {self.left_policy} to {self.right_policy}")
 
         self.added_types, self.removed_types, matched_types = self._set_diff(
             (SymbolWrapper(t) for t in self.left_policy.types()),

@@ -19,7 +19,7 @@ def expand_attr(attr):
     """Render type and role attributes."""
     items = "\n\t".join(sorted(str(i) for i in attr.expand()))
     contents = items if items else "<empty attribute>"
-    return "{0}\n\t{1}".format(attr.statement(), contents)
+    return f"{attr.statement()}\n\t{contents}"
 
 
 signal.signal(signal.SIGPIPE, signal.SIG_DFL)
@@ -332,10 +332,11 @@ try:
     if (not components or args.all) and not args.flat:
         mls = "enabled" if p.mls else "disabled"
 
-        print("Statistics for policy file: {0}".format(p))
-        print("Policy Version:             {0} (MLS {1})".format(p.version, mls))
-        print("Target Policy:              {0}".format(p.target_platform))
-        print("Handle unknown classes:     {0}".format(p.handle_unknown))
+        print(f"Statistics for policy file: {p}")
+        print(f"Policy Version:             {p.version} (MLS {mls})")
+        print(f"Target Policy:              {p.target_platform}")
+        print(f"Handle unknown classes:     {p.handle_unknown}")
+        # keeping str.format below to ease alignment
         print("  Classes:         {0:7}    Permissions:     {1:7}".format(
             p.class_count, p.permission_count))
         print("  Sensitivities:   {0:7}    Categories:      {1:7}".format(
@@ -389,7 +390,7 @@ try:
     for desc, component, expander in components:
         results = sorted(component.results())
         if not args.flat:
-            print("\n{0}: {1}".format(desc, len(results)))
+            print(f"\n{desc}: {len(results)}")
         for item in results:
             result = expander(item) if args.expand else item
             strfmt = "   {0}" if not args.flat else "{0}"

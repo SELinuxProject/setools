@@ -54,7 +54,7 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
         if value:
             pending_value = int(value)
             if not 0 < pending_value < 256:
-                raise ValueError("Endport value must be 1-255.")
+                raise ValueError(f"Endport value must be 1-255: {pending_value}")
 
             self._port = pending_value
         else:
@@ -62,9 +62,9 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
 
     def results(self) -> Iterable[Ibendportcon]:
         """Generator which yields all matching ibendportcons."""
-        self.log.info("Generating ibendportcon results from {0.policy}".format(self))
+        self.log.info(f"Generating ibendportcon results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Port: {0.port!r}".format(self))
+        self.log.debug(f"{self.port=}")
         self._match_context_debug(self.log)
 
         for endport in self.policy.ibendportcons():

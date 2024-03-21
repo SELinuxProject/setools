@@ -33,8 +33,8 @@ class ConfigDescriptor(CriteriaDescriptor):
             try:
                 super().__set__(obj, value.strip())
             except ValueError as ex:
-                raise InvalidCheckValue("{}: Invalid {} setting: {}".format(
-                    obj.checkname, self.name, ex)) from ex
+                raise InvalidCheckValue(
+                    f"{obj.checkname}: Invalid {self.name} setting: {ex}") from ex
 
 
 class ConfigSetDescriptor(CriteriaDescriptor):
@@ -86,13 +86,12 @@ class ConfigSetDescriptor(CriteriaDescriptor):
                         ret.add(o)
                 except ValueError as e:
                     if self.strict:
-                        log.error("Invalid {} item: {}".format(self.name, e))
+                        log.error(f"Invalid {self.name} item: {e}")
                         log.debug("Traceback:", exc_info=e)
-                        raise InvalidCheckValue("{}: Invalid {} item: {}".format(
-                            obj.checkname, self.name, e)) from e
+                        raise InvalidCheckValue(
+                            f"{obj.checkname}: Invalid {self.name} item: {e}") from e
 
-                    log.info("{}: Invalid {} item: {}".format(
-                        obj.checkname, self.name, e))
+                    log.info(f"{obj.checkname}: Invalid {self.name} item: {e}")
 
             setattr(obj, self.name, frozenset(ret))
 
@@ -119,5 +118,5 @@ class ConfigPermissionSetDescriptor(CriteriaPermissionSetDescriptor):
             try:
                 super().__set__(obj, (v for v in value.split(" ") if v))
             except ValueError as ex:
-                raise InvalidCheckValue("{}: Invalid {} setting: {}".format(
-                    obj.checkname, self.name, ex)) from ex
+                raise InvalidCheckValue(
+                    f"{obj.checkname}: Invalid {self.name} setting: {ex}") from ex

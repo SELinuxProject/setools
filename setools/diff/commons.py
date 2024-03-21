@@ -34,7 +34,7 @@ class CommonDifference(Difference):
         """Generate the difference in commons between the policies."""
 
         self.log.info(
-            "Generating common differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating common differences from {self.left_policy} to {self.right_policy}")
 
         self.added_commons, self.removed_commons, matched_commons = self._set_diff(
             (SymbolWrapper(c) for c in self.left_policy.commons()),

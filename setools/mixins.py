@@ -4,10 +4,8 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 # pylint: disable=attribute-defined-outside-init,no-member
-from dataclasses import astuple
 from logging import Logger
 from typing import Any
-import warnings
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, CriteriaPermissionSetDescriptor
 from .policyrep import Context
@@ -23,7 +21,7 @@ class MatchAlias:
 
     def _match_alias_debug(self, log: Logger) -> None:
         """Emit log debugging info for alias matching."""
-        log.debug("Alias: {0.alias}, regex: {0.alias_regex}".format(self))
+        log.debug(f"{self.alias=}, {self.alias_regex=}")
 
     def _match_alias(self, obj):
         """
@@ -81,11 +79,11 @@ class MatchContext:
 
     def _match_context_debug(self, log: Logger):
         """Emit log debugging info for context matching."""
-        log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
-        log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                  "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        log.debug(f"{self.user=}, {self.user_regex=}")
+        log.debug(f"{self.role=}, {self.role_regex=}")
+        log.debug(f"{self.type_=}, {self.type_regex=}")
+        log.debug(f"{self.range_=}, {self.range_subset=}, {self.range_overlap=}, "
+                  f"{self.range_superset=}, {self.range_proper=}")
 
     def _match_context(self, context: Context) -> bool:
         """
@@ -136,7 +134,7 @@ class MatchName:
 
     def _match_name_debug(self, log: Logger) -> None:
         """Log debugging messages for name matching."""
-        log.debug("Name: {0.name!r}, regex: {0.name_regex}, deref: {0.alias_deref}".format(self))
+        log.debug(f"{self.name=}, {self.name_regex=}, {self.alias_deref=}")
 
     def _match_name(self, obj):
         """Match the object to the name criteria."""
@@ -160,7 +158,7 @@ class MatchObjClass:
 
     def _match_object_class_debug(self, log: Logger) -> None:
         """Emit log debugging info for permission matching."""
-        log.debug("Class: {0.tclass!r}, regex: {0.tclass_regex}".format(self))
+        log.debug(f"{self.tclass=}, {self.tclass_regex=}")
 
     def _match_object_class(self, obj):
         """
@@ -190,8 +188,8 @@ class MatchPermission:
 
     def _match_perms_debug(self, log: Logger):
         """Emit log debugging info for permission matching."""
-        log.debug("Perms: {0.perms!r}, regex: {0.perms_regex}, eq: {0.perms_equal}, "
-                  "subset: {0.perms_subset!r}".format(self))
+        log.debug(f"{self.perms=}, {self.perms_regex=}, {self.perms_equal=}, "
+                  f"{self.perms_subset=}")
 
     def _match_perms(self, obj):
         """

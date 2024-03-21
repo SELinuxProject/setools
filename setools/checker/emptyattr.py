@@ -44,16 +44,14 @@ class EmptyTypeAttr(CheckerModule):
     def attr(self, value):
         try:
             if not value:
-                raise InvalidCheckValue("{}: \"{}\" setting is missing.".format(self.checkname,
-                                                                                ATTR_OPT))
+                raise InvalidCheckValue(f"{self.checkname}: \"{ATTR_OPT}\" setting is missing.")
 
             self._attr = self.policy.lookup_typeattr(value)
             self._pass_by_missing = False
 
         except InvalidType as e:
             if not self.missing_ok:
-                raise InvalidCheckValue("{}: attr setting error: {}".format(
-                    self.checkname, e)) from e
+                raise InvalidCheckValue(f"{self.checkname}: attr setting error: {e}") from e
 
             self._attr = value
             self._pass_by_missing = True
@@ -73,14 +71,14 @@ class EmptyTypeAttr(CheckerModule):
             self._pass_by_missing = False
 
     def run(self) -> List:
-        self.log.info("Checking type attribute {} is empty.".format(self.attr))
+        self.log.info(f"Checking type attribute {self.attr} is empty.")
 
         failures = []
 
         if self._pass_by_missing:
-            self.log_info("    {} does not exist.".format(self.attr))
+            self.log_info(f"    {self.attr} does not exist.")
         else:
-            self.output.write("Member types of {}:\n".format(self.attr))
+            self.output.write(f"Member types of {self.attr}:\n")
 
             types = sorted(self.attr.expand())
             if types:
@@ -90,5 +88,5 @@ class EmptyTypeAttr(CheckerModule):
             else:
                 self.log_ok("    <empty>")
 
-        self.log.debug("{} failure(s)".format(failures))
+        self.log.debug(f"{failures} failure(s)")
         return failures

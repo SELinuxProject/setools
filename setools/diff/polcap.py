@@ -16,8 +16,8 @@ class PolCapsDifference(Difference):
     def diff_polcaps(self) -> None:
         """Generate the difference in polcaps between the policies."""
 
-        self.log.info("Generating policy cap differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating policy cap differences from {self.left_policy} to {self.right_policy}")
 
         self.added_polcaps, self.removed_polcaps, _ = self._set_diff(
             (SymbolWrapper(n) for n in self.left_policy.polcaps()),

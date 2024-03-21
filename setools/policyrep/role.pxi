@@ -40,14 +40,11 @@ cdef class Role(PolicySymbol):
         cdef size_t count
         types = list(str(t) for t in self._types)
         count = len(types)
-        stmt = "role {0}".format(self)
+        stmt = f"role {self.name}"
         if count == 1:
-            stmt += " types {0}".format(types[0])
-        else:
-            stmt += " types {{ {0} }}".format(' '.join(sorted(types)))
+            return f"role {self.name} types {types[0]};"
 
-        stmt += ";"
-        return stmt
+        return f"role {self.name} types {{ {' '.join(sorted(types))} }};"
 
 
 #

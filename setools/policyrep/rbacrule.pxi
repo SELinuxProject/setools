@@ -38,7 +38,7 @@ cdef class RoleAllow(PolicyRule):
         return r
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}".format(self))
+        return hash(f"{self.ruletype}|{self.source}|{self.target}")
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -73,7 +73,7 @@ cdef class RoleAllow(PolicyRule):
             yield self
 
     def statement(self):
-        return "{0.ruletype} {0.source} {0.target};".format(self)
+        return f"{self.ruletype} {self.source} {self.target};"
 
 
 cdef class RoleTransition(PolicyRule):
@@ -101,7 +101,7 @@ cdef class RoleTransition(PolicyRule):
         return r
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|None|None".format(self))
+        return hash(f"{self.ruletype}|{self.source}|{self.target}|{self.tclass}|None|None")
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -132,7 +132,7 @@ cdef class RoleTransition(PolicyRule):
             yield self
 
     def statement(self):
-        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};".format(self)
+        return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
 
 
 #

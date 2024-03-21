@@ -68,13 +68,13 @@ class IoportconQuery(MatchContext, PolicyQuery):
         if value:
             pending_ports = IoportconRange(*value)
             if pending_ports.low < 1 or pending_ports.high < 1:
-                raise ValueError("Port numbers must be positive: {0.low}-{0.high}".
-                                 format(pending_ports))
+                raise ValueError(
+                    f"Port numbers must be positive: {pending_ports.low}-{pending_ports.high}")
 
             if pending_ports.low > pending_ports.high:
                 raise ValueError(
-                    "The low port must be smaller than the high port: {0.low}-{0.high}".
-                    format(pending_ports))
+                    "The low port must be smaller than the high port: "
+                    f"{pending_ports.low}-{pending_ports.high}")
 
             self._ports = pending_ports
         else:
@@ -82,10 +82,9 @@ class IoportconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Ioportcon]:
         """Generator which yields all matching ioportcons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Ports: {0.ports!r}, overlap: {0.ports_overlap}, "
-                       "subset: {0.ports_subset}, superset: {0.ports_superset}, "
-                       "proper: {0.ports_proper}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.ports=}, {self.ports_overlap=}, {self.ports_subset=}, "
+                       f"{self.ports_superset=}, {self.ports_proper=}")
         self._match_context_debug(self.log)
 
         for ioportcon in self.policy.ioportcons():

@@ -39,10 +39,9 @@ class TypeAttributeQuery(MatchName, PolicyQuery):
 
     def results(self) -> Iterable[TypeAttribute]:
         """Generator which yields all matching types."""
-        self.log.info("Generating type attribute results from {0.policy}".format(self))
+        self.log.info(f"Generating type attribute results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Types: {0.types!r}, regex: {0.types_regex}, "
-                       "eq: {0.types_equal}".format(self))
+        self.log.debug(f"{self.types=}, {self.types_regex=}, {self.types_equal=}")
 
         for attr in self.policy.typeattributes():
             if not self._match_name(attr):

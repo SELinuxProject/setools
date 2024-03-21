@@ -56,12 +56,11 @@ class TypeQuery(MatchAlias, MatchName, PolicyQuery):
 
     def results(self) -> Iterable[Type]:
         """Generator which yields all matching types."""
-        self.log.info("Generating type results from {0.policy}".format(self))
+        self.log.info(f"Generating type results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_alias_debug(self.log)
-        self.log.debug("Attrs: {0.attrs!r}, regex: {0.attrs_regex}, "
-                       "eq: {0.attrs_equal}".format(self))
-        self.log.debug("Permissive: {0.permissive}".format(self))
+        self.log.debug(f"{self.attrs=}, {self.attrs_regex=}, {self.attrs_equal=}")
+        self.log.debug(f"{self.permissive=}")
 
         for t in self.policy.types():
             if not self._match_name(t):

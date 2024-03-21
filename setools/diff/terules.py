@@ -265,8 +265,7 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
         """Generate the difference in rules between the policies."""
 
         self.log.info(
-            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
-            format(ruletype, self))
+            f"Generating {ruletype} differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_te_rules is None or self._right_te_rules is None:
             self._create_te_rule_lists()
@@ -276,10 +275,10 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
         rule_db[TERULES_UNCONDITIONAL] = dict()
         rule_db[TERULES_UNCONDITIONAL][TERULES_UNCONDITIONAL_BLOCK] = dict()
 
-        self.log.info("Expanding AV rules from {0.left_policy}.".format(self))
+        self.log.info(f"Expanding AV rules from {self.left_policy}.")
         _avrule_expand_generator(self._left_te_rules[ruletype], rule_db, type_db, Side.left)
 
-        self.log.info("Expanding AV rules from {0.right_policy}.".format(self))
+        self.log.info(f"Expanding AV rules from {self.right_policy}.")
         _avrule_expand_generator(self._right_te_rules[ruletype], rule_db, type_db, Side.right)
 
         self.log.info("Removing redundant AV rules.")
@@ -292,9 +291,9 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
         type_db.right.clear()
         rule_db.clear()
 
-        setattr(self, "added_{0}s".format(ruletype), added)
-        setattr(self, "removed_{0}s".format(ruletype), removed)
-        setattr(self, "modified_{0}s".format(ruletype), modified)
+        setattr(self, f"added_{ruletype}s", added)
+        setattr(self, f"removed_{ruletype}s", removed)
+        setattr(self, f"modified_{ruletype}s", modified)
 
     return diff
 
@@ -320,9 +319,7 @@ def _avxrule_expand_generator(rule_list: Iterable[AVRuleXperm]) -> Iterable["AVR
                 items[expanded_wrapped_rule] = expanded_wrapped_rule
 
     if items:
-        logging.getLogger(__name__).debug(
-            "Expanded {0.ruletype} rules for {0.policy}: {1}".format(
-                unexpanded_rule, len(items)))
+        logging.getLogger(__name__).debug(f"Expanded {len(items)} rules")
 
     return items.keys()
 
@@ -341,8 +338,8 @@ def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
         """Generate the difference in rules between the policies."""
 
         self.log.info(
-            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
-            format(ruletype, self))
+            f"Generating {ruletype} differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         if not self._left_te_rules or not self._right_te_rules:
             self._create_te_rule_lists()
@@ -369,9 +366,9 @@ def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
                                                IoctlSet(removed_perms),
                                                IoctlSet(p[0] for p in matched_perms)))
 
-        setattr(self, "added_{0}s".format(ruletype), set(a.origin for a in added))
-        setattr(self, "removed_{0}s".format(ruletype), set(r.origin for r in removed))
-        setattr(self, "modified_{0}s".format(ruletype), modified)
+        setattr(self, f"added_{ruletype}s", set(a.origin for a in added))
+        setattr(self, f"removed_{ruletype}s", set(r.origin for r in removed))
+        setattr(self, f"modified_{ruletype}s", modified)
 
     return diff
 
@@ -390,8 +387,7 @@ def te_diff_template(ruletype: str) -> Callable[[Any], None]:
         """Generate the difference in rules between the policies."""
 
         self.log.info(
-            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
-            format(ruletype, self))
+            f"Generating {ruletype} differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_te_rules is None or self._right_te_rules is None:
             self._create_te_rule_lists()
@@ -409,9 +405,9 @@ def te_diff_template(ruletype: str) -> Callable[[Any], None]:
                                                right_rule.default,
                                                left_rule.default))
 
-        setattr(self, "added_{0}s".format(ruletype), added)
-        setattr(self, "removed_{0}s".format(ruletype), removed)
-        setattr(self, "modified_{0}s".format(ruletype), modified)
+        setattr(self, f"added_{ruletype}s", added)
+        setattr(self, f"removed_{ruletype}s", removed)
+        setattr(self, f"modified_{ruletype}s", modified)
 
     return diff
 
@@ -488,21 +484,21 @@ class TERulesDifference(Difference):
         """Create rule lists for both policies."""
         # do not expand yet, to keep memory
         # use down as long as possible
-        self.log.debug("Building TE rule lists from {0.left_policy}".format(self))
+        self.log.debug(f"Building TE rule lists from {self.left_policy}")
         self._left_te_rules = defaultdict(list)
         for rule in self.left_policy.terules():
             self._left_te_rules[rule.ruletype].append(rule)
 
         for ruletype, rules in self._left_te_rules.items():
-            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+            self.log.debug(f"Loaded {len(rules)} {ruletype} rules.")
 
-        self.log.debug("Building TE rule lists from {0.right_policy}".format(self))
+        self.log.debug(f"Building TE rule lists from {self.right_policy}")
         self._right_te_rules = defaultdict(list)
         for rule in self.right_policy.terules():
             self._right_te_rules[rule.ruletype].append(rule)
 
         for ruletype, rules in self._right_te_rules.items():
-            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+            self.log.debug(f"Loaded {len(rules)} {ruletype} rules.")
 
         self.log.debug("Completed building TE rule lists.")
 

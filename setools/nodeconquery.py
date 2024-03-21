@@ -78,9 +78,9 @@ class NodeconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Nodecon]:
         """Generator which yields all matching nodecons."""
-        self.log.info("Generating nodecon results from {0.policy}".format(self))
-        self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
-        self.log.debug("IP Version: {0.ip_version!r}".format(self))
+        self.log.info(f"Generating nodecon results from {self.policy}")
+        self.log.debug(f"{self.network=}, {self.network_overlap=}")
+        self.log.debug(f"{self.ip_version=}")
         self._match_context_debug(self.log)
 
         for nodecon in self.policy.nodecons():

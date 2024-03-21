@@ -71,7 +71,7 @@ cdef class SELinuxPolicy:
             sepol.sepol_handle_destroy(self.sh)
 
     def __repr__(self):
-        return "<SELinuxPolicy(\"{0}\")>".format(self.path)
+        return f"<SELinuxPolicy(\"{self.path}\")>"
 
     def __str__(self):
         return self.path
@@ -341,7 +341,7 @@ cdef class SELinuxPolicy:
             if b == name:
                 return b
 
-        raise InvalidBoolean("{0} is not a valid Boolean".format(name))
+        raise InvalidBoolean(f"{name} is not a valid Boolean")
 
     def lookup_category(self, name, deref=True):
         """Look up a category, with optional alias dereferencing."""
@@ -349,7 +349,7 @@ cdef class SELinuxPolicy:
             if c == name or (deref and name in list(c.aliases())):
                 return c
 
-        raise InvalidCategory("{0} is not a valid category".format(name))
+        raise InvalidCategory("f{name} is not a valid category")
 
     def lookup_class(self, name):
         """Look up an object class."""
@@ -357,7 +357,7 @@ cdef class SELinuxPolicy:
             if cls == name:
                 return cls
 
-        raise InvalidClass("{0} is not a valid class".format(name))
+        raise InvalidClass(f"{name} is not a valid class")
 
     def lookup_common(self, name):
         """Look up a common permission set."""
@@ -365,7 +365,7 @@ cdef class SELinuxPolicy:
             if common == name:
                 return common
 
-        raise InvalidCommon("{0} is not a valid common".format(name))
+        raise InvalidCommon(f"{name} is not a valid common")
 
     def lookup_initialsid(self, name):
         """Look up an initial sid."""
@@ -373,7 +373,7 @@ cdef class SELinuxPolicy:
             if sid == name:
                 return sid
 
-        raise InvalidInitialSid("{0} is not a valid initial SID".format(name))
+        raise InvalidInitialSid(f"{name} is not a valid initial SID")
 
     def lookup_level(self, level):
         """Look up a MLS level."""
@@ -385,7 +385,7 @@ cdef class SELinuxPolicy:
             if s == name or (deref and name in list(s.aliases())):
                 return s
 
-        raise InvalidSensitivity("{0} is not a valid sensitivity".format(name))
+        raise InvalidSensitivity(f"{name} is not a valid sensitivity")
 
     def lookup_range(self, range_):
         """Look up a MLS range."""
@@ -397,7 +397,7 @@ cdef class SELinuxPolicy:
             if r == name:
                 return r
 
-        raise InvalidRole("{0} is not a valid role".format(name))
+        raise InvalidRole(f"{name} is not a valid role")
 
     def lookup_type(self, name, deref=True):
         """Look up a type by name, with optional alias dereferencing."""
@@ -405,7 +405,7 @@ cdef class SELinuxPolicy:
             if t == name or (deref and name in list(t.aliases())):
                 return t
 
-        raise InvalidType("{0} is not a valid type".format(name))
+        raise InvalidType(f"{name} is not a valid type")
 
     def lookup_type_or_attr(self, name, deref=True):
         """Look up a type or type attribute by name, with optional alias dereferencing."""
@@ -417,7 +417,7 @@ cdef class SELinuxPolicy:
             if t == name:
                 return t
 
-        raise InvalidType("{0} is not a valid type attribute".format(name))
+        raise InvalidType(f"{name} is not a valid type attribute")
 
     def lookup_typeattr(self, name):
         """Look up a type attribute by name."""
@@ -425,7 +425,7 @@ cdef class SELinuxPolicy:
             if t == name:
                 return t
 
-        raise InvalidType("{0} is not a valid type attribute".format(name))
+        raise InvalidType(f"{name} is not a valid type attribute")
 
     def lookup_user(self, name):
         """Look up a user by name."""
@@ -433,7 +433,7 @@ cdef class SELinuxPolicy:
             if u == name:
                 return u
 
-        raise InvalidUser("{0} is not a valid user".format(name))
+        raise InvalidUser(f"{name} is not a valid user")
 
     #
     # Policy components iterators
@@ -662,7 +662,7 @@ cdef class SELinuxPolicy:
             sepol.sepol_policy_file_t *pfile = NULL
             FILE *infile = NULL
 
-        self.log.info("Opening SELinux policy \"{0}\"".format(filename))
+        self.log.info(f"Opening SELinux policy \"{filename}\"")
 
         self.sh = sepol.sepol_handle_create()
         if self.sh == NULL:
@@ -684,10 +684,9 @@ cdef class SELinuxPolicy:
         sepol.sepol_policy_file_set_fp(pfile, infile)
 
         if sepol.sepol_policydb_read(self.handle, pfile) < 0:
-            raise InvalidPolicy("Invalid policy: {}. A binary policy must be specified. "
-                                "(use e.g. policy.{} or sepolicy) Source policies are not "
-                                "supported.".format(filename,
-                                                    sepol.sepol_policy_kern_vers_max()))
+            raise InvalidPolicy(f"Invalid policy: {filename}. A binary policy must be specified. "
+                                "(use e.g. policy.{sepol.sepol_policy_kern_vers_max()} or "
+                                "sepolicy) Source policies are not supported.")
 
         fclose(infile)
         sepol.sepol_policy_file_free(pfile)
@@ -724,7 +723,7 @@ cdef class SELinuxPolicy:
             self._load_sensitivity_aliases()
             self._load_category_aliases()
 
-        self.log.info("Successfully opened SELinux policy \"{0}\"".format(filename))
+        self.log.info(f"Successfully opened SELinux policy \"{filename}\"")
         self.path = filename
 
     cdef _load_running_policy(self):
@@ -737,12 +736,10 @@ cdef class SELinuxPolicy:
             list potential_policies = []
 
         self.log.info("Attempting to locate current running policy.")
-        self.log.debug("SELinuxfs exists: {}".format(selinux.selinuxfs_exists()))
-        self.log.debug("Sepol version range: {}-{}".format(min_ver, max_ver))
-        self.log.debug("Current policy path: {}".format(current_policy_path
-                                                        if current_policy_path != NULL else None))
-        self.log.debug("Binary policy path: {}".format(base_policy_path
-                                                       if base_policy_path != NULL else None))
+        self.log.debug(f"SELinuxfs exists: {selinux.selinuxfs_exists()}")
+        self.log.debug(f"Sepol version range: {min_ver}-{max_ver}")
+        self.log.debug(f"Current policy path: {current_policy_path if current_policy_path != NULL else None}")
+        self.log.debug(f"Binary policy path: {base_policy_path if base_policy_path != NULL else None}")
 
         # first try libselinux for current policy
         if current_policy_path != NULL:
@@ -751,9 +748,9 @@ cdef class SELinuxPolicy:
         # look through the supported policy versions
         if base_policy_path != NULL:
             for version in range(max_ver, min_ver - 1, -1):
-                potential_policies.append("{0}.{1}".format(base_policy_path, version))
+                potential_policies.append(f"{base_policy_path}.{version}")
 
-        self.log.debug("Potential policies: {}".format(potential_policies))
+        self.log.debug("Potential policies: {potential_policies}")
         for filename in potential_policies:
             try:
                 self._load_policy(filename)

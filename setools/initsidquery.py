@@ -43,7 +43,7 @@ class InitialSIDQuery(MatchName, MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[InitialSID]:
         """Generator which yields all matching initial SIDs."""
-        self.log.info("Generating initial SID results from {0.policy}".format(self))
+        self.log.info(f"Generating initial SID results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_context_debug(self.log)
 

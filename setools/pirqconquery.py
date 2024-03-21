@@ -53,7 +53,7 @@ class PirqconQuery(MatchContext, PolicyQuery):
     def irq(self, value: Optional[int]) -> None:
         if value:
             if value < 1:
-                raise ValueError("The IRQ must be positive: {0}".format(value))
+                raise ValueError(f"The IRQ must be positive: {value}")
 
             self._irq = value
         else:
@@ -61,8 +61,8 @@ class PirqconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Pirqcon]:
         """Generator which yields all matching pirqcons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("IRQ: {0.irq!r}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.irq=}")
         self._match_context_debug(self.log)
 
         for pirqcon in self.policy.pirqcons():

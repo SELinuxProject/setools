@@ -29,7 +29,7 @@ cdef class Boolean(PolicySymbol):
 
     def statement(self):
         """The policy statement."""
-        return "bool {0} {1};".format(self.name, str(self.state).lower())
+        return f"bool {self.name} {str(self.state).lower()};"
 
 
 cdef class Conditional(PolicyObject):

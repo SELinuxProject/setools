@@ -68,17 +68,17 @@ class IbpkeyconQuery(MatchContext, PolicyQuery):
             pending_pkeys = IbpkeyconRange(*value)
 
             if pending_pkeys.low < 1 or pending_pkeys.high < 1:
-                raise ValueError("Pkeys must be positive: {0.low:#x}-{0.high:#x}".
-                                 format(pending_pkeys))
+                raise ValueError(
+                    f"Pkeys must be positive: {pending_pkeys.low:#x}-{pending_pkeys.high:#x}")
 
             if pending_pkeys.low > 0xffff or pending_pkeys.high > 0xffff:
-                raise ValueError("Pkeys maximum is 0xffff: {0.low:#x}-{0.high:#x}".
-                                 format(pending_pkeys))
+                raise ValueError(
+                    f"Pkeys maximum is 0xffff: {pending_pkeys.low:#x}-{pending_pkeys.high:#x}")
 
             if pending_pkeys.low > pending_pkeys.high:
                 raise ValueError(
-                    "The low pkey must be smaller than the high pkey: {0.low:#x}-{0.high:#x}".
-                    format(pending_pkeys))
+                    "The low pkey must be smaller than the high pkey: "
+                    f"{pending_pkeys.low:#x}-{pending_pkeys.high:#x}")
 
             self._pkeys = pending_pkeys
         else:
@@ -97,11 +97,10 @@ class IbpkeyconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Ibpkeycon]:
         """Generator which yields all matching ibpkeycons."""
-        self.log.info("Generating ibpkeycon results from {0.policy}".format(self))
-        self.log.debug("Subnet Prefix: {0.subnet_prefix}".format(self))
-        self.log.debug("Pkeys: {0.pkeys}, overlap: {0.pkeys_overlap}, "
-                       "subset: {0.pkeys_subset}, superset: {0.pkeys_superset}, "
-                       "proper: {0.pkeys_proper}".format(self))
+        self.log.info(f"Generating ibpkeycon results from {self.policy}")
+        self.log.debug(f"{self.subnet_prefix=}")
+        self.log.debug(f"{self.pkeys=}, {self.pkeys_overlap=}, {self.pkeys_subset=}, "
+                       f"{self.pkeys_superset=}, {self.pkeys_proper=}")
         self._match_context_debug(self.log)
 
         for pk in self.policy.ibpkeycons():

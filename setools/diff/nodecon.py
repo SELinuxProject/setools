@@ -36,8 +36,8 @@ class NodeconsDifference(Difference):
     def diff_nodecons(self) -> None:
         """Generate the difference in nodecons between the policies."""
 
-        self.log.info("Generating nodecon differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating nodecon differences from {self.left_policy} to {self.right_policy}")
 
         self.added_nodecons, self.removed_nodecons, matched_nodecons = self._set_diff(
             (NodeconWrapper(n) for n in self.left_policy.nodecons()),

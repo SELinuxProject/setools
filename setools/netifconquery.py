@@ -44,7 +44,7 @@ class NetifconQuery(MatchContext, MatchName, PolicyQuery):
 
     def results(self) -> Iterable[Netifcon]:
         """Generator which yields all matching netifcons."""
-        self.log.info("Generating netifcon results from {0.policy}".format(self))
+        self.log.info(f"Generating netifcon results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_context_debug(self.log)
 

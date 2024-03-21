@@ -29,16 +29,16 @@ class CheckRegistry(ABCMeta):
 
         if clsname != "CheckerModule":
             if not isinstance(check_type, str):
-                raise TypeError("Checker module {} does not set a check_type.".format(clsname))
+                raise TypeError(f"Checker module {clsname} does not set a check_type.")
 
             if not isinstance(check_config, frozenset):
-                raise TypeError("Checker module {} does not set a valid check_config.".format(
-                    clsname))
+                raise TypeError(f"Checker module {clsname} does not set a valid check_config.")
 
             if check_type in CHECKER_REGISTRY:
                 existing_check_module = CHECKER_REGISTRY[check_type].__name__
-                raise TypeError("Checker module {} conflicts with registered check {}".format(
-                                clsname, existing_check_module))
+                raise TypeError(
+                    f"Checker module {clsname} conflicts with "
+                    f"registered check {existing_check_module}")
 
         classdef = super().__new__(cls, clsname, superclasses, attributedict)
 
@@ -83,8 +83,7 @@ class CheckerModule(metaclass=CheckRegistry):
         valid_options = GLOBAL_CONFIG_KEYS | self.check_config
         for k in config:
             if k not in valid_options:
-                raise InvalidCheckOption("{}: Invalid option: {}".format(
-                    self.checkname, k))
+                raise InvalidCheckOption(f"{self.checkname}: Invalid option: {k}")
 
         # Make sure all global config attrs are initialized for this check
         self.desc = config.get(CHECK_DESC_KEY)
@@ -102,13 +101,13 @@ class CheckerModule(metaclass=CheckRegistry):
         surpressed unless self.log_passing is True.
         """
         if self.log_passing:
-            self.output.write("P   * {}\n".format(msg))
-        self.log.debug("P   * {}".format(msg))
+            self.output.write(f"P   * {msg}\n")
+        self.log.debug(f"P   * {msg}")
 
     def log_fail(self, msg: str) -> None:
         """Log findings that fail the check."""
-        self.output.write("{}   * {}\n".format("F" if self.log_passing else " ", msg))
-        self.log.debug("F   * {}".format(msg))
+        self.output.write(f"{'F' if self.log_passing else ' '}   * {msg}\n")
+        self.log.debug(f"F   * {msg}")
 
     @abstractmethod
     def run(self) -> List:

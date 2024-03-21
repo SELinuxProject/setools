@@ -47,8 +47,8 @@ class DevicetreeconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Devicetreecon]:
         """Generator which yields all matching devicetreecons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Path: {0.path!r}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.path=}")
         self._match_context_debug(self.log)
 
         for devicetreecon in self.policy.devicetreecons():

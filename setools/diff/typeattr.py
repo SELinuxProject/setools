@@ -53,8 +53,8 @@ class TypeAttributesDifference(Difference):
         """Generate the difference in type attributes between the policies."""
 
         self.log.info(
-            "Generating type attribute differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating type attribute differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         self.added_type_attributes, self.removed_type_attributes, matched_attributes = \
             self._set_diff(

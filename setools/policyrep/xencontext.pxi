@@ -28,7 +28,7 @@ cdef class Devicetreecon(Ocontext):
         return d
 
     def statement(self):
-        return "devicetreecon {0.path} {0.context}".format(self)
+        return f"devicetreecon {self.path} {self.context}"
 
 
 cdef class Iomemcon(Ocontext):
@@ -51,9 +51,9 @@ cdef class Iomemcon(Ocontext):
         low, high = self.addr
 
         if low == high:
-            return "iomemcon {0} {1}".format(low, self.context)
+            return "iomemcon {low} {self.context1}"
         else:
-            return "iomemcon {0}-{1} {2}".format(low, high, self.context)
+            return "iomemcon {low}-{high} {self.context}"
 
 
 cdef class Ioportcon(Ocontext):
@@ -76,9 +76,9 @@ cdef class Ioportcon(Ocontext):
         low, high = self.ports
 
         if low == high:
-            return "ioportcon {0} {1}".format(low, self.context)
+            return "ioportcon {low} {self.context}"
         else:
-            return "ioportcon {0}-{1} {2}".format(low, high, self.context)
+            return "ioportcon {low}-{high} {self.context}"
 
 
 cdef class Pcidevicecon(Ocontext):
@@ -98,7 +98,7 @@ cdef class Pcidevicecon(Ocontext):
         return p
 
     def statement(self):
-        return "pcidevicecon {0.device} {0.context}".format(self)
+        return f"pcidevicecon {self.device} {self.context}"
 
 
 cdef class Pirqcon(Ocontext):
@@ -118,7 +118,7 @@ cdef class Pirqcon(Ocontext):
         return p
 
     def statement(self):
-        return "pirqcon {0.irq} {0.context}".format(self)
+        return f"pirqcon {self.irq} {self.context}"
 
 
 #

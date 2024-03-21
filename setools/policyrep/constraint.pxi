@@ -58,12 +58,12 @@ cdef class Constraint(BaseConstraint):
 
     def statement(self):
         if len(self.perms) > 1:
-            perms = "{{ {0} }}".format(' '.join(sorted(self.perms)))
+            perms = f"{{ {' '.join(sorted(self.perms))} }}"
         else:
             # convert to list since sets cannot be indexed
             perms = list(self.perms)[0]
 
-        return "{0.ruletype} {0.tclass} {1} ({0.expression}); ".format(self, perms)
+        return f"{self.ruletype} {self.tclass} {perms} ({self.expression});"
 
 
 cdef class Validatetrans(BaseConstraint):
@@ -84,10 +84,10 @@ cdef class Validatetrans(BaseConstraint):
 
     @property
     def perms(self):
-        raise ConstraintUseError("{0} rules do not have permissions.".format(self.ruletype))
+        raise ConstraintUseError(f"{self.ruletype} rules do not have permissions.")
 
     def statement(self):
-        return "{0.ruletype} {0.tclass} ({0.expression});".format(self)
+        return f"{self.ruletype} {self.tclass} ({self.expression});"
 
 
 cdef class ConstraintExpression(PolicyObject):
@@ -149,9 +149,9 @@ cdef class ConstraintExpression(PolicyObject):
         for item in self.infix():
             if isinstance(item, frozenset):
                 if len(item) > 1:
-                    ret.append("{{ {0} }} ".format(" ".join(str(j) for j in item)))
+                    ret.append(f"{{ {' '.join(str(j) for j in item)} }} ")
                 else:
-                    ret.append("{0}".format(" ".join(str(j) for j in item)))
+                    ret.append(f"{' '.join(str(j) for j in item)}")
             else:
                 ret.append(item)
 

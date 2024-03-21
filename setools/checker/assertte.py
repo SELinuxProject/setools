@@ -61,13 +61,13 @@ class AssertTE(CheckerModule):
 
         source_exempt_expect_overlap = self.exempt_source & self.expect_source
         if source_exempt_expect_overlap:
-            self.log.info("Overlap in expect_source and exempt_source: {}".
-                          format(", ".join(i.name for i in source_exempt_expect_overlap)))
+            self.log.info("Overlap in expect_source and exempt_source: "
+                          f"{', '.join(i.name for i in source_exempt_expect_overlap)}")
 
         target_exempt_expect_overlap = self.exempt_target & self.expect_target
         if target_exempt_expect_overlap:
-            self.log.info("Overlap in expect_target and exempt_target: {}".
-                          format(", ".join(i.name for i in target_exempt_expect_overlap)))
+            self.log.info("Overlap in expect_target and exempt_target: "
+                          f"{', '.join(i.name for i in target_exempt_expect_overlap)}")
 
     def run(self) -> List:
         assert any((self.source, self.target, self.tclass, self.perms)), \
@@ -100,14 +100,14 @@ class AssertTE(CheckerModule):
                 self.log_ok(str(rule))
 
         for item in unseen_sources:
-            failure = "Expected rule with source \"{}\" not found.".format(item)
+            failure = f"Expected rule with source \"{item}\" not found."
             self.log_fail(failure)
             failures.append(failure)
 
         for item in unseen_targets:
-            failure = "Expected rule with target \"{}\" not found.".format(item)
+            failure = f"Expected rule with target \"{item}\" not found."
             self.log_fail(failure)
             failures.append(failure)
 
-        self.log.debug("{} failure(s)".format(failures))
+        self.log.debug(f"{failures} failure(s)")
         return failures

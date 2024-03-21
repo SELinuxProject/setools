@@ -54,10 +54,10 @@ class GenfsconQuery(MatchContext, PolicyQuery):
 
     def results(self) -> Iterable[Genfscon]:
         """Generator which yields all matching genfscons."""
-        self.log.info("Generating genfscon results from {0.policy}".format(self))
-        self.log.debug("FS: {0.fs!r}, regex: {0.fs_regex}".format(self))
-        self.log.debug("Path: {0.path!r}, regex: {0.path_regex}".format(self))
-        self.log.debug("Filetype: {0.filetype!r}".format(self))
+        self.log.info(f"Generating genfscon results from {self.policy}")
+        self.log.debug(f"{self.fs=}, {self.fs_regex=}")
+        self.log.debug(f"{self.path=}, {self.path_regex=}")
+        self.log.debug(f"{self.filetype=}")
         self._match_context_debug(self.log)
 
         for genfs in self.policy.genfscons():
