@@ -65,7 +65,7 @@ for lang in linguas:
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
 setup(name='setools',
-      version='4.5.0-dev',
+      version='4.6.0-dev',
       description='SELinux policy analysis tools.',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
