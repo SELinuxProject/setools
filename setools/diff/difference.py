@@ -7,7 +7,6 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Generic, Iterable, TypeVar
 
-from ..mixins import TupleCompat
 from ..policyrep import PolicyObject, PolicySymbol, SELinuxPolicy
 
 
@@ -118,7 +117,7 @@ class Difference:
             return added_items, removed_items, matched_items
 
 
-class DifferenceResult(TupleCompat):
+class DifferenceResult:
 
     """Base class for difference results"""
 
