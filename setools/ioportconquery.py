@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional, Tuple
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .policyrep import Ioportcon, IoportconRange
-from .query import PolicyQuery
-from .util import match_range
+from . import mixins, policyrep, query, util
+
+__all__: typing.Final[tuple[str, ...]] = ("IoportconQuery",)
 
 
-class IoportconQuery(MatchContext, PolicyQuery):
+class IoportconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Ioportcon context query.
@@ -53,20 +53,20 @@ class IoportconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _ports: Optional[IoportconRange] = None
+    _ports: policyrep.IoportconRange | None = None
     ports_subset: bool = False
     ports_overlap: bool = False
     ports_superset: bool = False
     ports_proper: bool = False
 
     @property
-    def ports(self) -> Optional[IoportconRange]:
+    def ports(self) -> policyrep.IoportconRange | None:
         return self._ports
 
     @ports.setter
-    def ports(self, value: Optional[Tuple[int, int]]) -> None:
+    def ports(self, value: tuple[int, int] | None) -> None:
         if value:
-            pending_ports = IoportconRange(*value)
+            pending_ports = policyrep.IoportconRange(*value)
             if pending_ports.low < 1 or pending_ports.high < 1:
                 raise ValueError(
                     f"Port numbers must be positive: {pending_ports.low}-{pending_ports.high}")
@@ -80,7 +80,7 @@ class IoportconQuery(MatchContext, PolicyQuery):
         else:
             self._ports = None
 
-    def results(self) -> Iterable[Ioportcon]:
+    def results(self) -> Iterable[policyrep.Ioportcon]:
         """Generator which yields all matching ioportcons."""
         self.log.info(f"Generating results from {self.policy}")
         self.log.debug(f"{self.ports=}, {self.ports_overlap=}, {self.ports_subset=}, "
@@ -89,7 +89,7 @@ class IoportconQuery(MatchContext, PolicyQuery):
 
         for ioportcon in self.policy.ioportcons():
 
-            if self.ports and not match_range(
+            if self.ports and not util.match_range(
                     ioportcon.ports,
                     self.ports,
                     self.ports_subset,

@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
 
+from . import policyrep
 from .descriptors import CriteriaDescriptor
 from .mixins import MatchAlias, MatchName
-from .policyrep import Sensitivity
 from .query import PolicyQuery
 
 
@@ -32,11 +32,11 @@ class SensitivityQuery(MatchAlias, MatchName, PolicyQuery):
                  by the sensitivity.
     """
 
-    sens = CriteriaDescriptor(lookup_function="lookup_sensitivity")
+    sens = CriteriaDescriptor[policyrep.Sensitivity](lookup_function="lookup_sensitivity")
     sens_dom: bool = False
     sens_domby: bool = False
 
-    def results(self) -> Iterable[Sensitivity]:
+    def results(self) -> Iterable[policyrep.Sensitivity]:
         """Generator which yields all matching sensitivities."""
         self.log.info(f"Generating sensitivity results from {self.policy}")
         self._match_name_debug(self.log)

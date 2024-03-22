@@ -2,13 +2,12 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
 
+from . import policyrep, util
 from .descriptors import CriteriaSetDescriptor
 from .mixins import MatchName
-from .policyrep import TypeAttribute
 from .query import PolicyQuery
-from .util import match_regex_or_set
 
 
 class TypeAttributeQuery(MatchName, PolicyQuery):
@@ -33,11 +32,11 @@ class TypeAttributeQuery(MatchName, PolicyQuery):
                         of set logic.
     """
 
-    types = CriteriaSetDescriptor("types_regex", "lookup_type")
+    types = CriteriaSetDescriptor[policyrep.Type]("types_regex", "lookup_type")
     types_equal: bool = False
     types_regex: bool = False
 
-    def results(self) -> Iterable[TypeAttribute]:
+    def results(self) -> Iterable[policyrep.TypeAttribute]:
         """Generator which yields all matching types."""
         self.log.info(f"Generating type attribute results from {self.policy}")
         self._match_name_debug(self.log)
@@ -47,7 +46,7 @@ class TypeAttributeQuery(MatchName, PolicyQuery):
             if not self._match_name(attr):
                 continue
 
-            if self.types and not match_regex_or_set(
+            if self.types and not util.match_regex_or_set(
                     set(attr.expand()),
                     self.types,
                     self.types_equal,

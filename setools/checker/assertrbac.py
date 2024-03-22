@@ -4,21 +4,21 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-import logging
-from typing import List, Union
+import typing
 
-from ..exception import InvalidCheckValue
-from ..policyrep import AnyRBACRule
+from .. import exception, policyrep
 from ..rbacrulequery import RBACRuleQuery
 from .checkermodule import CheckerModule
 from .descriptors import ConfigDescriptor, ConfigSetDescriptor
 
-SOURCE_OPT = "source"
-TARGET_OPT = "target"
-EXEMPT_SRC_OPT = "exempt_source"
-EXEMPT_TGT_OPT = "exempt_target"
-EXPECT_SRC_OPT = "expect_source"
-EXPECT_TGT_OPT = "expect_target"
+SOURCE_OPT: typing.Final[str] = "source"
+TARGET_OPT: typing.Final[str] = "target"
+EXEMPT_SRC_OPT: typing.Final[str] = "exempt_source"
+EXEMPT_TGT_OPT: typing.Final[str] = "exempt_target"
+EXPECT_SRC_OPT: typing.Final[str] = "expect_source"
+EXPECT_TGT_OPT: typing.Final[str] = "expect_target"
+
+__all__: typing.Final[tuple[str, ...]] = ("AssertRBAC",)
 
 
 class AssertRBAC(CheckerModule):
@@ -29,18 +29,18 @@ class AssertRBAC(CheckerModule):
     check_config = frozenset((SOURCE_OPT, TARGET_OPT, EXEMPT_SRC_OPT, EXEMPT_TGT_OPT,
                               EXPECT_SRC_OPT, EXPECT_TGT_OPT))
 
-    source = ConfigDescriptor("lookup_role")
-    target = ConfigDescriptor("lookup_role")
+    source = ConfigDescriptor[policyrep.Role]("lookup_role")
+    target = ConfigDescriptor[policyrep.Role]("lookup_role")
 
-    exempt_source = ConfigSetDescriptor("lookup_role", strict=False, expand=True)
-    exempt_target = ConfigSetDescriptor("lookup_role", strict=False, expand=True)
-    expect_source = ConfigSetDescriptor("lookup_role", strict=True, expand=True)
-    expect_target = ConfigSetDescriptor("lookup_role", strict=True, expand=True)
+    exempt_source = ConfigSetDescriptor[policyrep.Role]("lookup_role", strict=False, expand=True)
+    exempt_target = ConfigSetDescriptor[policyrep.Role]("lookup_role", strict=False, expand=True)
+    expect_source = ConfigSetDescriptor[policyrep.Role]("lookup_role", strict=True, expand=True)
+    expect_target = ConfigSetDescriptor[policyrep.Role]("lookup_role", strict=True, expand=True)
 
-    def __init__(self, policy, checkname, config) -> None:
+    def __init__(self, policy: policyrep.SELinuxPolicy, checkname: str,
+                 config: dict[str, str]) -> None:
+
         super().__init__(policy, checkname, config)
-        self.log = logging.getLogger(__name__)
-
         self.source = config.get(SOURCE_OPT)
         self.target = config.get(TARGET_OPT)
 
@@ -50,7 +50,7 @@ class AssertRBAC(CheckerModule):
         self.expect_target = config.get(EXPECT_TGT_OPT)
 
         if not any((self.source, self.target)):
-            raise InvalidCheckValue(
+            raise exception.InvalidCheckValue(
                 "At least one of source or target options must be set.")
 
         source_exempt_expect_overlap = self.exempt_source & self.expect_source
@@ -63,7 +63,7 @@ class AssertRBAC(CheckerModule):
             self.log.info("Overlap in expect_target and exempt_target: "
                           f"{', '.join(i.name for i in target_exempt_expect_overlap)}")
 
-    def run(self) -> List:
+    def run(self) -> list[policyrep.AnyRBACRule | str]:
         assert any((self.source, self.target)), "AssertRBAC no options set, this is a bug."
 
         self.log.info("Checking RBAC allow rule assertion.")
@@ -75,7 +75,7 @@ class AssertRBAC(CheckerModule):
 
         unseen_sources = set(self.expect_source)
         unseen_targets = set(self.expect_target)
-        failures: List[Union[AnyRBACRule, str]] = []
+        failures: list[policyrep.AnyRBACRule | str] = []
         for rule in sorted(query.results()):
             srcs = set(rule.source.expand())
             tgts = set(rule.target.expand())

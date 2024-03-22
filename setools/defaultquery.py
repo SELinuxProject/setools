@@ -2,15 +2,16 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import cast, Iterable
+from collections.abc import Iterable
+import typing
 
-from .query import PolicyQuery
+from . import mixins, policyrep, query
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .mixins import MatchObjClass
-from .policyrep import AnyDefault, DefaultRange, DefaultRuletype, DefaultValue, DefaultRangeValue
+
+__all__: typing.Final[tuple[str, ...]] = ("DefaultQuery",)
 
 
-class DefaultQuery(MatchObjClass, PolicyQuery):
+class DefaultQuery(mixins.MatchObjClass, query.PolicyQuery):
 
     """
     Query default_* statements.
@@ -28,11 +29,14 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
                     ("low", "high", "low_high")
     """
 
-    ruletype = CriteriaSetDescriptor(enum_class=DefaultRuletype)
-    default = CriteriaDescriptor(enum_class=DefaultValue)
-    default_range = CriteriaDescriptor(enum_class=DefaultRangeValue)
+    ruletype = CriteriaSetDescriptor[policyrep.DefaultRuletype](
+        enum_class=policyrep.DefaultRuletype)
+    default = CriteriaDescriptor[policyrep.DefaultValue](
+        enum_class=policyrep.DefaultValue)
+    default_range = CriteriaDescriptor[policyrep.DefaultRangeValue](
+        enum_class=policyrep.DefaultRangeValue)
 
-    def results(self) -> Iterable[AnyDefault]:
+    def results(self) -> Iterable[policyrep.AnyDefault]:
         """Generator which yields all matching default_* statements."""
         self.log.info(f"Generating default_* results from {self.policy}")
         self.log.debug(f"{self.ruletype=}")
@@ -52,7 +56,7 @@ class DefaultQuery(MatchObjClass, PolicyQuery):
 
             if self.default_range:
                 try:
-                    if cast(DefaultRange, d).default_range != self.default_range:
+                    if typing.cast(policyrep.DefaultRange, d).default_range != self.default_range:
                         continue
                 except AttributeError:
                     continue

@@ -16,7 +16,7 @@ from .types import type_or_attr_wrapper_factory
 from .typing import RuleList
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedRBACRule(DifferenceResult):
 
     """Difference details for a modified RBAC rule."""
@@ -25,21 +25,18 @@ class ModifiedRBACRule(DifferenceResult):
     added_default: Role
     removed_default: Role
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class RBACRulesDifference(Difference):
 
     """Determine the difference in RBAC rules between two policies."""
 
-    added_role_allows = DiffResultDescriptor("diff_role_allows")
-    removed_role_allows = DiffResultDescriptor("diff_role_allows")
+    added_role_allows = DiffResultDescriptor[RoleAllow]("diff_role_allows")
+    removed_role_allows = DiffResultDescriptor[RoleAllow]("diff_role_allows")
     # role allows cannot be modified, only added/removed
 
-    added_role_transitions = DiffResultDescriptor("diff_role_transitions")
-    removed_role_transitions = DiffResultDescriptor("diff_role_transitions")
-    modified_role_transitions = DiffResultDescriptor("diff_role_transitions")
+    added_role_transitions = DiffResultDescriptor[RoleTransition]("diff_role_transitions")
+    removed_role_transitions = DiffResultDescriptor[RoleTransition]("diff_role_transitions")
+    modified_role_transitions = DiffResultDescriptor[ModifiedRBACRule]("diff_role_transitions")
 
     # Lists of rules for each policy
     _left_rbac_rules: RuleList[RBACRuletype, AnyRBACRule] = None
@@ -80,7 +77,7 @@ class RBACRulesDifference(Difference):
             self._expand_generator(self._right_rbac_rules[RBACRuletype.role_transition],
                                    RoleTransitionWrapper))
 
-        modified = []
+        modified = list[ModifiedRBACRule]()
         for left_rule, right_rule in matched:
             # Criteria for modified rules
             # 1. change to default role
@@ -115,11 +112,11 @@ class RBACRulesDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting RBAC rule differences")
-        self.added_role_allows = None
-        self.removed_role_allows = None
-        self.added_role_transitions = None
-        self.removed_role_transitions = None
-        self.modified_role_transitions = None
+        del self.added_role_allows
+        del self.removed_role_allows
+        del self.added_role_transitions
+        del self.removed_role_transitions
+        del self.modified_role_transitions
 
         # Sets of rules for each policy
         self._left_rbac_rules = None

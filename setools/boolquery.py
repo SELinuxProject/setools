@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchName
-from .policyrep import Boolean
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("BoolQuery",)
 
 
-class BoolQuery(MatchName, PolicyQuery):
+class BoolQuery(mixins.MatchName, query.PolicyQuery):
 
     """Query SELinux policy Booleans.
 
@@ -24,10 +25,10 @@ class BoolQuery(MatchName, PolicyQuery):
                     is None, the default state not be matched.
     """
 
-    _default: Optional[bool] = None
+    _default: bool | None = None
 
     @property
-    def default(self) -> Optional[bool]:
+    def default(self) -> bool | None:
         return self._default
 
     @default.setter
@@ -37,7 +38,7 @@ class BoolQuery(MatchName, PolicyQuery):
         else:
             self._default = bool(value)
 
-    def results(self) -> Iterable[Boolean]:
+    def results(self) -> Iterable[policyrep.Boolean]:
         """Generator which yields all Booleans matching the criteria."""
         self.log.info(f"Generating Boolean results from {self.policy}")
         self._match_name_debug(self.log)

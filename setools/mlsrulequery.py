@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
+from . import mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .mixins import MatchObjClass
-from .policyrep import MLSRule, MLSRuletype
-from .query import PolicyQuery
-from .util import match_indirect_regex, match_range
+
+__all__: typing.Final[tuple[str, ...]] = ("MLSRuleQuery",)
 
 
-class MLSRuleQuery(MatchObjClass, PolicyQuery):
+class MLSRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
 
     """
     Query MLS rules.
@@ -32,22 +32,22 @@ class MLSRuleQuery(MatchObjClass, PolicyQuery):
                      matching the rule's object class.
     """
 
-    ruletype = CriteriaSetDescriptor(enum_class=MLSRuletype)
-    source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
+    ruletype = CriteriaSetDescriptor[policyrep.MLSRuletype](enum_class=policyrep.MLSRuletype)
+    source = CriteriaDescriptor[policyrep.TypeOrAttr]("source_regex", "lookup_type_or_attr")
     source_regex: bool = False
     source_indirect: bool = True
-    target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
+    target = CriteriaDescriptor[policyrep.TypeOrAttr]("target_regex", "lookup_type_or_attr")
     target_regex: bool = False
     target_indirect: bool = True
-    tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
+    tclass = CriteriaSetDescriptor[policyrep.ObjClass]("tclass_regex", "lookup_class")
     tclass_regex: bool = False
-    default = CriteriaDescriptor(lookup_function="lookup_range")
+    default = CriteriaDescriptor[policyrep.Range](lookup_function="lookup_range")
     default_overlap: bool = False
     default_subset: bool = False
     default_superset: bool = False
     default_proper: bool = False
 
-    def results(self) -> Iterable[MLSRule]:
+    def results(self) -> Iterable[policyrep.MLSRule]:
         """Generator which yields all matching MLS rules."""
         self.log.info(f"Generating MLS rule results from {self.policy}")
         self.log.debug(f"{self.ruletype=}")
@@ -68,7 +68,7 @@ class MLSRuleQuery(MatchObjClass, PolicyQuery):
             #
             # Matching on source type
             #
-            if self.source and not match_indirect_regex(
+            if self.source and not util.match_indirect_regex(
                     rule.source,
                     self.source,
                     self.source_indirect,
@@ -78,7 +78,7 @@ class MLSRuleQuery(MatchObjClass, PolicyQuery):
             #
             # Matching on target type
             #
-            if self.target and not match_indirect_regex(
+            if self.target and not util.match_indirect_regex(
                     rule.target,
                     self.target,
                     self.target_indirect,
@@ -94,7 +94,7 @@ class MLSRuleQuery(MatchObjClass, PolicyQuery):
             #
             # Matching on range
             #
-            if self.default and not match_range(
+            if self.default and not util.match_range(
                     rule.default,
                     self.default,
                     self.default_subset,

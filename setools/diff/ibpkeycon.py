@@ -11,7 +11,7 @@ from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, Wrapper
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedIbpkeycon(DifferenceResult):
 
     """Difference details for a modified ibpkeycon."""
@@ -20,17 +20,14 @@ class ModifiedIbpkeycon(DifferenceResult):
     added_context: Context
     removed_context: Context
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class IbpkeyconsDifference(Difference):
 
     """Determine the difference in ibpkeycons between two policies."""
 
-    added_ibpkeycons = DiffResultDescriptor("diff_ibpkeycons")
-    removed_ibpkeycons = DiffResultDescriptor("diff_ibpkeycons")
-    modified_ibpkeycons = DiffResultDescriptor("diff_ibpkeycons")
+    added_ibpkeycons = DiffResultDescriptor[Ibpkeycon]("diff_ibpkeycons")
+    removed_ibpkeycons = DiffResultDescriptor[Ibpkeycon]("diff_ibpkeycons")
+    modified_ibpkeycons = DiffResultDescriptor[ModifiedIbpkeycon]("diff_ibpkeycons")
 
     def diff_ibpkeycons(self) -> None:
         """Generate the difference in ibpkeycons between the policies."""
@@ -43,7 +40,7 @@ class IbpkeyconsDifference(Difference):
                 (IbpkeyconWrapper(n) for n in self.left_policy.ibpkeycons()),
                 (IbpkeyconWrapper(n) for n in self.right_policy.ibpkeycons()))
 
-        self.modified_ibpkeycons = []
+        self.modified_ibpkeycons = list[ModifiedIbpkeycon]()
 
         for left_ibpkey, right_ibpkey in matched_ibpkeycons:
             # Criteria for modified ibpkeycons
@@ -58,9 +55,9 @@ class IbpkeyconsDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting ibpkeycon differences")
-        self.added_ibpkeycons = None
-        self.removed_ibpkeycons = None
-        self.modified_ibpkeycons = None
+        del self.added_ibpkeycons
+        del self.removed_ibpkeycons
+        del self.modified_ibpkeycons
 
 
 class IbpkeyconWrapper(Wrapper[Ibpkeycon]):

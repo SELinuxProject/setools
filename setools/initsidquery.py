@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext, MatchName
-from .policyrep import InitialSID
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("InitialSIDQuery",)
 
 
-class InitialSIDQuery(MatchName, MatchContext, PolicyQuery):
+class InitialSIDQuery(mixins.MatchName, mixins.MatchContext, query.PolicyQuery):
 
     """
     Initial SID (Initial context) query.
@@ -41,7 +42,7 @@ class InitialSIDQuery(MatchName, MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    def results(self) -> Iterable[InitialSID]:
+    def results(self) -> Iterable[policyrep.InitialSID]:
         """Generator which yields all matching initial SIDs."""
         self.log.info(f"Generating initial SID results from {self.policy}")
         self._match_name_debug(self.log)

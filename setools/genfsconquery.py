@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional
+from collections.abc import Iterable
+import typing
 
+from . import mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor
-from .mixins import MatchContext
-from .policyrep import Genfscon
-from .query import PolicyQuery
-from .util import match_regex
+
+__all__: typing.Final[tuple[str, ...]] = ("GenfsconQuery",)
 
 
-class GenfsconQuery(MatchContext, PolicyQuery):
+class GenfsconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Query genfscon statements.
@@ -46,13 +46,13 @@ class GenfsconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    filetype: Optional[int] = None
-    fs = CriteriaDescriptor("fs_regex")
+    filetype: int | None = None
+    fs = CriteriaDescriptor[str]("fs_regex")
     fs_regex: bool = False
-    path = CriteriaDescriptor("path_regex")
+    path = CriteriaDescriptor[str]("path_regex")
     path_regex: bool = False
 
-    def results(self) -> Iterable[Genfscon]:
+    def results(self) -> Iterable[policyrep.Genfscon]:
         """Generator which yields all matching genfscons."""
         self.log.info(f"Generating genfscon results from {self.policy}")
         self.log.debug(f"{self.fs=}, {self.fs_regex=}")
@@ -61,13 +61,13 @@ class GenfsconQuery(MatchContext, PolicyQuery):
         self._match_context_debug(self.log)
 
         for genfs in self.policy.genfscons():
-            if self.fs and not match_regex(
+            if self.fs and not util.match_regex(
                     genfs.fs,
                     self.fs,
                     self.fs_regex):
                 continue
 
-            if self.path and not match_regex(
+            if self.path and not util.match_regex(
                     genfs.path,
                     self.path,
                     self.path_regex):

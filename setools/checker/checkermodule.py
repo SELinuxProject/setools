@@ -6,17 +6,18 @@
 import sys
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Dict, FrozenSet, List, Mapping
+from collections.abc import Mapping
+import typing
 
 from ..exception import InvalidCheckOption
 from ..policyrep import SELinuxPolicy
 
-from .globalkeys import CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE, GLOBAL_CONFIG_KEYS
+from .globalkeys import CHECK_DESC_KEY, CHECK_DISABLE, GLOBAL_CONFIG_KEYS
 
 
-CHECKER_REGISTRY: Dict[str, type] = {}
+CHECKER_REGISTRY: dict[str, type] = {}
 
-__all__ = ['CheckerModule']
+__all__: typing.Final[tuple[str, ...]] = ("CheckerModule",)
 
 
 class CheckRegistry(ABCMeta):
@@ -54,30 +55,27 @@ class CheckerModule(metaclass=CheckRegistry):
 
     # The name of the check used in config files.
     # This must be set by subclasses.
-    check_type: str
+    check_type: typing.ClassVar[str]
 
     # The container of valid config keys specific to the check
     # This is in addition to the common config keys
     # in the GLOBAL_CONFIG_KEYS above.  This must be set by subclasses.
     # If no additional keys  are needed, this should be set to an
     # empty container.
-    check_config: FrozenSet[str]
+    check_config: typing.ClassVar[frozenset[str]]
 
     # T/F log findings that pass the check.
-    log_passing: bool = False
+    log_passing: typing.ClassVar[bool] = False
 
     # Default output to stdout.
-    output = sys.stdout
+    output: typing.TextIO = sys.stdout
 
     policy: SELinuxPolicy
 
     def __init__(self, policy: SELinuxPolicy, checkname: str, config: Mapping[str, str]) -> None:
         self.policy = policy
         self.checkname = checkname
-
-        # ensure there is a logger available. This should
-        # be replaced with the concrete class' logger
-        self.log = logging.getLogger(__name__)
+        self.log = logging.getLogger(self.__module__)
 
         # Check available options are valid
         valid_options = GLOBAL_CONFIG_KEYS | self.check_config
@@ -110,7 +108,7 @@ class CheckerModule(metaclass=CheckRegistry):
         self.log.debug(f"F   * {msg}")
 
     @abstractmethod
-    def run(self) -> List:
+    def run(self) -> list:
         """
         Run the configured check on the policy.
 

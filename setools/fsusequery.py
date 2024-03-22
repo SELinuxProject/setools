@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
+from . import mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .mixins import MatchContext
-from .policyrep import FSUse, FSUseRuletype
-from .query import PolicyQuery
-from .util import match_regex
+
+__all__: typing.Final[tuple[str, ...]] = ("FSUseQuery",)
 
 
-class FSUseQuery(MatchContext, PolicyQuery):
+class FSUseQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Query fs_use_* statements.
@@ -44,11 +44,11 @@ class FSUseQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    ruletype = CriteriaSetDescriptor(enum_class=FSUseRuletype)
-    fs = CriteriaDescriptor("fs_regex")
+    ruletype = CriteriaSetDescriptor[policyrep.FSUseRuletype](enum_class=policyrep.FSUseRuletype)
+    fs = CriteriaDescriptor[str]("fs_regex")
     fs_regex: bool = False
 
-    def results(self) -> Iterable[FSUse]:
+    def results(self) -> Iterable[policyrep.FSUse]:
         """Generator which yields all matching fs_use_* statements."""
         self.log.info(f"Generating fs_use_* results from {self.policy}")
         self.log.debug(f"{self.ruletype=}")
@@ -59,7 +59,7 @@ class FSUseQuery(MatchContext, PolicyQuery):
             if self.ruletype and fsu.ruletype not in self.ruletype:
                 continue
 
-            if self.fs and not match_regex(
+            if self.fs and not util.match_regex(
                     fsu.fs,
                     self.fs,
                     self.fs_regex):

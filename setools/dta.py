@@ -19,16 +19,13 @@ try:
 except ImportError as iex:
     logging.getLogger(__name__).debug(f"{iex.name} failed to import.")
 
-from . import exception
+from . import exception, mixins, policyrep, query
 from .descriptors import CriteriaDescriptor, EdgeAttrDict, EdgeAttrList
-from .mixins import NetworkXGraphEdge
-from .policyrep import AnyTERule, SELinuxPolicy, TERuletype, Type
-from .query import DirectedGraphAnalysis
 
-__all__ = ['DomainTransitionAnalysis',
-           'DomainTransition',
-           'DomainEntrypoint',
-           'DTAPath']
+__all__: typing.Final[tuple[str, ...]] = ('DomainTransitionAnalysis',
+                                          'DomainTransition',
+                                          'DomainEntrypoint',
+                                          'DTAPath')
 
 
 @dataclass
@@ -36,10 +33,10 @@ class DomainEntrypoint:
 
     """Entrypoint list entry."""
 
-    name: Type
-    entrypoint: list[AnyTERule]
-    execute: list[AnyTERule]
-    type_transition: list[AnyTERule]
+    name: policyrep.Type
+    entrypoint: list[policyrep.AnyTERule]
+    execute: list[policyrep.AnyTERule]
+    type_transition: list[policyrep.AnyTERule]
 
     def __lt__(self, other: "DomainEntrypoint") -> bool:
         # basic comparison for sorting
@@ -65,13 +62,13 @@ class DomainTransition:
 
     """Transition step output."""
 
-    source: Type
-    target: Type
-    transition: list[AnyTERule]
+    source: policyrep.Type
+    target: policyrep.Type
+    transition: list[policyrep.AnyTERule]
     entrypoints: list[DomainEntrypoint]
-    setexec: list[AnyTERule]
-    dyntransition: list[AnyTERule]
-    setcurrent: list[AnyTERule]
+    setexec: list[policyrep.AnyTERule]
+    dyntransition: list[policyrep.AnyTERule]
+    setcurrent: list[policyrep.AnyTERule]
 
     def __format__(self, spec: str) -> str:
         lines: list[str] = [f"{self.source} -> {self.target}\n"]
@@ -110,10 +107,10 @@ class DomainTransition:
 # Typing
 #
 DTAPath = Iterable[DomainTransition]
-RuleHash = defaultdict[Type, list[AnyTERule]]
+RuleHash = defaultdict[policyrep.Type, list[policyrep.AnyTERule]]
 
 
-class DomainTransitionAnalysis(DirectedGraphAnalysis):
+class DomainTransitionAnalysis(query.DirectedGraphAnalysis):
 
     """
     Domain transition analysis.
@@ -141,17 +138,17 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
     DIRECT_MODES: typing.Final[tuple[Mode, ...]] = (Mode.TransitionsIn, Mode.TransitionsOut)
     TRANSITIVE_MODES: typing.Final[tuple[Mode, ...]] = (Mode.ShortestPaths, Mode.AllPaths)
 
-    source = CriteriaDescriptor(lookup_function="lookup_type")
-    target = CriteriaDescriptor(lookup_function="lookup_type")
+    source = CriteriaDescriptor[policyrep.Type](lookup_function="lookup_type")
+    target = CriteriaDescriptor[policyrep.Type](lookup_function="lookup_type")
     mode = Mode.ShortestPaths
 
-    def __init__(self, policy: SELinuxPolicy, /, *,
+    def __init__(self, policy: policyrep.SELinuxPolicy, /, *,
                  reverse: bool = False,
-                 source: Type | str | None = None,
-                 target: Type | str | None = None,
+                 source: policyrep.Type | str | None = None,
+                 target: policyrep.Type | str | None = None,
                  mode: Mode = Mode.ShortestPaths,
                  depth_limit: int | None = 1,
-                 exclude: Iterable[Type | str] | None = None) -> None:
+                 exclude: Iterable[policyrep.Type | str] | None = None) -> None:
 
         super().__init__(policy, reverse=reverse, source=source, target=target, mode=mode,
                          depth_limit=depth_limit, exclude=exclude)
@@ -193,11 +190,11 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
         self.rebuildsubgraph = True
 
     @property
-    def exclude(self) -> list[Type]:
+    def exclude(self) -> list[policyrep.Type]:
         return self._exclude
 
     @exclude.setter
-    def exclude(self, types: Iterable[Type | str] | None) -> None:
+    def exclude(self, types: Iterable[policyrep.Type | str] | None) -> None:
         if types:
             self._exclude = [self.policy.lookup_type(t) for t in types]
         else:
@@ -389,7 +386,7 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
         return [DomainEntrypoint(e, edge.entrypoint[e], edge.execute[e], edge.type_transition[e])
                 for e in edge.entrypoint]
 
-    def _generate_steps(self, path: list[Type]) -> DTAPath:
+    def _generate_steps(self, path: list[policyrep.Type]) -> DTAPath:
         """
         Generator which yields the source, target, and associated rules
         for each domain transition.
@@ -494,15 +491,15 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
         # hash tables keyed on (domain, entrypoint file type)
         # the parameter for defaultdict has to be callable
         # hence the lambda for the nested defaultdict
-        execute: defaultdict[Type, RuleHash] = defaultdict(lambda: defaultdict(list))
-        entrypoint: defaultdict[Type, RuleHash] = defaultdict(lambda: defaultdict(list))
+        execute: defaultdict[policyrep.Type, RuleHash] = defaultdict(lambda: defaultdict(list))
+        entrypoint: defaultdict[policyrep.Type, RuleHash] = defaultdict(lambda: defaultdict(list))
 
         # hash table keyed on (domain, entrypoint, target domain)
-        type_trans: defaultdict[Type, defaultdict[Type, RuleHash]] = \
+        type_trans: defaultdict[policyrep.Type, defaultdict[policyrep.Type, RuleHash]] = \
             defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         for rule in self.policy.terules():
-            if rule.ruletype == TERuletype.allow:
+            if rule.ruletype == policyrep.TERuletype.allow:
                 if rule.tclass not in ["process", "file"]:
                     continue
 
@@ -542,7 +539,7 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
                         for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                             entrypoint[s][t].append(rule)
 
-            elif rule.ruletype == TERuletype.type_transition:
+            elif rule.ruletype == policyrep.TERuletype.type_transition:
                 if rule.tclass != "process":
                     continue
 
@@ -685,7 +682,7 @@ class DomainTransitionAnalysis(DirectedGraphAnalysis):
 
 
 @dataclass
-class Edge(NetworkXGraphEdge):
+class Edge(mixins.NetworkXGraphEdge):
 
     """
     A graph edge.  Also used for returning domain transition steps.
@@ -701,8 +698,8 @@ class Edge(NetworkXGraphEdge):
     """
 
     G: nx.DiGraph
-    source: Type
-    target: Type
+    source: policyrep.Type
+    target: policyrep.Type
     create: InitVar[bool] = False
     transition = EdgeAttrList()
     setexec = EdgeAttrList()

@@ -2,18 +2,17 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
+from collections.abc import Iterable
 from contextlib import suppress
-from typing import Iterable
+import typing
 
+from . import exception, mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .exception import NoCommon
-from .mixins import MatchName
-from .policyrep import ObjClass
-from .query import PolicyQuery
-from .util import match_regex, match_regex_or_set
+
+__all__: typing.Final[tuple[str, ...]] = ("ObjClassQuery",)
 
 
-class ObjClassQuery(MatchName, PolicyQuery):
+class ObjClassQuery(mixins.MatchName, query.PolicyQuery):
 
     """
     Query object classes.
@@ -42,14 +41,14 @@ class ObjClassQuery(MatchName, PolicyQuery):
                     is true.
     """
 
-    common = CriteriaDescriptor("common_regex", "lookup_common")
+    common = CriteriaDescriptor[policyrep.Common]("common_regex", "lookup_common")
     common_regex: bool = False
-    perms = CriteriaSetDescriptor("perms_regex")
+    perms = CriteriaSetDescriptor[str]("perms_regex")
     perms_equal: bool = False
     perms_indirect: bool = True
     perms_regex: bool = False
 
-    def results(self) -> Iterable[ObjClass]:
+    def results(self) -> Iterable[policyrep.ObjClass]:
         """Generator which yields all matching object classes."""
         self.log.info(f"Generating object class results from {self.policy}")
         self._match_name_debug(self.log)
@@ -63,22 +62,22 @@ class ObjClassQuery(MatchName, PolicyQuery):
 
             if self.common:
                 try:
-                    if not match_regex(
+                    if not util.match_regex(
                             class_.common,
                             self.common,
                             self.common_regex):
                         continue
-                except NoCommon:
+                except exception.NoCommon:
                     continue
 
             if self.perms:
                 perms = class_.perms
 
                 if self.perms_indirect:
-                    with suppress(NoCommon):
+                    with suppress(exception.NoCommon):
                         perms |= class_.common.perms
 
-                if not match_regex_or_set(
+                if not util.match_regex_or_set(
                         perms,
                         self.perms,
                         self.perms_equal,

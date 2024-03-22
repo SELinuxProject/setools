@@ -17,19 +17,15 @@ try:
 except ImportError as iex:
     logging.getLogger(__name__).debug(f"{iex.name} failed to import.")
 
-from . import exception
+from . import exception, mixins, permmap, policyrep, query
 from .descriptors import CriteriaDescriptor, EdgeAttrIntMax, EdgeAttrList
-from .mixins import NetworkXGraphEdge
-from .permmap import PermissionMap
-from .policyrep import AVRule, SELinuxPolicy, TERuletype, Type
-from .query import DirectedGraphAnalysis
-
-__all__ = ['InfoFlowAnalysis', 'InfoFlowStep', 'InfoFlowPath']
 
 InfoFlowPath = Iterable['InfoFlowStep']
 
+__all__: typing.Final[tuple[str, ...]] = ("InfoFlowAnalysis", "InfoFlowStep", "InfoFlowPath")
 
-class InfoFlowAnalysis(DirectedGraphAnalysis):
+
+class InfoFlowAnalysis(query.DirectedGraphAnalysis):
 
     """
     Information flow analysis.
@@ -65,18 +61,18 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
     DIRECT_MODES: typing.Final[tuple[Mode, ...]] = (Mode.FlowsIn, Mode.FlowsOut)
     TRANSITIVE_MODES: typing.Final[tuple[Mode, ...]] = (Mode.ShortestPaths, Mode.AllPaths)
 
-    source = CriteriaDescriptor(lookup_function="lookup_type")
-    target = CriteriaDescriptor(lookup_function="lookup_type")
+    source = CriteriaDescriptor[policyrep.Type](lookup_function="lookup_type")
+    target = CriteriaDescriptor[policyrep.Type](lookup_function="lookup_type")
     mode = Mode.ShortestPaths
     booleans: Mapping[str, bool] | None
 
-    def __init__(self, policy: SELinuxPolicy, perm_map: PermissionMap, /, *,
+    def __init__(self, policy: policyrep.SELinuxPolicy, perm_map: permmap.PermissionMap, /, *,
                  min_weight: int = 1,
-                 source: Type | str | None = None,
-                 target: Type | str | None = None,
+                 source: policyrep.Type | str | None = None,
+                 target: policyrep.Type | str | None = None,
                  mode: Mode = Mode.ShortestPaths,
                  depth_limit: int | None = 1,
-                 exclude: Iterable[Type | str] | None = None,
+                 exclude: Iterable[policyrep.Type | str] | None = None,
                  booleans: Mapping[str, bool] | None = None) -> None:
 
         super().__init__(policy, perm_map=perm_map, min_weight=min_weight, source=source,
@@ -84,7 +80,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                          exclude=exclude, booleans=booleans)
 
         self._min_weight: int
-        self._perm_map: PermissionMap
+        self._perm_map: permmap.PermissionMap
         self._depth_limit: int | None
 
         self.rebuildgraph = True
@@ -125,23 +121,23 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         self.rebuildsubgraph = True
 
     @property
-    def perm_map(self) -> PermissionMap:
+    def perm_map(self) -> permmap.PermissionMap:
         return self._perm_map
 
     @perm_map.setter
-    def perm_map(self, perm_map: PermissionMap) -> None:
+    def perm_map(self, perm_map: permmap.PermissionMap) -> None:
         self._perm_map = perm_map
         self.rebuildgraph = True
         self.rebuildsubgraph = True
 
     @property
-    def exclude(self) -> list[Type]:
+    def exclude(self) -> list[policyrep.Type]:
         return self._exclude
 
     @exclude.setter
-    def exclude(self, types: Iterable[Type | str] | None) -> None:
+    def exclude(self, types: Iterable[policyrep.Type | str] | None) -> None:
         if types:
-            self._exclude: list[Type] = [self.policy.lookup_type(t) for t in types]
+            self._exclude: list[policyrep.Type] = [self.policy.lookup_type(t) for t in types]
         else:
             self._exclude = []
 
@@ -299,7 +295,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
     # Internal functions follow
     #
 
-    def _generate_steps(self, path: list[Type]) -> InfoFlowPath:
+    def _generate_steps(self, path: list[policyrep.Type]) -> InfoFlowPath:
         """
         Generator which returns the source, target, and associated rules
         for each information flow step.
@@ -341,10 +337,10 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
         self.log.debug(f"{self.perm_map=}")
 
         for rule in self.policy.terules():
-            if rule.ruletype != TERuletype.allow:
+            if rule.ruletype != policyrep.TERuletype.allow:
                 continue
 
-            weight = self.perm_map.rule_weight(typing.cast(AVRule, rule))
+            weight = self.perm_map.rule_weight(typing.cast(policyrep.AVRule, rule))
 
             for s, t in itertools.product(rule.source.expand(), rule.target.expand()):
                 # only add flows if they actually flow
@@ -403,7 +399,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                     if not rule.enabled(**self.booleans):
                         rule_list.append(rule)
 
-                deleted_rules: list[AVRule] = []
+                deleted_rules: list[policyrep.AVRule] = []
                 for rule in rule_list:
                     if rule not in deleted_rules:
                         edge.rules.remove(rule)
@@ -421,7 +417,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
 
 
 @dataclass
-class InfoFlowStep(NetworkXGraphEdge):
+class InfoFlowStep(mixins.NetworkXGraphEdge):
 
     """
     A graph edge.  Also used for returning information flow steps.
@@ -437,8 +433,8 @@ class InfoFlowStep(NetworkXGraphEdge):
     """
 
     G: nx.DiGraph
-    source: Type
-    target: Type
+    source: policyrep.Type
+    target: policyrep.Type
     create: InitVar[bool] = False
     rules = EdgeAttrList()
 

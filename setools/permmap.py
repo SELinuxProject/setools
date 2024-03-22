@@ -5,22 +5,24 @@
 import logging
 import copy
 from collections import OrderedDict
+from collections.abc import Iterable
 from contextlib import suppress
 from dataclasses import dataclass
 from importlib import resources as pkg_resources
 import pathlib
-from typing import cast, Dict, Final, Iterable, Union
+import typing
 
-from . import exception
+from . import exception, policyrep
 from .descriptors import PermissionMapDescriptor
-from .policyrep import AVRule, SELinuxPolicy, TERuletype
 
 # This is the filename in the Python package
-DEFAULT_PERM_MAP: Final[str] = "perm_map"
+DEFAULT_PERM_MAP: typing.Final[str] = "perm_map"
 
-INFOFLOW_DIRECTIONS: Final = ("r", "w", "b", "n", "u")
-MIN_WEIGHT: Final[int] = 1
-MAX_WEIGHT: Final[int] = 10
+INFOFLOW_DIRECTIONS: typing.Final = ("r", "w", "b", "n", "u")
+MIN_WEIGHT: typing.Final[int] = 1
+MAX_WEIGHT: typing.Final[int] = 10
+
+__all__: typing.Final[tuple[str, ...]] = ("RuleWeight", "Mapping", "PermissionMap")
 
 
 @dataclass
@@ -50,7 +52,7 @@ def validate_direction(direction: str) -> str:
 
 
 # Internal data structure for permission map
-MapStruct = Dict[str, Dict[str, Dict[str, Union[bool, str, int]]]]
+MapStruct = dict[str, dict[str, dict[str, bool | str | int]]]
 
 
 class Mapping:
@@ -96,8 +98,8 @@ class PermissionMap:
 
     """Permission Map for information flow analysis."""
 
-    MIN_WEIGHT: Final[int] = MIN_WEIGHT
-    MAX_WEIGHT: Final[int] = MAX_WEIGHT
+    MIN_WEIGHT: typing.Final[int] = MIN_WEIGHT
+    MAX_WEIGHT: typing.Final[int] = MAX_WEIGHT
 
     def __init__(self, permmapfile: str | pathlib.Path | None = None) -> None:
         """
@@ -142,7 +144,7 @@ class PermissionMap:
         # 1 = read number of classes
         # 2 = read class name and number of perms
         # 3 = read perms
-        with open(permmapfile, "r") as mapfile:
+        with open(permmapfile, "r", encoding="utf-8") as mapfile:
             total_perms = 0
             class_count = 0
             num_classes = 0
@@ -246,7 +248,7 @@ class PermissionMap:
         Parameter:
         permmapfile         The path to write the permission map.
         """
-        with open(permmapfile, "w") as mapfile:
+        with open(permmapfile, "w", encoding="utf-8") as mapfile:
             self.log.info(f"Writing permission map to \"{permmapfile}\"")
             mapfile.write(f"{len(self._permmap)}\n\n")
 
@@ -254,8 +256,8 @@ class PermissionMap:
                 mapfile.write(f"class {classname} {len(perms)}\n")
 
                 for permname, settings in perms.items():
-                    direction = cast(str, settings['direction'])
-                    weight = cast(int, settings['weight'])
+                    direction = typing.cast(str, settings['direction'])
+                    weight = typing.cast(int, settings['weight'])
 
                     assert MIN_WEIGHT <= weight <= MAX_WEIGHT, \
                         f"{classname}:{permname} weight is out of range ({weight}). " \
@@ -360,7 +362,7 @@ class PermissionMap:
 
         Mapping(self._permmap, class_, permission).enabled = True
 
-    def map_policy(self, policy: SELinuxPolicy) -> None:
+    def map_policy(self, policy: policyrep.SELinuxPolicy) -> None:
         """Create mappings for all classes and permissions in the specified policy."""
         for class_ in policy.classes():
             class_name = str(class_)
@@ -380,7 +382,7 @@ class PermissionMap:
                         f"Adding unmapped permission {perm_name} in {class_name} from {policy}")
                     Mapping(self._permmap, class_name, perm_name, create=True)
 
-    def rule_weight(self, rule: AVRule) -> RuleWeight:
+    def rule_weight(self, rule: policyrep.AVRule) -> RuleWeight:
         """
         Get the type enforcement rule's information flow read and write weights.
 
@@ -396,7 +398,7 @@ class PermissionMap:
         read_weight = 0
         class_name = str(rule.tclass)
 
-        if rule.ruletype != TERuletype.allow:
+        if rule.ruletype != policyrep.TERuletype.allow:
             raise exception.RuleTypeError(
                 f"{rule.ruletype} rules cannot be used for calculating a weight")
 

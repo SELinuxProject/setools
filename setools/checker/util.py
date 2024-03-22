@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
+import typing
+
+__all__: typing.Final[tuple[str, ...]] = ('config_bool_value',)
+
 
 def config_bool_value(value) -> bool:
     """Convert a boolean configuration value."""

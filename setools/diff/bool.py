@@ -21,6 +21,7 @@ class ModifiedBoolean(DifferenceResult):
 
     """Difference details for a modified Boolean."""
 
+    boolean: Boolean
     added_state: bool
     removed_state: bool
 
@@ -44,9 +45,9 @@ class BooleansDifference(Difference):
 
     """Determine the difference in type attributes between two policies."""
 
-    added_booleans = DiffResultDescriptor("diff_booleans")
-    removed_booleans = DiffResultDescriptor("diff_booleans")
-    modified_booleans = DiffResultDescriptor("diff_booleans")
+    added_booleans = DiffResultDescriptor[Boolean]("diff_booleans")
+    removed_booleans = DiffResultDescriptor[Boolean]("diff_booleans")
+    modified_booleans = DiffResultDescriptor[ModifiedBoolean]("diff_booleans")
 
     def diff_booleans(self) -> None:
         """Generate the difference in type attributes between the policies."""
@@ -59,14 +60,15 @@ class BooleansDifference(Difference):
                 (SymbolWrapper(b) for b in self.left_policy.bools()),
                 (SymbolWrapper(b) for b in self.right_policy.bools()))
 
-        self.modified_booleans = dict()
+        self.modified_booleans = list[ModifiedBoolean]()
 
         for left_boolean, right_boolean in matched_booleans:
             # Criteria for modified booleans
             # 1. change to default state
             if left_boolean.state != right_boolean.state:
-                self.modified_booleans[left_boolean] = ModifiedBoolean(right_boolean.state,
-                                                                       left_boolean.state)
+                self.modified_booleans.append(ModifiedBoolean(left_boolean,
+                                                              right_boolean.state,
+                                                              left_boolean.state))
 
     #
     # Internal functions
@@ -74,6 +76,6 @@ class BooleansDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting Boolean differences")
-        self.added_booleans = None
-        self.removed_booleans = None
-        self.modified_booleans = None
+        del self.added_booleans
+        del self.removed_booleans
+        del self.modified_booleans

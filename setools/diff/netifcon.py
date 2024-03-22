@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from dataclasses import dataclass
-from typing import Optional
 
 from ..policyrep import Context, Netifcon
 
@@ -12,28 +11,25 @@ from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, Wrapper
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedNetifcon(DifferenceResult):
 
     """Difference details for a modified netifcon."""
 
     rule: Netifcon
-    added_context: Optional[Context]
-    removed_context: Optional[Context]
-    added_packet: Optional[Context]
-    removed_packet: Optional[Context]
-
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
+    added_context: Context | None
+    removed_context: Context | None
+    added_packet: Context | None
+    removed_packet: Context | None
 
 
 class NetifconsDifference(Difference):
 
     """Determine the difference in netifcons between two policies."""
 
-    added_netifcons = DiffResultDescriptor("diff_netifcons")
-    removed_netifcons = DiffResultDescriptor("diff_netifcons")
-    modified_netifcons = DiffResultDescriptor("diff_netifcons")
+    added_netifcons = DiffResultDescriptor[Netifcon]("diff_netifcons")
+    removed_netifcons = DiffResultDescriptor[Netifcon]("diff_netifcons")
+    modified_netifcons = DiffResultDescriptor[ModifiedNetifcon]("diff_netifcons")
 
     def diff_netifcons(self) -> None:
         """Generate the difference in netifcons between the policies."""
@@ -45,7 +41,7 @@ class NetifconsDifference(Difference):
             (NetifconWrapper(n) for n in self.left_policy.netifcons()),
             (NetifconWrapper(n) for n in self.right_policy.netifcons()))
 
-        self.modified_netifcons = []
+        self.modified_netifcons = list[ModifiedNetifcon]()
 
         for left_netifcon, right_netifcon in matched_netifcons:
             # Criteria for modified netifcons
@@ -75,9 +71,9 @@ class NetifconsDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting netifcon differences")
-        self.added_netifcons = None
-        self.removed_netifcons = None
-        self.modified_netifcons = None
+        del self.added_netifcons
+        del self.removed_netifcons
+        del self.modified_netifcons
 
 
 class NetifconWrapper(Wrapper[Netifcon]):

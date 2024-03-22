@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional, Tuple
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .policyrep import Iomemcon, IomemconRange
-from .query import PolicyQuery
-from .util import match_range
+from . import mixins, policyrep, query, util
+
+__all__: typing.Final[tuple[str, ...]] = ("IomemconQuery",)
 
 
-class IomemconQuery(MatchContext, PolicyQuery):
+class IomemconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Iomemcon context query.
@@ -53,20 +53,20 @@ class IomemconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _addr: Optional[IomemconRange] = None
+    _addr: policyrep.IomemconRange | None = None
     addr_subset: bool = False
     addr_overlap: bool = False
     addr_superset: bool = False
     addr_proper: bool = False
 
     @property
-    def addr(self) -> Optional[IomemconRange]:
+    def addr(self) -> policyrep.IomemconRange | None:
         return self._addr
 
     @addr.setter
-    def addr(self, value: Optional[Tuple[int, int]]) -> None:
+    def addr(self, value: tuple[int, int] | None) -> None:
         if value:
-            pending_addr = IomemconRange(*value)
+            pending_addr = policyrep.IomemconRange(*value)
 
             if pending_addr.low < 1 or pending_addr.high < 1:
                 raise ValueError(
@@ -81,7 +81,7 @@ class IomemconQuery(MatchContext, PolicyQuery):
         else:
             self._addr = None
 
-    def results(self) -> Iterable[Iomemcon]:
+    def results(self) -> Iterable[policyrep.Iomemcon]:
         """Generator which yields all matching iomemcons."""
         self.log.info(f"Generating results from {self.policy}")
         self.log.debug(f"{self.addr=}, {self.addr_overlap=}, {self.addr_subset=}, "
@@ -90,7 +90,7 @@ class IomemconQuery(MatchContext, PolicyQuery):
 
         for iomemcon in self.policy.iomemcons():
 
-            if self.addr and not match_range(
+            if self.addr and not util.match_range(
                     iomemcon.addr,
                     self.addr,
                     self.addr_subset,

@@ -3,20 +3,20 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-import logging
 from collections import defaultdict
-from typing import Dict, List, Set
+import typing
 
-from ..policyrep import AnyTERule, Type
+from .. import policyrep
 from ..terulequery import TERuleQuery
 
 from .checkermodule import CheckerModule
 from .descriptors import ConfigSetDescriptor
 
+EXEMPT_WRITE: typing.Final[str] = "exempt_write_domain"
+EXEMPT_EXEC: typing.Final[str] = "exempt_exec_domain"
+EXEMPT_FILE: typing.Final[str] = "exempt_file"
 
-EXEMPT_WRITE = "exempt_write_domain"
-EXEMPT_EXEC = "exempt_exec_domain"
-EXEMPT_FILE = "exempt_file"
+__all__: typing.Final[tuple[str, ...]] = ("ReadOnlyExecutables",)
 
 
 class ReadOnlyExecutables(CheckerModule):
@@ -26,19 +26,22 @@ class ReadOnlyExecutables(CheckerModule):
     check_type = "ro_execs"
     check_config = frozenset((EXEMPT_WRITE, EXEMPT_EXEC, EXEMPT_FILE))
 
-    exempt_write_domain = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
-    exempt_file = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
-    exempt_exec_domain = ConfigSetDescriptor("lookup_type_or_attr", strict=False, expand=True)
+    exempt_write_domain = ConfigSetDescriptor[policyrep.Type](
+        "lookup_type_or_attr", strict=False, expand=True)
+    exempt_file = ConfigSetDescriptor[policyrep.Type](
+        "lookup_type_or_attr", strict=False, expand=True)
+    exempt_exec_domain = ConfigSetDescriptor[policyrep.Type](
+        "lookup_type_or_attr", strict=False, expand=True)
 
-    def __init__(self, policy, checkname, config) -> None:
+    def __init__(self, policy: policyrep.SELinuxPolicy, checkname: str,
+                 config: dict[str, str]) -> None:
+
         super().__init__(policy, checkname, config)
-        self.log = logging.getLogger(__name__)
-
         self.exempt_write_domain = config.get(EXEMPT_WRITE)
         self.exempt_file = config.get(EXEMPT_FILE)
         self.exempt_exec_domain = config.get(EXEMPT_EXEC)
 
-    def _collect_executables(self) -> Dict[Type, Set[AnyTERule]]:
+    def _collect_executables(self) -> defaultdict[policyrep.Type, set[policyrep.AVRule]]:
         self.log.debug("Collecting list of executable file types.")
         self.log.debug(f"{self.exempt_exec_domain=}")
         query = TERuleQuery(self.policy,
@@ -46,7 +49,7 @@ class ReadOnlyExecutables(CheckerModule):
                             tclass=("file",),
                             perms=("execute", "execute_no_trans"))
 
-        collected = defaultdict(set)
+        collected = defaultdict[policyrep.Type, set[policyrep.AVRule]](set)
         for rule in query.results():
             sources = set(rule.source.expand()) - self.exempt_exec_domain
             targets = set(rule.target.expand()) - self.exempt_file
@@ -58,11 +61,13 @@ class ReadOnlyExecutables(CheckerModule):
 
             for t in targets:
                 self.log.debug(f"Determined {t} is executable by: {rule}")
+                assert isinstance(rule, policyrep.AVRule), \
+                    f"Expected AVRule, got {type(rule)}, this is an SETools bug."
                 collected[t].add(rule)
 
         return collected
 
-    def run(self) -> List:
+    def run(self) -> list[policyrep.Type]:
         self.log.info("Checking executables are read-only.")
 
         query = TERuleQuery(self.policy,

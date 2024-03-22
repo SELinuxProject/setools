@@ -1,20 +1,19 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import DefaultDict, Dict, List, Optional, TypeVar, Union
+from collections import defaultdict
+import typing
 
-from ..policyrep import AnyConstraint, PolicyEnum, PolicyObject, PolicyRule, PolicySymbol, \
-                        SELinuxPolicy
-
-from .difference import Wrapper, SymbolWrapper
+from . import difference
+from .. import policyrep
 
 
-PE = TypeVar("PE", bound=PolicyEnum)
-PO = TypeVar("PO", bound=PolicyObject)
-PS = TypeVar("PS", bound=PolicySymbol)
-PR = TypeVar("PR", bound=Union[AnyConstraint, PolicyRule])
-WR = TypeVar("WR", bound=Wrapper)
+PE = typing.TypeVar("PE", bound=policyrep.PolicyEnum)
+PO = typing.TypeVar("PO", bound=policyrep.PolicyObject)
+PS = typing.TypeVar("PS", bound=policyrep.PolicySymbol)
+PR = typing.TypeVar("PR", bound=policyrep.AnyConstraint | policyrep.PolicyRule)
+WR = typing.TypeVar("WR", bound=difference.Wrapper)
 
-Cache = DefaultDict[SELinuxPolicy, Dict[PO, WR]]
-SymbolCache = Cache[PS, SymbolWrapper[PS]]
+Cache = defaultdict[policyrep.SELinuxPolicy, dict[PO, WR]]
+SymbolCache = Cache[PS, difference.SymbolWrapper[PS]]
 
-RuleList = Optional[DefaultDict[PE, List[PR]]]
+RuleList = defaultdict[PE, list[PR]] | None

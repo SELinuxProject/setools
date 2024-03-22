@@ -5,7 +5,8 @@
 #
 import logging
 from abc import ABC, abstractmethod
-from typing import Generic, Iterable, TypeVar
+from collections.abc import Iterable
+import typing
 
 from ..policyrep import PolicyObject, PolicySymbol, SELinuxPolicy
 
@@ -123,10 +124,10 @@ class DifferenceResult:
     pass
 
 
-T = TypeVar("T", bound=PolicyObject)
+T = typing.TypeVar("T", bound=PolicyObject)
 
 
-class Wrapper(ABC, Generic[T]):
+class Wrapper(ABC, typing.Generic[T]):
 
     """Abstract base class for policy object wrappers."""
 
@@ -159,7 +160,7 @@ class Wrapper(ABC, Generic[T]):
         return not self == other
 
 
-S = TypeVar("S", bound=PolicySymbol)
+S = typing.TypeVar("S", bound=PolicySymbol)
 
 
 class SymbolWrapper(Wrapper[S]):

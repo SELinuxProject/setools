@@ -8,15 +8,14 @@ from logging import Logger
 from typing import Any
 
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor, CriteriaPermissionSetDescriptor
-from .policyrep import Context
-from .util import match_in_set, match_regex, match_range, match_regex_or_set
+from . import policyrep, util
 
 
 class MatchAlias:
 
     """Mixin for matching an object's aliases."""
 
-    alias = CriteriaDescriptor("alias_regex")
+    alias = CriteriaDescriptor[str]("alias_regex")
     alias_regex: bool = False
 
     def _match_alias_debug(self, log: Logger) -> None:
@@ -35,7 +34,7 @@ class MatchAlias:
             # if there is no criteria, everything matches.
             return True
 
-        return match_in_set(obj.aliases(), self.alias, self.alias_regex)
+        return util.match_in_set(obj.aliases(), self.alias, self.alias_regex)
 
 
 class MatchContext:
@@ -65,13 +64,13 @@ class MatchContext:
                     No effect if not using set operations.
     """
 
-    user = CriteriaDescriptor("user_regex", "lookup_user")
+    user = CriteriaDescriptor[policyrep.User]("user_regex", "lookup_user")
     user_regex: bool = False
-    role = CriteriaDescriptor("role_regex", "lookup_role")
+    role = CriteriaDescriptor[policyrep.Role]("role_regex", "lookup_role")
     role_regex: bool = False
-    type_ = CriteriaDescriptor("type_regex", "lookup_type")
+    type_ = CriteriaDescriptor[policyrep.Type]("type_regex", "lookup_type")
     type_regex: bool = False
-    range_ = CriteriaDescriptor(lookup_function="lookup_range")
+    range_ = CriteriaDescriptor[policyrep.Range](lookup_function="lookup_range")
     range_overlap: bool = False
     range_subset: bool = False
     range_superset: bool = False
@@ -85,7 +84,7 @@ class MatchContext:
         log.debug(f"{self.range_=}, {self.range_subset=}, {self.range_overlap=}, "
                   f"{self.range_superset=}, {self.range_proper=}")
 
-    def _match_context(self, context: Context) -> bool:
+    def _match_context(self, context: policyrep.Context) -> bool:
         """
         Match the context criteria.
 
@@ -94,25 +93,25 @@ class MatchContext:
                 "type_" and "range_".
         """
 
-        if self.user and not match_regex(
+        if self.user and not util.match_regex(
                 context.user,
                 self.user,
                 self.user_regex):
             return False
 
-        if self.role and not match_regex(
+        if self.role and not util.match_regex(
                 context.role,
                 self.role,
                 self.role_regex):
             return False
 
-        if self.type_ and not match_regex(
+        if self.type_ and not util.match_regex(
                 context.type_,
                 self.type_,
                 self.type_regex):
             return False
 
-        if self.range_ and not match_range(
+        if self.range_ and not util.match_range(
                 context.range_,
                 self.range_,
                 self.range_subset,
@@ -128,7 +127,7 @@ class MatchName:
 
     """Mixin for matching an object's name with alias dereferencing."""
 
-    name = CriteriaDescriptor("name_regex")
+    name = CriteriaDescriptor[str]("name_regex")
     name_regex: bool = False
     alias_deref: bool = False
 
@@ -143,17 +142,17 @@ class MatchName:
             return True
 
         if self.alias_deref:
-            return match_regex(obj, self.name, self.name_regex) or \
-                match_in_set(obj.aliases(), self.name, self.name_regex)
+            return util.match_regex(obj, self.name, self.name_regex) or \
+                util.match_in_set(obj.aliases(), self.name, self.name_regex)
         else:
-            return match_regex(obj, self.name, self.name_regex)
+            return util.match_regex(obj, self.name, self.name_regex)
 
 
 class MatchObjClass:
 
     """Mixin for matching an object's class."""
 
-    tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
+    tclass = CriteriaSetDescriptor[policyrep.ObjClass]("tclass_regex", "lookup_class")
     tclass_regex: bool = False
 
     def _match_object_class_debug(self, log: Logger) -> None:
@@ -206,7 +205,8 @@ class MatchPermission:
         if self.perms_subset:
             return obj.perms >= self.perms
         else:
-            return match_regex_or_set(obj.perms, self.perms, self.perms_equal, self.perms_regex)
+            return util.match_regex_or_set(obj.perms, self.perms, self.perms_equal,
+                                           self.perms_regex)
 
 
 class NetworkXGraphEdge:

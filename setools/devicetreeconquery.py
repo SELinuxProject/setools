@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .policyrep import Devicetreecon
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("DevicetreeconQuery",)
 
 
-class DevicetreeconQuery(MatchContext, PolicyQuery):
+class DevicetreeconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Devicetreecon context query.
@@ -43,9 +44,9 @@ class DevicetreeconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    path: Optional[str] = None
+    path: str | None = None
 
-    def results(self) -> Iterable[Devicetreecon]:
+    def results(self) -> Iterable[policyrep.Devicetreecon]:
         """Generator which yields all matching devicetreecons."""
         self.log.info(f"Generating results from {self.policy}")
         self.log.debug(f"{self.path=}")

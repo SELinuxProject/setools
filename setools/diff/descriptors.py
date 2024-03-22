@@ -3,8 +3,12 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
+import typing
 
-class DiffResultDescriptor:
+T = typing.TypeVar("T")
+
+
+class DiffResultDescriptor(typing.Generic[T]):
 
     """Descriptor for managing diff results."""
 
@@ -13,13 +17,14 @@ class DiffResultDescriptor:
 
     def __init__(self, diff_function: str) -> None:
         self.diff_function = diff_function
+        self.name: str
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner, name: str) -> None:
         self.name = f"_internal_{name}"
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj, objtype=None) -> list[T]:
         if obj is None:
-            return self
+            raise AttributeError
 
         if getattr(obj, self.name, None) is None:
             diff = getattr(obj, self.diff_function)
@@ -27,8 +32,8 @@ class DiffResultDescriptor:
 
         return getattr(obj, self.name)
 
-    def __set__(self, obj, value):
+    def __set__(self, obj, value: list[T]) -> None:
         setattr(obj, self.name, value)
 
-    def __delete__(self, obj):
+    def __delete__(self, obj) -> None:
         setattr(obj, self.name, None)

@@ -5,13 +5,15 @@
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, SymbolWrapper
 
+from .. import policyrep
+
 
 class PolCapsDifference(Difference):
 
     """Determine the difference in polcaps between two policies."""
 
-    added_polcaps = DiffResultDescriptor("diff_polcaps")
-    removed_polcaps = DiffResultDescriptor("diff_polcaps")
+    added_polcaps = DiffResultDescriptor[policyrep.PolicyCapability]("diff_polcaps")
+    removed_polcaps = DiffResultDescriptor[policyrep.PolicyCapability]("diff_polcaps")
 
     def diff_polcaps(self) -> None:
         """Generate the difference in polcaps between the policies."""
@@ -29,5 +31,5 @@ class PolCapsDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting policy capability differences")
-        self.added_polcaps = None
-        self.removed_polcaps = None
+        del self.added_polcaps
+        del self.removed_polcaps

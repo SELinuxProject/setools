@@ -12,7 +12,7 @@ from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, Wrapper
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedNodecon(DifferenceResult):
 
     """Difference details for a modified netifcon."""
@@ -21,17 +21,14 @@ class ModifiedNodecon(DifferenceResult):
     added_context: Context
     removed_context: Context
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class NodeconsDifference(Difference):
 
     """Determine the difference in nodecons between two policies."""
 
-    added_nodecons = DiffResultDescriptor("diff_nodecons")
-    removed_nodecons = DiffResultDescriptor("diff_nodecons")
-    modified_nodecons = DiffResultDescriptor("diff_nodecons")
+    added_nodecons = DiffResultDescriptor[Nodecon]("diff_nodecons")
+    removed_nodecons = DiffResultDescriptor[Nodecon]("diff_nodecons")
+    modified_nodecons = DiffResultDescriptor[ModifiedNodecon]("diff_nodecons")
 
     def diff_nodecons(self) -> None:
         """Generate the difference in nodecons between the policies."""
@@ -43,7 +40,7 @@ class NodeconsDifference(Difference):
             (NodeconWrapper(n) for n in self.left_policy.nodecons()),
             (NodeconWrapper(n) for n in self.right_policy.nodecons()))
 
-        self.modified_nodecons = []
+        self.modified_nodecons = list[ModifiedNodecon]()
 
         for left_nodecon, right_nodecon in matched_nodecons:
             # Criteria for modified nodecons
@@ -59,9 +56,9 @@ class NodeconsDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting nodecon differences")
-        self.added_nodecons = None
-        self.removed_nodecons = None
-        self.modified_nodecons = None
+        del self.added_nodecons
+        del self.removed_nodecons
+        del self.modified_nodecons
 
 
 class NodeconWrapper(Wrapper[Nodecon]):

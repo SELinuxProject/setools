@@ -2,16 +2,13 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
+from . import mixins, policyrep, query, util
 from .descriptors import CriteriaSetDescriptor
-from .mixins import MatchAlias, MatchName
-from .policyrep import Type
-from .query import PolicyQuery
-from .util import match_regex_or_set
 
 
-class TypeQuery(MatchAlias, MatchName, PolicyQuery):
+class TypeQuery(mixins.MatchAlias, mixins.MatchName, query.PolicyQuery):
 
     """
     Query SELinux policy types.
@@ -38,13 +35,13 @@ class TypeQuery(MatchAlias, MatchName, PolicyQuery):
                         is None, the state is not matched.
     """
 
-    attrs = CriteriaSetDescriptor("attrs_regex", "lookup_typeattr")
+    attrs = CriteriaSetDescriptor[policyrep.TypeAttribute]("attrs_regex", "lookup_typeattr")
     attrs_regex: bool = False
     attrs_equal: bool = False
-    _permissive: Optional[bool] = None
+    _permissive: bool | None = None
 
     @property
-    def permissive(self) -> Optional[bool]:
+    def permissive(self) -> bool | None:
         return self._permissive
 
     @permissive.setter
@@ -54,7 +51,7 @@ class TypeQuery(MatchAlias, MatchName, PolicyQuery):
         else:
             self._permissive = bool(value)
 
-    def results(self) -> Iterable[Type]:
+    def results(self) -> Iterable[policyrep.Type]:
         """Generator which yields all matching types."""
         self.log.info(f"Generating type results from {self.policy}")
         self._match_name_debug(self.log)
@@ -69,7 +66,7 @@ class TypeQuery(MatchAlias, MatchName, PolicyQuery):
             if not self._match_alias(t):
                 continue
 
-            if self.attrs and not match_regex_or_set(
+            if self.attrs and not util.match_regex_or_set(
                     set(t.attributes()),
                     self.attrs,
                     self.attrs_equal,
