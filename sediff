@@ -6,6 +6,7 @@
 
 import setools
 import argparse
+from dataclasses import astuple
 import sys
 import logging
 import signal
@@ -305,7 +306,7 @@ try:
                         else:
                             change.append("Added permissive")
 
-                    print(f"      * {name} ({change})")
+                    print(f"      * {name} ({','.join(change)})")
                     if mod.added_attributes or mod.removed_attributes:
                         print("          Attributes:")
                     for t in sorted(mod.added_attributes):
@@ -497,7 +498,8 @@ try:
                     print(f"      - {r}")
             if diff.modified_levels and not args.stats:
                 print(f"   Modified Levels: {len(diff.modified_levels)}")
-                for level, added_categories, removed_categories, _ in sorted(diff.modified_levels):
+                for level, added_categories, removed_categories, _ in (
+                        astuple(entry) for entry in sorted(diff.modified_levels)):
                     change = []
                     if added_categories:
                         change.append(f"{len(added_categories)} Added Categories")
@@ -533,7 +535,8 @@ try:
             if diff.modified_allows and not args.stats:
                 print(f"   Modified Allow Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(diff.modified_allows):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_allows)):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -570,8 +573,8 @@ try:
             if diff.modified_allowxperms and not args.stats:
                 print(f"   Modified Allowxperm Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_allowxperms):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_allowxperms)):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -624,8 +627,8 @@ try:
             if diff.modified_neverallows and not args.stats:
                 print(f"   Modified Neverallow Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_neverallows):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_neverallows)):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -662,8 +665,8 @@ try:
             if diff.modified_neverallowxperms and not args.stats:
                 print(f"   Modified Neverallowxperm Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_neverallowxperms):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_neverallowxperms)):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -717,8 +720,8 @@ try:
             if diff.modified_auditallows and not args.stats:
                 print(f"   Modified Auditallow Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_auditallows):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_auditallows)):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -757,8 +760,8 @@ try:
             if diff.modified_auditallowxperms and not args.stats:
                 print(f"   Modified Auditallowxperm Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_auditallowxperms):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_auditallowxperms)):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -813,8 +816,8 @@ try:
             if diff.modified_dontaudits and not args.stats:
                 print(f"   Modified Dontaudit Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_dontaudits):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_dontaudits)):
                     perm_str = " ".join(chain((p for p in matched_perms),
                                               ("+" + p for p in added_perms),
                                               ("-" + p for p in removed_perms)))
@@ -853,8 +856,8 @@ try:
             if diff.modified_dontauditxperms and not args.stats:
                 print(f"   Modified Dontauditxperm Rules: {nm}")
 
-                for rule, added_perms, removed_perms, matched_perms in sorted(
-                        diff.modified_dontauditxperms):
+                for rule, added_perms, removed_perms, matched_perms in (
+                        astuple(entry) for entry in sorted(diff.modified_dontauditxperms)):
 
                     # Process the string representation of the sets
                     # so hex representation and ranges are preserved.
@@ -891,9 +894,9 @@ try:
         if diff.added_type_transitions or diff.removed_type_transitions or \
                 diff.modified_type_transitions or args.type_trans:
 
-            na = len(diff.added_dontauditxperms)
-            nr = len(diff.removed_dontauditxperms)
-            nm = len(diff.modified_dontauditxperms)
+            na = len(diff.added_type_transitions)
+            nr = len(diff.removed_type_transitions)
+            nm = len(diff.modified_type_transitions)
             print(f"Type_transition Rules ({na} Added, {nr} Removed, {nm} Modified)")
 
             if diff.added_type_transitions and not args.stats:
@@ -909,7 +912,8 @@ try:
             if diff.modified_type_transitions and not args.stats:
                 print(f"   Modified Type_transition Rules: {nm}")
 
-                for rule, added_default, removed_default in sorted(diff.modified_type_transitions):
+                for rule, added_default, removed_default in (
+                        astuple(entry) for entry in sorted(diff.modified_type_transitions)):
                     rule_string = \
                         f"{rule.ruletype} {rule.source} {rule.target}:{rule.tclass} " \
                         f"+{added_default} -{removed_default}"
@@ -951,7 +955,8 @@ try:
             if diff.modified_type_changes and not args.stats:
                 print(f"   Modified Type_change Rules: {nm}")
 
-                for rule, added_default, removed_default in sorted(diff.modified_type_changes):
+                for rule, added_default, removed_default in (
+                        astuple(entry) for entry in sorted(diff.modified_type_changes)):
                     rule_string = \
                         f"{rule.ruletype} {rule.source} {rule.target}:{rule.tclass} " \
                         f"+{added_default} -{removed_default};"
@@ -988,7 +993,8 @@ try:
             if diff.modified_type_members and not args.stats:
                 print(f"   Modified Type_member Rules: {nm}")
 
-                for rule, added_default, removed_default in sorted(diff.modified_type_members):
+                for rule, added_default, removed_default in (
+                        astuple(entry) for entry in sorted(diff.modified_type_members)):
                     rule_string = \
                         f"{rule.ruletype} {rule.source} {rule.target}:{rule.tclass} " \
                         f"+{added_default} -{removed_default};"
@@ -1006,8 +1012,8 @@ try:
     if all_differences or args.role_allow:
         if diff.added_role_allows or diff.removed_role_allows or args.role_allow:
 
-            na = len(diff.added_type_members)
-            nr = len(diff.removed_type_members)
+            na = len(diff.added_role_allows)
+            nr = len(diff.removed_role_allows)
             print(f"Role allow Rules ({na} Added, {nr} Removed)")
 
             if diff.added_role_allows and not args.stats:
@@ -1046,7 +1052,8 @@ try:
             if diff.modified_role_transitions and not args.stats:
                 print(f"   Modified Role_transition Rules: {nm}")
 
-                for rule, added_default, removed_default in sorted(diff.modified_role_transitions):
+                for rule, added_default, removed_default in (
+                        astuple(entry) for entry in sorted(diff.modified_role_transitions)):
                     rule_string = \
                         f"{rule.ruletype} {rule.source} {rule.target}:{rule.tclass} " \
                         f"+{added_default} -{removed_default};"
@@ -1080,7 +1087,8 @@ try:
             if diff.modified_range_transitions and not args.stats:
                 print(f"   Modified Range_transition Rules: {nm}")
 
-                for rule, added_default, removed_default in sorted(diff.modified_range_transitions):
+                for rule, added_default, removed_default in (
+                        astuple(entry) for entry in sorted(diff.modified_range_transitions)):
                     # added brackets around range change for clarity since ranges
                     # can have '-' and spaces.
                     rule_string = \
@@ -1397,7 +1405,8 @@ try:
                     print(f"      - {n}")
             if diff.modified_portcons and not args.stats:
                 print(f"   Modified Portcons: {nm}")
-                for con, added_context, removed_context in sorted(diff.modified_portcons):
+                for con, added_context, removed_context in (
+                        astuple(entry) for entry in sorted(diff.modified_portcons)):
                     low, high = con.ports
                     if low == high:
                         print(f"      * portcon {con.protocol} {low} +[{added_context}] "
@@ -1445,8 +1454,8 @@ try:
                     print(f"      - {d}")
             if diff.modified_defaults and not args.stats:
                 print(f"   Modified Defaults: {nm}")
-                for default, added_default, removed_default, added_range, removed_range in sorted(
-                        diff.modified_defaults):
+                for default, added_default, removed_default, added_range, removed_range in (
+                        astuple(entry) for entry in sorted(diff.modified_defaults)):
                     line = f"      * {default.ruletype} {default.tclass} "
                     if removed_default:
                         line += f"+{added_default} -{removed_default}"
@@ -1484,7 +1493,8 @@ try:
                     print(f"      - {d}")
             if diff.modified_typebounds and not args.stats:
                 print(f"   Modified Typebounds: {nm}")
-                for bound, added_bound, removed_bound in sorted(diff.modified_typebounds):
+                for bound, added_bound, removed_bound in (
+                        astuple(entry) for entry in sorted(diff.modified_typebounds)):
                     print(
                         f"      * {bound.ruletype} +{added_bound} -{removed_bound} {bound.child};")
 
