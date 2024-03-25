@@ -8,7 +8,7 @@ import unittest
 from dataclasses import astuple
 from ipaddress import IPv6Address, IPv4Network, IPv6Network
 
-from setools import PolicyDifference, PortconProtocol
+from setools import PolicyDifference, PortconProtocol, PortconRange
 from setools import BoundsRuletype as BRT
 from setools import ConstraintRuletype as CRT
 from setools import DefaultRuletype as DRT
@@ -1283,11 +1283,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         portcon = lst[0]
         self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertTupleEqual((2024, 2026), portcon.ports)
+        self.assertEqual(PortconRange(2024, 2026), portcon.ports)
 
         portcon = lst[1]
         self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertTupleEqual((2024, 2024), portcon.ports)
+        self.assertEqual(PortconRange(2024, 2024), portcon.ports)
 
     def test_removed_portcons(self):
         """Diff: removed portcons."""
@@ -1296,11 +1296,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         portcon = lst[0]
         self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertTupleEqual((1024, 1026), portcon.ports)
+        self.assertEqual(PortconRange(1024, 1026), portcon.ports)
 
         portcon = lst[1]
         self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertTupleEqual((1024, 1024), portcon.ports)
+        self.assertEqual(PortconRange(1024, 1024), portcon.ports)
 
     def test_modified_portcons(self):
         """Diff: modified portcons."""
@@ -1309,13 +1309,13 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         portcon, added_context, removed_context = astuple(lst[0])
         self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertTupleEqual((3024, 3026), portcon.ports)
+        self.assertEqual(PortconRange(3024, 3026), portcon.ports)
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 
         portcon, added_context, removed_context = astuple(lst[1])
         self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertTupleEqual((3024, 3024), portcon.ports)
+        self.assertEqual(PortconRange(3024, 3024), portcon.ports)
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 

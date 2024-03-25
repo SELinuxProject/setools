@@ -4,8 +4,53 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-IbpkeyconRange = collections.namedtuple("IbpkeyconRange", ["low", "high"])
-PortconRange = collections.namedtuple("PortconRange", ["low", "high"])
+@dataclasses.dataclass(eq=True, order=True, frozen=True)
+class IbpkeyconRange:
+
+    """A range of Infiniband partition keys."""
+
+    low: int
+    high: int
+
+    MIN: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=0x0001)
+    MAX: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=0xffff)
+
+    def __post_init__(self):
+        if self.low < IbpkeyconRange.MIN or self.high < IbpkeyconRange.MIN:
+            raise ValueError(
+                f"Pkeys must be >= {IbpkeyconRange.MIN:#x}: {self.low:#x}-{self.high:#x}")
+
+        if self.low > IbpkeyconRange.MAX or self.high > IbpkeyconRange.MAX:
+            raise ValueError(
+                f"Pkeys must be <= {IbpkeyconRange.MAX:#x}: {self.low:#x}-{self.high:#x}")
+
+        if self.low > self.high:
+            raise ValueError(
+                f"The low pkey must be <= the high pkey: {self.low:#x}-{self.high:#x}")
+
+
+@dataclasses.dataclass(eq=True, order=True, frozen=True)
+class PortconRange:
+
+    """A range of IP ports."""
+
+    low: int
+    high: int
+
+    MIN: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=1)
+    MAX: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=65535)
+
+    def __post_init__(self):
+        if self.low < PortconRange.MIN or self.high < PortconRange.MIN:
+            raise ValueError(f"Port numbers must be >= {PortconRange.MIN}: {self.low}-{self.high}")
+
+        if self.low > PortconRange.MAX or self.high > PortconRange.MAX:
+            raise ValueError(f"Port numbers must be <= {PortconRange.MAX}: {self.low}-{self.high}")
+
+        if self.low > self.high:
+            raise ValueError(
+                f"The low port must be <= the high port: {self.low}-{self.high}")
+
 
 #
 # Classes
@@ -271,7 +316,7 @@ cdef class Portcon(Ocontext):
         return str(self) < str(other)
 
     def statement(self):
-        low, high = self.ports
+        low, high = self.ports.low, self.ports.high
 
         if low == high:
             return f"portcon {self.protocol} {low} {self.context}"

@@ -69,7 +69,7 @@ class PortconWrapper(Wrapper[Portcon]):
     def __init__(self, ocon: Portcon) -> None:
         self.origin = ocon
         self.protocol = ocon.protocol
-        self.low, self.high = ocon.ports
+        self.low, self.high = ocon.ports.low, ocon.ports.high
         self.key = hash(ocon)
 
     def __hash__(self):

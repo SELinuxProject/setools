@@ -66,18 +66,7 @@ class IomemconQuery(mixins.MatchContext, query.PolicyQuery):
     @addr.setter
     def addr(self, value: tuple[int, int] | None) -> None:
         if value:
-            pending_addr = policyrep.IomemconRange(*value)
-
-            if pending_addr.low < 1 or pending_addr.high < 1:
-                raise ValueError(
-                    f"Memory address must be positive: {pending_addr.low}-{pending_addr.high}")
-
-            if pending_addr.low > pending_addr.high:
-                raise ValueError(
-                    "The low mem addr must be smaller than the high mem addr: "
-                    f"{pending_addr.low}-{pending_addr.high}")
-
-            self._addr = pending_addr
+            self._addr = policyrep.IomemconRange(*value)
         else:
             self._addr = None
 

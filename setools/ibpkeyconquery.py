@@ -64,23 +64,8 @@ class IbpkeyconQuery(mixins.MatchContext, query.PolicyQuery):
 
     @pkeys.setter
     def pkeys(self, value: tuple[int, int] | None) -> None:
-        if value is not None:
-            pending_pkeys = policyrep.IbpkeyconRange(*value)
-
-            if pending_pkeys.low < 1 or pending_pkeys.high < 1:
-                raise ValueError(
-                    f"Pkeys must be positive: {pending_pkeys.low:#x}-{pending_pkeys.high:#x}")
-
-            if pending_pkeys.low > 0xffff or pending_pkeys.high > 0xffff:
-                raise ValueError(
-                    f"Pkeys maximum is 0xffff: {pending_pkeys.low:#x}-{pending_pkeys.high:#x}")
-
-            if pending_pkeys.low > pending_pkeys.high:
-                raise ValueError(
-                    "The low pkey must be smaller than the high pkey: "
-                    f"{pending_pkeys.low:#x}-{pending_pkeys.high:#x}")
-
-            self._pkeys = pending_pkeys
+        if value:
+            self._pkeys = policyrep.IbpkeyconRange(*value)
         else:
             self._pkeys = None
 

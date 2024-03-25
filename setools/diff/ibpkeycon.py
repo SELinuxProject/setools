@@ -69,7 +69,7 @@ class IbpkeyconWrapper(Wrapper[Ibpkeycon]):
     def __init__(self, ocon: Ibpkeycon) -> None:
         self.origin = ocon
         self.subnet_prefix = ocon.subnet_prefix
-        self.low, self.high = ocon.pkeys
+        self.low, self.high = ocon.pkeys.low, ocon.pkeys.high
         self.key = hash(ocon)
 
     def __hash__(self):

@@ -4,9 +4,54 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-IomemconRange = collections.namedtuple("IomemconRange", ["low", "high"])
-IoportconRange = collections.namedtuple("IoportconRange", ["low", "high"])
+@dataclasses.dataclass(eq=True, order=True, frozen=True)
+class IomemconRange:
 
+    """A range of Xen IO memory ranges"""
+
+    low: int
+    high: int
+
+    MIN: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=0x0001)
+    MAX: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=0xffff)
+
+    def __post_init__(self):
+        if self.low < IomemconRange.MIN or self.high < IomemconRange.MIN:
+            raise ValueError(
+                f"Memory address must be >= {IomemconRange.MIN}: {self.low}-{self.high}")
+
+        if self.low > IomemconRange.MAX or self.high > IomemconRange.MAX:
+            raise ValueError(
+                f"Memory address must be <= {IomemconRange.MAX}: {self.low}-{self.high}")
+
+        if self.low > self.high:
+            raise ValueError(
+                f"The low mem addr must be smaller than the high mem addr: {self.low}-{self.high}")
+
+
+@dataclasses.dataclass(eq=True, order=True, frozen=True)
+class IoportconRange:
+
+    """A range of Xen IO ports"""
+
+    low: int
+    high: int
+
+    MIN: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=0x0001)
+    MAX: dataclasses.ClassVar[int] = dataclasses.field(init=False, default=0xffff)
+
+    def __post_init__(self):
+        if self.low < IoportconRange.MIN or self.high < IoportconRange.MIN:
+            raise ValueError(
+                f"Port numbers must be >= {IoportconRange.MIN}: {self.low}-{self.high}")
+
+        if self.low > IoportconRange.MAX or self.high > IoportconRange.MAX:
+            raise ValueError(
+                f"Port numbers must be <= {IoportconRange.MAX}: {self.low}-{self.high}")
+
+        if self.low > self.high:
+            raise ValueError("The low port must be smaller than the high port: "
+                f"{self.low}-{self.high}")
 
 #
 # Classes
@@ -48,7 +93,7 @@ cdef class Iomemcon(Ocontext):
         return i
 
     def statement(self):
-        low, high = self.addr
+        low, high = self.addr.low, self.addr.high
 
         if low == high:
             return "iomemcon {low} {self.context1}"
@@ -73,7 +118,7 @@ cdef class Ioportcon(Ocontext):
         return i
 
     def statement(self):
-        low, high = self.ports
+        low, high = self.ports.low, self.ports.high
 
         if low == high:
             return "ioportcon {low} {self.context}"

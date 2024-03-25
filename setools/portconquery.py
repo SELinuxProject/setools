@@ -70,19 +70,7 @@ class PortconQuery(mixins.MatchContext, query.PolicyQuery):
     @ports.setter
     def ports(self, value: tuple[int, int] | None) -> None:
         if value:
-            pending_ports = policyrep.PortconRange(*value)
-
-            if all(pending_ports):
-                if pending_ports.low < 1 or pending_ports.high < 1:
-                    raise ValueError(
-                        f"Port numbers must be positive: {pending_ports.low}-{pending_ports.high}")
-
-                if pending_ports.low > pending_ports.high:
-                    raise ValueError(
-                        "The low port must be smaller than the high port: "
-                        f"{pending_ports.low}-{pending_ports.high}")
-
-                self._ports = pending_ports
+            self._ports = policyrep.PortconRange(*value)
         else:
             self._ports = None
 

@@ -23,8 +23,8 @@ class IbpkeyconTable(SEToolsTableModel[setools.Ibpkeycon]):
         if not self.item_list or not index.isValid():
             return None
 
-        row = index.row()
-        col = index.column()
+        row: int = index.row()
+        col: int = index.column()
         rule = self.item_list[row]
 
         match role:
@@ -33,7 +33,7 @@ class IbpkeyconTable(SEToolsTableModel[setools.Ibpkeycon]):
                     case 0:
                         return str(rule.subnet_prefix)
                     case 1:
-                        low, high = rule.pkeys
+                        low, high = rule.pkeys.low, rule.pkeys.high
                         if low == high:
                             return f"{low:#x}"
                         return f"{low:#x}-{high:#x}"
