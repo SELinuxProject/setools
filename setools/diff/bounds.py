@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from dataclasses import dataclass
-from typing import cast, List, Optional
+import typing
 
 from ..policyrep import Bounds, BoundsRuletype, Type
 
@@ -13,7 +13,7 @@ from .difference import Difference, DifferenceResult, Wrapper
 from .types import type_wrapper_factory
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedBounds(DifferenceResult):
 
     """Difference details for a modified bounds rule."""
@@ -22,42 +22,39 @@ class ModifiedBounds(DifferenceResult):
     added_bound: Type
     removed_bound: Type
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class BoundsDifference(Difference):
 
     """Determine the difference in *bounds between two policies."""
 
-    added_typebounds = DiffResultDescriptor("diff_typebounds")
-    removed_typebounds = DiffResultDescriptor("diff_typebounds")
-    modified_typebounds = DiffResultDescriptor("diff_typebounds")
-
-    # Lists of rules for each policy
-    _left_typebounds: Optional[List[Bounds]] = None
-    _right_typebounds: Optional[List[Bounds]] = None
-
     def diff_typebounds(self) -> None:
         """Generate the difference in typebound rules between the policies."""
 
-        self.log.info("Generating typebounds differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating typebounds differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_typebounds is None or self._right_typebounds is None:
             self._create_typebound_lists()
 
         self.added_typebounds, self.removed_typebounds, matched_typebounds = self._set_diff(
-            (BoundsWrapper(c) for c in cast(List[Bounds], self._left_typebounds)),
-            (BoundsWrapper(c) for c in cast(List[Bounds], self._right_typebounds)),
+            (BoundsWrapper(c) for c in typing.cast(list[Bounds], self._left_typebounds)),
+            (BoundsWrapper(c) for c in typing.cast(list[Bounds], self._right_typebounds)),
             key=lambda b: str(b.child))
 
-        self.modified_typebounds = []
+        self.modified_typebounds = list[ModifiedBounds]()
 
         for left_bound, right_bound in matched_typebounds:
             if type_wrapper_factory(left_bound.parent) != type_wrapper_factory(right_bound.parent):
                 self.modified_typebounds.append(ModifiedBounds(
                     left_bound, right_bound.parent, left_bound.parent))
+
+    added_typebounds = DiffResultDescriptor[Bounds](diff_typebounds)
+    removed_typebounds = DiffResultDescriptor[Bounds](diff_typebounds)
+    modified_typebounds = DiffResultDescriptor[ModifiedBounds](diff_typebounds)
+
+    # Lists of rules for each policy
+    _left_typebounds: list[Bounds] | None = None
+    _right_typebounds: list[Bounds] | None = None
 
     #
     # Internal functions
@@ -69,22 +66,20 @@ class BoundsDifference(Difference):
             if rule.ruletype == BoundsRuletype.typebounds:
                 self._left_typebounds.append(rule)
             else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
+                self.log.error(f"Unknown rule type: {rule.ruletype} (This is an SETools bug)")
 
         self._right_typebounds = []
         for rule in self.right_policy.bounds():
             if rule.ruletype == BoundsRuletype.typebounds:
                 self._right_typebounds.append(rule)
             else:
-                self.log.error("Unknown rule type: {0} (This is an SETools bug)".
-                               format(rule.ruletype))
+                self.log.error(f"Unknown rule type: {rule.ruletype} (This is an SETools bug)")
 
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting all *bounds differences")
-        self.added_typebounds = None
-        self.removed_typebounds = None
+        del self.added_typebounds
+        del self.removed_typebounds
 
         # Sets of rules for each policy
         self._left_typebounds = None

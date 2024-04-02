@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
+from . import mixins, policyrep, query, util
 from .descriptors import CriteriaSetDescriptor
-from .mixins import MatchName
-from .policyrep import Role
-from .query import PolicyQuery
-from .util import match_regex_or_set
+
+__all__: typing.Final[tuple[str, ...]] = ("RoleQuery",)
 
 
-class RoleQuery(MatchName, PolicyQuery):
+class RoleQuery(mixins.MatchName, query.PolicyQuery):
 
     """
     Query SELinux policy roles.
@@ -33,22 +33,21 @@ class RoleQuery(MatchName, PolicyQuery):
                  of set logic.
     """
 
-    types = CriteriaSetDescriptor("types_regex", "lookup_type")
+    types = CriteriaSetDescriptor[policyrep.Type]("types_regex", "lookup_type")
     types_equal: bool = False
     types_regex: bool = False
 
-    def results(self) -> Iterable[Role]:
+    def results(self) -> Iterable[policyrep.Role]:
         """Generator which yields all matching roles."""
-        self.log.info("Generating role results from {0.policy}".format(self))
+        self.log.info(f"Generating role results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Types: {0.types!r}, regex: {0.types_regex}, "
-                       "eq: {0.types_equal}".format(self))
+        self.log.debug(f"{self.types=}, {self.types_regex=}, {self.types_equal=}")
 
         for r in self.policy.roles():
             if not self._match_name(r):
                 continue
 
-            if self.types and not match_regex_or_set(
+            if self.types and not util.match_regex_or_set(
                     set(r.types()),
                     self.types,
                     self.types_equal,

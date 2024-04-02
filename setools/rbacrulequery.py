@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
+from collections.abc import Iterable
 import re
-from typing import cast, Iterable, Optional, Pattern, Union
+import typing
 
-from . import mixins, query
+from . import exception, mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .exception import InvalidType, RuleUseError
-from .policyrep import AnyRBACRule, RBACRuletype, Role, TypeOrAttr
-from .util import match_indirect_regex
+
+__all__: typing.Final[tuple[str, ...]] = ("RBACRuleQuery",)
 
 
 class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
@@ -42,44 +42,44 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
                     be used on the default role.
     """
 
-    ruletype = CriteriaSetDescriptor(enum_class=RBACRuletype)
-    source = CriteriaDescriptor("source_regex", "lookup_role")
+    ruletype = CriteriaSetDescriptor[policyrep.RBACRuletype](enum_class=policyrep.RBACRuletype)
+    source = CriteriaDescriptor[policyrep.Role]("source_regex", "lookup_role")
     source_regex: bool = False
     source_indirect: bool = True
-    _target: Optional[Union[Pattern, Role, TypeOrAttr]] = None
+    _target: re.Pattern[str] | policyrep.Role | policyrep.TypeOrAttr | None = None
     target_regex: bool = False
     target_indirect: bool = True
-    tclass = CriteriaSetDescriptor("tclass_regex", "lookup_class")
+    tclass = CriteriaSetDescriptor[policyrep.ObjClass]("tclass_regex", "lookup_class")
     tclass_regex: bool = False
-    default = CriteriaDescriptor("default_regex", "lookup_role")
+    default = CriteriaDescriptor[policyrep.Role]("default_regex", "lookup_role")
     default_regex: bool = False
 
     @property
-    def target(self) -> Optional[Union[Pattern, Role, TypeOrAttr]]:
+    def target(self) -> re.Pattern[str] | policyrep.Role | policyrep.TypeOrAttr | None:
         return self._target
 
     @target.setter
-    def target(self, value: Optional[Union[str, Role, TypeOrAttr]]) -> None:
+    def target(self, value: str | policyrep.Role | policyrep.TypeOrAttr | None) -> None:
         if not value:
             self._target = None
         elif self.target_regex:
-            self._target = re.compile(value)
+            self._target = re.compile(str(value))
         else:
             try:
-                self._target = self.policy.lookup_type_or_attr(cast(Union[str, TypeOrAttr], value))
-            except InvalidType:
-                self._target = self.policy.lookup_role(cast(Union[str, Role], value))
+                self._target = self.policy.lookup_type_or_attr(
+                    typing.cast(str | policyrep.TypeOrAttr, value))
+            except exception.InvalidType:
+                self._target = self.policy.lookup_role(
+                    typing.cast(str | policyrep.Role, value))
 
-    def results(self) -> Iterable[AnyRBACRule]:
+    def results(self) -> Iterable[policyrep.AnyRBACRule]:
         """Generator which yields all matching RBAC rules."""
-        self.log.info("Generating RBAC rule results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Source: {0.source!r}, indirect: {0.source_indirect}, "
-                       "regex: {0.source_regex}".format(self))
-        self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
-                       "regex: {0.target_regex}".format(self))
+        self.log.info(f"Generating RBAC rule results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
+        self.log.debug(f"{self.source=}, {self.source_indirect=}, {self.source_regex=}")
+        self.log.debug(f"{self.target=}, {self.target_indirect=}, {self.target_regex=}")
         self._match_object_class_debug(self.log)
-        self.log.debug("Default: {0.default!r}, regex: {0.default_regex}".format(self))
+        self.log.debug(f"{self.default=}, {self.default_regex=}")
 
         for rule in self.policy.rbacrules():
             #
@@ -92,7 +92,7 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on source role
             #
-            if self.source and not match_indirect_regex(
+            if self.source and not util.match_indirect_regex(
                     rule.source,
                     self.source,
                     self.source_indirect,
@@ -102,7 +102,7 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             #
             # Matching on target type (role_transition)/role(allow)
             #
-            if self.target and not match_indirect_regex(
+            if self.target and not util.match_indirect_regex(
                     rule.target,
                     self.target,
                     self.target_indirect,
@@ -115,7 +115,7 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
             try:
                 if not self._match_object_class(rule):
                     continue
-            except RuleUseError:
+            except exception.RuleUseError:
                 continue
 
             #
@@ -126,13 +126,13 @@ class RBACRuleQuery(mixins.MatchObjClass, query.PolicyQuery):
                     # because default role is always a single
                     # role, hard-code indirect to True
                     # so the criteria can be an attribute
-                    if not match_indirect_regex(
+                    if not util.match_indirect_regex(
                             rule.default,
                             self.default,
                             True,
                             self.default_regex):
                         continue
-                except RuleUseError:
+                except exception.RuleUseError:
                     continue
 
             # if we get here, we have matched all available criteria

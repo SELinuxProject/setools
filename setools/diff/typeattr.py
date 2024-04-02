@@ -5,7 +5,6 @@
 #
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Set
 
 from ..policyrep import Type, TypeAttribute
 
@@ -21,9 +20,10 @@ class ModifiedTypeAttribute(DifferenceResult):
 
     """Difference details for a modified type attribute."""
 
-    added_types: Set[Type]
-    removed_types: Set[Type]
-    matched_types: Set[Type]
+    attr: TypeAttribute
+    added_types: set[Type]
+    removed_types: set[Type]
+    matched_types: set[Type]
 
 
 def typeattr_wrapper_factory(attr: TypeAttribute) -> SymbolWrapper[TypeAttribute]:
@@ -45,23 +45,19 @@ class TypeAttributesDifference(Difference):
 
     """Determine the difference in type attributes between two policies."""
 
-    added_type_attributes = DiffResultDescriptor("diff_type_attributes")
-    removed_type_attributes = DiffResultDescriptor("diff_type_attributes")
-    modified_type_attributes = DiffResultDescriptor("diff_type_attributes")
-
     def diff_type_attributes(self) -> None:
         """Generate the difference in type attributes between the policies."""
 
         self.log.info(
-            "Generating type attribute differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating type attribute differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         self.added_type_attributes, self.removed_type_attributes, matched_attributes = \
             self._set_diff(
                 (SymbolWrapper(r) for r in self.left_policy.typeattributes()),
                 (SymbolWrapper(r) for r in self.right_policy.typeattributes()))
 
-        self.modified_type_attributes = dict()
+        self.modified_type_attributes = list[ModifiedTypeAttribute]()
 
         for left_attribute, right_attribute in matched_attributes:
             # Criteria for modified attributes
@@ -71,8 +67,12 @@ class TypeAttributesDifference(Difference):
                 (SymbolWrapper(t) for t in right_attribute.expand()))
 
             if added_types or removed_types:
-                self.modified_type_attributes[left_attribute] = ModifiedTypeAttribute(
-                    added_types, removed_types, matched_types)
+                self.modified_type_attributes.append(ModifiedTypeAttribute(
+                    left_attribute, added_types, removed_types, matched_types))
+
+    added_type_attributes = DiffResultDescriptor[TypeAttribute](diff_type_attributes)
+    removed_type_attributes = DiffResultDescriptor[TypeAttribute](diff_type_attributes)
+    modified_type_attributes = DiffResultDescriptor[ModifiedTypeAttribute](diff_type_attributes)
 
     #
     # Internal functions
@@ -80,6 +80,6 @@ class TypeAttributesDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting type attribute differences")
-        self.added_type_attributes = None
-        self.removed_type_attributes = None
-        self.modified_type_attributes = None
+        del self.added_type_attributes
+        del self.removed_type_attributes
+        del self.modified_type_attributes

@@ -35,7 +35,7 @@ cdef class Bounds(PolicyObject):
         return b
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.child};".format(self))
+        return hash(f"{self.ruletype}|{self.child}")
 
     def __eq__(self, other):
         return self.policy == other.policy \
@@ -48,7 +48,7 @@ cdef class Bounds(PolicyObject):
         return str(self) < str(other)
 
     def statement(self):
-        return "{0.ruletype} {0.parent} {0.child};".format(self)
+        return f"{self.ruletype} {self.parent} {self.child};"
 
 
 #

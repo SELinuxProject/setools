@@ -5,7 +5,6 @@
 #
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Set
 
 from ..policyrep import Role, Type
 
@@ -22,9 +21,10 @@ class ModifiedRole(DifferenceResult):
 
     """Difference details for a modified role."""
 
-    added_types: Set[Type]
-    removed_types: Set[Type]
-    matched_types: Set[Type]
+    role: Role
+    added_types: set[Type]
+    removed_types: set[Type]
+    matched_types: set[Type]
 
 
 def role_wrapper_factory(role: Role) -> SymbolWrapper[Role]:
@@ -46,21 +46,17 @@ class RolesDifference(Difference):
 
     """Determine the difference in roles between two policies."""
 
-    added_roles = DiffResultDescriptor("diff_roles")
-    removed_roles = DiffResultDescriptor("diff_roles")
-    modified_roles = DiffResultDescriptor("diff_roles")
-
     def diff_roles(self) -> None:
         """Generate the difference in roles between the policies."""
 
         self.log.info(
-            "Generating role differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating role differences from {self.left_policy} to {self.right_policy}")
 
         self.added_roles, self.removed_roles, matched_roles = self._set_diff(
             (role_wrapper_factory(r) for r in self.left_policy.roles()),
             (role_wrapper_factory(r) for r in self.right_policy.roles()))
 
-        self.modified_roles = dict()
+        self.modified_roles = list[ModifiedRole]()
 
         for left_role, right_role in matched_roles:
             # Criteria for modified roles
@@ -71,9 +67,14 @@ class RolesDifference(Difference):
                 (type_wrapper_factory(t) for t in right_role.types()))
 
             if added_types or removed_types:
-                self.modified_roles[left_role] = ModifiedRole(added_types,
-                                                              removed_types,
-                                                              matched_types)
+                self.modified_roles.append(ModifiedRole(left_role,
+                                                        added_types,
+                                                        removed_types,
+                                                        matched_types))
+
+    added_roles = DiffResultDescriptor[Role](diff_roles)
+    removed_roles = DiffResultDescriptor[Role](diff_roles)
+    modified_roles = DiffResultDescriptor[ModifiedRole](diff_roles)
 
     #
     # Internal functions
@@ -81,6 +82,6 @@ class RolesDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting role differences")
-        self.added_roles = None
-        self.removed_roles = None
-        self.modified_roles = None
+        del self.added_roles
+        del self.removed_roles
+        del self.modified_roles

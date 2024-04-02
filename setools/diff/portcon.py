@@ -11,7 +11,7 @@ from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, Wrapper
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedPortcon(DifferenceResult):
 
     """Difference details for a modified portcon."""
@@ -20,29 +20,22 @@ class ModifiedPortcon(DifferenceResult):
     added_context: Context
     removed_context: Context
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class PortconsDifference(Difference):
 
     """Determine the difference in portcons between two policies."""
 
-    added_portcons = DiffResultDescriptor("diff_portcons")
-    removed_portcons = DiffResultDescriptor("diff_portcons")
-    modified_portcons = DiffResultDescriptor("diff_portcons")
-
     def diff_portcons(self) -> None:
         """Generate the difference in portcons between the policies."""
 
-        self.log.info("Generating portcon differences from {0.left_policy} to {0.right_policy}".
-                      format(self))
+        self.log.info(
+            f"Generating portcon differences from {self.left_policy} to {self.right_policy}")
 
         self.added_portcons, self.removed_portcons, matched_portcons = self._set_diff(
             (PortconWrapper(n) for n in self.left_policy.portcons()),
             (PortconWrapper(n) for n in self.right_policy.portcons()))
 
-        self.modified_portcons = []
+        self.modified_portcons = list[ModifiedPortcon]()
 
         for left_portcon, right_portcon in matched_portcons:
             # Criteria for modified portcons
@@ -52,15 +45,19 @@ class PortconsDifference(Difference):
                                                               right_portcon.context,
                                                               left_portcon.context))
 
+    added_portcons = DiffResultDescriptor[Portcon](diff_portcons)
+    removed_portcons = DiffResultDescriptor[Portcon](diff_portcons)
+    modified_portcons = DiffResultDescriptor[ModifiedPortcon](diff_portcons)
+
     #
     # Internal functions
     #
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting portcon differences")
-        self.added_portcons = None
-        self.removed_portcons = None
-        self.modified_portcons = None
+        del self.added_portcons
+        del self.removed_portcons
+        del self.modified_portcons
 
 
 class PortconWrapper(Wrapper[Portcon]):
@@ -72,7 +69,7 @@ class PortconWrapper(Wrapper[Portcon]):
     def __init__(self, ocon: Portcon) -> None:
         self.origin = ocon
         self.protocol = ocon.protocol
-        self.low, self.high = ocon.ports
+        self.low, self.high = ocon.ports.low, ocon.ports.high
         self.key = hash(ocon)
 
     def __hash__(self):

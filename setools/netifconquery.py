@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext, MatchName
-from .policyrep import Netifcon
-from .query import PolicyQuery
-from .util import match_regex
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ()
 
 
-class NetifconQuery(MatchContext, MatchName, PolicyQuery):
+class NetifconQuery(mixins.MatchContext, mixins.MatchName, query.PolicyQuery):
 
     """
     Network interface context query.
@@ -42,17 +42,14 @@ class NetifconQuery(MatchContext, MatchName, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    def results(self) -> Iterable[Netifcon]:
+    def results(self) -> Iterable[policyrep.Netifcon]:
         """Generator which yields all matching netifcons."""
-        self.log.info("Generating netifcon results from {0.policy}".format(self))
+        self.log.info(f"Generating netifcon results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_context_debug(self.log)
 
         for netif in self.policy.netifcons():
-            if self.name and not match_regex(
-                    netif.netif,
-                    self.name,
-                    self.name_regex):
+            if not self._match_name(netif.netif):
                 continue
 
             if not self._match_context(netif.context):

@@ -5,7 +5,6 @@
 #
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Set, Optional, Union
 
 from ..exception import MLSDisabled
 from ..policyrep import Level, Range, Role, User
@@ -24,13 +23,14 @@ class ModifiedUser(DifferenceResult):
 
     """Difference details for a modified user."""
 
-    added_roles: Set[Role]
-    removed_roles: Set[Role]
-    matched_roles: Set[Role]
-    added_level: Optional[Union[Level, str]]
-    removed_level: Optional[Union[Level, str]]
-    added_range: Optional[Union[Range, str]]
-    removed_range: Optional[Union[Range, str]]
+    user: User
+    added_roles: set[Role]
+    removed_roles: set[Role]
+    matched_roles: set[Role]
+    added_level: Level | str | None
+    removed_level: Level | str | None
+    added_range: Range | str | None
+    removed_range: Range | str | None
 
 
 def user_wrapper_factory(user: User) -> SymbolWrapper[User]:
@@ -52,21 +52,17 @@ class UsersDifference(Difference):
 
     """Determine the difference in users between two policies."""
 
-    added_users = DiffResultDescriptor("diff_users")
-    removed_users = DiffResultDescriptor("diff_users")
-    modified_users = DiffResultDescriptor("diff_users")
-
     def diff_users(self) -> None:
         """Generate the difference in users between the policies."""
 
         self.log.info(
-            "Generating user differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating user differences from {self.left_policy} to {self.right_policy}")
 
         self.added_users, self.removed_users, matched_users = self._set_diff(
             (user_wrapper_factory(r) for r in self.left_policy.users()),
             (user_wrapper_factory(r) for r in self.right_policy.users()))
 
-        self.modified_users = dict()
+        self.modified_users = list[ModifiedUser]()
 
         for left_user, right_user in matched_users:
             # Criteria for modified users
@@ -79,18 +75,18 @@ class UsersDifference(Difference):
 
             # keep wrapped and unwrapped MLS objects here so there
             # are not several nested try blocks
-            left_level_wrap: Optional[LevelWrapper]
-            left_range_wrap: Optional[RangeWrapper]
-            left_level: Union[Level, str]
-            left_range: Union[Range, str]
-            right_level_wrap: Optional[LevelWrapper]
-            right_range_wrap: Optional[RangeWrapper]
-            right_level: Union[Level, str]
-            right_range: Union[Range, str]
-            added_level: Optional[Union[Level, str]]
-            added_range: Optional[Union[Range, str]]
-            removed_level: Optional[Union[Level, str]]
-            removed_range: Optional[Union[Range, str]]
+            left_level_wrap: LevelWrapper | None
+            left_range_wrap: RangeWrapper | None
+            left_level: Level | str
+            left_range: Range | str
+            right_level_wrap: LevelWrapper | None
+            right_range_wrap: RangeWrapper | None
+            right_level: Level | str
+            right_range: Range | str
+            added_level: Level | str | None
+            added_range: Range | str | None
+            removed_level: Level | str | None
+            removed_range: Range | str | None
             try:
                 left_level_wrap = LevelWrapper(left_user.mls_level)
                 left_range_wrap = RangeWrapper(left_user.mls_range)
@@ -128,13 +124,18 @@ class UsersDifference(Difference):
                 removed_range = None
 
             if added_roles or removed_roles or removed_level or removed_range:
-                self.modified_users[left_user] = ModifiedUser(added_roles,
-                                                              removed_roles,
-                                                              matched_roles,
-                                                              added_level,
-                                                              removed_level,
-                                                              added_range,
-                                                              removed_range)
+                self.modified_users.append(ModifiedUser(left_user,
+                                                        added_roles,
+                                                        removed_roles,
+                                                        matched_roles,
+                                                        added_level,
+                                                        removed_level,
+                                                        added_range,
+                                                        removed_range))
+
+    added_users = DiffResultDescriptor[User](diff_users)
+    removed_users = DiffResultDescriptor[User](diff_users)
+    modified_users = DiffResultDescriptor[ModifiedUser](diff_users)
 
     #
     # Internal functions
@@ -142,6 +143,6 @@ class UsersDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting user differences")
-        self.added_users = None
-        self.removed_users = None
-        self.modified_users = None
+        del self.added_users
+        del self.removed_users
+        del self.modified_users

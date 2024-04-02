@@ -37,14 +37,14 @@ cdef class FSUse(Ocontext):
         return f
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.fs}".format(self))
+        return hash(f"{self.ruletype}|{self.fs}")
 
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
     def statement(self):
-        return "{0.ruletype} {0.fs} {0.context};".format(self)
+        return f"{self.ruletype} {self.fs} {self.context};"
 
 
 cdef class GenfsFiletype(int):
@@ -107,8 +107,8 @@ cdef class Genfscon(Ocontext):
                 g.filetype = GenfsFiletype(Genfscon._sclass_to_stat[g.tclass.name])
             except KeyError as ex:
                 log = logging.getLogger(__name__)
-                log.warning("Genfscon {} {} object class {} does not match a file object class. "
-                            "Dropping file type.".format(g.fs, g.path, g.tclass.name))
+                log.warning("Genfscon {g.fs} {g.path} object class {g.tclass.name} does not match "
+                            "a file object class. Dropping file type.")
                 g.filetype = GenfsFiletype(0)
                 g.tclass = None
 
@@ -120,14 +120,14 @@ cdef class Genfscon(Ocontext):
         return g
 
     def __hash__(self):
-        return hash("genfscon|{0.fs}|{0.path}|{0.filetype}".format(self))
+        return hash(f"genfscon|{self.fs}|{self.path}|{self.filetype}")
 
     def __lt__(self, other):
         # this is used by Python sorting functions
         return str(self) < str(other)
 
     def statement(self):
-        return "genfscon {0.fs} {0.path} {0.filetype} {0.context}".format(self)
+        return f"genfscon {self.fs} {self.path} {self.filetype} {self.context}"
 
 
 #

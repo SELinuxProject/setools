@@ -2,16 +2,16 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
+from . import mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .mixins import MatchName
-from .policyrep import User
-from .query import PolicyQuery
-from .util import match_regex_or_set, match_level, match_range
+
+__all__: typing.Final[tuple[str, ...]] = ("UserQuery",)
 
 
-class UserQuery(MatchName, PolicyQuery):
+class UserQuery(mixins.MatchName, query.PolicyQuery):
 
     """
     Query SELinux policy users.
@@ -49,42 +49,41 @@ class UserQuery(MatchName, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    level = CriteriaDescriptor(lookup_function="lookup_level")
+    level = CriteriaDescriptor[policyrep.Level](lookup_function="lookup_level")
     level_dom: bool = False
     level_domby: bool = False
     level_incomp: bool = False
-    range_ = CriteriaDescriptor(lookup_function="lookup_range")
+    range_ = CriteriaDescriptor[policyrep.Range](lookup_function="lookup_range")
     range_overlap: bool = False
     range_subset: bool = False
     range_superset: bool = False
     range_proper: bool = False
-    roles = CriteriaSetDescriptor("roles_regex", "lookup_role")
+    roles = CriteriaSetDescriptor[policyrep.Role]("roles_regex", "lookup_role")
     roles_equal: bool = False
     roles_regex: bool = False
 
-    def results(self) -> Iterable[User]:
+    def results(self) -> Iterable[policyrep.User]:
         """Generator which yields all matching users."""
-        self.log.info("Generating user results from {0.policy}".format(self))
+        self.log.info(f"Generating user results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Roles: {0.roles!r}, regex: {0.roles_regex}, "
-                       "eq: {0.roles_equal}".format(self))
-        self.log.debug("Level: {0.level!r}, dom: {0.level_dom}, domby: {0.level_domby}, "
-                       "incomp: {0.level_incomp}".format(self))
-        self.log.debug("Range: {0.range_!r}, subset: {0.range_subset}, overlap: {0.range_overlap}, "
-                       "superset: {0.range_superset}, proper: {0.range_proper}".format(self))
+        self.log.debug(f"{self.roles=}, {self.roles_regex=}, {self.roles_equal=}")
+        self.log.debug(f"{self.level=}, {self.level_dom=}, {self.level_domby=}, "
+                       f"{self.level_incomp=}")
+        self.log.debug(f"{self.range_=}, {self.range_subset=}, {self.range_overlap=}, "
+                       f"{self.range_superset=}, {self.range_proper=}")
 
         for user in self.policy.users():
             if not self._match_name(user):
                 continue
 
-            if self.roles and not match_regex_or_set(
+            if self.roles and not util.match_regex_or_set(
                     user.roles,
                     self.roles,
                     self.roles_equal,
                     self.roles_regex):
                 continue
 
-            if self.level and not match_level(
+            if self.level and not util.match_level(
                     user.mls_level,
                     self.level,
                     self.level_dom,
@@ -92,7 +91,7 @@ class UserQuery(MatchName, PolicyQuery):
                     self.level_incomp):
                 continue
 
-            if self.range_ and not match_range(
+            if self.range_ and not util.match_range(
                     user.mls_range,
                     self.range_,
                     self.range_subset,

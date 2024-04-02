@@ -2,12 +2,10 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-
+from collections.abc import Iterable
 from contextlib import suppress
-from typing import Iterable, List, Optional, Tuple
 
-from .exception import InvalidPermission, NoCommon
-from .policyrep import Level, ObjClass, SELinuxPolicy
+from . import exception, policyrep
 
 
 def match_regex(obj, criteria, regex: bool) -> bool:
@@ -136,7 +134,8 @@ def match_range(obj, criteria, subset: bool, overlap: bool, superset: bool, prop
         return criteria.low == obj.low and obj.high == criteria.high
 
 
-def match_level(obj: Level, criteria: Level, dom: bool, domby: bool, incomp: bool) -> bool:
+def match_level(obj: policyrep.Level, criteria: policyrep.Level, dom: bool, domby: bool,
+                incomp: bool) -> bool:
     """
     Match the an MLS level.
 
@@ -157,8 +156,8 @@ def match_level(obj: Level, criteria: Level, dom: bool, domby: bool, incomp: boo
         return (criteria == obj)
 
 
-def validate_perms_any(perms: Iterable[str], tclass: Optional[Iterable[ObjClass]] = None,
-                       policy: Optional[SELinuxPolicy] = None) -> None:
+def validate_perms_any(perms: Iterable[str], tclass: Iterable[policyrep.ObjClass] | None = None,
+                       policy: policyrep.SELinuxPolicy | None = None) -> None:
     """
     Validate that each permission is valid for at least one
     of specified object classes.  If no classes are specified,
@@ -195,23 +194,21 @@ def validate_perms_any(perms: Iterable[str], tclass: Optional[Iterable[ObjClass]
     for c in selected_classes:
         invalid -= c.perms
 
-        with suppress(NoCommon):
+        with suppress(exception.NoCommon):
             invalid -= c.common.perms
 
         if not invalid:
             break
     else:
         if tclass:
-            raise InvalidPermission(
-                "Permission(s) do not exist in the specified classes: {}"
-                .format(", ".join(invalid)))
+            raise exception.InvalidPermission(
+                f"Permission(s) do not exist in the specified classes: {', '.join(invalid)}")
         else:
-            raise InvalidPermission(
-                "Permission(s) do not exist any class: {}"
-                .format(", ".join(invalid)))
+            raise exception.InvalidPermission(
+                f"Permission(s) do not exist any class: {', '.join(invalid)}")
 
 
-def xperm_str_to_tuple_ranges(perms: str, separator: str = ",") -> List[Tuple[int, int]]:
+def xperm_str_to_tuple_ranges(perms: str, separator: str = ",") -> list[tuple[int, int]]:
     """
     Create a extended permission list of ranges from a string representation of ranges.
     This does not do any checking for out-of-range values.
@@ -227,7 +224,7 @@ def xperm_str_to_tuple_ranges(perms: str, separator: str = ",") -> List[Tuple[in
     Return:     List[Tuple[int, int]] equivalent of the permissions.
     """
 
-    xperms: List[Tuple[int, int]] = []
+    xperms: list[tuple[int, int]] = []
     for item in perms.split(separator):
         rng = item.split("-")
         if len(rng) == 2:
@@ -235,6 +232,6 @@ def xperm_str_to_tuple_ranges(perms: str, separator: str = ",") -> List[Tuple[in
         elif len(rng) == 1:
             xperms.append((int(rng[0], base=16), int(rng[0], base=16)))
         else:
-            raise ValueError("Unable to parse \"{}\" for xperms.".format(item))
+            raise ValueError(f"Unable to parse \"{item}\" for xperms.")
 
     return xperms

@@ -2,17 +2,16 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
+from . import exception, mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .exception import ConstraintUseError
-from .mixins import MatchObjClass, MatchPermission
-from .policyrep import AnyConstraint, ConstraintRuletype
-from .query import PolicyQuery
-from .util import match_in_set
+
+__all__: typing.Final[tuple[str, ...]] = ("ConstraintQuery",)
 
 
-class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
+class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuery):
 
     """
     Query constraint rules, (mls)constrain/(mls)validatetrans.
@@ -50,17 +49,19 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
                       be used on the user.
     """
 
-    ruletype = CriteriaSetDescriptor(enum_class=ConstraintRuletype)
-    user = CriteriaDescriptor("user_regex", "lookup_user")
+    ruletype = CriteriaSetDescriptor[policyrep.ConstraintRuletype](
+        enum_class=policyrep.ConstraintRuletype)
+    user = CriteriaDescriptor[policyrep.User]("user_regex", "lookup_user")
     user_regex: bool = False
-    role = CriteriaDescriptor("role_regex", "lookup_role")
+    role = CriteriaDescriptor[policyrep.Role]("role_regex", "lookup_role")
     role_regex: bool = False
     role_indirect: bool = True
-    type_ = CriteriaDescriptor("type_regex", "lookup_type_or_attr")
+    type_ = CriteriaDescriptor[policyrep.Type]("type_regex", "lookup_type_or_attr")
     type_regex: bool = False
     type_indirect: bool = True
 
-    def _match_expr(self, expr, criteria, indirect, regex):
+    def _match_expr(self, expr: frozenset[policyrep.User] | frozenset[policyrep.Role] |
+                    frozenset[policyrep.Type], criteria, indirect: bool, regex: bool) -> bool:
         """
         Match roles/types/users in a constraint expression,
         optionally by expanding the contents of attributes.
@@ -72,24 +73,25 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
         regex       If regular expression matching should be used.
         """
 
+        obj: set | frozenset
         if indirect:
             obj = set()
             for item in expr:
-                obj.update(item.expand())
+                obj.update(item.expand())  # type: ignore[union-attr]
         else:
             obj = expr
 
-        return match_in_set(obj, criteria, regex)
+        return util.match_in_set(obj, criteria, regex)
 
-    def results(self) -> Iterable[AnyConstraint]:
+    def results(self) -> Iterable[policyrep.AnyConstraint]:
         """Generator which yields all matching constraints rules."""
-        self.log.info("Generating constraint results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
+        self.log.info(f"Generating constraint results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
         self._match_object_class_debug(self.log)
         self._match_perms_debug(self.log)
-        self.log.debug("User: {0.user!r}, regex: {0.user_regex}".format(self))
-        self.log.debug("Role: {0.role!r}, regex: {0.role_regex}".format(self))
-        self.log.debug("Type: {0.type_!r}, regex: {0.type_regex}".format(self))
+        self.log.debug(f"{self.user=}, {self.user_regex=}")
+        self.log.debug(f"{self.role=}, {self.role_regex=}")
+        self.log.debug(f"{self.type_=}, {self.type_regex=}")
 
         for c in self.policy.constraints():
             if self.ruletype:
@@ -102,7 +104,7 @@ class ConstraintQuery(MatchObjClass, MatchPermission, PolicyQuery):
             try:
                 if not self._match_perms(c):
                     continue
-            except ConstraintUseError:
+            except exception.ConstraintUseError:
                 continue
 
             if self.role and not self._match_expr(

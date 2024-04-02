@@ -63,8 +63,7 @@ cdef class Type(BaseType):
         """Factory function for creating Type objects."""
         cdef Type t
         if symbol.flavor != sepol.TYPE_TYPE:
-            raise ValueError("{0} is not a type".format(
-                policy.type_value_to_name(symbol.s.value - 1)))
+            raise ValueError(f"{policy.type_value_to_name(symbol.s.value - 1)} is not a type")
 
         try:
             return _type_cache[policy][<uintptr_t>symbol]
@@ -106,13 +105,13 @@ cdef class Type(BaseType):
         self._load_attributes()
         count = len(self._aliases)
 
-        stmt = "type {0}".format(self.name)
+        stmt = f"type {self.name}"
         if count > 1:
-            stmt += " alias {{ {0} }}".format(' '.join(self._aliases))
+            stmt += f" alias {{ {' '.join(self._aliases)} }}"
         elif count == 1:
-            stmt += " alias {0}".format(self._aliases[0])
+            stmt += f" alias {self._aliases[0]}"
         for attr in self._attrs:
-            stmt += ", {0}".format(attr)
+            stmt += f", {attr}"
         stmt += ";"
         return stmt
 
@@ -128,8 +127,8 @@ cdef class TypeAttribute(BaseType):
         """Factory function for creating TypeAttribute objects."""
         cdef TypeAttribute a
         if symbol.flavor != sepol.TYPE_ATTRIB:
-            raise ValueError("{0} is not an attribute".format(
-                policy.type_value_to_name(symbol.s.value - 1)))
+            raise ValueError(
+                f"{policy.type_value_to_name(symbol.s.value - 1)} is not an attribute")
 
         try:
             return _typeattr_cache[policy][<uintptr_t>symbol]
@@ -165,20 +164,19 @@ cdef class TypeAttribute(BaseType):
 
     def attributes(self):
         """Generator that yields all attributes for this type."""
-        raise SymbolUseError("{0} is an attribute, thus does not have attributes.".format(
-                             self.name))
+        raise SymbolUseError(f"{self.name} is an attribute, thus does not have attributes.")
 
     def aliases(self):
         """Generator that yields all aliases for this type."""
-        raise SymbolUseError("{0} is an attribute, thus does not have aliases.".format(self.name))
+        raise SymbolUseError(f"{self.name} is an attribute, thus does not have aliases.")
 
     @property
     def ispermissive(self):
         """(T/F) the type is permissive."""
-        raise SymbolUseError("{0} is an attribute, thus cannot be permissive.".format(self.name))
+        raise SymbolUseError(f"{self.name} is an attribute, thus cannot be permissive.")
 
     def statement(self):
-        return "attribute {0};".format(self.name)
+        return f"attribute {self.name};"
 
 
 #

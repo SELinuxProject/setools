@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .policyrep import Pcidevicecon
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("PcideviceconQuery",)
 
 
-class PcideviceconQuery(MatchContext, PolicyQuery):
+class PcideviceconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Pcidevicecon context query.
@@ -43,26 +44,26 @@ class PcideviceconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _device: Optional[int] = None
+    _device: int | None = None
 
     @property
-    def device(self) -> Optional[int]:
+    def device(self) -> int | None:
         return self._device
 
     @device.setter
-    def device(self, value: Optional[int]) -> None:
+    def device(self, value: int | None) -> None:
         if value:
             if value < 1:
-                raise ValueError("PCI device ID must be positive: {0}".format(value))
+                raise ValueError(f"PCI device ID must be positive: {value}")
 
             self._device = value
         else:
             self._device = None
 
-    def results(self) -> Iterable[Pcidevicecon]:
+    def results(self) -> Iterable[policyrep.Pcidevicecon]:
         """Generator which yields all matching pcidevicecons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Device ID: {0.device!r}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.device=}")
         self._match_context_debug(self.log)
 
         for pcidevicecon in self.policy.pcidevicecons():

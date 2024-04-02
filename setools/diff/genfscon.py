@@ -11,7 +11,7 @@ from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, Wrapper
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedGenfscon(DifferenceResult):
 
     """Difference details for a modified genfscons."""
@@ -20,30 +20,22 @@ class ModifiedGenfscon(DifferenceResult):
     added_context: Context
     removed_context: Context
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class GenfsconsDifference(Difference):
 
     """Determine the difference in genfscon rules between two policies."""
 
-    added_genfscons = DiffResultDescriptor("diff_genfscons")
-    removed_genfscons = DiffResultDescriptor("diff_genfscons")
-    modified_genfscons = DiffResultDescriptor("diff_genfscons")
-
     def diff_genfscons(self) -> None:
         """Generate the difference in genfscon rules between the policies."""
 
         self.log.info(
-            "Generating genfscon differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating genfscon differences from {self.left_policy} to {self.right_policy}")
 
         self.added_genfscons, self.removed_genfscons, matched = self._set_diff(
             (GenfsconWrapper(fs) for fs in self.left_policy.genfscons()),
             (GenfsconWrapper(fs) for fs in self.right_policy.genfscons()))
 
-        self.modified_genfscons = []
+        self.modified_genfscons = list[ModifiedGenfscon]()
 
         for left_rule, right_rule in matched:
             # Criteria for modified rules
@@ -53,15 +45,19 @@ class GenfsconsDifference(Difference):
                                                                 right_rule.context,
                                                                 left_rule.context))
 
+    added_genfscons = DiffResultDescriptor[Genfscon](diff_genfscons)
+    removed_genfscons = DiffResultDescriptor[Genfscon](diff_genfscons)
+    modified_genfscons = DiffResultDescriptor[ModifiedGenfscon](diff_genfscons)
+
     #
     # Internal functions
     #
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting genfscon rule differences")
-        self.added_genfscons = None
-        self.removed_genfscons = None
-        self.modified_genfscons = None
+        del self.added_genfscons
+        del self.removed_genfscons
+        del self.modified_genfscons
 
 
 class GenfsconWrapper(Wrapper[Genfscon]):

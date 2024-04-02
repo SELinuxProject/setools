@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional, Tuple, Union
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .query import PolicyQuery
-from .policyrep import Portcon, PortconRange, PortconProtocol
-from .util import match_range
+from . import mixins, query, policyrep, util
+
+__all__: typing.Final[tuple[str, ...]] = ("PortconQuery",)
 
 
-class PortconQuery(MatchContext, PolicyQuery):
+class PortconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Port context query.
@@ -56,59 +56,46 @@ class PortconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _protocol: Optional[PortconProtocol] = None
-    _ports: Optional[PortconRange] = None
+    _protocol: policyrep.PortconProtocol | None = None
+    _ports: policyrep.PortconRange | None = None
     ports_subset: bool = False
     ports_overlap: bool = False
     ports_superset: bool = False
     ports_proper: bool = False
 
     @property
-    def ports(self) -> Optional[PortconRange]:
+    def ports(self) -> policyrep.PortconRange | None:
         return self._ports
 
     @ports.setter
-    def ports(self, value: Optional[Tuple[int, int]]) -> None:
+    def ports(self, value: tuple[int, int] | None) -> None:
         if value:
-            pending_ports = PortconRange(*value)
-
-            if all(pending_ports):
-                if pending_ports.low < 1 or pending_ports.high < 1:
-                    raise ValueError("Port numbers must be positive: {0.low}-{0.high}".
-                                     format(pending_ports))
-
-                if pending_ports.low > pending_ports.high:
-                    raise ValueError(
-                        "The low port must be smaller than the high port: {0.low}-{0.high}".
-                        format(pending_ports))
-
-                self._ports = pending_ports
+            self._ports = policyrep.PortconRange(*value)
         else:
             self._ports = None
 
     @property
-    def protocol(self) -> Optional[PortconProtocol]:
+    def protocol(self) -> policyrep.PortconProtocol | None:
         return self._protocol
 
     @protocol.setter
-    def protocol(self, value: Optional[Union[str, PortconProtocol]]) -> None:
+    def protocol(self, value: policyrep.PortconProtocol | str | None) -> None:
         if value:
-            self._protocol = PortconProtocol.lookup(value)
+            self._protocol = policyrep.PortconProtocol.lookup(value)
         else:
             self._protocol = None
 
-    def results(self) -> Iterable[Portcon]:
+    def results(self) -> Iterable[policyrep.Portcon]:
         """Generator which yields all matching portcons."""
-        self.log.info("Generating portcon results from {0.policy}".format(self))
-        self.log.debug("Ports: {0.ports}, overlap: {0.ports_overlap}, "
-                       "subset: {0.ports_subset}, superset: {0.ports_superset}, "
-                       "proper: {0.ports_proper}".format(self))
-        self.log.debug("Protocol: {0.protocol!r}".format(self))
+        self.log.info(f"Generating portcon results from {self.policy}")
+        self.log.debug(f"{self.ports=}, {self.ports_overlap=}, {self.ports_subset=}, "
+                       f"{self.ports_superset=}, {self.ports_proper=}")
+        self.log.debug(f"Protocol: {self.protocol=}")
         self._match_context_debug(self.log)
 
         for portcon in self.policy.portcons():
 
-            if self.ports and not match_range(
+            if self.ports and not util.match_range(
                     portcon.ports,
                     self.ports,
                     self.ports_subset,

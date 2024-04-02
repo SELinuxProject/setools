@@ -5,13 +5,13 @@
 #
 import logging
 from collections import defaultdict
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from sys import intern
 from enum import Enum
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+import typing
 
-from ..exception import RuleNotConditional, RuleUseError, TERuleNoFilename
-from ..policyrep import AnyTERule, AVRule, AVRuleXperm, Conditional, IoctlSet, TERuletype, Type
+from .. import exception, policyrep
 
 from .conditional import conditional_wrapper_factory
 from .descriptors import DiffResultDescriptor
@@ -24,31 +24,36 @@ TERULES_UNCONDITIONAL = intern("<<unconditional>>")
 TERULES_UNCONDITIONAL_BLOCK = intern("True")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedAVRule(DifferenceResult):
 
     """Difference details for a modified access vector rule."""
 
-    rule: AVRule
-    added_perms: Union[Set[str], IoctlSet]
-    removed_perms: Union[Set[str], IoctlSet]
-    matched_perms: Union[Set[str], IoctlSet]
-
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
+    rule: policyrep.AVRule
+    added_perms: set[str]
+    removed_perms: set[str]
+    matched_perms: set[str]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
+class ModifiedAVRuleXperm(DifferenceResult):
+
+    """Difference details for a modified access vector rule."""
+
+    rule: policyrep.AVRuleXperm
+    added_perms: policyrep.IoctlSet
+    removed_perms: policyrep.IoctlSet
+    matched_perms: policyrep.IoctlSet
+
+
+@dataclass(frozen=True, order=True)
 class ModifiedTERule(DifferenceResult):
 
     """Difference details for a modified type_* rule."""
 
-    rule: AVRule
-    added_default: Type
-    removed_default: Type
-
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
+    rule: policyrep.AVRule
+    added_default: policyrep.Type
+    removed_default: policyrep.Type
 
 
 #
@@ -61,30 +66,30 @@ class Side(Enum):
 
 @dataclass
 class RuleDBSideDataRecord:
-    perms: Set[str]
-    orig_rule: AVRule
+    perms: set[str]
+    orig_rule: policyrep.AVRule
 
 
 @dataclass
 class RuleDBSidesRecord:
-    left: Optional[RuleDBSideDataRecord]
-    right: Optional[RuleDBSideDataRecord]
+    left: RuleDBSideDataRecord | None
+    right: RuleDBSideDataRecord | None
 
 
 @dataclass
 class TypeDBRecord:
-    left: Dict[str, Type]
-    right: Dict[str, Type]
+    left: dict[str, policyrep.Type]
+    right: dict[str, policyrep.Type]
 
 
 # These conditional items are unioned with str to handle unconditional rules
-CondExp = Union[Conditional, str]
-CondBlock = Union[bool, str]
-RuleDB = Dict[CondExp, Dict[CondBlock, Dict[str, Dict[str, Dict[str, RuleDBSidesRecord]]]]]
+CondExp = policyrep.Conditional | str
+CondBlock = bool | str
+RuleDB = dict[CondExp, dict[CondBlock, dict[str, dict[str, dict[str, RuleDBSidesRecord]]]]]
 
 
-def _avrule_expand_generator(rule_list: List[AVRule], rule_db: RuleDB, type_db: TypeDBRecord,
-                             side: Side) -> None:
+def _avrule_expand_generator(rule_list: list[policyrep.AVRule], rule_db: RuleDB,
+                             type_db: TypeDBRecord, side: Side) -> None:
     """
     Using rule_list, build up rule_db which is a data structure which consists
     of nested dicts that store BOTH the left and the right policies. All of the
@@ -114,7 +119,7 @@ def _avrule_expand_generator(rule_list: List[AVRule], rule_db: RuleDB, type_db: 
         try:
             cond_exp = intern(str(unexpanded_rule.conditional))
             block_bool = intern(str(unexpanded_rule.conditional_block))
-        except RuleNotConditional:
+        except exception.RuleNotConditional:
             cond_exp = TERULES_UNCONDITIONAL
             block_bool = TERULES_UNCONDITIONAL_BLOCK
 
@@ -213,11 +218,11 @@ def _av_remove_redundant_rules(rule_db: RuleDB) -> None:
 
 
 def _av_generate_diffs(rule_db: RuleDB, type_db: TypeDBRecord) -> \
-        Tuple[List[AVRule], List[AVRule], List[ModifiedAVRule]]:
+        tuple[list[policyrep.AVRule], list[policyrep.AVRule], list[ModifiedAVRule]]:
 
-    added: List[AVRule] = []
-    removed: List[AVRule] = []
-    modified: List[ModifiedAVRule] = []
+    added: list[policyrep.AVRule] = []
+    removed: list[policyrep.AVRule] = []
+    modified: list[ModifiedAVRule] = []
     for cond_blocks in rule_db.values():
         for block in cond_blocks.values():
             for src, src_data in block.items():
@@ -251,7 +256,7 @@ def _av_generate_diffs(rule_db: RuleDB, type_db: TypeDBRecord) -> \
     return added, removed, modified
 
 
-def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
+def av_diff_template(ruletype: policyrep.TERuletype) -> Callable[["TERulesDifference"], None]:
 
     """
     This is a template for the access vector diff functions.
@@ -259,14 +264,11 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
     Parameters:
     ruletype    The rule type, e.g. "allow".
     """
-    ruletype = TERuletype.lookup(ruletype)
-
     def diff(self) -> None:
         """Generate the difference in rules between the policies."""
 
         self.log.info(
-            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
-            format(ruletype, self))
+            f"Generating {ruletype} differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_te_rules is None or self._right_te_rules is None:
             self._create_te_rule_lists()
@@ -276,10 +278,10 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
         rule_db[TERULES_UNCONDITIONAL] = dict()
         rule_db[TERULES_UNCONDITIONAL][TERULES_UNCONDITIONAL_BLOCK] = dict()
 
-        self.log.info("Expanding AV rules from {0.left_policy}.".format(self))
+        self.log.info(f"Expanding AV rules from {self.left_policy}.")
         _avrule_expand_generator(self._left_te_rules[ruletype], rule_db, type_db, Side.left)
 
-        self.log.info("Expanding AV rules from {0.right_policy}.".format(self))
+        self.log.info(f"Expanding AV rules from {self.right_policy}.")
         _avrule_expand_generator(self._right_te_rules[ruletype], rule_db, type_db, Side.right)
 
         self.log.info("Removing redundant AV rules.")
@@ -292,19 +294,20 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
         type_db.right.clear()
         rule_db.clear()
 
-        setattr(self, "added_{0}s".format(ruletype), added)
-        setattr(self, "removed_{0}s".format(ruletype), removed)
-        setattr(self, "modified_{0}s".format(ruletype), modified)
+        setattr(self, f"added_{ruletype}s", added)
+        setattr(self, f"removed_{ruletype}s", removed)
+        setattr(self, f"modified_{ruletype}s", modified)
 
     return diff
 
 
-def _avxrule_expand_generator(rule_list: Iterable[AVRuleXperm]) -> Iterable["AVRuleXpermWrapper"]:
+def _avxrule_expand_generator(rule_list: Iterable[policyrep.AVRuleXperm]
+                              ) -> Iterable["AVRuleXpermWrapper"]:
     """
     Generator that yields wrapped, expanded, av(x) rules with
     unioned permission sets.
     """
-    items: Dict["AVRuleXpermWrapper", "AVRuleXpermWrapper"] = dict()
+    items: dict["AVRuleXpermWrapper", "AVRuleXpermWrapper"] = dict()
 
     for unexpanded_rule in rule_list:
         for expanded_rule in unexpanded_rule.expand():
@@ -320,14 +323,12 @@ def _avxrule_expand_generator(rule_list: Iterable[AVRuleXperm]) -> Iterable["AVR
                 items[expanded_wrapped_rule] = expanded_wrapped_rule
 
     if items:
-        logging.getLogger(__name__).debug(
-            "Expanded {0.ruletype} rules for {0.policy}: {1}".format(
-                unexpanded_rule, len(items)))
+        logging.getLogger(__name__).debug(f"Expanded {len(items)} rules")
 
     return items.keys()
 
 
-def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
+def avx_diff_template(ruletype: policyrep.TERuletype) -> Callable[["TERulesDifference"], None]:
 
     """
     This is a template for the extended permission access vector diff functions.
@@ -335,14 +336,12 @@ def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
     Parameters:
     ruletype    The rule type, e.g. "allowxperm".
     """
-    ruletype = TERuletype.lookup(ruletype)
-
     def diff(self) -> None:
         """Generate the difference in rules between the policies."""
 
         self.log.info(
-            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
-            format(ruletype, self))
+            f"Generating {ruletype} differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         if not self._left_te_rules or not self._right_te_rules:
             self._create_te_rule_lists()
@@ -364,19 +363,20 @@ def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
             # like [("perm1", "perm1"), ("perm2", "perm2")], as the
             # matched_perms return from _set_diff is a set of tuples
             if added_perms or removed_perms:
-                modified.append(ModifiedAVRule(left_rule.origin,
-                                               IoctlSet(added_perms),
-                                               IoctlSet(removed_perms),
-                                               IoctlSet(p[0] for p in matched_perms)))
+                modified.append(
+                    ModifiedAVRuleXperm(left_rule.origin,
+                                        policyrep.IoctlSet(added_perms),
+                                        policyrep.IoctlSet(removed_perms),
+                                        policyrep.IoctlSet(p[0] for p in matched_perms)))
 
-        setattr(self, "added_{0}s".format(ruletype), set(a.origin for a in added))
-        setattr(self, "removed_{0}s".format(ruletype), set(r.origin for r in removed))
-        setattr(self, "modified_{0}s".format(ruletype), modified)
+        setattr(self, f"added_{ruletype}s", set(a.origin for a in added))
+        setattr(self, f"removed_{ruletype}s", set(r.origin for r in removed))
+        setattr(self, f"modified_{ruletype}s", modified)
 
     return diff
 
 
-def te_diff_template(ruletype: str) -> Callable[[Any], None]:
+def te_diff_template(ruletype: policyrep.TERuletype) -> Callable[[typing.Any], None]:
 
     """
     This is a template for the type_* diff functions.
@@ -384,14 +384,11 @@ def te_diff_template(ruletype: str) -> Callable[[Any], None]:
     Parameters:
     ruletype    The rule type, e.g. "type_transition".
     """
-    ruletype = TERuletype.lookup(ruletype)
-
     def diff(self) -> None:
         """Generate the difference in rules between the policies."""
 
         self.log.info(
-            "Generating {0} differences from {1.left_policy} to {1.right_policy}".
-            format(ruletype, self))
+            f"Generating {ruletype} differences from {self.left_policy} to {self.right_policy}")
 
         if self._left_te_rules is None or self._right_te_rules is None:
             self._create_te_rule_lists()
@@ -409,9 +406,9 @@ def te_diff_template(ruletype: str) -> Callable[[Any], None]:
                                                right_rule.default,
                                                left_rule.default))
 
-        setattr(self, "added_{0}s".format(ruletype), added)
-        setattr(self, "removed_{0}s".format(ruletype), removed)
-        setattr(self, "modified_{0}s".format(ruletype), modified)
+        setattr(self, f"added_{ruletype}s", added)
+        setattr(self, f"removed_{ruletype}s", removed)
+        setattr(self, f"modified_{ruletype}s", modified)
 
     return diff
 
@@ -423,63 +420,63 @@ class TERulesDifference(Difference):
     between two policies.
     """
 
-    diff_allows = av_diff_template("allow")
-    added_allows = DiffResultDescriptor("diff_allows")
-    removed_allows = DiffResultDescriptor("diff_allows")
-    modified_allows = DiffResultDescriptor("diff_allows")
+    diff_allows = av_diff_template(policyrep.TERuletype.allow)
+    added_allows = DiffResultDescriptor[policyrep.AVRule](diff_allows)
+    removed_allows = DiffResultDescriptor[policyrep.AVRule](diff_allows)
+    modified_allows = DiffResultDescriptor[ModifiedAVRule](diff_allows)
 
-    diff_auditallows = av_diff_template("auditallow")
-    added_auditallows = DiffResultDescriptor("diff_auditallows")
-    removed_auditallows = DiffResultDescriptor("diff_auditallows")
-    modified_auditallows = DiffResultDescriptor("diff_auditallows")
+    diff_auditallows = av_diff_template(policyrep.TERuletype.auditallow)
+    added_auditallows = DiffResultDescriptor[policyrep.AVRule](diff_auditallows)
+    removed_auditallows = DiffResultDescriptor[policyrep.AVRule](diff_auditallows)
+    modified_auditallows = DiffResultDescriptor[ModifiedAVRule](diff_auditallows)
 
-    diff_neverallows = av_diff_template("neverallow")
-    added_neverallows = DiffResultDescriptor("diff_neverallows")
-    removed_neverallows = DiffResultDescriptor("diff_neverallows")
-    modified_neverallows = DiffResultDescriptor("diff_neverallows")
+    diff_neverallows = av_diff_template(policyrep.TERuletype.neverallow)
+    added_neverallows = DiffResultDescriptor[policyrep.AVRule](diff_neverallows)
+    removed_neverallows = DiffResultDescriptor[policyrep.AVRule](diff_neverallows)
+    modified_neverallows = DiffResultDescriptor[ModifiedAVRule](diff_neverallows)
 
-    diff_dontaudits = av_diff_template("dontaudit")
-    added_dontaudits = DiffResultDescriptor("diff_dontaudits")
-    removed_dontaudits = DiffResultDescriptor("diff_dontaudits")
-    modified_dontaudits = DiffResultDescriptor("diff_dontaudits")
+    diff_dontaudits = av_diff_template(policyrep.TERuletype.dontaudit)
+    added_dontaudits = DiffResultDescriptor[policyrep.AVRule](diff_dontaudits)
+    removed_dontaudits = DiffResultDescriptor[policyrep.AVRule](diff_dontaudits)
+    modified_dontaudits = DiffResultDescriptor[ModifiedAVRule](diff_dontaudits)
 
-    diff_allowxperms = avx_diff_template("allowxperm")
-    added_allowxperms = DiffResultDescriptor("diff_allowxperms")
-    removed_allowxperms = DiffResultDescriptor("diff_allowxperms")
-    modified_allowxperms = DiffResultDescriptor("diff_allowxperms")
+    diff_allowxperms = avx_diff_template(policyrep.TERuletype.allowxperm)
+    added_allowxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_allowxperms)
+    removed_allowxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_allowxperms)
+    modified_allowxperms = DiffResultDescriptor[ModifiedAVRuleXperm](diff_allowxperms)
 
-    diff_auditallowxperms = avx_diff_template("auditallowxperm")
-    added_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
-    removed_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
-    modified_auditallowxperms = DiffResultDescriptor("diff_auditallowxperms")
+    diff_auditallowxperms = avx_diff_template(policyrep.TERuletype.auditallowxperm)
+    added_auditallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_auditallowxperms)
+    removed_auditallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_auditallowxperms)
+    modified_auditallowxperms = DiffResultDescriptor[ModifiedAVRuleXperm](diff_auditallowxperms)
 
-    diff_neverallowxperms = avx_diff_template("neverallowxperm")
-    added_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
-    removed_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
-    modified_neverallowxperms = DiffResultDescriptor("diff_neverallowxperms")
+    diff_neverallowxperms = avx_diff_template(policyrep.TERuletype.neverallowxperm)
+    added_neverallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_neverallowxperms)
+    removed_neverallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_neverallowxperms)
+    modified_neverallowxperms = DiffResultDescriptor[ModifiedAVRuleXperm](diff_neverallowxperms)
 
-    diff_dontauditxperms = avx_diff_template("dontauditxperm")
-    added_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
-    removed_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
-    modified_dontauditxperms = DiffResultDescriptor("diff_dontauditxperms")
+    diff_dontauditxperms = avx_diff_template(policyrep.TERuletype.dontauditxperm)
+    added_dontauditxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_dontauditxperms)
+    removed_dontauditxperms = DiffResultDescriptor[policyrep.AVRuleXperm](diff_dontauditxperms)
+    modified_dontauditxperms = DiffResultDescriptor[ModifiedAVRuleXperm](diff_dontauditxperms)
 
-    diff_type_transitions = te_diff_template("type_transition")
-    added_type_transitions = DiffResultDescriptor("diff_type_transitions")
-    removed_type_transitions = DiffResultDescriptor("diff_type_transitions")
-    modified_type_transitions = DiffResultDescriptor("diff_type_transitions")
+    diff_type_transitions = te_diff_template(policyrep.TERuletype.type_transition)
+    added_type_transitions = DiffResultDescriptor[policyrep.TERule](diff_type_transitions)
+    removed_type_transitions = DiffResultDescriptor[policyrep.TERule](diff_type_transitions)
+    modified_type_transitions = DiffResultDescriptor[ModifiedTERule](diff_type_transitions)
 
-    diff_type_changes = te_diff_template("type_change")
-    added_type_changes = DiffResultDescriptor("diff_type_changes")
-    removed_type_changes = DiffResultDescriptor("diff_type_changes")
-    modified_type_changes = DiffResultDescriptor("diff_type_changes")
+    diff_type_changes = te_diff_template(policyrep.TERuletype.type_change)
+    added_type_changes = DiffResultDescriptor[policyrep.TERule](diff_type_changes)
+    removed_type_changes = DiffResultDescriptor[policyrep.TERule](diff_type_changes)
+    modified_type_changes = DiffResultDescriptor[ModifiedTERule](diff_type_changes)
 
-    diff_type_members = te_diff_template("type_member")
-    added_type_members = DiffResultDescriptor("diff_type_members")
-    removed_type_members = DiffResultDescriptor("diff_type_members")
-    modified_type_members = DiffResultDescriptor("diff_type_members")
+    diff_type_members = te_diff_template(policyrep.TERuletype.type_member)
+    added_type_members = DiffResultDescriptor[policyrep.TERule](diff_type_members)
+    removed_type_members = DiffResultDescriptor[policyrep.TERule](diff_type_members)
+    modified_type_members = DiffResultDescriptor[ModifiedTERule](diff_type_members)
 
-    _left_te_rules: RuleList[TERuletype, AnyTERule] = None
-    _right_te_rules: RuleList[TERuletype, AnyTERule] = None
+    _left_te_rules: RuleList[policyrep.TERuletype, policyrep.AnyTERule] = None
+    _right_te_rules: RuleList[policyrep.TERuletype, policyrep.AnyTERule] = None
 
     #
     # Internal functions
@@ -488,73 +485,73 @@ class TERulesDifference(Difference):
         """Create rule lists for both policies."""
         # do not expand yet, to keep memory
         # use down as long as possible
-        self.log.debug("Building TE rule lists from {0.left_policy}".format(self))
+        self.log.debug(f"Building TE rule lists from {self.left_policy}")
         self._left_te_rules = defaultdict(list)
         for rule in self.left_policy.terules():
             self._left_te_rules[rule.ruletype].append(rule)
 
         for ruletype, rules in self._left_te_rules.items():
-            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+            self.log.debug(f"Loaded {len(rules)} {ruletype} rules.")
 
-        self.log.debug("Building TE rule lists from {0.right_policy}".format(self))
+        self.log.debug(f"Building TE rule lists from {self.right_policy}")
         self._right_te_rules = defaultdict(list)
         for rule in self.right_policy.terules():
             self._right_te_rules[rule.ruletype].append(rule)
 
         for ruletype, rules in self._right_te_rules.items():
-            self.log.debug("Loaded {0} {1} rules.".format(len(rules), ruletype))
+            self.log.debug(f"Loaded {len(rules)} {ruletype} rules.")
 
         self.log.debug("Completed building TE rule lists.")
 
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting TE rule differences")
-        self.added_allows = None
-        self.removed_allows = None
-        self.modified_allows = None
-        self.added_auditallows = None
-        self.removed_auditallows = None
-        self.modified_auditallows = None
-        self.added_neverallows = None
-        self.removed_neverallows = None
-        self.modified_neverallows = None
-        self.added_dontaudits = None
-        self.removed_dontaudits = None
-        self.modified_dontaudits = None
-        self.added_allowxperms = None
-        self.removed_allowxperms = None
-        self.modified_allowxperms = None
-        self.added_auditallowxperms = None
-        self.removed_auditallowxperms = None
-        self.modified_auditallowxperms = None
-        self.added_neverallowxperms = None
-        self.removed_neverallowxperms = None
-        self.modified_neverallowxperms = None
-        self.added_dontauditxperms = None
-        self.removed_dontauditxperms = None
-        self.modified_dontauditxperms = None
-        self.added_type_transitions = None
-        self.removed_type_transitions = None
-        self.modified_type_transitions = None
-        self.added_type_changes = None
-        self.removed_type_changes = None
-        self.modified_type_changes = None
-        self.added_type_members = None
-        self.removed_type_members = None
-        self.modified_type_members = None
+        del self.added_allows
+        del self.removed_allows
+        del self.modified_allows
+        del self.added_auditallows
+        del self.removed_auditallows
+        del self.modified_auditallows
+        del self.added_neverallows
+        del self.removed_neverallows
+        del self.modified_neverallows
+        del self.added_dontaudits
+        del self.removed_dontaudits
+        del self.modified_dontaudits
+        del self.added_allowxperms
+        del self.removed_allowxperms
+        del self.modified_allowxperms
+        del self.added_auditallowxperms
+        del self.removed_auditallowxperms
+        del self.modified_auditallowxperms
+        del self.added_neverallowxperms
+        del self.removed_neverallowxperms
+        del self.modified_neverallowxperms
+        del self.added_dontauditxperms
+        del self.removed_dontauditxperms
+        del self.modified_dontauditxperms
+        del self.added_type_transitions
+        del self.removed_type_transitions
+        del self.modified_type_transitions
+        del self.added_type_changes
+        del self.removed_type_changes
+        del self.modified_type_changes
+        del self.added_type_members
+        del self.removed_type_members
+        del self.modified_type_members
 
         # Lists of rules for each policy
         self._left_te_rules = None
         self._right_te_rules = None
 
 
-class AVRuleXpermWrapper(Wrapper[AVRuleXperm]):
+class AVRuleXpermWrapper(Wrapper[policyrep.AVRuleXperm]):
 
     """Wrap extended permission access vector rules to allow set operations."""
 
     __slots__ = ("source", "target", "tclass", "xperm_type", "perms")
 
-    def __init__(self, rule: AVRuleXperm) -> None:
+    def __init__(self, rule: policyrep.AVRuleXperm) -> None:
         self.origin = rule
         self.source = type_or_attr_wrapper_factory(rule.source)
         self.target = type_or_attr_wrapper_factory(rule.target)
@@ -594,13 +591,13 @@ class TERuleWrapper(Wrapper):
         try:
             self.conditional = conditional_wrapper_factory(rule.conditional)
             self.conditional_block = rule.conditional_block
-        except RuleNotConditional:
+        except exception.RuleNotConditional:
             self.conditional = None
             self.conditional_block = None
 
         try:
             self.filename = rule.filename
-        except (RuleUseError, TERuleNoFilename):
+        except (exception.RuleUseError, exception.TERuleNoFilename):
             self.filename = None
 
     def __hash__(self):

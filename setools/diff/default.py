@@ -3,49 +3,40 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from dataclasses import dataclass
-from typing import Optional
 
-from ..policyrep import Default, DefaultValue, DefaultRangeValue
+from ..policyrep import AnyDefault, Default, DefaultValue, DefaultRangeValue
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, SymbolWrapper, Wrapper
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedDefault(DifferenceResult):
 
     """Difference details for a modified default_*."""
 
     rule: Default
-    added_default: Optional[DefaultValue]
-    removed_default: Optional[DefaultValue]
-    added_default_range: Optional[DefaultRangeValue]
-    removed_default_range: Optional[DefaultRangeValue]
-
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
+    added_default: DefaultValue | None
+    removed_default: DefaultValue | None
+    added_default_range: DefaultRangeValue | None
+    removed_default_range: DefaultRangeValue | None
 
 
 class DefaultsDifference(Difference):
 
     """Determine the difference in default_* between two policies."""
 
-    added_defaults = DiffResultDescriptor("diff_defaults")
-    removed_defaults = DiffResultDescriptor("diff_defaults")
-    modified_defaults = DiffResultDescriptor("diff_defaults")
-
     def diff_defaults(self) -> None:
         """Generate the difference in type defaults between the policies."""
 
         self.log.info(
-            "Generating default_* differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating default_* differences from {self.left_policy} to {self.right_policy}")
 
         self.added_defaults, self.removed_defaults, matched_defaults = self._set_diff(
             (DefaultWrapper(d) for d in self.left_policy.defaults()),
             (DefaultWrapper(d) for d in self.right_policy.defaults()))
 
-        self.modified_defaults = []
+        self.modified_defaults = list[ModifiedDefault]()
 
         for left_default, right_default in matched_defaults:
             # Criteria for modified defaults
@@ -78,15 +69,19 @@ class DefaultsDifference(Difference):
                                     added_default_range,
                                     removed_default_range))
 
+    added_defaults = DiffResultDescriptor[AnyDefault](diff_defaults)
+    removed_defaults = DiffResultDescriptor[AnyDefault](diff_defaults)
+    modified_defaults = DiffResultDescriptor[ModifiedDefault](diff_defaults)
+
     #
     # Internal functions
     #
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting default_* differences")
-        self.added_defaults = None
-        self.removed_defaults = None
-        self.modified_defaults = None
+        del self.added_defaults
+        del self.removed_defaults
+        del self.modified_defaults
 
 
 class DefaultWrapper(Wrapper[Default]):

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from dataclasses import dataclass
-from typing import Union
 
 from ..policyrep import PolicyEnum
 
@@ -17,8 +16,8 @@ class ModifiedProperty(DifferenceResult):
     """Difference details for a modified policy property."""
 
     property: str
-    added: Union[PolicyEnum, bool, int]
-    removed: Union[PolicyEnum, bool, int]
+    added: PolicyEnum | bool | int
+    removed: PolicyEnum | bool | int
 
     def __lt__(self, other) -> bool:
         return self.property < other.property
@@ -31,10 +30,8 @@ class PropertiesDifference(Difference):
     (unknown permissions, MLS, etc.) between two policies.
     """
 
-    modified_properties = DiffResultDescriptor("diff_properties")
-
     def diff_properties(self) -> None:
-        self.modified_properties = []
+        self.modified_properties = list[ModifiedProperty]()
 
         if self.left_policy.handle_unknown != self.right_policy.handle_unknown:
             self.modified_properties.append(
@@ -54,10 +51,12 @@ class PropertiesDifference(Difference):
                                  self.right_policy.version,
                                  self.left_policy.version))
 
+    modified_properties = DiffResultDescriptor[ModifiedProperty](diff_properties)
+
     #
     # Internal functions
     #
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting property differences")
-        self.modified_properties = None
+        del self.modified_properties

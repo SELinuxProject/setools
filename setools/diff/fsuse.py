@@ -11,7 +11,7 @@ from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, Wrapper
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedFSUse(DifferenceResult):
 
     """Difference details for a modified fs_use_*."""
@@ -20,30 +20,22 @@ class ModifiedFSUse(DifferenceResult):
     added_context: Context
     removed_context: Context
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class FSUsesDifference(Difference):
 
     """Determine the difference in fs_use_* rules between two policies."""
 
-    added_fs_uses = DiffResultDescriptor("diff_fs_uses")
-    removed_fs_uses = DiffResultDescriptor("diff_fs_uses")
-    modified_fs_uses = DiffResultDescriptor("diff_fs_uses")
-
     def diff_fs_uses(self) -> None:
         """Generate the difference in fs_use rules between the policies."""
 
         self.log.info(
-            "Generating fs_use_* differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating fs_use_* differences from {self.left_policy} to {self.right_policy}")
 
         self.added_fs_uses, self.removed_fs_uses, matched = self._set_diff(
             (FSUseWrapper(fs) for fs in self.left_policy.fs_uses()),
             (FSUseWrapper(fs) for fs in self.right_policy.fs_uses()))
 
-        self.modified_fs_uses = []
+        self.modified_fs_uses = list[ModifiedFSUse]()
 
         for left_rule, right_rule in matched:
             # Criteria for modified rules
@@ -53,15 +45,19 @@ class FSUsesDifference(Difference):
                                                            right_rule.context,
                                                            left_rule.context))
 
+    added_fs_uses = DiffResultDescriptor[FSUse](diff_fs_uses)
+    removed_fs_uses = DiffResultDescriptor[FSUse](diff_fs_uses)
+    modified_fs_uses = DiffResultDescriptor[ModifiedFSUse](diff_fs_uses)
+
     #
     # Internal functions
     #
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting fs_use_* rule differences")
-        self.added_fs_uses = None
-        self.removed_fs_uses = None
-        self.modified_fs_uses = None
+        del self.added_fs_uses
+        del self.removed_fs_uses
+        del self.modified_fs_uses
 
 
 class FSUseWrapper(Wrapper[FSUse]):

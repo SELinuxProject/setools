@@ -61,6 +61,7 @@ cdef class Common(PolicySymbol):
         return other in self.perms
 
     def statement(self):
+        # backslashes not allowed in f-strings
         return "common {0}\n{{\n\t{1}\n}}".format(self, '\n\t'.join(sorted(self.perms)))
 
 
@@ -165,7 +166,7 @@ cdef class ObjClass(PolicySymbol):
         if self._common:
             return self._common
         else:
-            raise NoCommon("{0} does not inherit a common.".format(self.name))
+            raise NoCommon(f"{self.name} does not inherit a common.")
 
     def constraints(self):
         """Iterator for the constraints that apply to this class."""
@@ -181,15 +182,16 @@ cdef class ObjClass(PolicySymbol):
         return iter(self._defaults)
 
     def statement(self):
-        stmt = "class {0}\n".format(self.name)
+        stmt = f"class {self.name}\n"
 
         try:
-            stmt += "inherits {0}\n".format(self.common)
+            stmt += f"inherits {self.common.name}\n"
         except NoCommon:
             pass
 
         # a class that inherits may not have additional permissions
         if len(self.perms) > 0:
+            # backslashes not allowed in f-strings
             stmt += "{{\n\t{0}\n}}".format('\n\t'.join(sorted(self.perms)))
 
         return stmt

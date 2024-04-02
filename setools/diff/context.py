@@ -4,8 +4,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-from typing import Optional
-
 from ..exception import MLSDisabled
 from ..policyrep import Context
 
@@ -27,9 +25,10 @@ class ContextWrapper(Wrapper[Context]):
         self.user = user_wrapper_factory(ctx.user)
         self.role = role_wrapper_factory(ctx.role)
         self.type_ = type_wrapper_factory(ctx.type_)
+        self.range_: RangeWrapper | None
 
         try:
-            self.range_: Optional[RangeWrapper] = RangeWrapper(ctx.range_)
+            self.range_ = RangeWrapper(ctx.range_)
         except MLSDisabled:
             self.range_ = None
 

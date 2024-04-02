@@ -3,9 +3,18 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-# This is a separate file to break a circular import.
-CHECK_TYPE_KEY = "check_type"
-CHECK_DESC_KEY = "desc"
-CHECK_DISABLE = "disable"
+import typing
 
-GLOBAL_CONFIG_KEYS = frozenset((CHECK_TYPE_KEY, CHECK_DESC_KEY, CHECK_DISABLE))
+# This is a separate file to break a circular import.
+CHECK_TYPE_KEY: typing.Final[str] = "check_type"
+CHECK_DESC_KEY: typing.Final[str] = "desc"
+CHECK_DISABLE: typing.Final[str] = "disable"
+
+GLOBAL_CONFIG_KEYS: typing.Final[frozenset[str]] = frozenset((CHECK_TYPE_KEY,
+                                                              CHECK_DESC_KEY,
+                                                              CHECK_DISABLE))
+
+__all__: typing.Final[tuple[str, ...]] = ("CHECK_TYPE_KEY",
+                                          "CHECK_DESC_KEY",
+                                          "CHECK_DISABLE",
+                                          "GLOBAL_CONFIG_KEYS")

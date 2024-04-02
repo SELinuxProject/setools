@@ -16,7 +16,7 @@ from .types import type_or_attr_wrapper_factory
 from .typing import RuleList
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedMLSRule(DifferenceResult):
 
     """Difference details for a modified MLS rule."""
@@ -25,28 +25,17 @@ class ModifiedMLSRule(DifferenceResult):
     added_default: Range
     removed_default: Range
 
-    def __lt__(self, other) -> bool:
-        return self.rule < other.rule
-
 
 class MLSRulesDifference(Difference):
 
     """Determine the difference in MLS rules between two policies."""
 
-    added_range_transitions = DiffResultDescriptor("diff_range_transitions")
-    removed_range_transitions = DiffResultDescriptor("diff_range_transitions")
-    modified_range_transitions = DiffResultDescriptor("diff_range_transitions")
-
-    # Lists of rules for each policy
-    _left_mls_rules: RuleList[MLSRuletype, MLSRule] = None
-    _right_mls_rules: RuleList[MLSRuletype, MLSRule] = None
-
     def diff_range_transitions(self) -> None:
         """Generate the difference in range_transition rules between the policies."""
 
         self.log.info(
-            "Generating range_transition differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating range_transition differences from {self.left_policy} "
+            f"to {self.right_policy}")
 
         if self._left_mls_rules is None or self._right_mls_rules is None:
             self._create_mls_rule_lists()
@@ -60,7 +49,7 @@ class MLSRulesDifference(Difference):
             self._expand_generator(self._right_mls_rules[MLSRuletype.range_transition],
                                    MLSRuleWrapper))
 
-        modified = []
+        modified = list[ModifiedMLSRule]()
 
         for left_rule, right_rule in matched:
             # Criteria for modified rules
@@ -74,6 +63,14 @@ class MLSRulesDifference(Difference):
         self.removed_range_transitions = removed
         self.modified_range_transitions = modified
 
+    added_range_transitions = DiffResultDescriptor[MLSRule](diff_range_transitions)
+    removed_range_transitions = DiffResultDescriptor[MLSRule](diff_range_transitions)
+    modified_range_transitions = DiffResultDescriptor[ModifiedMLSRule](diff_range_transitions)
+
+    # Lists of rules for each policy
+    _left_mls_rules: RuleList[MLSRuletype, MLSRule] = None
+    _right_mls_rules: RuleList[MLSRuletype, MLSRule] = None
+
     #
     # Internal functions
     #
@@ -82,12 +79,12 @@ class MLSRulesDifference(Difference):
         # do not expand yet, to keep memory
         # use down as long as possible
         self._left_mls_rules = defaultdict(list)
-        self.log.debug("Building MLS rule lists from {0.left_policy}".format(self))
+        self.log.debug(f"Building MLS rule lists from {self.left_policy}")
         for rule in self.left_policy.mlsrules():
             self._left_mls_rules[rule.ruletype].append(rule)
 
         self._right_mls_rules = defaultdict(list)
-        self.log.debug("Building MLS rule lists from {0.right_policy}".format(self))
+        self.log.debug(f"Building MLS rule lists from {self.right_policy}")
         for rule in self.right_policy.mlsrules():
             self._right_mls_rules[rule.ruletype].append(rule)
 
@@ -96,9 +93,9 @@ class MLSRulesDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting MLS rule differences")
-        self.added_range_transitions = None
-        self.removed_range_transitions = None
-        self.modified_range_transitions = None
+        del self.added_range_transitions
+        del self.removed_range_transitions
+        del self.modified_range_transitions
 
         # Sets of rules for each policy
         self._left_mls_rules = None

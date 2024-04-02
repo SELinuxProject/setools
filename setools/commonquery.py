@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchName, MatchPermission
-from .policyrep import Common
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("CommonQuery",)
 
 
-class CommonQuery(MatchPermission, MatchName, PolicyQuery):
+class CommonQuery(mixins.MatchPermission, mixins.MatchName, query.PolicyQuery):
 
     """
     Query common permission sets.
@@ -30,9 +31,9 @@ class CommonQuery(MatchPermission, MatchName, PolicyQuery):
                  on the permission names instead of set logic.
     """
 
-    def results(self) -> Iterable[Common]:
+    def results(self) -> Iterable[policyrep.Common]:
         """Generator which yields all matching commons."""
-        self.log.info("Generating common results from {0.policy}".format(self))
+        self.log.info(f"Generating common results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_perms_debug(self.log)
 

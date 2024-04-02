@@ -5,7 +5,6 @@
 #
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Set
 
 from ..policyrep import Category, Level, LevelDecl, Range, Sensitivity
 
@@ -22,9 +21,10 @@ class ModifiedCategory(DifferenceResult):
 
     """Difference details for a modified category."""
 
-    added_aliases: Set[str]
-    removed_aliases: Set[str]
-    matched_aliases: Set[str]
+    category: Category
+    added_aliases: set[str]
+    removed_aliases: set[str]
+    matched_aliases: set[str]
 
 
 @dataclass(frozen=True, order=True)
@@ -32,23 +32,21 @@ class ModifiedSensitivity(DifferenceResult):
 
     """Difference details for a modified sensitivity."""
 
-    added_aliases: Set[str]
-    removed_aliases: Set[str]
-    matched_aliases: Set[str]
+    sensitivity: Sensitivity
+    added_aliases: set[str]
+    removed_aliases: set[str]
+    matched_aliases: set[str]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class ModifiedLevelDecl(DifferenceResult):
 
     """Difference details for a modified level declaration."""
 
     level: LevelDecl
-    added_categories: Set[Category]
-    removed_categories: Set[Category]
-    matched_categories: Set[Category]
-
-    def __lt__(self, other) -> bool:
-        return self.level < other.level
+    added_categories: set[Category]
+    removed_categories: set[Category]
+    matched_categories: set[Category]
 
 
 def category_wrapper_factory(category: Category) -> SymbolWrapper[Category]:
@@ -85,21 +83,17 @@ class CategoriesDifference(Difference):
 
     """Determine the difference in categories between two policies."""
 
-    added_categories = DiffResultDescriptor("diff_categories")
-    removed_categories = DiffResultDescriptor("diff_categories")
-    modified_categories = DiffResultDescriptor("diff_categories")
-
     def diff_categories(self) -> None:
         """Generate the difference in categories between the policies."""
 
         self.log.info(
-            "Generating category differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating category differences from {self.left_policy} to {self.right_policy}")
 
         self.added_categories, self.removed_categories, matched_categories = self._set_diff(
             (category_wrapper_factory(c) for c in self.left_policy.categories()),
             (category_wrapper_factory(c) for c in self.right_policy.categories()))
 
-        self.modified_categories = dict()
+        self.modified_categories = list[ModifiedCategory]()
 
         for left_category, right_category in matched_categories:
             # Criteria for modified categories
@@ -108,9 +102,14 @@ class CategoriesDifference(Difference):
                 left_category.aliases(), right_category.aliases(), unwrap=False)
 
             if added_aliases or removed_aliases:
-                self.modified_categories[left_category] = ModifiedCategory(added_aliases,
-                                                                           removed_aliases,
-                                                                           matched_aliases)
+                self.modified_categories.append(ModifiedCategory(left_category,
+                                                                 added_aliases,
+                                                                 removed_aliases,
+                                                                 matched_aliases))
+
+    added_categories = DiffResultDescriptor[Category](diff_categories)
+    removed_categories = DiffResultDescriptor[Category](diff_categories)
+    modified_categories = DiffResultDescriptor[ModifiedCategory](diff_categories)
 
     #
     # Internal functions
@@ -118,32 +117,27 @@ class CategoriesDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting category differences")
-        self.added_categories = None
-        self.removed_categories = None
-        self.modified_categories = None
+        del self.added_categories
+        del self.removed_categories
+        del self.modified_categories
 
 
 class SensitivitiesDifference(Difference):
 
     """Determine the difference in sensitivities between two policies."""
 
-    added_sensitivities = DiffResultDescriptor("diff_sensitivities")
-    removed_sensitivities = DiffResultDescriptor("diff_sensitivities")
-    modified_sensitivities = DiffResultDescriptor("diff_sensitivities")
-
     def diff_sensitivities(self) -> None:
         """Generate the difference in sensitivities between the policies."""
 
         self.log.info(
-            "Generating sensitivity differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating sensitivity differences from {self.left_policy} to {self.right_policy}")
 
         self.added_sensitivities, self.removed_sensitivities, matched_sensitivities = \
             self._set_diff(
                 (sensitivity_wrapper_factory(s) for s in self.left_policy.sensitivities()),
                 (sensitivity_wrapper_factory(s) for s in self.right_policy.sensitivities()))
 
-        self.modified_sensitivities = dict()
+        self.modified_sensitivities = list[ModifiedSensitivity]()
 
         for left_sens, right_sens in matched_sensitivities:
             # Criteria for modified sensitivities
@@ -152,9 +146,14 @@ class SensitivitiesDifference(Difference):
                 left_sens.aliases(), right_sens.aliases(), unwrap=False)
 
             if added_aliases or removed_aliases:
-                self.modified_sensitivities[left_sens] = ModifiedSensitivity(added_aliases,
-                                                                             removed_aliases,
-                                                                             matched_aliases)
+                self.modified_sensitivities.append(ModifiedSensitivity(left_sens,
+                                                                       added_aliases,
+                                                                       removed_aliases,
+                                                                       matched_aliases))
+
+    added_sensitivities = DiffResultDescriptor[Sensitivity](diff_sensitivities)
+    removed_sensitivities = DiffResultDescriptor[Sensitivity](diff_sensitivities)
+    modified_sensitivities = DiffResultDescriptor[ModifiedSensitivity](diff_sensitivities)
 
     #
     # Internal functions
@@ -162,32 +161,27 @@ class SensitivitiesDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting sensitivity differences")
-        self.added_sensitivities = None
-        self.removed_sensitivities = None
-        self.modified_sensitivities = None
+        del self.added_sensitivities
+        del self.removed_sensitivities
+        del self.modified_sensitivities
 
 
 class LevelDeclsDifference(Difference):
 
     """Determine the difference in levels between two policies."""
 
-    added_levels = DiffResultDescriptor("diff_levels")
-    removed_levels = DiffResultDescriptor("diff_levels")
-    modified_levels = DiffResultDescriptor("diff_levels")
-
     def diff_levels(self) -> None:
         """Generate the difference in levels between the policies."""
 
         self.log.info(
-            "Generating level decl differences from {0.left_policy} to {0.right_policy}".
-            format(self))
+            f"Generating level decl differences from {self.left_policy} to {self.right_policy}")
 
         self.added_levels, self.removed_levels, matched_levels = \
             self._set_diff(
                 (LevelDeclWrapper(s) for s in self.left_policy.levels()),
                 (LevelDeclWrapper(s) for s in self.right_policy.levels()))
 
-        self.modified_levels = []
+        self.modified_levels = list[ModifiedLevelDecl]()
 
         for left_level, right_level in matched_levels:
             # Criteria for modified levels
@@ -200,15 +194,19 @@ class LevelDeclsDifference(Difference):
                 self.modified_levels.append(ModifiedLevelDecl(
                     left_level, added_categories, removed_categories, matched_categories))
 
+    added_levels = DiffResultDescriptor[LevelDecl](diff_levels)
+    removed_levels = DiffResultDescriptor[LevelDecl](diff_levels)
+    modified_levels = DiffResultDescriptor[ModifiedLevelDecl](diff_levels)
+
     #
     # Internal functions
     #
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting sensitivity differences")
-        self.added_levels = None
-        self.removed_levels = None
-        self.modified_levels = None
+        del self.added_levels
+        del self.removed_levels
+        del self.modified_levels
 
 
 class LevelDeclWrapper(Wrapper[LevelDecl]):

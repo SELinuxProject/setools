@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchName
-from .policyrep import PolicyCapability
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("PolCapQuery",)
 
 
-class PolCapQuery(MatchName, PolicyQuery):
+class PolCapQuery(mixins.MatchName, query.PolicyQuery):
 
     """
     Query SELinux policy capabilities
@@ -23,9 +24,9 @@ class PolCapQuery(MatchName, PolicyQuery):
                 be used for matching the name.
     """
 
-    def results(self) -> Iterable[PolicyCapability]:
+    def results(self) -> Iterable[policyrep.PolicyCapability]:
         """Generator which yields all matching policy capabilities."""
-        self.log.info("Generating policy capability results from {0.policy}".format(self))
+        self.log.info(f"Generating policy capability results from {self.policy}")
         self._match_name_debug(self.log)
 
         for cap in self.policy.polcaps():

@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext, MatchName
-from .policyrep import Ibendportcon
-from .query import PolicyQuery
-from .util import match_regex
+from . import mixins, policyrep, query, util
+
+__all__: typing.Final[tuple[str, ...]] = ("IbendportconQuery",)
 
 
-class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
+class IbendportconQuery(mixins.MatchContext, mixins.MatchName, query.PolicyQuery):
 
     """
     Infiniband endport context query.
@@ -43,32 +43,32 @@ class IbendportconQuery(MatchContext, MatchName, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _port: Optional[int] = None
+    _port: int | None = None
 
     @property
-    def port(self) -> Optional[int]:
+    def port(self) -> int | None:
         return self._port
 
     @port.setter
-    def port(self, value: Optional[int]) -> None:
+    def port(self, value: int | None) -> None:
         if value:
             pending_value = int(value)
             if not 0 < pending_value < 256:
-                raise ValueError("Endport value must be 1-255.")
+                raise ValueError(f"Endport value must be 1-255: {pending_value}")
 
             self._port = pending_value
         else:
             self._port = None
 
-    def results(self) -> Iterable[Ibendportcon]:
+    def results(self) -> Iterable[policyrep.Ibendportcon]:
         """Generator which yields all matching ibendportcons."""
-        self.log.info("Generating ibendportcon results from {0.policy}".format(self))
+        self.log.info(f"Generating ibendportcon results from {self.policy}")
         self._match_name_debug(self.log)
-        self.log.debug("Port: {0.port!r}".format(self))
+        self.log.debug(f"{self.port=}")
         self._match_context_debug(self.log)
 
         for endport in self.policy.ibendportcons():
-            if self.name and not match_regex(
+            if self.name and not util.match_regex(
                     endport.name,
                     self.name,
                     self.name_regex):

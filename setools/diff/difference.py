@@ -5,7 +5,8 @@
 #
 import logging
 from abc import ABC, abstractmethod
-from typing import Generic, Iterable, TypeVar
+from collections.abc import Iterable
+import typing
 
 from ..policyrep import PolicyObject, PolicySymbol, SELinuxPolicy
 
@@ -28,7 +29,7 @@ class Difference:
 
     @left_policy.setter
     def left_policy(self, policy):
-        self.log.info("Policy diff left policy set to {0}".format(policy))
+        self.log.info(f"Policy diff left policy set to {policy}")
         self._left_policy = policy
         self._reset_diff()
 
@@ -38,7 +39,7 @@ class Difference:
 
     @right_policy.setter
     def right_policy(self, policy):
-        self.log.info("Policy diff right policy set to {0}".format(policy))
+        self.log.info(f"Policy diff right policy set to {policy}")
         self._right_policy = policy
         self._reset_diff()
 
@@ -99,13 +100,12 @@ class Difference:
         left_matched_items = sorted((left_items - removed_items), key=key)
         right_matched_items = sorted((right_items - added_items), key=key)
         assert len(left_matched_items) == len(right_matched_items), \
-            "Matched items assertion failure (this is an SETools bug), {0} != {1}". \
-            format(len(left_matched_items), len(right_matched_items))
+            "Matched items assertion failure (this is an SETools bug), " \
+            f"{len(left_matched_items)} != {len(right_matched_items)}"
 
         for left, right in zip(left_matched_items, right_matched_items):
             assert left == right, \
-                "Matched items assertion failure (this is an SETools bug), {0} != {1}".format(
-                    left, right)
+                f"Matched items assertion failure (this is an SETools bug), {left} != {right}"
 
             matched_items.add((left, right))
 
@@ -124,10 +124,10 @@ class DifferenceResult:
     pass
 
 
-T = TypeVar("T", bound=PolicyObject)
+T = typing.TypeVar("T", bound=PolicyObject)
 
 
-class Wrapper(ABC, Generic[T]):
+class Wrapper(ABC, typing.Generic[T]):
 
     """Abstract base class for policy object wrappers."""
 
@@ -142,7 +142,7 @@ class Wrapper(ABC, Generic[T]):
 
     def __repr__(self):
         # pylint: disable=no-member
-        return "<{0.__class__.__name__}(Wrapping {1})>".format(self, repr(self.origin))
+        return f"<{self.__class__.__name__}(Wrapping {repr(self.origin)})>"
 
     @abstractmethod
     def __hash__(self):
@@ -160,7 +160,7 @@ class Wrapper(ABC, Generic[T]):
         return not self == other
 
 
-S = TypeVar("S", bound=PolicySymbol)
+S = typing.TypeVar("S", bound=PolicySymbol)
 
 
 class SymbolWrapper(Wrapper[S]):

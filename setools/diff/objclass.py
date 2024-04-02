@@ -6,7 +6,6 @@
 from collections import defaultdict
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Set
 
 from ..exception import NoCommon
 from ..policyrep import ObjClass
@@ -23,9 +22,10 @@ class ModifiedObjClass(DifferenceResult):
 
     """Difference details for a modified object class."""
 
-    added_perms: Set[str]
-    removed_perms: Set[str]
-    matched_perms: Set[str]
+    class_: ObjClass
+    added_perms: set[str]
+    removed_perms: set[str]
+    matched_perms: set[str]
 
 
 def class_wrapper_factory(class_: ObjClass) -> SymbolWrapper[ObjClass]:
@@ -51,21 +51,17 @@ class ObjClassDifference(Difference):
     between two policies.
     """
 
-    added_classes = DiffResultDescriptor("diff_classes")
-    removed_classes = DiffResultDescriptor("diff_classes")
-    modified_classes = DiffResultDescriptor("diff_classes")
-
     def diff_classes(self) -> None:
         """Generate the difference in object classes between the policies."""
 
         self.log.info(
-            "Generating class differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating class differences from {self.left_policy} to {self.right_policy}")
 
         self.added_classes, self.removed_classes, matched_classes = self._set_diff(
             (SymbolWrapper(c) for c in self.left_policy.classes()),
             (SymbolWrapper(c) for c in self.right_policy.classes()))
 
-        self.modified_classes = dict()
+        self.modified_classes = list[ModifiedObjClass]()
 
         for left_class, right_class in matched_classes:
             # Criteria for modified classes
@@ -84,9 +80,14 @@ class ObjClassDifference(Difference):
                                                                        unwrap=False)
 
             if added_perms or removed_perms:
-                self.modified_classes[left_class] = ModifiedObjClass(added_perms,
-                                                                     removed_perms,
-                                                                     matched_perms)
+                self.modified_classes.append(ModifiedObjClass(left_class,
+                                                              added_perms,
+                                                              removed_perms,
+                                                              matched_perms))
+
+    added_classes = DiffResultDescriptor[ObjClass](diff_classes)
+    removed_classes = DiffResultDescriptor[ObjClass](diff_classes)
+    modified_classes = DiffResultDescriptor[ModifiedObjClass](diff_classes)
 
     #
     # Internal functions
@@ -94,6 +95,6 @@ class ObjClassDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting object class differences")
-        self.added_classes = None
-        self.removed_classes = None
-        self.modified_classes = None
+        del self.added_classes
+        del self.removed_classes
+        del self.modified_classes

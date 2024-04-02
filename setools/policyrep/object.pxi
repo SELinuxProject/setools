@@ -56,7 +56,7 @@ cdef class PolicyObject:
         return self.statement()
 
     def __repr__(self):
-        return "<{0.__class__.__name__}({1}, \"{0}\")>".format(self, repr(self.policy))
+        return f"<{self.__class__.__name__}({repr(self.policy)}, \"{self}\")>"
 
     def statement(self):
         """

@@ -16,11 +16,12 @@ for more details.
 import re
 from abc import ABC, abstractmethod
 from collections import defaultdict
-from collections.abc import Collection
-from enum import Enum
-from typing import Callable, Optional, Type, Union
+from collections.abc import Callable, Collection
+import typing
 
-from .util import validate_perms_any
+from . import policyrep, util
+
+T = typing.TypeVar("T")
 
 #
 # Query criteria descriptors
@@ -30,7 +31,7 @@ from .util import validate_perms_any
 #
 
 
-class CriteriaDescriptor:
+class CriteriaDescriptor(typing.Generic[T]):
 
     """
     Single item criteria descriptor.
@@ -54,29 +55,30 @@ class CriteriaDescriptor:
                     does not exist, False is assumed.
     """
 
-    def __init__(self, name_regex: Optional[str] = None,
-                 lookup_function: Optional[Union[Callable, str]] = None,
-                 default_value=None, enum_class: Optional[Type[Enum]] = None) -> None:
+    def __init__(self, name_regex: str | None = None,
+                 lookup_function: Callable | str | None = None,
+                 default_value=None, enum_class: type[policyrep.PolicyEnum] | None = None) -> None:
 
         assert name_regex or lookup_function or enum_class, \
             "A simple attribute should be used if there is no regex, lookup function, or enum."
         assert not (lookup_function and enum_class), \
             "Lookup functions and enum classes are mutually exclusive."
-        self.regex: Optional[str] = name_regex
+        self.regex: str | None = name_regex
         self.default_value = default_value
-        self.lookup_function: Optional[Union[Callable, str]] = lookup_function
+        self.lookup_function: Callable | str | None = lookup_function
         self.enum_class = enum_class
+        self.name: str
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner, name: str) -> None:
         self.name = f"_internal_{name}"
 
-    def __get__(self, obj, objtype=None):
+    def __get__(self, obj, objtype=None) -> T:
         if obj is None:
-            return self
+            raise AttributeError
 
         return getattr(obj, self.name, self.default_value)
 
-    def __set__(self, obj, value):
+    def __set__(self, obj, value) -> None:
         if not value:
             setattr(obj, self.name, self.default_value)
         elif self.regex and getattr(obj, self.regex, False):
@@ -93,7 +95,7 @@ class CriteriaDescriptor:
             setattr(obj, self.name, value)
 
 
-class CriteriaSetDescriptor(CriteriaDescriptor):
+class CriteriaSetDescriptor(CriteriaDescriptor[set[T]]):
 
     """Descriptor for a set of criteria."""
 
@@ -114,7 +116,7 @@ class CriteriaSetDescriptor(CriteriaDescriptor):
             setattr(obj, self.name, frozenset(value))
 
 
-class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
+class CriteriaPermissionSetDescriptor(CriteriaDescriptor[set[str]]):
 
     """
     Descriptor for a set of permissions criteria.
@@ -136,11 +138,11 @@ class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
                     if the attribute doesn't exist.
     """
 
-    def __init__(self, name_regex: Optional[str] = None, default_value=None) -> None:
-        self.regex: Optional[str] = name_regex
+    def __init__(self, name_regex: str | None = None, default_value=None) -> None:
+        self.regex = name_regex
         self.default_value = default_value
 
-    def __set__(self, obj, value):
+    def __set__(self, obj, value) -> None:
         if not value:
             setattr(obj, self.name, self.default_value)
         elif self.regex and getattr(obj, self.regex, False):
@@ -156,9 +158,9 @@ class CriteriaPermissionSetDescriptor(CriteriaDescriptor):
             if tclass and not isinstance(tclass, Collection):
                 tclass = frozenset((tclass,))
 
-            validate_perms_any(perms,
-                               tclass=tclass,
-                               policy=obj.policy)
+            util.validate_perms_any(perms,
+                                    tclass=tclass,
+                                    policy=obj.policy)
 
             setattr(obj, self.name, perms)
 
@@ -185,8 +187,9 @@ class NetworkXGraphEdgeDescriptor(ABC):
     target      The edge's target node
     """
 
-    def __init__(self, propname: Optional[str] = None) -> None:
+    def __init__(self, propname: str | None = None) -> None:
         self.override_name = propname
+        self.name: str
 
     def __set_name__(self, owner, name):
         self.name = self.override_name if self.override_name else name
@@ -218,8 +221,7 @@ class EdgeAttrDict(NetworkXGraphEdgeDescriptor):
         if value is None:
             obj.G[obj.source][obj.target][self.name] = defaultdict(list)
         else:
-            raise AttributeError("{0} dictionaries should not be assigned directly".
-                                 format(self.name))
+            raise AttributeError(f"{self.name} dictionaries should not be assigned directly")
 
     def __delete__(self, obj):
         obj.G[obj.source][obj.target][self.name].clear()
@@ -253,7 +255,7 @@ class EdgeAttrList(NetworkXGraphEdgeDescriptor):
         if value is None:
             obj.G[obj.source][obj.target][self.name] = []
         else:
-            raise ValueError("{0} lists should not be assigned directly".format(self.name))
+            raise ValueError(f"{self.name} lists should not be assigned directly")
 
     def __delete__(self, obj):
         obj.G[obj.source][obj.target][self.name].clear()
@@ -278,6 +280,7 @@ class PermissionMapDescriptor:
 
     def __init__(self, validator: Callable):
         self.validator: Callable = validator
+        self.name: str
 
     def __set_name__(self, owner, name):
         self.name = name

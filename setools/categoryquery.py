@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchAlias, MatchName
-from .policyrep import Category
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("CategoryQuery",)
 
 
-class CategoryQuery(MatchAlias, MatchName, PolicyQuery):
+class CategoryQuery(mixins.MatchAlias, mixins.MatchName, query.PolicyQuery):
 
     """
     Query MLS Categories
@@ -26,9 +27,9 @@ class CategoryQuery(MatchAlias, MatchName, PolicyQuery):
                  will be used on the alias names.
     """
 
-    def results(self) -> Iterable[Category]:
+    def results(self) -> Iterable[policyrep.Category]:
         """Generator which yields all matching categories."""
-        self.log.info("Generating category results from {0.policy}".format(self))
+        self.log.info(f"Generating category results from {self.policy}")
         self._match_name_debug(self.log)
         self._match_alias_debug(self.log)
 

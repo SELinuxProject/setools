@@ -2,15 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional, Tuple
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .policyrep import Ioportcon, IoportconRange
-from .query import PolicyQuery
-from .util import match_range
+from . import mixins, policyrep, query, util
+
+__all__: typing.Final[tuple[str, ...]] = ("IoportconQuery",)
 
 
-class IoportconQuery(MatchContext, PolicyQuery):
+class IoportconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Ioportcon context query.
@@ -53,44 +53,33 @@ class IoportconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _ports: Optional[IoportconRange] = None
+    _ports: policyrep.IoportconRange | None = None
     ports_subset: bool = False
     ports_overlap: bool = False
     ports_superset: bool = False
     ports_proper: bool = False
 
     @property
-    def ports(self) -> Optional[IoportconRange]:
+    def ports(self) -> policyrep.IoportconRange | None:
         return self._ports
 
     @ports.setter
-    def ports(self, value: Optional[Tuple[int, int]]) -> None:
+    def ports(self, value: tuple[int, int] | None) -> None:
         if value:
-            pending_ports = IoportconRange(*value)
-            if pending_ports.low < 1 or pending_ports.high < 1:
-                raise ValueError("Port numbers must be positive: {0.low}-{0.high}".
-                                 format(pending_ports))
-
-            if pending_ports.low > pending_ports.high:
-                raise ValueError(
-                    "The low port must be smaller than the high port: {0.low}-{0.high}".
-                    format(pending_ports))
-
-            self._ports = pending_ports
+            self._ports = policyrep.IoportconRange(*value)
         else:
             self._ports = None
 
-    def results(self) -> Iterable[Ioportcon]:
+    def results(self) -> Iterable[policyrep.Ioportcon]:
         """Generator which yields all matching ioportcons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("Ports: {0.ports!r}, overlap: {0.ports_overlap}, "
-                       "subset: {0.ports_subset}, superset: {0.ports_superset}, "
-                       "proper: {0.ports_proper}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.ports=}, {self.ports_overlap=}, {self.ports_subset=}, "
+                       f"{self.ports_superset=}, {self.ports_proper=}")
         self._match_context_debug(self.log)
 
         for ioportcon in self.policy.ioportcons():
 
-            if self.ports and not match_range(
+            if self.ports and not util.match_range(
                     ioportcon.ports,
                     self.ports,
                     self.ports_subset,

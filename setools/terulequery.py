@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import cast, Iterable, Optional, Set, Tuple
 
-from . import mixins, query
+from collections.abc import Iterable
+import typing
+
+from . import exception, mixins, policyrep, query, util
 from .descriptors import CriteriaDescriptor, CriteriaSetDescriptor
-from .exception import RuleUseError, RuleNotConditional
-from .policyrep import AnyTERule, AVRuleXperm, IoctlSet, TERuletype
-from .util import match_indirect_regex, match_regex_or_set
+
+__all__: typing.Final[tuple[str, ...]] = ("TERuleQuery",)
 
 
 class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuery):
@@ -67,60 +68,57 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                       will match.  Default is false.
     """
 
-    ruletype = CriteriaSetDescriptor(enum_class=TERuletype)
-    source = CriteriaDescriptor("source_regex", "lookup_type_or_attr")
+    ruletype = CriteriaSetDescriptor[policyrep.TERuletype](enum_class=policyrep.TERuletype)
+    source = CriteriaDescriptor[policyrep.TypeOrAttr]("source_regex", "lookup_type_or_attr")
     source_regex: bool = False
     source_indirect: bool = True
-    target = CriteriaDescriptor("target_regex", "lookup_type_or_attr")
+    target = CriteriaDescriptor[policyrep.TypeOrAttr]("target_regex", "lookup_type_or_attr")
     target_regex: bool = False
     target_indirect: bool = True
-    default = CriteriaDescriptor("default_regex", "lookup_type_or_attr")
+    default = CriteriaDescriptor[policyrep.Type]("default_regex", "lookup_type_or_attr")
     default_regex: bool = False
-    boolean = CriteriaSetDescriptor("boolean_regex", "lookup_boolean")
+    boolean = CriteriaSetDescriptor[policyrep.Boolean]("boolean_regex", "lookup_boolean")
     boolean_regex: bool = False
     boolean_equal: bool = False
-    _xperms: Optional[IoctlSet] = None
+    _xperms: policyrep.IoctlSet | None = None
     xperms_equal: bool = False
 
     @property
-    def xperms(self) -> Optional[IoctlSet]:
+    def xperms(self) -> policyrep.IoctlSet | None:
         return self._xperms
 
     @xperms.setter
-    def xperms(self, value: Optional[Iterable[Tuple[int, int]]]) -> None:
+    def xperms(self, value: Iterable[tuple[int, int]] | None) -> None:
         if value:
-            pending_xperms: Set[int] = set()
+            pending_xperms = set[int]()
 
             for low, high in value:
                 if not (0 <= low <= 0xffff):
-                    raise ValueError("{0:#07x} is not a valid ioctl.".format(low))
+                    raise ValueError(f"{low:#07x} is not a valid ioctl.")
 
                 if not (0 <= high <= 0xffff):
-                    raise ValueError("{0:#07x} is not a valid ioctl.".format(high))
+                    raise ValueError(f"{high:#07x} is not a valid ioctl.")
 
                 if high < low:
                     high, low = low, high
 
                 pending_xperms.update(i for i in range(low, high + 1))
 
-            self._xperms = IoctlSet(pending_xperms)
+            self._xperms = policyrep.IoctlSet(pending_xperms)
         else:
             self._xperms = None
 
-    def results(self) -> Iterable[AnyTERule]:
+    def results(self) -> Iterable[policyrep.AnyTERule]:
         """Generator which yields all matching TE rules."""
-        self.log.info("Generating TE rule results from {0.policy}".format(self))
-        self.log.debug("Ruletypes: {0.ruletype}".format(self))
-        self.log.debug("Source: {0.source!r}, indirect: {0.source_indirect}, "
-                       "regex: {0.source_regex}".format(self))
-        self.log.debug("Target: {0.target!r}, indirect: {0.target_indirect}, "
-                       "regex: {0.target_regex}".format(self))
+        self.log.info(f"Generating TE rule results from {self.policy}")
+        self.log.debug(f"{self.ruletype=}")
+        self.log.debug(f"{self.source=}, {self.source_indirect=}, {self.source_regex=}")
+        self.log.debug(f"{self.target=}, {self.target_indirect=}, {self.target_regex=}")
         self._match_object_class_debug(self.log)
         self._match_perms_debug(self.log)
-        self.log.debug("Xperms: {0.xperms!r}, eq: {0.xperms_equal}".format(self))
-        self.log.debug("Default: {0.default!r}, regex: {0.default_regex}".format(self))
-        self.log.debug("Boolean: {0.boolean!r}, eq: {0.boolean_equal}, "
-                       "regex: {0.boolean_regex}".format(self))
+        self.log.debug(f"{self.xperms=}, {self.xperms_equal=}")
+        self.log.debug(f"{self.default=}, {self.default_regex=}")
+        self.log.debug(f"{self.boolean=}, {self.boolean_equal=}, {self.boolean_regex=}")
 
         for rule in self.policy.terules():
             #
@@ -133,7 +131,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             #
             # Matching on source type
             #
-            if self.source and not match_indirect_regex(
+            if self.source and not util.match_indirect_regex(
                     rule.source,
                     self.source,
                     self.source_indirect,
@@ -143,7 +141,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             #
             # Matching on target type
             #
-            if self.target and not match_indirect_regex(
+            if self.target and not util.match_indirect_regex(
                     rule.target,
                     self.target,
                     self.target_indirect,
@@ -167,25 +165,27 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                         # permission set equality option is on.
                         continue
 
-                    if cast(AVRuleXperm, rule).xperm_type not in self.perms:
+                    assert isinstance(rule, policyrep.AVRuleXperm), \
+                        "Rule is not an extended permission rule, this is an SETools bug."
+                    if rule.xperm_type not in self.perms:
                         continue
                 elif not self._match_perms(rule):
                     continue
-            except RuleUseError:
+            except exception.RuleUseError:
                 continue
 
             #
             # Matching on extended permissions
             #
             try:
-                if self.xperms and not match_regex_or_set(
+                if self.xperms and not util.match_regex_or_set(
                         rule.perms,
                         self.xperms,
                         self.xperms_equal,
                         False):
                     continue
 
-            except RuleUseError:
+            except exception.RuleUseError:
                 continue
 
             #
@@ -196,13 +196,13 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
                     # because default type is always a single
                     # type, hard-code indirect to True
                     # so the criteria can be an attribute
-                    if not match_indirect_regex(
+                    if not util.match_indirect_regex(
                             rule.default,
                             self.default,
                             True,
                             self.default_regex):
                         continue
-                except RuleUseError:
+                except exception.RuleUseError:
                     continue
 
             #
@@ -210,13 +210,13 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
             #
             if self.boolean:
                 try:
-                    if not match_regex_or_set(
+                    if not util.match_regex_or_set(
                             rule.conditional.booleans,
                             self.boolean,
                             self.boolean_equal,
                             self.boolean_regex):
                         continue
-                except RuleNotConditional:
+                except exception.RuleNotConditional:
                     continue
 
             # if we get here, we have matched all available criteria

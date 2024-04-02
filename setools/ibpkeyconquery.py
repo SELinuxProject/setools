@@ -3,15 +3,15 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from ipaddress import IPv6Address
-from typing import Iterable, Optional, Tuple, Union
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .policyrep import Ibpkeycon, IbpkeyconRange
-from .query import PolicyQuery
-from .util import match_range
+from . import mixins, policyrep, query, util
+
+__all__: typing.Final[tuple[str, ...]] = ("IbpkeyconQuery",)
 
 
-class IbpkeyconQuery(MatchContext, PolicyQuery):
+class IbpkeyconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Infiniband pkey context query.
@@ -51,64 +51,48 @@ class IbpkeyconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _subnet_prefix: Optional[IPv6Address] = None
-    _pkeys: Optional[IbpkeyconRange] = None
+    _subnet_prefix: IPv6Address | None = None
+    _pkeys: policyrep.IbpkeyconRange | None = None
     pkeys_subset: bool = False
     pkeys_overlap: bool = False
     pkeys_superset: bool = False
     pkeys_proper: bool = False
 
     @property
-    def pkeys(self) -> Optional[IbpkeyconRange]:
+    def pkeys(self) -> policyrep.IbpkeyconRange | None:
         return self._pkeys
 
     @pkeys.setter
-    def pkeys(self, value: Optional[Tuple[int, int]]) -> None:
-        if value is not None:
-            pending_pkeys = IbpkeyconRange(*value)
-
-            if pending_pkeys.low < 1 or pending_pkeys.high < 1:
-                raise ValueError("Pkeys must be positive: {0.low:#x}-{0.high:#x}".
-                                 format(pending_pkeys))
-
-            if pending_pkeys.low > 0xffff or pending_pkeys.high > 0xffff:
-                raise ValueError("Pkeys maximum is 0xffff: {0.low:#x}-{0.high:#x}".
-                                 format(pending_pkeys))
-
-            if pending_pkeys.low > pending_pkeys.high:
-                raise ValueError(
-                    "The low pkey must be smaller than the high pkey: {0.low:#x}-{0.high:#x}".
-                    format(pending_pkeys))
-
-            self._pkeys = pending_pkeys
+    def pkeys(self, value: tuple[int, int] | None) -> None:
+        if value:
+            self._pkeys = policyrep.IbpkeyconRange(*value)
         else:
             self._pkeys = None
 
     @property
-    def subnet_prefix(self) -> Optional[IPv6Address]:
+    def subnet_prefix(self) -> IPv6Address | None:
         return self._subnet_prefix
 
     @subnet_prefix.setter
-    def subnet_prefix(self, value: Optional[Union[str, IPv6Address]]) -> None:
+    def subnet_prefix(self, value: str | IPv6Address | None) -> None:
         if value:
             self._subnet_prefix = IPv6Address(value)
         else:
             self._subnet_prefix = None
 
-    def results(self) -> Iterable[Ibpkeycon]:
+    def results(self) -> Iterable[policyrep.Ibpkeycon]:
         """Generator which yields all matching ibpkeycons."""
-        self.log.info("Generating ibpkeycon results from {0.policy}".format(self))
-        self.log.debug("Subnet Prefix: {0.subnet_prefix}".format(self))
-        self.log.debug("Pkeys: {0.pkeys}, overlap: {0.pkeys_overlap}, "
-                       "subset: {0.pkeys_subset}, superset: {0.pkeys_superset}, "
-                       "proper: {0.pkeys_proper}".format(self))
+        self.log.info(f"Generating ibpkeycon results from {self.policy}")
+        self.log.debug(f"{self.subnet_prefix=}")
+        self.log.debug(f"{self.pkeys=}, {self.pkeys_overlap=}, {self.pkeys_subset=}, "
+                       f"{self.pkeys_superset=}, {self.pkeys_proper=}")
         self._match_context_debug(self.log)
 
         for pk in self.policy.ibpkeycons():
             if self.subnet_prefix is not None and self.subnet_prefix != pk.subnet_prefix:
                 continue
 
-            if self.pkeys and not match_range(
+            if self.pkeys and not util.match_range(
                     pk.pkeys,
                     self.pkeys,
                     self.pkeys_subset,

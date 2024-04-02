@@ -5,7 +5,6 @@
 #
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Set, Union
 
 from ..policyrep import Type, TypeAttribute, TypeOrAttr
 
@@ -22,14 +21,15 @@ class ModifiedType(DifferenceResult):
 
     """Difference details for a modified type."""
 
-    added_attributes: Set[TypeAttribute]
-    removed_attributes: Set[TypeAttribute]
-    matched_attributes: Set[TypeAttribute]
+    type_: Type
+    added_attributes: set[TypeAttribute]
+    removed_attributes: set[TypeAttribute]
+    matched_attributes: set[TypeAttribute]
     modified_permissive: bool
     permissive: bool
-    added_aliases: Set[str]
-    removed_aliases: Set[str]
-    matched_aliases: Set[str]
+    added_aliases: set[str]
+    removed_aliases: set[str]
+    matched_aliases: set[str]
 
 
 def type_wrapper_factory(type_: Type) -> SymbolWrapper[Type]:
@@ -48,7 +48,7 @@ def type_wrapper_factory(type_: Type) -> SymbolWrapper[Type]:
 
 
 def type_or_attr_wrapper_factory(type_: TypeOrAttr) -> \
-        Union[SymbolWrapper[Type], SymbolWrapper[TypeAttribute]]:
+        SymbolWrapper[Type] | SymbolWrapper[TypeAttribute]:
 
     """
     Wrap types or attributes from the specified policy.
@@ -66,21 +66,17 @@ class TypesDifference(Difference):
 
     """Determine the difference in types between two policies."""
 
-    added_types = DiffResultDescriptor("diff_types")
-    removed_types = DiffResultDescriptor("diff_types")
-    modified_types = DiffResultDescriptor("diff_types")
-
     def diff_types(self) -> None:
         """Generate the difference in types between the policies."""
 
         self.log.info(
-            "Generating type differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating type differences from {self.left_policy} to {self.right_policy}")
 
         self.added_types, self.removed_types, matched_types = self._set_diff(
             (SymbolWrapper(t) for t in self.left_policy.types()),
             (SymbolWrapper(t) for t in self.right_policy.types()))
 
-        self.modified_types = dict()
+        self.modified_types = list[ModifiedType]()
 
         for left_type, right_type in matched_types:
             # Criteria for modified types
@@ -100,14 +96,19 @@ class TypesDifference(Difference):
             mod_permissive = left_permissive != right_permissive
 
             if added_attr or removed_attr or added_aliases or removed_aliases or mod_permissive:
-                self.modified_types[left_type] = ModifiedType(added_attr,
-                                                              removed_attr,
-                                                              matched_attr,
-                                                              mod_permissive,
-                                                              left_permissive,
-                                                              added_aliases,
-                                                              removed_aliases,
-                                                              matched_aliases)
+                self.modified_types.append(ModifiedType(left_type,
+                                                        added_attr,
+                                                        removed_attr,
+                                                        matched_attr,
+                                                        mod_permissive,
+                                                        left_permissive,
+                                                        added_aliases,
+                                                        removed_aliases,
+                                                        matched_aliases))
+
+    added_types = DiffResultDescriptor[Type](diff_types)
+    removed_types = DiffResultDescriptor[Type](diff_types)
+    modified_types = DiffResultDescriptor[ModifiedType](diff_types)
 
     #
     # Internal functions
@@ -115,6 +116,6 @@ class TypesDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting type differences")
-        self.added_types = None
-        self.removed_types = None
-        self.modified_types = None
+        del self.added_types
+        del self.removed_types
+        del self.modified_types

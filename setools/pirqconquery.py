@@ -2,14 +2,15 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-from typing import Iterable, Optional
+from collections.abc import Iterable
+import typing
 
-from .mixins import MatchContext
-from .policyrep import Pirqcon
-from .query import PolicyQuery
+from . import mixins, policyrep, query
+
+__all__: typing.Final[tuple[str, ...]] = ("PirqconQuery",)
 
 
-class PirqconQuery(MatchContext, PolicyQuery):
+class PirqconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Pirqcon context query.
@@ -43,26 +44,26 @@ class PirqconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _irq: Optional[int] = None
+    _irq: int | None = None
 
     @property
-    def irq(self) -> Optional[int]:
+    def irq(self) -> int | None:
         return self._irq
 
     @irq.setter
-    def irq(self, value: Optional[int]) -> None:
+    def irq(self, value: int | None) -> None:
         if value:
             if value < 1:
-                raise ValueError("The IRQ must be positive: {0}".format(value))
+                raise ValueError(f"The IRQ must be positive: {value}")
 
             self._irq = value
         else:
             self._irq = None
 
-    def results(self) -> Iterable[Pirqcon]:
+    def results(self) -> Iterable[policyrep.Pirqcon]:
         """Generator which yields all matching pirqcons."""
-        self.log.info("Generating results from {0.policy}".format(self))
-        self.log.debug("IRQ: {0.irq!r}".format(self))
+        self.log.info(f"Generating results from {self.policy}")
+        self.log.debug(f"{self.irq=}")
         self._match_context_debug(self.log)
 
         for pirqcon in self.policy.pirqcons():

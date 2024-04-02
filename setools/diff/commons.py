@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 from dataclasses import dataclass
-from typing import Set
 
 from .descriptors import DiffResultDescriptor
 from .difference import Difference, DifferenceResult, SymbolWrapper
+from .. import policyrep
 
 
 @dataclass(frozen=True, order=True)
@@ -14,9 +14,10 @@ class ModifiedCommon(DifferenceResult):
 
     """Difference details for a modified common permission set."""
 
-    added_perms: Set[str]
-    removed_perms: Set[str]
-    matched_perms: Set[str]
+    common: policyrep.Common
+    added_perms: set[str]
+    removed_perms: set[str]
+    matched_perms: set[str]
 
 
 class CommonDifference(Difference):
@@ -26,21 +27,17 @@ class CommonDifference(Difference):
     between two policies.
     """
 
-    added_commons = DiffResultDescriptor("diff_commons")
-    removed_commons = DiffResultDescriptor("diff_commons")
-    modified_commons = DiffResultDescriptor("diff_commons")
-
     def diff_commons(self) -> None:
         """Generate the difference in commons between the policies."""
 
         self.log.info(
-            "Generating common differences from {0.left_policy} to {0.right_policy}".format(self))
+            f"Generating common differences from {self.left_policy} to {self.right_policy}")
 
         self.added_commons, self.removed_commons, matched_commons = self._set_diff(
             (SymbolWrapper(c) for c in self.left_policy.commons()),
             (SymbolWrapper(c) for c in self.right_policy.commons()))
 
-        self.modified_commons = dict()
+        self.modified_commons = list[ModifiedCommon]()
 
         for left_common, right_common in matched_commons:
             # Criteria for modified commons
@@ -50,9 +47,14 @@ class CommonDifference(Difference):
                                                                        unwrap=False)
 
             if added_perms or removed_perms:
-                self.modified_commons[left_common] = ModifiedCommon(added_perms,
-                                                                    removed_perms,
-                                                                    matched_perms)
+                self.modified_commons.append(ModifiedCommon(left_common,
+                                                            added_perms,
+                                                            removed_perms,
+                                                            matched_perms))
+
+    added_commons = DiffResultDescriptor[policyrep.Common](diff_commons)
+    removed_commons = DiffResultDescriptor[policyrep.Common](diff_commons)
+    modified_commons = DiffResultDescriptor[ModifiedCommon](diff_commons)
 
     #
     # Internal functions
@@ -60,6 +62,6 @@ class CommonDifference(Difference):
     def _reset_diff(self) -> None:
         """Reset diff results on policy changes."""
         self.log.debug("Resetting common differences")
-        self.added_commons = None
-        self.removed_commons = None
-        self.modified_commons = None
+        del self.added_commons
+        del self.removed_commons
+        del self.modified_commons

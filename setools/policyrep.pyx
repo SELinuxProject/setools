@@ -12,6 +12,7 @@ from libc.stdlib cimport calloc, free
 from libc.string cimport memcpy, memset, strerror
 from posix.stat cimport S_IFBLK, S_IFCHR, S_IFDIR, S_IFIFO, S_IFREG, S_IFLNK, S_IFSOCK
 
+import dataclasses
 import logging
 import warnings
 import itertools

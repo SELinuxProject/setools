@@ -50,7 +50,7 @@ cdef class InitialSID(Ocontext):
         return self.name
 
     def statement(self):
-        return "sid {0} {0.context}".format(self)
+        return f"sid {self.name} {self.context}"
 
 
 cdef class InitialSIDIterator(OcontextIterator):

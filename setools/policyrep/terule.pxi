@@ -49,7 +49,7 @@ cdef class BaseTERule(PolicyRule):
         if self.ruletype == TERuletype.type_transition:
             raise TERuleNoFilename
         else:
-            raise RuleUseError("{0} rules do not have file names".format(self.ruletype))
+            raise RuleUseError(f"{self.ruletype} rules do not have file names")
 
     @property
     def conditional(self):
@@ -134,8 +134,8 @@ cdef class AVRule(BaseTERule):
         return r
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}".
-            format(self, self._conditional, self._conditional_block))
+        return hash(
+            f"{self.ruletype}|{self.source}|{self.target}|{self.tclass}|{self._conditional}|{self._conditional_block}")
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -143,18 +143,18 @@ cdef class AVRule(BaseTERule):
     @property
     def default(self):
         """The rule's default type."""
-        raise RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
+        raise RuleUseError(f"{self.ruletype} rules do not have a default type.")
 
     def derive_expanded(self, BaseType source, BaseType target, perms):
         """Derive an expanded rule from source, target, and perms."""
         cdef AVRule r
         if self.origin is not None:
-            raise RuleUseError("{0} rule is already expanded.".format(self.ruletype))
+            raise RuleUseError(f"{self.ruletype} rule is already expanded.")
 
         if source is not self.source and source not in self.source:
-            raise RuleUseError("{0} is not {1} and is not in {1}".format(source, self.source))
+            raise RuleUseError(f"{source} is not {self.source} and is not in {self.source}")
         if target is not self.target and target not in self.target:
-            raise RuleUseError("{0} is not {1} and is not in {1}".format(target, self.target))
+            raise RuleUseError(f"{target} is not {self.target} and is not in {self.target}")
         # No reasonable perms check possible as perms can be disjoint
         # from self.perms when redundant perms are removed.
 
@@ -195,18 +195,18 @@ cdef class AVRule(BaseTERule):
 
     def statement(self):
         if not self.rule_string:
-            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} ".format(self)
+            self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} "
 
             # allow/dontaudit/auditallow/neverallow rules
             perms = self.perms
             if len(perms) > 1:
-                self.rule_string += "{{ {0} }};".format(' '.join(sorted(perms)))
+                self.rule_string += f"{{ {' '.join(sorted(perms))} }};"
             else:
                 # convert to list since sets cannot be indexed
-                self.rule_string += "{0};".format(list(perms)[0])
+                self.rule_string += f"{list(perms)[0]};"
 
             try:
-                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+                self.rule_string += f" [ {self.conditional} ]:{self.conditional_block}"
             except RuleNotConditional:
                 pass
 
@@ -240,9 +240,9 @@ cdef class IoctlSet(frozenset):
         for _, i in itertools.groupby(perms, key=lambda k, c=itertools.count(): k - next(c)):
             group = list(i)
             if len(group) > 1:
-                shortlist.append("{0:#06x}-{1:#06x}".format(group[0], group[-1]))
+                shortlist.append(f"{group[0]:#06x}-{group[-1]:#06x}")
             else:
-                shortlist.append("{0:#06x}".format(group[0]))
+                shortlist.append(f"{group[0]:#06x}")
 
         if not spec:
             return " ".join(shortlist)
@@ -252,10 +252,10 @@ cdef class IoctlSet(frozenset):
             return super(IoctlSet, self).__format__(spec)
 
     def __str__(self):
-        return "{0}".format(self)
+        return f"{self}"
 
     def __repr__(self):
-        return "{{ {0:,} }}".format(self)
+        return f"{{ {self:,} }}"
 
     def ranges(self):
         """
@@ -298,8 +298,7 @@ cdef class AVRuleXperm(BaseTERule):
                     base_value = curr << 8
                     perms.update(range(base_value, base_value + 0x100))
                 else:
-                    raise LowLevelPolicyError("Unknown extended permission: {}".format(
-                                              xperms.specified))
+                    raise LowLevelPolicyError(f"Unknown extended permission: {xperms.specified}")
 
         #
         # Determine xperm type
@@ -311,8 +310,7 @@ cdef class AVRuleXperm(BaseTERule):
             or datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLDRIVER:
             xperm_type = intern("ioctl")
         else:
-            raise LowLevelPolicyError("Unknown extended permission: {}".format(
-                                      datum.xperms.specified))
+            raise LowLevelPolicyError(f"Unknown extended permission: {datum.xperms.specified}")
 
         #
         # Construct rule object
@@ -344,8 +342,8 @@ cdef class AVRuleXperm(BaseTERule):
         return r
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.xperm_type}|{1}|{2}".
-            format(self, self._conditional, self._conditional_block))
+        return hash(
+            f"{self.ruletype}|{self.source}|{self.target}|{self.tclass}|{self.xperm_type}|{self._conditional}|{self._conditional_block}")
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -353,7 +351,7 @@ cdef class AVRuleXperm(BaseTERule):
     @property
     def default(self):
         """The rule's default type."""
-        raise RuleUseError("{0} rules do not have a default type.".format(self.ruletype))
+        raise RuleUseError(f"{self.ruletype} rules do not have a default type.")
 
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
@@ -381,15 +379,14 @@ cdef class AVRuleXperm(BaseTERule):
 
     def statement(self):
         if not self.rule_string:
-            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.xperm_type} ". \
-                                format(self)
+            self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.xperm_type} "
 
             # generate short permission notation
             perms = self.perms
             if perms.ranges() > 1:
-                self.rule_string += "{{ {0} }};".format(perms)
+                self.rule_string += f"{{ {perms} }};"
             else:
-                self.rule_string += "{0};".format(perms)
+                self.rule_string += f"{perms};"
 
         return self.rule_string
 
@@ -418,8 +415,7 @@ cdef class TERule(BaseTERule):
         return r
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{1}|{2}|{3}".format(
-            self, None, self._conditional, self._conditional_block))
+        return hash(f"{self.ruletype}|{self.source}|{self.target}|{self.tclass}|None|{self._conditional}|{self._conditional_block}")
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -427,7 +423,7 @@ cdef class TERule(BaseTERule):
     @property
     def perms(self):
         """The rule's permission set."""
-        raise RuleUseError("{0} rules do not have a permission set.".format(self.ruletype))
+        raise RuleUseError(f"{self.ruletype} rules do not have a permission set.")
 
     @property
     def default(self):
@@ -458,11 +454,10 @@ cdef class TERule(BaseTERule):
 
     def statement(self):
         if not self.rule_string:
-            self.rule_string = "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default};". \
-                               format(self)
+            self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
 
             try:
-                self.rule_string += " [ {0.conditional} ]:{0.conditional_block}".format(self)
+                self.rule_string += f" [ {self.conditional} ]:{self.conditional_block}"
             except RuleNotConditional:
                 pass
 
@@ -495,8 +490,8 @@ cdef class FileNameTERule(BaseTERule):
         return r
 
     def __hash__(self):
-        return hash("{0.ruletype}|{0.source}|{0.target}|{0.tclass}|{0.filename}|{1}|{2}".format(
-            self, None, None))
+        return hash(
+            f"{self.ruletype}|{self.source}|{self.target}|{self.tclass}|{self.filename}|None|None")
 
     def __lt__(self, other):
         return str(self) < str(other)
@@ -504,7 +499,7 @@ cdef class FileNameTERule(BaseTERule):
     @property
     def perms(self):
         """The rule's permission set."""
-        raise RuleUseError("{0} rules do not have a permission set.".format(self.ruletype))
+        raise RuleUseError(f"{self.ruletype} rules do not have a permission set.")
 
     @property
     def default(self):
@@ -536,8 +531,7 @@ cdef class FileNameTERule(BaseTERule):
             yield self
 
     def statement(self):
-        return "{0.ruletype} {0.source} {0.target}:{0.tclass} {0.default} {0.filename};". \
-            format(self)
+        return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default} {self.filename};"
 
 
 #
@@ -600,7 +594,7 @@ cdef class TERuleIterator(PolicyIterator):
         elif key.specified & sepol.AVRULE_XPERMS:
             return AVRuleXperm.factory(self.policy, key, datum, None, None)
         else:
-            raise LowLevelPolicyError("Unknown AV rule type 0x{}".format(key.specified, '04x'))
+            raise LowLevelPolicyError(f"Unknown AV rule type 0x{key.specified:04x}")
 
     def __len__(self):
         return self.table.nel
@@ -677,7 +671,7 @@ cdef class ConditionalTERuleIterator(PolicyIterator):
         elif key.specified & sepol.AVRULE_XPERMS:
             return AVRuleXperm.factory(self.policy, key, datum, self.conditional, self.conditional_block)
         else:
-            raise LowLevelPolicyError("Unknown AV rule type 0x{}".format(key.specified, '04x'))
+            raise LowLevelPolicyError(f"Unknown AV rule type 0x{key.specified:04x}")
 
     def __len__(self):
         cdef:

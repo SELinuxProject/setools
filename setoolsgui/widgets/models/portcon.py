@@ -23,15 +23,15 @@ class PortconTable(SEToolsTableModel[setools.Portcon]):
         if not self.item_list or not index.isValid():
             return None
 
-        row = index.row()
-        col = index.column()
+        row: int = index.row()
+        col: int = index.column()
         rule = self.item_list[row]
 
         match role:
             case ModelRoles.DisplayRole:
                 match col:
                     case 0:
-                        low, high = rule.ports
+                        low, high = rule.ports.low, rule.ports.high
                         if low == high:
                             return str(low)
                         return f"{low}-{high}"

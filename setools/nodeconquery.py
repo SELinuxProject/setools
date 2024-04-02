@@ -3,18 +3,18 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
+from collections.abc import Iterable
 import ipaddress
+import typing
 
-from typing import Iterable, Optional, Union
+from . import mixins, policyrep, query
 
-from .mixins import MatchContext
-from .policyrep import Nodecon, NodeconIPVersion
-from .query import PolicyQuery
+AnyIPNetwork = ipaddress.IPv4Network | ipaddress.IPv6Network
 
-AnyIPNetwork = Union[ipaddress.IPv4Network, ipaddress.IPv6Network]
+__all__: typing.Final[tuple[str, ...]] = ("AnyIPNetwork", "NodeconQuery")
 
 
-class NodeconQuery(MatchContext, PolicyQuery):
+class NodeconQuery(mixins.MatchContext, query.PolicyQuery):
 
     """
     Query nodecon statements.
@@ -50,37 +50,37 @@ class NodeconQuery(MatchContext, PolicyQuery):
                     No effect if not using set operations.
     """
 
-    _network: Optional[AnyIPNetwork] = None
+    _network: AnyIPNetwork | None = None
     network_overlap: bool = False
-    _ip_version: Optional[NodeconIPVersion] = None
+    _ip_version: policyrep.NodeconIPVersion | None = None
 
     @property
-    def ip_version(self) -> Optional[NodeconIPVersion]:
+    def ip_version(self) -> policyrep.NodeconIPVersion | None:
         return self._ip_version
 
     @ip_version.setter
-    def ip_version(self, value: Optional[Union[str, NodeconIPVersion]]) -> None:
+    def ip_version(self, value: policyrep.NodeconIPVersion | str | None) -> None:
         if value:
-            self._ip_version = NodeconIPVersion.lookup(value)
+            self._ip_version = policyrep.NodeconIPVersion.lookup(value)
         else:
             self._ip_version = None
 
     @property
-    def network(self) -> Optional[AnyIPNetwork]:
+    def network(self) -> AnyIPNetwork | None:
         return self._network
 
     @network.setter
-    def network(self, value: Optional[Union[str, AnyIPNetwork]]) -> None:
+    def network(self, value: AnyIPNetwork | str | None) -> None:
         if value:
             self._network = ipaddress.ip_network(value)
         else:
             self._network = None
 
-    def results(self) -> Iterable[Nodecon]:
+    def results(self) -> Iterable[policyrep.Nodecon]:
         """Generator which yields all matching nodecons."""
-        self.log.info("Generating nodecon results from {0.policy}".format(self))
-        self.log.debug("Network: {0.network!r}, overlap: {0.network_overlap}".format(self))
-        self.log.debug("IP Version: {0.ip_version!r}".format(self))
+        self.log.info(f"Generating nodecon results from {self.policy}")
+        self.log.debug(f"{self.network=}, {self.network_overlap=}")
+        self.log.debug(f"{self.ip_version=}")
         self._match_context_debug(self.log)
 
         for nodecon in self.policy.nodecons():

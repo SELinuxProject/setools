@@ -31,9 +31,9 @@ cdef class Context(PolicyObject):
 
     def __str__(self):
         if self._range:
-            return "{0.user}:{0.role}:{0.type_}:{0.range_}".format(self)
+            return f"{self.user}:{self.role}:{self.type_}:{self.range_}"
         else:
-            return "{0.user}:{0.role}:{0.type_}".format(self)
+            return f"{self.user}:{self.role}:{self.type_}"
 
     @property
     def range_(self):

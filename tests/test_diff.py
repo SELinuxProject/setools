@@ -8,7 +8,7 @@ import unittest
 from dataclasses import astuple
 from ipaddress import IPv6Address, IPv4Network, IPv6Network
 
-from setools import PolicyDifference, PortconProtocol
+from setools import PolicyDifference, PortconProtocol, PortconRange
 from setools import BoundsRuletype as BRT
 from setools import ConstraintRuletype as CRT
 from setools import DefaultRuletype as DRT
@@ -55,79 +55,87 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_types_remove_attr(self):
         """Diff: modified type with removed attribute."""
-        self.assertIn("modified_remove_attr", self.diff.modified_types)
-        removed_attrs = self.diff.modified_types["modified_remove_attr"].removed_attributes
-        self.assertSetEqual(set(["an_attr"]), removed_attrs)
-        self.assertFalse(self.diff.modified_types["modified_remove_attr"].added_attributes)
-        self.assertFalse(self.diff.modified_types["modified_remove_attr"].matched_attributes)
-        self.assertFalse(self.diff.modified_types["modified_remove_attr"].modified_permissive)
-        self.assertFalse(self.diff.modified_types["modified_remove_attr"].permissive)
-        self.assertFalse(self.diff.modified_types["modified_remove_attr"].added_aliases)
-        self.assertFalse(self.diff.modified_types["modified_remove_attr"].removed_aliases)
-        self.assertFalse(self.diff.modified_types["modified_remove_attr"].matched_aliases)
+        # modified_remove_attr
+        self.diff.modified_types.sort()
+        type_ = self.diff.modified_types[4]
+        self.assertSetEqual(set(["an_attr"]), type_.removed_attributes)
+        self.assertFalse(type_.added_attributes)
+        self.assertFalse(type_.matched_attributes)
+        self.assertFalse(type_.modified_permissive)
+        self.assertFalse(type_.permissive)
+        self.assertFalse(type_.added_aliases)
+        self.assertFalse(type_.removed_aliases)
+        self.assertFalse(type_.matched_aliases)
 
     def test_modified_types_remove_alias(self):
         """Diff: modified type with removed alias."""
-        self.assertIn("modified_remove_alias", self.diff.modified_types)
-        removed_alias = self.diff.modified_types["modified_remove_alias"].removed_aliases
-        self.assertSetEqual(set(["an_alias"]), removed_alias)
-        self.assertFalse(self.diff.modified_types["modified_remove_alias"].added_attributes)
-        self.assertFalse(self.diff.modified_types["modified_remove_alias"].removed_attributes)
-        self.assertFalse(self.diff.modified_types["modified_remove_alias"].matched_attributes)
-        self.assertFalse(self.diff.modified_types["modified_remove_alias"].modified_permissive)
-        self.assertFalse(self.diff.modified_types["modified_remove_alias"].permissive)
-        self.assertFalse(self.diff.modified_types["modified_remove_alias"].added_aliases)
-        self.assertFalse(self.diff.modified_types["modified_remove_alias"].matched_aliases)
+        # modified_remove_alias
+        self.diff.modified_types.sort()
+        type_ = self.diff.modified_types[3]
+        self.assertSetEqual(set(["an_alias"]), type_.removed_aliases)
+        self.assertFalse(type_.added_attributes)
+        self.assertFalse(type_.removed_attributes)
+        self.assertFalse(type_.matched_attributes)
+        self.assertFalse(type_.modified_permissive)
+        self.assertFalse(type_.permissive)
+        self.assertFalse(type_.added_aliases)
+        self.assertFalse(type_.matched_aliases)
 
     def test_modified_types_remove_permissive(self):
         """Diff: modified type with removed permissve."""
-        self.assertIn("modified_remove_permissive", self.diff.modified_types)
-        self.assertFalse(self.diff.modified_types["modified_remove_permissive"].added_attributes)
-        self.assertFalse(self.diff.modified_types["modified_remove_permissive"].removed_attributes)
-        self.assertFalse(self.diff.modified_types["modified_remove_permissive"].matched_attributes)
-        self.assertTrue(self.diff.modified_types["modified_remove_permissive"].modified_permissive)
-        self.assertTrue(self.diff.modified_types["modified_remove_permissive"].permissive)
-        self.assertFalse(self.diff.modified_types["modified_remove_permissive"].added_aliases)
-        self.assertFalse(self.diff.modified_types["modified_remove_permissive"].removed_aliases)
-        self.assertFalse(self.diff.modified_types["modified_remove_permissive"].matched_aliases)
+        # modified_remove_permissive
+        self.diff.modified_types.sort()
+        type_ = self.diff.modified_types[5]
+        self.assertFalse(type_.added_attributes)
+        self.assertFalse(type_.removed_attributes)
+        self.assertFalse(type_.matched_attributes)
+        self.assertTrue(type_.modified_permissive)
+        self.assertTrue(type_.permissive)
+        self.assertFalse(type_.added_aliases)
+        self.assertFalse(type_.removed_aliases)
+        self.assertFalse(type_.matched_aliases)
 
     def test_modified_types_add_attr(self):
         """Diff: modified type with added attribute."""
-        self.assertIn("modified_add_attr", self.diff.modified_types)
-        added_attrs = self.diff.modified_types["modified_add_attr"].added_attributes
-        self.assertSetEqual(set(["an_attr"]), added_attrs)
-        self.assertFalse(self.diff.modified_types["modified_add_attr"].removed_attributes)
-        self.assertFalse(self.diff.modified_types["modified_add_attr"].matched_attributes)
-        self.assertFalse(self.diff.modified_types["modified_add_attr"].modified_permissive)
-        self.assertFalse(self.diff.modified_types["modified_add_attr"].permissive)
-        self.assertFalse(self.diff.modified_types["modified_add_attr"].added_aliases)
-        self.assertFalse(self.diff.modified_types["modified_add_attr"].removed_aliases)
-        self.assertFalse(self.diff.modified_types["modified_add_attr"].matched_aliases)
+        # modified_add_attr
+        self.diff.modified_types.sort()
+        type_ = self.diff.modified_types[1]
+        self.assertSetEqual(set(["an_attr"]), type_.added_attributes)
+        self.assertFalse(type_.removed_attributes)
+        self.assertFalse(type_.matched_attributes)
+        self.assertFalse(type_.modified_permissive)
+        self.assertFalse(type_.permissive)
+        self.assertFalse(type_.added_aliases)
+        self.assertFalse(type_.removed_aliases)
+        self.assertFalse(type_.matched_aliases)
 
     def test_modified_types_add_alias(self):
         """Diff: modified type with added alias."""
-        self.assertIn("modified_add_alias", self.diff.modified_types)
-        added_alias = self.diff.modified_types["modified_add_alias"].added_aliases
-        self.assertSetEqual(set(["an_alias"]), added_alias)
-        self.assertFalse(self.diff.modified_types["modified_add_alias"].added_attributes)
-        self.assertFalse(self.diff.modified_types["modified_add_alias"].removed_attributes)
-        self.assertFalse(self.diff.modified_types["modified_add_alias"].matched_attributes)
-        self.assertFalse(self.diff.modified_types["modified_add_alias"].modified_permissive)
-        self.assertFalse(self.diff.modified_types["modified_add_alias"].permissive)
-        self.assertFalse(self.diff.modified_types["modified_add_alias"].removed_aliases)
-        self.assertFalse(self.diff.modified_types["modified_add_alias"].matched_aliases)
+        # modified_add_alias
+        self.diff.modified_types.sort()
+        type_ = self.diff.modified_types[0]
+        self.assertSetEqual(set(["an_alias"]), type_.added_aliases)
+        self.assertFalse(type_.added_attributes)
+        self.assertFalse(type_.removed_attributes)
+        self.assertFalse(type_.matched_attributes)
+        self.assertFalse(type_.modified_permissive)
+        self.assertFalse(type_.permissive)
+        self.assertFalse(type_.removed_aliases)
+        self.assertFalse(type_.matched_aliases)
 
     def test_modified_types_add_permissive(self):
         """Diff: modified type with added permissive."""
-        self.assertIn("modified_add_permissive", self.diff.modified_types)
-        self.assertFalse(self.diff.modified_types["modified_add_permissive"].added_attributes)
-        self.assertFalse(self.diff.modified_types["modified_add_permissive"].removed_attributes)
-        self.assertFalse(self.diff.modified_types["modified_add_permissive"].matched_attributes)
-        self.assertTrue(self.diff.modified_types["modified_add_permissive"].modified_permissive)
-        self.assertFalse(self.diff.modified_types["modified_add_permissive"].permissive)
-        self.assertFalse(self.diff.modified_types["modified_add_permissive"].added_aliases)
-        self.assertFalse(self.diff.modified_types["modified_add_permissive"].removed_aliases)
-        self.assertFalse(self.diff.modified_types["modified_add_permissive"].matched_aliases)
+        # modified_add_permissive
+        self.diff.modified_types.sort()
+        type_ = self.diff.modified_types[2]
+        self.assertFalse(type_.added_attributes)
+        self.assertFalse(type_.removed_attributes)
+        self.assertFalse(type_.matched_attributes)
+        self.assertTrue(type_.modified_permissive)
+        self.assertFalse(type_.permissive)
+        self.assertFalse(type_.added_aliases)
+        self.assertFalse(type_.removed_aliases)
+        self.assertFalse(type_.matched_aliases)
 
     #
     # Roles
@@ -146,15 +154,19 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_role_add_type(self):
         """Diff: modified role with added type."""
+        # modified_add_type
+        self.diff.modified_roles.sort()
         self.assertSetEqual(set(["system"]),
-                            self.diff.modified_roles["modified_add_type"].added_types)
-        self.assertFalse(self.diff.modified_roles["modified_add_type"].removed_types)
+                            self.diff.modified_roles[0].added_types)
+        self.assertFalse(self.diff.modified_roles[0].removed_types)
 
     def test_modified_role_remove_type(self):
         """Diff: modified role with removed type."""
+        # modified_remove_type
+        self.diff.modified_roles.sort()
         self.assertSetEqual(set(["system"]),
-                            self.diff.modified_roles["modified_remove_type"].removed_types)
-        self.assertFalse(self.diff.modified_roles["modified_remove_type"].added_types)
+                            self.diff.modified_roles[1].removed_types)
+        self.assertFalse(self.diff.modified_roles[1].added_types)
 
     #
     # Commons
@@ -173,15 +185,19 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_common_add_perm(self):
         """Diff: modified common with added perm."""
+        # modified_add_perm
+        self.diff.modified_commons.sort()
         self.assertSetEqual(set(["added_perm"]),
-                            self.diff.modified_commons["modified_add_perm"].added_perms)
-        self.assertFalse(self.diff.modified_commons["modified_add_perm"].removed_perms)
+                            self.diff.modified_commons[0].added_perms)
+        self.assertFalse(self.diff.modified_commons[0].removed_perms)
 
     def test_modified_common_remove_perm(self):
         """Diff: modified common with removed perm."""
+        # modified_remove_perm
+        self.diff.modified_commons.sort()
         self.assertSetEqual(set(["removed_perm"]),
-                            self.diff.modified_commons["modified_remove_perm"].removed_perms)
-        self.assertFalse(self.diff.modified_commons["modified_remove_perm"].added_perms)
+                            self.diff.modified_commons[1].removed_perms)
+        self.assertFalse(self.diff.modified_commons[1].added_perms)
 
     #
     # Classes
@@ -200,22 +216,28 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_class_add_perm(self):
         """Diff: modified class with added perm."""
+        # modified_add_perm
+        self.diff.modified_classes.sort()
         self.assertSetEqual(set(["added_perm"]),
-                            self.diff.modified_classes["modified_add_perm"].added_perms)
-        self.assertFalse(self.diff.modified_classes["modified_add_perm"].removed_perms)
+                            self.diff.modified_classes[0].added_perms)
+        self.assertFalse(self.diff.modified_classes[0].removed_perms)
 
     def test_modified_class_remove_perm(self):
         """Diff: modified class with removed perm."""
+        # modified_remove_perm
+        self.diff.modified_classes.sort()
         self.assertSetEqual(set(["removed_perm"]),
-                            self.diff.modified_classes["modified_remove_perm"].removed_perms)
-        self.assertFalse(self.diff.modified_classes["modified_remove_perm"].added_perms)
+                            self.diff.modified_classes[2].removed_perms)
+        self.assertFalse(self.diff.modified_classes[2].added_perms)
 
     def test_modified_class_change_common(self):
         """Diff: modified class due to modified common."""
+        # modified_change_common
+        self.diff.modified_classes.sort()
         self.assertSetEqual(set(["old_com"]),
-                            self.diff.modified_classes["modified_change_common"].removed_perms)
+                            self.diff.modified_classes[1].removed_perms)
         self.assertSetEqual(set(["new_com"]),
-                            self.diff.modified_classes["modified_change_common"].added_perms)
+                            self.diff.modified_classes[1].added_perms)
 
     #
     # Allow rules
@@ -884,27 +906,35 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
     def test_modified_user_add_role(self):
         """Diff: modified user with added role."""
+        # modified_add_role
+        self.diff.modified_users.sort()
         self.assertSetEqual(set(["added_role"]),
-                            self.diff.modified_users["modified_add_role"].added_roles)
-        self.assertFalse(self.diff.modified_users["modified_add_role"].removed_roles)
+                            self.diff.modified_users[0].added_roles)
+        self.assertFalse(self.diff.modified_users[0].removed_roles)
 
     def test_modified_user_remove_role(self):
         """Diff: modified user with removed role."""
+        # modified_remove_role
+        self.diff.modified_users.sort()
         self.assertSetEqual(set(["removed_role"]),
-                            self.diff.modified_users["modified_remove_role"].removed_roles)
-        self.assertFalse(self.diff.modified_users["modified_remove_role"].added_roles)
+                            self.diff.modified_users[3].removed_roles)
+        self.assertFalse(self.diff.modified_users[3].added_roles)
 
     def test_modified_user_change_level(self):
         """Diff: modified user due to modified default level."""
-        self.assertEqual("s2:c0", self.diff.modified_users["modified_change_level"].removed_level)
-        self.assertEqual("s2:c1", self.diff.modified_users["modified_change_level"].added_level)
+        # modified_change_level
+        self.diff.modified_users.sort()
+        self.assertEqual("s2:c0", self.diff.modified_users[1].removed_level)
+        self.assertEqual("s2:c1", self.diff.modified_users[1].added_level)
 
     def test_modified_user_change_range(self):
         """Diff: modified user due to modified range."""
+        # modified_change_range
+        self.diff.modified_users.sort()
         self.assertEqual("s3:c1 - s3:c1.c3",
-                         self.diff.modified_users["modified_change_range"].removed_range)
+                         self.diff.modified_users[2].removed_range)
         self.assertEqual("s3:c1 - s3:c1.c4",
-                         self.diff.modified_users["modified_change_range"].added_range)
+                         self.diff.modified_users[2].added_range)
 
     #
     # Type attributes
@@ -921,9 +951,9 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         """Diff: modified type attribute."""
         self.assertEqual(1, len(self.diff.modified_type_attributes))
         self.assertSetEqual(set(["modified_add_attr"]),
-                            self.diff.modified_type_attributes["an_attr"].added_types)
+                            self.diff.modified_type_attributes[0].added_types)
         self.assertSetEqual(set(["modified_remove_attr"]),
-                            self.diff.modified_type_attributes["an_attr"].removed_types)
+                            self.diff.modified_type_attributes[0].removed_types)
 
     #
     # Booleans
@@ -939,8 +969,8 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
     def test_modified_boolean(self):
         """Diff: modified boolean."""
         self.assertEqual(1, len(self.diff.modified_booleans))
-        self.assertTrue(self.diff.modified_booleans["modified_bool"].added_state)
-        self.assertFalse(self.diff.modified_booleans["modified_bool"].removed_state)
+        self.assertTrue(self.diff.modified_booleans[0].added_state)
+        self.assertFalse(self.diff.modified_booleans[0].removed_state)
 
     #
     # Categories
@@ -956,14 +986,15 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
     def test_modified_category(self):
         """Diff: modified categories."""
         self.assertEqual(2, len(self.diff.modified_categories))
+        self.diff.modified_categories.sort()
 
-        # add alias
-        self.assertEqual(set(["foo"]), self.diff.modified_categories["c1"].added_aliases)
-        self.assertFalse(self.diff.modified_categories["c1"].removed_aliases)
+        # add alias on c1
+        self.assertEqual(set(["foo"]), self.diff.modified_categories[1].added_aliases)
+        self.assertFalse(self.diff.modified_categories[1].removed_aliases)
 
-        # remove alias
-        self.assertFalse(self.diff.modified_categories["c0"].added_aliases)
-        self.assertEqual(set(["eggs"]), self.diff.modified_categories["c0"].removed_aliases)
+        # remove alias on c0
+        self.assertFalse(self.diff.modified_categories[0].added_aliases)
+        self.assertEqual(set(["eggs"]), self.diff.modified_categories[0].removed_aliases)
 
     #
     # Sensitivity
@@ -979,14 +1010,15 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
     def test_modified_sensitivities(self):
         """Diff: modified sensitivities."""
         self.assertEqual(2, len(self.diff.modified_sensitivities))
+        self.diff.modified_sensitivities.sort()
 
-        # add alias
-        self.assertSetEqual(set(["al4"]), self.diff.modified_sensitivities["s1"].added_aliases)
-        self.assertFalse(self.diff.modified_sensitivities["s1"].removed_aliases)
+        # add alias to s1
+        self.assertSetEqual(set(["al4"]), self.diff.modified_sensitivities[1].added_aliases)
+        self.assertFalse(self.diff.modified_sensitivities[1].removed_aliases)
 
-        # remove alias
-        self.assertFalse(self.diff.modified_sensitivities["s0"].added_aliases)
-        self.assertSetEqual(set(["al2"]), self.diff.modified_sensitivities["s0"].removed_aliases)
+        # remove alias from s0
+        self.assertFalse(self.diff.modified_sensitivities[0].added_aliases)
+        self.assertSetEqual(set(["al2"]), self.diff.modified_sensitivities[0].removed_aliases)
 
     #
     # Initial SIDs
@@ -1004,9 +1036,9 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         """Diff: modified initialsids."""
         self.assertEqual(1, len(self.diff.modified_initialsids))
         self.assertEqual("system:system:system:s0",
-                         self.diff.modified_initialsids["fs"].added_context)
+                         self.diff.modified_initialsids[0].added_context)
         self.assertEqual("removed_user:system:system:s0",
-                         self.diff.modified_initialsids["fs"].removed_context)
+                         self.diff.modified_initialsids[0].removed_context)
 
     #
     # fs_use_*
@@ -1251,11 +1283,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         portcon = lst[0]
         self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertTupleEqual((2024, 2026), portcon.ports)
+        self.assertEqual(PortconRange(2024, 2026), portcon.ports)
 
         portcon = lst[1]
         self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertTupleEqual((2024, 2024), portcon.ports)
+        self.assertEqual(PortconRange(2024, 2024), portcon.ports)
 
     def test_removed_portcons(self):
         """Diff: removed portcons."""
@@ -1264,11 +1296,11 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         portcon = lst[0]
         self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertTupleEqual((1024, 1026), portcon.ports)
+        self.assertEqual(PortconRange(1024, 1026), portcon.ports)
 
         portcon = lst[1]
         self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertTupleEqual((1024, 1024), portcon.ports)
+        self.assertEqual(PortconRange(1024, 1024), portcon.ports)
 
     def test_modified_portcons(self):
         """Diff: modified portcons."""
@@ -1277,13 +1309,13 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
 
         portcon, added_context, removed_context = astuple(lst[0])
         self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertTupleEqual((3024, 3026), portcon.ports)
+        self.assertEqual(PortconRange(3024, 3026), portcon.ports)
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 
         portcon, added_context, removed_context = astuple(lst[1])
         self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertTupleEqual((3024, 3024), portcon.ports)
+        self.assertEqual(PortconRange(3024, 3024), portcon.ports)
         self.assertEqual("added_user:object_r:system:s1", added_context)
         self.assertEqual("removed_user:object_r:system:s0", removed_context)
 

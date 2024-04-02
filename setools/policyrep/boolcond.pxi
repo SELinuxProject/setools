@@ -4,7 +4,15 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-TruthTableRow = collections.namedtuple("TruthTableRow", ["values", "result"])
+@dataclasses.dataclass(eq=True, frozen=True)
+class TruthTableRow:
+
+    """A single row of a Conditional expression truth table."""
+
+    # key: Boolean name; value: True/False (state of the Boolean).
+    values: dict[str, bool]
+    result: bool
+
 
 cdef object _cond_cache = WeakKeyDefaultDict(dict)
 
@@ -29,7 +37,7 @@ cdef class Boolean(PolicySymbol):
 
     def statement(self):
         """The policy statement."""
-        return "bool {0} {1};".format(self.name, str(self.state).lower())
+        return f"bool {self.name} {str(self.state).lower()};"
 
 
 cdef class Conditional(PolicyObject):
