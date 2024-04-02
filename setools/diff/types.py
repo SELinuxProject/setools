@@ -66,10 +66,6 @@ class TypesDifference(Difference):
 
     """Determine the difference in types between two policies."""
 
-    added_types = DiffResultDescriptor[Type]("diff_types")
-    removed_types = DiffResultDescriptor[Type]("diff_types")
-    modified_types = DiffResultDescriptor[ModifiedType]("diff_types")
-
     def diff_types(self) -> None:
         """Generate the difference in types between the policies."""
 
@@ -109,6 +105,10 @@ class TypesDifference(Difference):
                                                         added_aliases,
                                                         removed_aliases,
                                                         matched_aliases))
+
+    added_types = DiffResultDescriptor[Type](diff_types)
+    removed_types = DiffResultDescriptor[Type](diff_types)
+    modified_types = DiffResultDescriptor[ModifiedType](diff_types)
 
     #
     # Internal functions

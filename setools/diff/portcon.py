@@ -25,10 +25,6 @@ class PortconsDifference(Difference):
 
     """Determine the difference in portcons between two policies."""
 
-    added_portcons = DiffResultDescriptor[Portcon]("diff_portcons")
-    removed_portcons = DiffResultDescriptor[Portcon]("diff_portcons")
-    modified_portcons = DiffResultDescriptor[ModifiedPortcon]("diff_portcons")
-
     def diff_portcons(self) -> None:
         """Generate the difference in portcons between the policies."""
 
@@ -48,6 +44,10 @@ class PortconsDifference(Difference):
                 self.modified_portcons.append(ModifiedPortcon(left_portcon,
                                                               right_portcon.context,
                                                               left_portcon.context))
+
+    added_portcons = DiffResultDescriptor[Portcon](diff_portcons)
+    removed_portcons = DiffResultDescriptor[Portcon](diff_portcons)
+    modified_portcons = DiffResultDescriptor[ModifiedPortcon](diff_portcons)
 
     #
     # Internal functions

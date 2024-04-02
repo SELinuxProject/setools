@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
+from collections.abc import Callable
 import typing
 
 T = typing.TypeVar("T")
@@ -15,7 +16,7 @@ class DiffResultDescriptor(typing.Generic[T]):
     # @properties could be used instead, but there are so
     # many result attributes, this will keep the code cleaner.
 
-    def __init__(self, diff_function: str) -> None:
+    def __init__(self, diff_function: Callable[[typing.Any], None]) -> None:
         self.diff_function = diff_function
         self.name: str
 
@@ -27,8 +28,11 @@ class DiffResultDescriptor(typing.Generic[T]):
             raise AttributeError
 
         if getattr(obj, self.name, None) is None:
-            diff = getattr(obj, self.diff_function)
-            diff()
+            # must specify obj here since the function is not bound to a
+            # a particular instance.  Otherwise you get:
+            # TypeError: av_diff_template.<locals>.diff() missing 1 required
+            # positional argument: 'self'
+            self.diff_function(obj)
 
         return getattr(obj, self.name)
 

@@ -25,10 +25,6 @@ class GenfsconsDifference(Difference):
 
     """Determine the difference in genfscon rules between two policies."""
 
-    added_genfscons = DiffResultDescriptor[Genfscon]("diff_genfscons")
-    removed_genfscons = DiffResultDescriptor[Genfscon]("diff_genfscons")
-    modified_genfscons = DiffResultDescriptor[ModifiedGenfscon]("diff_genfscons")
-
     def diff_genfscons(self) -> None:
         """Generate the difference in genfscon rules between the policies."""
 
@@ -48,6 +44,10 @@ class GenfsconsDifference(Difference):
                 self.modified_genfscons.append(ModifiedGenfscon(left_rule,
                                                                 right_rule.context,
                                                                 left_rule.context))
+
+    added_genfscons = DiffResultDescriptor[Genfscon](diff_genfscons)
+    removed_genfscons = DiffResultDescriptor[Genfscon](diff_genfscons)
+    modified_genfscons = DiffResultDescriptor[ModifiedGenfscon](diff_genfscons)
 
     #
     # Internal functions

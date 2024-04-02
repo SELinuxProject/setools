@@ -45,10 +45,6 @@ class TypeAttributesDifference(Difference):
 
     """Determine the difference in type attributes between two policies."""
 
-    added_type_attributes = DiffResultDescriptor[TypeAttribute]("diff_type_attributes")
-    removed_type_attributes = DiffResultDescriptor[TypeAttribute]("diff_type_attributes")
-    modified_type_attributes = DiffResultDescriptor[ModifiedTypeAttribute]("diff_type_attributes")
-
     def diff_type_attributes(self) -> None:
         """Generate the difference in type attributes between the policies."""
 
@@ -73,6 +69,10 @@ class TypeAttributesDifference(Difference):
             if added_types or removed_types:
                 self.modified_type_attributes.append(ModifiedTypeAttribute(
                     left_attribute, added_types, removed_types, matched_types))
+
+    added_type_attributes = DiffResultDescriptor[TypeAttribute](diff_type_attributes)
+    removed_type_attributes = DiffResultDescriptor[TypeAttribute](diff_type_attributes)
+    modified_type_attributes = DiffResultDescriptor[ModifiedTypeAttribute](diff_type_attributes)
 
     #
     # Internal functions

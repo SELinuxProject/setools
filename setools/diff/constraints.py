@@ -30,23 +30,6 @@ class ConstraintsDifference(Difference):
     be reflected as a difference.
     """
 
-    added_constrains = DiffResultDescriptor[policyrep.Constraint]("diff_constrains")
-    removed_constrains = DiffResultDescriptor[policyrep.Constraint]("diff_constrains")
-
-    added_mlsconstrains = DiffResultDescriptor[policyrep.Constraint]("diff_mlsconstrains")
-    removed_mlsconstrains = DiffResultDescriptor[policyrep.Constraint]("diff_mlsconstrains")
-
-    added_validatetrans = DiffResultDescriptor[policyrep.Validatetrans]("diff_validatetrans")
-    removed_validatetrans = DiffResultDescriptor[policyrep.Validatetrans]("diff_validatetrans")
-
-    added_mlsvalidatetrans = DiffResultDescriptor[policyrep.Validatetrans]("diff_mlsvalidatetrans")
-    removed_mlsvalidatetrans = DiffResultDescriptor[policyrep.Validatetrans](
-        "diff_mlsvalidatetrans")
-
-    # Lists of rules for each policy
-    _left_constraints: RuleList[policyrep.ConstraintRuletype, policyrep.AnyConstraint] = None
-    _right_constraints: RuleList[policyrep.ConstraintRuletype, policyrep.AnyConstraint] = None
-
     def diff_constrains(self) -> None:
         """Generate the difference in constraint rules between the policies."""
 
@@ -120,6 +103,22 @@ class ConstraintsDifference(Difference):
                 policyrep.ConstraintRuletype.mlsvalidatetrans]),
             (ConstraintWrapper(c) for c in self._right_constraints[
                 policyrep.ConstraintRuletype.mlsvalidatetrans]))
+
+    added_constrains = DiffResultDescriptor[policyrep.Constraint](diff_constrains)
+    removed_constrains = DiffResultDescriptor[policyrep.Constraint](diff_constrains)
+
+    added_mlsconstrains = DiffResultDescriptor[policyrep.Constraint](diff_mlsconstrains)
+    removed_mlsconstrains = DiffResultDescriptor[policyrep.Constraint](diff_mlsconstrains)
+
+    added_validatetrans = DiffResultDescriptor[policyrep.Validatetrans](diff_validatetrans)
+    removed_validatetrans = DiffResultDescriptor[policyrep.Validatetrans](diff_validatetrans)
+
+    added_mlsvalidatetrans = DiffResultDescriptor[policyrep.Validatetrans](diff_mlsvalidatetrans)
+    removed_mlsvalidatetrans = DiffResultDescriptor[policyrep.Validatetrans](diff_mlsvalidatetrans)
+
+    # Lists of rules for each policy
+    _left_constraints: RuleList[policyrep.ConstraintRuletype, policyrep.AnyConstraint] = None
+    _right_constraints: RuleList[policyrep.ConstraintRuletype, policyrep.AnyConstraint] = None
 
     #
     # Internal functions

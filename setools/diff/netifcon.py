@@ -27,10 +27,6 @@ class NetifconsDifference(Difference):
 
     """Determine the difference in netifcons between two policies."""
 
-    added_netifcons = DiffResultDescriptor[Netifcon]("diff_netifcons")
-    removed_netifcons = DiffResultDescriptor[Netifcon]("diff_netifcons")
-    modified_netifcons = DiffResultDescriptor[ModifiedNetifcon]("diff_netifcons")
-
     def diff_netifcons(self) -> None:
         """Generate the difference in netifcons between the policies."""
 
@@ -64,6 +60,10 @@ class NetifconsDifference(Difference):
             if removed_context or removed_packet:
                 self.modified_netifcons.append(ModifiedNetifcon(
                     left_netifcon, added_context, removed_context, added_packet, removed_packet))
+
+    added_netifcons = DiffResultDescriptor[Netifcon](diff_netifcons)
+    removed_netifcons = DiffResultDescriptor[Netifcon](diff_netifcons)
+    modified_netifcons = DiffResultDescriptor[ModifiedNetifcon](diff_netifcons)
 
     #
     # Internal functions

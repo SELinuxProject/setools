@@ -27,10 +27,6 @@ class CommonDifference(Difference):
     between two policies.
     """
 
-    added_commons = DiffResultDescriptor[policyrep.Common]("diff_commons")
-    removed_commons = DiffResultDescriptor[policyrep.Common]("diff_commons")
-    modified_commons = DiffResultDescriptor[ModifiedCommon]("diff_commons")
-
     def diff_commons(self) -> None:
         """Generate the difference in commons between the policies."""
 
@@ -55,6 +51,10 @@ class CommonDifference(Difference):
                                                             added_perms,
                                                             removed_perms,
                                                             matched_perms))
+
+    added_commons = DiffResultDescriptor[policyrep.Common](diff_commons)
+    removed_commons = DiffResultDescriptor[policyrep.Common](diff_commons)
+    modified_commons = DiffResultDescriptor[ModifiedCommon](diff_commons)
 
     #
     # Internal functions

@@ -30,8 +30,6 @@ class PropertiesDifference(Difference):
     (unknown permissions, MLS, etc.) between two policies.
     """
 
-    modified_properties = DiffResultDescriptor[ModifiedProperty]("diff_properties")
-
     def diff_properties(self) -> None:
         self.modified_properties = list[ModifiedProperty]()
 
@@ -52,6 +50,8 @@ class PropertiesDifference(Difference):
                 ModifiedProperty("version",
                                  self.right_policy.version,
                                  self.left_policy.version))
+
+    modified_properties = DiffResultDescriptor[ModifiedProperty](diff_properties)
 
     #
     # Internal functions

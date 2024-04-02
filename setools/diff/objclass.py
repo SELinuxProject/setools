@@ -51,10 +51,6 @@ class ObjClassDifference(Difference):
     between two policies.
     """
 
-    added_classes = DiffResultDescriptor[ObjClass]("diff_classes")
-    removed_classes = DiffResultDescriptor[ObjClass]("diff_classes")
-    modified_classes = DiffResultDescriptor[ModifiedObjClass]("diff_classes")
-
     def diff_classes(self) -> None:
         """Generate the difference in object classes between the policies."""
 
@@ -88,6 +84,10 @@ class ObjClassDifference(Difference):
                                                               added_perms,
                                                               removed_perms,
                                                               matched_perms))
+
+    added_classes = DiffResultDescriptor[ObjClass](diff_classes)
+    removed_classes = DiffResultDescriptor[ObjClass](diff_classes)
+    modified_classes = DiffResultDescriptor[ModifiedObjClass](diff_classes)
 
     #
     # Internal functions

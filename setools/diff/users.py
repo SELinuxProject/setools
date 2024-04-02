@@ -52,10 +52,6 @@ class UsersDifference(Difference):
 
     """Determine the difference in users between two policies."""
 
-    added_users = DiffResultDescriptor[User]("diff_users")
-    removed_users = DiffResultDescriptor[User]("diff_users")
-    modified_users = DiffResultDescriptor[ModifiedUser]("diff_users")
-
     def diff_users(self) -> None:
         """Generate the difference in users between the policies."""
 
@@ -136,6 +132,10 @@ class UsersDifference(Difference):
                                                         removed_level,
                                                         added_range,
                                                         removed_range))
+
+    added_users = DiffResultDescriptor[User](diff_users)
+    removed_users = DiffResultDescriptor[User](diff_users)
+    modified_users = DiffResultDescriptor[ModifiedUser](diff_users)
 
     #
     # Internal functions

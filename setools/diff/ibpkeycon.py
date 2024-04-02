@@ -25,10 +25,6 @@ class IbpkeyconsDifference(Difference):
 
     """Determine the difference in ibpkeycons between two policies."""
 
-    added_ibpkeycons = DiffResultDescriptor[Ibpkeycon]("diff_ibpkeycons")
-    removed_ibpkeycons = DiffResultDescriptor[Ibpkeycon]("diff_ibpkeycons")
-    modified_ibpkeycons = DiffResultDescriptor[ModifiedIbpkeycon]("diff_ibpkeycons")
-
     def diff_ibpkeycons(self) -> None:
         """Generate the difference in ibpkeycons between the policies."""
 
@@ -48,6 +44,10 @@ class IbpkeyconsDifference(Difference):
             if ContextWrapper(left_ibpkey.context) != ContextWrapper(right_ibpkey.context):
                 self.modified_ibpkeycons.append(
                     ModifiedIbpkeycon(left_ibpkey, right_ibpkey.context, left_ibpkey.context))
+
+    added_ibpkeycons = DiffResultDescriptor[Ibpkeycon](diff_ibpkeycons)
+    removed_ibpkeycons = DiffResultDescriptor[Ibpkeycon](diff_ibpkeycons)
+    modified_ibpkeycons = DiffResultDescriptor[ModifiedIbpkeycon](diff_ibpkeycons)
 
     #
     # Internal functions

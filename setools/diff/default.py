@@ -26,10 +26,6 @@ class DefaultsDifference(Difference):
 
     """Determine the difference in default_* between two policies."""
 
-    added_defaults = DiffResultDescriptor[AnyDefault]("diff_defaults")
-    removed_defaults = DiffResultDescriptor[AnyDefault]("diff_defaults")
-    modified_defaults = DiffResultDescriptor[ModifiedDefault]("diff_defaults")
-
     def diff_defaults(self) -> None:
         """Generate the difference in type defaults between the policies."""
 
@@ -72,6 +68,10 @@ class DefaultsDifference(Difference):
                                     removed_default,
                                     added_default_range,
                                     removed_default_range))
+
+    added_defaults = DiffResultDescriptor[AnyDefault](diff_defaults)
+    removed_defaults = DiffResultDescriptor[AnyDefault](diff_defaults)
+    modified_defaults = DiffResultDescriptor[ModifiedDefault](diff_defaults)
 
     #
     # Internal functions

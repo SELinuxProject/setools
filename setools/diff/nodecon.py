@@ -26,10 +26,6 @@ class NodeconsDifference(Difference):
 
     """Determine the difference in nodecons between two policies."""
 
-    added_nodecons = DiffResultDescriptor[Nodecon]("diff_nodecons")
-    removed_nodecons = DiffResultDescriptor[Nodecon]("diff_nodecons")
-    modified_nodecons = DiffResultDescriptor[ModifiedNodecon]("diff_nodecons")
-
     def diff_nodecons(self) -> None:
         """Generate the difference in nodecons between the policies."""
 
@@ -49,6 +45,10 @@ class NodeconsDifference(Difference):
                 self.modified_nodecons.append(ModifiedNodecon(left_nodecon,
                                                               right_nodecon.context,
                                                               left_nodecon.context))
+
+    added_nodecons = DiffResultDescriptor[Nodecon](diff_nodecons)
+    removed_nodecons = DiffResultDescriptor[Nodecon](diff_nodecons)
+    modified_nodecons = DiffResultDescriptor[ModifiedNodecon](diff_nodecons)
 
     #
     # Internal functions

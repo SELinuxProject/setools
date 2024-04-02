@@ -30,18 +30,6 @@ class RBACRulesDifference(Difference):
 
     """Determine the difference in RBAC rules between two policies."""
 
-    added_role_allows = DiffResultDescriptor[RoleAllow]("diff_role_allows")
-    removed_role_allows = DiffResultDescriptor[RoleAllow]("diff_role_allows")
-    # role allows cannot be modified, only added/removed
-
-    added_role_transitions = DiffResultDescriptor[RoleTransition]("diff_role_transitions")
-    removed_role_transitions = DiffResultDescriptor[RoleTransition]("diff_role_transitions")
-    modified_role_transitions = DiffResultDescriptor[ModifiedRBACRule]("diff_role_transitions")
-
-    # Lists of rules for each policy
-    _left_rbac_rules: RuleList[RBACRuletype, AnyRBACRule] = None
-    _right_rbac_rules: RuleList[RBACRuletype, AnyRBACRule] = None
-
     def diff_role_allows(self) -> None:
         """Generate the difference in role allow rules between the policies."""
 
@@ -89,6 +77,18 @@ class RBACRulesDifference(Difference):
         self.added_role_transitions = added
         self.removed_role_transitions = removed
         self.modified_role_transitions = modified
+
+    added_role_allows = DiffResultDescriptor[RoleAllow](diff_role_allows)
+    removed_role_allows = DiffResultDescriptor[RoleAllow](diff_role_allows)
+    # role allows cannot be modified, only added/removed
+
+    added_role_transitions = DiffResultDescriptor[RoleTransition](diff_role_transitions)
+    removed_role_transitions = DiffResultDescriptor[RoleTransition](diff_role_transitions)
+    modified_role_transitions = DiffResultDescriptor[ModifiedRBACRule](diff_role_transitions)
+
+    # Lists of rules for each policy
+    _left_rbac_rules: RuleList[RBACRuletype, AnyRBACRule] = None
+    _right_rbac_rules: RuleList[RBACRuletype, AnyRBACRule] = None
 
     #
     # Internal functions

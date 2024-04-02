@@ -25,10 +25,6 @@ class InitialSIDsDifference(Difference):
 
     """Determine the difference in initsids between two policies."""
 
-    added_initialsids = DiffResultDescriptor[policyrep.InitialSID]("diff_initialsids")
-    removed_initialsids = DiffResultDescriptor[policyrep.InitialSID]("diff_initialsids")
-    modified_initialsids = DiffResultDescriptor[ModifiedInitialSID]("diff_initialsids")
-
     def diff_initialsids(self) -> None:
         """Generate the difference in initial SIDs between the policies."""
 
@@ -47,6 +43,10 @@ class InitialSIDsDifference(Difference):
             if ContextWrapper(left_initialsid.context) != ContextWrapper(right_initialsid.context):
                 self.modified_initialsids.append(ModifiedInitialSID(
                     left_initialsid, right_initialsid.context, left_initialsid.context))
+
+    added_initialsids = DiffResultDescriptor[policyrep.InitialSID](diff_initialsids)
+    removed_initialsids = DiffResultDescriptor[policyrep.InitialSID](diff_initialsids)
+    modified_initialsids = DiffResultDescriptor[ModifiedInitialSID](diff_initialsids)
 
     #
     # Internal functions

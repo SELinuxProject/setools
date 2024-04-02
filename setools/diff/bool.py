@@ -45,10 +45,6 @@ class BooleansDifference(Difference):
 
     """Determine the difference in type attributes between two policies."""
 
-    added_booleans = DiffResultDescriptor[Boolean]("diff_booleans")
-    removed_booleans = DiffResultDescriptor[Boolean]("diff_booleans")
-    modified_booleans = DiffResultDescriptor[ModifiedBoolean]("diff_booleans")
-
     def diff_booleans(self) -> None:
         """Generate the difference in type attributes between the policies."""
 
@@ -69,6 +65,10 @@ class BooleansDifference(Difference):
                 self.modified_booleans.append(ModifiedBoolean(left_boolean,
                                                               right_boolean.state,
                                                               left_boolean.state))
+
+    added_booleans = DiffResultDescriptor[Boolean](diff_booleans)
+    removed_booleans = DiffResultDescriptor[Boolean](diff_booleans)
+    modified_booleans = DiffResultDescriptor[ModifiedBoolean](diff_booleans)
 
     #
     # Internal functions

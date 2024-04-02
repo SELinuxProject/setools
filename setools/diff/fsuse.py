@@ -25,10 +25,6 @@ class FSUsesDifference(Difference):
 
     """Determine the difference in fs_use_* rules between two policies."""
 
-    added_fs_uses = DiffResultDescriptor[FSUse]("diff_fs_uses")
-    removed_fs_uses = DiffResultDescriptor[FSUse]("diff_fs_uses")
-    modified_fs_uses = DiffResultDescriptor[ModifiedFSUse]("diff_fs_uses")
-
     def diff_fs_uses(self) -> None:
         """Generate the difference in fs_use rules between the policies."""
 
@@ -48,6 +44,10 @@ class FSUsesDifference(Difference):
                 self.modified_fs_uses.append(ModifiedFSUse(left_rule,
                                                            right_rule.context,
                                                            left_rule.context))
+
+    added_fs_uses = DiffResultDescriptor[FSUse](diff_fs_uses)
+    removed_fs_uses = DiffResultDescriptor[FSUse](diff_fs_uses)
+    modified_fs_uses = DiffResultDescriptor[ModifiedFSUse](diff_fs_uses)
 
     #
     # Internal functions

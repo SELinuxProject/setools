@@ -46,10 +46,6 @@ class RolesDifference(Difference):
 
     """Determine the difference in roles between two policies."""
 
-    added_roles = DiffResultDescriptor[Role]("diff_roles")
-    removed_roles = DiffResultDescriptor[Role]("diff_roles")
-    modified_roles = DiffResultDescriptor[ModifiedRole]("diff_roles")
-
     def diff_roles(self) -> None:
         """Generate the difference in roles between the policies."""
 
@@ -75,6 +71,10 @@ class RolesDifference(Difference):
                                                         added_types,
                                                         removed_types,
                                                         matched_types))
+
+    added_roles = DiffResultDescriptor[Role](diff_roles)
+    removed_roles = DiffResultDescriptor[Role](diff_roles)
+    modified_roles = DiffResultDescriptor[ModifiedRole](diff_roles)
 
     #
     # Internal functions

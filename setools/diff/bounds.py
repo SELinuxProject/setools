@@ -27,14 +27,6 @@ class BoundsDifference(Difference):
 
     """Determine the difference in *bounds between two policies."""
 
-    added_typebounds = DiffResultDescriptor[Bounds]("diff_typebounds")
-    removed_typebounds = DiffResultDescriptor[Bounds]("diff_typebounds")
-    modified_typebounds = DiffResultDescriptor[ModifiedBounds]("diff_typebounds")
-
-    # Lists of rules for each policy
-    _left_typebounds: list[Bounds] | None = None
-    _right_typebounds: list[Bounds] | None = None
-
     def diff_typebounds(self) -> None:
         """Generate the difference in typebound rules between the policies."""
 
@@ -55,6 +47,14 @@ class BoundsDifference(Difference):
             if type_wrapper_factory(left_bound.parent) != type_wrapper_factory(right_bound.parent):
                 self.modified_typebounds.append(ModifiedBounds(
                     left_bound, right_bound.parent, left_bound.parent))
+
+    added_typebounds = DiffResultDescriptor[Bounds](diff_typebounds)
+    removed_typebounds = DiffResultDescriptor[Bounds](diff_typebounds)
+    modified_typebounds = DiffResultDescriptor[ModifiedBounds](diff_typebounds)
+
+    # Lists of rules for each policy
+    _left_typebounds: list[Bounds] | None = None
+    _right_typebounds: list[Bounds] | None = None
 
     #
     # Internal functions

@@ -83,10 +83,6 @@ class CategoriesDifference(Difference):
 
     """Determine the difference in categories between two policies."""
 
-    added_categories = DiffResultDescriptor[Category]("diff_categories")
-    removed_categories = DiffResultDescriptor[Category]("diff_categories")
-    modified_categories = DiffResultDescriptor[ModifiedCategory]("diff_categories")
-
     def diff_categories(self) -> None:
         """Generate the difference in categories between the policies."""
 
@@ -111,6 +107,10 @@ class CategoriesDifference(Difference):
                                                                  removed_aliases,
                                                                  matched_aliases))
 
+    added_categories = DiffResultDescriptor[Category](diff_categories)
+    removed_categories = DiffResultDescriptor[Category](diff_categories)
+    modified_categories = DiffResultDescriptor[ModifiedCategory](diff_categories)
+
     #
     # Internal functions
     #
@@ -125,10 +125,6 @@ class CategoriesDifference(Difference):
 class SensitivitiesDifference(Difference):
 
     """Determine the difference in sensitivities between two policies."""
-
-    added_sensitivities = DiffResultDescriptor[Sensitivity]("diff_sensitivities")
-    removed_sensitivities = DiffResultDescriptor[Sensitivity]("diff_sensitivities")
-    modified_sensitivities = DiffResultDescriptor[ModifiedSensitivity]("diff_sensitivities")
 
     def diff_sensitivities(self) -> None:
         """Generate the difference in sensitivities between the policies."""
@@ -155,6 +151,10 @@ class SensitivitiesDifference(Difference):
                                                                        removed_aliases,
                                                                        matched_aliases))
 
+    added_sensitivities = DiffResultDescriptor[Sensitivity](diff_sensitivities)
+    removed_sensitivities = DiffResultDescriptor[Sensitivity](diff_sensitivities)
+    modified_sensitivities = DiffResultDescriptor[ModifiedSensitivity](diff_sensitivities)
+
     #
     # Internal functions
     #
@@ -169,10 +169,6 @@ class SensitivitiesDifference(Difference):
 class LevelDeclsDifference(Difference):
 
     """Determine the difference in levels between two policies."""
-
-    added_levels = DiffResultDescriptor[LevelDecl]("diff_levels")
-    removed_levels = DiffResultDescriptor[LevelDecl]("diff_levels")
-    modified_levels = DiffResultDescriptor[ModifiedLevelDecl]("diff_levels")
 
     def diff_levels(self) -> None:
         """Generate the difference in levels between the policies."""
@@ -197,6 +193,10 @@ class LevelDeclsDifference(Difference):
             if added_categories or removed_categories:
                 self.modified_levels.append(ModifiedLevelDecl(
                     left_level, added_categories, removed_categories, matched_categories))
+
+    added_levels = DiffResultDescriptor[LevelDecl](diff_levels)
+    removed_levels = DiffResultDescriptor[LevelDecl](diff_levels)
+    modified_levels = DiffResultDescriptor[ModifiedLevelDecl](diff_levels)
 
     #
     # Internal functions

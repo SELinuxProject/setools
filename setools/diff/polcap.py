@@ -12,9 +12,6 @@ class PolCapsDifference(Difference):
 
     """Determine the difference in polcaps between two policies."""
 
-    added_polcaps = DiffResultDescriptor[policyrep.PolicyCapability]("diff_polcaps")
-    removed_polcaps = DiffResultDescriptor[policyrep.PolicyCapability]("diff_polcaps")
-
     def diff_polcaps(self) -> None:
         """Generate the difference in polcaps between the policies."""
 
@@ -24,6 +21,9 @@ class PolCapsDifference(Difference):
         self.added_polcaps, self.removed_polcaps, _ = self._set_diff(
             (SymbolWrapper(n) for n in self.left_policy.polcaps()),
             (SymbolWrapper(n) for n in self.right_policy.polcaps()))
+
+    added_polcaps = DiffResultDescriptor[policyrep.PolicyCapability](diff_polcaps)
+    removed_polcaps = DiffResultDescriptor[policyrep.PolicyCapability](diff_polcaps)
 
     #
     # Internal functions

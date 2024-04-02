@@ -30,14 +30,6 @@ class MLSRulesDifference(Difference):
 
     """Determine the difference in MLS rules between two policies."""
 
-    added_range_transitions = DiffResultDescriptor[MLSRule]("diff_range_transitions")
-    removed_range_transitions = DiffResultDescriptor[MLSRule]("diff_range_transitions")
-    modified_range_transitions = DiffResultDescriptor[ModifiedMLSRule]("diff_range_transitions")
-
-    # Lists of rules for each policy
-    _left_mls_rules: RuleList[MLSRuletype, MLSRule] = None
-    _right_mls_rules: RuleList[MLSRuletype, MLSRule] = None
-
     def diff_range_transitions(self) -> None:
         """Generate the difference in range_transition rules between the policies."""
 
@@ -70,6 +62,14 @@ class MLSRulesDifference(Difference):
         self.added_range_transitions = added
         self.removed_range_transitions = removed
         self.modified_range_transitions = modified
+
+    added_range_transitions = DiffResultDescriptor[MLSRule](diff_range_transitions)
+    removed_range_transitions = DiffResultDescriptor[MLSRule](diff_range_transitions)
+    modified_range_transitions = DiffResultDescriptor[ModifiedMLSRule](diff_range_transitions)
+
+    # Lists of rules for each policy
+    _left_mls_rules: RuleList[MLSRuletype, MLSRule] = None
+    _right_mls_rules: RuleList[MLSRuletype, MLSRule] = None
 
     #
     # Internal functions

@@ -25,10 +25,6 @@ class IbendportconsDifference(Difference):
 
     """Determine the difference in ibendportcons between two policies."""
 
-    added_ibendportcons = DiffResultDescriptor[Ibendportcon]("diff_ibendportcons")
-    removed_ibendportcons = DiffResultDescriptor[Ibendportcon]("diff_ibendportcons")
-    modified_ibendportcons = DiffResultDescriptor[ModifiedIbendportcon]("diff_ibendportcons")
-
     def diff_ibendportcons(self) -> None:
         """Generate the difference in ibendportcons between the policies."""
 
@@ -48,6 +44,10 @@ class IbendportconsDifference(Difference):
             if ContextWrapper(left_ibep.context) != ContextWrapper(right_ibep.context):
                 self.modified_ibendportcons.append(
                     ModifiedIbendportcon(left_ibep, right_ibep.context, left_ibep.context))
+
+    added_ibendportcons = DiffResultDescriptor[Ibendportcon](diff_ibendportcons)
+    removed_ibendportcons = DiffResultDescriptor[Ibendportcon](diff_ibendportcons)
+    modified_ibendportcons = DiffResultDescriptor[ModifiedIbendportcon](diff_ibendportcons)
 
     #
     # Internal functions
