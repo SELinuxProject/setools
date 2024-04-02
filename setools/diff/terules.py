@@ -256,7 +256,7 @@ def _av_generate_diffs(rule_db: RuleDB, type_db: TypeDBRecord) -> \
     return added, removed, modified
 
 
-def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
+def av_diff_template(ruletype: policyrep.TERuletype) -> Callable[["TERulesDifference"], None]:
 
     """
     This is a template for the access vector diff functions.
@@ -264,8 +264,6 @@ def av_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
     Parameters:
     ruletype    The rule type, e.g. "allow".
     """
-    ruletype = policyrep.TERuletype.lookup(ruletype)
-
     def diff(self) -> None:
         """Generate the difference in rules between the policies."""
 
@@ -330,7 +328,7 @@ def _avxrule_expand_generator(rule_list: Iterable[policyrep.AVRuleXperm]
     return items.keys()
 
 
-def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
+def avx_diff_template(ruletype: policyrep.TERuletype) -> Callable[["TERulesDifference"], None]:
 
     """
     This is a template for the extended permission access vector diff functions.
@@ -338,8 +336,6 @@ def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
     Parameters:
     ruletype    The rule type, e.g. "allowxperm".
     """
-    ruletype = policyrep.TERuletype.lookup(ruletype)
-
     def diff(self) -> None:
         """Generate the difference in rules between the policies."""
 
@@ -380,7 +376,7 @@ def avx_diff_template(ruletype: str) -> Callable[["TERulesDifference"], None]:
     return diff
 
 
-def te_diff_template(ruletype: str) -> Callable[[typing.Any], None]:
+def te_diff_template(ruletype: policyrep.TERuletype) -> Callable[[typing.Any], None]:
 
     """
     This is a template for the type_* diff functions.
@@ -388,8 +384,6 @@ def te_diff_template(ruletype: str) -> Callable[[typing.Any], None]:
     Parameters:
     ruletype    The rule type, e.g. "type_transition".
     """
-    ruletype = policyrep.TERuletype.lookup(ruletype)
-
     def diff(self) -> None:
         """Generate the difference in rules between the policies."""
 
@@ -426,57 +420,57 @@ class TERulesDifference(Difference):
     between two policies.
     """
 
-    diff_allows = av_diff_template("allow")
+    diff_allows = av_diff_template(policyrep.TERuletype.allow)
     added_allows = DiffResultDescriptor[policyrep.AVRule]("diff_allows")
     removed_allows = DiffResultDescriptor[policyrep.AVRule]("diff_allows")
     modified_allows = DiffResultDescriptor[ModifiedAVRule]("diff_allows")
 
-    diff_auditallows = av_diff_template("auditallow")
+    diff_auditallows = av_diff_template(policyrep.TERuletype.auditallow)
     added_auditallows = DiffResultDescriptor[policyrep.AVRule]("diff_auditallows")
     removed_auditallows = DiffResultDescriptor[policyrep.AVRule]("diff_auditallows")
     modified_auditallows = DiffResultDescriptor[ModifiedAVRule]("diff_auditallows")
 
-    diff_neverallows = av_diff_template("neverallow")
+    diff_neverallows = av_diff_template(policyrep.TERuletype.neverallow)
     added_neverallows = DiffResultDescriptor[policyrep.AVRule]("diff_neverallows")
     removed_neverallows = DiffResultDescriptor[policyrep.AVRule]("diff_neverallows")
     modified_neverallows = DiffResultDescriptor[ModifiedAVRule]("diff_neverallows")
 
-    diff_dontaudits = av_diff_template("dontaudit")
+    diff_dontaudits = av_diff_template(policyrep.TERuletype.dontaudit)
     added_dontaudits = DiffResultDescriptor[policyrep.AVRule]("diff_dontaudits")
     removed_dontaudits = DiffResultDescriptor[policyrep.AVRule]("diff_dontaudits")
     modified_dontaudits = DiffResultDescriptor[ModifiedAVRule]("diff_dontaudits")
 
-    diff_allowxperms = avx_diff_template("allowxperm")
+    diff_allowxperms = avx_diff_template(policyrep.TERuletype.allowxperm)
     added_allowxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_allowxperms")
     removed_allowxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_allowxperms")
     modified_allowxperms = DiffResultDescriptor[ModifiedAVRuleXperm]("diff_allowxperms")
 
-    diff_auditallowxperms = avx_diff_template("auditallowxperm")
+    diff_auditallowxperms = avx_diff_template(policyrep.TERuletype.auditallowxperm)
     added_auditallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_auditallowxperms")
     removed_auditallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_auditallowxperms")
     modified_auditallowxperms = DiffResultDescriptor[ModifiedAVRuleXperm]("diff_auditallowxperms")
 
-    diff_neverallowxperms = avx_diff_template("neverallowxperm")
+    diff_neverallowxperms = avx_diff_template(policyrep.TERuletype.neverallowxperm)
     added_neverallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_neverallowxperms")
     removed_neverallowxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_neverallowxperms")
     modified_neverallowxperms = DiffResultDescriptor[ModifiedAVRuleXperm]("diff_neverallowxperms")
 
-    diff_dontauditxperms = avx_diff_template("dontauditxperm")
+    diff_dontauditxperms = avx_diff_template(policyrep.TERuletype.dontauditxperm)
     added_dontauditxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_dontauditxperms")
     removed_dontauditxperms = DiffResultDescriptor[policyrep.AVRuleXperm]("diff_dontauditxperms")
     modified_dontauditxperms = DiffResultDescriptor[ModifiedAVRuleXperm]("diff_dontauditxperms")
 
-    diff_type_transitions = te_diff_template("type_transition")
+    diff_type_transitions = te_diff_template(policyrep.TERuletype.type_transition)
     added_type_transitions = DiffResultDescriptor[policyrep.TERule]("diff_type_transitions")
     removed_type_transitions = DiffResultDescriptor[policyrep.TERule]("diff_type_transitions")
     modified_type_transitions = DiffResultDescriptor[ModifiedTERule]("diff_type_transitions")
 
-    diff_type_changes = te_diff_template("type_change")
+    diff_type_changes = te_diff_template(policyrep.TERuletype.type_change)
     added_type_changes = DiffResultDescriptor[policyrep.TERule]("diff_type_changes")
     removed_type_changes = DiffResultDescriptor[policyrep.TERule]("diff_type_changes")
     modified_type_changes = DiffResultDescriptor[ModifiedTERule]("diff_type_changes")
 
-    diff_type_members = te_diff_template("type_member")
+    diff_type_members = te_diff_template(policyrep.TERuletype.type_member)
     added_type_members = DiffResultDescriptor[policyrep.TERule]("diff_type_members")
     removed_type_members = DiffResultDescriptor[policyrep.TERule]("diff_type_members")
     modified_type_members = DiffResultDescriptor[ModifiedTERule]("diff_type_members")
