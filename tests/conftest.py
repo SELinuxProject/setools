@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 # pylint: disable=attribute-defined-outside-init
 
+from contextlib import suppress
 from unittest.mock import Mock
 
 import pytest
@@ -19,7 +20,62 @@ class SortableMock(Mock):
 
 
 @pytest.fixture
-def mock_policy() -> Mock:
+def mock_role():
+    generated_roles: dict[str, setools.Role] = {}
+
+    def _factory(name: str, /, *, types: frozenset[setools.Type] | None = None) -> setools.Role:
+        """Factory function for Role objects."""
+        with suppress(KeyError):
+            return generated_roles[name]
+
+        role = SortableMock(setools.Role)
+        role.name = name
+
+        if types is not None:
+            role.types.return_value = types
+
+        generated_roles[name] = role
+        return role
+
+    return _factory
+
+
+@pytest.fixture
+def mock_user(mock_role):
+    generated_users: dict[str, setools.User] = {}
+
+    def _factory(name: str, /, *, roles: frozenset[setools.Role] | None = None,
+                 level: setools.Level | None = None,
+                 range_: setools.Range | None = None) -> setools.User:
+        """Factory function for User objects."""
+        with suppress(KeyError):
+            return generated_users[name]
+
+        assert (level and range_) or (not level and not range_)
+
+        user = SortableMock(setools.User)
+        user.name = name
+
+        if roles is not None:
+            # inject object_r, like the compiler does
+            full_roles = {mock_role("object_r"), *roles}
+            user.roles.return_value = frozenset(full_roles)
+
+        if level:
+            user._level = level
+            user._range = range_
+        else:
+            user._level = None
+            user._range = None
+
+        generated_users[name] = user
+        return user
+
+    return _factory
+
+
+@pytest.fixture
+def mock_policy(mock_user, mock_role) -> setools.SELinuxPolicy:
     """Build a mock policy."""
     foo_bool = SortableMock(setools.Boolean)
     foo_bool.name = "foo_bool"
@@ -53,19 +109,11 @@ def mock_policy() -> Mock:
     bar_t.attributes.return_value = (barattr,)
     barattr.expand.return_value = (bar_t,)
 
-    foo_r = SortableMock(setools.Role)
-    foo_r.name = "foo_r"
-    foo_r.types.return_value = (foo_t,)
-    bar_r = SortableMock(setools.Role)
-    bar_r.name = "bar_r"
-    bar_r.types.return_value = (bar_t,)
+    foo_r = mock_role("foo_r", types=frozenset((foo_t,)))
+    bar_r = mock_role("bar_r", types=frozenset((bar_t,)))
 
-    foo_u = SortableMock(setools.User)
-    foo_u.name = "foo_u"
-    foo_u.roles.return_value = (foo_r,)
-    bar_u = SortableMock(setools.User)
-    bar_u.name = "bar_u"
-    bar_u.roles.return_value = (bar_r,)
+    foo_u = mock_user("foo_u", roles=frozenset((foo_r,)))
+    bar_u = mock_user("bar_u", roles=frozenset((bar_r,)))
 
     foo_cat = SortableMock(setools.Category)
     foo_cat.name = "foo_cat"
@@ -96,7 +144,7 @@ def mock_policy() -> Mock:
 
 
 @pytest.fixture
-def mock_query(mock_policy) -> Mock:
+def mock_query(mock_policy) -> setools.PolicyQuery:
     """Build a mock query with mocked policy."""
     query = Mock(setools.PolicyQuery)
     query.policy = mock_policy

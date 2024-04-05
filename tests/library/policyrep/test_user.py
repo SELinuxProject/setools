@@ -18,22 +18,6 @@ class UserTest(unittest.TestCase):
     def setUpClass(cls):
         cls.p = SELinuxPolicy("tests/policyrep/user.conf")
 
-    def mock_user_factory(self, name, roles, level=None, range_=None):
-        """Factory function for User objects, using a mock qpol object."""
-        assert (level and range_) or (not level and not range_)
-
-        # inject object_r, like the compiler does
-        roles_with_objr = roles
-        roles_with_objr.append('object_r')
-
-        mock_user = Mock(qpol.qpol_user_t)
-        mock_user.name.return_value = name
-        mock_user.role_iter = lambda x: iter(roles_with_objr)
-        mock_user.dfltlevel.return_value = level
-        mock_user.range.return_value = range_
-
-        return user_factory(self.p.policy, mock_user)
-
     def test_001_lookup(self):
         """User factory policy lookup."""
         user = user_factory(self.p.policy, "user10")
