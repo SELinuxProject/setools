@@ -2,68 +2,44 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-# Until this is fixed for cython:
-# pylint: disable=undefined-variable,no-member
-import unittest
-from unittest.mock import Mock
-
-from setools import SELinuxPolicy
-from setools.exception import InvalidRole
+import pytest
+import setools
 
 
-@unittest.skip("Needs to be reworked for cython")
-class RoleTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/policyrep/role.conf")
+class TestRole:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/policyrep/role.conf")
-
-    def test_001_lookup(self):
-        """Role factory policy lookup."""
-        role = role_factory(self.p.policy, "role20_r")
-        self.assertEqual("role20_r", role.qpol_symbol.name(self.p.policy))
-
-    def test_002_lookup_invalid(self):
-        """Role factory policy invalid lookup."""
-        with self.assertRaises(InvalidRole):
-            role_factory(self.p.policy, "INVALID")
-
-    def test_003_lookup_object(self):
-        """Role factory policy lookup of Role object."""
-        role1 = role_factory(self.p.policy, "role20_r")
-        role2 = role_factory(self.p.policy, role1)
-        self.assertIs(role2, role1)
-
-    def test_010_string(self):
+    def test_string(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role basic string rendering."""
-        role = self.mock_role_factory("rolename10", ['type1'])
-        self.assertEqual("rolename10", str(role))
+        role = compiled_policy.lookup_role("role20_r")
+        assert "role20_r" == str(role), f"{role}"
 
-    def test_020_statement_type(self):
+    def test_statement_type(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role statement, one type."""
-        role = self.mock_role_factory("rolename20", ['type30'])
-        self.assertEqual("role rolename20 types type30;", role.statement())
+        role = compiled_policy.lookup_role("role20_r")
+        assert "role role20_r types system;" == role.statement(), role.statement()
 
-    def test_021_statement_two_types(self):
+    def test_statement_two_types(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role statement, two types."""
-        role = self.mock_role_factory("rolename21", ['type31a', 'type31b'])
-        self.assertEqual("role rolename21 types { type31a type31b };", role.statement())
+        role = compiled_policy.lookup_role("rolename21")
+        assert "role rolename21 types { type31a type31b };" == role.statement(), role.statement()
 
-    def test_022_statement_decl(self):
+    def test_statement_decl(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role statement, no types."""
         # This is an unlikely corner case, where a role
         # has been declared but has no types.
-        role = self.mock_role_factory("rolename22", [])
-        self.assertEqual("role rolename22;", role.statement())
+        role = compiled_policy.lookup_role("rolename22")
+        assert "role rolename22;" == role.statement(), role.statement()
 
-    def test_030_types(self):
+    def test_types(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role types generator."""
-        role = self.mock_role_factory("rolename", ['type31b', 'type31c'])
-        self.assertEqual(['type31b', 'type31c'], sorted(role.types()))
+        role = compiled_policy.lookup_role("rolename23")
+        types = sorted(role.types())
+        assert ["type31b", "type31c"] == types, types
 
-    def test_040_expand(self):
+    def test_expand(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role expansion"""
-        role = self.mock_role_factory("rolename", ['type31a', 'type31b', 'type31c'])
+        role = compiled_policy.lookup_role("system")
         expanded = list(role.expand())
-        self.assertEqual(1, len(expanded))
-        self.assertIs(role, expanded[0])
+        assert 1 == len(expanded), expanded
+        assert role == expanded[0], expanded
