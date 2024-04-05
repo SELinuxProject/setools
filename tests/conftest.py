@@ -1,7 +1,10 @@
 # SPDX-License-Identifier: GPL-2.0-only
 # pylint: disable=attribute-defined-outside-init
-
+import os
+from collections.abc import Iterable
 from contextlib import suppress
+import subprocess
+import tempfile
 from unittest.mock import Mock
 
 import pytest
@@ -149,3 +152,34 @@ def mock_query(mock_policy) -> setools.PolicyQuery:
     query = Mock(setools.PolicyQuery)
     query.policy = mock_policy
     return query
+
+
+@pytest.fixture(scope="class")
+def compiled_policy(request: pytest.FixtureRequest) -> Iterable[setools.SELinuxPolicy]:
+    """Build a compiled policy."""
+    marker = request.node.get_closest_marker("obj_args")
+    args = marker.args if marker else ()
+    kwargs = marker.kwargs if marker else {}
+
+    source_file = args[0]
+
+    if "USERSPACE_SRC" in os.environ:
+        command = [os.environ['USERSPACE_SRC'] + "/checkpolicy/checkpolicy"]
+    elif "CHECKPOLICY" in os.environ:
+        command = [os.environ['CHECKPOLICY']]
+    else:
+        command = ["/usr/bin/checkpolicy"]
+
+    if kwargs.get("mls", True):
+        command.append("-M")
+
+    if kwargs.get("xen", False):
+        command.extend(["-t", "xen", "-c", "30"])
+
+    with tempfile.NamedTemporaryFile("w") as fd:
+        command.extend(["-o", fd.name, "-U", "reject", source_file])
+
+        with open(os.devnull, "w+b") as null:
+            subprocess.check_call(command, stdout=null, shell=False, close_fds=True)
+
+        yield setools.SELinuxPolicy(fd.name)

@@ -2,105 +2,74 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-# Until this is fixed for cython:
-# pylint: disable=undefined-variable,no-member
-import unittest
-from unittest.mock import Mock, patch
-
-from setools import SELinuxPolicy
-from setools.exception import MLSDisabled, InvalidUser
+import pytest
+import setools
 
 
-@unittest.skip("Needs to be reworked for cython")
-class UserTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/policyrep/user_mls.conf")
+class TestUserMLS:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/policyrep/user.conf")
-
-    def test_001_lookup(self):
-        """User factory policy lookup."""
-        user = user_factory(self.p.policy, "user10")
-        self.assertEqual("user10", user.qpol_symbol.name(self.p.policy))
-
-    def test_002_lookup_invalid(self):
-        """User factory policy invalid lookup."""
-        with self.assertRaises(InvalidUser):
-            user_factory(self.p.policy, "INVALID")
-
-    def test_003_lookup_object(self):
-        """User factory policy lookup of User object."""
-        user1 = user_factory(self.p.policy, "user10")
-        user2 = user_factory(self.p.policy, user1)
-        self.assertIs(user2, user1)
-
-    def test_010_string(self):
+    def test_string(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """User basic string rendering."""
-        user = self.mock_user_factory("username", ['role1'])
-        self.assertEqual("username", str(user))
+        user = compiled_policy.lookup_user("system")
+        assert "system" == str(user), f"{user}"
 
-    def test_020_statement_role(self):
-        """User statement, one role."""
-        with patch('setools.policyrep.mls.enabled', return_value=False):
-            user = self.mock_user_factory("username", ['role20_r'])
-            self.assertEqual("user username roles role20_r;", user.statement())
-
-    def test_021_statement_two_roles(self):
-        """User statement, two roles."""
-        with patch('setools.policyrep.mls.enabled', return_value=False):
-            user = self.mock_user_factory("username", ['role20_r', 'role21a_r'])
-            # roles are stored in a set, so the role order may vary
-            self.assertRegex(user.statement(), "("
-                             "user username roles { role20_r role21a_r };"
-                             "|"
-                             "user username roles { role21a_r role20_r };"
-                             ")")
-
-    def test_022_statement_one_role_mls(self):
+    def test_statement_one_role_mls(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """User statement, one role, MLS."""
-        user = self.mock_user_factory("username", ['role20_r'], level="s0", range_="s0-s2")
-        self.assertEqual("user username roles role20_r level s0 range s0 - s2;", user.statement())
+        user = compiled_policy.lookup_user("user10")
+        assert "user user10 roles system level s1:c2 range s1 - s2:c0.c4;" == \
+            user.statement(), user.statement()
 
-    def test_023_statement_two_roles_mls(self):
+    def test_023_statement_two_roles_mls(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """User statement, two roles, MLS."""
-        user = self.mock_user_factory("username", ['role20_r', 'role21a_r'],
-                                      level="s0", range_="s0 - s2")
+        user = compiled_policy.lookup_user("user20")
         # roles are stored in a set, so the role order may vary
-        self.assertRegex(
-            user.statement(), "("
-            "user username roles { role20_r role21a_r } level s0 range s0 - s2;"
-            "|"
-            "user username roles { role21a_r role20_r } level s0 range s0 - s2;"
-            ")")
+        assert user.statement() in (
+            "user user20 roles { role20_r role21a_r } level s0 range s0 - s2:c0.c4;",
+            "user user20 roles { role21a_r role20_r } level s0 range s0 - s2:c0.c4;"), \
+            user.statement()
 
-    def test_030_roles(self):
+    def test_roles(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """User roles."""
-        user = self.mock_user_factory("username", ['role20_r', 'role21a_r'])
-        self.assertSetEqual(user.roles, set(['role20_r', 'role21a_r']))
+        user = compiled_policy.lookup_user("user20")
+        assert set(['role20_r', 'role21a_r']) == user.roles, user.roles
 
-    def test_040_level(self):
+    def test_level(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """User level."""
-        user = self.mock_user_factory("username", ['role20_r', 'role21a_r'],
-                                      level="s0", range_="s0-s2")
-        self.assertEqual("s0", user.mls_level)
+        user = compiled_policy.lookup_user("user10")
+        assert "s1:c2" == user.mls_level, user.mls_level
 
-    def test_041_level_non_mls(self):
-        """User level, MLS disabled."""
-        user = self.mock_user_factory("username", ['role20_r', 'role21a_r'])
-        with patch('setools.policyrep.mls.enabled', return_value=False):
-            with self.assertRaises(MLSDisabled):
-                user.mls_level
-
-    def test_050_range(self):
+    def test_range(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """User level."""
-        user = self.mock_user_factory("username", ['role20_r', 'role21a_r'],
-                                      level="s0", range_="s0-s2")
-        self.assertEqual("s0 - s2", user.mls_range)
+        user = compiled_policy.lookup_user("user20")
+        assert "s0 - s2:c0.c4" == user.mls_range, user.mls_range
 
-    def test_051_range_non_mls(self):
+
+@pytest.mark.obj_args("tests/library/policyrep/user_standard.conf", mls=False)
+class TestUserStandard:
+
+    def test_statement_role(self, compiled_policy: setools.SELinuxPolicy) -> None:
+        """User statement, one role."""
+        user = compiled_policy.lookup_user("user10")
+        assert "user user10 roles system;" == user.statement(), user.statement()
+
+    def test_statement_two_roles(self, compiled_policy: setools.SELinuxPolicy) -> None:
+        """User statement, two roles."""
+        user = compiled_policy.lookup_user("user20")
+        # roles are stored in a set, so the role order may vary
+        assert user.statement() in (
+            "user user20 roles { role20_r role21a_r };",
+            "user user20 roles { role21a_r role20_r };"), \
+            user.statement()
+
+    def test_level(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """User level, MLS disabled."""
-        user = self.mock_user_factory("username", ['role20_r', 'role21a_r'],
-                                      level="s0", range_="s0-s2")
-        with patch('setools.policyrep.mls.enabled', return_value=False):
-            with self.assertRaises(MLSDisabled):
-                user.mls_range
+        user = compiled_policy.lookup_user("user10")
+        with pytest.raises(setools.exception.MLSDisabled):
+            user.mls_level
+
+    def test_range(self, compiled_policy: setools.SELinuxPolicy) -> None:
+        """User level, MLS disabled."""
+        user = compiled_policy.lookup_user("user20")
+        with pytest.raises(setools.exception.MLSDisabled):
+            user.mls_range
