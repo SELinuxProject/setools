@@ -349,7 +349,7 @@ cdef class SELinuxPolicy:
             if c == name or (deref and name in list(c.aliases())):
                 return c
 
-        raise InvalidCategory("f{name} is not a valid category")
+        raise InvalidCategory(f"{name} is not a valid category")
 
     def lookup_class(self, name):
         """Look up an object class."""
