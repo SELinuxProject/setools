@@ -2,67 +2,27 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-# Until this is fixed for cython:
-# pylint: disable=undefined-variable,no-member
-import unittest
-from unittest.mock import Mock, patch
-
-from setools import SELinuxPolicy
-from setools.exception import InvalidInitialSid
+import pytest
+import setools
 
 
-@unittest.skip("Needs to be reworked for cython")
-@patch('setools.policyrep.context.context_factory', lambda x, y: y)
-class InitialSIDTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/policyrep/initsid.conf")
+class TestInitialSID:
 
-    @staticmethod
-    def mock_sid(name):
-        sid = Mock(qpol.qpol_isid_t)
-        sid.name.return_value = name
-        sid.context.return_value = name + "_context"
-        return sid
-
-    @classmethod
-    def setUpClass(cls):
-        cls.p = SELinuxPolicy("tests/policyrep/initsid.conf")
-
-    def test_001_factory(self):
-        """InitialSID: factory on qpol object."""
-        q = self.mock_sid("test1")
-        sid = initialsid_factory(self.p.policy, q)
-        self.assertEqual("test1", sid.qpol_symbol.name(self.p.policy))
-
-    def test_002_factory_object(self):
-        """InitialSID: factory on InitialSID object."""
-        q = self.mock_sid("test2")
-        sid1 = initialsid_factory(self.p.policy, q)
-        sid2 = initialsid_factory(self.p.policy, sid1)
-        self.assertIs(sid2, sid1)
-
-    def test_003_factory_lookup(self):
-        """InitialSID: factory lookup."""
-        sid = initialsid_factory(self.p.policy, "kernel")
-        self.assertEqual("kernel", sid.qpol_symbol.name(self.p.policy))
-
-    def test_004_factory_lookup_invalid(self):
-        """InitialSID: factory lookup."""
-        with self.assertRaises(InvalidInitialSid):
-            initialsid_factory(self.p.policy, "INVALID")
-
-    def test_010_string(self):
+    def test_string(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """InitialSID: basic string rendering."""
-        q = self.mock_sid("test10")
-        sid = initialsid_factory(self.p.policy, q)
-        self.assertEqual("test10", str(sid))
+        sids = list(compiled_policy.initialsids())
+        assert len(sids) == 1
+        assert "kernel" == str(sids[0])
 
-    def test_020_statement(self):
+    def test_context(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """InitialSID: context."""
-        q = self.mock_sid("test20")
-        sid = initialsid_factory(self.p.policy, q)
-        self.assertEqual("test20_context", sid.context)
+        sids = list(compiled_policy.initialsids())
+        assert len(sids) == 1
+        assert "system:system:system:s0" == sids[0].context, sids[0].context
 
-    def test_030_statement(self):
+    def test_statement(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """InitialSID: statement."""
-        q = self.mock_sid("test30")
-        sid = initialsid_factory(self.p.policy, q)
-        self.assertEqual("sid test30 test30_context", sid.statement())
+        sids = list(compiled_policy.initialsids())
+        assert len(sids) == 1
+        assert "sid kernel system:system:system:s0" == sids[0].statement(), sids[0].statement()
