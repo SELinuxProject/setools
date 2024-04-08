@@ -4,6 +4,7 @@
 #
 
 import copy
+import dataclasses
 
 import pytest
 import setools
@@ -191,3 +192,91 @@ class TestSELinuxPolicy:
     def test_dontauditxperm_count(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """SELinuxPolicy: dontauditxperm rount"""
         assert compiled_policy.dontauditxperm_count == 193
+
+
+@dataclasses.dataclass
+class LookupTestCase:
+
+    method_name: str
+    obj_name: str
+    exc_type: type[Exception]
+    alias_name: str | None = None
+
+
+lookup_test_data = [
+    LookupTestCase("lookup_boolean", "bool13", setools.exception.InvalidBoolean),
+    LookupTestCase("lookup_category", "c15", setools.exception.InvalidCategory),
+    LookupTestCase("lookup_category", "c2", setools.exception.InvalidCategory, "cat_alias2"),
+    LookupTestCase("lookup_class", "infoflow6", setools.exception.InvalidClass),
+    LookupTestCase("lookup_common", "hi_c", setools.exception.InvalidCommon),
+    LookupTestCase("lookup_level", "s4:c5", setools.exception.InvalidLevel),
+    LookupTestCase("lookup_range", "s0 - s3", setools.exception.InvalidRange),
+    LookupTestCase("lookup_role", "role50", setools.exception.InvalidRole),
+    LookupTestCase("lookup_sensitivity", "s3", setools.exception.InvalidSensitivity),
+    LookupTestCase("lookup_sensitivity", "s0", setools.exception.InvalidSensitivity,
+                   "sens_alias0"),
+    LookupTestCase("lookup_type", "type32", setools.exception.InvalidType),
+    LookupTestCase("lookup_type", "type1", setools.exception.InvalidType, "type_alias1"),
+    LookupTestCase("lookup_type_or_attr", "type97", setools.exception.InvalidType),
+    LookupTestCase("lookup_type_or_attr", "type2", setools.exception.InvalidType, "type_alias2"),
+    LookupTestCase("lookup_type_or_attr", "attr13", setools.exception.InvalidType),
+    LookupTestCase("lookup_typeattr", "attr17", setools.exception.InvalidType),
+    LookupTestCase("lookup_user", "user57", setools.exception.InvalidUser)
+]
+
+
+@pytest.mark.obj_args("tests/library/policyrep/selinuxpolicy.conf")
+@pytest.mark.parametrize("testcase", lookup_test_data)
+class TestSELinuxPolicyLookup:
+
+    """Generated test cases for the SELinuxPolicy lookup methods."""
+
+    def test_lookup(self, testcase: LookupTestCase,
+                    compiled_policy: setools.SELinuxPolicy) -> None:
+        """Test successful policy lookup."""
+        method = getattr(compiled_policy, testcase.method_name)
+        if testcase.alias_name:
+            # look up by alias
+            obj = method(testcase.alias_name)
+        else:
+            obj = method(testcase.obj_name)
+
+        assert testcase.obj_name == obj, f"{obj}"
+
+    def test_lookup_invalid(self, testcase: LookupTestCase,
+                            compiled_policy: setools.SELinuxPolicy) -> None:
+        """Test failed lookup."""
+        method = getattr(compiled_policy, testcase.method_name)
+        with pytest.raises(testcase.exc_type):
+            obj = method("INVALID")
+
+    def test_lookup_alias(self, testcase: LookupTestCase,
+                          compiled_policy: setools.SELinuxPolicy) -> None:
+        """Test successful policy lookup by alias."""
+        if not testcase.alias_name:
+            pytest.skip("Alias not configured for testcase.")
+
+        method = getattr(compiled_policy, testcase.method_name)
+        # look up by alias
+        obj = method(testcase.alias_name, deref=True)
+        assert testcase.obj_name == obj, f"{obj}"
+
+    def test_lookup_invalid_alias(self, testcase: LookupTestCase,
+                                  compiled_policy: setools.SELinuxPolicy) -> None:
+        """Test failed lookup due to invalid alias."""
+        if not testcase.alias_name:
+            pytest.skip("Alias not configured for testcase.")
+
+        method = getattr(compiled_policy, testcase.method_name)
+        with pytest.raises(testcase.exc_type):
+            obj = method("INVALID", deref=True)
+
+    def test_lookup_no_deref_alias(self, testcase: LookupTestCase,
+                                   compiled_policy: setools.SELinuxPolicy) -> None:
+        """Test failed lookup due to disabled dereference."""
+        if not testcase.alias_name:
+            pytest.skip("Alias not configured for testcase.")
+
+        method = getattr(compiled_policy, testcase.method_name)
+        with pytest.raises(testcase.exc_type):
+            obj = method(testcase.alias_name, deref=False)
