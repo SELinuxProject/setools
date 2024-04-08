@@ -44,6 +44,42 @@ def mock_role():
 
 
 @pytest.fixture
+def mock_type():
+    generated_types: dict[str, setools.Type] = {}
+
+    def _factory(name: str, attrs: Iterable[setools.TypeAttribute] | None = None,
+                 alias: Iterable[str] | None = None, perm: bool = False) -> setools.Type:
+        """Factory function for Type objects."""
+        with suppress(KeyError):
+            return generated_types[name]
+
+        type_ = SortableMock(setools.Type)
+        type_.name = name
+        type_.ispermissive = perm
+        type_.attributes.return_value = attrs if attrs is not None else ()
+        type_.aliases.return_value = alias if alias is not None else ()
+        generated_types[name] = type_
+        return type_
+
+    return _factory
+
+
+@pytest.fixture
+def mock_typeattr():
+    generated_attrs: dict[str, setools.TypeAttribute] = {}
+
+    def _factory(name: str, types: Iterable[setools.Type] | None = None) -> setools.TypeAttribute:
+        """Factory function for TypeAttribute objects, using a mock qpol object."""
+        attr = SortableMock(setools.TypeAttribute)
+        attr.name = name
+        attr.expand.return_value = types if types is not None else ()
+        generated_attrs[name] = attr
+        return attr
+
+    return _factory
+
+
+@pytest.fixture
 def mock_user(mock_role):
     generated_users: dict[str, setools.User] = {}
 
@@ -78,7 +114,7 @@ def mock_user(mock_role):
 
 
 @pytest.fixture
-def mock_policy(mock_user, mock_role) -> setools.SELinuxPolicy:
+def mock_policy(mock_type, mock_typeattr, mock_user, mock_role) -> setools.SELinuxPolicy:
     """Build a mock policy."""
     foo_bool = SortableMock(setools.Boolean)
     foo_bool.name = "foo_bool"
@@ -98,18 +134,12 @@ def mock_policy(mock_user, mock_role) -> setools.SELinuxPolicy:
     bar_class.perms = frozenset(("bar_perm1", "bar_perm2"))
     bar_class.common = common
 
-    fooattr = SortableMock(setools.TypeAttribute)
-    fooattr.name = "foo_type"
-    barattr = SortableMock(setools.TypeAttribute)
-    barattr.name = "bar_type"
+    fooattr = mock_typeattr("foo_type")
+    barattr = mock_typeattr("bar_type")
 
-    foo_t = SortableMock(setools.Type)
-    foo_t.name = "foo_t"
-    foo_t.attributes.return_value = (fooattr,)
+    foo_t = mock_type("foo_t", attrs=(fooattr,))
     fooattr.expand.return_value = (foo_t,)
-    bar_t = SortableMock(setools.Type)
-    bar_t.name = "bar_t"
-    bar_t.attributes.return_value = (barattr,)
+    bar_t = mock_type("bar_t", attrs=(barattr,))
     barattr.expand.return_value = (bar_t,)
 
     foo_r = mock_role("foo_r", types=frozenset((foo_t,)))
