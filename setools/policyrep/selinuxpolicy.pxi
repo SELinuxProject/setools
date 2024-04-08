@@ -367,14 +367,6 @@ cdef class SELinuxPolicy:
 
         raise InvalidCommon(f"{name} is not a valid common")
 
-    def lookup_initialsid(self, name):
-        """Look up an initial sid."""
-        for sid in self.initialsids():
-            if sid == name:
-                return sid
-
-        raise InvalidInitialSid(f"{name} is not a valid initial SID")
-
     def lookup_level(self, level):
         """Look up a MLS level."""
         return Level.factory_from_string(self, level)
