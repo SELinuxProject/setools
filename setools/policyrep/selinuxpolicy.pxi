@@ -677,7 +677,7 @@ cdef class SELinuxPolicy:
 
         if sepol.sepol_policydb_read(self.handle, pfile) < 0:
             raise InvalidPolicy(f"Invalid policy: {filename}. A binary policy must be specified. "
-                                "(use e.g. policy.{sepol.sepol_policy_kern_vers_max()} or "
+                                f"(use e.g. policy.{sepol.sepol_policy_kern_vers_max()} or "
                                 "sepolicy) Source policies are not supported.")
 
         fclose(infile)
