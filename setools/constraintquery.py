@@ -77,7 +77,7 @@ class ConstraintQuery(mixins.MatchObjClass, mixins.MatchPermission, query.Policy
         if indirect:
             obj = set()
             for item in expr:
-                obj.update(item.expand())  # type: ignore[union-attr]
+                obj.update(item.expand())
         else:
             obj = expr
 

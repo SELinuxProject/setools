@@ -43,16 +43,6 @@ cdef class RoleAllow(PolicyRule):
     def __lt__(self, other):
         return str(self) < str(other)
 
-    @property
-    def tclass(self):
-        """The rule's object class."""
-        raise RuleUseError("Role allow rules do not have an object class.")
-
-    @property
-    def default(self):
-        """The rule's default role."""
-        raise RuleUseError("Role allow rules do not have a default role.")
-
     def expand(self):
         """Expand the rule into an equivalent set of rules without attributes."""
         cdef RoleAllow r

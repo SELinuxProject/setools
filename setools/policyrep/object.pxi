@@ -72,8 +72,17 @@ cdef class PolicySymbol(PolicyObject):
 
     cdef readonly str name
 
+    def __contains__(self, other):
+        # Default is non-expandable.
+        return self is other
+
     def __str__(self):
         return self.name
+
+    def expand(self):
+        """Expand the symbol into constitent symbols."""
+        # Default is non-expandable.
+        yield self
 
 
 cdef class Ocontext(PolicyObject):
