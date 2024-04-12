@@ -331,9 +331,11 @@ cdef class Level(BaseMLSLevel):
 
         # verify level is valid
         if not l <= l.sensitivity.level_decl():
+            invalid_cats = l._categories - set(l.sensitivity.level_decl().categories())
             raise InvalidLevel(
-                f"{name} is not a valid level (one or more categories are not associated with the "
-                "sensitivity)")
+                f"{name} is not a valid level "
+                f"(category {', '.join(str(c) for c in invalid_cats)} is not associated "
+                f"with sensitivity {l.sensitivity})")
 
         return l
 
