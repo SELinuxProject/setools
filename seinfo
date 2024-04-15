@@ -308,7 +308,7 @@ try:
 
         components.append(("Validatetrans", vtq, lambda x: x.statement()))
 
-    if p.target_platform == "xen":
+    if p.target_platform == setools.PolicyTarget.xen:
         if args.ioportconquery or args.all:
             xiopq = setools.IoportconQuery(p)
             components.append(("Ioportcon", xiopq, lambda x: x.statement()))
