@@ -1,116 +1,99 @@
 # Copyright 2020, Microsoft Corporation
 #
-# This file is part of SETools.
+# SPDX-License-Identifier: GPL-2.0-only
 #
-# SETools is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation, either version 2.1 of
-# the License, or (at your option) any later version.
-#
-# SETools is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with SETools.  If not, see
-# <http://www.gnu.org/licenses/>.
-#
-
 import os
-import unittest
 
-from ..policyrep.util import compile_policy
-
-from setools.checker.roexec import ReadOnlyExecutables
-from setools.exception import InvalidCheckOption, InvalidCheckValue
+import pytest
+import setools
 
 
-class ReadOnlyExecutablesTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/checker/roexec.conf")
+class TestReadOnlyExecutables:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/checker/roexec.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_invalid_option(self):
+    def test_invalid_option(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test invalid option"""
-        with self.assertRaises(InvalidCheckOption):
+        with pytest.raises(setools.exception.InvalidCheckOption):
             config = {"INVALID": "option"}
-            check = ReadOnlyExecutables(self.p, "test_invalid_option", config)
+            check = setools.checker.roexec.ReadOnlyExecutables(
+                compiled_policy, "test_invalid_option", config)
 
-    def test_all_exec(self):
+    def test_all_exec(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test all executables are returned for no-option test.."""
-        config = {}
-        check = ReadOnlyExecutables(self.p, "test_all_exec", config)
+        config = dict[str, str]()
+        check = setools.checker.roexec.ReadOnlyExecutables(
+            compiled_policy, "test_all_exec", config)
         result = check._collect_executables()
 
         # becasue of unconfined, nonexec is executable
         expected = set(("roexec", "execfile1", "execfile2", "nonexec", "exempt_file"))
-        self.assertSetEqual(expected, set(result.keys()))
+        assert expected == set(result.keys())
 
-    def test_exempt_exec_domain(self):
+    def test_exempt_exec_domain(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test for exempting an exec domain."""
         config = {"exempt_exec_domain": "unconfined"}
-        check = ReadOnlyExecutables(self.p, "test_exempt_exec_domain", config)
+        check = setools.checker.roexec.ReadOnlyExecutables(
+            compiled_policy, "test_exempt_exec_domain", config)
         result = check._collect_executables()
 
         expected = set(("execfile1", "execfile2", "roexec"))
-        self.assertSetEqual(expected, set(result.keys()))
+        assert expected == set(result.keys())
 
-    def test_exempt_file(self):
+    def test_exempt_file(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test for exempting a file."""
         config = {"exempt_file": "exempt_file"}
-        check = ReadOnlyExecutables(self.p, "test_exempt_file", config)
+        check = setools.checker.roexec.ReadOnlyExecutables(
+            compiled_policy, "test_exempt_file", config)
         result = check._collect_executables()
 
         expected = set(("roexec", "execfile1", "execfile2", "nonexec"))
-        self.assertSetEqual(expected, set(result.keys()))
+        assert expected == result.keys()
 
-    def test_exempt_file_attr(self):
+    def test_exempt_file_attr(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test for exempting a file by attribute."""
         config = {"exempt_file": "exempt_files_attr"}
-        check = ReadOnlyExecutables(self.p, "test_exempt_file_attr", config)
+        check = setools.checker.roexec.ReadOnlyExecutables(
+            compiled_policy, "test_exempt_file_attr", config)
         result = check._collect_executables()
 
         expected = set(("roexec", "nonexec", "exempt_file"))
-        self.assertSetEqual(expected, set(result.keys()))
+        assert expected == result.keys()
 
-    def test_fail(self):
+    def test_fail(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test for failing."""
-        with open("/dev/null", "w") as fd:
+        with open(os.devnull, "w", encoding="utf-8") as fd:
             config = {"exempt_exec_domain": "unconfined",
                       "exempt_write_domain": "unconfined"}
-            check = ReadOnlyExecutables(self.p, "test_fail", config)
+            check = setools.checker.roexec.ReadOnlyExecutables(
+                compiled_policy, "test_fail", config)
             check.output = fd
             result = check.run()
 
-            expected = [self.p.lookup_type("execfile1"),
-                        self.p.lookup_type("execfile2")]
-            self.assertListEqual(expected, result)
+            expected = [compiled_policy.lookup_type("execfile1"),
+                        compiled_policy.lookup_type("execfile2")]
+            assert expected == result
 
-    def test_pass(self):
+    def test_pass(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test for passing."""
-        with open("/dev/null", "w") as fd:
+        with open(os.devnull, "w", encoding="utf-8") as fd:
             config = {"exempt_exec_domain": "unconfined",
                       "exempt_write_domain": "domain1  domain2  unconfined"}
-            check = ReadOnlyExecutables(self.p, "test_pass", config)
+            check = setools.checker.roexec.ReadOnlyExecutables(
+                compiled_policy, "test_pass", config)
             check.output = fd
             result = check.run()
 
-            self.assertFalse(result)
+            assert not result
 
-    def test_pass2(self):
+    def test_pass2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test for passing with alternate exemptions."""
-        with open("/dev/null", "w") as fd:
+        with open(os.devnull, "w", encoding="utf-8") as fd:
             config = {"exempt_exec_domain": "unconfined",
                       "exempt_file": "execfile2",
                       "exempt_write_domain": "domain1  unconfined"}
-            check = ReadOnlyExecutables(self.p, "test_pass2", config)
+            check = setools.checker.roexec.ReadOnlyExecutables(
+                compiled_policy, "test_pass2", config)
             check.output = fd
             result = check.run()
 
-            self.assertFalse(result)
+            assert not result
