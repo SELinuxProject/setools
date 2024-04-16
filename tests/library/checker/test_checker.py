@@ -1,72 +1,51 @@
 # Copyright 2020, Microsoft Corporation
 #
-# This file is part of SETools.
+# SPDX-License-Identifier: GPL-2.0-only
 #
-# SETools is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as
-# published by the Free Software Foundation, either version 2.1 of
-# the License, or (at your option) any later version.
-#
-# SETools is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public
-# License along with SETools.  If not, see
-# <http://www.gnu.org/licenses/>.
-#
-
 import os
-import unittest
 from unittest.mock import Mock
 
-from ..policyrep.util import compile_policy
-
-from setools.checker import PolicyChecker
-from setools.exception import InvalidCheckerConfig, InvalidCheckerModule, InvalidCheckOption, \
-    InvalidCheckValue
+import pytest
+import setools
 
 
-class PolicyCheckerTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/checker/checker.conf")
+class TestPolicyChecker:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/checker/checker.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_config_empty(self):
+    def test_config_empty(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test empty config file"""
-        with self.assertRaises(InvalidCheckerConfig):
-            PolicyChecker(self.p, "/dev/null")
+        with pytest.raises(setools.exception.InvalidCheckerConfig):
+            setools.checker.PolicyChecker(compiled_policy, os.devnull)
 
-    def test_config_check_missing_type(self):
+    def test_config_check_missing_type(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test check missing check type"""
-        with self.assertRaises(InvalidCheckerModule):
-            PolicyChecker(self.p, "tests/library/checker/checker-missingtype.ini")
+        with pytest.raises(setools.exception.InvalidCheckerModule):
+            setools.checker.PolicyChecker(compiled_policy,
+                                          "tests/library/checker/checker-missingtype.ini")
 
-    def test_config_check_invalid_type(self):
+    def test_config_check_invalid_type(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test check invalid check type"""
-        with self.assertRaises(InvalidCheckerModule):
-            PolicyChecker(self.p, "tests/library/checker/checker-invalidtype.ini")
+        with pytest.raises(setools.exception.InvalidCheckerModule):
+            setools.checker.PolicyChecker(compiled_policy,
+                                          "tests/library/checker/checker-invalidtype.ini")
 
-    def test_config_check_invalid_option(self):
+    def test_config_check_invalid_option(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test check invalid check option"""
-        with self.assertRaises(InvalidCheckOption):
-            PolicyChecker(self.p, "tests/library/checker/checker-invalidoption.ini")
+        with pytest.raises(setools.exception.InvalidCheckOption):
+            setools.checker.PolicyChecker(compiled_policy,
+                                          "tests/library/checker/checker-invalidoption.ini")
 
-    def test_config_check_invalid_value(self):
+    def test_config_check_invalid_value(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test check invalid check type"""
-        with self.assertRaises(InvalidCheckValue):
-            PolicyChecker(self.p, "tests/library/checker/checker-invalidvalue.ini")
+        with pytest.raises(setools.exception.InvalidCheckValue):
+            setools.checker.PolicyChecker(compiled_policy,
+                                          "tests/library/checker/checker-invalidvalue.ini")
 
-    def test_run_pass(self):
+    def test_run_pass(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test run with passing config."""
-        with open(os.devnull, "w") as fd:
-            checker = PolicyChecker(self.p, "tests/library/checker/checker-valid.ini")
+        with open(os.devnull, "w", encoding="utf-8") as fd:
+            checker = setools.checker.PolicyChecker(compiled_policy,
+                                                    "tests/library/checker/checker-valid.ini")
 
             # create additional disabled mock test
             newcheck = Mock()
@@ -76,15 +55,16 @@ class PolicyCheckerTest(unittest.TestCase):
             newcheck.run.return_value = []
             checker.checks.append(newcheck)
 
-            self.assertEqual(4, len(checker.checks))
+            assert 4 == len(checker.checks)
             result = checker.run(output=fd)
-            self.assertEqual(0, result)
+            assert 0 == result
             newcheck.run.assert_not_called()
 
-    def test_run_fail(self):
+    def test_run_fail(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Test run with failing config."""
-        with open(os.devnull, "w") as fd:
-            checker = PolicyChecker(self.p, "tests/library/checker/checker-valid.ini")
+        with open(os.devnull, "w", encoding="utf-8") as fd:
+            checker = setools.checker.PolicyChecker(compiled_policy,
+                                                    "tests/library/checker/checker-valid.ini")
 
             # create additional failing mock test
             newcheck = Mock()
@@ -94,8 +74,8 @@ class PolicyCheckerTest(unittest.TestCase):
             newcheck.run.return_value = list(range(13))
             checker.checks.append(newcheck)
 
-            self.assertEqual(4, len(checker.checks))
+            assert 4 == len(checker.checks)
 
             result = checker.run(output=fd)
             newcheck.run.assert_called()
-            self.assertEqual(13, result)
+            assert 13 == result
