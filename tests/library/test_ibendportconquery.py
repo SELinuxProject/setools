@@ -2,226 +2,222 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import IbendportconQuery
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class IbendportconQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/ibendportconquery.conf")
+class TestIbendportconQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/ibendportconquery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with no criteria"""
         # query with no parameters gets all ibendportcons.
-        ibendportcons = sorted(self.p.ibendportcons())
+        ibendportcons = sorted(compiled_policy.ibendportcons())
 
-        q = IbendportconQuery(self.p)
+        q = setools.IbendportconQuery(compiled_policy)
         q_ibendportcons = sorted(q.results())
 
-        self.assertListEqual(ibendportcons, q_ibendportcons)
+        assert ibendportcons == q_ibendportcons
 
-    def test_001_name_exact(self):
+    def test_name_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with exact name match."""
-        q = IbendportconQuery(self.p, name="test1", name_regex=False)
+        q = setools.IbendportconQuery(compiled_policy, name="test1", name_regex=False)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test1"], ibendportcons)
+        assert ["test1"] == ibendportcons
 
-    def test_002_name_regext(self):
+    def test_name_regext(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with regex name match."""
-        q = IbendportconQuery(self.p, name="test2(a|b)", name_regex=True)
+        q = setools.IbendportconQuery(compiled_policy, name="test2(a|b)", name_regex=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test2a", "test2b"], ibendportcons)
+        assert ["test2a", "test2b"] == ibendportcons
 
-    def test_010_port(self):
+    def test_port(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with port match."""
-        q = IbendportconQuery(self.p, port=10)
+        q = setools.IbendportconQuery(compiled_policy, port=10)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test10"], ibendportcons)
+        assert ["test10"] == ibendportcons
 
-    def test_020_user_exact(self):
+    def test_user_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context user exact match"""
-        q = IbendportconQuery(self.p, user="user20", user_regex=False)
+        q = setools.IbendportconQuery(compiled_policy, user="user20", user_regex=False)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test20"], ibendportcons)
+        assert ["test20"] == ibendportcons
 
-    def test_021_user_regex(self):
+    def test_user_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context user regex match"""
-        q = IbendportconQuery(self.p, user="user21(a|b)", user_regex=True)
+        q = setools.IbendportconQuery(compiled_policy, user="user21(a|b)", user_regex=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test21a", "test21b"], ibendportcons)
+        assert ["test21a", "test21b"] == ibendportcons
 
-    def test_030_role_exact(self):
+    def test_role_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context role exact match"""
-        q = IbendportconQuery(self.p, role="role30_r", role_regex=False)
+        q = setools.IbendportconQuery(compiled_policy, role="role30_r", role_regex=False)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test30"], ibendportcons)
+        assert ["test30"] == ibendportcons
 
-    def test_031_role_regex(self):
+    def test_role_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context role regex match"""
-        q = IbendportconQuery(self.p, role="role31(a|c)_r", role_regex=True)
+        q = setools.IbendportconQuery(compiled_policy, role="role31(a|c)_r", role_regex=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test31a", "test31c"], ibendportcons)
+        assert ["test31a", "test31c"] == ibendportcons
 
-    def test_040_type_exact(self):
+    def test_type_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context type exact match"""
-        q = IbendportconQuery(self.p, type_="type40", type_regex=False)
+        q = setools.IbendportconQuery(compiled_policy, type_="type40", type_regex=False)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test40"], ibendportcons)
+        assert ["test40"] == ibendportcons
 
-    def test_041_type_regex(self):
+    def test_type_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context type regex match"""
-        q = IbendportconQuery(self.p, type_="type41(b|c)", type_regex=True)
+        q = setools.IbendportconQuery(compiled_policy, type_="type41(b|c)", type_regex=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test41b", "test41c"], ibendportcons)
+        assert ["test41b", "test41c"] == ibendportcons
 
-    def test_050_range_exact(self):
+    def test_range_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range exact match"""
-        q = IbendportconQuery(self.p, range_="s0:c1 - s0:c0.c4")
+        q = setools.IbendportconQuery(compiled_policy, range_="s0:c1 - s0:c0.c4")
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test50"], ibendportcons)
+        assert ["test50"] == ibendportcons
 
-    def test_051_range_overlap1(self):
+    def test_range_overlap1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range overlap match (equal)"""
-        q = IbendportconQuery(self.p, range_="s1:c1 - s1:c0.c4", range_overlap=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s1:c1 - s1:c0.c4",
+                                      range_overlap=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test51"], ibendportcons)
+        assert ["test51"] == ibendportcons
 
-    def test_051_range_overlap2(self):
+    def test_range_overlap2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range overlap match (subset)"""
-        q = IbendportconQuery(self.p, range_="s1:c1,c2 - s1:c0.c3", range_overlap=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s1:c1,c2 - s1:c0.c3",
+                                      range_overlap=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test51"], ibendportcons)
+        assert ["test51"] == ibendportcons
 
-    def test_051_range_overlap3(self):
+    def test_range_overlap3(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range overlap match (superset)"""
-        q = IbendportconQuery(self.p, range_="s1 - s1:c0.c4", range_overlap=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s1 - s1:c0.c4", range_overlap=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test51"], ibendportcons)
+        assert ["test51"] == ibendportcons
 
-    def test_051_range_overlap4(self):
+    def test_range_overlap4(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range overlap match (overlap low level)"""
-        q = IbendportconQuery(self.p, range_="s1 - s1:c1,c2", range_overlap=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s1 - s1:c1,c2", range_overlap=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test51"], ibendportcons)
+        assert ["test51"] == ibendportcons
 
-    def test_051_range_overlap5(self):
+    def test_range_overlap5(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range overlap match (overlap high level)"""
-        q = IbendportconQuery(self.p, range_="s1:c1,c2 - s1:c0.c4", range_overlap=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s1:c1,c2 - s1:c0.c4",
+                                      range_overlap=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test51"], ibendportcons)
+        assert ["test51"] == ibendportcons
 
-    def test_052_range_subset1(self):
+    def test_range_subset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range subset match"""
-        q = IbendportconQuery(self.p, range_="s2:c1,c2 - s2:c0.c3", range_overlap=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s2:c1,c2 - s2:c0.c3",
+                                      range_overlap=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test52"], ibendportcons)
+        assert ["test52"] == ibendportcons
 
-    def test_052_range_subset2(self):
+    def test_range_subset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range subset match (equal)"""
-        q = IbendportconQuery(self.p, range_="s2:c1 - s2:c1.c3", range_overlap=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s2:c1 - s2:c1.c3",
+                                      range_overlap=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test52"], ibendportcons)
+        assert ["test52"] == ibendportcons
 
-    def test_053_range_superset1(self):
+    def test_range_superset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range superset match"""
-        q = IbendportconQuery(self.p, range_="s3 - s3:c0.c4", range_superset=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s3 - s3:c0.c4", range_superset=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test53"], ibendportcons)
+        assert ["test53"] == ibendportcons
 
-    def test_053_range_superset2(self):
+    def test_range_superset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range superset match (equal)"""
-        q = IbendportconQuery(self.p, range_="s3:c1 - s3:c1.c3", range_superset=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s3:c1 - s3:c1.c3",
+                                      range_superset=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test53"], ibendportcons)
+        assert ["test53"] == ibendportcons
 
-    def test_054_range_proper_subset1(self):
+    def test_range_proper_subset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper subset match"""
-        q = IbendportconQuery(self.p, range_="s4:c1,c2", range_subset=True, range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s4:c1,c2", range_subset=True,
+                                      range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test54"], ibendportcons)
+        assert ["test54"] == ibendportcons
 
-    def test_054_range_proper_subset2(self):
+    def test_range_proper_subset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper subset match (equal)"""
-        q = IbendportconQuery(self.p, range_="s4:c1 - s4:c1.c3", range_subset=True,
-                              range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s4:c1 - s4:c1.c3",
+                                      range_subset=True, range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual([], ibendportcons)
+        assert [] == ibendportcons
 
-    def test_054_range_proper_subset3(self):
+    def test_range_proper_subset3(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper subset match (equal low only)"""
-        q = IbendportconQuery(self.p, range_="s4:c1 - s4:c1.c2", range_subset=True,
-                              range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s4:c1 - s4:c1.c2",
+                                      range_subset=True, range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test54"], ibendportcons)
+        assert ["test54"] == ibendportcons
 
-    def test_054_range_proper_subset4(self):
+    def test_range_proper_subset4(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper subset match (equal high only)"""
-        q = IbendportconQuery(self.p, range_="s4:c1,c2 - s4:c1.c3", range_subset=True,
-                              range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s4:c1,c2 - s4:c1.c3",
+                                      range_subset=True, range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test54"], ibendportcons)
+        assert ["test54"] == ibendportcons
 
-    def test_055_range_proper_superset1(self):
+    def test_range_proper_superset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper superset match"""
-        q = IbendportconQuery(self.p, range_="s5 - s5:c0.c4", range_superset=True,
-                              range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s5 - s5:c0.c4", range_superset=True,
+                                      range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test55"], ibendportcons)
+        assert ["test55"] == ibendportcons
 
-    def test_055_range_proper_superset2(self):
+    def test_range_proper_superset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper superset match (equal)"""
-        q = IbendportconQuery(self.p, range_="s5:c1 - s5:c1.c3", range_superset=True,
-                              range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s5:c1 - s5:c1.c3",
+                                      range_superset=True, range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual([], ibendportcons)
+        assert [] == ibendportcons
 
-    def test_055_range_proper_superset3(self):
+    def test_range_proper_superset3(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper superset match (equal low)"""
-        q = IbendportconQuery(self.p, range_="s5:c1 - s5:c1.c4", range_superset=True,
-                              range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s5:c1 - s5:c1.c4",
+                                      range_superset=True, range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test55"], ibendportcons)
+        assert ["test55"] == ibendportcons
 
-    def test_055_range_proper_superset4(self):
+    def test_range_proper_superset4(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Ibendportcon query with context range proper superset match (equal high)"""
-        q = IbendportconQuery(self.p, range_="s5 - s5:c1.c3", range_superset=True,
-                              range_proper=True)
+        q = setools.IbendportconQuery(compiled_policy, range_="s5 - s5:c1.c3", range_superset=True,
+                                      range_proper=True)
 
         ibendportcons = sorted(n.name for n in q.results())
-        self.assertListEqual(["test55"], ibendportcons)
+        assert ["test55"] == ibendportcons
