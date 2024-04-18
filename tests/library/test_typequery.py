@@ -3,95 +3,84 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import TypeQuery
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class TypeQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/typequery.conf")
+class TestTypeQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/typequery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with no criteria."""
         # query with no parameters gets all types.
-        alltypes = sorted(self.p.types())
+        alltypes = sorted(compiled_policy.types())
 
-        q = TypeQuery(self.p)
+        q = setools.TypeQuery(compiled_policy)
         qtypes = sorted(q.results())
 
-        self.assertListEqual(alltypes, qtypes)
+        assert alltypes == qtypes
 
-    def test_001_name_exact(self):
+    def test_name_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with exact name match."""
-        q = TypeQuery(self.p, name="test1")
+        q = setools.TypeQuery(compiled_policy, name="test1")
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test1"], types)
+        assert ["test1"] == types
 
-    def test_002_name_regex(self):
+    def test_name_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with regex name match."""
-        q = TypeQuery(self.p, name="test2(a|b)", name_regex=True)
+        q = setools.TypeQuery(compiled_policy, name="test2(a|b)", name_regex=True)
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test2a", "test2b"], types)
+        assert ["test2a", "test2b"] == types
 
-    def test_010_attr_intersect(self):
+    def test_attr_intersect(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with attribute set intersection."""
-        q = TypeQuery(self.p, attrs=["test10a", "test10b"])
+        q = setools.TypeQuery(compiled_policy, attrs=["test10a", "test10b"])
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test10t1", "test10t2", "test10t3",
-                              "test10t4", "test10t5", "test10t6"], types)
+        assert ["test10t1", "test10t2", "test10t3",
+                "test10t4", "test10t5", "test10t6"] == types
 
-    def test_011_attr_equality(self):
+    def test_attr_equality(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with attribute set equality."""
-        q = TypeQuery(self.p, attrs=["test11a", "test11b"], attrs_equal=True)
+        q = setools.TypeQuery(compiled_policy, attrs=["test11a", "test11b"], attrs_equal=True)
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test11t2"], types)
+        assert ["test11t2"] == types
 
-    def test_012_attr_regex(self):
+    def test_attr_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with attribute regex match."""
-        q = TypeQuery(self.p, attrs="test12(a|b)", attrs_regex=True)
+        q = setools.TypeQuery(compiled_policy, attrs="test12(a|b)", attrs_regex=True)
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test12t1", "test12t2", "test12t3",
-                              "test12t4", "test12t5", "test12t6"], types)
+        assert ["test12t1", "test12t2", "test12t3",
+                "test12t4", "test12t5", "test12t6"] == types
 
-    def test_020_alias_exact(self):
+    def test_alias_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with exact alias match."""
-        q = TypeQuery(self.p, alias="test20a")
+        q = setools.TypeQuery(compiled_policy, alias="test20a")
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test20t1"], types)
+        assert ["test20t1"] == types
 
-    def test_021_alias_regex(self):
+    def test_alias_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with regex alias match."""
-        q = TypeQuery(self.p, alias="test21(a|b)", alias_regex=True)
+        q = setools.TypeQuery(compiled_policy, alias="test21(a|b)", alias_regex=True)
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test21t1", "test21t2"], types)
+        assert ["test21t1", "test21t2"] == types
 
-    def test_022_alias_dereference(self):
+    def test_alias_dereference(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with alias dereference."""
-        q = TypeQuery(self.p, name="test22alias", alias_deref=True)
+        q = setools.TypeQuery(compiled_policy, name="test22alias", alias_deref=True)
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test22"], types)
+        assert ["test22"] == types
 
-    def test_030_permissive(self):
+    def test_permissive(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Type query with permissive match"""
-        q = TypeQuery(self.p, permissive=True)
+        q = setools.TypeQuery(compiled_policy, permissive=True)
 
         types = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test30"], types)
+        assert ["test30"] == types
