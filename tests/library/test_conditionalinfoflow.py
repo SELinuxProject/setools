@@ -2,18 +2,8 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import InfoFlowAnalysis
-from setools import TERuletype as TERT
-from setools.exception import InvalidType
-from setools.permmap import PermissionMap
-from setools.policyrep import Type
-
-from . import mixins
-from .policyrep.util import compile_policy
-
+import pytest
+import setools
 
 # Note: the testing for having correct rules on every edge is only
 # performed once on the full graph, since it is assumed that NetworkX's
@@ -21,111 +11,110 @@ from .policyrep.util import compile_policy
 # the subgraph.
 
 
-class ConditionalInfoFlowAnalysisTest(unittest.TestCase):
+@pytest.fixture
+def analysis(compiled_policy: setools.SELinuxPolicy) -> setools.InfoFlowAnalysis:
+    perm_map = setools.PermissionMap("tests/library/perm_map")
+    ret = setools.InfoFlowAnalysis(compiled_policy, perm_map)
+    ret._build_graph()
+    return ret
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/conditionalinfoflow.conf", mls=False)
-        cls.m = PermissionMap("tests/library/perm_map")
-        cls.a = InfoFlowAnalysis(cls.p, cls.m)
 
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
+@pytest.mark.obj_args("tests/library/conditionalinfoflow.conf", mls=False)
+class TestConditionalInfoFlowAnalysis:
 
-    def test_001_keep_conditional_rules(self):
+    def test_keep_conditional_rules(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Keep all conditional rules."""
-        self.a.booleans = None
-        self.a._rebuildgraph = True
-        self.a._build_subgraph()
+        analysis.booleans = None
+        analysis.rebuildgraph = True
+        analysis._build_subgraph()
 
-        source = self.p.lookup_type("src")
-        target = self.p.lookup_type("tgt")
-        flow_true = self.p.lookup_type("flow_true")
-        flow_false = self.p.lookup_type("flow_false")
+        source = analysis.policy.lookup_type("src")
+        target = analysis.policy.lookup_type("tgt")
+        flow_true = analysis.policy.lookup_type("flow_true")
+        flow_false = analysis.policy.lookup_type("flow_false")
 
-        r = self.a.G.edges[source, flow_true]["rules"]
-        self.assertEqual(len(r), 1)
-        r = self.a.G.edges[flow_true, target]["rules"]
-        self.assertEqual(len(r), 1)
-        r = self.a.G.edges[source, flow_false]["rules"]
-        self.assertEqual(len(r), 1)
-        r = self.a.G.edges[flow_false, target]["rules"]
-        self.assertEqual(len(r), 1)
+        r = analysis.G.edges[source, flow_true]["rules"]
+        assert len(r) == 1
+        r = analysis.G.edges[flow_true, target]["rules"]
+        assert len(r) == 1
+        r = analysis.G.edges[source, flow_false]["rules"]
+        assert len(r) == 1
+        r = analysis.G.edges[flow_false, target]["rules"]
+        assert len(r) == 1
 
-    def test_002_default_conditional_rules(self):
+    def test_default_conditional_rules(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Keep only default conditional rules."""
-        self.a.booleans = {}
-        self.a._rebuildgraph = True
-        self.a._build_subgraph()
+        analysis.booleans = {}
+        analysis.rebuildgraph = True
+        analysis._build_subgraph()
 
-        source = self.p.lookup_type("src")
-        target = self.p.lookup_type("tgt")
-        flow_true = self.p.lookup_type("flow_true")
-        flow_false = self.p.lookup_type("flow_false")
+        source = analysis.policy.lookup_type("src")
+        target = analysis.policy.lookup_type("tgt")
+        flow_true = analysis.policy.lookup_type("flow_true")
+        flow_false = analysis.policy.lookup_type("flow_false")
 
-        r = self.a.G.edges[source, flow_true]["rules"]
-        self.assertEqual(len(r), 0)
-        r = self.a.G.edges[flow_true, target]["rules"]
-        self.assertEqual(len(r), 0)
-        r = self.a.G.edges[source, flow_false]["rules"]
-        self.assertEqual(len(r), 1)
-        r = self.a.G.edges[flow_false, target]["rules"]
-        self.assertEqual(len(r), 1)
+        r = analysis.G.edges[source, flow_true]["rules"]
+        assert len(r) == 0
+        r = analysis.G.edges[flow_true, target]["rules"]
+        assert len(r) == 0
+        r = analysis.G.edges[source, flow_false]["rules"]
+        assert len(r) == 1
+        r = analysis.G.edges[flow_false, target]["rules"]
+        assert len(r) == 1
 
-    def test_003_user_conditional_true(self):
+    def test_user_conditional_true(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Keep only conditional rules selected by user specified booleans (True Case.)"""
-        self.a.booleans = {"condition": True}
-        self.a.rebuildgraph = True
-        self.a._build_subgraph()
+        analysis.booleans = {"condition": True}
+        analysis.rebuildgraph = True
+        analysis._build_subgraph()
 
-        source = self.p.lookup_type("src")
-        target = self.p.lookup_type("tgt")
-        flow_true = self.p.lookup_type("flow_true")
-        flow_false = self.p.lookup_type("flow_false")
+        source = analysis.policy.lookup_type("src")
+        target = analysis.policy.lookup_type("tgt")
+        flow_true = analysis.policy.lookup_type("flow_true")
+        flow_false = analysis.policy.lookup_type("flow_false")
 
-        r = self.a.G.edges[source, flow_true]["rules"]
-        self.assertEqual(len(r), 1)
-        r = self.a.G.edges[flow_true, target]["rules"]
-        self.assertEqual(len(r), 1)
-        r = self.a.G.edges[source, flow_false]["rules"]
-        self.assertEqual(len(r), 0)
-        r = self.a.G.edges[flow_false, target]["rules"]
-        self.assertEqual(len(r), 0)
+        r = analysis.G.edges[source, flow_true]["rules"]
+        assert len(r) == 1
+        r = analysis.G.edges[flow_true, target]["rules"]
+        assert len(r) == 1
+        r = analysis.G.edges[source, flow_false]["rules"]
+        assert len(r) == 0
+        r = analysis.G.edges[flow_false, target]["rules"]
+        assert len(r) == 0
 
-    def test_004_user_conditional_false(self):
+    def test_user_conditional_false(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Keep only conditional rules selected by user specified booleans (False Case.)"""
-        self.a.booleans = {"condition": False}
-        self.a.rebuildgraph = True
-        self.a._build_subgraph()
+        analysis.booleans = {"condition": False}
+        analysis.rebuildgraph = True
+        analysis._build_subgraph()
 
-        source = self.p.lookup_type("src")
-        target = self.p.lookup_type("tgt")
-        flow_true = self.p.lookup_type("flow_true")
-        flow_false = self.p.lookup_type("flow_false")
+        source = analysis.policy.lookup_type("src")
+        target = analysis.policy.lookup_type("tgt")
+        flow_true = analysis.policy.lookup_type("flow_true")
+        flow_false = analysis.policy.lookup_type("flow_false")
 
-        r = self.a.G.edges[source, flow_true]["rules"]
-        self.assertEqual(len(r), 0)
-        r = self.a.G.edges[flow_true, target]["rules"]
-        self.assertEqual(len(r), 0)
-        r = self.a.G.edges[source, flow_false]["rules"]
-        self.assertEqual(len(r), 1)
-        r = self.a.G.edges[flow_false, target]["rules"]
-        self.assertEqual(len(r), 1)
+        r = analysis.G.edges[source, flow_true]["rules"]
+        assert len(r) == 0
+        r = analysis.G.edges[flow_true, target]["rules"]
+        assert len(r) == 0
+        r = analysis.G.edges[source, flow_false]["rules"]
+        assert len(r) == 1
+        r = analysis.G.edges[flow_false, target]["rules"]
+        assert len(r) == 1
 
-    def test_005_remaining_edges(self):
+    def test_remaining_edges(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Keep edges when rules are deleted, but there are still remaining rules on the edge."""
-        self.a.booleans = {}
-        self.a.rebuildgraph = True
-        self.a._build_subgraph()
+        analysis.booleans = {}
+        analysis.rebuildgraph = True
+        analysis._build_subgraph()
 
-        source = self.p.lookup_type("src_remain")
-        target = self.p.lookup_type("tgt_remain")
-        flow = self.p.lookup_type("flow_remain")
+        source = analysis.policy.lookup_type("src_remain")
+        target = analysis.policy.lookup_type("tgt_remain")
+        flow = analysis.policy.lookup_type("flow_remain")
 
-        r = self.a.G.edges[source, flow]["rules"]
-        self.assertEqual(len(r), 1)
-        self.assertEqual(str(r[0]), 'allow src_remain flow_remain:infoflow hi_w;')
-        r = self.a.G.edges[flow, target]["rules"]
-        self.assertEqual(len(r), 1)
-        self.assertEqual(str(r[0]), 'allow tgt_remain flow_remain:infoflow hi_r;')
+        r = analysis.G.edges[source, flow]["rules"]
+        assert len(r) == 1
+        assert str(r[0]) == 'allow src_remain flow_remain:infoflow hi_w;'
+        r = analysis.G.edges[flow, target]["rules"]
+        assert len(r) == 1
+        assert str(r[0]) == 'allow tgt_remain flow_remain:infoflow hi_r;'
