@@ -184,6 +184,40 @@ def mock_query(mock_policy) -> setools.PolicyQuery:
     return query
 
 
+def _do_compile(source_file: str, output_file: str, /, *, mls: bool = True,
+                xen: bool = False) -> setools.SELinuxPolicy:
+    """
+    Compile the specified source policy.  Checkpolicy is
+    assumed to be /usr/bin/checkpolicy.  Otherwise the path
+    must be specified in the CHECKPOLICY environment variable.
+
+    Return:
+    A SELinuxPolicy object.
+    """
+    user_src = os.getenv("USERSPACE_SRC")
+    checkpol = os.getenv("CHECKPOLICY")
+
+    if user_src:
+        command = [user_src + "/checkpolicy/checkpolicy"]
+    elif checkpol:
+        command = [checkpol]
+    else:
+        command = ["/usr/bin/checkpolicy"]
+
+    if mls:
+        command.append("-M")
+
+    if xen:
+        command.extend(["-t", "xen", "-c", "30"])
+
+    command.extend(["-o", output_file, "-U", "reject", source_file])
+
+    with open(os.devnull, "w") as null:
+        subprocess.check_call(command, stdout=null, shell=False, close_fds=True)
+
+    return setools.SELinuxPolicy(output_file)
+
+
 @pytest.fixture(scope="class")
 def compiled_policy(request: pytest.FixtureRequest) -> Iterable[setools.SELinuxPolicy]:
     """Build a compiled policy."""
@@ -193,23 +227,28 @@ def compiled_policy(request: pytest.FixtureRequest) -> Iterable[setools.SELinuxP
 
     source_file = args[0]
 
-    if "USERSPACE_SRC" in os.environ:
-        command = [os.environ['USERSPACE_SRC'] + "/checkpolicy/checkpolicy"]
-    elif "CHECKPOLICY" in os.environ:
-        command = [os.environ['CHECKPOLICY']]
-    else:
-        command = ["/usr/bin/checkpolicy"]
-
-    if kwargs.get("mls", True):
-        command.append("-M")
-
-    if kwargs.get("xen", False):
-        command.extend(["-t", "xen", "-c", "30"])
-
     with tempfile.NamedTemporaryFile("w") as fd:
-        command.extend(["-o", fd.name, "-U", "reject", source_file])
+        yield _do_compile(source_file, fd.name, mls=kwargs.get("mls", True),
+                          xen=kwargs.get("xen", False))
 
-        with open(os.devnull, "w+b") as null:
-            subprocess.check_call(command, stdout=null, shell=False, close_fds=True)
 
-        yield setools.SELinuxPolicy(fd.name)
+@pytest.fixture(scope="class")
+def policy_pair(request: pytest.FixtureRequest) -> \
+        Iterable[tuple[setools.SELinuxPolicy, setools.SELinuxPolicy]]:
+    """Build a compiled policy."""
+    marker = request.node.get_closest_marker("obj_args")
+    args = marker.args if marker else ()
+    kwargs = marker.kwargs if marker else {}
+
+    source_file_left = args[0]
+    source_file_right = args[1]
+
+    with tempfile.NamedTemporaryFile("w") as fd_left:
+        with tempfile.NamedTemporaryFile("w") as fd_right:
+            left = _do_compile(source_file_left, fd_left.name,
+                               mls=kwargs.get("mls_left", True),
+                               xen=kwargs.get("xen_left", False))
+            right = _do_compile(source_file_right, fd_right.name,
+                                mls=kwargs.get("mls_right", True),
+                                xen=kwargs.get("xen_right", False))
+            yield left, right

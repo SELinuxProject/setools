@@ -3,11 +3,11 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
 from dataclasses import astuple
 from ipaddress import IPv6Address, IPv4Network, IPv6Network
 
+import pytest
+import setools
 from setools import PolicyDifference, PortconProtocol, PortconRange
 from setools import BoundsRuletype as BRT
 from setools import ConstraintRuletype as CRT
@@ -20,232 +20,218 @@ from setools import RBACRuletype as RRT
 from setools import TERuletype as TRT
 
 from .mixins import ValidateRule
-from .policyrep.util import compile_policy
 
 
-class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
+@pytest.fixture(scope="class")
+def analysis(policy_pair: tuple[setools.SELinuxPolicy, setools.SELinuxPolicy]) -> PolicyDifference:
+    return PolicyDifference(*policy_pair)
+
+
+@pytest.mark.obj_args("tests/library/diff_left.conf", "tests/library/diff_right.conf")
+class TestPolicyDifference(ValidateRule):
 
     """Policy difference tests."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.p_left = compile_policy("tests/library/diff_left.conf")
-        cls.p_right = compile_policy("tests/library/diff_right.conf")
-        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p_left.path)
-        os.unlink(cls.p_right.path)
 
     #
     # Types
     #
-    def test_added_types(self):
+    def test_added_types(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added type"""
-        self.assertSetEqual(set(["added_type"]), self.diff.added_types)
+        assert set(["added_type"]) == analysis.added_types
 
-    def test_removed_types(self):
+    def test_removed_types(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type"""
-        self.assertSetEqual(set(["removed_type"]), self.diff.removed_types)
+        assert set(["removed_type"]) == analysis.removed_types
 
-    def test_modified_types_count(self):
+    def test_modified_types_count(self, analysis: setools.PolicyDifference) -> None:
         """Diff: total modified types"""
-        self.assertEqual(6, len(self.diff.modified_types))
+        assert 6 == len(analysis.modified_types)
 
-    def test_modified_types_remove_attr(self):
+    def test_modified_types_remove_attr(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type with removed attribute."""
         # modified_remove_attr
-        self.diff.modified_types.sort()
-        type_ = self.diff.modified_types[4]
-        self.assertSetEqual(set(["an_attr"]), type_.removed_attributes)
-        self.assertFalse(type_.added_attributes)
-        self.assertFalse(type_.matched_attributes)
-        self.assertFalse(type_.modified_permissive)
-        self.assertFalse(type_.permissive)
-        self.assertFalse(type_.added_aliases)
-        self.assertFalse(type_.removed_aliases)
-        self.assertFalse(type_.matched_aliases)
+        analysis.modified_types.sort()
+        type_ = analysis.modified_types[4]
+        assert set(["an_attr"]) == type_.removed_attributes
+        assert not type_.added_attributes
+        assert not type_.matched_attributes
+        assert not type_.modified_permissive
+        assert not type_.permissive
+        assert not type_.added_aliases
+        assert not type_.removed_aliases
+        assert not type_.matched_aliases
 
-    def test_modified_types_remove_alias(self):
+    def test_modified_types_remove_alias(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type with removed alias."""
         # modified_remove_alias
-        self.diff.modified_types.sort()
-        type_ = self.diff.modified_types[3]
-        self.assertSetEqual(set(["an_alias"]), type_.removed_aliases)
-        self.assertFalse(type_.added_attributes)
-        self.assertFalse(type_.removed_attributes)
-        self.assertFalse(type_.matched_attributes)
-        self.assertFalse(type_.modified_permissive)
-        self.assertFalse(type_.permissive)
-        self.assertFalse(type_.added_aliases)
-        self.assertFalse(type_.matched_aliases)
+        analysis.modified_types.sort()
+        type_ = analysis.modified_types[3]
+        assert set(["an_alias"]) == type_.removed_aliases
+        assert not type_.added_attributes
+        assert not type_.removed_attributes
+        assert not type_.matched_attributes
+        assert not type_.modified_permissive
+        assert not type_.permissive
+        assert not type_.added_aliases
+        assert not type_.matched_aliases
 
-    def test_modified_types_remove_permissive(self):
+    def test_modified_types_remove_permissive(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type with removed permissve."""
         # modified_remove_permissive
-        self.diff.modified_types.sort()
-        type_ = self.diff.modified_types[5]
-        self.assertFalse(type_.added_attributes)
-        self.assertFalse(type_.removed_attributes)
-        self.assertFalse(type_.matched_attributes)
-        self.assertTrue(type_.modified_permissive)
-        self.assertTrue(type_.permissive)
-        self.assertFalse(type_.added_aliases)
-        self.assertFalse(type_.removed_aliases)
-        self.assertFalse(type_.matched_aliases)
+        analysis.modified_types.sort()
+        type_ = analysis.modified_types[5]
+        assert not type_.added_attributes
+        assert not type_.removed_attributes
+        assert not type_.matched_attributes
+        assert type_.modified_permissive
+        assert type_.permissive
+        assert not type_.added_aliases
+        assert not type_.removed_aliases
+        assert not type_.matched_aliases
 
-    def test_modified_types_add_attr(self):
+    def test_modified_types_add_attr(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type with added attribute."""
         # modified_add_attr
-        self.diff.modified_types.sort()
-        type_ = self.diff.modified_types[1]
-        self.assertSetEqual(set(["an_attr"]), type_.added_attributes)
-        self.assertFalse(type_.removed_attributes)
-        self.assertFalse(type_.matched_attributes)
-        self.assertFalse(type_.modified_permissive)
-        self.assertFalse(type_.permissive)
-        self.assertFalse(type_.added_aliases)
-        self.assertFalse(type_.removed_aliases)
-        self.assertFalse(type_.matched_aliases)
+        analysis.modified_types.sort()
+        type_ = analysis.modified_types[1]
+        assert set(["an_attr"]) == type_.added_attributes
+        assert not type_.removed_attributes
+        assert not type_.matched_attributes
+        assert not type_.modified_permissive
+        assert not type_.permissive
+        assert not type_.added_aliases
+        assert not type_.removed_aliases
+        assert not type_.matched_aliases
 
-    def test_modified_types_add_alias(self):
+    def test_modified_types_add_alias(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type with added alias."""
         # modified_add_alias
-        self.diff.modified_types.sort()
-        type_ = self.diff.modified_types[0]
-        self.assertSetEqual(set(["an_alias"]), type_.added_aliases)
-        self.assertFalse(type_.added_attributes)
-        self.assertFalse(type_.removed_attributes)
-        self.assertFalse(type_.matched_attributes)
-        self.assertFalse(type_.modified_permissive)
-        self.assertFalse(type_.permissive)
-        self.assertFalse(type_.removed_aliases)
-        self.assertFalse(type_.matched_aliases)
+        analysis.modified_types.sort()
+        type_ = analysis.modified_types[0]
+        assert set(["an_alias"]) == type_.added_aliases
+        assert not type_.added_attributes
+        assert not type_.removed_attributes
+        assert not type_.matched_attributes
+        assert not type_.modified_permissive
+        assert not type_.permissive
+        assert not type_.removed_aliases
+        assert not type_.matched_aliases
 
-    def test_modified_types_add_permissive(self):
+    def test_modified_types_add_permissive(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type with added permissive."""
         # modified_add_permissive
-        self.diff.modified_types.sort()
-        type_ = self.diff.modified_types[2]
-        self.assertFalse(type_.added_attributes)
-        self.assertFalse(type_.removed_attributes)
-        self.assertFalse(type_.matched_attributes)
-        self.assertTrue(type_.modified_permissive)
-        self.assertFalse(type_.permissive)
-        self.assertFalse(type_.added_aliases)
-        self.assertFalse(type_.removed_aliases)
-        self.assertFalse(type_.matched_aliases)
+        analysis.modified_types.sort()
+        type_ = analysis.modified_types[2]
+        assert not type_.added_attributes
+        assert not type_.removed_attributes
+        assert not type_.matched_attributes
+        assert type_.modified_permissive
+        assert not type_.permissive
+        assert not type_.added_aliases
+        assert not type_.removed_aliases
+        assert not type_.matched_aliases
 
     #
     # Roles
     #
-    def test_added_role(self):
+    def test_added_role(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added role."""
-        self.assertSetEqual(set(["added_role"]), self.diff.added_roles)
+        assert set(["added_role"]) == analysis.added_roles
 
-    def test_removed_role(self):
+    def test_removed_role(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed role."""
-        self.assertSetEqual(set(["removed_role"]), self.diff.removed_roles)
+        assert set(["removed_role"]) == analysis.removed_roles
 
-    def test_modified_role_count(self):
+    def test_modified_role_count(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified role."""
-        self.assertEqual(2, len(self.diff.modified_roles))
+        assert 2 == len(analysis.modified_roles)
 
-    def test_modified_role_add_type(self):
+    def test_modified_role_add_type(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified role with added type."""
         # modified_add_type
-        self.diff.modified_roles.sort()
-        self.assertSetEqual(set(["system"]),
-                            self.diff.modified_roles[0].added_types)
-        self.assertFalse(self.diff.modified_roles[0].removed_types)
+        analysis.modified_roles.sort()
+        assert set(["system"]) == analysis.modified_roles[0].added_types
+        assert not analysis.modified_roles[0].removed_types
 
-    def test_modified_role_remove_type(self):
+    def test_modified_role_remove_type(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified role with removed type."""
         # modified_remove_type
-        self.diff.modified_roles.sort()
-        self.assertSetEqual(set(["system"]),
-                            self.diff.modified_roles[1].removed_types)
-        self.assertFalse(self.diff.modified_roles[1].added_types)
+        analysis.modified_roles.sort()
+        assert set(["system"]) == analysis.modified_roles[1].removed_types
+        assert not analysis.modified_roles[1].added_types
 
     #
     # Commons
     #
-    def test_added_common(self):
+    def test_added_common(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added common."""
-        self.assertSetEqual(set(["added_common"]), self.diff.added_commons)
+        assert set(["added_common"]) == analysis.added_commons
 
-    def test_removed_common(self):
+    def test_removed_common(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed common."""
-        self.assertSetEqual(set(["removed_common"]), self.diff.removed_commons)
+        assert set(["removed_common"]) == analysis.removed_commons
 
-    def test_modified_common_count(self):
+    def test_modified_common_count(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified common count."""
-        self.assertEqual(2, len(self.diff.modified_commons))
+        assert 2 == len(analysis.modified_commons)
 
-    def test_modified_common_add_perm(self):
+    def test_modified_common_add_perm(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified common with added perm."""
         # modified_add_perm
-        self.diff.modified_commons.sort()
-        self.assertSetEqual(set(["added_perm"]),
-                            self.diff.modified_commons[0].added_perms)
-        self.assertFalse(self.diff.modified_commons[0].removed_perms)
+        analysis.modified_commons.sort()
+        assert set(["added_perm"]) == analysis.modified_commons[0].added_perms
+        assert not analysis.modified_commons[0].removed_perms
 
-    def test_modified_common_remove_perm(self):
+    def test_modified_common_remove_perm(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified common with removed perm."""
         # modified_remove_perm
-        self.diff.modified_commons.sort()
-        self.assertSetEqual(set(["removed_perm"]),
-                            self.diff.modified_commons[1].removed_perms)
-        self.assertFalse(self.diff.modified_commons[1].added_perms)
+        analysis.modified_commons.sort()
+        assert set(["removed_perm"]) == analysis.modified_commons[1].removed_perms
+        assert not analysis.modified_commons[1].added_perms
 
     #
     # Classes
     #
-    def test_added_class(self):
+    def test_added_class(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added class."""
-        self.assertSetEqual(set(["added_class"]), self.diff.added_classes)
+        assert set(["added_class"]) == analysis.added_classes
 
-    def test_removed_class(self):
+    def test_removed_class(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed class."""
-        self.assertSetEqual(set(["removed_class"]), self.diff.removed_classes)
+        assert set(["removed_class"]) == analysis.removed_classes
 
-    def test_modified_class_count(self):
+    def test_modified_class_count(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified class count."""
-        self.assertEqual(3, len(self.diff.modified_classes))
+        assert 3 == len(analysis.modified_classes)
 
-    def test_modified_class_add_perm(self):
+    def test_modified_class_add_perm(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified class with added perm."""
         # modified_add_perm
-        self.diff.modified_classes.sort()
-        self.assertSetEqual(set(["added_perm"]),
-                            self.diff.modified_classes[0].added_perms)
-        self.assertFalse(self.diff.modified_classes[0].removed_perms)
+        analysis.modified_classes.sort()
+        assert set(["added_perm"]) == analysis.modified_classes[0].added_perms
+        assert not analysis.modified_classes[0].removed_perms
 
-    def test_modified_class_remove_perm(self):
+    def test_modified_class_remove_perm(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified class with removed perm."""
         # modified_remove_perm
-        self.diff.modified_classes.sort()
-        self.assertSetEqual(set(["removed_perm"]),
-                            self.diff.modified_classes[2].removed_perms)
-        self.assertFalse(self.diff.modified_classes[2].added_perms)
+        analysis.modified_classes.sort()
+        assert set(["removed_perm"]) == analysis.modified_classes[2].removed_perms
+        assert not analysis.modified_classes[2].added_perms
 
-    def test_modified_class_change_common(self):
+    def test_modified_class_change_common(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified class due to modified common."""
         # modified_change_common
-        self.diff.modified_classes.sort()
-        self.assertSetEqual(set(["old_com"]),
-                            self.diff.modified_classes[1].removed_perms)
-        self.assertSetEqual(set(["new_com"]),
-                            self.diff.modified_classes[1].added_perms)
+        analysis.modified_classes.sort()
+        assert set(["old_com"]) == analysis.modified_classes[1].removed_perms
+        assert set(["new_com"]) == analysis.modified_classes[1].added_perms
 
     #
     # Allow rules
     #
-    def test_added_allow_rules(self):
+    def test_added_allow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added allow rules."""
-        rules = sorted(self.diff.added_allows)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.added_allows)
+        assert 5 == len(rules)
 
         # added rule with existing types
         self.validate_rule(rules[0], TRT.allow, "added_rule_source", "added_rule_target",
@@ -267,10 +253,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
                            set(["hi_r"]), cond="switch_block_b", cond_block=False)
 
-    def test_removed_allow_rules(self):
+    def test_removed_allow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed allow rules."""
-        rules = sorted(self.diff.removed_allows)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.removed_allows)
+        assert 5 == len(rules)
 
         # rule moved out of a conditional
         self.validate_rule(rules[0], TRT.allow, "move_from_bool", "move_from_bool", "infoflow4",
@@ -292,52 +278,52 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
                            set(["hi_r"]), cond="switch_block_b", cond_block=True)
 
-    def test_modified_allow_rules(self):
+    def test_modified_allow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified allow rules."""
-        lst = sorted(self.diff.modified_allows, key=lambda x: x.rule)
-        self.assertEqual(3, len(lst))
+        lst = sorted(analysis.modified_allows, key=lambda x: x.rule)
+        assert 3 == len(lst)
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
-        self.assertEqual(TRT.allow, rule.ruletype)
-        self.assertEqual("modified_rule_add_perms", rule.source)
-        self.assertEqual("modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set(["hi_w"]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set(["hi_r"]), matched_perms)
+        assert TRT.allow == rule.ruletype
+        assert "modified_rule_add_perms" == rule.source
+        assert "modified_rule_add_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert set(["hi_w"]) == added_perms
+        assert not removed_perms
+        assert set(["hi_r"]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
-        self.assertEqual(TRT.allow, rule.ruletype)
-        self.assertEqual("modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set(["super_r"]), added_perms)
-        self.assertSetEqual(set(["super_w"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
+        assert TRT.allow == rule.ruletype
+        assert "modified_rule_add_remove_perms" == rule.source
+        assert "modified_rule_add_remove_perms" == rule.target
+        assert "infoflow2" == rule.tclass
+        assert set(["super_r"]) == added_perms
+        assert set(["super_w"]) == removed_perms
+        assert set(["low_w"]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
-        self.assertEqual(TRT.allow, rule.ruletype)
-        self.assertEqual("modified_rule_remove_perms", rule.source)
-        self.assertEqual("modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set(["low_r"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
+        assert TRT.allow == rule.ruletype
+        assert "modified_rule_remove_perms" == rule.source
+        assert "modified_rule_remove_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert not added_perms
+        assert set(["low_r"]) == removed_perms
+        assert set(["low_w"]) == matched_perms
 
     #
     # Auditallow rules
     #
-    def test_added_auditallow_rules(self):
+    def test_added_auditallow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added auditallow rules."""
-        rules = sorted(self.diff.added_auditallows)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.added_auditallows)
+        assert 5 == len(rules)
 
         # added rule with existing types
-        self.validate_rule(rules[0], TRT.auditallow, "aa_added_rule_source", "aa_added_rule_target",
-                           "infoflow", set(["med_w"]))
+        self.validate_rule(rules[0], TRT.auditallow, "aa_added_rule_source",
+                           "aa_added_rule_target", "infoflow", set(["med_w"]))
 
         # rule moved out of a conditional
         self.validate_rule(rules[1], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
@@ -355,10 +341,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
                            set(["hi_r"]), cond="aa_switch_block_b", cond_block=False)
 
-    def test_removed_auditallow_rules(self):
+    def test_removed_auditallow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed auditallow rules."""
-        rules = sorted(self.diff.removed_auditallows)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.removed_auditallows)
+        assert 5 == len(rules)
 
         # rule moved out of a conditional
         self.validate_rule(rules[0], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
@@ -380,48 +366,48 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
                            set(["hi_r"]), cond="aa_switch_block_b", cond_block=True)
 
-    def test_modified_auditallow_rules(self):
+    def test_modified_auditallow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified auditallow rules."""
-        lst = sorted(self.diff.modified_auditallows, key=lambda x: x.rule)
-        self.assertEqual(3, len(lst))
+        lst = sorted(analysis.modified_auditallows, key=lambda x: x.rule)
+        assert 3 == len(lst)
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
-        self.assertEqual(TRT.auditallow, rule.ruletype)
-        self.assertEqual("aa_modified_rule_add_perms", rule.source)
-        self.assertEqual("aa_modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set(["hi_w"]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set(["hi_r"]), matched_perms)
+        assert TRT.auditallow == rule.ruletype
+        assert "aa_modified_rule_add_perms" == rule.source
+        assert "aa_modified_rule_add_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert set(["hi_w"]) == added_perms
+        assert not removed_perms
+        assert set(["hi_r"]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
-        self.assertEqual(TRT.auditallow, rule.ruletype)
-        self.assertEqual("aa_modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("aa_modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set(["super_r"]), added_perms)
-        self.assertSetEqual(set(["super_w"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
+        assert TRT.auditallow == rule.ruletype
+        assert "aa_modified_rule_add_remove_perms" == rule.source
+        assert "aa_modified_rule_add_remove_perms" == rule.target
+        assert "infoflow2" == rule.tclass
+        assert set(["super_r"]) == added_perms
+        assert set(["super_w"]) == removed_perms
+        assert set(["low_w"]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
-        self.assertEqual(TRT.auditallow, rule.ruletype)
-        self.assertEqual("aa_modified_rule_remove_perms", rule.source)
-        self.assertEqual("aa_modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set(["low_r"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
+        assert TRT.auditallow == rule.ruletype
+        assert "aa_modified_rule_remove_perms" == rule.source
+        assert "aa_modified_rule_remove_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert not added_perms
+        assert set(["low_r"]) == removed_perms
+        assert set(["low_w"]) == matched_perms
 
     #
     # Dontaudit rules
     #
-    def test_added_dontaudit_rules(self):
+    def test_added_dontaudit_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added dontaudit rules."""
-        rules = sorted(self.diff.added_dontaudits)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.added_dontaudits)
+        assert 5 == len(rules)
 
         # added rule with new type
         self.validate_rule(rules[0], TRT.dontaudit, "added_type", "added_type", "infoflow7",
@@ -443,10 +429,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
                            set(["hi_r"]), cond="da_switch_block_b", cond_block=False)
 
-    def test_removed_dontaudit_rules(self):
+    def test_removed_dontaudit_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed dontaudit rules."""
-        rules = sorted(self.diff.removed_dontaudits)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.removed_dontaudits)
+        assert 5 == len(rules)
 
         # rule moved out of a conditional
         self.validate_rule(rules[0], TRT.dontaudit, "da_move_from_bool", "da_move_from_bool",
@@ -468,51 +454,51 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
                            set(["hi_r"]), cond="da_switch_block_b", cond_block=True)
 
-    def test_modified_dontaudit_rules(self):
+    def test_modified_dontaudit_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified dontaudit rules."""
-        lst = sorted(self.diff.modified_dontaudits, key=lambda x: x.rule)
-        self.assertEqual(3, len(lst))
+        lst = sorted(analysis.modified_dontaudits, key=lambda x: x.rule)
+        assert 3 == len(lst)
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
-        self.assertEqual(TRT.dontaudit, rule.ruletype)
-        self.assertEqual("da_modified_rule_add_perms", rule.source)
-        self.assertEqual("da_modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set(["hi_w"]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set(["hi_r"]), matched_perms)
+        assert TRT.dontaudit == rule.ruletype
+        assert "da_modified_rule_add_perms" == rule.source
+        assert "da_modified_rule_add_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert set(["hi_w"]) == added_perms
+        assert not removed_perms
+        assert set(["hi_r"]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
-        self.assertEqual(TRT.dontaudit, rule.ruletype)
-        self.assertEqual("da_modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("da_modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set(["super_r"]), added_perms)
-        self.assertSetEqual(set(["super_w"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
+        assert TRT.dontaudit == rule.ruletype
+        assert "da_modified_rule_add_remove_perms" == rule.source
+        assert "da_modified_rule_add_remove_perms" == rule.target
+        assert "infoflow2" == rule.tclass
+        assert set(["super_r"]) == added_perms
+        assert set(["super_w"]) == removed_perms
+        assert set(["low_w"]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
-        self.assertEqual(TRT.dontaudit, rule.ruletype)
-        self.assertEqual("da_modified_rule_remove_perms", rule.source)
-        self.assertEqual("da_modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set(["low_r"]), removed_perms)
-        self.assertSetEqual(set(["low_w"]), matched_perms)
+        assert TRT.dontaudit == rule.ruletype
+        assert "da_modified_rule_remove_perms" == rule.source
+        assert "da_modified_rule_remove_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert not added_perms
+        assert set(["low_r"]) == removed_perms
+        assert set(["low_w"]) == matched_perms
 
     #
     # Neverallow rules
     #
-    def test_added_neverallow_rules(self):
+    def test_added_neverallow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added neverallow rules."""
-        self.assertFalse(self.diff.added_neverallows)
+        assert not analysis.added_neverallows
         # changed after dropping source policy support
 
-        # rules = sorted(self.diff.added_neverallows)
-        # self.assertEqual(2, len(rules))
+        # rules = sorted(analysis.added_neverallows)
+        # assert 2 == len(rules)
 
         # added rule with new type
         # self.validate_rule(rules[0], TRT.neverallow, "added_type", "added_type", "added_class",
@@ -522,12 +508,12 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         # self.validate_rule(rules[1], TRT.neverallow, "na_added_rule_source",
         #                   "na_added_rule_target", "infoflow", set(["med_w"]))
 
-    def test_removed_neverallow_rules(self):
+    def test_removed_neverallow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed neverallow rules."""
-        self.assertFalse(self.diff.removed_neverallows)
+        assert not analysis.removed_neverallows
         # changed after dropping source policy support
-        # rules = sorted(self.diff.removed_neverallows)
-        # self.assertEqual(2, len(rules))
+        # rules = sorted(analysis.removed_neverallows)
+        # assert 2 == len(rules)
 
         # removed rule with existing types
         # self.validate_rule(rules[0], TRT.neverallow, "na_removed_rule_source",
@@ -537,50 +523,50 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         # self.validate_rule(rules[1], TRT.neverallow, "removed_type", "removed_type",
         #                   "removed_class", set(["null_perm"]))
 
-    def test_modified_neverallow_rules(self):
+    def test_modified_neverallow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified neverallow rules."""
         # changed after dropping source policy support
-        self.assertFalse(self.diff.modified_neverallows)
-        # l = sorted(self.diff.modified_neverallows, key=lambda x: x.rule)
-        # self.assertEqual(3, len(l))
+        assert not analysis.modified_neverallows
+        # l = sorted(analysis.modified_neverallows, key=lambda x: x.rule)
+        # assert 3 == len(l)
         #
         # # add permissions
         # rule, added_perms, removed_perms, matched_perms = l[0]
-        # self.assertEqual(TRT.neverallow, rule.ruletype)
-        # self.assertEqual("na_modified_rule_add_perms", rule.source)
-        # self.assertEqual("na_modified_rule_add_perms", rule.target)
-        # self.assertEqual("infoflow", rule.tclass)
-        # self.assertSetEqual(set(["hi_w"]), added_perms)
-        # self.assertFalse(removed_perms)
-        # self.assertSetEqual(set(["hi_r"]), matched_perms)
+        # assert TRT.neverallow == rule.ruletype
+        # assert "na_modified_rule_add_perms" == rule.source
+        # assert "na_modified_rule_add_perms" == rule.target
+        # assert "infoflow" == rule.tclass
+        # assert set(["hi_w"]) == added_perms
+        # assert not removed_perms
+        # assert set(["hi_r"]) == matched_perms
         #
         # # add and remove permissions
         # rule, added_perms, removed_perms, matched_perms = l[1]
-        # self.assertEqual(TRT.neverallow, rule.ruletype)
-        # self.assertEqual("na_modified_rule_add_remove_perms", rule.source)
-        # self.assertEqual("na_modified_rule_add_remove_perms", rule.target)
-        # self.assertEqual("infoflow2", rule.tclass)
-        # self.assertSetEqual(set(["super_r"]), added_perms)
-        # self.assertSetEqual(set(["super_w"]), removed_perms)
-        # self.assertSetEqual(set(["low_w"]), matched_perms)
+        # assert TRT.neverallow == rule.ruletype
+        # assert "na_modified_rule_add_remove_perms" == rule.source
+        # assert "na_modified_rule_add_remove_perms" == rule.target
+        # assert "infoflow2" == rule.tclass
+        # assert set(["super_r"]) == added_perms
+        # assert set(["super_w"]) == removed_perms
+        # assert set(["low_w"]) == matched_perms
         #
         # # remove permissions
         # rule, added_perms, removed_perms, matched_perms = l[2]
-        # self.assertEqual(TRT.neverallow, rule.ruletype)
-        # self.assertEqual("na_modified_rule_remove_perms", rule.source)
-        # self.assertEqual("na_modified_rule_remove_perms", rule.target)
-        # self.assertEqual("infoflow", rule.tclass)
-        # self.assertFalse(added_perms)
-        # self.assertSetEqual(set(["low_r"]), removed_perms)
-        # self.assertSetEqual(set(["low_w"]), matched_perms)
+        # assert TRT.neverallow == rule.ruletype
+        # assert "na_modified_rule_remove_perms" == rule.source
+        # assert "na_modified_rule_remove_perms" == rule.target
+        # assert "infoflow" == rule.tclass
+        # assert not added_perms
+        # assert set(["low_r"]) == removed_perms
+        # assert set(["low_w"]) == matched_perms
 
     #
     # Type_transition rules
     #
-    def test_added_type_transition_rules(self):
+    def test_added_type_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added type_transition rules."""
-        rules = sorted(self.diff.added_type_transitions)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.added_type_transitions)
+        assert 5 == len(rules)
 
         # added rule with new type
         self.validate_rule(rules[0], TRT.type_transition, "added_type", "system", "infoflow4",
@@ -602,10 +588,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.type_transition, "tt_move_to_bool", "system",
                            "infoflow3", "system", cond="tt_move_to_bool_b", cond_block=True)
 
-    def test_removed_type_transition_rules(self):
+    def test_removed_type_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed type_transition rules."""
-        rules = sorted(self.diff.removed_type_transitions)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.removed_type_transitions)
+        assert 5 == len(rules)
 
         # removed rule with new type
         self.validate_rule(rules[0], TRT.type_transition, "removed_type", "system", "infoflow4",
@@ -627,26 +613,26 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.type_transition, "tt_removed_rule_source",
                            "tt_removed_rule_target", "infoflow", "system")
 
-    def test_modified_type_transition_rules(self):
+    def test_modified_type_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type_transition rules."""
-        lst = sorted(self.diff.modified_type_transitions, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_type_transitions, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         rule, added_default, removed_default = astuple(lst[0])
-        self.assertEqual(TRT.type_transition, rule.ruletype)
-        self.assertEqual("tt_matched_source", rule.source)
-        self.assertEqual("system", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertEqual("tt_new_type", added_default)
-        self.assertEqual("tt_old_type", removed_default)
+        assert TRT.type_transition == rule.ruletype
+        assert "tt_matched_source" == rule.source
+        assert "system" == rule.target
+        assert "infoflow" == rule.tclass
+        assert "tt_new_type" == added_default
+        assert "tt_old_type" == removed_default
 
     #
     # Type_change rules
     #
-    def test_added_type_change_rules(self):
+    def test_added_type_change_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added type_change rules."""
-        rules = sorted(self.diff.added_type_changes)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.added_type_changes)
+        assert 5 == len(rules)
 
         # added rule with new type
         self.validate_rule(rules[0], TRT.type_change, "added_type", "system", "infoflow4",
@@ -668,10 +654,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.type_change, "tc_move_to_bool", "system",
                            "infoflow3", "system", cond="tc_move_to_bool_b", cond_block=True)
 
-    def test_removed_type_change_rules(self):
+    def test_removed_type_change_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed type_change rules."""
-        rules = sorted(self.diff.removed_type_changes)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.removed_type_changes)
+        assert 5 == len(rules)
 
         # removed rule with new type
         self.validate_rule(rules[0], TRT.type_change, "removed_type", "system", "infoflow4",
@@ -693,26 +679,26 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.type_change, "tc_removed_rule_source",
                            "tc_removed_rule_target", "infoflow", "system")
 
-    def test_modified_type_change_rules(self):
+    def test_modified_type_change_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type_change rules."""
-        lst = sorted(self.diff.modified_type_changes, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_type_changes, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         rule, added_default, removed_default = astuple(lst[0])
-        self.assertEqual(TRT.type_change, rule.ruletype)
-        self.assertEqual("tc_matched_source", rule.source)
-        self.assertEqual("system", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertEqual("tc_new_type", added_default)
-        self.assertEqual("tc_old_type", removed_default)
+        assert TRT.type_change == rule.ruletype
+        assert "tc_matched_source" == rule.source
+        assert "system" == rule.target
+        assert "infoflow" == rule.tclass
+        assert "tc_new_type" == added_default
+        assert "tc_old_type" == removed_default
 
     #
     # Type_member rules
     #
-    def test_added_type_member_rules(self):
+    def test_added_type_member_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added type_member rules."""
-        rules = sorted(self.diff.added_type_members)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.added_type_members)
+        assert 5 == len(rules)
 
         # added rule with new type
         self.validate_rule(rules[0], TRT.type_member, "added_type", "system", "infoflow4",
@@ -734,10 +720,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.type_member, "tm_move_to_bool", "system",
                            "infoflow3", "system", cond="tm_move_to_bool_b", cond_block=True)
 
-    def test_removed_type_member_rules(self):
+    def test_removed_type_member_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed type_member rules."""
-        rules = sorted(self.diff.removed_type_members)
-        self.assertEqual(5, len(rules))
+        rules = sorted(analysis.removed_type_members)
+        assert 5 == len(rules)
 
         # removed rule with new type
         self.validate_rule(rules[0], TRT.type_member, "removed_type", "system", "infoflow4",
@@ -759,26 +745,26 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[4], TRT.type_member, "tm_removed_rule_source",
                            "tm_removed_rule_target", "infoflow", "system")
 
-    def test_modified_type_member_rules(self):
+    def test_modified_type_member_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type_member rules."""
-        lst = sorted(self.diff.modified_type_members, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_type_members, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         rule, added_default, removed_default = astuple(lst[0])
-        self.assertEqual(TRT.type_member, rule.ruletype)
-        self.assertEqual("tm_matched_source", rule.source)
-        self.assertEqual("system", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertEqual("tm_new_type", added_default)
-        self.assertEqual("tm_old_type", removed_default)
+        assert TRT.type_member == rule.ruletype
+        assert "tm_matched_source" == rule.source
+        assert "system" == rule.target
+        assert "infoflow" == rule.tclass
+        assert "tm_new_type" == added_default
+        assert "tm_old_type" == removed_default
 
     #
     # Range_transition rules
     #
-    def test_added_range_transition_rules(self):
+    def test_added_range_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added range_transition rules."""
-        rules = sorted(self.diff.added_range_transitions)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.added_range_transitions)
+        assert 2 == len(rules)
 
         # added rule with new type
         self.validate_rule(rules[0], MRT.range_transition, "added_type", "system", "infoflow4",
@@ -788,10 +774,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[1], MRT.range_transition, "rt_added_rule_source",
                            "rt_added_rule_target", "infoflow", "s3")
 
-    def test_removed_range_transition_rules(self):
+    def test_removed_range_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed range_transition rules."""
-        rules = sorted(self.diff.removed_range_transitions)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.removed_range_transitions)
+        assert 2 == len(rules)
 
         # removed rule with new type
         self.validate_rule(rules[0], MRT.range_transition, "removed_type", "system", "infoflow4",
@@ -801,59 +787,59 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[1], MRT.range_transition, "rt_removed_rule_source",
                            "rt_removed_rule_target", "infoflow", "s1")
 
-    def test_modified_range_transition_rules(self):
+    def test_modified_range_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified range_transition rules."""
-        lst = sorted(self.diff.modified_range_transitions, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_range_transitions, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         rule, added_default, removed_default = astuple(lst[0])
-        self.assertEqual(MRT.range_transition, rule.ruletype)
-        self.assertEqual("rt_matched_source", rule.source)
-        self.assertEqual("system", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertEqual("s0:c0,c4 - s1:c0.c2,c4", added_default)
-        self.assertEqual("s2:c0 - s3:c0.c2", removed_default)
+        assert MRT.range_transition == rule.ruletype
+        assert "rt_matched_source" == rule.source
+        assert "system" == rule.target
+        assert "infoflow" == rule.tclass
+        assert "s0:c0,c4 - s1:c0.c2,c4" == added_default
+        assert "s2:c0 - s3:c0.c2" == removed_default
 
     #
     # Role allow rules
     #
-    def test_added_role_allow_rules(self):
+    def test_added_role_allow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added role_allow rules."""
-        rules = sorted(self.diff.added_role_allows)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.added_role_allows)
+        assert 2 == len(rules)
 
         # added rule with existing roles
-        self.assertEqual(RRT.allow, rules[0].ruletype)
-        self.assertEqual("added_role", rules[0].source)
-        self.assertEqual("system", rules[0].target)
+        assert RRT.allow == rules[0].ruletype
+        assert "added_role" == rules[0].source
+        assert "system" == rules[0].target
 
         # added rule with new roles
-        self.assertEqual(RRT.allow, rules[1].ruletype)
-        self.assertEqual("added_rule_source_r", rules[1].source)
-        self.assertEqual("added_rule_target_r", rules[1].target)
+        assert RRT.allow == rules[1].ruletype
+        assert "added_rule_source_r" == rules[1].source
+        assert "added_rule_target_r" == rules[1].target
 
-    def test_removed_role_allow_rules(self):
+    def test_removed_role_allow_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed role_allow rules."""
-        rules = sorted(self.diff.removed_role_allows)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.removed_role_allows)
+        assert 2 == len(rules)
 
         # removed rule with removed role
-        self.assertEqual(RRT.allow, rules[0].ruletype)
-        self.assertEqual("removed_role", rules[0].source)
-        self.assertEqual("system", rules[0].target)
+        assert RRT.allow == rules[0].ruletype
+        assert "removed_role" == rules[0].source
+        assert "system" == rules[0].target
 
         # removed rule with existing roles
-        self.assertEqual(RRT.allow, rules[1].ruletype)
-        self.assertEqual("removed_rule_source_r", rules[1].source)
-        self.assertEqual("removed_rule_target_r", rules[1].target)
+        assert RRT.allow == rules[1].ruletype
+        assert "removed_rule_source_r" == rules[1].source
+        assert "removed_rule_target_r" == rules[1].target
 
     #
     # Role_transition rules
     #
-    def test_added_role_transition_rules(self):
+    def test_added_role_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added role_transition rules."""
-        rules = sorted(self.diff.added_role_transitions)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.added_role_transitions)
+        assert 2 == len(rules)
 
         # added rule with new role
         self.validate_rule(rules[0], RRT.role_transition, "added_role", "system", "infoflow4",
@@ -863,10 +849,10 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[1], RRT.role_transition, "role_tr_added_rule_source",
                            "role_tr_added_rule_target", "infoflow6", "system")
 
-    def test_removed_role_transition_rules(self):
+    def test_removed_role_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed role_transition rules."""
-        rules = sorted(self.diff.removed_role_transitions)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.removed_role_transitions)
+        assert 2 == len(rules)
 
         # removed rule with new role
         self.validate_rule(rules[0], RRT.role_transition, "removed_role", "system", "infoflow4",
@@ -876,1071 +862,1051 @@ class PolicyDifferenceTest(ValidateRule, unittest.TestCase):
         self.validate_rule(rules[1], RRT.role_transition, "role_tr_removed_rule_source",
                            "role_tr_removed_rule_target", "infoflow5", "system")
 
-    def test_modified_role_transition_rules(self):
+    def test_modified_role_transition_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified role_transition rules."""
-        lst = sorted(self.diff.modified_role_transitions, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_role_transitions, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         rule, added_default, removed_default = astuple(lst[0])
-        self.assertEqual(RRT.role_transition, rule.ruletype)
-        self.assertEqual("role_tr_matched_source", rule.source)
-        self.assertEqual("role_tr_matched_target", rule.target)
-        self.assertEqual("infoflow3", rule.tclass)
-        self.assertEqual("role_tr_new_role", added_default)
-        self.assertEqual("role_tr_old_role", removed_default)
+        assert RRT.role_transition == rule.ruletype
+        assert "role_tr_matched_source" == rule.source
+        assert "role_tr_matched_target" == rule.target
+        assert "infoflow3" == rule.tclass
+        assert "role_tr_new_role" == added_default
+        assert "role_tr_old_role" == removed_default
 
     #
     # Users
     #
-    def test_added_user(self):
+    def test_added_user(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added user."""
-        self.assertSetEqual(set(["added_user"]), self.diff.added_users)
+        assert set(["added_user"]) == analysis.added_users
 
-    def test_removed_user(self):
+    def test_removed_user(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed user."""
-        self.assertSetEqual(set(["removed_user"]), self.diff.removed_users)
+        assert set(["removed_user"]) == analysis.removed_users
 
-    def test_modified_user_count(self):
+    def test_modified_user_count(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified user count."""
-        self.assertEqual(4, len(self.diff.modified_users))
+        assert 4 == len(analysis.modified_users)
 
-    def test_modified_user_add_role(self):
+    def test_modified_user_add_role(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified user with added role."""
         # modified_add_role
-        self.diff.modified_users.sort()
-        self.assertSetEqual(set(["added_role"]),
-                            self.diff.modified_users[0].added_roles)
-        self.assertFalse(self.diff.modified_users[0].removed_roles)
+        analysis.modified_users.sort()
+        assert set(["added_role"]) == analysis.modified_users[0].added_roles
+        assert not analysis.modified_users[0].removed_roles
 
-    def test_modified_user_remove_role(self):
+    def test_modified_user_remove_role(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified user with removed role."""
         # modified_remove_role
-        self.diff.modified_users.sort()
-        self.assertSetEqual(set(["removed_role"]),
-                            self.diff.modified_users[3].removed_roles)
-        self.assertFalse(self.diff.modified_users[3].added_roles)
+        analysis.modified_users.sort()
+        assert set(["removed_role"]) == analysis.modified_users[3].removed_roles
+        assert not analysis.modified_users[3].added_roles
 
-    def test_modified_user_change_level(self):
+    def test_modified_user_change_level(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified user due to modified default level."""
         # modified_change_level
-        self.diff.modified_users.sort()
-        self.assertEqual("s2:c0", self.diff.modified_users[1].removed_level)
-        self.assertEqual("s2:c1", self.diff.modified_users[1].added_level)
+        analysis.modified_users.sort()
+        assert "s2:c0" == analysis.modified_users[1].removed_level
+        assert "s2:c1" == analysis.modified_users[1].added_level
 
-    def test_modified_user_change_range(self):
+    def test_modified_user_change_range(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified user due to modified range."""
         # modified_change_range
-        self.diff.modified_users.sort()
-        self.assertEqual("s3:c1 - s3:c1.c3",
-                         self.diff.modified_users[2].removed_range)
-        self.assertEqual("s3:c1 - s3:c1.c4",
-                         self.diff.modified_users[2].added_range)
+        analysis.modified_users.sort()
+        assert "s3:c1 - s3:c1.c3" == analysis.modified_users[2].removed_range
+        assert "s3:c1 - s3:c1.c4" == analysis.modified_users[2].added_range
 
     #
     # Type attributes
     #
-    def test_added_type_attribute(self):
+    def test_added_type_attribute(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added type attribute."""
-        self.assertSetEqual(set(["added_attr"]), self.diff.added_type_attributes)
+        assert set(["added_attr"]) == analysis.added_type_attributes
 
-    def test_removed_type_attribute(self):
+    def test_removed_type_attribute(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed type attribute."""
-        self.assertSetEqual(set(["removed_attr"]), self.diff.removed_type_attributes)
+        assert set(["removed_attr"]) == analysis.removed_type_attributes
 
-    def test_modified_type_attribute(self):
+    def test_modified_type_attribute(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified type attribute."""
-        self.assertEqual(1, len(self.diff.modified_type_attributes))
-        self.assertSetEqual(set(["modified_add_attr"]),
-                            self.diff.modified_type_attributes[0].added_types)
-        self.assertSetEqual(set(["modified_remove_attr"]),
-                            self.diff.modified_type_attributes[0].removed_types)
+        assert 1 == len(analysis.modified_type_attributes)
+        assert set(["modified_add_attr"]) == analysis.modified_type_attributes[0].added_types
+        assert set(["modified_remove_attr"]) == analysis.modified_type_attributes[0].removed_types
 
     #
     # Booleans
     #
-    def test_added_boolean(self):
+    def test_added_boolean(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added boolean."""
-        self.assertSetEqual(set(["added_bool"]), self.diff.added_booleans)
+        assert set(["added_bool"]) == analysis.added_booleans
 
-    def test_removed_boolean(self):
+    def test_removed_boolean(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed boolean."""
-        self.assertSetEqual(set(["removed_bool"]), self.diff.removed_booleans)
+        assert set(["removed_bool"]) == analysis.removed_booleans
 
-    def test_modified_boolean(self):
+    def test_modified_boolean(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified boolean."""
-        self.assertEqual(1, len(self.diff.modified_booleans))
-        self.assertTrue(self.diff.modified_booleans[0].added_state)
-        self.assertFalse(self.diff.modified_booleans[0].removed_state)
+        assert 1 == len(analysis.modified_booleans)
+        assert analysis.modified_booleans[0].added_state
+        assert not analysis.modified_booleans[0].removed_state
 
     #
     # Categories
     #
-    def test_added_category(self):
+    def test_added_category(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added category."""
-        self.assertSetEqual(set(["c6"]), self.diff.added_categories)
+        assert set(["c6"]) == analysis.added_categories
 
-    def test_removed_category(self):
+    def test_removed_category(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed category."""
-        self.assertSetEqual(set(["c5"]), self.diff.removed_categories)
+        assert set(["c5"]) == analysis.removed_categories
 
-    def test_modified_category(self):
+    def test_modified_category(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified categories."""
-        self.assertEqual(2, len(self.diff.modified_categories))
-        self.diff.modified_categories.sort()
+        assert 2 == len(analysis.modified_categories)
+        analysis.modified_categories.sort()
 
         # add alias on c1
-        self.assertEqual(set(["foo"]), self.diff.modified_categories[1].added_aliases)
-        self.assertFalse(self.diff.modified_categories[1].removed_aliases)
+        assert set(["foo"]) == analysis.modified_categories[1].added_aliases
+        assert not analysis.modified_categories[1].removed_aliases
 
         # remove alias on c0
-        self.assertFalse(self.diff.modified_categories[0].added_aliases)
-        self.assertEqual(set(["eggs"]), self.diff.modified_categories[0].removed_aliases)
+        assert not analysis.modified_categories[0].added_aliases
+        assert set(["eggs"]) == analysis.modified_categories[0].removed_aliases
 
     #
     # Sensitivity
     #
-    def test_added_sensitivities(self):
+    def test_added_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added sensitivities."""
-        self.assertSetEqual(set(["s46"]), self.diff.added_sensitivities)
+        assert set(["s46"]) == analysis.added_sensitivities
 
-    def test_removed_sensitivities(self):
+    def test_removed_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed sensitivities."""
-        self.assertSetEqual(set(["s47"]), self.diff.removed_sensitivities)
+        assert set(["s47"]) == analysis.removed_sensitivities
 
-    def test_modified_sensitivities(self):
+    def test_modified_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified sensitivities."""
-        self.assertEqual(2, len(self.diff.modified_sensitivities))
-        self.diff.modified_sensitivities.sort()
+        assert 2 == len(analysis.modified_sensitivities)
+        analysis.modified_sensitivities.sort()
 
         # add alias to s1
-        self.assertSetEqual(set(["al4"]), self.diff.modified_sensitivities[1].added_aliases)
-        self.assertFalse(self.diff.modified_sensitivities[1].removed_aliases)
+        assert set(["al4"]) == analysis.modified_sensitivities[1].added_aliases
+        assert not analysis.modified_sensitivities[1].removed_aliases
 
         # remove alias from s0
-        self.assertFalse(self.diff.modified_sensitivities[0].added_aliases)
-        self.assertSetEqual(set(["al2"]), self.diff.modified_sensitivities[0].removed_aliases)
+        assert not analysis.modified_sensitivities[0].added_aliases
+        assert set(["al2"]) == analysis.modified_sensitivities[0].removed_aliases
 
     #
     # Initial SIDs
     #
-    def test_added_initialsids(self):
+    def test_added_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added initialsids."""
-        self.assertSetEqual(set(["file_labels"]), self.diff.added_initialsids)
+        assert set(["file_labels"]) == analysis.added_initialsids
 
-    @unittest.skip("Moved to PolicyDifferenceRmIsidTest.")
-    def test_removed_initialsids(self):
+    @pytest.mark.skip("Moved to PolicyDifferenceRmIsidTest.")
+    def test_removed_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed initialsids."""
-        self.assertSetEqual(set(["removed_sid"]), self.diff.removed_initialsids)
+        assert set(["removed_sid"]) == analysis.removed_initialsids
 
-    def test_modified_initialsids(self):
+    def test_modified_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified initialsids."""
-        self.assertEqual(1, len(self.diff.modified_initialsids))
-        self.assertEqual("system:system:system:s0",
-                         self.diff.modified_initialsids[0].added_context)
-        self.assertEqual("removed_user:system:system:s0",
-                         self.diff.modified_initialsids[0].removed_context)
+        assert 1 == len(analysis.modified_initialsids)
+        assert "system:system:system:s0" == analysis.modified_initialsids[0].added_context
+        assert "removed_user:system:system:s0" == analysis.modified_initialsids[0].removed_context
 
     #
     # fs_use_*
     #
-    def test_added_fs_uses(self):
+    def test_added_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added fs_uses."""
-        lst = sorted(self.diff.added_fs_uses)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.added_fs_uses)
+        assert 1 == len(lst)
 
         rule = lst[0]
-        self.assertEqual(FSURT.fs_use_xattr, rule.ruletype)
-        self.assertEqual("added_fsuse", rule.fs)
-        self.assertEqual("system:object_r:system:s0", rule.context)
+        assert FSURT.fs_use_xattr == rule.ruletype
+        assert "added_fsuse" == rule.fs
+        assert "system:object_r:system:s0" == rule.context
 
-    def test_removed_fs_uses(self):
+    def test_removed_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed fs_uses."""
-        lst = sorted(self.diff.removed_fs_uses)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.removed_fs_uses)
+        assert 1 == len(lst)
 
         rule = lst[0]
-        self.assertEqual(FSURT.fs_use_task, rule.ruletype)
-        self.assertEqual("removed_fsuse", rule.fs)
-        self.assertEqual("system:object_r:system:s0", rule.context)
+        assert FSURT.fs_use_task == rule.ruletype
+        assert "removed_fsuse" == rule.fs
+        assert "system:object_r:system:s0" == rule.context
 
-    def test_modified_fs_uses(self):
+    def test_modified_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified fs_uses."""
-        lst = sorted(self.diff.modified_fs_uses, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_fs_uses, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         rule, added_context, removed_context = astuple(lst[0])
-        self.assertEqual(FSURT.fs_use_trans, rule.ruletype)
-        self.assertEqual("modified_fsuse", rule.fs)
-        self.assertEqual("added_user:object_r:system:s1", added_context)
-        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+        assert FSURT.fs_use_trans == rule.ruletype
+        assert "modified_fsuse" == rule.fs
+        assert "added_user:object_r:system:s1" == added_context
+        assert "removed_user:object_r:system:s0" == removed_context
 
     #
     # genfscon
     #
-    def test_added_genfscons(self):
+    def test_added_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added genfscons."""
-        lst = sorted(self.diff.added_genfscons)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.added_genfscons)
+        assert 2 == len(lst)
 
         rule = lst[0]
-        self.assertEqual("added_genfs", rule.fs)
-        self.assertEqual("/", rule.path)
-        self.assertEqual("added_user:object_r:system:s0", rule.context)
+        assert "added_genfs" == rule.fs
+        assert "/" == rule.path
+        assert "added_user:object_r:system:s0" == rule.context
 
         rule = lst[1]
-        self.assertEqual("change_path", rule.fs)
-        self.assertEqual("/new", rule.path)
-        self.assertEqual("system:object_r:system:s0", rule.context)
+        assert "change_path" == rule.fs
+        assert "/new" == rule.path
+        assert "system:object_r:system:s0" == rule.context
 
-    def test_removed_genfscons(self):
+    def test_removed_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed genfscons."""
-        lst = sorted(self.diff.removed_genfscons)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.removed_genfscons)
+        assert 2 == len(lst)
 
         rule = lst[0]
-        self.assertEqual("change_path", rule.fs)
-        self.assertEqual("/old", rule.path)
-        self.assertEqual("system:object_r:system:s0", rule.context)
+        assert "change_path" == rule.fs
+        assert "/old" == rule.path
+        assert "system:object_r:system:s0" == rule.context
 
         rule = lst[1]
-        self.assertEqual("removed_genfs", rule.fs)
-        self.assertEqual("/", rule.path)
-        self.assertEqual("system:object_r:system:s0", rule.context)
+        assert "removed_genfs" == rule.fs
+        assert "/" == rule.path
+        assert "system:object_r:system:s0" == rule.context
 
-    def test_modified_genfscons(self):
+    def test_modified_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified genfscons."""
-        lst = sorted(self.diff.modified_genfscons, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_genfscons, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         rule, added_context, removed_context = astuple(lst[0])
-        self.assertEqual("modified_genfs", rule.fs)
-        self.assertEqual("/", rule.path)
-        self.assertEqual("added_user:object_r:system:s0", added_context)
-        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+        assert "modified_genfs" == rule.fs
+        assert "/" == rule.path
+        assert "added_user:object_r:system:s0" == added_context
+        assert "removed_user:object_r:system:s0" == removed_context
 
     #
     # level decl
     #
-    def test_added_levels(self):
+    def test_added_levels(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added levels."""
-        lst = sorted(self.diff.added_levels)
-        self.assertEqual(1, len(lst))
-        self.assertEqual("s46:c0.c4", lst[0])
+        lst = sorted(analysis.added_levels)
+        assert 1 == len(lst)
+        assert "s46:c0.c4" == lst[0]
 
-    def test_removed_levels(self):
+    def test_removed_levels(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed levels."""
-        lst = sorted(self.diff.removed_levels)
-        self.assertEqual(1, len(lst))
-        self.assertEqual("s47:c0.c4", lst[0])
+        lst = sorted(analysis.removed_levels)
+        assert 1 == len(lst)
+        assert "s47:c0.c4" == lst[0]
 
-    def test_modified_levels(self):
+    def test_modified_levels(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified levels."""
-        lst = sorted(self.diff.modified_levels)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.modified_levels)
+        assert 2 == len(lst)
 
         level = lst[0]
-        self.assertEqual("s40", level.level.sensitivity)
-        self.assertSetEqual(set(["c3"]), level.added_categories)
-        self.assertFalse(level.removed_categories)
+        assert "s40" == level.level.sensitivity
+        assert set(["c3"]) == level.added_categories
+        assert not level.removed_categories
 
         level = lst[1]
-        self.assertEqual("s41", level.level.sensitivity)
-        self.assertFalse(level.added_categories)
-        self.assertSetEqual(set(["c4"]), level.removed_categories)
+        assert "s41" == level.level.sensitivity
+        assert not level.added_categories
+        assert set(["c4"]) == level.removed_categories
 
     #
     # netifcon
     #
-    def test_added_netifcons(self):
+    def test_added_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added netifcons."""
-        lst = sorted(self.diff.added_netifcons)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.added_netifcons)
+        assert 1 == len(lst)
 
         rule = lst[0]
-        self.assertEqual("added_netif", rule.netif)
-        self.assertEqual("system:object_r:system:s0", rule.context)
-        self.assertEqual("system:object_r:system:s0", rule.packet)
+        assert "added_netif" == rule.netif
+        assert "system:object_r:system:s0" == rule.context
+        assert "system:object_r:system:s0" == rule.packet
 
-    def test_removed_netifcons(self):
+    def test_removed_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed netifcons."""
-        lst = sorted(self.diff.removed_netifcons)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.removed_netifcons)
+        assert 1 == len(lst)
 
         rule = lst[0]
-        self.assertEqual("removed_netif", rule.netif)
-        self.assertEqual("system:object_r:system:s0", rule.context)
-        self.assertEqual("system:object_r:system:s0", rule.packet)
+        assert "removed_netif" == rule.netif
+        assert "system:object_r:system:s0" == rule.context
+        assert "system:object_r:system:s0" == rule.packet
 
-    def test_modified_netifcons(self):
+    def test_modified_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified netifcons."""
-        lst = sorted(self.diff.modified_netifcons, key=lambda x: x.rule)
-        self.assertEqual(3, len(lst))
+        lst = sorted(analysis.modified_netifcons, key=lambda x: x.rule)
+        assert 3 == len(lst)
 
         # modified both contexts
         rule, added_context, removed_context, added_packet, removed_packet = astuple(lst[0])
-        self.assertEqual("mod_both_netif", rule.netif)
-        self.assertEqual("added_user:object_r:system:s0", added_context)
-        self.assertEqual("removed_user:object_r:system:s0", removed_context)
-        self.assertEqual("added_user:object_r:system:s0", added_packet)
-        self.assertEqual("removed_user:object_r:system:s0", removed_packet)
+        assert "mod_both_netif" == rule.netif
+        assert "added_user:object_r:system:s0" == added_context
+        assert "removed_user:object_r:system:s0" == removed_context
+        assert "added_user:object_r:system:s0" == added_packet
+        assert "removed_user:object_r:system:s0" == removed_packet
 
         # modified context
         rule, added_context, removed_context, added_packet, removed_packet = astuple(lst[1])
-        self.assertEqual("mod_ctx_netif", rule.netif)
-        self.assertEqual("added_user:object_r:system:s0", added_context)
-        self.assertEqual("removed_user:object_r:system:s0", removed_context)
-        self.assertIsNone(added_packet)
-        self.assertIsNone(removed_packet)
+        assert "mod_ctx_netif" == rule.netif
+        assert "added_user:object_r:system:s0" == added_context
+        assert "removed_user:object_r:system:s0" == removed_context
+        assert added_packet is None
+        assert removed_packet is None
 
         # modified packet context
         rule, added_context, removed_context, added_packet, removed_packet = astuple(lst[2])
-        self.assertEqual("mod_pkt_netif", rule.netif)
-        self.assertIsNone(added_context)
-        self.assertIsNone(removed_context)
-        self.assertEqual("added_user:object_r:system:s0", added_packet)
-        self.assertEqual("removed_user:object_r:system:s0", removed_packet)
+        assert "mod_pkt_netif" == rule.netif
+        assert added_context is None
+        assert removed_context is None
+        assert "added_user:object_r:system:s0" == added_packet
+        assert "removed_user:object_r:system:s0" == removed_packet
 
     #
     # nodecons
     #
-    def test_added_nodecons(self):
+    def test_added_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added nodecons."""
-        lst = sorted(self.diff.added_nodecons)
-        self.assertEqual(4, len(lst))
+        lst = sorted(analysis.added_nodecons)
+        assert 4 == len(lst)
 
         # new IPv4
         nodecon = lst[0]
-        self.assertEqual(IPv4Network("124.0.0.0/8"), nodecon.network)
+        assert IPv4Network("124.0.0.0/8") == nodecon.network
 
         # changed IPv4 netmask
         nodecon = lst[1]
-        self.assertEqual(IPv4Network("125.0.0.0/16"), nodecon.network)
+        assert IPv4Network("125.0.0.0/16") == nodecon.network
 
         # new IPv6
         nodecon = lst[2]
-        self.assertEqual(IPv6Network("ff04::/62"), nodecon.network)
+        assert IPv6Network("ff04::/62") == nodecon.network
 
         # changed IPv6 netmask
         nodecon = lst[3]
-        self.assertEqual(IPv6Network("ff05::/60"), nodecon.network)
+        assert IPv6Network("ff05::/60") == nodecon.network
 
-    def test_removed_nodecons(self):
+    def test_removed_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed nodecons."""
-        lst = sorted(self.diff.removed_nodecons)
-        self.assertEqual(4, len(lst))
+        lst = sorted(analysis.removed_nodecons)
+        assert 4 == len(lst)
 
         # new IPv4
         nodecon = lst[0]
-        self.assertEqual(IPv4Network("122.0.0.0/8"), nodecon.network)
+        assert IPv4Network("122.0.0.0/8") == nodecon.network
 
         # changed IPv4 netmask
         nodecon = lst[1]
-        self.assertEqual(IPv4Network("125.0.0.0/8"), nodecon.network)
+        assert IPv4Network("125.0.0.0/8") == nodecon.network
 
         # new IPv6
         nodecon = lst[2]
-        self.assertEqual(IPv6Network("ff02::/62"), nodecon.network)
+        assert IPv6Network("ff02::/62") == nodecon.network
 
         # changed IPv6 netmask
         nodecon = lst[3]
-        self.assertEqual(IPv6Network("ff05::/62"), nodecon.network)
+        assert IPv6Network("ff05::/62") == nodecon.network
 
-    def test_modified_nodecons(self):
+    def test_modified_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified nodecons."""
-        lst = sorted(self.diff.modified_nodecons, key=lambda x: x.rule)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.modified_nodecons, key=lambda x: x.rule)
+        assert 2 == len(lst)
 
         # changed IPv4
         nodecon, added_context, removed_context = astuple(lst[0])
-        self.assertEqual(IPv4Network("123.0.0.0/8"), nodecon.network)
-        self.assertEqual("modified_change_level:object_r:system:s2:c0", added_context)
-        self.assertEqual("modified_change_level:object_r:system:s2:c1", removed_context)
+        assert IPv4Network("123.0.0.0/8") == nodecon.network
+        assert "modified_change_level:object_r:system:s2:c0" == added_context
+        assert "modified_change_level:object_r:system:s2:c1" == removed_context
 
         # changed IPv6
         nodecon, added_context, removed_context = astuple(lst[1])
-        self.assertEqual(IPv6Network("ff03::/62"), nodecon.network)
-        self.assertEqual("modified_change_level:object_r:system:s2:c1", added_context)
-        self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed_context)
+        assert IPv6Network("ff03::/62") == nodecon.network
+        assert "modified_change_level:object_r:system:s2:c1" == added_context
+        assert "modified_change_level:object_r:system:s2:c0.c1" == removed_context
 
     #
     # Policy capabilities
     #
-    def test_added_polcaps(self):
+    def test_added_polcaps(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added polcaps."""
-        self.assertSetEqual(set(["always_check_network"]), self.diff.added_polcaps)
+        assert set(["always_check_network"]) == analysis.added_polcaps
 
-    def test_removed_polcaps(self):
+    def test_removed_polcaps(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed polcaps."""
-        self.assertSetEqual(set(["network_peer_controls"]), self.diff.removed_polcaps)
+        assert set(["network_peer_controls"]) == analysis.removed_polcaps
 
     #
     # portcons
     #
-    def test_added_portcons(self):
+    def test_added_portcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added portcons."""
-        lst = sorted(self.diff.added_portcons)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.added_portcons)
+        assert 2 == len(lst)
 
         portcon = lst[0]
-        self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertEqual(PortconRange(2024, 2026), portcon.ports)
+        assert PortconProtocol.tcp == portcon.protocol
+        assert PortconRange(2024, 2026) == portcon.ports
 
         portcon = lst[1]
-        self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertEqual(PortconRange(2024, 2024), portcon.ports)
+        assert PortconProtocol.udp == portcon.protocol
+        assert PortconRange(2024, 2024) == portcon.ports
 
-    def test_removed_portcons(self):
+    def test_removed_portcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed portcons."""
-        lst = sorted(self.diff.removed_portcons)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.removed_portcons)
+        assert 2 == len(lst)
 
         portcon = lst[0]
-        self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertEqual(PortconRange(1024, 1026), portcon.ports)
+        assert PortconProtocol.tcp == portcon.protocol
+        assert PortconRange(1024, 1026) == portcon.ports
 
         portcon = lst[1]
-        self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertEqual(PortconRange(1024, 1024), portcon.ports)
+        assert PortconProtocol.udp == portcon.protocol
+        assert PortconRange(1024, 1024) == portcon.ports
 
-    def test_modified_portcons(self):
+    def test_modified_portcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified portcons."""
-        lst = sorted(self.diff.modified_portcons, key=lambda x: x.rule)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.modified_portcons, key=lambda x: x.rule)
+        assert 2 == len(lst)
 
         portcon, added_context, removed_context = astuple(lst[0])
-        self.assertEqual(PortconProtocol.tcp, portcon.protocol)
-        self.assertEqual(PortconRange(3024, 3026), portcon.ports)
-        self.assertEqual("added_user:object_r:system:s1", added_context)
-        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+        assert PortconProtocol.tcp == portcon.protocol
+        assert PortconRange(3024, 3026) == portcon.ports
+        assert "added_user:object_r:system:s1" == added_context
+        assert "removed_user:object_r:system:s0" == removed_context
 
         portcon, added_context, removed_context = astuple(lst[1])
-        self.assertEqual(PortconProtocol.udp, portcon.protocol)
-        self.assertEqual(PortconRange(3024, 3024), portcon.ports)
-        self.assertEqual("added_user:object_r:system:s1", added_context)
-        self.assertEqual("removed_user:object_r:system:s0", removed_context)
+        assert PortconProtocol.udp == portcon.protocol
+        assert PortconRange(3024, 3024) == portcon.ports
+        assert "added_user:object_r:system:s1" == added_context
+        assert "removed_user:object_r:system:s0" == removed_context
 
     #
     # defaults
     #
-    def test_added_defaults(self):
+    def test_added_defaults(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added defaults."""
-        lst = sorted(self.diff.added_defaults)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.added_defaults)
+        assert 2 == len(lst)
 
         default = lst[0]
-        self.assertEqual(DRT.default_range, default.ruletype)
-        self.assertEqual("infoflow2", default.tclass)
+        assert DRT.default_range == default.ruletype
+        assert "infoflow2" == default.tclass
 
         default = lst[1]
-        self.assertEqual(DRT.default_user, default.ruletype)
-        self.assertEqual("infoflow2", default.tclass)
+        assert DRT.default_user == default.ruletype
+        assert "infoflow2" == default.tclass
 
-    def test_removed_defaults(self):
+    def test_removed_defaults(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed defaults."""
-        lst = sorted(self.diff.removed_defaults)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.removed_defaults)
+        assert 2 == len(lst)
 
         default = lst[0]
-        self.assertEqual(DRT.default_range, default.ruletype)
-        self.assertEqual("infoflow3", default.tclass)
+        assert DRT.default_range == default.ruletype
+        assert "infoflow3" == default.tclass
 
         default = lst[1]
-        self.assertEqual(DRT.default_role, default.ruletype)
-        self.assertEqual("infoflow3", default.tclass)
+        assert DRT.default_role == default.ruletype
+        assert "infoflow3" == default.tclass
 
-    def test_modified_defaults(self):
+    def test_modified_defaults(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified defaults."""
-        lst = sorted(self.diff.modified_defaults, key=lambda x: x.rule)
-        self.assertEqual(4, len(lst))
+        lst = sorted(analysis.modified_defaults, key=lambda x: x.rule)
+        assert 4 == len(lst)
 
         default, added_default, removed_default, added_range, removed_range = astuple(lst[0])
-        self.assertEqual(DRT.default_range, default.ruletype)
-        self.assertEqual("infoflow4", default.tclass)
-        self.assertEqual(DV.target, added_default)
-        self.assertEqual(DV.source, removed_default)
-        self.assertIsNone(added_range)
-        self.assertIsNone(removed_range)
+        assert DRT.default_range == default.ruletype
+        assert "infoflow4" == default.tclass
+        assert DV.target == added_default
+        assert DV.source == removed_default
+        assert added_range is None
+        assert removed_range is None
 
         default, added_default, removed_default, added_range, removed_range = astuple(lst[1])
-        self.assertEqual(DRT.default_range, default.ruletype)
-        self.assertEqual("infoflow5", default.tclass)
-        self.assertIsNone(added_default)
-        self.assertIsNone(removed_default)
-        self.assertEqual(DRV.high, added_range)
-        self.assertEqual(DRV.low, removed_range)
+        assert DRT.default_range == default.ruletype
+        assert "infoflow5" == default.tclass
+        assert added_default is None
+        assert removed_default is None
+        assert DRV.high == added_range
+        assert DRV.low == removed_range
 
         default, added_default, removed_default, added_range, removed_range = astuple(lst[2])
-        self.assertEqual(DRT.default_range, default.ruletype)
-        self.assertEqual("infoflow6", default.tclass)
-        self.assertEqual(DV.target, added_default)
-        self.assertEqual(DV.source, removed_default)
-        self.assertEqual(DRV.low, added_range)
-        self.assertEqual(DRV.high, removed_range)
+        assert DRT.default_range == default.ruletype
+        assert "infoflow6" == default.tclass
+        assert DV.target == added_default
+        assert DV.source == removed_default
+        assert DRV.low == added_range
+        assert DRV.high == removed_range
 
         default, added_default, removed_default, added_range, removed_range = astuple(lst[3])
-        self.assertEqual(DRT.default_type, default.ruletype)
-        self.assertEqual("infoflow4", default.tclass)
-        self.assertEqual(DV.target, added_default)
-        self.assertEqual(DV.source, removed_default)
-        self.assertIsNone(added_range)
-        self.assertIsNone(removed_range)
+        assert DRT.default_type == default.ruletype
+        assert "infoflow4" == default.tclass
+        assert DV.target == added_default
+        assert DV.source == removed_default
+        assert added_range is None
+        assert removed_range is None
 
     #
     # constrains
     #
-    def test_added_constrains(self):
+    def test_added_constrains(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added constrains."""
-        lst = sorted(self.diff.added_constrains)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.added_constrains)
+        assert 2 == len(lst)
 
         constrain = lst[0]
-        self.assertEqual(CRT.constrain, constrain.ruletype)
-        self.assertEqual("infoflow3", constrain.tclass)
-        self.assertSetEqual(set(["null"]), constrain.perms)
-        self.assertEqual(["u1", "u2", "!="], constrain.expression)
+        assert CRT.constrain == constrain.ruletype
+        assert "infoflow3" == constrain.tclass
+        assert set(["null"]) == constrain.perms
+        assert ["u1", "u2", "!="] == constrain.expression
 
         constrain = lst[1]
-        self.assertEqual(CRT.constrain, constrain.ruletype)
-        self.assertEqual("infoflow5", constrain.tclass)
-        self.assertSetEqual(set(["hi_r"]), constrain.perms)
-        self.assertEqual(
-            ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '!=', 'or'],
-            constrain.expression)
+        assert CRT.constrain == constrain.ruletype
+        assert "infoflow5" == constrain.tclass
+        assert set(["hi_r"]) == constrain.perms
+        assert ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '!=', 'or'] \
+            == constrain.expression
 
-    def test_removed_constrains(self):
+    def test_removed_constrains(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed constrains."""
-        lst = sorted(self.diff.removed_constrains)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.removed_constrains)
+        assert 2 == len(lst)
 
         constrain = lst[0]
-        self.assertEqual(CRT.constrain, constrain.ruletype)
-        self.assertEqual("infoflow4", constrain.tclass)
-        self.assertSetEqual(set(["hi_w"]), constrain.perms)
-        self.assertEqual(["u1", "u2", "!="], constrain.expression)
+        assert CRT.constrain == constrain.ruletype
+        assert "infoflow4" == constrain.tclass
+        assert set(["hi_w"]) == constrain.perms
+        assert ["u1", "u2", "!="] == constrain.expression
 
         constrain = lst[1]
-        self.assertEqual(CRT.constrain, constrain.ruletype)
-        self.assertEqual("infoflow5", constrain.tclass)
-        self.assertSetEqual(set(["hi_r"]), constrain.perms)
-        self.assertEqual(
-            ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '==', 'or'],
-            constrain.expression)
+        assert CRT.constrain == constrain.ruletype
+        assert "infoflow5" == constrain.tclass
+        assert set(["hi_r"]) == constrain.perms
+        assert ['u1', 'u2', '==', 'r1', 'r2', '==', 'and', 't1', set(["system"]), '==', 'or'] == \
+            constrain.expression
 
     #
     # mlsconstrains
     #
-    def test_added_mlsconstrains(self):
+    def test_added_mlsconstrains(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added mlsconstrains."""
-        lst = sorted(self.diff.added_mlsconstrains)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.added_mlsconstrains)
+        assert 2 == len(lst)
 
         mlsconstrain = lst[0]
-        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
-        self.assertEqual("infoflow3", mlsconstrain.tclass)
-        self.assertSetEqual(set(["null"]), mlsconstrain.perms)
-        self.assertEqual(
-            ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
-                't1', set(["mls_exempt"]), '!=', 'or'],
-            mlsconstrain.expression)
+        assert CRT.mlsconstrain == mlsconstrain.ruletype
+        assert "infoflow3" == mlsconstrain.tclass
+        assert set(["null"]) == mlsconstrain.perms
+        assert ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
+                't1', set(["mls_exempt"]), '!=', 'or'] == mlsconstrain.expression
 
         mlsconstrain = lst[1]
-        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
-        self.assertEqual("infoflow5", mlsconstrain.tclass)
-        self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
-        self.assertEqual(
-            ['l1', 'l2', 'domby', 'h1', 'h2', 'incomp',
-                'and', 't1', set(["mls_exempt"]), '==', 'or'],
-            mlsconstrain.expression)
+        assert CRT.mlsconstrain == mlsconstrain.ruletype
+        assert "infoflow5" == mlsconstrain.tclass
+        assert set(["hi_r"]) == mlsconstrain.perms
+        assert ['l1', 'l2', 'domby', 'h1', 'h2', 'incomp',
+                'and', 't1', set(["mls_exempt"]), '==', 'or'] == mlsconstrain.expression
 
-    def test_removed_mlsconstrains(self):
+    def test_removed_mlsconstrains(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed mlsconstrains."""
-        lst = sorted(self.diff.removed_mlsconstrains)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.removed_mlsconstrains)
+        assert 2 == len(lst)
 
         mlsconstrain = lst[0]
-        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
-        self.assertEqual("infoflow4", mlsconstrain.tclass)
-        self.assertSetEqual(set(["hi_w"]), mlsconstrain.perms)
-        self.assertEqual(
-            ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
-                't1', set(["mls_exempt"]), '==', 'or'],
-            mlsconstrain.expression)
+        assert CRT.mlsconstrain == mlsconstrain.ruletype
+        assert "infoflow4" == mlsconstrain.tclass
+        assert set(["hi_w"]) == mlsconstrain.perms
+        assert ['l1', 'l2', 'domby', 'h1', 'h2', 'domby', 'and',
+                't1', set(["mls_exempt"]), '==', 'or'] == mlsconstrain.expression
 
         mlsconstrain = lst[1]
-        self.assertEqual(CRT.mlsconstrain, mlsconstrain.ruletype)
-        self.assertEqual("infoflow5", mlsconstrain.tclass)
-        self.assertSetEqual(set(["hi_r"]), mlsconstrain.perms)
-        self.assertEqual(
-            ['l1', 'l2', 'domby', 'h1', 'h2', 'dom', 'and', 't1', set(["mls_exempt"]), '==', 'or'],
-            mlsconstrain.expression)
+        assert CRT.mlsconstrain == mlsconstrain.ruletype
+        assert "infoflow5" == mlsconstrain.tclass
+        assert set(["hi_r"]) == mlsconstrain.perms
+        assert ['l1', 'l2', 'domby', 'h1', 'h2', 'dom', 'and', 't1', set(["mls_exempt"]), '==',
+                'or'] == mlsconstrain.expression
 
     #
     # validatetrans
     #
-    def test_added_validatetrans(self):
+    def test_added_validatetrans(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added validatetrans."""
-        lst = sorted(self.diff.added_validatetrans)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.added_validatetrans)
+        assert 2 == len(lst)
 
         validatetrans = lst[0]
-        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
-        self.assertEqual("infoflow3", validatetrans.tclass)
-        self.assertEqual(
-            ['t1', 't2', '==', 't3', set(["system"]), '==', 'or'],
-            validatetrans.expression)
+        assert CRT.validatetrans == validatetrans.ruletype
+        assert "infoflow3" == validatetrans.tclass
+        assert ['t1', 't2', '==', 't3', set(["system"]), '==', 'or'] == validatetrans.expression
 
         validatetrans = lst[1]
-        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
-        self.assertEqual("infoflow5", validatetrans.tclass)
-        self.assertEqual(
-            ['u1', 'u2', '!=', 'r1', 'r2', '==', 'and', 't3', set(["system"]), '==', 'or'],
-            validatetrans.expression)
+        assert CRT.validatetrans == validatetrans.ruletype
+        assert "infoflow5" == validatetrans.tclass
+        assert ['u1', 'u2', '!=', 'r1', 'r2', '==', 'and', 't3', set(["system"]), '==', 'or'] \
+            == validatetrans.expression
 
-    def test_removed_validatetrans(self):
+    def test_removed_validatetrans(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed validatetrans."""
-        lst = sorted(self.diff.removed_validatetrans)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.removed_validatetrans)
+        assert 2 == len(lst)
 
         validatetrans = lst[0]
-        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
-        self.assertEqual("infoflow4", validatetrans.tclass)
-        self.assertEqual(
-            ['u1', 'u2', '==', 't3', set(["system"]), '==', 'or'],
-            validatetrans.expression)
+        assert CRT.validatetrans == validatetrans.ruletype
+        assert "infoflow4" == validatetrans.tclass
+        assert ['u1', 'u2', '==', 't3', set(["system"]), '==', 'or'] == validatetrans.expression
 
         validatetrans = lst[1]
-        self.assertEqual(CRT.validatetrans, validatetrans.ruletype)
-        self.assertEqual("infoflow5", validatetrans.tclass)
-        self.assertEqual(
-            ['u1', 'u2', '==', 'r1', 'r2', '!=', 'and', 't3', set(["system"]), '==', 'or'],
-            validatetrans.expression)
+        assert CRT.validatetrans == validatetrans.ruletype
+        assert "infoflow5" == validatetrans.tclass
+        assert ['u1', 'u2', '==', 'r1', 'r2', '!=', 'and', 't3', set(["system"]), '==', 'or'] \
+            == validatetrans.expression
 
     #
     # mlsvalidatetrans
     #
-    def test_added_mlsvalidatetrans(self):
+    def test_added_mlsvalidatetrans(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added mlsvalidatetrans."""
-        lst = sorted(self.diff.added_mlsvalidatetrans)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.added_mlsvalidatetrans)
+        assert 2 == len(lst)
 
         mlsvalidatetrans = lst[0]
-        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
-        self.assertEqual("infoflow3", mlsvalidatetrans.tclass)
-        self.assertEqual(
-            ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.expression)
+        assert CRT.mlsvalidatetrans == mlsvalidatetrans.ruletype
+        assert "infoflow3" == mlsvalidatetrans.tclass
+        assert ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==',
+                'or'] == mlsvalidatetrans.expression
 
         mlsvalidatetrans = lst[1]
-        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
-        self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
-        self.assertEqual(
-            ['l1', 'l2', 'incomp', 'h1', 'h2', 'domby',
-                'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.expression)
+        assert CRT.mlsvalidatetrans == mlsvalidatetrans.ruletype
+        assert "infoflow5" == mlsvalidatetrans.tclass
+        assert ['l1', 'l2', 'incomp', 'h1', 'h2', 'domby', 'and', 't3', set(["mls_exempt"]), '==',
+                'or'] == mlsvalidatetrans.expression
 
-    def test_removed_mlsvalidatetrans(self):
+    def test_removed_mlsvalidatetrans(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed mlsvalidatetrans."""
-        lst = sorted(self.diff.removed_mlsvalidatetrans)
-        self.assertEqual(2, len(lst))
+        lst = sorted(analysis.removed_mlsvalidatetrans)
+        assert 2 == len(lst)
 
         mlsvalidatetrans = lst[0]
-        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
-        self.assertEqual("infoflow4", mlsvalidatetrans.tclass)
-        self.assertEqual(
-            ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.expression)
+        assert CRT.mlsvalidatetrans == mlsvalidatetrans.ruletype
+        assert "infoflow4" == mlsvalidatetrans.tclass
+        assert ['l1', 'l2', '==', 'h1', 'h2', '==', 'and', 't3', set(["mls_exempt"]), '==',
+                'or'] == mlsvalidatetrans.expression
 
         mlsvalidatetrans = lst[1]
-        self.assertEqual(CRT.mlsvalidatetrans, mlsvalidatetrans.ruletype)
-        self.assertEqual("infoflow5", mlsvalidatetrans.tclass)
-        self.assertEqual(
-            ['l1', 'l2', 'dom', 'h1', 'h2', 'dom', 'and', 't3', set(["mls_exempt"]), '==', 'or'],
-            mlsvalidatetrans.expression)
+        assert CRT.mlsvalidatetrans == mlsvalidatetrans.ruletype
+        assert "infoflow5" == mlsvalidatetrans.tclass
+        assert ['l1', 'l2', 'dom', 'h1', 'h2', 'dom', 'and', 't3', set(["mls_exempt"]), '==',
+                'or'] == mlsvalidatetrans.expression
 
     #
     # typebounds
     #
-    def test_added_typebounds(self):
+    def test_added_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added typebounds."""
-        lst = sorted(self.diff.added_typebounds)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.added_typebounds)
+        assert 1 == len(lst)
 
         bounds = lst[0]
-        self.assertEqual(BRT.typebounds, bounds.ruletype)
-        self.assertEqual("added_parent", bounds.parent)
-        self.assertEqual("added_child", bounds.child)
+        assert BRT.typebounds == bounds.ruletype
+        assert "added_parent" == bounds.parent
+        assert "added_child" == bounds.child
 
-    def test_removed_typebounds(self):
+    def test_removed_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed typebounds."""
-        lst = sorted(self.diff.removed_typebounds)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.removed_typebounds)
+        assert 1 == len(lst)
 
         bounds = lst[0]
-        self.assertEqual(BRT.typebounds, bounds.ruletype)
-        self.assertEqual("removed_parent", bounds.parent)
-        self.assertEqual("removed_child", bounds.child)
+        assert BRT.typebounds == bounds.ruletype
+        assert "removed_parent" == bounds.parent
+        assert "removed_child" == bounds.child
 
-    def test_modified_typebounds(self):
+    def test_modified_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified typebounds."""
-        lst = sorted(self.diff.modified_typebounds, key=lambda x: x.rule)
-        self.assertEqual(1, len(lst))
+        lst = sorted(analysis.modified_typebounds, key=lambda x: x.rule)
+        assert 1 == len(lst)
 
         bounds, added_bound, removed_bound = astuple(lst[0])
-        self.assertEqual(BRT.typebounds, bounds.ruletype)
-        self.assertEqual("mod_child", bounds.child)
-        self.assertEqual("mod_parent_added", added_bound)
-        self.assertEqual("mod_parent_removed", removed_bound)
+        assert BRT.typebounds == bounds.ruletype
+        assert "mod_child" == bounds.child
+        assert "mod_parent_added" == added_bound
+        assert "mod_parent_removed" == removed_bound
 
     #
     # Allowxperm rules
     #
-    def test_added_allowxperm_rules(self):
+    def test_added_allowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added allowxperm rules."""
-        rules = sorted(self.diff.added_allowxperms)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.added_allowxperms)
+        assert 2 == len(rules)
 
         # added rule with new type
         self.validate_rule(rules[0], TRT.allowxperm, "added_type", "added_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
+                           setools.IoctlSet([0x0009]), xperm="ioctl")
 
         # added rule with existing types
         self.validate_rule(rules[1], TRT.allowxperm, "ax_added_rule_source", "ax_added_rule_target",
-                           "infoflow", set([0x0002]), xperm="ioctl")
+                           "infoflow", setools.IoctlSet([0x0002]), xperm="ioctl")
 
-    def test_removed_allowxperm_rules(self):
+    def test_removed_allowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed allowxperm rules."""
-        rules = sorted(self.diff.removed_allowxperms)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.removed_allowxperms)
+        assert 2 == len(rules)
 
         # removed rule with existing types
         self.validate_rule(rules[0], TRT.allowxperm, "ax_removed_rule_source",
-                           "ax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+                           "ax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+                           xperm="ioctl")
 
         # removed rule with new type
         self.validate_rule(rules[1], TRT.allowxperm, "removed_type", "removed_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
+                           setools.IoctlSet([0x0009]), xperm="ioctl")
 
-    def test_modified_allowxperm_rules(self):
+    def test_modified_allowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified allowxperm rules."""
-        lst = sorted(self.diff.modified_allowxperms, key=lambda x: x.rule)
-        self.assertEqual(3, len(lst))
+        lst = sorted(analysis.modified_allowxperms, key=lambda x: x.rule)
+        assert 3 == len(lst)
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
-        self.assertEqual(TRT.allowxperm, rule.ruletype)
-        self.assertEqual("ax_modified_rule_add_perms", rule.source)
-        self.assertEqual("ax_modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set([0x000f]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set([0x0004]), matched_perms)
+        assert TRT.allowxperm == rule.ruletype
+        assert "ax_modified_rule_add_perms" == rule.source
+        assert "ax_modified_rule_add_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert setools.IoctlSet([0x000f]) == added_perms
+        assert not removed_perms
+        assert setools.IoctlSet([0x0004]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
-        self.assertEqual(TRT.allowxperm, rule.ruletype)
-        self.assertEqual("ax_modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("ax_modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set([0x0006]), added_perms)
-        self.assertSetEqual(set([0x0007]), removed_perms)
-        self.assertSetEqual(set([0x0008]), matched_perms)
+        assert TRT.allowxperm == rule.ruletype
+        assert "ax_modified_rule_add_remove_perms" == rule.source
+        assert "ax_modified_rule_add_remove_perms" == rule.target
+        assert "infoflow2" == rule.tclass
+        assert setools.IoctlSet([0x0006]) == added_perms
+        assert setools.IoctlSet([0x0007]) == removed_perms
+        assert setools.IoctlSet([0x0008]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
-        self.assertEqual(TRT.allowxperm, rule.ruletype)
-        self.assertEqual("ax_modified_rule_remove_perms", rule.source)
-        self.assertEqual("ax_modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set([0x0006]), removed_perms)
-        self.assertSetEqual(set([0x0005]), matched_perms)
+        assert TRT.allowxperm == rule.ruletype
+        assert "ax_modified_rule_remove_perms" == rule.source
+        assert "ax_modified_rule_remove_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert not added_perms
+        assert setools.IoctlSet([0x0006]) == removed_perms
+        assert setools.IoctlSet([0x0005]) == matched_perms
 
     #
     # Auditallowxperm rules
     #
-    def test_added_auditallowxperm_rules(self):
+    def test_added_auditallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added auditallowxperm rules."""
-        rules = sorted(self.diff.added_auditallowxperms)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.added_auditallowxperms)
+        assert 2 == len(rules)
 
         # added rule with existing types
         self.validate_rule(rules[0], TRT.auditallowxperm, "aax_added_rule_source",
-                           "aax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+                           "aax_added_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+                           xperm="ioctl")
 
         # added rule with new type
         self.validate_rule(rules[1], TRT.auditallowxperm, "added_type", "added_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
+                           setools.IoctlSet([0x0009]), xperm="ioctl")
 
-    def test_removed_auditallowxperm_rules(self):
+    def test_removed_auditallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed auditallowxperm rules."""
-        rules = sorted(self.diff.removed_auditallowxperms)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.removed_auditallowxperms)
+        assert 2 == len(rules)
 
         # removed rule with existing types
         self.validate_rule(rules[0], TRT.auditallowxperm, "aax_removed_rule_source",
-                           "aax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+                           "aax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+                           xperm="ioctl")
 
         # removed rule with new type
         self.validate_rule(rules[1], TRT.auditallowxperm, "removed_type", "removed_type",
-                           "infoflow7", set([0x0009]), xperm="ioctl")
+                           "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
 
-    def test_modified_auditallowxperm_rules(self):
+    def test_modified_auditallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified auditallowxperm rules."""
-        lst = sorted(self.diff.modified_auditallowxperms, key=lambda x: x.rule)
-        self.assertEqual(3, len(lst))
+        lst = sorted(analysis.modified_auditallowxperms, key=lambda x: x.rule)
+        assert 3 == len(lst)
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
-        self.assertEqual(TRT.auditallowxperm, rule.ruletype)
-        self.assertEqual("aax_modified_rule_add_perms", rule.source)
-        self.assertEqual("aax_modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set([0x000f]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set([0x0004]), matched_perms)
+        assert TRT.auditallowxperm == rule.ruletype
+        assert "aax_modified_rule_add_perms" == rule.source
+        assert "aax_modified_rule_add_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert setools.IoctlSet([0x000f]) == added_perms
+        assert not removed_perms
+        assert setools.IoctlSet([0x0004]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
-        self.assertEqual(TRT.auditallowxperm, rule.ruletype)
-        self.assertEqual("aax_modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("aax_modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set([0x0006]), added_perms)
-        self.assertSetEqual(set([0x0007]), removed_perms)
-        self.assertSetEqual(set([0x0008]), matched_perms)
+        assert TRT.auditallowxperm == rule.ruletype
+        assert "aax_modified_rule_add_remove_perms" == rule.source
+        assert "aax_modified_rule_add_remove_perms" == rule.target
+        assert "infoflow2" == rule.tclass
+        assert setools.IoctlSet([0x0006]) == added_perms
+        assert setools.IoctlSet([0x0007]) == removed_perms
+        assert setools.IoctlSet([0x0008]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
-        self.assertEqual(TRT.auditallowxperm, rule.ruletype)
-        self.assertEqual("aax_modified_rule_remove_perms", rule.source)
-        self.assertEqual("aax_modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set([0x0006]), removed_perms)
-        self.assertSetEqual(set([0x0005]), matched_perms)
+        assert TRT.auditallowxperm == rule.ruletype
+        assert "aax_modified_rule_remove_perms" == rule.source
+        assert "aax_modified_rule_remove_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert not added_perms
+        assert setools.IoctlSet([0x0006]) == removed_perms
+        assert setools.IoctlSet([0x0005]) == matched_perms
 
     #
     # Neverallowxperm rules
     #
-    def test_added_neverallowxperm_rules(self):
+    def test_added_neverallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added neverallowxperm rules."""
-        self.assertFalse(self.diff.added_neverallowxperms)
+        assert not analysis.added_neverallowxperms
         # changed after dropping source policy support
-        # rules = sorted(self.diff.added_neverallowxperms)
-        # self.assertEqual(2, len(rules))
+        # rules = sorted(analysis.added_neverallowxperms)
+        # assert 2 == len(rules)
         #
         # # added rule with new type
-        # self.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type", "infoflow7",
-        #                    set([0x0009]), xperm="ioctl")
+        # self.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type",
+        #                    "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
         #
         # # added rule with existing types
         # self.validate_rule(rules[1], TRT.neverallowxperm, "nax_added_rule_source",
-        #                    "nax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+        #                    "nax_added_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+        #                    xperm="ioctl")
 
-    def test_removed_neverallowxperm_rules(self):
+    def test_removed_neverallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed neverallowxperm rules."""
-        self.assertFalse(self.diff.removed_neverallowxperms)
+        assert not analysis.removed_neverallowxperms
         # changed after dropping source policy support
-        # rules = sorted(self.diff.removed_neverallowxperms)
-        # self.assertEqual(2, len(rules))
+        # rules = sorted(analysis.removed_neverallowxperms)
+        # assert 2 == len(rules)
         #
         # # removed rule with existing types
         # self.validate_rule(rules[0], TRT.neverallowxperm, "nax_removed_rule_source",
-        #                    "nax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+        #                    "nax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+        #                    xperm="ioctl")
         #
         # # removed rule with new type
         # self.validate_rule(rules[1], TRT.neverallowxperm, "removed_type", "removed_type",
-        #                    "infoflow7", set([0x0009]), xperm="ioctl")
+        #                    "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
 
-    def test_modified_neverallowxperm_rules(self):
+    def test_modified_neverallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified neverallowxperm rules."""
-        self.assertFalse(self.diff.modified_neverallowxperms)
+        assert not analysis.modified_neverallowxperms
         # changed after dropping source policy support
-        # l = sorted(self.diff.modified_neverallowxperms, key=lambda x: x.rule)
-        # self.assertEqual(3, len(l))
+        # l = sorted(analysis.modified_neverallowxperms, key=lambda x: x.rule)
+        # assert 3 == len(l)
         #
         # # add permissions
         # rule, added_perms, removed_perms, matched_perms = l[0]
-        # self.assertEqual(TRT.neverallowxperm, rule.ruletype)
-        # self.assertEqual("nax_modified_rule_add_perms", rule.source)
-        # self.assertEqual("nax_modified_rule_add_perms", rule.target)
-        # self.assertEqual("infoflow", rule.tclass)
-        # self.assertSetEqual(set([0x000f]), added_perms)
-        # self.assertFalse(removed_perms)
-        # self.assertSetEqual(set([0x0004]), matched_perms)
+        # assert TRT.neverallowxperm == rule.ruletype
+        # assert "nax_modified_rule_add_perms" == rule.source
+        # assert "nax_modified_rule_add_perms" == rule.target
+        # assert "infoflow" == rule.tclass
+        # assert setools.IoctlSet([0x000f]) == added_perms
+        # assert not removed_perms
+        # assert setools.IoctlSet([0x0004]) == matched_perms
         #
         # # add and remove permissions
         # rule, added_perms, removed_perms, matched_perms = l[1]
-        # self.assertEqual(TRT.neverallowxperm, rule.ruletype)
-        # self.assertEqual("nax_modified_rule_add_remove_perms", rule.source)
-        # self.assertEqual("nax_modified_rule_add_remove_perms", rule.target)
-        # self.assertEqual("infoflow2", rule.tclass)
-        # self.assertSetEqual(set([0x0006]), added_perms)
-        # self.assertSetEqual(set([0x0007]), removed_perms)
-        # self.assertSetEqual(set([0x0008]), matched_perms)
+        # assert TRT.neverallowxperm == rule.ruletype
+        # assert "nax_modified_rule_add_remove_perms" == rule.source
+        # assert "nax_modified_rule_add_remove_perms" == rule.target
+        # assert "infoflow2" == rule.tclass
+        # assert setools.IoctlSet([0x0006]) == added_perms
+        # assert setools.IoctlSet([0x0007]) == removed_perms
+        # assert setools.IoctlSet([0x0008]) == matched_perms
         #
         # # remove permissions
         # rule, added_perms, removed_perms, matched_perms = l[2]
-        # self.assertEqual(TRT.neverallowxperm, rule.ruletype)
-        # self.assertEqual("nax_modified_rule_remove_perms", rule.source)
-        # self.assertEqual("nax_modified_rule_remove_perms", rule.target)
-        # self.assertEqual("infoflow", rule.tclass)
-        # self.assertFalse(added_perms)
-        # self.assertSetEqual(set([0x0006]), removed_perms)
-        # self.assertSetEqual(set([0x0005]), matched_perms)
+        # assert TRT.neverallowxperm == rule.ruletype
+        # assert "nax_modified_rule_remove_perms" == rule.source
+        # assert "nax_modified_rule_remove_perms" == rule.target
+        # assert "infoflow" == rule.tclass
+        # assert not added_perms
+        # assert setools.IoctlSet([0x0006]) == removed_perms
+        # assert setools.IoctlSet([0x0005]) == matched_perms
 
     #
     # Dontauditxperm rules
     #
-    def test_added_dontauditxperm_rules(self):
+    def test_added_dontauditxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added dontauditxperm rules."""
-        rules = sorted(self.diff.added_dontauditxperms)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.added_dontauditxperms)
+        assert 2 == len(rules)
 
         # added rule with new type
         self.validate_rule(rules[0], TRT.dontauditxperm, "added_type", "added_type", "infoflow7",
-                           set([0x0009]), xperm="ioctl")
+                           setools.IoctlSet([0x0009]), xperm="ioctl")
 
         # added rule with existing types
         self.validate_rule(rules[1], TRT.dontauditxperm, "dax_added_rule_source",
-                           "dax_added_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+                           "dax_added_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+                           xperm="ioctl")
 
-    def test_removed_dontauditxperm_rules(self):
+    def test_removed_dontauditxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed dontauditxperm rules."""
-        rules = sorted(self.diff.removed_dontauditxperms)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.removed_dontauditxperms)
+        assert 2 == len(rules)
 
         # removed rule with existing types
         self.validate_rule(rules[0], TRT.dontauditxperm, "dax_removed_rule_source",
-                           "dax_removed_rule_target", "infoflow", set([0x0002]), xperm="ioctl")
+                           "dax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+                           xperm="ioctl")
 
         # removed rule with new type
         self.validate_rule(rules[1], TRT.dontauditxperm, "removed_type", "removed_type",
-                           "infoflow7", set([0x0009]), xperm="ioctl")
+                           "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
 
-    def test_modified_dontauditxperm_rules(self):
+    def test_modified_dontauditxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified dontauditxperm rules."""
-        lst = sorted(self.diff.modified_dontauditxperms, key=lambda x: x.rule)
-        self.assertEqual(3, len(lst))
+        lst = sorted(analysis.modified_dontauditxperms, key=lambda x: x.rule)
+        assert 3 == len(lst)
 
         # add permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[0])
-        self.assertEqual(TRT.dontauditxperm, rule.ruletype)
-        self.assertEqual("dax_modified_rule_add_perms", rule.source)
-        self.assertEqual("dax_modified_rule_add_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertSetEqual(set([0x000f]), added_perms)
-        self.assertFalse(removed_perms)
-        self.assertSetEqual(set([0x0004]), matched_perms)
+        assert TRT.dontauditxperm == rule.ruletype
+        assert "dax_modified_rule_add_perms" == rule.source
+        assert "dax_modified_rule_add_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert setools.IoctlSet([0x000f]) == added_perms
+        assert not removed_perms
+        assert setools.IoctlSet([0x0004]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
-        self.assertEqual(TRT.dontauditxperm, rule.ruletype)
-        self.assertEqual("dax_modified_rule_add_remove_perms", rule.source)
-        self.assertEqual("dax_modified_rule_add_remove_perms", rule.target)
-        self.assertEqual("infoflow2", rule.tclass)
-        self.assertSetEqual(set([0x0006]), added_perms)
-        self.assertSetEqual(set([0x0007]), removed_perms)
-        self.assertSetEqual(set([0x0008]), matched_perms)
+        assert TRT.dontauditxperm == rule.ruletype
+        assert "dax_modified_rule_add_remove_perms" == rule.source
+        assert "dax_modified_rule_add_remove_perms" == rule.target
+        assert "infoflow2" == rule.tclass
+        assert setools.IoctlSet([0x0006]) == added_perms
+        assert setools.IoctlSet([0x0007]) == removed_perms
+        assert setools.IoctlSet([0x0008]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
-        self.assertEqual(TRT.dontauditxperm, rule.ruletype)
-        self.assertEqual("dax_modified_rule_remove_perms", rule.source)
-        self.assertEqual("dax_modified_rule_remove_perms", rule.target)
-        self.assertEqual("infoflow", rule.tclass)
-        self.assertFalse(added_perms)
-        self.assertSetEqual(set([0x0006]), removed_perms)
-        self.assertSetEqual(set([0x0005]), matched_perms)
+        assert TRT.dontauditxperm == rule.ruletype
+        assert "dax_modified_rule_remove_perms" == rule.source
+        assert "dax_modified_rule_remove_perms" == rule.target
+        assert "infoflow" == rule.tclass
+        assert not added_perms
+        assert setools.IoctlSet([0x0006]) == removed_perms
+        assert setools.IoctlSet([0x0005]) == matched_perms
 
     #
     # Ibendportcon statements
     #
-    def test_added_ibendportcons(self):
+    def test_added_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added ibendportcon statements."""
-        rules = sorted(self.diff.added_ibendportcons)
-        self.assertEqual(1, len(rules))
-        self.assertEqual("add", rules[0].name)
-        self.assertEqual(23, rules[0].port)
-        self.assertEqual("system:system:system:s0", rules[0].context)
+        rules = sorted(analysis.added_ibendportcons)
+        assert 1 == len(rules)
+        assert "add" == rules[0].name
+        assert 23 == rules[0].port
+        assert "system:system:system:s0" == rules[0].context
 
-    def test_removed_ibendportcons(self):
+    def test_removed_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed ibendportcon statements."""
-        rules = sorted(self.diff.removed_ibendportcons)
-        self.assertEqual(1, len(rules))
-        self.assertEqual("removed", rules[0].name)
-        self.assertEqual(7, rules[0].port)
-        self.assertEqual("system:system:system:s0", rules[0].context)
+        rules = sorted(analysis.removed_ibendportcons)
+        assert 1 == len(rules)
+        assert "removed" == rules[0].name
+        assert 7 == rules[0].port
+        assert "system:system:system:s0" == rules[0].context
 
-    def test_modified_ibendportcons(self):
+    def test_modified_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified ibendportcon statements"""
-        rules = sorted(self.diff.modified_ibendportcons)
-        self.assertEqual(1, len(rules))
+        rules = sorted(analysis.modified_ibendportcons)
+        assert 1 == len(rules)
 
         rule, added, removed = astuple(rules[0])
-        self.assertEqual("modified", rule.name)
-        self.assertEqual(13, rule.port)
-        self.assertEqual("modified_change_level:object_r:system:s2", added)
-        self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed)
+        assert "modified" == rule.name
+        assert 13 == rule.port
+        assert "modified_change_level:object_r:system:s2" == added
+        assert "modified_change_level:object_r:system:s2:c0.c1" == removed
 
     #
     # Ibpkeycon statements
     #
-    def test_added_ibpkeycons(self):
+    def test_added_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: added ibpkeycon statements."""
-        rules = sorted(self.diff.added_ibpkeycons)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.added_ibpkeycons)
+        assert 2 == len(rules)
 
         rule = rules[0]
-        self.assertEqual(IPv6Address("beef::"), rule.subnet_prefix)
-        self.assertEqual(0xe, rule.pkeys.low)
-        self.assertEqual(0xe, rule.pkeys.high)
-        self.assertEqual("system:system:system:s0", rule.context)
+        assert IPv6Address("beef::") == rule.subnet_prefix
+        assert 0xe == rule.pkeys.low
+        assert 0xe == rule.pkeys.high
+        assert "system:system:system:s0" == rule.context
 
         rule = rules[1]
-        self.assertEqual(IPv6Address("dead::"), rule.subnet_prefix)
-        self.assertEqual(0xbeef, rule.pkeys.low)
-        self.assertEqual(0xdead, rule.pkeys.high)
-        self.assertEqual("system:system:system:s0", rule.context)
+        assert IPv6Address("dead::") == rule.subnet_prefix
+        assert 0xbeef == rule.pkeys.low
+        assert 0xdead == rule.pkeys.high
+        assert "system:system:system:s0" == rule.context
 
-    def test_removed_ibpkeycons(self):
+    def test_removed_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed ibpkeycon statements."""
-        rules = sorted(self.diff.removed_ibpkeycons)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.removed_ibpkeycons)
+        assert 2 == len(rules)
 
         rule = rules[0]
-        self.assertEqual(IPv6Address("dccc::"), rule.subnet_prefix)
-        self.assertEqual(0xc, rule.pkeys.low)
-        self.assertEqual(0xc, rule.pkeys.high)
-        self.assertEqual("system:system:system:s0", rule.context)
+        assert IPv6Address("dccc::") == rule.subnet_prefix
+        assert 0xc == rule.pkeys.low
+        assert 0xc == rule.pkeys.high
+        assert "system:system:system:s0" == rule.context
 
         rule = rules[1]
-        self.assertEqual(IPv6Address("feee::"), rule.subnet_prefix)
-        self.assertEqual(0xaaaa, rule.pkeys.low)
-        self.assertEqual(0xbbbb, rule.pkeys.high)
-        self.assertEqual("system:system:system:s0", rule.context)
+        assert IPv6Address("feee::") == rule.subnet_prefix
+        assert 0xaaaa == rule.pkeys.low
+        assert 0xbbbb == rule.pkeys.high
+        assert "system:system:system:s0" == rule.context
 
-    def test_modified_ibpkeycons(self):
+    def test_modified_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified ibpkeycon statements"""
-        rules = sorted(self.diff.modified_ibpkeycons)
-        self.assertEqual(2, len(rules))
+        rules = sorted(analysis.modified_ibpkeycons)
+        assert 2 == len(rules)
 
         rule, added, removed = astuple(rules[0])
-        self.assertEqual(IPv6Address("aaaa::"), rule.subnet_prefix)
-        self.assertEqual(0xcccc, rule.pkeys.low)
-        self.assertEqual(0xdddd, rule.pkeys.high)
-        self.assertEqual("modified_change_level:object_r:system:s2:c0", added)
-        self.assertEqual("modified_change_level:object_r:system:s2:c1", removed)
+        assert IPv6Address("aaaa::") == rule.subnet_prefix
+        assert 0xcccc == rule.pkeys.low
+        assert 0xdddd == rule.pkeys.high
+        assert "modified_change_level:object_r:system:s2:c0" == added
+        assert "modified_change_level:object_r:system:s2:c1" == removed
 
         rule, added, removed = astuple(rules[1])
-        self.assertEqual(IPv6Address("bbbb::"), rule.subnet_prefix)
-        self.assertEqual(0xf, rule.pkeys.low)
-        self.assertEqual(0xf, rule.pkeys.high)
-        self.assertEqual("modified_change_level:object_r:system:s2:c1", added)
-        self.assertEqual("modified_change_level:object_r:system:s2:c0.c1", removed)
+        assert IPv6Address("bbbb::") == rule.subnet_prefix
+        assert 0xf == rule.pkeys.low
+        assert 0xf == rule.pkeys.high
+        assert "modified_change_level:object_r:system:s2:c1" == added
+        assert "modified_change_level:object_r:system:s2:c0.c1" == removed
 
 
-class PolicyDifferenceRmIsidTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/diff_left.conf", "tests/library/diff_right_rmisid.conf")
+class TestPolicyDifferenceRmIsid:
 
     """
     Policy difference test for removed initial SID.
@@ -1949,487 +1915,468 @@ class PolicyDifferenceRmIsidTest(unittest.TestCase):
     this cannot be in the above test suite.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p_left = compile_policy("tests/library/diff_left.conf")
-        cls.p_right = compile_policy("tests/library/diff_right_rmisid.conf")
-        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p_left.path)
-        os.unlink(cls.p_right.path)
-
-    def test_removed_initialsids(self):
+    def test_removed_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed initialsids."""
-        self.assertSetEqual(set(["file"]), self.diff.removed_initialsids)
+        assert set(["file"]) == analysis.removed_initialsids
 
 
-class PolicyDifferenceTestNoDiff(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/diff_left.conf", "tests/library/diff_left.conf")
+class TestPolicyDifferenceTestNoDiff:
 
     """Policy difference test with no policy differences."""
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p_left = compile_policy("tests/library/diff_left.conf")
-        cls.p_right = compile_policy("tests/library/diff_left.conf")
-        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p_left.path)
-        os.unlink(cls.p_right.path)
-
-    def test_added_types(self):
+    def test_added_types(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added types"""
-        self.assertFalse(self.diff.added_types)
+        assert not analysis.added_types
 
-    def test_removed_types(self):
+    def test_removed_types(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed types"""
-        self.assertFalse(self.diff.removed_types)
+        assert not analysis.removed_types
 
-    def test_modified_types(self):
+    def test_modified_types(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified types"""
-        self.assertFalse(self.diff.modified_types)
+        assert not analysis.modified_types
 
-    def test_added_roles(self):
+    def test_added_roles(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added roles."""
-        self.assertFalse(self.diff.added_roles)
+        assert not analysis.added_roles
 
-    def test_removed_roles(self):
+    def test_removed_roles(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed roles."""
-        self.assertFalse(self.diff.removed_roles)
+        assert not analysis.removed_roles
 
-    def test_modified_roles(self):
+    def test_modified_roles(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified roles."""
-        self.assertFalse(self.diff.modified_roles)
+        assert not analysis.modified_roles
 
-    def test_added_commons(self):
+    def test_added_commons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added commons."""
-        self.assertFalse(self.diff.added_commons)
+        assert not analysis.added_commons
 
-    def test_removed_commons(self):
+    def test_removed_commons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed commons."""
-        self.assertFalse(self.diff.removed_commons)
+        assert not analysis.removed_commons
 
-    def test_modified_commons(self):
+    def test_modified_commons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified commons."""
-        self.assertFalse(self.diff.modified_commons)
+        assert not analysis.modified_commons
 
-    def test_added_classes(self):
+    def test_added_classes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added classes."""
-        self.assertFalse(self.diff.added_classes)
+        assert not analysis.added_classes
 
-    def test_removed_classes(self):
+    def test_removed_classes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed classes."""
-        self.assertFalse(self.diff.removed_classes)
+        assert not analysis.removed_classes
 
-    def test_modified_classes(self):
+    def test_modified_classes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified classes."""
-        self.assertFalse(self.diff.modified_classes)
+        assert not analysis.modified_classes
 
-    def test_added_allows(self):
+    def test_added_allows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added allow rules."""
-        self.assertFalse(self.diff.added_allows)
+        assert not analysis.added_allows
 
-    def test_removed_allows(self):
+    def test_removed_allows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed allow rules."""
-        self.assertFalse(self.diff.removed_allows)
+        assert not analysis.removed_allows
 
-    def test_modified_allows(self):
+    def test_modified_allows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified allow rules."""
-        self.assertFalse(self.diff.modified_allows)
+        assert not analysis.modified_allows
 
-    def test_added_auditallows(self):
+    def test_added_auditallows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added auditallow rules."""
-        self.assertFalse(self.diff.added_auditallows)
+        assert not analysis.added_auditallows
 
-    def test_removed_auditallows(self):
+    def test_removed_auditallows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed auditallow rules."""
-        self.assertFalse(self.diff.removed_auditallows)
+        assert not analysis.removed_auditallows
 
-    def test_modified_auditallows(self):
+    def test_modified_auditallows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified auditallow rules."""
-        self.assertFalse(self.diff.modified_auditallows)
+        assert not analysis.modified_auditallows
 
-    def test_added_neverallows(self):
+    def test_added_neverallows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added neverallow rules."""
-        self.assertFalse(self.diff.added_neverallows)
+        assert not analysis.added_neverallows
 
-    def test_removed_neverallows(self):
+    def test_removed_neverallows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed neverallow rules."""
-        self.assertFalse(self.diff.removed_neverallows)
+        assert not analysis.removed_neverallows
 
-    def test_modified_neverallows(self):
+    def test_modified_neverallows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified neverallow rules."""
-        self.assertFalse(self.diff.modified_neverallows)
+        assert not analysis.modified_neverallows
 
-    def test_added_dontaudits(self):
+    def test_added_dontaudits(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added dontaudit rules."""
-        self.assertFalse(self.diff.added_dontaudits)
+        assert not analysis.added_dontaudits
 
-    def test_removed_dontaudits(self):
+    def test_removed_dontaudits(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed dontaudit rules."""
-        self.assertFalse(self.diff.removed_dontaudits)
+        assert not analysis.removed_dontaudits
 
-    def test_modified_dontaudits(self):
+    def test_modified_dontaudits(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified dontaudit rules."""
-        self.assertFalse(self.diff.modified_dontaudits)
+        assert not analysis.modified_dontaudits
 
-    def test_added_type_transitions(self):
+    def test_added_type_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added type_transition rules."""
-        self.assertFalse(self.diff.added_type_transitions)
+        assert not analysis.added_type_transitions
 
-    def test_removed_type_transitions(self):
+    def test_removed_type_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed type_transition rules."""
-        self.assertFalse(self.diff.removed_type_transitions)
+        assert not analysis.removed_type_transitions
 
-    def test_modified_type_transitions(self):
+    def test_modified_type_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified type_transition rules."""
-        self.assertFalse(self.diff.modified_type_transitions)
+        assert not analysis.modified_type_transitions
 
-    def test_added_type_changes(self):
+    def test_added_type_changes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added type_change rules."""
-        self.assertFalse(self.diff.added_type_changes)
+        assert not analysis.added_type_changes
 
-    def test_removed_type_changes(self):
+    def test_removed_type_changes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed type_change rules."""
-        self.assertFalse(self.diff.removed_type_changes)
+        assert not analysis.removed_type_changes
 
-    def test_modified_type_changes(self):
+    def test_modified_type_changes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified type_change rules."""
-        self.assertFalse(self.diff.modified_type_changes)
+        assert not analysis.modified_type_changes
 
-    def test_added_type_members(self):
+    def test_added_type_members(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added type_member rules."""
-        self.assertFalse(self.diff.added_type_members)
+        assert not analysis.added_type_members
 
-    def test_removed_type_members(self):
+    def test_removed_type_members(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed type_member rules."""
-        self.assertFalse(self.diff.removed_type_members)
+        assert not analysis.removed_type_members
 
-    def test_modified_type_members(self):
+    def test_modified_type_members(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified type_member rules."""
-        self.assertFalse(self.diff.modified_type_members)
+        assert not analysis.modified_type_members
 
-    def test_added_range_transitions(self):
+    def test_added_range_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added range_transition rules."""
-        self.assertFalse(self.diff.added_range_transitions)
+        assert not analysis.added_range_transitions
 
-    def test_removed_range_transitions(self):
+    def test_removed_range_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed range_transition rules."""
-        self.assertFalse(self.diff.removed_range_transitions)
+        assert not analysis.removed_range_transitions
 
-    def test_modified_range_transitions(self):
+    def test_modified_range_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified range_transition rules."""
-        self.assertFalse(self.diff.modified_range_transitions)
+        assert not analysis.modified_range_transitions
 
-    def test_added_role_allows(self):
+    def test_added_role_allows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added role_allow rules."""
-        self.assertFalse(self.diff.added_role_allows)
+        assert not analysis.added_role_allows
 
-    def test_removed_role_allows(self):
+    def test_removed_role_allows(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed role_allow rules."""
-        self.assertFalse(self.diff.removed_role_allows)
+        assert not analysis.removed_role_allows
 
-    def test_added_role_transitions(self):
+    def test_added_role_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added role_transition rules."""
-        self.assertFalse(self.diff.added_role_transitions)
+        assert not analysis.added_role_transitions
 
-    def test_removed_role_transitions(self):
+    def test_removed_role_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed role_transition rules."""
-        self.assertFalse(self.diff.removed_role_transitions)
+        assert not analysis.removed_role_transitions
 
-    def test_modified_role_transitions(self):
+    def test_modified_role_transitions(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified role_transition rules."""
-        self.assertFalse(self.diff.modified_role_transitions)
+        assert not analysis.modified_role_transitions
 
-    def test_added_users(self):
+    def test_added_users(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added users."""
-        self.assertFalse(self.diff.added_users)
+        assert not analysis.added_users
 
-    def test_removed_users(self):
+    def test_removed_users(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed users."""
-        self.assertFalse(self.diff.removed_users)
+        assert not analysis.removed_users
 
-    def test_modified_users(self):
+    def test_modified_users(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified user rules."""
-        self.assertFalse(self.diff.modified_users)
+        assert not analysis.modified_users
 
-    def test_added_type_attributes(self):
+    def test_added_type_attributes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added type attribute."""
-        self.assertFalse(self.diff.added_type_attributes)
+        assert not analysis.added_type_attributes
 
-    def test_removed_type_attributes(self):
+    def test_removed_type_attributes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed type attributes."""
-        self.assertFalse(self.diff.removed_type_attributes)
+        assert not analysis.removed_type_attributes
 
-    def test_modified_type_attributes(self):
+    def test_modified_type_attributes(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified type attributes."""
-        self.assertFalse(self.diff.modified_type_attributes)
+        assert not analysis.modified_type_attributes
 
-    def test_added_booleans(self):
+    def test_added_booleans(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added booleans."""
-        self.assertFalse(self.diff.added_booleans)
+        assert not analysis.added_booleans
 
-    def test_removed_booleans(self):
+    def test_removed_booleans(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed booleans."""
-        self.assertFalse(self.diff.removed_booleans)
+        assert not analysis.removed_booleans
 
-    def test_modified_booleans(self):
+    def test_modified_booleans(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified booleans."""
-        self.assertFalse(self.diff.modified_booleans)
+        assert not analysis.modified_booleans
 
-    def test_added_categories(self):
+    def test_added_categories(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added categories."""
-        self.assertFalse(self.diff.added_categories)
+        assert not analysis.added_categories
 
-    def test_removed_categories(self):
+    def test_removed_categories(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed categories."""
-        self.assertFalse(self.diff.removed_categories)
+        assert not analysis.removed_categories
 
-    def test_modified_categories(self):
+    def test_modified_categories(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified categories."""
-        self.assertFalse(self.diff.modified_categories)
+        assert not analysis.modified_categories
 
-    def test_added_sensitivities(self):
+    def test_added_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added sensitivities."""
-        self.assertFalse(self.diff.added_sensitivities)
+        assert not analysis.added_sensitivities
 
-    def test_removed_sensitivities(self):
+    def test_removed_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed sensitivities."""
-        self.assertFalse(self.diff.removed_sensitivities)
+        assert not analysis.removed_sensitivities
 
-    def test_modified_sensitivities(self):
+    def test_modified_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified sensitivities."""
-        self.assertFalse(self.diff.modified_sensitivities)
+        assert not analysis.modified_sensitivities
 
-    def test_added_initialsids(self):
+    def test_added_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added initialsids."""
-        self.assertFalse(self.diff.added_initialsids)
+        assert not analysis.added_initialsids
 
-    def test_removed_initialsids(self):
+    def test_removed_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed initialsids."""
-        self.assertFalse(self.diff.removed_initialsids)
+        assert not analysis.removed_initialsids
 
-    def test_modified_initialsids(self):
+    def test_modified_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified initialsids."""
-        self.assertFalse(self.diff.modified_initialsids)
+        assert not analysis.modified_initialsids
 
-    def test_added_fs_uses(self):
+    def test_added_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added fs_uses."""
-        self.assertFalse(self.diff.added_fs_uses)
+        assert not analysis.added_fs_uses
 
-    def test_removed_fs_uses(self):
+    def test_removed_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed fs_uses."""
-        self.assertFalse(self.diff.removed_fs_uses)
+        assert not analysis.removed_fs_uses
 
-    def test_modified_fs_uses(self):
+    def test_modified_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified fs_uses."""
-        self.assertFalse(self.diff.modified_fs_uses)
+        assert not analysis.modified_fs_uses
 
-    def test_added_genfscons(self):
+    def test_added_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added genfscons."""
-        self.assertFalse(self.diff.added_genfscons)
+        assert not analysis.added_genfscons
 
-    def test_removed_genfscons(self):
+    def test_removed_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed genfscons."""
-        self.assertFalse(self.diff.removed_genfscons)
+        assert not analysis.removed_genfscons
 
-    def test_modified_genfscons(self):
+    def test_modified_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified genfscons."""
-        self.assertFalse(self.diff.modified_genfscons)
+        assert not analysis.modified_genfscons
 
-    def test_added_levels(self):
+    def test_added_levels(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added levels."""
-        self.assertFalse(self.diff.added_levels)
+        assert not analysis.added_levels
 
-    def test_removed_levels(self):
+    def test_removed_levels(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed levels."""
-        self.assertFalse(self.diff.removed_levels)
+        assert not analysis.removed_levels
 
-    def test_modified_levels(self):
+    def test_modified_levels(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified levels."""
-        self.assertFalse(self.diff.modified_levels)
+        assert not analysis.modified_levels
 
-    def test_added_netifcons(self):
+    def test_added_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added netifcons."""
-        self.assertFalse(self.diff.added_netifcons)
+        assert not analysis.added_netifcons
 
-    def test_removed_netifcons(self):
+    def test_removed_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed netifcons."""
-        self.assertFalse(self.diff.removed_netifcons)
+        assert not analysis.removed_netifcons
 
-    def test_modified_netifcons(self):
+    def test_modified_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified netifcons."""
-        self.assertFalse(self.diff.modified_netifcons)
+        assert not analysis.modified_netifcons
 
-    def test_added_nodecons(self):
+    def test_added_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added nodecons."""
-        self.assertFalse(self.diff.added_nodecons)
+        assert not analysis.added_nodecons
 
-    def test_removed_nodecons(self):
+    def test_removed_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed nodecons."""
-        self.assertFalse(self.diff.removed_nodecons)
+        assert not analysis.removed_nodecons
 
-    def test_modified_nodecons(self):
+    def test_modified_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified nodecons."""
-        self.assertFalse(self.diff.modified_nodecons)
+        assert not analysis.modified_nodecons
 
-    def test_added_polcaps(self):
+    def test_added_polcaps(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added polcaps."""
-        self.assertFalse(self.diff.added_polcaps)
+        assert not analysis.added_polcaps
 
-    def test_removed_polcaps(self):
+    def test_removed_polcaps(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed polcaps."""
-        self.assertFalse(self.diff.removed_polcaps)
+        assert not analysis.removed_polcaps
 
-    def test_added_portcons(self):
+    def test_added_portcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added portcons."""
-        self.assertFalse(self.diff.added_portcons)
+        assert not analysis.added_portcons
 
-    def test_removed_portcons(self):
+    def test_removed_portcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed portcons."""
-        self.assertFalse(self.diff.removed_portcons)
+        assert not analysis.removed_portcons
 
-    def test_modified_portcons(self):
+    def test_modified_portcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified portcons."""
-        self.assertFalse(self.diff.modified_portcons)
+        assert not analysis.modified_portcons
 
-    def test_modified_properties(self):
+    def test_modified_properties(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified properties."""
-        self.assertFalse(self.diff.modified_properties)
+        assert not analysis.modified_properties
 
-    def test_added_defaults(self):
+    def test_added_defaults(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added defaults."""
-        self.assertFalse(self.diff.added_defaults)
+        assert not analysis.added_defaults
 
-    def test_removed_defaults(self):
+    def test_removed_defaults(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed defaults."""
-        self.assertFalse(self.diff.removed_defaults)
+        assert not analysis.removed_defaults
 
-    def test_modified_defaults(self):
+    def test_modified_defaults(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified defaults."""
-        self.assertFalse(self.diff.modified_defaults)
+        assert not analysis.modified_defaults
 
-    def test_added_constrains(self):
+    def test_added_constrains(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added constrains."""
-        self.assertFalse(self.diff.added_constrains)
+        assert not analysis.added_constrains
 
-    def test_removed_constrains(self):
+    def test_removed_constrains(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed constrains."""
-        self.assertFalse(self.diff.removed_constrains)
+        assert not analysis.removed_constrains
 
-    def test_added_mlsconstrains(self):
+    def test_added_mlsconstrains(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added mlsconstrains."""
-        self.assertFalse(self.diff.added_mlsconstrains)
+        assert not analysis.added_mlsconstrains
 
-    def test_removed_mlsconstrains(self):
+    def test_removed_mlsconstrains(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed mlsconstrains."""
-        self.assertFalse(self.diff.removed_mlsconstrains)
+        assert not analysis.removed_mlsconstrains
 
-    def test_added_validatetrans(self):
+    def test_added_validatetrans(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added validatetrans."""
-        self.assertFalse(self.diff.added_validatetrans)
+        assert not analysis.added_validatetrans
 
-    def test_removed_validatetrans(self):
+    def test_removed_validatetrans(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed validatetrans."""
-        self.assertFalse(self.diff.removed_validatetrans)
+        assert not analysis.removed_validatetrans
 
-    def test_added_mlsvalidatetrans(self):
+    def test_added_mlsvalidatetrans(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added mlsvalidatetrans."""
-        self.assertFalse(self.diff.added_mlsvalidatetrans)
+        assert not analysis.added_mlsvalidatetrans
 
-    def test_removed_mlsvalidatetrans(self):
+    def test_removed_mlsvalidatetrans(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed mlsvalidatetrans."""
-        self.assertFalse(self.diff.removed_mlsvalidatetrans)
+        assert not analysis.removed_mlsvalidatetrans
 
-    def test_added_typebounds(self):
+    def test_added_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added typebounds."""
-        self.assertFalse(self.diff.added_typebounds)
+        assert not analysis.added_typebounds
 
-    def test_removed_typebounds(self):
+    def test_removed_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed typebounds."""
-        self.assertFalse(self.diff.removed_typebounds)
+        assert not analysis.removed_typebounds
 
-    def test_modified_typebounds(self):
+    def test_modified_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified typebounds."""
-        self.assertFalse(self.diff.modified_typebounds)
+        assert not analysis.modified_typebounds
 
-    def test_added_allowxperms(self):
+    def test_added_allowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added allowxperm rules."""
-        self.assertFalse(self.diff.added_allowxperms)
+        assert not analysis.added_allowxperms
 
-    def test_removed_allowxperms(self):
+    def test_removed_allowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed allowxperm rules."""
-        self.assertFalse(self.diff.removed_allowxperms)
+        assert not analysis.removed_allowxperms
 
-    def test_modified_allowxperms(self):
+    def test_modified_allowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified allowxperm rules."""
-        self.assertFalse(self.diff.modified_allowxperms)
+        assert not analysis.modified_allowxperms
 
-    def test_added_auditallowxperms(self):
+    def test_added_auditallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added auditallowxperm rules."""
-        self.assertFalse(self.diff.added_auditallowxperms)
+        assert not analysis.added_auditallowxperms
 
-    def test_removed_auditallowxperms(self):
+    def test_removed_auditallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed auditallowxperm rules."""
-        self.assertFalse(self.diff.removed_auditallowxperms)
+        assert not analysis.removed_auditallowxperms
 
-    def test_modified_auditallowxperms(self):
+    def test_modified_auditallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified auditallowxperm rules."""
-        self.assertFalse(self.diff.modified_auditallowxperms)
+        assert not analysis.modified_auditallowxperms
 
-    def test_added_neverallowxperms(self):
+    def test_added_neverallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added neverallowxperm rules."""
-        self.assertFalse(self.diff.added_neverallowxperms)
+        assert not analysis.added_neverallowxperms
 
-    def test_removed_neverallowxperms(self):
+    def test_removed_neverallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed neverallowxperm rules."""
-        self.assertFalse(self.diff.removed_neverallowxperms)
+        assert not analysis.removed_neverallowxperms
 
-    def test_modified_neverallowxperms(self):
+    def test_modified_neverallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified neverallowxperm rules."""
-        self.assertFalse(self.diff.modified_neverallowxperms)
+        assert not analysis.modified_neverallowxperms
 
-    def test_added_dontauditxperms(self):
+    def test_added_dontauditxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added dontauditxperm rules."""
-        self.assertFalse(self.diff.added_dontauditxperms)
+        assert not analysis.added_dontauditxperms
 
-    def test_removed_dontauditxperms(self):
+    def test_removed_dontauditxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed dontauditxperm rules."""
-        self.assertFalse(self.diff.removed_dontauditxperms)
+        assert not analysis.removed_dontauditxperms
 
-    def test_modified_dontauditxperms(self):
+    def test_modified_dontauditxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified dontauditxperm rules."""
-        self.assertFalse(self.diff.modified_dontauditxperms)
+        assert not analysis.modified_dontauditxperms
 
-    def test_added_ibendportcons(self):
+    def test_added_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added ibendportcon rules."""
-        self.assertFalse(self.diff.added_ibendportcons)
+        assert not analysis.added_ibendportcons
 
-    def test_removed_ibendportcons(self):
+    def test_removed_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed ibendportcon rules."""
-        self.assertFalse(self.diff.removed_ibendportcons)
+        assert not analysis.removed_ibendportcons
 
-    def test_modified_ibendportcons(self):
+    def test_modified_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified ibendportcon rules."""
-        self.assertFalse(self.diff.modified_ibendportcons)
+        assert not analysis.modified_ibendportcons
 
-    def test_added_ibpkeycons(self):
+    def test_added_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added ibpkeycon rules."""
-        self.assertFalse(self.diff.added_ibpkeycons)
+        assert not analysis.added_ibpkeycons
 
-    def test_removed_ibpkeycons(self):
+    def test_removed_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed ibpkeycon rules."""
-        self.assertFalse(self.diff.removed_ibpkeycons)
+        assert not analysis.removed_ibpkeycons
 
-    def test_modified_ibpkeycons(self):
+    def test_modified_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified ibpkeycon rules."""
-        self.assertFalse(self.diff.modified_ibpkeycons)
+        assert not analysis.modified_ibpkeycons
 
 
-class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/diff_left.conf", "tests/library/diff_left_standard.conf",
+                      mls_right=False)
+class TestPolicyDifferenceTestMLStoStandard:
 
     """
     Policy difference test between MLS and standard (non-MLS) policy.
@@ -2438,508 +2385,481 @@ class PolicyDifferenceTestMLStoStandard(unittest.TestCase):
     left policy, except with MLS disabled.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p_left = compile_policy("tests/library/diff_left.conf")
-        cls.p_right = compile_policy("tests/library/diff_left_standard.conf", mls=False)
-        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p_left.path)
-        os.unlink(cls.p_right.path)
-
-    def test_added_types(self):
+    def test_added_types(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added types"""
-        self.assertFalse(self.diff.added_types)
+        assert not analysis.added_types
 
-    def test_removed_types(self):
+    def test_removed_types(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed types"""
-        self.assertFalse(self.diff.removed_types)
+        assert not analysis.removed_types
 
-    def test_modified_types(self):
+    def test_modified_types(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified types"""
-        self.assertFalse(self.diff.modified_types)
+        assert not analysis.modified_types
 
-    def test_added_roles(self):
+    def test_added_roles(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added roles."""
-        self.assertFalse(self.diff.added_roles)
+        assert not analysis.added_roles
 
-    def test_removed_roles(self):
+    def test_removed_roles(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed roles."""
-        self.assertFalse(self.diff.removed_roles)
+        assert not analysis.removed_roles
 
-    def test_modified_roles(self):
+    def test_modified_roles(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified roles."""
-        self.assertFalse(self.diff.modified_roles)
+        assert not analysis.modified_roles
 
-    def test_added_commons(self):
+    def test_added_commons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added commons."""
-        self.assertFalse(self.diff.added_commons)
+        assert not analysis.added_commons
 
-    def test_removed_commons(self):
+    def test_removed_commons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed commons."""
-        self.assertFalse(self.diff.removed_commons)
+        assert not analysis.removed_commons
 
-    def test_modified_commons(self):
+    def test_modified_commons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified commons."""
-        self.assertFalse(self.diff.modified_commons)
+        assert not analysis.modified_commons
 
-    def test_added_classes(self):
+    def test_added_classes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added classes."""
-        self.assertFalse(self.diff.added_classes)
+        assert not analysis.added_classes
 
-    def test_removed_classes(self):
+    def test_removed_classes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed classes."""
-        self.assertFalse(self.diff.removed_classes)
+        assert not analysis.removed_classes
 
-    def test_modified_classes(self):
+    def test_modified_classes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified classes."""
-        self.assertFalse(self.diff.modified_classes)
+        assert not analysis.modified_classes
 
-    def test_added_allows(self):
+    def test_added_allows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added allow rules."""
-        self.assertFalse(self.diff.added_allows)
+        assert not analysis.added_allows
 
-    def test_removed_allows(self):
+    def test_removed_allows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed allow rules."""
-        self.assertFalse(self.diff.removed_allows)
+        assert not analysis.removed_allows
 
-    def test_modified_allows(self):
+    def test_modified_allows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified allow rules."""
-        self.assertFalse(self.diff.modified_allows)
+        assert not analysis.modified_allows
 
-    def test_added_auditallows(self):
+    def test_added_auditallows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added auditallow rules."""
-        self.assertFalse(self.diff.added_auditallows)
+        assert not analysis.added_auditallows
 
-    def test_removed_auditallows(self):
+    def test_removed_auditallows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed auditallow rules."""
-        self.assertFalse(self.diff.removed_auditallows)
+        assert not analysis.removed_auditallows
 
-    def test_modified_auditallows(self):
+    def test_modified_auditallows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified auditallow rules."""
-        self.assertFalse(self.diff.modified_auditallows)
+        assert not analysis.modified_auditallows
 
-    def test_added_neverallows(self):
+    def test_added_neverallows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added neverallow rules."""
-        self.assertFalse(self.diff.added_neverallows)
+        assert not analysis.added_neverallows
 
-    def test_removed_neverallows(self):
+    def test_removed_neverallows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed neverallow rules."""
-        self.assertFalse(self.diff.removed_neverallows)
+        assert not analysis.removed_neverallows
 
-    def test_modified_neverallows(self):
+    def test_modified_neverallows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified neverallow rules."""
-        self.assertFalse(self.diff.modified_neverallows)
+        assert not analysis.modified_neverallows
 
-    def test_added_dontaudits(self):
+    def test_added_dontaudits(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added dontaudit rules."""
-        self.assertFalse(self.diff.added_dontaudits)
+        assert not analysis.added_dontaudits
 
-    def test_removed_dontaudits(self):
+    def test_removed_dontaudits(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed dontaudit rules."""
-        self.assertFalse(self.diff.removed_dontaudits)
+        assert not analysis.removed_dontaudits
 
-    def test_modified_dontaudits(self):
+    def test_modified_dontaudits(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified dontaudit rules."""
-        self.assertFalse(self.diff.modified_dontaudits)
+        assert not analysis.modified_dontaudits
 
-    def test_added_type_transitions(self):
+    def test_added_type_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added type_transition rules."""
-        self.assertFalse(self.diff.added_type_transitions)
+        assert not analysis.added_type_transitions
 
-    def test_removed_type_transitions(self):
+    def test_removed_type_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed type_transition rules."""
-        self.assertFalse(self.diff.removed_type_transitions)
+        assert not analysis.removed_type_transitions
 
-    def test_modified_type_transitions(self):
+    def test_modified_type_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified type_transition rules."""
-        self.assertFalse(self.diff.modified_type_transitions)
+        assert not analysis.modified_type_transitions
 
-    def test_added_type_changes(self):
+    def test_added_type_changes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added type_change rules."""
-        self.assertFalse(self.diff.added_type_changes)
+        assert not analysis.added_type_changes
 
-    def test_removed_type_changes(self):
+    def test_removed_type_changes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed type_change rules."""
-        self.assertFalse(self.diff.removed_type_changes)
+        assert not analysis.removed_type_changes
 
-    def test_modified_type_changes(self):
+    def test_modified_type_changes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified type_change rules."""
-        self.assertFalse(self.diff.modified_type_changes)
+        assert not analysis.modified_type_changes
 
-    def test_added_type_members(self):
+    def test_added_type_members(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added type_member rules."""
-        self.assertFalse(self.diff.added_type_members)
+        assert not analysis.added_type_members
 
-    def test_removed_type_members(self):
+    def test_removed_type_members(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed type_member rules."""
-        self.assertFalse(self.diff.removed_type_members)
+        assert not analysis.removed_type_members
 
-    def test_modified_type_members(self):
+    def test_modified_type_members(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified type_member rules."""
-        self.assertFalse(self.diff.modified_type_members)
+        assert not analysis.modified_type_members
 
-    def test_added_range_transitions(self):
+    def test_added_range_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added range_transition rules."""
-        self.assertFalse(self.diff.added_range_transitions)
+        assert not analysis.added_range_transitions
 
-    def test_removed_range_transitions(self):
+    def test_removed_range_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all range_transition rules removed."""
-        self.assertEqual(self.diff.left_policy.range_transition_count,
-                         len(self.diff.removed_range_transitions))
+        assert analysis.left_policy.range_transition_count == \
+            len(analysis.removed_range_transitions)
 
-    def test_modified_range_transitions(self):
+    def test_modified_range_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified range_transition rules."""
-        self.assertFalse(self.diff.modified_range_transitions)
+        assert not analysis.modified_range_transitions
 
-    def test_added_role_allows(self):
+    def test_added_role_allows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added role_allow rules."""
-        self.assertFalse(self.diff.added_role_allows)
+        assert not analysis.added_role_allows
 
-    def test_removed_role_allows(self):
+    def test_removed_role_allows(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed role_allow rules."""
-        self.assertFalse(self.diff.removed_role_allows)
+        assert not analysis.removed_role_allows
 
-    def test_added_role_transitions(self):
+    def test_added_role_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added role_transition rules."""
-        self.assertFalse(self.diff.added_role_transitions)
+        assert not analysis.added_role_transitions
 
-    def test_removed_role_transitions(self):
+    def test_removed_role_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed role_transition rules."""
-        self.assertFalse(self.diff.removed_role_transitions)
+        assert not analysis.removed_role_transitions
 
-    def test_modified_role_transitions(self):
+    def test_modified_role_transitions(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified role_transition rules."""
-        self.assertFalse(self.diff.modified_role_transitions)
+        assert not analysis.modified_role_transitions
 
-    def test_added_users(self):
+    def test_added_users(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added users."""
-        self.assertFalse(self.diff.added_users)
+        assert not analysis.added_users
 
-    def test_removed_users(self):
+    def test_removed_users(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed users."""
-        self.assertFalse(self.diff.removed_users)
+        assert not analysis.removed_users
 
-    def test_modified_users(self):
+    def test_modified_users(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all users modified."""
-        self.assertEqual(self.diff.left_policy.user_count, len(self.diff.modified_users))
+        assert analysis.left_policy.user_count == len(analysis.modified_users)
 
-    def test_added_type_attributes(self):
+    def test_added_type_attributes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added type attribute."""
-        self.assertFalse(self.diff.added_type_attributes)
+        assert not analysis.added_type_attributes
 
-    def test_removed_type_attributes(self):
+    def test_removed_type_attributes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed type attributes."""
-        self.assertFalse(self.diff.removed_type_attributes)
+        assert not analysis.removed_type_attributes
 
-    def test_modified_type_attributes(self):
+    def test_modified_type_attributes(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified type attributes."""
-        self.assertFalse(self.diff.modified_type_attributes)
+        assert not analysis.modified_type_attributes
 
-    def test_added_booleans(self):
+    def test_added_booleans(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added booleans."""
-        self.assertFalse(self.diff.added_booleans)
+        assert not analysis.added_booleans
 
-    def test_removed_booleans(self):
+    def test_removed_booleans(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed booleans."""
-        self.assertFalse(self.diff.removed_booleans)
+        assert not analysis.removed_booleans
 
-    def test_modified_booleans(self):
+    def test_modified_booleans(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified booleans."""
-        self.assertFalse(self.diff.modified_booleans)
+        assert not analysis.modified_booleans
 
-    def test_added_categories(self):
+    def test_added_categories(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added categories."""
-        self.assertFalse(self.diff.added_categories)
+        assert not analysis.added_categories
 
-    def test_removed_categories(self):
+    def test_removed_categories(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all categories removed."""
-        self.assertEqual(self.diff.left_policy.category_count, len(self.diff.removed_categories))
+        assert analysis.left_policy.category_count == len(analysis.removed_categories)
 
-    def test_modified_categories(self):
+    def test_modified_categories(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified categories."""
-        self.assertFalse(self.diff.modified_categories)
+        assert not analysis.modified_categories
 
-    def test_added_sensitivities(self):
+    def test_added_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added sensitivities."""
-        self.assertFalse(self.diff.added_sensitivities)
+        assert not analysis.added_sensitivities
 
-    def test_removed_sensitivities(self):
+    def test_removed_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all sensitivities removed."""
-        self.assertEqual(self.diff.left_policy.level_count, len(self.diff.removed_sensitivities))
+        assert analysis.left_policy.level_count == len(analysis.removed_sensitivities)
 
-    def test_modified_sensitivities(self):
+    def test_modified_sensitivities(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified sensitivities."""
-        self.assertFalse(self.diff.modified_sensitivities)
+        assert not analysis.modified_sensitivities
 
-    def test_added_initialsids(self):
+    def test_added_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added initialsids."""
-        self.assertFalse(self.diff.added_initialsids)
+        assert not analysis.added_initialsids
 
-    def test_removed_initialsids(self):
+    def test_removed_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed initialsids."""
-        self.assertFalse(self.diff.removed_initialsids)
+        assert not analysis.removed_initialsids
 
-    def test_modified_initialsids(self):
+    def test_modified_initialsids(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all initialsids modified."""
-        self.assertEqual(self.diff.left_policy.initialsids_count,
-                         len(self.diff.modified_initialsids))
+        assert analysis.left_policy.initialsids_count == len(analysis.modified_initialsids)
 
-    def test_added_fs_uses(self):
+    def test_added_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added fs_uses."""
-        self.assertFalse(self.diff.added_fs_uses)
+        assert not analysis.added_fs_uses
 
-    def test_removed_fs_uses(self):
+    def test_removed_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed fs_uses."""
-        self.assertFalse(self.diff.removed_fs_uses)
+        assert not analysis.removed_fs_uses
 
-    def test_modified_fs_uses(self):
+    def test_modified_fs_uses(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all fs_uses modified."""
-        self.assertEqual(self.diff.left_policy.fs_use_count, len(self.diff.modified_fs_uses))
+        assert analysis.left_policy.fs_use_count == len(analysis.modified_fs_uses)
 
-    def test_added_genfscons(self):
+    def test_added_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added genfscons."""
-        self.assertFalse(self.diff.added_genfscons)
+        assert not analysis.added_genfscons
 
-    def test_removed_genfscons(self):
+    def test_removed_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed genfscons."""
-        self.assertFalse(self.diff.removed_genfscons)
+        assert not analysis.removed_genfscons
 
-    def test_modified_genfscons(self):
+    def test_modified_genfscons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all genfscons modified."""
-        self.assertEqual(self.diff.left_policy.genfscon_count, len(self.diff.modified_genfscons))
+        assert analysis.left_policy.genfscon_count == len(analysis.modified_genfscons)
 
-    def test_added_levels(self):
+    def test_added_levels(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added levels."""
-        self.assertFalse(self.diff.added_levels)
+        assert not analysis.added_levels
 
-    def test_removed_levels(self):
+    def test_removed_levels(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all levels removed."""
-        self.assertEqual(self.diff.left_policy.level_count, len(self.diff.removed_levels))
+        assert analysis.left_policy.level_count == len(analysis.removed_levels)
 
-    def test_modified_levels(self):
+    def test_modified_levels(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified levels."""
-        self.assertFalse(self.diff.modified_levels)
+        assert not analysis.modified_levels
 
-    def test_added_netifcons(self):
+    def test_added_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added netifcons."""
-        self.assertFalse(self.diff.added_netifcons)
+        assert not analysis.added_netifcons
 
-    def test_removed_netifcons(self):
+    def test_removed_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed netifcons."""
-        self.assertFalse(self.diff.removed_netifcons)
+        assert not analysis.removed_netifcons
 
-    def test_modified_netifcons(self):
+    def test_modified_netifcons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all netifcons modified."""
-        self.assertEqual(self.diff.left_policy.netifcon_count, len(self.diff.modified_netifcons))
+        assert analysis.left_policy.netifcon_count == len(analysis.modified_netifcons)
 
-    def test_added_nodecons(self):
+    def test_added_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added nodecons."""
-        self.assertFalse(self.diff.added_nodecons)
+        assert not analysis.added_nodecons
 
-    def test_removed_nodecons(self):
+    def test_removed_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed nodecons."""
-        self.assertFalse(self.diff.removed_nodecons)
+        assert not analysis.removed_nodecons
 
-    def test_modified_nodecons(self):
+    def test_modified_nodecons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all nodecons modified."""
-        self.assertEqual(self.diff.left_policy.nodecon_count, len(self.diff.modified_nodecons))
+        assert analysis.left_policy.nodecon_count == len(analysis.modified_nodecons)
 
-    def test_added_polcaps(self):
+    def test_added_polcaps(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added polcaps."""
-        self.assertFalse(self.diff.added_polcaps)
+        assert not analysis.added_polcaps
 
-    def test_removed_polcaps(self):
+    def test_removed_polcaps(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed polcaps."""
-        self.assertFalse(self.diff.removed_polcaps)
+        assert not analysis.removed_polcaps
 
-    def test_added_portcons(self):
+    def test_added_portcons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added portcons."""
-        self.assertFalse(self.diff.added_portcons)
+        assert not analysis.added_portcons
 
-    def test_removed_portcons(self):
+    def test_removed_portcons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed portcons."""
-        self.assertFalse(self.diff.removed_portcons)
+        assert not analysis.removed_portcons
 
-    def test_modified_portcons(self):
+    def test_modified_portcons(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all portcons modified."""
-        self.assertEqual(self.diff.left_policy.portcon_count, len(self.diff.modified_portcons))
+        assert analysis.left_policy.portcon_count == len(analysis.modified_portcons)
 
-    def test_modified_properties(self):
+    def test_modified_properties(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: MLS property modified only."""
-        self.assertEqual(1, len(self.diff.modified_properties))
+        assert 1 == len(analysis.modified_properties)
 
-        name, added, removed = astuple(self.diff.modified_properties[0])
-        self.assertEqual("MLS", name)
-        self.assertIs(False, added)
-        self.assertIs(True, removed)
+        name, added, removed = astuple(analysis.modified_properties[0])
+        assert "MLS" == name
+        assert added is False
+        assert removed is True
 
-    def test_added_defaults(self):
+    def test_added_defaults(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added defaults."""
-        self.assertFalse(self.diff.added_defaults)
+        assert not analysis.added_defaults
 
-    def test_removed_defaults(self):
+    def test_removed_defaults(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all default_range removed."""
-        self.assertEqual(
-            sum(1 for d in self.diff.left_policy.defaults() if d.ruletype == DRT.default_range),
-            len(self.diff.removed_defaults))
+        assert sum(1 for d in analysis.left_policy.defaults() if d.ruletype == DRT.default_range) \
+            == len(analysis.removed_defaults)
 
-    def test_modified_defaults(self):
+    def test_modified_defaults(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no defaults modified."""
-        self.assertFalse(self.diff.modified_defaults)
+        assert not analysis.modified_defaults
 
-    def test_added_constraints(self):
+    def test_added_constraints(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added constraints."""
-        self.assertFalse(self.diff.added_constrains)
+        assert not analysis.added_constrains
 
-    def test_removed_constraints(self):
+    def test_removed_constraints(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed constraints."""
-        self.assertFalse(self.diff.removed_constrains)
+        assert not analysis.removed_constrains
 
-    def test_added_validatetrans(self):
+    def test_added_validatetrans(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added validatetrans."""
-        self.assertFalse(self.diff.added_validatetrans)
+        assert not analysis.added_validatetrans
 
-    def test_removed_validatetrans(self):
+    def test_removed_validatetrans(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed validatetrans."""
-        self.assertFalse(self.diff.removed_validatetrans)
+        assert not analysis.removed_validatetrans
 
-    def test_added_mlsconstraints(self):
+    def test_added_mlsconstraints(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added mlsconstraints."""
-        self.assertFalse(self.diff.added_mlsconstrains)
+        assert not analysis.added_mlsconstrains
 
-    def test_removed_mlsconstraints(self):
+    def test_removed_mlsconstraints(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all mlsconstraints removed."""
-        self.assertEqual(
-            sum(1 for m in self.diff.left_policy.constraints() if m.ruletype == CRT.mlsconstrain),
-            len(self.diff.removed_mlsconstrains))
+        assert sum(1 for m in analysis.left_policy.constraints() if
+                   m.ruletype == CRT.mlsconstrain) == len(analysis.removed_mlsconstrains)
 
-    def test_added_mlsvalidatetrans(self):
+    def test_added_mlsvalidatetrans(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added mlsvalidatetrans."""
-        self.assertFalse(self.diff.added_mlsvalidatetrans)
+        assert not analysis.added_mlsvalidatetrans
 
-    def test_removed_mlsvalidatetrans(self):
+    def test_removed_mlsvalidatetrans(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: all mlsvalidatetrans removed."""
-        self.assertEqual(
-            sum(1 for m in self.diff.left_policy.constraints()
-                if m.ruletype == CRT.mlsvalidatetrans),
-            len(self.diff.removed_mlsvalidatetrans))
+        assert sum(1 for m in analysis.left_policy.constraints()
+                   if m.ruletype == CRT.mlsvalidatetrans) == \
+            len(analysis.removed_mlsvalidatetrans)
 
-    def test_added_typebounds(self):
+    def test_added_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no added typebounds."""
-        self.assertFalse(self.diff.added_typebounds)
+        assert not analysis.added_typebounds
 
-    def test_removed_typebounds(self):
+    def test_removed_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no removed typebounds."""
-        self.assertFalse(self.diff.removed_typebounds)
+        assert not analysis.removed_typebounds
 
-    def test_modified_typebounds(self):
+    def test_modified_typebounds(self, analysis: setools.PolicyDifference) -> None:
         """MLSvsStandardDiff: no modified typebounds."""
-        self.assertFalse(self.diff.modified_typebounds)
+        assert not analysis.modified_typebounds
 
-    def test_added_allowxperms(self):
+    def test_added_allowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added allowxperm rules."""
-        self.assertFalse(self.diff.added_allowxperms)
+        assert not analysis.added_allowxperms
 
-    def test_removed_allowxperms(self):
+    def test_removed_allowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed allowxperm rules."""
-        self.assertFalse(self.diff.removed_allowxperms)
+        assert not analysis.removed_allowxperms
 
-    def test_modified_allowxperms(self):
+    def test_modified_allowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified allowxperm rules."""
-        self.assertFalse(self.diff.modified_allowxperms)
+        assert not analysis.modified_allowxperms
 
-    def test_added_auditallowxperms(self):
+    def test_added_auditallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added auditallowxperm rules."""
-        self.assertFalse(self.diff.added_auditallowxperms)
+        assert not analysis.added_auditallowxperms
 
-    def test_removed_auditallowxperms(self):
+    def test_removed_auditallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed auditallowxperm rules."""
-        self.assertFalse(self.diff.removed_auditallowxperms)
+        assert not analysis.removed_auditallowxperms
 
-    def test_modified_auditallowxperms(self):
+    def test_modified_auditallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified auditallowxperm rules."""
-        self.assertFalse(self.diff.modified_auditallowxperms)
+        assert not analysis.modified_auditallowxperms
 
-    def test_added_neverallowxperms(self):
+    def test_added_neverallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added neverallowxperm rules."""
-        self.assertFalse(self.diff.added_neverallowxperms)
+        assert not analysis.added_neverallowxperms
 
-    def test_removed_neverallowxperms(self):
+    def test_removed_neverallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed neverallowxperm rules."""
-        self.assertFalse(self.diff.removed_neverallowxperms)
+        assert not analysis.removed_neverallowxperms
 
-    def test_modified_neverallowxperms(self):
+    def test_modified_neverallowxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified neverallowxperm rules."""
-        self.assertFalse(self.diff.modified_neverallowxperms)
+        assert not analysis.modified_neverallowxperms
 
-    def test_added_dontauditxperms(self):
+    def test_added_dontauditxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added dontauditxperm rules."""
-        self.assertFalse(self.diff.added_dontauditxperms)
+        assert not analysis.added_dontauditxperms
 
-    def test_removed_dontauditxperms(self):
+    def test_removed_dontauditxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed dontauditxperm rules."""
-        self.assertFalse(self.diff.removed_dontauditxperms)
+        assert not analysis.removed_dontauditxperms
 
-    def test_modified_dontauditxperms(self):
+    def test_modified_dontauditxperms(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified dontauditxperm rules."""
-        self.assertFalse(self.diff.modified_dontauditxperms)
+        assert not analysis.modified_dontauditxperms
 
-    def test_added_ibpkeycons(self):
+    def test_added_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added ibpkeycon rules."""
-        self.assertFalse(self.diff.added_ibpkeycons)
+        assert not analysis.added_ibpkeycons
 
-    def test_removed_ibpkeycons(self):
+    def test_removed_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed ibpkeycon rules."""
-        self.assertFalse(self.diff.removed_ibpkeycons)
+        assert not analysis.removed_ibpkeycons
 
-    def test_modified_ibpkeycons(self):
+    def test_modified_ibpkeycons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified ibpkeycon rules."""
-        self.assertEqual(self.diff.left_policy.ibpkeycon_count,
-                         len(self.diff.modified_ibpkeycons))
+        assert analysis.left_policy.ibpkeycon_count == len(analysis.modified_ibpkeycons)
 
-    def test_added_ibendportcons(self):
+    def test_added_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no added ibendportcon rules."""
-        self.assertFalse(self.diff.added_ibendportcons)
+        assert not analysis.added_ibendportcons
 
-    def test_removed_ibendportcons(self):
+    def test_removed_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no removed ibendportcon rules."""
-        self.assertFalse(self.diff.removed_ibendportcons)
+        assert not analysis.removed_ibendportcons
 
-    def test_modified_ibendportcons(self):
+    def test_modified_ibendportcons(self, analysis: setools.PolicyDifference) -> None:
         """NoDiff: no modified ibendportcon rules."""
-        self.assertEqual(self.diff.left_policy.ibendportcon_count,
-                         len(self.diff.modified_ibendportcons))
+        assert analysis.left_policy.ibendportcon_count == len(analysis.modified_ibendportcons)
 
 
-class PolicyDifferenceTestRedundant(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/diff_left.conf", "tests/library/diff_left_redundant.conf")
+class TestPolicyDifferenceTestRedundant:
 
     """
     Policy difference test with redundant rules.
     There should be no policy differences.
     """
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p_left = compile_policy("tests/library/diff_left.conf")
-        cls.p_right = compile_policy("tests/library/diff_left_redundant.conf")
-        cls.diff = PolicyDifference(cls.p_left, cls.p_right)
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p_left.path)
-        os.unlink(cls.p_right.path)
-
-    def test_added_allows(self):
+    def test_added_allows(self, analysis: setools.PolicyDifference) -> None:
         """Redundant: no added allow rules."""
-        self.assertFalse(self.diff.added_allows)
+        assert not analysis.added_allows
 
-    def test_removed_allows(self):
+    def test_removed_allows(self, analysis: setools.PolicyDifference) -> None:
         """Redundant: no removed allow rules."""
-        self.assertFalse(self.diff.removed_allows)
+        assert not analysis.removed_allows
 
-    def test_modified_allows(self):
+    def test_modified_allows(self, analysis: setools.PolicyDifference) -> None:
         """Redundant: no modified allow rules."""
-        self.assertFalse(self.diff.modified_allows)
+        assert not analysis.modified_allows
