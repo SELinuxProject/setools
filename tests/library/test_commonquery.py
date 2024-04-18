@@ -2,65 +2,54 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import CommonQuery
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class CommonQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/commonquery.conf")
+class TestCommonQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/commonquery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Common query with no criteria."""
         # query with no parameters gets all types.
-        commons = sorted(self.p.commons())
+        commons = sorted(compiled_policy.commons())
 
-        q = CommonQuery(self.p)
+        q = setools.CommonQuery(compiled_policy)
         q_commons = sorted(q.results())
 
-        self.assertListEqual(commons, q_commons)
+        assert commons == q_commons
 
-    def test_001_name_exact(self):
+    def test_name_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Common query with exact name match."""
-        q = CommonQuery(self.p, name="test1")
+        q = setools.CommonQuery(compiled_policy, name="test1")
 
         commons = sorted(str(c) for c in q.results())
-        self.assertListEqual(["test1"], commons)
+        assert ["test1"] == commons
 
-    def test_002_name_regex(self):
+    def test_name_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Common query with regex name match."""
-        q = CommonQuery(self.p, name="test2(a|b)", name_regex=True)
+        q = setools.CommonQuery(compiled_policy, name="test2(a|b)", name_regex=True)
 
         commons = sorted(str(c) for c in q.results())
-        self.assertListEqual(["test2a", "test2b"], commons)
+        assert ["test2a", "test2b"] == commons
 
-    def test_010_perm_indirect_intersect(self):
+    def test_perm_indirect_intersect(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Common query with intersect permission name patch."""
-        q = CommonQuery(self.p, perms=set(["null"]), perms_equal=False)
+        q = setools.CommonQuery(compiled_policy, perms=set(["null"]), perms_equal=False)
 
         commons = sorted(str(c) for c in q.results())
-        self.assertListEqual(["test10a", "test10b"], commons)
+        assert ["test10a", "test10b"] == commons
 
-    def test_011_perm_indirect_equal(self):
+    def test_perm_indirect_equal(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Common query with equal permission name patch."""
-        q = CommonQuery(self.p, perms=set(["read", "write"]), perms_equal=True)
+        q = setools.CommonQuery(compiled_policy, perms=set(["read", "write"]), perms_equal=True)
 
         commons = sorted(str(c) for c in q.results())
-        self.assertListEqual(["test11a"], commons)
+        assert ["test11a"] == commons
 
-    def test_012_perm_indirect_regex(self):
+    def test_perm_indirect_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Common query with regex permission name patch."""
-        q = CommonQuery(self.p, perms="sig.+", perms_regex=True)
+        q = setools.CommonQuery(compiled_policy, perms="sig.+", perms_regex=True)
 
         commons = sorted(str(c) for c in q.results())
-        self.assertListEqual(["test12a", "test12b"], commons)
+        assert ["test12a", "test12b"] == commons
