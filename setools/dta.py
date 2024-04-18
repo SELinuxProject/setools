@@ -12,12 +12,8 @@ from contextlib import suppress
 from dataclasses import dataclass, InitVar
 import typing
 
-try:
-    import networkx as nx
-    from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
-
-except ImportError as iex:
-    logging.getLogger(__name__).debug(f"{iex.name} failed to import.")
+import networkx as nx
+from networkx.exception import NetworkXError, NetworkXNoPath, NodeNotFound
 
 from . import exception, mixins, policyrep, query
 from .descriptors import CriteriaDescriptor, EdgeAttrDict, EdgeAttrList

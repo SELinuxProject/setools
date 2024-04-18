@@ -76,12 +76,15 @@ from .pirqconquery import PirqconQuery
 from .pcideviceconquery import PcideviceconQuery
 from .devicetreeconquery import DevicetreeconQuery
 
-# Information Flow Analysis
-from .infoflow import *
+# Information Flow and Domain Transition Analysis
+try:
+    import networkx
+except ImportError:
+    logging.getLogger(__name__).debug("NetworkX failed to import, disabling infoflow and dta.")
+else:
+    from .infoflow import *
+    from .dta import *
 from .permmap import PermissionMap, RuleWeight, Mapping
-
-# Domain Transition Analysis
-from .dta import *
 
 # Policy difference
 from .diff import PolicyDifference
