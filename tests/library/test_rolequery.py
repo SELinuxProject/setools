@@ -2,67 +2,56 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import RoleQuery
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class RoleQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/rolequery.conf")
+class TestRoleQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/rolequery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role query with no criteria."""
         # query with no parameters gets all types.
-        roles = sorted(self.p.roles())
+        roles = sorted(compiled_policy.roles())
 
-        q = RoleQuery(self.p)
+        q = setools.RoleQuery(compiled_policy)
         q_roles = sorted(q.results())
 
-        self.assertListEqual(roles, q_roles)
+        assert roles == q_roles
 
-    def test_001_name_exact(self):
+    def test_name_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role query with exact name match."""
-        q = RoleQuery(self.p, name="test1")
+        q = setools.RoleQuery(compiled_policy, name="test1")
 
         roles = sorted(str(r) for r in q.results())
-        self.assertListEqual(["test1"], roles)
+        assert ["test1"] == roles
 
-    def test_002_name_regex(self):
+    def test_name_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role query with regex name match."""
-        q = RoleQuery(self.p, name="test2(a|b)", name_regex=True)
+        q = setools.RoleQuery(compiled_policy, name="test2(a|b)", name_regex=True)
 
         roles = sorted(str(r) for r in q.results())
-        self.assertListEqual(["test2a", "test2b"], roles)
+        assert ["test2a", "test2b"] == roles
 
-    def test_010_type_intersect(self):
+    def test_type_intersect(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role query with type set intersection."""
-        q = RoleQuery(self.p, types=["test10a", "test10b"])
+        q = setools.RoleQuery(compiled_policy, types=["test10a", "test10b"])
 
         roles = sorted(str(r) for r in q.results())
-        self.assertListEqual(["test10r1", "test10r2", "test10r3",
-                              "test10r4", "test10r5", "test10r6"], roles)
+        assert ["test10r1", "test10r2", "test10r3",
+                "test10r4", "test10r5", "test10r6"] == roles
 
-    def test_011_type_equality(self):
+    def test_type_equality(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role query with type set equality."""
-        q = RoleQuery(self.p, types=["test11a", "test11b"], types_equal=True)
+        q = setools.RoleQuery(compiled_policy, types=["test11a", "test11b"], types_equal=True)
 
         roles = sorted(str(r) for r in q.results())
-        self.assertListEqual(["test11r2"], roles)
+        assert ["test11r2"] == roles
 
-    def test_012_type_regex(self):
+    def test_type_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Role query with type set match."""
-        q = RoleQuery(self.p, types="test12(a|b)", types_regex=True)
+        q = setools.RoleQuery(compiled_policy, types="test12(a|b)", types_regex=True)
 
         roles = sorted(str(r) for r in q.results())
-        self.assertListEqual(["test12r1", "test12r2", "test12r3",
-                              "test12r4", "test12r5", "test12r6"], roles)
+        assert ["test12r1", "test12r2", "test12r3",
+                "test12r4", "test12r5", "test12r6"] == roles
