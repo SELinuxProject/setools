@@ -2,84 +2,73 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import BoundsQuery, BoundsRuletype
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class BoundsQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/boundsquery.conf")
+class TestBoundsQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/boundsquery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Bounds query with no criteria."""
         # query with no parameters gets all bounds.
-        allbounds = sorted(self.p.bounds())
+        allbounds = sorted(compiled_policy.bounds())
 
-        q = BoundsQuery(self.p)
+        q = setools.BoundsQuery(compiled_policy)
         qbounds = sorted(q.results())
 
-        self.assertListEqual(allbounds, qbounds)
+        assert allbounds == qbounds
 
-    def test_001_parent_exact(self):
+    def test_parent_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Bounds query with exact parent match."""
-        q = BoundsQuery(self.p, parent="test1_parent", parent_regex=False)
+        q = setools.BoundsQuery(compiled_policy, parent="test1_parent", parent_regex=False)
         qbounds = sorted(q.results())
-        self.assertEqual(1, len(qbounds))
+        assert 1 == len(qbounds)
 
         b = qbounds[0]
-        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
-        self.assertEqual("test1_parent", b.parent)
-        self.assertEqual("test1_child", b.child)
+        assert setools.BoundsRuletype.typebounds == b.ruletype
+        assert "test1_parent" == b.parent
+        assert "test1_child" == b.child
 
-    def test_002_parent_regex(self):
+    def test_parent_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Bounds query with regex parent match."""
-        q = BoundsQuery(self.p, parent="test2_parent?", parent_regex=True)
+        q = setools.BoundsQuery(compiled_policy, parent="test2_parent?", parent_regex=True)
         qbounds = sorted(q.results())
-        self.assertEqual(2, len(qbounds))
+        assert 2 == len(qbounds)
 
         b = qbounds[0]
-        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
-        self.assertEqual("test2_parent1", b.parent)
-        self.assertEqual("test2_child2", b.child)
+        assert setools.BoundsRuletype.typebounds == b.ruletype
+        assert "test2_parent1" == b.parent
+        assert "test2_child2" == b.child
 
         b = qbounds[1]
-        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
-        self.assertEqual("test2_parent2", b.parent)
-        self.assertEqual("test2_child1", b.child)
+        assert setools.BoundsRuletype.typebounds == b.ruletype
+        assert "test2_parent2" == b.parent
+        assert "test2_child1" == b.child
 
-    def test_010_child_exact(self):
+    def test_child_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Bounds query with exact child match."""
-        q = BoundsQuery(self.p, child="test10_child", child_regex=False)
+        q = setools.BoundsQuery(compiled_policy, child="test10_child", child_regex=False)
         qbounds = sorted(q.results())
-        self.assertEqual(1, len(qbounds))
+        assert 1 == len(qbounds)
 
         b = qbounds[0]
-        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
-        self.assertEqual("test10_parent", b.parent)
-        self.assertEqual("test10_child", b.child)
+        assert setools.BoundsRuletype.typebounds == b.ruletype
+        assert "test10_parent" == b.parent
+        assert "test10_child" == b.child
 
-    def test_011_child_regex(self):
+    def test_child_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Bounds query with regex child match."""
-        q = BoundsQuery(self.p, child="test11_child?", child_regex=True)
+        q = setools.BoundsQuery(compiled_policy, child="test11_child?", child_regex=True)
         qbounds = sorted(q.results())
-        self.assertEqual(2, len(qbounds))
+        assert 2 == len(qbounds)
 
         b = qbounds[0]
-        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
-        self.assertEqual("test11_parent1", b.parent)
-        self.assertEqual("test11_child2", b.child)
+        assert setools.BoundsRuletype.typebounds == b.ruletype
+        assert "test11_parent1" == b.parent
+        assert "test11_child2" == b.child
 
         b = qbounds[1]
-        self.assertEqual(BoundsRuletype.typebounds, b.ruletype)
-        self.assertEqual("test11_parent2", b.parent)
-        self.assertEqual("test11_child1", b.child)
+        assert setools.BoundsRuletype.typebounds == b.ruletype
+        assert "test11_parent2" == b.parent
+        assert "test11_child1" == b.child
