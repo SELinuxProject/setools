@@ -2,93 +2,82 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import SensitivityQuery
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class SensitivityQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/sensitivityquery.conf")
+class TestSensitivityQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/sensitivityquery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with no criteria."""
         # query with no parameters gets all sensitivities.
-        allsens = sorted(str(c) for c in self.p.sensitivities())
+        allsens = sorted(str(c) for c in compiled_policy.sensitivities())
 
-        q = SensitivityQuery(self.p)
+        q = setools.SensitivityQuery(compiled_policy)
         qsens = sorted(str(c) for c in q.results())
 
-        self.assertListEqual(allsens, qsens)
+        assert allsens == qsens
 
-    def test_001_name_exact(self):
+    def test_name_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with exact name match."""
-        q = SensitivityQuery(self.p, name="test1")
+        q = setools.SensitivityQuery(compiled_policy, name="test1")
 
         sens = sorted(str(c) for c in q.results())
-        self.assertListEqual(["test1"], sens)
+        assert ["test1"] == sens
 
-    def test_002_name_regex(self):
+    def test_name_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with regex name match."""
-        q = SensitivityQuery(self.p, name="test2(a|b)", name_regex=True)
+        q = setools.SensitivityQuery(compiled_policy, name="test2(a|b)", name_regex=True)
 
         sens = sorted(str(c) for c in q.results())
-        self.assertListEqual(["test2a", "test2b"], sens)
+        assert ["test2a", "test2b"] == sens
 
-    def test_010_alias_exact(self):
+    def test_alias_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with exact alias match."""
-        q = SensitivityQuery(self.p, alias="test10a")
+        q = setools.SensitivityQuery(compiled_policy, alias="test10a")
 
         sens = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test10s1"], sens)
+        assert ["test10s1"] == sens
 
-    def test_011_alias_regex(self):
+    def test_alias_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with regex alias match."""
-        q = SensitivityQuery(self.p, alias="test11(a|b)", alias_regex=True)
+        q = setools.SensitivityQuery(compiled_policy, alias="test11(a|b)", alias_regex=True)
 
         sens = sorted(str(t) for t in q.results())
-        self.assertListEqual(["test11s1", "test11s2"], sens)
+        assert ["test11s1", "test11s2"] == sens
 
-    def test_020_sens_equal(self):
+    def test_sens_equal(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with sens equality."""
-        q = SensitivityQuery(self.p, sens="test20")
+        q = setools.SensitivityQuery(compiled_policy, sens="test20")
 
         sens = sorted(str(u) for u in q.results())
-        self.assertListEqual(["test20"], sens)
+        assert ["test20"] == sens
 
-    def test_021_sens_dom1(self):
+    def test_sens_dom1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with sens dominance."""
-        q = SensitivityQuery(self.p, sens="test21crit", sens_dom=True)
+        q = setools.SensitivityQuery(compiled_policy, sens="test21crit", sens_dom=True)
 
         sens = sorted(str(u) for u in q.results())
-        self.assertListEqual(["test21", "test21crit"], sens)
+        assert ["test21", "test21crit"] == sens
 
-    def test_021_sens_dom2(self):
+    def test_sens_dom2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with sens dominance (equal)."""
-        q = SensitivityQuery(self.p, sens="test21", sens_dom=True)
+        q = setools.SensitivityQuery(compiled_policy, sens="test21", sens_dom=True)
 
         sens = sorted(str(u) for u in q.results())
-        self.assertListEqual(["test21"], sens)
+        assert ["test21"] == sens
 
-    def test_022_sens_domby1(self):
+    def test_sens_domby1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with sens dominated-by."""
-        q = SensitivityQuery(self.p, sens="test22crit", sens_domby=True)
+        q = setools.SensitivityQuery(compiled_policy, sens="test22crit", sens_domby=True)
 
         sens = sorted(str(u) for u in q.results())
-        self.assertListEqual(["test22", "test22crit"], sens)
+        assert ["test22", "test22crit"] == sens
 
-    def test_022_sens_domby2(self):
+    def test_sens_domby2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Sensitivity query with sens dominated-by (equal)."""
-        q = SensitivityQuery(self.p, sens="test22", sens_domby=True)
+        q = setools.SensitivityQuery(compiled_policy, sens="test22", sens_domby=True)
 
         sens = sorted(str(u) for u in q.results())
-        self.assertListEqual(["test22"], sens)
+        assert ["test22"] == sens
