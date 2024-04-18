@@ -2,114 +2,95 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import ConstraintQuery
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class ConstraintQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/constraintquery.conf")
+class TestConstraintQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/constraintquery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with no criteria."""
-        allconstraint = sorted(c.tclass for c in self.p.constraints())
+        allconstraint = sorted(c.tclass for c in compiled_policy.constraints())
 
-        q = ConstraintQuery(self.p)
+        q = setools.ConstraintQuery(compiled_policy)
         qconstraint = sorted(c.tclass for c in q.results())
+        assert allconstraint == qconstraint
 
-        self.assertListEqual(allconstraint, qconstraint)
-
-    def test_001_ruletype(self):
+    def test_ruletype(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with rule type match."""
-        q = ConstraintQuery(self.p, ruletype=["mlsconstrain"])
+        q = setools.ConstraintQuery(compiled_policy, ruletype=["mlsconstrain"])
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test1"], constraint)
+        assert ["test1"] == constraint
 
-    @unittest.skip("Setting tclass to a string is no longer supported.")
-    def test_010_class_exact(self):
-        """Constraint query with exact object class match."""
-        q = ConstraintQuery(self.p, tclass="test10")
-
-        constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test10"], constraint)
-
-    def test_011_class_list(self):
+    def test_class_list(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with object class list match."""
-        q = ConstraintQuery(self.p, tclass=["test11a", "test11b"])
+        q = setools.ConstraintQuery(compiled_policy, tclass=["test11a", "test11b"])
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test11a", "test11b"], constraint)
+        assert ["test11a", "test11b"] == constraint
 
-    def test_012_class_regex(self):
+    def test_class_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with object class regex match."""
-        q = ConstraintQuery(self.p, tclass="test12(a|c)", tclass_regex=True)
+        q = setools.ConstraintQuery(compiled_policy, tclass="test12(a|c)", tclass_regex=True)
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test12a", "test12c"], constraint)
+        assert ["test12a", "test12c"] == constraint
 
-    def test_020_perms_any(self):
+    def test_perms_any(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with permission set intersection match."""
-        q = ConstraintQuery(self.p, perms=["test20ap", "test20bp"])
+        q = setools.ConstraintQuery(compiled_policy, perms=["test20ap", "test20bp"])
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test20a", "test20b"], constraint)
+        assert ["test20a", "test20b"] == constraint
 
-    def test_021_perms_equal(self):
+    def test_perms_equal(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with permission set equality match."""
-        q = ConstraintQuery(self.p, perms=["test21ap", "test21bp"], perms_equal=True)
+        q = setools.ConstraintQuery(compiled_policy, perms=["test21ap", "test21bp"],
+                                    perms_equal=True)
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test21c"], constraint)
+        assert ["test21c"] == constraint
 
-    def test_030_role_match_single(self):
+    def test_role_match_single(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with role match."""
-        q = ConstraintQuery(self.p, role="test30r")
+        q = setools.ConstraintQuery(compiled_policy, role="test30r")
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test30"], constraint)
+        assert ["test30"] == constraint
 
-    def test_031_role_match_regex(self):
+    def test_role_match_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with regex role match."""
-        q = ConstraintQuery(self.p, role="test31r.", role_regex=True)
+        q = setools.ConstraintQuery(compiled_policy, role="test31r.", role_regex=True)
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test31a", "test31b"], constraint)
+        assert ["test31a", "test31b"] == constraint
 
-    def test_040_type_match_single(self):
+    def test_type_match_single(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with type match."""
-        q = ConstraintQuery(self.p, type_="test40t")
+        q = setools.ConstraintQuery(compiled_policy, type_="test40t")
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test40"], constraint)
+        assert ["test40"] == constraint
 
-    def test_041_type_match_regex(self):
+    def test_type_match_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with regex type match."""
-        q = ConstraintQuery(self.p, type_="test41t.", type_regex=True)
+        q = setools.ConstraintQuery(compiled_policy, type_="test41t.", type_regex=True)
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test41a", "test41b"], constraint)
+        assert ["test41a", "test41b"] == constraint
 
-    def test_050_user_match_single(self):
+    def test_user_match_single(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with user match."""
-        q = ConstraintQuery(self.p, user="test50u")
+        q = setools.ConstraintQuery(compiled_policy, user="test50u")
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test50"], constraint)
+        assert ["test50"] == constraint
 
-    def test_051_user_match_regex(self):
+    def test_user_match_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Constraint query with regex user match."""
-        q = ConstraintQuery(self.p, user="test51u.", user_regex=True)
+        q = setools.ConstraintQuery(compiled_policy, user="test51u.", user_regex=True)
 
         constraint = sorted(c.tclass for c in q.results())
-        self.assertListEqual(["test51a", "test51b"], constraint)
+        assert ["test51a", "test51b"] == constraint
