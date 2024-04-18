@@ -2,44 +2,33 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
-import os
-import unittest
-
-from setools import PolCapQuery
-
-from .policyrep.util import compile_policy
+import pytest
+import setools
 
 
-class PolCapQueryTest(unittest.TestCase):
+@pytest.mark.obj_args("tests/library/polcapquery.conf")
+class TestPolCapQuery:
 
-    @classmethod
-    def setUpClass(cls):
-        cls.p = compile_policy("tests/library/polcapquery.conf")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.unlink(cls.p.path)
-
-    def test_000_unset(self):
+    def test_unset(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Policy capability query with no criteria"""
         # query with no parameters gets all capabilities.
-        allcaps = sorted(self.p.polcaps())
+        allcaps = sorted(compiled_policy.polcaps())
 
-        q = PolCapQuery(self.p)
+        q = setools.PolCapQuery(compiled_policy)
         qcaps = sorted(q.results())
 
-        self.assertListEqual(allcaps, qcaps)
+        assert allcaps == qcaps
 
-    def test_001_name_exact(self):
+    def test_name_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Policy capability query with exact match"""
-        q = PolCapQuery(self.p, name="open_perms", name_regex=False)
+        q = setools.PolCapQuery(compiled_policy, name="open_perms", name_regex=False)
 
         caps = sorted(str(c) for c in q.results())
-        self.assertListEqual(["open_perms"], caps)
+        assert ["open_perms"] == caps
 
-    def test_002_name_regex(self):
+    def test_name_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Policy capability query with regex match"""
-        q = PolCapQuery(self.p, name="pe?er", name_regex=True)
+        q = setools.PolCapQuery(compiled_policy, name="pe?er", name_regex=True)
 
         caps = sorted(str(c) for c in q.results())
-        self.assertListEqual(["network_peer_controls", "open_perms"], caps)
+        assert ["network_peer_controls", "open_perms"] == caps
