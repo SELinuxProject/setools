@@ -10,11 +10,11 @@ from setools import RBACRuleQuery
 from setools import RBACRuletype as RRT
 from setools.exception import RuleUseError, RuleNotConditional
 
-from . import mixins
+from . import util
 
 
 @pytest.mark.obj_args("tests/library/rbacrulequery.conf")
-class TestRBACRuleQuery(mixins.ValidateRule):
+class TestRBACRuleQuery:
 
     """RBAC rule query unit tests."""
 
@@ -49,7 +49,7 @@ class TestRBACRuleQuery(mixins.ValidateRule):
         assert len(r) == 2
 
         self.validate_allow(r[0], "test1s", "test1t")
-        self.validate_rule(r[1], RRT.role_transition, "test1s", "system", "infoflow", "test1t")
+        util.validate_rule(r[1], RRT.role_transition, "test1s", "system", "infoflow", "test1t")
 
     def test_source_direct_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """RBAC rule query with regex, direct, source match."""
@@ -84,7 +84,7 @@ class TestRBACRuleQuery(mixins.ValidateRule):
 
         r = sorted(q.results())
         assert len(r) == 1
-        self.validate_rule(r[0], RRT.role_transition, "test12s", "test12t", "infoflow", "test12d")
+        util.validate_rule(r[0], RRT.role_transition, "test12s", "test12t", "infoflow", "test12d")
 
     def test_class_list(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """RBAC rule query with object class list match."""
@@ -93,8 +93,8 @@ class TestRBACRuleQuery(mixins.ValidateRule):
 
         r = sorted(q.results())
         assert len(r) == 2
-        self.validate_rule(r[0], RRT.role_transition, "test21", "system", "infoflow3", "test21d3")
-        self.validate_rule(r[1], RRT.role_transition, "test21", "system", "infoflow4", "test21d2")
+        util.validate_rule(r[0], RRT.role_transition, "test21", "system", "infoflow3", "test21d3")
+        util.validate_rule(r[1], RRT.role_transition, "test21", "system", "infoflow4", "test21d2")
 
     def test_class_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """RBAC rule query with object class regex match."""
@@ -102,8 +102,8 @@ class TestRBACRuleQuery(mixins.ValidateRule):
 
         r = sorted(q.results())
         assert len(r) == 2
-        self.validate_rule(r[0], RRT.role_transition, "test22", "system", "infoflow5", "test22d2")
-        self.validate_rule(r[1], RRT.role_transition, "test22", "system", "infoflow6", "test22d3")
+        util.validate_rule(r[0], RRT.role_transition, "test22", "system", "infoflow5", "test22d2")
+        util.validate_rule(r[1], RRT.role_transition, "test22", "system", "infoflow6", "test22d3")
 
     def test_default(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """RBAC rule query with exact default match."""
@@ -112,7 +112,7 @@ class TestRBACRuleQuery(mixins.ValidateRule):
 
         r = sorted(q.results())
         assert len(r) == 1
-        self.validate_rule(r[0], RRT.role_transition, "test30s", "system", "infoflow", "test30d")
+        util.validate_rule(r[0], RRT.role_transition, "test30s", "system", "infoflow", "test30d")
 
     def test_default_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """RBAC rule query with regex default match."""
@@ -121,8 +121,8 @@ class TestRBACRuleQuery(mixins.ValidateRule):
 
         r = sorted(q.results())
         assert len(r) == 2
-        self.validate_rule(r[0], RRT.role_transition, "test31s", "system", "infoflow7", "test31d3")
-        self.validate_rule(r[1], RRT.role_transition, "test31s", "system", "process", "test31d2")
+        util.validate_rule(r[0], RRT.role_transition, "test31s", "system", "infoflow7", "test31d3")
+        util.validate_rule(r[1], RRT.role_transition, "test31s", "system", "process", "test31d2")
 
     def test_ruletype(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """RBAC rule query with rule type."""

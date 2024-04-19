@@ -19,7 +19,7 @@ from setools import MLSRuletype as MRT
 from setools import RBACRuletype as RRT
 from setools import TERuletype as TRT
 
-from .mixins import ValidateRule
+from . import util
 
 
 @pytest.fixture(scope="class")
@@ -28,7 +28,7 @@ def analysis(policy_pair: tuple[setools.SELinuxPolicy, setools.SELinuxPolicy]) -
 
 
 @pytest.mark.obj_args("tests/library/diff_left.conf", "tests/library/diff_right.conf")
-class TestPolicyDifference(ValidateRule):
+class TestPolicyDifference:
 
     """Policy difference tests."""
 
@@ -234,23 +234,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # added rule with existing types
-        self.validate_rule(rules[0], TRT.allow, "added_rule_source", "added_rule_target",
+        util.validate_rule(rules[0], TRT.allow, "added_rule_source", "added_rule_target",
                            "infoflow", set(["med_w"]))
 
         # added rule with new type
-        self.validate_rule(rules[1], TRT.allow, "added_type", "added_type", "infoflow2",
+        util.validate_rule(rules[1], TRT.allow, "added_type", "added_type", "infoflow2",
                            set(["med_w"]))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], TRT.allow, "move_from_bool", "move_from_bool", "infoflow4",
+        util.validate_rule(rules[2], TRT.allow, "move_from_bool", "move_from_bool", "infoflow4",
                            set(["hi_r"]))
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], TRT.allow, "move_to_bool", "move_to_bool", "infoflow4",
+        util.validate_rule(rules[3], TRT.allow, "move_to_bool", "move_to_bool", "infoflow4",
                            set(["hi_w"]), cond="move_to_bool_b", cond_block=True)
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
+        util.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
                            set(["hi_r"]), cond="switch_block_b", cond_block=False)
 
     def test_removed_allow_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -259,23 +259,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[0], TRT.allow, "move_from_bool", "move_from_bool", "infoflow4",
+        util.validate_rule(rules[0], TRT.allow, "move_from_bool", "move_from_bool", "infoflow4",
                            set(["hi_r"]), cond="move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[1], TRT.allow, "move_to_bool", "move_to_bool", "infoflow4",
+        util.validate_rule(rules[1], TRT.allow, "move_to_bool", "move_to_bool", "infoflow4",
                            set(["hi_w"]))
 
         # removed rule with existing types
-        self.validate_rule(rules[2], TRT.allow, "removed_rule_source", "removed_rule_target",
+        util.validate_rule(rules[2], TRT.allow, "removed_rule_source", "removed_rule_target",
                            "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[3], TRT.allow, "removed_type", "removed_type", "infoflow3",
+        util.validate_rule(rules[3], TRT.allow, "removed_type", "removed_type", "infoflow3",
                            set(["null"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
+        util.validate_rule(rules[4], TRT.allow, "system", "switch_block", "infoflow6",
                            set(["hi_r"]), cond="switch_block_b", cond_block=True)
 
     def test_modified_allow_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -322,23 +322,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # added rule with existing types
-        self.validate_rule(rules[0], TRT.auditallow, "aa_added_rule_source",
+        util.validate_rule(rules[0], TRT.auditallow, "aa_added_rule_source",
                            "aa_added_rule_target", "infoflow", set(["med_w"]))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[1], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
+        util.validate_rule(rules[1], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
                            "infoflow4", set(["hi_r"]))
 
         # rule moved into a conditional
-        self.validate_rule(rules[2], TRT.auditallow, "aa_move_to_bool", "aa_move_to_bool",
+        util.validate_rule(rules[2], TRT.auditallow, "aa_move_to_bool", "aa_move_to_bool",
                            "infoflow4", set(["hi_w"]), cond="aa_move_to_bool_b", cond_block=True)
 
         # added rule with new type
-        self.validate_rule(rules[3], TRT.auditallow, "added_type", "added_type", "infoflow7",
+        util.validate_rule(rules[3], TRT.auditallow, "added_type", "added_type", "infoflow7",
                            set(["super_none"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
+        util.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
                            set(["hi_r"]), cond="aa_switch_block_b", cond_block=False)
 
     def test_removed_auditallow_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -347,23 +347,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[0], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
+        util.validate_rule(rules[0], TRT.auditallow, "aa_move_from_bool", "aa_move_from_bool",
                            "infoflow4", set(["hi_r"]), cond="aa_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[1], TRT.auditallow, "aa_move_to_bool", "aa_move_to_bool",
+        util.validate_rule(rules[1], TRT.auditallow, "aa_move_to_bool", "aa_move_to_bool",
                            "infoflow4", set(["hi_w"]))
 
         # removed rule with existing types
-        self.validate_rule(rules[2], TRT.auditallow, "aa_removed_rule_source",
+        util.validate_rule(rules[2], TRT.auditallow, "aa_removed_rule_source",
                            "aa_removed_rule_target", "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[3], TRT.auditallow, "removed_type", "removed_type", "infoflow7",
+        util.validate_rule(rules[3], TRT.auditallow, "removed_type", "removed_type", "infoflow7",
                            set(["super_unmapped"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
+        util.validate_rule(rules[4], TRT.auditallow, "system", "aa_switch_block", "infoflow6",
                            set(["hi_r"]), cond="aa_switch_block_b", cond_block=True)
 
     def test_modified_auditallow_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -410,23 +410,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # added rule with new type
-        self.validate_rule(rules[0], TRT.dontaudit, "added_type", "added_type", "infoflow7",
+        util.validate_rule(rules[0], TRT.dontaudit, "added_type", "added_type", "infoflow7",
                            set(["super_none"]))
 
         # added rule with existing types
-        self.validate_rule(rules[1], TRT.dontaudit, "da_added_rule_source", "da_added_rule_target",
+        util.validate_rule(rules[1], TRT.dontaudit, "da_added_rule_source", "da_added_rule_target",
                            "infoflow", set(["med_w"]))
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], TRT.dontaudit, "da_move_from_bool", "da_move_from_bool",
+        util.validate_rule(rules[2], TRT.dontaudit, "da_move_from_bool", "da_move_from_bool",
                            "infoflow4", set(["hi_r"]))
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], TRT.dontaudit, "da_move_to_bool", "da_move_to_bool",
+        util.validate_rule(rules[3], TRT.dontaudit, "da_move_to_bool", "da_move_to_bool",
                            "infoflow4", set(["hi_w"]), cond="da_move_to_bool_b", cond_block=True)
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
+        util.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
                            set(["hi_r"]), cond="da_switch_block_b", cond_block=False)
 
     def test_removed_dontaudit_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -435,23 +435,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[0], TRT.dontaudit, "da_move_from_bool", "da_move_from_bool",
+        util.validate_rule(rules[0], TRT.dontaudit, "da_move_from_bool", "da_move_from_bool",
                            "infoflow4", set(["hi_r"]), cond="da_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[1], TRT.dontaudit, "da_move_to_bool", "da_move_to_bool",
+        util.validate_rule(rules[1], TRT.dontaudit, "da_move_to_bool", "da_move_to_bool",
                            "infoflow4", set(["hi_w"]))
 
         # removed rule with existing types
-        self.validate_rule(rules[2], TRT.dontaudit, "da_removed_rule_source",
+        util.validate_rule(rules[2], TRT.dontaudit, "da_removed_rule_source",
                            "da_removed_rule_target", "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        self.validate_rule(rules[3], TRT.dontaudit, "removed_type", "removed_type", "infoflow7",
+        util.validate_rule(rules[3], TRT.dontaudit, "removed_type", "removed_type", "infoflow7",
                            set(["super_both"]))
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
+        util.validate_rule(rules[4], TRT.dontaudit, "system", "da_switch_block", "infoflow6",
                            set(["hi_r"]), cond="da_switch_block_b", cond_block=True)
 
     def test_modified_dontaudit_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -501,11 +501,11 @@ class TestPolicyDifference(ValidateRule):
         # assert 2 == len(rules)
 
         # added rule with new type
-        # self.validate_rule(rules[0], TRT.neverallow, "added_type", "added_type", "added_class",
+        # util.validate_rule(rules[0], TRT.neverallow, "added_type", "added_type", "added_class",
         #                   set(["new_class_perm"]))
 
         # added rule with existing types
-        # self.validate_rule(rules[1], TRT.neverallow, "na_added_rule_source",
+        # util.validate_rule(rules[1], TRT.neverallow, "na_added_rule_source",
         #                   "na_added_rule_target", "infoflow", set(["med_w"]))
 
     def test_removed_neverallow_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -516,11 +516,11 @@ class TestPolicyDifference(ValidateRule):
         # assert 2 == len(rules)
 
         # removed rule with existing types
-        # self.validate_rule(rules[0], TRT.neverallow, "na_removed_rule_source",
+        # util.validate_rule(rules[0], TRT.neverallow, "na_removed_rule_source",
         #                   "na_removed_rule_target", "infoflow", set(["hi_r"]))
 
         # removed rule with new type
-        # self.validate_rule(rules[1], TRT.neverallow, "removed_type", "removed_type",
+        # util.validate_rule(rules[1], TRT.neverallow, "removed_type", "removed_type",
         #                   "removed_class", set(["null_perm"]))
 
     def test_modified_neverallow_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -569,23 +569,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # added rule with new type
-        self.validate_rule(rules[0], TRT.type_transition, "added_type", "system", "infoflow4",
+        util.validate_rule(rules[0], TRT.type_transition, "added_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], TRT.type_transition, "system", "tt_switch_block", "infoflow6",
+        util.validate_rule(rules[1], TRT.type_transition, "system", "tt_switch_block", "infoflow6",
                            "system", cond="tt_switch_block_b", cond_block=False)
 
         # added rule with existing types
-        self.validate_rule(rules[2], TRT.type_transition, "tt_added_rule_source",
+        util.validate_rule(rules[2], TRT.type_transition, "tt_added_rule_source",
                            "tt_added_rule_target", "infoflow", "system")
 
         # rule moved out of a conditional
-        self.validate_rule(rules[3], TRT.type_transition, "tt_move_from_bool", "system",
+        util.validate_rule(rules[3], TRT.type_transition, "tt_move_from_bool", "system",
                            "infoflow4", "system")
 
         # rule moved into a conditional
-        self.validate_rule(rules[4], TRT.type_transition, "tt_move_to_bool", "system",
+        util.validate_rule(rules[4], TRT.type_transition, "tt_move_to_bool", "system",
                            "infoflow3", "system", cond="tt_move_to_bool_b", cond_block=True)
 
     def test_removed_type_transition_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -594,23 +594,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # removed rule with new type
-        self.validate_rule(rules[0], TRT.type_transition, "removed_type", "system", "infoflow4",
+        util.validate_rule(rules[0], TRT.type_transition, "removed_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], TRT.type_transition, "system", "tt_switch_block", "infoflow6",
+        util.validate_rule(rules[1], TRT.type_transition, "system", "tt_switch_block", "infoflow6",
                            "system", cond="tt_switch_block_b", cond_block=True)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], TRT.type_transition, "tt_move_from_bool", "system",
+        util.validate_rule(rules[2], TRT.type_transition, "tt_move_from_bool", "system",
                            "infoflow4", "system", cond="tt_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], TRT.type_transition, "tt_move_to_bool", "system",
+        util.validate_rule(rules[3], TRT.type_transition, "tt_move_to_bool", "system",
                            "infoflow3", "system")
 
         # removed rule with existing types
-        self.validate_rule(rules[4], TRT.type_transition, "tt_removed_rule_source",
+        util.validate_rule(rules[4], TRT.type_transition, "tt_removed_rule_source",
                            "tt_removed_rule_target", "infoflow", "system")
 
     def test_modified_type_transition_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -635,23 +635,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # added rule with new type
-        self.validate_rule(rules[0], TRT.type_change, "added_type", "system", "infoflow4",
+        util.validate_rule(rules[0], TRT.type_change, "added_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], TRT.type_change, "system", "tc_switch_block", "infoflow6",
+        util.validate_rule(rules[1], TRT.type_change, "system", "tc_switch_block", "infoflow6",
                            "system", cond="tc_switch_block_b", cond_block=False)
 
         # added rule with existing types
-        self.validate_rule(rules[2], TRT.type_change, "tc_added_rule_source",
+        util.validate_rule(rules[2], TRT.type_change, "tc_added_rule_source",
                            "tc_added_rule_target", "infoflow", "system")
 
         # rule moved out of a conditional
-        self.validate_rule(rules[3], TRT.type_change, "tc_move_from_bool", "system",
+        util.validate_rule(rules[3], TRT.type_change, "tc_move_from_bool", "system",
                            "infoflow4", "system")
 
         # rule moved into a conditional
-        self.validate_rule(rules[4], TRT.type_change, "tc_move_to_bool", "system",
+        util.validate_rule(rules[4], TRT.type_change, "tc_move_to_bool", "system",
                            "infoflow3", "system", cond="tc_move_to_bool_b", cond_block=True)
 
     def test_removed_type_change_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -660,23 +660,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # removed rule with new type
-        self.validate_rule(rules[0], TRT.type_change, "removed_type", "system", "infoflow4",
+        util.validate_rule(rules[0], TRT.type_change, "removed_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], TRT.type_change, "system", "tc_switch_block", "infoflow6",
+        util.validate_rule(rules[1], TRT.type_change, "system", "tc_switch_block", "infoflow6",
                            "system", cond="tc_switch_block_b", cond_block=True)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], TRT.type_change, "tc_move_from_bool", "system",
+        util.validate_rule(rules[2], TRT.type_change, "tc_move_from_bool", "system",
                            "infoflow4", "system", cond="tc_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], TRT.type_change, "tc_move_to_bool", "system",
+        util.validate_rule(rules[3], TRT.type_change, "tc_move_to_bool", "system",
                            "infoflow3", "system")
 
         # removed rule with existing types
-        self.validate_rule(rules[4], TRT.type_change, "tc_removed_rule_source",
+        util.validate_rule(rules[4], TRT.type_change, "tc_removed_rule_source",
                            "tc_removed_rule_target", "infoflow", "system")
 
     def test_modified_type_change_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -701,23 +701,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # added rule with new type
-        self.validate_rule(rules[0], TRT.type_member, "added_type", "system", "infoflow4",
+        util.validate_rule(rules[0], TRT.type_member, "added_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], TRT.type_member, "system", "tm_switch_block", "infoflow6",
+        util.validate_rule(rules[1], TRT.type_member, "system", "tm_switch_block", "infoflow6",
                            "system", cond="tm_switch_block_b", cond_block=False)
 
         # added rule with existing types
-        self.validate_rule(rules[2], TRT.type_member, "tm_added_rule_source",
+        util.validate_rule(rules[2], TRT.type_member, "tm_added_rule_source",
                            "tm_added_rule_target", "infoflow", "system")
 
         # rule moved out of a conditional
-        self.validate_rule(rules[3], TRT.type_member, "tm_move_from_bool", "system",
+        util.validate_rule(rules[3], TRT.type_member, "tm_move_from_bool", "system",
                            "infoflow4", "system")
 
         # rule moved into a conditional
-        self.validate_rule(rules[4], TRT.type_member, "tm_move_to_bool", "system",
+        util.validate_rule(rules[4], TRT.type_member, "tm_move_to_bool", "system",
                            "infoflow3", "system", cond="tm_move_to_bool_b", cond_block=True)
 
     def test_removed_type_member_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -726,23 +726,23 @@ class TestPolicyDifference(ValidateRule):
         assert 5 == len(rules)
 
         # removed rule with new type
-        self.validate_rule(rules[0], TRT.type_member, "removed_type", "system", "infoflow4",
+        util.validate_rule(rules[0], TRT.type_member, "removed_type", "system", "infoflow4",
                            "system")
 
         # rule moved from one conditional block to another (true to false)
-        self.validate_rule(rules[1], TRT.type_member, "system", "tm_switch_block", "infoflow6",
+        util.validate_rule(rules[1], TRT.type_member, "system", "tm_switch_block", "infoflow6",
                            "system", cond="tm_switch_block_b", cond_block=True)
 
         # rule moved out of a conditional
-        self.validate_rule(rules[2], TRT.type_member, "tm_move_from_bool", "system",
+        util.validate_rule(rules[2], TRT.type_member, "tm_move_from_bool", "system",
                            "infoflow4", "system", cond="tm_move_from_bool_b", cond_block=True)
 
         # rule moved into a conditional
-        self.validate_rule(rules[3], TRT.type_member, "tm_move_to_bool", "system",
+        util.validate_rule(rules[3], TRT.type_member, "tm_move_to_bool", "system",
                            "infoflow3", "system")
 
         # removed rule with existing types
-        self.validate_rule(rules[4], TRT.type_member, "tm_removed_rule_source",
+        util.validate_rule(rules[4], TRT.type_member, "tm_removed_rule_source",
                            "tm_removed_rule_target", "infoflow", "system")
 
     def test_modified_type_member_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -767,11 +767,11 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # added rule with new type
-        self.validate_rule(rules[0], MRT.range_transition, "added_type", "system", "infoflow4",
+        util.validate_rule(rules[0], MRT.range_transition, "added_type", "system", "infoflow4",
                            "s3")
 
         # added rule with existing types
-        self.validate_rule(rules[1], MRT.range_transition, "rt_added_rule_source",
+        util.validate_rule(rules[1], MRT.range_transition, "rt_added_rule_source",
                            "rt_added_rule_target", "infoflow", "s3")
 
     def test_removed_range_transition_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -780,11 +780,11 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # removed rule with new type
-        self.validate_rule(rules[0], MRT.range_transition, "removed_type", "system", "infoflow4",
+        util.validate_rule(rules[0], MRT.range_transition, "removed_type", "system", "infoflow4",
                            "s1")
 
         # removed rule with existing types
-        self.validate_rule(rules[1], MRT.range_transition, "rt_removed_rule_source",
+        util.validate_rule(rules[1], MRT.range_transition, "rt_removed_rule_source",
                            "rt_removed_rule_target", "infoflow", "s1")
 
     def test_modified_range_transition_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -842,11 +842,11 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # added rule with new role
-        self.validate_rule(rules[0], RRT.role_transition, "added_role", "system", "infoflow4",
+        util.validate_rule(rules[0], RRT.role_transition, "added_role", "system", "infoflow4",
                            "system")
 
         # added rule with existing roles
-        self.validate_rule(rules[1], RRT.role_transition, "role_tr_added_rule_source",
+        util.validate_rule(rules[1], RRT.role_transition, "role_tr_added_rule_source",
                            "role_tr_added_rule_target", "infoflow6", "system")
 
     def test_removed_role_transition_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -855,11 +855,11 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # removed rule with new role
-        self.validate_rule(rules[0], RRT.role_transition, "removed_role", "system", "infoflow4",
+        util.validate_rule(rules[0], RRT.role_transition, "removed_role", "system", "infoflow4",
                            "system")
 
         # removed rule with existing roles
-        self.validate_rule(rules[1], RRT.role_transition, "role_tr_removed_rule_source",
+        util.validate_rule(rules[1], RRT.role_transition, "role_tr_removed_rule_source",
                            "role_tr_removed_rule_target", "infoflow5", "system")
 
     def test_modified_role_transition_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -1558,11 +1558,11 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # added rule with new type
-        self.validate_rule(rules[0], TRT.allowxperm, "added_type", "added_type", "infoflow7",
+        util.validate_rule(rules[0], TRT.allowxperm, "added_type", "added_type", "infoflow7",
                            setools.IoctlSet([0x0009]), xperm="ioctl")
 
         # added rule with existing types
-        self.validate_rule(rules[1], TRT.allowxperm, "ax_added_rule_source", "ax_added_rule_target",
+        util.validate_rule(rules[1], TRT.allowxperm, "ax_added_rule_source", "ax_added_rule_target",
                            "infoflow", setools.IoctlSet([0x0002]), xperm="ioctl")
 
     def test_removed_allowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -1571,12 +1571,12 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # removed rule with existing types
-        self.validate_rule(rules[0], TRT.allowxperm, "ax_removed_rule_source",
+        util.validate_rule(rules[0], TRT.allowxperm, "ax_removed_rule_source",
                            "ax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
                            xperm="ioctl")
 
         # removed rule with new type
-        self.validate_rule(rules[1], TRT.allowxperm, "removed_type", "removed_type", "infoflow7",
+        util.validate_rule(rules[1], TRT.allowxperm, "removed_type", "removed_type", "infoflow7",
                            setools.IoctlSet([0x0009]), xperm="ioctl")
 
     def test_modified_allowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -1623,12 +1623,12 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # added rule with existing types
-        self.validate_rule(rules[0], TRT.auditallowxperm, "aax_added_rule_source",
+        util.validate_rule(rules[0], TRT.auditallowxperm, "aax_added_rule_source",
                            "aax_added_rule_target", "infoflow", setools.IoctlSet([0x0002]),
                            xperm="ioctl")
 
         # added rule with new type
-        self.validate_rule(rules[1], TRT.auditallowxperm, "added_type", "added_type", "infoflow7",
+        util.validate_rule(rules[1], TRT.auditallowxperm, "added_type", "added_type", "infoflow7",
                            setools.IoctlSet([0x0009]), xperm="ioctl")
 
     def test_removed_auditallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -1637,12 +1637,12 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # removed rule with existing types
-        self.validate_rule(rules[0], TRT.auditallowxperm, "aax_removed_rule_source",
+        util.validate_rule(rules[0], TRT.auditallowxperm, "aax_removed_rule_source",
                            "aax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
                            xperm="ioctl")
 
         # removed rule with new type
-        self.validate_rule(rules[1], TRT.auditallowxperm, "removed_type", "removed_type",
+        util.validate_rule(rules[1], TRT.auditallowxperm, "removed_type", "removed_type",
                            "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
 
     def test_modified_auditallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -1691,11 +1691,11 @@ class TestPolicyDifference(ValidateRule):
         # assert 2 == len(rules)
         #
         # # added rule with new type
-        # self.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type",
+        # util.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type",
         #                    "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
         #
         # # added rule with existing types
-        # self.validate_rule(rules[1], TRT.neverallowxperm, "nax_added_rule_source",
+        # util.validate_rule(rules[1], TRT.neverallowxperm, "nax_added_rule_source",
         #                    "nax_added_rule_target", "infoflow", setools.IoctlSet([0x0002]),
         #                    xperm="ioctl")
 
@@ -1707,12 +1707,12 @@ class TestPolicyDifference(ValidateRule):
         # assert 2 == len(rules)
         #
         # # removed rule with existing types
-        # self.validate_rule(rules[0], TRT.neverallowxperm, "nax_removed_rule_source",
+        # util.validate_rule(rules[0], TRT.neverallowxperm, "nax_removed_rule_source",
         #                    "nax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
         #                    xperm="ioctl")
         #
         # # removed rule with new type
-        # self.validate_rule(rules[1], TRT.neverallowxperm, "removed_type", "removed_type",
+        # util.validate_rule(rules[1], TRT.neverallowxperm, "removed_type", "removed_type",
         #                    "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
 
     def test_modified_neverallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -1761,11 +1761,11 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # added rule with new type
-        self.validate_rule(rules[0], TRT.dontauditxperm, "added_type", "added_type", "infoflow7",
+        util.validate_rule(rules[0], TRT.dontauditxperm, "added_type", "added_type", "infoflow7",
                            setools.IoctlSet([0x0009]), xperm="ioctl")
 
         # added rule with existing types
-        self.validate_rule(rules[1], TRT.dontauditxperm, "dax_added_rule_source",
+        util.validate_rule(rules[1], TRT.dontauditxperm, "dax_added_rule_source",
                            "dax_added_rule_target", "infoflow", setools.IoctlSet([0x0002]),
                            xperm="ioctl")
 
@@ -1775,12 +1775,12 @@ class TestPolicyDifference(ValidateRule):
         assert 2 == len(rules)
 
         # removed rule with existing types
-        self.validate_rule(rules[0], TRT.dontauditxperm, "dax_removed_rule_source",
+        util.validate_rule(rules[0], TRT.dontauditxperm, "dax_removed_rule_source",
                            "dax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
                            xperm="ioctl")
 
         # removed rule with new type
-        self.validate_rule(rules[1], TRT.dontauditxperm, "removed_type", "removed_type",
+        util.validate_rule(rules[1], TRT.dontauditxperm, "removed_type", "removed_type",
                            "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
 
     def test_modified_dontauditxperm_rules(self, analysis: setools.PolicyDifference) -> None:

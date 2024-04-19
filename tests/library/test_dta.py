@@ -8,7 +8,7 @@ import pytest
 import setools
 from setools import TERuletype as TERT
 
-from . import mixins
+from . import util
 
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def analysis(compiled_policy: setools.SELinuxPolicy) -> setools.DomainTransition
 
 
 @pytest.mark.obj_args("tests/library/dta.conf")
-class TestDomainTransitionAnalysis(mixins.ValidateRule):
+class TestDomainTransitionAnalysis:
 
     def test_graph_structure(self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: verify graph structure."""
@@ -52,12 +52,12 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
         # regular transition
         r = analysis.G.edges[s, t]["transition"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition", "dyntransition"]))
+        util.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition", "dyntransition"]))
 
         # setexec perms
         r = analysis.G.edges[s, t]["setexec"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec", "setcurrent"]))
+        util.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec", "setcurrent"]))
 
         # exec perms
         k = sorted(analysis.G.edges[s, t]["execute"].keys())
@@ -65,7 +65,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["execute"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
+        util.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(analysis.G.edges[s, t]["entrypoint"].keys())
@@ -73,7 +73,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["entrypoint"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
+        util.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(analysis.G.edges[s, t]["type_transition"].keys())
@@ -81,17 +81,17 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["type_transition"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.type_transition, s, e, "process", t)
+        util.validate_rule(r[0], TERT.type_transition, s, e, "process", t)
 
         # dynamic transition
         r = analysis.G.edges[s, t]["dyntransition"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition", "dyntransition"]))
+        util.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition", "dyntransition"]))
 
         # setcurrent
         r = analysis.G.edges[s, t]["setcurrent"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec", "setcurrent"]))
+        util.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec", "setcurrent"]))
 
     def test_dyntrans(self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: setcon() transition."""
@@ -122,12 +122,12 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
         # dynamic transition
         r = analysis.G.edges[s, t]["dyntransition"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, t, "process", set(["dyntransition"]))
+        util.validate_rule(r[0], TERT.allow, s, t, "process", set(["dyntransition"]))
 
         # setcurrent
         r = analysis.G.edges[s, t]["setcurrent"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, s, "process", set(["setcurrent"]))
+        util.validate_rule(r[0], TERT.allow, s, s, "process", set(["setcurrent"]))
 
     def test_trans(self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: type_transition transition."""
@@ -139,7 +139,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
         # regular transition
         r = analysis.G.edges[s, t]["transition"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
+        util.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
 
         # setexec perms
         r = analysis.G.edges[s, t]["setexec"]
@@ -151,7 +151,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["execute"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
+        util.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(analysis.G.edges[s, t]["entrypoint"].keys())
@@ -159,7 +159,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["entrypoint"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
+        util.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(analysis.G.edges[s, t]["type_transition"].keys())
@@ -167,7 +167,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["type_transition"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.type_transition, s, e, "process", t)
+        util.validate_rule(r[0], TERT.type_transition, s, e, "process", t)
 
         # dynamic transition
         r = analysis.G.edges[s, t]["dyntransition"]
@@ -187,12 +187,12 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
         # regular transition
         r = analysis.G.edges[s, t]["transition"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
+        util.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
 
         # setexec perms
         r = analysis.G.edges[s, t]["setexec"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec"]))
+        util.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec"]))
 
         # exec perms
         k = sorted(analysis.G.edges[s, t]["execute"].keys())
@@ -200,7 +200,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["execute"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
+        util.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(analysis.G.edges[s, t]["entrypoint"].keys())
@@ -208,7 +208,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["entrypoint"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
+        util.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(analysis.G.edges[s, t]["type_transition"].keys())
@@ -233,12 +233,12 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
         # regular transition
         r = analysis.G.edges[s, t]["transition"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
+        util.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
 
         # setexec perms
         r = analysis.G.edges[s, t]["setexec"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec"]))
+        util.validate_rule(r[0], TERT.allow, s, s, "process", set(["setexec"]))
 
         # exec perms
         k = sorted(analysis.G.edges[s, t]["execute"].keys())
@@ -246,11 +246,11 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["execute"][e[0]]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, e[0], "file", set(["execute"]))
+        util.validate_rule(r[0], TERT.allow, s, e[0], "file", set(["execute"]))
 
         r = analysis.G.edges[s, t]["execute"][e[1]]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, e[1], "file", set(["execute"]))
+        util.validate_rule(r[0], TERT.allow, s, e[1], "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(analysis.G.edges[s, t]["entrypoint"].keys())
@@ -258,11 +258,11 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["entrypoint"][e[0]]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, t, e[0], "file", set(["entrypoint"]))
+        util.validate_rule(r[0], TERT.allow, t, e[0], "file", set(["entrypoint"]))
 
         r = analysis.G.edges[s, t]["entrypoint"][e[1]]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, t, e[1], "file", set(["entrypoint"]))
+        util.validate_rule(r[0], TERT.allow, t, e[1], "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(analysis.G.edges[s, t]["type_transition"].keys())
@@ -270,7 +270,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["type_transition"][e[0]]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.type_transition, s, e[0], "process", t)
+        util.validate_rule(r[0], TERT.type_transition, s, e[0], "process", t)
 
         # dynamic transition
         r = analysis.G.edges[s, t]["dyntransition"]
@@ -290,7 +290,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
         # regular transition
         r = analysis.G.edges[s, t]["transition"]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
+        util.validate_rule(r[0], TERT.allow, s, t, "process", set(["transition"]))
 
         # setexec perms
         r = analysis.G.edges[s, t]["setexec"]
@@ -302,7 +302,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["execute"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
+        util.validate_rule(r[0], TERT.allow, s, e, "file", set(["execute"]))
 
         # entrypoint perms
         k = sorted(analysis.G.edges[s, t]["entrypoint"].keys())
@@ -310,7 +310,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["entrypoint"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
+        util.validate_rule(r[0], TERT.allow, t, e, "file", set(["entrypoint"]))
 
         # type_transition
         k = sorted(analysis.G.edges[s, t]["type_transition"].keys())
@@ -318,7 +318,7 @@ class TestDomainTransitionAnalysis(mixins.ValidateRule):
 
         r = analysis.G.edges[s, t]["type_transition"][e]
         assert len(r) == 1
-        self.validate_rule(r[0], TERT.type_transition, s, e, "process", t, cond="trans5")
+        util.validate_rule(r[0], TERT.type_transition, s, e, "process", t, cond="trans5")
 
         # dynamic transition
         r = analysis.G.edges[s, t]["dyntransition"]
