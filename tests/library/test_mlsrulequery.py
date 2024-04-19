@@ -36,7 +36,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test1s", "test1t", "infoflow", "s0")
+        util.validate_rule(r[0], RT.range_transition, "test1s", "test1t", tclass="infoflow",
+                           default="s0")
 
     def test_source_direct_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with regex, direct, source match."""
@@ -45,8 +46,10 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 2
-        util.validate_rule(r[0], RT.range_transition, "test3s", "test3t", "infoflow", "s1")
-        util.validate_rule(r[1], RT.range_transition, "test3s", "test3t", "infoflow2", "s2")
+        util.validate_rule(r[0], RT.range_transition, "test3s", "test3t", tclass="infoflow",
+                           default="s1")
+        util.validate_rule(r[1], RT.range_transition, "test3s", "test3t", tclass="infoflow2",
+                           default="s2")
 
     def test_issue111(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with attribute source criteria, indirect match."""
@@ -55,8 +58,10 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 2
-        util.validate_rule(r[0], RT.range_transition, "test5t1", "test5target", "infoflow", "s1")
-        util.validate_rule(r[1], RT.range_transition, "test5t2", "test5target", "infoflow7", "s2")
+        util.validate_rule(r[0], RT.range_transition, "test5t1", "test5target", tclass="infoflow",
+                           default="s1")
+        util.validate_rule(r[1], RT.range_transition, "test5t2", "test5target", tclass="infoflow7",
+                           default="s2")
 
     def test_target_direct(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with exact, direct, target match."""
@@ -65,8 +70,10 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 2
-        util.validate_rule(r[0], RT.range_transition, "test10s", "test10t", "infoflow", "s0")
-        util.validate_rule(r[1], RT.range_transition, "test10s", "test10t", "infoflow2", "s1")
+        util.validate_rule(r[0], RT.range_transition, "test10s", "test10t", tclass="infoflow",
+                           default="s0")
+        util.validate_rule(r[1], RT.range_transition, "test10s", "test10t", tclass="infoflow2",
+                           default="s1")
 
     def test_target_direct_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with regex, direct, target match."""
@@ -75,7 +82,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test12s", "test12aFAIL", "infoflow", "s2")
+        util.validate_rule(r[0], RT.range_transition, "test12s", "test12aFAIL", tclass="infoflow",
+                           default="s2")
 
     def test_issue111_2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with attribute target criteria, indirect match."""
@@ -84,9 +92,10 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 2
-        util.validate_rule(r[0], RT.range_transition, "test14source", "test14t1", "infoflow", "s1")
-        util.validate_rule(r[1], RT.range_transition, "test14source", "test14t2", "infoflow7",
-                           "s2")
+        util.validate_rule(r[0], RT.range_transition, "test14source", "test14t1",
+                           tclass="infoflow", default="s1")
+        util.validate_rule(r[1], RT.range_transition, "test14source", "test14t2",
+                           tclass="infoflow7", default="s2")
 
     def test_class_list(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with object class list match."""
@@ -95,8 +104,10 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 2
-        util.validate_rule(r[0], RT.range_transition, "test21", "test21", "infoflow3", "s2")
-        util.validate_rule(r[1], RT.range_transition, "test21", "test21", "infoflow4", "s1")
+        util.validate_rule(r[0], RT.range_transition, "test21", "test21", tclass="infoflow3",
+                           default="s2")
+        util.validate_rule(r[1], RT.range_transition, "test21", "test21", tclass="infoflow4",
+                           default="s1")
 
     def test_class_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with object class regex match."""
@@ -104,8 +115,10 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 2
-        util.validate_rule(r[0], RT.range_transition, "test22", "test22", "infoflow5", "s1")
-        util.validate_rule(r[1], RT.range_transition, "test22", "test22", "infoflow6", "s2")
+        util.validate_rule(r[0], RT.range_transition, "test22", "test22", tclass="infoflow5",
+                           default="s1")
+        util.validate_rule(r[1], RT.range_transition, "test22", "test22", tclass="infoflow6",
+                           default="s2")
 
     def test_range_exact(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range exact match"""
@@ -113,8 +126,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test40", "test40", "infoflow",
-                           "s40:c1 - s40:c0.c4")
+        util.validate_rule(r[0], RT.range_transition, "test40", "test40", tclass="infoflow",
+                           default="s40:c1 - s40:c0.c4")
 
     def test_range_overlap1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range overlap match (equal)"""
@@ -122,8 +135,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test41", "test41", "infoflow",
-                           "s41:c1 - s41:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test41", "test41", tclass="infoflow",
+                           default="s41:c1 - s41:c1.c3")
 
     def test_range_overlap2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range overlap match (subset)"""
@@ -131,8 +144,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test41", "test41", "infoflow",
-                           "s41:c1 - s41:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test41", "test41", tclass="infoflow",
+                           default="s41:c1 - s41:c1.c3")
 
     def test_range_overlap3(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range overlap match (superset)"""
@@ -140,8 +153,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test41", "test41", "infoflow",
-                           "s41:c1 - s41:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test41", "test41", tclass="infoflow",
+                           default="s41:c1 - s41:c1.c3")
 
     def test_range_overlap4(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range overlap match (overlap low level)"""
@@ -149,8 +162,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test41", "test41", "infoflow",
-                           "s41:c1 - s41:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test41", "test41", tclass="infoflow",
+                           default="s41:c1 - s41:c1.c3")
 
     def test_range_overlap5(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range overlap match (overlap high level)"""
@@ -158,8 +171,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test41", "test41", "infoflow",
-                           "s41:c1 - s41:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test41", "test41", tclass="infoflow",
+                           default="s41:c1 - s41:c1.c3")
 
     def test_range_subset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range subset match"""
@@ -167,8 +180,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test42", "test42", "infoflow",
-                           "s42:c1 - s42:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test42", "test42", tclass="infoflow",
+                           default="s42:c1 - s42:c1.c3")
 
     def test_range_subset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range subset match (equal)"""
@@ -176,8 +189,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test42", "test42", "infoflow",
-                           "s42:c1 - s42:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test42", "test42", tclass="infoflow",
+                           default="s42:c1 - s42:c1.c3")
 
     def test_range_superset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range superset match"""
@@ -185,8 +198,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test43", "test43", "infoflow",
-                           "s43:c1 - s43:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test43", "test43", tclass="infoflow",
+                           default="s43:c1 - s43:c1.c3")
 
     def test_range_superset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range superset match (equal)"""
@@ -194,8 +207,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test43", "test43", "infoflow",
-                           "s43:c1 - s43:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test43", "test43", tclass="infoflow",
+                           default="s43:c1 - s43:c1.c3")
 
     def test_range_proper_subset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range proper subset match"""
@@ -204,8 +217,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test44", "test44", "infoflow",
-                           "s44:c1 - s44:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test44", "test44", tclass="infoflow",
+                           default="s44:c1 - s44:c1.c3")
 
     def test_range_proper_subset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range proper subset match (equal)"""
@@ -222,8 +235,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test44", "test44", "infoflow",
-                           "s44:c1 - s44:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test44", "test44", tclass="infoflow",
+                           default="s44:c1 - s44:c1.c3")
 
     def test_range_proper_subset4(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range proper subset match (equal high only)"""
@@ -232,8 +245,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test44", "test44", "infoflow",
-                           "s44:c1 - s44:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test44", "test44", tclass="infoflow",
+                           default="s44:c1 - s44:c1.c3")
 
     def test_range_proper_superset1(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range proper superset match"""
@@ -242,8 +255,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test45", "test45", "infoflow",
-                           "s45:c1 - s45:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test45", "test45", tclass="infoflow",
+                           default="s45:c1 - s45:c1.c3")
 
     def test_range_proper_superset2(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range proper superset match (equal)"""
@@ -260,8 +273,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test45", "test45", "infoflow",
-                           "s45:c1 - s45:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test45", "test45", tclass="infoflow",
+                           default="s45:c1 - s45:c1.c3")
 
     def test_range_proper_superset4(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with context range proper superset match (equal high)"""
@@ -270,8 +283,8 @@ class TestMLSRuleQuery:
 
         r = sorted(q.results())
         assert len(r) == 1
-        util.validate_rule(r[0], RT.range_transition, "test45", "test45", "infoflow",
-                           "s45:c1 - s45:c1.c3")
+        util.validate_rule(r[0], RT.range_transition, "test45", "test45", tclass="infoflow",
+                           default="s45:c1 - s45:c1.c3")
 
     def test_invalid_ruletype(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with invalid rule type."""

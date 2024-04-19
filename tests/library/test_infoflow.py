@@ -63,54 +63,65 @@ class TestInfoFlowAnalysis:
 
         r = analysis.G.edges[disconnected1, disconnected2]["rules"]
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "disconnected1", "disconnected2", "infoflow2",
-                           set(["super"]))
+        util.validate_rule(r[0], TERT.allow, "disconnected1", "disconnected2", tclass="infoflow2",
+                           perms=set(["super"]))
 
         r = analysis.G.edges[disconnected2, disconnected1]["rules"]
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "disconnected1", "disconnected2", "infoflow2",
-                           set(["super"]))
+        util.validate_rule(r[0], TERT.allow, "disconnected1", "disconnected2", tclass="infoflow2",
+                           perms=set(["super"]))
 
         r = sorted(analysis.G.edges[node1, node2]["rules"])
         assert len(r) == 2
-        util.validate_rule(r[0], TERT.allow, "node1", "node2", "infoflow", set(["med_w"]))
-        util.validate_rule(r[1], TERT.allow, "node2", "node1", "infoflow", set(["hi_r"]))
+        util.validate_rule(r[0], TERT.allow, "node1", "node2", tclass="infoflow",
+                           perms=set(["med_w"]))
+        util.validate_rule(r[1], TERT.allow, "node2", "node1", tclass="infoflow",
+                           perms=set(["hi_r"]))
 
         r = sorted(analysis.G.edges[node1, node3]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node3", "node1", "infoflow", set(["low_r", "med_r"]))
+        util.validate_rule(r[0], TERT.allow, "node3", "node1", tclass="infoflow",
+                           perms=set(["low_r", "med_r"]))
 
         r = sorted(analysis.G.edges[node2, node4]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node2", "node4", "infoflow", set(["hi_w"]))
+        util.validate_rule(r[0], TERT.allow, "node2", "node4", tclass="infoflow",
+                           perms=set(["hi_w"]))
 
         r = sorted(analysis.G.edges[node3, node5]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node5", "node3", "infoflow", set(["low_r"]))
+        util.validate_rule(r[0], TERT.allow, "node5", "node3", tclass="infoflow",
+                           perms=set(["low_r"]))
 
         r = sorted(analysis.G.edges[node4, node6]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node4", "node6", "infoflow2", set(["hi_w"]))
+        util.validate_rule(r[0], TERT.allow, "node4", "node6", tclass="infoflow2",
+                           perms=set(["hi_w"]))
 
         r = sorted(analysis.G.edges[node5, node8]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node5", "node8", "infoflow2", set(["hi_w"]))
+        util.validate_rule(r[0], TERT.allow, "node5", "node8", tclass="infoflow2",
+                           perms=set(["hi_w"]))
 
         r = sorted(analysis.G.edges[node6, node5]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node5", "node6", "infoflow", set(["med_r"]))
+        util.validate_rule(r[0], TERT.allow, "node5", "node6", tclass="infoflow",
+                           perms=set(["med_r"]))
 
         r = sorted(analysis.G.edges[node6, node7]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node6", "node7", "infoflow", set(["hi_w"]))
+        util.validate_rule(r[0], TERT.allow, "node6", "node7", tclass="infoflow",
+                           perms=set(["hi_w"]))
 
         r = sorted(analysis.G.edges[node8, node9]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node8", "node9", "infoflow2", set(["super"]))
+        util.validate_rule(r[0], TERT.allow, "node8", "node9", tclass="infoflow2",
+                           perms=set(["super"]))
 
         r = sorted(analysis.G.edges[node9, node8]["rules"])
         assert len(r) == 1
-        util.validate_rule(r[0], TERT.allow, "node8", "node9", "infoflow2", set(["super"]))
+        util.validate_rule(r[0], TERT.allow, "node8", "node9", tclass="infoflow2",
+                           perms=set(["super"]))
 
     def test_minimum_3(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis with minimum weight 3."""

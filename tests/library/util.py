@@ -12,8 +12,10 @@ def validate_rule(rule: setools.policyrep.PolicyRule,
                   ruletype: setools.policyrep.PolicyEnum | str,
                   source: setools.policyrep.PolicySymbol | str,
                   target: setools.policyrep.PolicySymbol | str,
-                  tclass: setools.ObjClass | str,
-                  last_item: set[str] | setools.IoctlSet | setools.policyrep.PolicySymbol | str,
+                  /, *,
+                  tclass: setools.ObjClass | str | None = None,
+                  perms: set[str] | setools.IoctlSet | None = None,
+                  default: setools.policyrep.PolicySymbol | str | None = None,
                   cond: str | None = None,
                   cond_block: bool | None = None,
                   xperm: str | None = None) -> None:
@@ -22,27 +24,27 @@ def validate_rule(rule: setools.policyrep.PolicyRule,
     assert ruletype == rule.ruletype
     assert source == rule.source
     assert target == rule.target
-    assert tclass == rule.tclass
 
-    try:
-        # This is the common case.
-        assert last_item == rule.perms
-    except (AttributeError, setools.exception.RuleUseError):
-        assert last_item == rule.default
+    if tclass is not None:
+        assert tclass == rule.tclass
+
+    if perms is not None:
+        assert perms == rule.perms
+
+    elif default is not None:
+        assert default == rule.default
 
     if cond:
         assert cond == rule.conditional
+        assert cond_block == rule.conditional_block
     else:
         with pytest.raises(setools.exception.RuleNotConditional):
             rule.conditional
-
-    if cond_block is not None:
-        assert cond_block == rule.conditional_block
+        with pytest.raises(setools.exception.RuleNotConditional):
+            rule.conditional_block
 
     if xperm:
         assert xperm == rule.xperm_type
         assert rule.extended
     else:
-        with pytest.raises(AttributeError):
-            rule.xperm_type
         assert not rule.extended
