@@ -45,7 +45,7 @@ class TERuleTable(SEToolsTableModel[setools.AnyTERule]):
                     case 4:
                         try:
                             if rule.extended:
-                                return f"{rule.xperm_type}: {rule.perms:,}"  # type: ignore
+                                return f"{rule.xperm_type}: {rule.perms:,}"
                             else:
                                 return ", ".join(sorted(rule.perms))  # type: ignore
                         except RuleUseError:

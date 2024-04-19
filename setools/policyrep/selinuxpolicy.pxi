@@ -349,7 +349,7 @@ cdef class SELinuxPolicy:
             if c == name or (deref and name in list(c.aliases())):
                 return c
 
-        raise InvalidCategory("f{name} is not a valid category")
+        raise InvalidCategory(f"{name} is not a valid category")
 
     def lookup_class(self, name):
         """Look up an object class."""
@@ -366,14 +366,6 @@ cdef class SELinuxPolicy:
                 return common
 
         raise InvalidCommon(f"{name} is not a valid common")
-
-    def lookup_initialsid(self, name):
-        """Look up an initial sid."""
-        for sid in self.initialsids():
-            if sid == name:
-                return sid
-
-        raise InvalidInitialSid(f"{name} is not a valid initial SID")
 
     def lookup_level(self, level):
         """Look up a MLS level."""
@@ -685,7 +677,7 @@ cdef class SELinuxPolicy:
 
         if sepol.sepol_policydb_read(self.handle, pfile) < 0:
             raise InvalidPolicy(f"Invalid policy: {filename}. A binary policy must be specified. "
-                                "(use e.g. policy.{sepol.sepol_policy_kern_vers_max()} or "
+                                f"(use e.g. policy.{sepol.sepol_policy_kern_vers_max()} or "
                                 "sepolicy) Source policies are not supported.")
 
         fclose(infile)

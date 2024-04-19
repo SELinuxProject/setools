@@ -28,6 +28,33 @@ cdef class PolicyRule(PolicyObject):
         # Most rule types cannot be conditional.
         raise RuleNotConditional
 
+    @property
+    def default(self):
+        """The rule's default."""
+        raise RuleUseError
+
+    @property
+    def filename(self):
+        """The filename for this rule."""
+        # Most rule types do not have filenames.
+        raise RuleUseError
+
+    @property
+    def perms(self):
+        """The permissions for this rule."""
+        raise RuleUseError
+
+    @property
+    def tclass(self):
+        """The rule's object class."""
+        raise RuleUseError
+
+    @property
+    def xperm_type(self):
+        """The extended permission type for this rule."""
+        # Most rule types are not extended.
+        raise RuleUseError
+
     def enabled(self, **kwargs):
         """
         Determine if the rule is enabled, given the stated boolean values.

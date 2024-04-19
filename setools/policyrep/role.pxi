@@ -28,10 +28,6 @@ cdef class Role(PolicySymbol):
         #return set(RoleEbitmapIterator.factory(self.policy, &self.handle.dominates))
         return frozenset()
 
-    def expand(self):
-        """Generator that expands this into its member roles."""
-        yield self
-
     def types(self):
         """Generator which yields the role's set of types."""
         return iter(self._types)
@@ -41,6 +37,8 @@ cdef class Role(PolicySymbol):
         types = list(str(t) for t in self._types)
         count = len(types)
         stmt = f"role {self.name}"
+        if count == 0:
+            return f"role {self.name};"
         if count == 1:
             return f"role {self.name} types {types[0]};"
 
