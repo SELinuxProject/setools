@@ -64,42 +64,11 @@ for lang in linguas:
     if lang and os.path.exists(join("man", lang)):
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
-setup(name='setools',
-      version='4.6.0-dev',
-      description='SELinux policy analysis tools.',
-      author='Chris PeBenito',
-      author_email='pebenito@ieee.org',
-      url='https://github.com/SELinuxProject/setools',
-      packages=['setools', 'setools.checker', 'setools.diff', 'setoolsgui', 'setoolsgui.widgets',
-                'setoolsgui.widgets.criteria', 'setoolsgui.widgets.details',
-                'setoolsgui.widgets.models', 'setoolsgui.widgets.views'],
-      scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta', 'sechecker'],
-      data_files=installed_data,
-      package_data={'': ['*.css', '*.html'],
-                    'setools': ['perm_map', 'policyrep.pyi', 'py.typed']},
+# see pyproject.toml for most package options.
+setup(data_files=installed_data,
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
                             compiler_directives={"language_level": 3,
                                                  "c_string_type": "str",
                                                  "c_string_encoding": "ascii",
-                                                 "linetrace": enable_coverage}),
-      test_suite='tests',
-      license='GPLv2+, LGPLv2.1+',
-      classifiers=[
-          'Environment :: Console',
-          'Environment :: X11 Applications :: Qt',
-          'Intended Audience :: Information Technology',
-          'Topic :: Security',
-          'Topic :: Utilities',
-      ],
-      keywords='SELinux SETools policy analysis tools seinfo sesearch sediff sedta seinfoflow apol',
-      python_requires='>=3.10',
-      # setup also requires libsepol and libselinux
-      # C libraries and headers to compile.
-      setup_requires=['setuptools', 'Cython>=0.29.14'],
-      install_requires=['setuptools'],
-      extras_require={
-          "analysis": ["networkx>=2.6", "pygraphviz"],
-          "test": "tox"
-      }
-      )
+                                                 "linetrace": enable_coverage}))
