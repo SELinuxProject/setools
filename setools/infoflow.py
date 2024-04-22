@@ -207,7 +207,7 @@ class InfoFlowAnalysis(DirectedGraphAnalysis):
                 case _:
                     raise ValueError(f"Unknown analysis mode: {self.mode}")
 
-    def graphical_results(self) -> nx.DiGraph:
+    def graphical_results(self) -> "nx.DiGraph":
 
         """
         Return the results of the analysis as a NetworkX directed graph.
@@ -590,7 +590,7 @@ class InfoFlowStep(NetworkXGraphEdge):
                 The default is False.
     """
 
-    G: nx.DiGraph
+    G: "nx.DiGraph"
     source: Type
     target: Type
     create: InitVar[bool] = False
