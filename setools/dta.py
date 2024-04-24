@@ -278,7 +278,7 @@ class DomainTransitionAnalysis(query.DirectedGraphAnalysis):
                 case _:
                     raise ValueError(f"Unknown analysis mode: {self.mode}")
 
-    def graphical_results(self) -> nx.DiGraph:
+    def graphical_results(self) -> "nx.DiGraph":
 
         """
         Return the results of the analysis as a NetworkX directed graph.
@@ -697,7 +697,7 @@ class Edge(mixins.NetworkXGraphEdge):
                 The default is False.
     """
 
-    G: nx.DiGraph
+    G: "nx.DiGraph"
     source: policyrep.Type
     target: policyrep.Type
     create: InitVar[bool] = False
