@@ -1,37 +1,34 @@
 #!/usr/bin/env python3
 
-import glob
-from setuptools import Extension, setup
 import sys
 import os
-from os.path import join
-from contextlib import suppress
+import glob
+from pathlib import Path
+
+from setuptools import Extension, setup
 from Cython.Build import cythonize
-import os.path
 
 
 # Library linkage
-lib_dirs = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
-include_dirs = []
+lib_dirs: list[str] = ['.', '/usr/lib64', '/usr/lib', '/usr/local/lib']
+include_dirs: list[str] = []
 
-with suppress(KeyError):
-    userspace_src = os.environ["USERSPACE_SRC"]
-    include_dirs.insert(0, userspace_src + "/libsepol/include")
-    include_dirs.insert(1, userspace_src + "/libselinux/include")
-    lib_dirs.insert(0, userspace_src + "/libsepol/src")
-    lib_dirs.insert(1, userspace_src + "/libselinux/src")
+userspace_src = os.getenv("USERSPACE_SRC", "")
+if userspace_src:
+    userspace_path = Path(userspace_src)
+    include_dirs.insert(0, str(userspace_path / "libsepol/include"))
+    include_dirs.insert(1, str(userspace_path / "libselinux/include"))
+    lib_dirs.insert(0, str(userspace_path / "libsepol/src"))
+    lib_dirs.insert(1, str(userspace_path / "libselinux/src"))
 
-if sys.platform.startswith('darwin'):
-    macros=[('DARWIN',1)]
-else:
-    macros=[]
+macros: list[tuple[str, str | int]] = [('DARWIN',1)] if sys.platform.startswith('darwin') else []
 
 # Code coverage.  Enable this to get coverage in the cython code.
-enable_coverage = bool(os.environ.get("SETOOLS_COVERAGE", False))
+enable_coverage = bool(os.getenv("SETOOLS_COVERAGE", ""))
 if enable_coverage:
     macros.append(("CYTHON_TRACE", 1))
 
-cython_annotate = bool(os.environ.get("SETOOLS_ANNOTATE", False))
+cython_annotate = bool(os.getenv("SETOOLS_ANNOTATE", ""))
 
 ext_py_mods = [Extension('setools.policyrep', ['setools/policyrep.pyx'],
                          include_dirs=include_dirs,
@@ -53,53 +50,26 @@ ext_py_mods = [Extension('setools.policyrep', ['setools/policyrep.pyx'],
                                              '-Wwrite-strings',
                                              '-fno-exceptions'])]
 
-installed_data = [('share/man/man1', glob.glob("man/*.1"))]
+linguas: set[Path] = set(Path(p) for p in os.getenv("LINGUAS", "").split(" ") if p)
+if not linguas:
+    linguas.add(Path("ru"))
+linguas.add(Path("."))
 
-linguas = ["ru"]
-
-with suppress(KeyError):
-    linguas = os.environ["LINGUAS"].split(" ")
-
+base_source_path = Path("man")  # below source root
+base_target_path = Path("share/man")  # below prefixdir, usually /usr or /usr/local
+installed_data = list[tuple]()
 for lang in linguas:
-    if lang and os.path.exists(join("man", lang)):
-        installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
+    source_path = base_source_path / lang
+    if source_path.exists():
+        for i in range(1, 9):
+            installed_data.append((base_target_path / lang / f"man{i}",
+                                   glob.glob(str(source_path / f"*.{i}"))))
 
-setup(name='setools',
-      version='4.6.0-dev',
-      description='SELinux policy analysis tools.',
-      author='Chris PeBenito',
-      author_email='pebenito@ieee.org',
-      url='https://github.com/SELinuxProject/setools',
-      packages=['setools', 'setools.checker', 'setools.diff', 'setoolsgui', 'setoolsgui.widgets',
-                'setoolsgui.widgets.criteria', 'setoolsgui.widgets.details',
-                'setoolsgui.widgets.models', 'setoolsgui.widgets.views'],
-      scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta', 'sechecker'],
-      data_files=installed_data,
-      package_data={'': ['*.css', '*.html'],
-                    'setools': ['perm_map', 'policyrep.pyi', 'py.typed']},
+# see pyproject.toml for most package options.
+setup(data_files=installed_data,
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
                             compiler_directives={"language_level": 3,
                                                  "c_string_type": "str",
                                                  "c_string_encoding": "ascii",
-                                                 "linetrace": enable_coverage}),
-      test_suite='tests',
-      license='GPLv2+, LGPLv2.1+',
-      classifiers=[
-          'Environment :: Console',
-          'Environment :: X11 Applications :: Qt',
-          'Intended Audience :: Information Technology',
-          'Topic :: Security',
-          'Topic :: Utilities',
-      ],
-      keywords='SELinux SETools policy analysis tools seinfo sesearch sediff sedta seinfoflow apol',
-      python_requires='>=3.10',
-      # setup also requires libsepol and libselinux
-      # C libraries and headers to compile.
-      setup_requires=['setuptools', 'Cython>=0.29.14'],
-      install_requires=['setuptools'],
-      extras_require={
-          "analysis": ["networkx>=2.6", "pygraphviz"],
-          "test": "tox"
-      }
-      )
+                                                 "linetrace": enable_coverage}))

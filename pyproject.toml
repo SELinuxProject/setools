@@ -1,6 +1,69 @@
 [build-system]
-requires = ["setuptools", "Cython>=0.27"]
+# setup also requires libsepol and libselinux
+# C libraries and headers to compile.
+requires = ["setuptools", "Cython>=0.29.14"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "setools"
+version = "4.6.0.dev"
+description="SELinux policy analysis tools."
+authors = [{name = "Chris PeBenito", email="pebenito@ieee.org"}]
+readme = {file = "README.md", content-type = "text/markdown"}
+urls.Homepage = "https://github.com/SELinuxProject/setools"
+urls.Repository = "https://github.com/SELinuxProject/setools.git"
+urls."Bug Tracker" = "https://github.com/SELinuxProject/setools/issues"
+
+keywords = ["SELinux",
+            "SETools",
+            "policy",
+            "analysis",
+            "seinfo",
+            "sesearch",
+            "sediff",
+            "sedta",
+            "seinfoflow",
+            "apol"]
+
+# https://pypi.org/classifiers/
+classifiers = ["Development Status :: 5 - Production/Stable",
+               "Environment :: Console",
+               "Environment :: X11 Applications :: Qt",
+               "Intended Audience :: Information Technology",
+               "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+               "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+               "Programming Language :: Cython",
+               "Topic :: Security",
+               "Topic :: Utilities",
+               "Typing :: Typed"]
+
+requires-python=">=3.10"
+# also requires libsepol.so and libselinux.so.
+dependencies = ["setuptools"]
+
+optional-dependencies.analysis = ["networkx>=2.6",
+                                  "pygraphviz"]
+optional-dependencies.gui = ["PyQt6"]
+optional-dependencies.test = ["tox"]
+
+[tool.setuptools]
+include-package-data = false
+script-files = ["apol",
+                "sediff",
+                "seinfo",
+                "seinfoflow",
+                "sesearch",
+                "sedta",
+                "sechecker"]
+
+[tool.setuptools.packages.find]
+include = ["setools*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.css", "*.html", "perm_map", "py.typed"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.c", "*.pyi", "*.pyx"]
 
 
 #
