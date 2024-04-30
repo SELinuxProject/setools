@@ -1,4 +1,5 @@
 # Copyright 2015, Tresys Technology, LLC
+# Copyright 2024, Sealing Technologies, Inc.
 #
 # SPDX-License-Identifier: GPL-2.0-only
 #
@@ -94,3 +95,17 @@ class TestConstraintQuery:
 
         constraint = sorted(c.tclass for c in q.results())
         assert ["test51a", "test51b"] == constraint
+
+    def test_or_and_parens(self, compiled_policy: setools.SELinuxPolicy) -> None:
+        """Constraint with an or expression anded with another expression"""
+        q = setools.ConstraintQuery(compiled_policy, tclass=["test52a"])
+
+        constraint = sorted(str(c.expression) for c in q.results())
+        assert ["( r1 == system or r2 == system ) and u1 == u2"] == constraint
+
+    def test_or_and_no_parens(self, compiled_policy: setools.SELinuxPolicy) -> None:
+        """Constraint with an or expression anded with another expression"""
+        q = setools.ConstraintQuery(compiled_policy, tclass=["test52b"])
+
+        constraint = sorted(str(c.expression) for c in q.results())
+        assert ["r1 == system or r2 == system and u1 == u2"] == constraint
