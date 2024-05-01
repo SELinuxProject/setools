@@ -65,7 +65,7 @@ for lang in linguas:
         installed_data.append((join('share/man', lang, 'man1'), glob.glob(join("man", lang, "*.1"))))
 
 setup(name='setools',
-      version='4.5.0',
+      version='4.5.1',
       description='SELinux policy analysis tools.',
       author='Chris PeBenito',
       author_email='pebenito@ieee.org',
@@ -75,7 +75,7 @@ setup(name='setools',
                 'setoolsgui.widgets.models', 'setoolsgui.widgets.views'],
       scripts=['apol', 'sediff', 'seinfo', 'seinfoflow', 'sesearch', 'sedta', 'sechecker'],
       data_files=installed_data,
-      package_data={'': ['*.html'],
+      package_data={'': ['*.css', '*.html'],
                     'setools': ['perm_map', 'policyrep.pyi', 'py.typed']},
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
