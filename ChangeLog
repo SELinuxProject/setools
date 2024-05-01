@@ -1,3 +1,8 @@
+*setools-4.5.1 (01 May 2024)
+
+  * Correct annotations of NetworkX types to make it optional again.
+  * Fix packaging issue for apol's style sheet (apol.css).
+
 *setools-4.5.0 (21 Mar 2024)
 
   * Rework apol to fully generate the UI programmatically.
