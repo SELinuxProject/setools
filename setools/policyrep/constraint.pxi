@@ -1,5 +1,6 @@
 # Copyright 2014-2016, Tresys Technology, LLC
 # Copyright 2016-2018, Chris PeBenito <pebenito@ieee.org>
+# Copyright 2024, Sealing Technologies, Inc.
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
@@ -192,40 +193,52 @@ cdef class ConstraintExpression(PolicyObject):
 
             # sepol representation is in postfix notation.  This code
             # converts it to infix notation.  Parentheses are added
-            # to ensure correct expressions, though they may end up
-            # being overused.  Set previous operator at start to the
-            # highest precedence (op) so if there is a single binary
-            # operator, no parentheses are output
+            # to ensure correct expressions. Parentheses are needed
+            # whenever an operation involves a subexpression with
+            # lower precedence.
             stack = []
-            prev_op_precedence = _max_precedence
+
+            @dataclasses.dataclass(repr=False, eq=False, frozen=True)
+            class StackObj:
+                precedence: int
+                expression: List[str]
+
             for op in self._postfix:
                 if isinstance(op, frozenset) or op in _operands:
                     # operands
-                    stack.append(op)
+                    stack.append(StackObj(_max_precedence, op))
                 else:
                     # operators
+                    op_precedence = _precedence[op]
                     if op == "not":
                         # unary operator
                         operator = op
-                        operand = stack.pop()
-                        op_precedence = _precedence[op]
-                        stack.append([operator, "(", operand, ")"])
+                        operand_info = stack.pop()
+                        if operand_info.precedence < op_precedence:
+                            e = [operator, "(", operand_info.expression, ")"]
+                        else:
+                            e = [operator, operand_info.expression]
                     else:
                         # binary operators
-                        operand2 = stack.pop()
-                        operand1 = stack.pop()
+                        operand2_info = stack.pop()
+                        operand1_info = stack.pop()
                         operator = op
 
-                        # if previous operator is of higher precedence
-                        # no parentheses are needed.
-                        if _precedence[op] < prev_op_precedence:
-                            stack.append([operand1, operator, operand2])
+                        if operand1_info.precedence < op_precedence:
+                            operand1 = ["(", operand1_info.expression, ")"]
                         else:
-                            stack.append(["(", operand1, operator, operand2, ")"])
+                            operand1 = [operand1_info.expression]
 
-                    prev_op_precedence = _precedence[op]
+                        if operand2_info.precedence < op_precedence:
+                            operand2 = ["(", operand2_info.expression, ")"]
+                        else:
+                            operand2 = [operand2_info.expression]
 
-            self._infix = flatten_list(stack)
+                        e = operand1 + [operator] + operand2
+
+                    stack.append(StackObj(op_precedence, e))
+
+            self._infix = flatten_list(map(lambda x:x.expression, stack))
 
         return self._infix
 
