@@ -36,6 +36,7 @@ cdef class SELinuxPolicy:
         dict category_alias_map
         dict sensitivity_alias_map
         object __weakref__
+        bint gen_cil
 
         # Public attributes:
         readonly str path
@@ -44,7 +45,7 @@ cdef class SELinuxPolicy:
         readonly unsigned int version
         readonly bint mls
 
-    def __cinit__(self, policyfile=None):
+    def __cinit__(self, policyfile=None, gen_cil=False):
         """
         Parameter:
         policyfile  Path to a policy to open.
@@ -59,6 +60,8 @@ cdef class SELinuxPolicy:
             self._load_policy(policyfile)
         else:
             self._load_running_policy()
+
+        self.gen_cil = gen_cil
 
     def __dealloc__(self):
         PyMem_Free(self.cat_val_to_struct)

@@ -63,7 +63,10 @@ cdef class RoleAllow(PolicyRule):
             yield self
 
     def statement(self):
-        return f"{self.ruletype} {self.source} {self.target};"
+        if self.policy.gen_cil:
+            return f"(roleallow {self.source} {self.target})"
+        else:
+            return f"{self.ruletype} {self.source} {self.target};"
 
 
 cdef class RoleTransition(PolicyRule):
@@ -122,7 +125,10 @@ cdef class RoleTransition(PolicyRule):
             yield self
 
     def statement(self):
-        return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
+        if self.policy.gen_cil:
+            return f"(roletransition {self.source} {self.target} {self.tclass} {self.default})"
+        else:
+            return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
 
 
 #

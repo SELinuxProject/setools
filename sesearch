@@ -21,6 +21,7 @@ parser.add_argument("policy", help="Path to the SELinux policy to search.", narg
 parser.add_argument("-v", "--verbose", action="store_true",
                     help="Print extra informational messages")
 parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
+parser.add_argument("-C", "--cil", action="store_true", dest="gen_cil", help="Enable CIL output.")
 
 rtypes = parser.add_argument_group("TE Rule Types")
 rtypes.add_argument("-A", action="store_true", help="Search allow and allowxperm rules.")
@@ -143,7 +144,7 @@ else:
         warnings.simplefilter("ignore")
 
 try:
-    p = setools.SELinuxPolicy(args.policy)
+    p = setools.SELinuxPolicy(args.policy, gen_cil=args.gen_cil)
 
     if args.tertypes:
         terq = setools.TERuleQuery(p,

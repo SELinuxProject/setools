@@ -195,20 +195,27 @@ cdef class AVRule(BaseTERule):
 
     def statement(self):
         if not self.rule_string:
-            self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} "
-
-            # allow/dontaudit/auditallow/neverallow rules
-            perms = self.perms
-            if len(perms) > 1:
-                self.rule_string += f"{{ {' '.join(sorted(perms))} }};"
+            if self.policy.gen_cil:
+                self.rule_string = f"({self.ruletype} {self.source} {self.target} ({self.tclass} ({' '.join(sorted(self.perms))})))"
+                try:
+                    self.rule_string = f"(booleanif ({self.conditional})\n\t({str(self.conditional_block).lower())}\n\t\t{self.rule_string}\n\t)\n)"
+                except RuleNotConditional:
+                    pass
             else:
-                # convert to list since sets cannot be indexed
-                self.rule_string += f"{list(perms)[0]};"
+                self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} "
 
-            try:
-                self.rule_string += f" [ {self.conditional} ]:{self.conditional_block}"
-            except RuleNotConditional:
-                pass
+                # allow/dontaudit/auditallow/neverallow rules
+                perms = self.perms
+                if len(perms) > 1:
+                    self.rule_string += f"{{ {' '.join(sorted(perms))} }};"
+                else:
+                    # convert to list since sets cannot be indexed
+                    self.rule_string += f"{list(perms)[0]};"
+
+                try:
+                    self.rule_string += f" [ {self.conditional} ]:{self.conditional_block}"
+                except RuleNotConditional:
+                    pass
 
         return self.rule_string
 
@@ -379,14 +386,17 @@ cdef class AVRuleXperm(BaseTERule):
 
     def statement(self):
         if not self.rule_string:
-            self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.xperm_type} "
-
-            # generate short permission notation
-            perms = self.perms
-            if perms.ranges() > 1:
-                self.rule_string += f"{{ {perms} }};"
+            if self.policy.gen_cil:
+                self.rule_string = f"({self.ruletype} {self.source} {self.target} ({self.tclass} ({self.xperm_type} {self.perms})))"
             else:
-                self.rule_string += f"{perms};"
+                self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.xperm_type} "
+
+                # generate short permission notation
+                perms = self.perms
+                if perms.ranges() > 1:
+                    self.rule_string += f"{{ {perms} }};"
+                else:
+                    self.rule_string += f"{perms};"
 
         return self.rule_string
 
@@ -454,12 +464,20 @@ cdef class TERule(BaseTERule):
 
     def statement(self):
         if not self.rule_string:
-            self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
+            if self.policy.gen_cil:
+                self.rule_string = f"({self.ruletype} {self.source} {self.target} ({self.tclass} ({self.default})))"
+                try:
+                    self.rule_string = f"(booleanif ({self.conditional})\n\t({str(self.conditional_block).lower())}\n\t\t{self.rule_string}\n\t)\n)"
+                except RuleNotConditional:
+                    pass
 
-            try:
-                self.rule_string += f" [ {self.conditional} ]:{self.conditional_block}"
-            except RuleNotConditional:
-                pass
+            else:
+                self.rule_string = f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
+
+                try:
+                    self.rule_string += f" [ {self.conditional} ]:{self.conditional_block}"
+                except RuleNotConditional:
+                    pass
 
         return self.rule_string
 
@@ -531,7 +549,10 @@ cdef class FileNameTERule(BaseTERule):
             yield self
 
     def statement(self):
-        return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default} {self.filename};"
+        if self.policy.gen_cil:
+            return f"({self.ruletype} {self.source} {self.target} ({self.tclass} {self.default} {self.filename}))"
+        else:
+            return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default} {self.filename};"
 
 
 #

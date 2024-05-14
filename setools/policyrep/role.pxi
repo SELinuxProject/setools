@@ -34,15 +34,21 @@ cdef class Role(PolicySymbol):
 
     def statement(self):
         cdef size_t count
-        types = list(str(t) for t in self._types)
-        count = len(types)
-        stmt = f"role {self.name}"
-        if count == 0:
-            return f"role {self.name};"
-        if count == 1:
-            return f"role {self.name} types {types[0]};"
+        if self.policy.gen_cil:
+            stmt = ""
+            for t in self._types:
+                stmt += f"(roletype {self} {t})\n"
+            return stmt
+        else:
+            types = list(str(t) for t in self._types)
+            count = len(types)
+            stmt = f"role {self.name}"
+            if count == 0:
+                return f"role {self.name};"
+            if count == 1:
+                return f"role {self.name} types {types[0]};"
 
-        return f"role {self.name} types {{ {' '.join(sorted(types))} }};"
+            return f"role {self.name} types {{ {' '.join(sorted(types))} }};"
 
 
 #
