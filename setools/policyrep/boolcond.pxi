@@ -78,50 +78,77 @@ cdef class Conditional(PolicyObject):
         return other in self.booleans
 
     def __str__(self):
-        # sepol representation is in postfix notation.  This code
-        # converts it to infix notation.  Parentheses are added
-        # to ensure correct expressions, though they may end up
-        # being overused.  Set previous operator at start to the
-        # highest precedence (NOT) so if there is a single binary
-        # operator, no parentheses are output
-        stack = []
-        prev_op_precedence = 5
+        if self.policy.gen_cil:
+            # sepol representation is in postfix notation.  This code
+            # converts it to prefix notation used by CIL.  Parentheses
+            # are always needed.
+            stack = []
 
-        for expr_node in self.expression():
-            if isinstance(expr_node, Boolean):
-                # append the boolean name
-                stack.append(str(expr_node))
-            elif expr_node.unary:
-                operand = stack.pop()
-                operator = str(expr_node)
-                op_precedence = expr_node.precedence
+            for expr_node in self.expression():
+                if isinstance(expr_node, Boolean):
+                    # append the boolean name
+                    stack.append(str(expr_node))
+                elif expr_node.unary:
+                    operand = stack.pop()
+                    operator = str(expr_node)
 
-                # NOT is the highest precedence, so only need
-                # parentheses if the operand is a subexpression
-                if isinstance(operand, list):
-                    subexpr = [operator, "(", operand, ")"]
+                    subexpr = ["(", operator, " ", operand, ")"]
+
+                    stack.append(subexpr)
                 else:
-                    subexpr = [operator, operand]
+                    operand1 = stack.pop()
+                    operand2 = stack.pop()
+                    operator = str(expr_node)
 
-                stack.append(subexpr)
-                prev_op_precedence = op_precedence
-            else:
-                operand1 = stack.pop()
-                operand2 = stack.pop()
-                operator = str(expr_node)
-                op_precedence = expr_node.precedence
+                    subexpr = ["(", operator, " ", operand1, " ", operand2, ")"]
 
-                if prev_op_precedence > op_precedence:
-                    # if previous operator is of higher precedence
-                    # no parentheses are needed.
-                    subexpr = [operand1, operator, operand2]
+                    stack.append(subexpr)
+            return ''.join(flatten_list(stack))
+
+        else:
+            # This code converts sepol to infix notation.  Parentheses are
+            # added to ensure correct expressions, though they may end up
+            # being overused.  Set previous operator at start to the
+            # highest precedence (NOT) so if there is a single binary
+            # operator, no parentheses are output
+            stack = []
+            prev_op_precedence = 5
+
+            for expr_node in self.expression():
+                if isinstance(expr_node, Boolean):
+                    # append the boolean name
+                    stack.append(str(expr_node))
+                elif expr_node.unary:
+                    operand = stack.pop()
+                    operator = str(expr_node)
+                    op_precedence = expr_node.precedence
+
+                    # NOT is the highest precedence, so only need
+                    # parentheses if the operand is a subexpression
+                    if isinstance(operand, list):
+                        subexpr = [operator, "(", operand, ")"]
+                    else:
+                        subexpr = [operator, operand]
+
+                        stack.append(subexpr)
+                        prev_op_precedence = op_precedence
                 else:
-                    subexpr = ["(", operand1, operator, operand2, ")"]
+                    operand1 = stack.pop()
+                    operand2 = stack.pop()
+                    operator = str(expr_node)
+                    op_precedence = expr_node.precedence
 
-                stack.append(subexpr)
-                prev_op_precedence = op_precedence
+                    if prev_op_precedence > op_precedence:
+                        # if previous operator is of higher precedence
+                        # no parentheses are needed.
+                        subexpr = [operand1, operator, operand2]
+                    else:
+                        subexpr = ["(", operand1, operator, operand2, ")"]
 
-        return ' '.join(flatten_list(stack))
+                        stack.append(subexpr)
+                        prev_op_precedence = op_precedence
+
+            return ' '.join(flatten_list(stack))
 
     def __hash__(self):
         return hash(self.key)
@@ -222,6 +249,7 @@ cdef class ConditionalOperator(PolicyObject):
 
     cdef:
         str text
+        str cil_text
         readonly int precedence
         # T/F the operator is unary
         readonly bint unary
@@ -231,12 +259,12 @@ cdef class ConditionalOperator(PolicyObject):
         readonly object evaluate
 
     _cond_expr_val_to_details = {
-        sepol.COND_NOT: ("!", 5, lambda x: not x),
-        sepol.COND_OR: ("||", 1, lambda x, y: x or y),
-        sepol.COND_AND: ("&&", 3, lambda x, y: x and y),
-        sepol.COND_XOR: ("^", 2, lambda x, y: x ^ y),
-        sepol.COND_EQ: ("==", 4, lambda x, y: x == y),
-        sepol.COND_NEQ: ("!=", 4, lambda x, y: x != y)}
+        sepol.COND_NOT: ("!", "not", 5, lambda x: not x),
+        sepol.COND_OR: ("||", "or", 1, lambda x, y: x or y),
+        sepol.COND_AND: ("&&", "and", 3, lambda x, y: x and y),
+        sepol.COND_XOR: ("^", "xor", 2, lambda x, y: x ^ y),
+        sepol.COND_EQ: ("==", "eq", 4, lambda x, y: x == y),
+        sepol.COND_NEQ: ("!=", "ne", 4, lambda x, y: x != y)}
 
     @staticmethod
     cdef inline ConditionalOperator factory(SELinuxPolicy policy, sepol.cond_expr_t *symbol):
@@ -245,11 +273,14 @@ cdef class ConditionalOperator(PolicyObject):
         op.policy = policy
         op.key = <uintptr_t>symbol
         op.unary = symbol.expr_type == sepol.COND_NOT
-        op.text, op.precedence, op.evaluate = op._cond_expr_val_to_details[symbol.expr_type]
+        op.text, op.cil_text, op.precedence, op.evaluate = op._cond_expr_val_to_details[symbol.expr_type]
         return op
 
     def __str__(self):
-        return self.text
+        if self.policy.gen_cil:
+            return self.cil_text
+        else:
+            return self.text
 
     def statement(self):
         raise NoStatement

@@ -168,17 +168,20 @@ cdef class BaseMLSLevel(PolicyObject):
         cats = sorted(self._categories, key=lambda k: k._value)
 
         if cats:
-            # generate short category notation
-            shortlist = []
-            for _, i in itertools.groupby(cats, key=lambda k,
-                                          c=itertools.count(): k._value - next(c)):
-                group = list(i)
-                if len(group) > 1:
-                    shortlist.append(f"{group[0]}.{group[-1]}")
-                else:
-                    shortlist.append(str(group[0]))
+            if self.policy.gen_cil:
+                lvl += " (" + " ".join(c.name for c in cats) + ")"
+            else:
+                # generate short category notation
+                shortlist = []
+                for _, i in itertools.groupby(cats, key=lambda k,
+                                              c=itertools.count(): k._value - next(c)):
+                    group = list(i)
+                    if len(group) > 1:
+                        shortlist.append(f"{group[0]}.{group[-1]}")
+                    else:
+                        shortlist.append(str(group[0]))
 
-            lvl += ":" + ','.join(shortlist)
+                lvl += ":" + ','.join(shortlist)
 
         return lvl
 
@@ -431,10 +434,16 @@ cdef class Range(PolicyObject):
         return r
 
     def __str__(self):
-        if self.high == self.low:
-            return str(self.low)
+        if self.policy.gen_cil:
+            if self.high == self.low:
+                return f"({self.low})"
 
-        return f"{self.low} - {self.high}"
+            return f"({self.low} {self.high})"
+        else:
+            if self.high == self.low:
+                return str(self.low)
+
+            return f"{self.low} - {self.high}"
 
     def __hash__(self):
         return hash(str(self))

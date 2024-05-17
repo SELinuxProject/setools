@@ -67,7 +67,10 @@ cdef class MLSRule(PolicyRule):
             yield self
 
     def statement(self):
-        return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
+        if self.policy.gen_cil:
+            return f"(rangetransition {self.source} {self.target} {self.tclass} {self.default})"
+        else:
+            return f"{self.ruletype} {self.source} {self.target}:{self.tclass} {self.default};"
 
 
 #
