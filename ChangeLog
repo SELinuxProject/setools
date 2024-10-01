@@ -103,7 +103,7 @@
   This release focused on improving performance and reducing memory usage.
 
   A Cython-based policy representation replaced the
-  Python/SWIG/static-linked-libsepol implemention. SETools no longer statically
+  Python/SWIG/static-linked-libsepol implementation. SETools no longer statically
   links to libsepol, though it is strongly suggested that users rebuild SETools
   after updating libsepol, in case the policy structure changes.
 

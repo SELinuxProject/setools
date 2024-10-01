@@ -49,7 +49,7 @@ class UserQueryTab(tab.TableResultTabWidget[setools.UserQuery, setools.User]):
             lvl.setToolTip("MLS is disabled in this policy.")
             lvl.setWhatsThis(
                 """
-                <p>This MLS lavel for user matching is not available because
+                <p>This MLS level for user matching is not available because
                 MLS is disabled in this policy.</p>
                 """)
 

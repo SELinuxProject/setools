@@ -13,8 +13,8 @@ import setools
 @pytest.mark.obj_args("tests/library/policyrep/selinuxpolicy.conf")
 class TestSELinuxPolicy:
 
-    def test_open_policy_non_existant(self) -> None:
-        """SELinuxPolicy: Non existant policy on open."""
+    def test_open_policy_non_existent(self) -> None:
+        """SELinuxPolicy: Non existent policy on open."""
         with pytest.raises(OSError):
             setools.SELinuxPolicy("tests/policyrep/DOES_NOT_EXIST")
 
@@ -58,7 +58,7 @@ class TestSELinuxPolicy:
         assert compiled_policy.class_count == 7
 
     def test_common_count(self, compiled_policy: setools.SELinuxPolicy) -> None:
-        """SELinuxPolicy: common permisison set count"""
+        """SELinuxPolicy: common permission set count"""
         assert compiled_policy.common_count == 3
 
     def test_conditional_count(self, compiled_policy: setools.SELinuxPolicy) -> None:

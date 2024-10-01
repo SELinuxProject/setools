@@ -54,7 +54,7 @@ if __name__ == '__main__':
     mw = QtWidgets.QMainWindow()
     w = BoundsRuleType("Test default ruletypes", q, parent=mw)
     w.setToolTip("test tooltip")
-    w.setWhatsThis("test whats this")
+    w.setWhatsThis("test what's this")
     mw.setCentralWidget(w)
     mw.resize(w.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

@@ -23,7 +23,7 @@ class PolicyQuery(ABC):
         # keys are sorted in reverse order so regex settings
         # are set before the criteria, e.g. name_regex
         # is set before name.  This ensures correct behavior
-        # since the criteria descriptors are sensitve to
+        # since the criteria descriptors are sensitive to
         # regex settings.
         for name in sorted(kwargs.keys(), reverse=True):
             attr = getattr(self, name, None)  # None is not callable

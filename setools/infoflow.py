@@ -91,7 +91,7 @@ class InfoFlowAnalysis(query.DirectedGraphAnalysis):
             self.subG = self.G.copy()
         except NameError:
             self.log.critical("NetworkX is not available.  This is "
-                              "requried for Information Flow Analysis.")
+                              "required for Information Flow Analysis.")
             self.log.critical("This is typically in the python3-networkx package.")
             raise
 

@@ -67,7 +67,7 @@ class TestAssertRBAC:
         assert expected == check.exempt_source
 
     def test_exempt_source_missing(self, compiled_policy: setools.SELinuxPolicy) -> None:
-        """Test exempt_source missing role is ignroed."""
+        """Test exempt_source missing role is ignored."""
         config = {"source": "system",
                   "exempt_source": "FAIL  exempt_src2"}
         check = setools.checker.assertrbac.AssertRBAC(

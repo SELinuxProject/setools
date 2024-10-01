@@ -88,7 +88,7 @@ if __name__ == '__main__':
     layout.addWidget(widget2)
     layout.addWidget(widget3)
     window.setToolTip("test tooltip")
-    window.setWhatsThis("test whats this")
+    window.setWhatsThis("test what's this")
     mw.setCentralWidget(window)
     mw.resize(window.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

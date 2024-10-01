@@ -120,7 +120,7 @@ cdef class EbitmapIterator(PolicyIterator):
     """
     Base class for iterators over hash tables.
 
-    Sublcasses must provide their own __next__, which calls this class's __next__
+    Subclasses must provide their own __next__, which calls this class's __next__
     and then uses a factory function to build and return an object from self.curr.
 
     For example:
@@ -177,7 +177,7 @@ cdef class HashtabIterator(PolicyIterator):
     """
     Base class for iterators over hash tables.
 
-    Sublcasses must provide their own __next__, which calls this class's __next__
+    Subclasses must provide their own __next__, which calls this class's __next__
     and then uses a factory function to build and return an object from self.curr.
 
     For example:
@@ -243,7 +243,7 @@ cdef class OcontextIterator(PolicyIterator):
     """
     Base class for iterators for most in-policy labeling statements, (portcon, nodecon, etc.)
 
-    Sublcasses must provide their own __next__, which calls this class's __next__
+    Subclasses must provide their own __next__, which calls this class's __next__
     and then uses a factory function to build and return an object from self.ocon.
 
     For example:
