@@ -934,6 +934,10 @@ cdef class SELinuxPolicy:
         for i in range(self.handle.p.symtab[sepol.SYM_TYPES].nprim):
             tmp_type = self.handle.p.type_val_to_struct[i]
 
+            # skip gaps
+            if tmp_type == NULL:
+                continue
+
             # skip types
             if tmp_type.flavor != sepol.TYPE_ATTRIB:
                 continue
