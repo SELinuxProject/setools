@@ -25,7 +25,7 @@ class TestReadOnlyExecutables:
             compiled_policy, "test_all_exec", config)
         result = check._collect_executables()
 
-        # becasue of unconfined, nonexec is executable
+        # because of unconfined, nonexec is executable
         expected = set(("roexec", "execfile1", "execfile2", "nonexec", "exempt_file"))
         assert expected == set(result.keys())
 

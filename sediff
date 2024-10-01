@@ -532,7 +532,7 @@ try:
             nm = len(diff.modified_sensitivities)
             print(f"Sensitivities ({na} Added, {nr} Removed, {nm} Modified)")
             if diff.added_sensitivities and not args.stats:
-                print(f"   Added Sensitivites: {na}")
+                print(f"   Added Sensitivities: {na}")
                 for sens in sorted(diff.added_sensitivities):
                     print(f"      + {sens}")
             if diff.removed_sensitivities and not args.stats:

@@ -85,7 +85,7 @@ if __name__ == '__main__':
     widget1 = DefaultValues("Test default values", q1, "default", "default_range", parent=window)
     layout.addWidget(widget1)
     window.setToolTip("test tooltip")
-    window.setWhatsThis("test whats this")
+    window.setWhatsThis("test what's this")
     mw.setCentralWidget(window)
     mw.resize(window.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

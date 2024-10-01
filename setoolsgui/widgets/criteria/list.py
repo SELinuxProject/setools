@@ -76,7 +76,7 @@ class ListWidget(CriteriaWidget):
         self.criteria_any.setChecked(not any((EQUAL_DEFAULT_CHECKED, SUBSET_DEFAULT_CHECKED)))
         self.top_layout.addWidget(self.criteria_any, 0, 2, 1, 1)
 
-        # the rstrip("_") below is to aviod names like "name__equal"
+        # the rstrip("_") below is to avoid names like "name__equal"
         if enable_equal:
             self.criteria_equal = QtWidgets.QRadioButton(self)
             self.criteria_equal.setObjectName(f"{self.attrname.rstrip('_')}_equal")

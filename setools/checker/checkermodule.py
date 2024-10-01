@@ -96,7 +96,7 @@ class CheckerModule(metaclass=CheckRegistry):
     def log_ok(self, msg: str) -> None:
         """
         Log findings that pass the check.  By default these messages are
-        surpressed unless self.log_passing is True.
+        suppressed unless self.log_passing is True.
         """
         if self.log_passing:
             self.output.write(f"P   * {msg}\n")

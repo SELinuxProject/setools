@@ -19,7 +19,7 @@ class TestCommon:
         com = list(compiled_policy.commons()).pop()
         assert set(["low_w", "low_r"]) == com.perms, com.perms
 
-    def test_statment(self, compiled_policy: setools.SELinuxPolicy) -> None:
+    def test_statement(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Common: statement."""
         com = list(compiled_policy.commons()).pop()
         assert com.statement() in (

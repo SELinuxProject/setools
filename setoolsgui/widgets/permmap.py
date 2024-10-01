@@ -147,7 +147,7 @@ class PermissionMapEditor(QtWidgets.QDialog):
             self.perm_mappings.addWidget(mapping)
             self.widgets.append(mapping)
 
-            # add horizonal line
+            # add horizontal line
             line = QtWidgets.QFrame(self)
             line.setFrameShape(QtWidgets.QFrame.Shape.HLine)
             line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)

@@ -13,7 +13,7 @@ from .name import NameWidget
 class RangedWidget(NameWidget):
 
     """
-    Base classs for widgets providing a QLineEdit that saves the input to the attributes
+    Base class for widgets providing a QLineEdit that saves the input to the attributes
     of the specified query.  This supports inputs of ranges, e.g. port ranges and MLS ranges.
     """
 

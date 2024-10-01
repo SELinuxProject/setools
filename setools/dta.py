@@ -164,7 +164,7 @@ class DomainTransitionAnalysis(query.DirectedGraphAnalysis):
             self.subG = self.G.copy()
         except NameError:
             self.log.critical("NetworkX is not available.  This is "
-                              "requried for Domain Transition Analysis.")
+                              "required for Domain Transition Analysis.")
             self.log.critical("This is typically in the python3-networkx package.")
             raise
 
@@ -690,7 +690,7 @@ class Edge(mixins.NetworkXGraphEdge):
     Parameters:
     graph       The NetworkX graph.
     source      The source type of the edge.
-    target      The target tyep of the edge.
+    target      The target type of the edge.
 
     Keyword Parameters:
     create      (T/F) create the edge if it does not exist.

@@ -66,7 +66,7 @@ class TestAssertTE:
         assert expected == check.exempt_source
 
     def test_source_missing_ignored(self, compiled_policy: setools.SELinuxPolicy) -> None:
-        """Test exempt_source missing type is ignroed."""
+        """Test exempt_source missing type is ignored."""
         config = {"source": "system",
                   "exempt_source": "FAIL  exempt_src2"}
         check = setools.checker.assertte.AssertTE(
@@ -88,7 +88,7 @@ class TestAssertTE:
         assert expected == check.exempt_target
 
     def test_target_missing_ignored(self, compiled_policy: setools.SELinuxPolicy) -> None:
-        """Test exempt_target missing type is ignroed."""
+        """Test exempt_target missing type is ignored."""
         config = {"target": "system",
                   "exempt_target": "FAIL  exempt_tgt2"}
         check = setools.checker.assertte.AssertTE(

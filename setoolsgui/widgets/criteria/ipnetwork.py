@@ -21,7 +21,7 @@ __all__ = ("IP_NetworkName",)
 class IP_NetworkName(NameWidget):
 
     """
-    Base classs for widgets providing a QLineEdit that saves the input to the attributes
+    Base class for widgets providing a QLineEdit that saves the input to the attributes
     of the specified query.  This supports inputs of IP networks, IPv4 or IPv6.
     """
 

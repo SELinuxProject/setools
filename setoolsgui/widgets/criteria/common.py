@@ -47,7 +47,7 @@ if __name__ == '__main__':
     mw = QtWidgets.QMainWindow()
     widget = CommonName("Test Common", q, "name", parent=mw)
     widget.setToolTip("test tooltip")
-    widget.setWhatsThis("test whats this")
+    widget.setWhatsThis("test what's this")
     mw.setCentralWidget(widget)
     mw.resize(widget.size())
     whatsthis = QtWidgets.QWhatsThis.createAction(mw)

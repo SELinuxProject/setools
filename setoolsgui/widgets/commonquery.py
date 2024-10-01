@@ -13,7 +13,7 @@ class CommonQueryTab(tab.TableResultTabWidget[setools.CommonQuery, setools.Commo
     """A common permission set query."""
 
     section = tab.AnalysisSection.Components
-    tab_title = "Common Permision Sets"
+    tab_title = "Common Permission Sets"
     mlsonly = False
 
     def __init__(self, policy: setools.SELinuxPolicy, /, *,

@@ -263,7 +263,7 @@ if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     widget = ExcludeTypes(a)
     widget.setToolTip("test tooltip")
-    widget.setWhatsThis("test whats this")
+    widget.setWhatsThis("test what's this")
     widget.resize(620, 340)
     widget.show()
     sys.exit(app.exec())

@@ -222,7 +222,7 @@ cdef class IoctlSet(frozenset):
 
     def __format__(self, spec):
         """
-        String formating.
+        String formatting.
 
         The standard formatting (no specification) will render the
         ranges of ioctls, space separated.
