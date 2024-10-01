@@ -17,7 +17,7 @@ except ImportError:
     have_pqtestqt = False
 
 
-def pytest_ignore_collect(collection_path: pathlib.Path, path,
+def pytest_ignore_collect(collection_path: pathlib.Path,
                           config: pytest.Config) -> bool | None:
 
     """Ignore GUI tests if DISPLAY is not set or PyQt is not available."""
