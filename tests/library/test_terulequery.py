@@ -289,7 +289,7 @@ class TestTERuleQuery:
 
 
 @pytest.mark.obj_args("tests/library/terulequery2.conf")
-class TERuleQueryXperm:
+class TestTERuleQueryXperm:
 
     """TE Rule Query with extended permission rules."""
 
@@ -463,3 +463,12 @@ class TERuleQueryXperm:
         util.validate_rule(r[0], TRT.allowxperm, "test101c", "test101c", tclass="infoflow7",
                            perms=setools.XpermSet([0x9011, 0x9012, 0x9013]), xperm="ioctl")
 
+    def test_nlmsg(self, compiled_policy: setools.SELinuxPolicy) -> None:
+        """Xperm rule query with exact, direct, source match."""
+        q = TERuleQuery(
+            compiled_policy, source="test102a", source_indirect=False, source_regex=False)
+
+        r = sorted(q.results())
+        assert len(r) == 1
+        util.validate_rule(r[0], TRT.allowxperm, "test102a", "test102t", tclass="infoflow8",
+                           perms=setools.XpermSet(range(0x1, 0xf1+1)), xperm="nlmsg")

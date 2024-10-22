@@ -60,8 +60,8 @@ rule_test_data = [
                  xperm="ioctl", perms=setools.XpermSet((0x00ff,)), type_=setools.AVRuleXperm,
                  statement="allowxperm type30 type31a:infoflow ioctl 0x00ff;"),
     RuleTestCase(setools.TERuletype.auditallowxperm, "type31a", "type31b", tclass="infoflow",
-                 xperm="ioctl", perms=setools.XpermSet((1, 2, 3)), type_=setools.AVRuleXperm,
-                 statement="auditallowxperm type31a type31b:infoflow ioctl 0x0001-0x0003;")]
+                 xperm="nlmsg", perms=setools.XpermSet((1, 2, 3)), type_=setools.AVRuleXperm,
+                 statement="auditallowxperm type31a type31b:infoflow nlmsg 0x0001-0x0003;")]
 
 
 @pytest.mark.obj_args("tests/library/policyrep/rules.conf")
