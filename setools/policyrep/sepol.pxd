@@ -157,6 +157,7 @@ cdef extern from "<sepol/policydb/avtab.h>":
     #
     cdef int AVTAB_XPERMS_IOCTLFUNCTION
     cdef int AVTAB_XPERMS_IOCTLDRIVER
+    cdef int AVTAB_XPERMS_NLMSG
 
     cdef struct avtab_extended_perms:
         uint8_t specified
@@ -437,6 +438,7 @@ cdef extern from "<sepol/policydb/policydb.h>":
     #
     cdef int AVRULE_XPERMS_IOCTLFUNCTION
     cdef int AVRULE_XPERMS_IOCTLDRIVER
+    cdef int AVRULE_XPERMS_NLMSG
     cdef int EXTENDED_PERMS_LEN
 
     cdef struct av_extended_perms:

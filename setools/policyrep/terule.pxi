@@ -300,9 +300,10 @@ cdef class AVRuleXperm(BaseTERule):
         #
         for curr in range(len):
             if sepol.xperm_test(curr, xperms.perms):
-                if xperms.specified & sepol.AVTAB_XPERMS_IOCTLFUNCTION:
+                if (xperms.specified == sepol.AVTAB_XPERMS_IOCTLFUNCTION \
+                    or xperms.specified == sepol.AVTAB_XPERMS_NLMSG):
                     perms.add(xperms.driver << 8 | curr)
-                elif xperms.specified & sepol.AVTAB_XPERMS_IOCTLDRIVER:
+                elif xperms.specified == sepol.AVTAB_XPERMS_IOCTLDRIVER:
                     base_value = curr << 8
                     perms.update(range(base_value, base_value + 0x100))
                 else:
@@ -317,6 +318,8 @@ cdef class AVRuleXperm(BaseTERule):
         if datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLFUNCTION \
             or datum.xperms.specified == sepol.AVTAB_XPERMS_IOCTLDRIVER:
             xperm_type = intern("ioctl")
+        elif datum.xperms.specified == sepol.AVTAB_XPERMS_NLMSG:
+            xperm_type = intern("nlmsg")
         else:
             raise LowLevelPolicyError(f"Unknown extended permission: {datum.xperms.specified}")
 
