@@ -80,11 +80,11 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
     boolean = CriteriaSetDescriptor[policyrep.Boolean]("boolean_regex", "lookup_boolean")
     boolean_regex: bool = False
     boolean_equal: bool = False
-    _xperms: policyrep.IoctlSet | None = None
+    _xperms: policyrep.XpermSet | None = None
     xperms_equal: bool = False
 
     @property
-    def xperms(self) -> policyrep.IoctlSet | None:
+    def xperms(self) -> policyrep.XpermSet | None:
         return self._xperms
 
     @xperms.setter
@@ -104,7 +104,7 @@ class TERuleQuery(mixins.MatchObjClass, mixins.MatchPermission, query.PolicyQuer
 
                 pending_xperms.update(i for i in range(low, high + 1))
 
-            self._xperms = policyrep.IoctlSet(pending_xperms)
+            self._xperms = policyrep.XpermSet(pending_xperms)
         else:
             self._xperms = None
 

@@ -213,11 +213,11 @@ cdef class AVRule(BaseTERule):
         return self.rule_string
 
 
-cdef class IoctlSet(frozenset):
+cdef class XpermSet(frozenset):
 
     """
     A set with overridden string functions which compresses
-    the output into ioctl ranges instead of individual elements.
+    the output into ioctl/nlmsg ranges instead of individual elements.
     """
 
     def __format__(self, spec):
@@ -249,7 +249,7 @@ cdef class IoctlSet(frozenset):
         elif spec == ",":
             return ", ".join(shortlist)
         else:
-            return super(IoctlSet, self).__format__(spec)
+            return super().__format__(spec)
 
     def __str__(self):
         return f"{self}"
@@ -267,12 +267,20 @@ cdef class IoctlSet(frozenset):
             sorted(self), key=lambda k, c=itertools.count(): k - next(c)))
 
 
+cdef class IoctlSet(XpermSet):
+
+    def __init__(self, *args, **kwargs):
+        log = logging.getLogger(__name__)
+        log.warning("IoctlSet is deprecated, use XpermSet instead.")
+        super().__init__(*args, **kwargs)
+
+
 cdef class AVRuleXperm(BaseTERule):
 
     """An extended permission access vector type enforcement rule."""
 
     cdef:
-        readonly IoctlSet perms
+        readonly XpermSet perms
         readonly str xperm_type
 
     @staticmethod
@@ -322,7 +330,7 @@ cdef class AVRuleXperm(BaseTERule):
         r.source = type_or_attr_factory(policy, policy.type_value_to_datum(key.source_type - 1))
         r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
-        r.perms = IoctlSet(perms)
+        r.perms = XpermSet(perms)
         r.extended = True
         r.xperm_type = xperm_type
         r._conditional = conditional

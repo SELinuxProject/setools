@@ -301,7 +301,7 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 1
         util.validate_rule(r[0], TRT.allowxperm, "test1a", "test1t", tclass="infoflow",
-                           perms=setools.IoctlSet(range(0xebe0, 0xebff + 1)), xperm="ioctl")
+                           perms=setools.XpermSet(range(0xebe0, 0xebff + 1)), xperm="ioctl")
 
     def test_source_indirect(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with exact, indirect, source match."""
@@ -311,7 +311,7 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 1
         util.validate_rule(r[0], TRT.allowxperm, "test2a", "test2t", tclass="infoflow",
-                           perms=setools.IoctlSet([0x5411, 0x5451]), xperm="ioctl")
+                           perms=setools.XpermSet([0x5411, 0x5451]), xperm="ioctl")
 
     def test_source_direct_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with regex, direct, source match."""
@@ -321,7 +321,7 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 1
         util.validate_rule(r[0], TRT.allowxperm, "test3aS", "test3t", tclass="infoflow",
-                           perms=setools.IoctlSet([0x1111]), xperm="ioctl")
+                           perms=setools.XpermSet([0x1111]), xperm="ioctl")
 
     def test_source_indirect_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with regex, indirect, source match."""
@@ -331,9 +331,9 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 2
         util.validate_rule(r[0], TRT.allowxperm, "test4a1", "test4a1", tclass="infoflow",
-                           perms=setools.IoctlSet([0x9999]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9999]), xperm="ioctl")
         util.validate_rule(r[1], TRT.allowxperm, "test4a2", "test4a2", tclass="infoflow",
-                           perms=setools.IoctlSet([0x1111]), xperm="ioctl")
+                           perms=setools.XpermSet([0x1111]), xperm="ioctl")
 
     def test_target_direct(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with exact, direct, target match."""
@@ -343,7 +343,7 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 1
         util.validate_rule(r[0], TRT.allowxperm, "test5s", "test5a", tclass="infoflow",
-                           perms=setools.IoctlSet([0x9999]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9999]), xperm="ioctl")
 
     def test_target_indirect(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with exact, indirect, target match."""
@@ -353,9 +353,9 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 2
         util.validate_rule(r[0], TRT.allowxperm, "test6s", "test6a", tclass="infoflow",
-                           perms=setools.IoctlSet([0x9999]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9999]), xperm="ioctl")
         util.validate_rule(r[1], TRT.allowxperm, "test6s", "test6t", tclass="infoflow",
-                           perms=setools.IoctlSet([0x1111]), xperm="ioctl")
+                           perms=setools.XpermSet([0x1111]), xperm="ioctl")
 
     def test_target_direct_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with regex, direct, target match."""
@@ -365,7 +365,7 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 1
         util.validate_rule(r[0], TRT.allowxperm, "test7s", "test7aPASS", tclass="infoflow",
-                           perms=setools.IoctlSet([0x1111]), xperm="ioctl")
+                           perms=setools.XpermSet([0x1111]), xperm="ioctl")
 
     def test_target_indirect_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with regex, indirect, target match."""
@@ -375,9 +375,9 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 2
         util.validate_rule(r[0], TRT.allowxperm, "test8a1", "test8a1", tclass="infoflow",
-                           perms=setools.IoctlSet([0x9999]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9999]), xperm="ioctl")
         util.validate_rule(r[1], TRT.allowxperm, "test8a2", "test8a2", tclass="infoflow",
-                           perms=setools.IoctlSet([0x1111]), xperm="ioctl")
+                           perms=setools.XpermSet([0x1111]), xperm="ioctl")
 
     def test_class_list(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with object class list match."""
@@ -387,9 +387,9 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 2
         util.validate_rule(r[0], TRT.allowxperm, "test10", "test10", tclass="infoflow3",
-                           perms=setools.IoctlSet([0]), xperm="ioctl")
+                           perms=setools.XpermSet([0]), xperm="ioctl")
         util.validate_rule(r[1], TRT.allowxperm, "test10", "test10", tclass="infoflow4",
-                           perms=setools.IoctlSet([0x9999]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9999]), xperm="ioctl")
 
     def test_class_regex(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with object class regex match."""
@@ -398,9 +398,9 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 2
         util.validate_rule(r[0], TRT.allowxperm, "test11", "test11", tclass="infoflow5",
-                           perms=setools.IoctlSet([0x1111]), xperm="ioctl")
+                           perms=setools.XpermSet([0x1111]), xperm="ioctl")
         util.validate_rule(r[1], TRT.allowxperm, "test11", "test11", tclass="infoflow6",
-                           perms=setools.IoctlSet([0x5555]), xperm="ioctl")
+                           perms=setools.XpermSet([0x5555]), xperm="ioctl")
 
     def test_ruletype(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query with rule type match."""
@@ -409,9 +409,9 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 2
         util.validate_rule(r[0], TRT.auditallowxperm, "test14", "test14", tclass="infoflow7",
-                           perms=setools.IoctlSet([0x1234]), xperm="ioctl")
+                           perms=setools.XpermSet([0x1234]), xperm="ioctl")
         util.validate_rule(r[1], TRT.dontauditxperm, "test14", "test14", tclass="infoflow7",
-                           perms=setools.IoctlSet([0x4321]), xperm="ioctl")
+                           perms=setools.XpermSet([0x4321]), xperm="ioctl")
 
     def test_std_perm_any(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query match by standard permission."""
@@ -425,7 +425,7 @@ class TERuleQueryXperm:
         # util.validate_rule(r[0], TRT.neverallow, "test100", "system", "infoflow2",
         #                   set(["ioctl", "hi_w"]))
         # util.validate_rule(r[1], TRT.neverallowxperm, "test100", "test100", "infoflow2",
-        #                   setools.IoctlSet([0x1234]), xperm="ioctl")
+        #                   setools.XpermSet([0x1234]), xperm="ioctl")
 
     def test_std_perm_equal(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query match by standard permission, equal perm set."""
@@ -446,13 +446,13 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 4
         util.validate_rule(r[0], TRT.allowxperm, "test101a", "test101a", tclass="infoflow7",
-                           perms=setools.IoctlSet([0x9011]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9011]), xperm="ioctl")
         util.validate_rule(r[1], TRT.allowxperm, "test101b", "test101b", tclass="infoflow7",
-                           perms=setools.IoctlSet([0x9011, 0x9012]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9011, 0x9012]), xperm="ioctl")
         util.validate_rule(r[2], TRT.allowxperm, "test101c", "test101c", tclass="infoflow7",
-                           perms=setools.IoctlSet([0x9011, 0x9012, 0x9013]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9011, 0x9012, 0x9013]), xperm="ioctl")
         util.validate_rule(r[3], TRT.allowxperm, "test101d", "test101d", tclass="infoflow7",
-                           perms=setools.IoctlSet([0x9011, 0x9012, 0x9013, 0x9014]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9011, 0x9012, 0x9013, 0x9014]), xperm="ioctl")
 
     def test_xperm_equal(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Xperm rule query match equal perm set."""
@@ -461,4 +461,5 @@ class TERuleQueryXperm:
         r = sorted(q.results())
         assert len(r) == 1
         util.validate_rule(r[0], TRT.allowxperm, "test101c", "test101c", tclass="infoflow7",
-                           perms=setools.IoctlSet([0x9011, 0x9012, 0x9013]), xperm="ioctl")
+                           perms=setools.XpermSet([0x9011, 0x9012, 0x9013]), xperm="ioctl")
+
