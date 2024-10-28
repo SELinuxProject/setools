@@ -225,6 +225,7 @@ def compiled_policy(request: pytest.FixtureRequest) -> Iterable[setools.SELinuxP
     args = marker.args if marker else ()
     kwargs = marker.kwargs if marker else {}
 
+    assert len(args) == 1
     source_file = args[0]
 
     with tempfile.NamedTemporaryFile("w") as fd:
@@ -240,6 +241,7 @@ def policy_pair(request: pytest.FixtureRequest) -> \
     args = marker.args if marker else ()
     kwargs = marker.kwargs if marker else {}
 
+    assert len(args) == 2
     source_file_left = args[0]
     source_file_right = args[1]
 
