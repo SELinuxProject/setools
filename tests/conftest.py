@@ -225,7 +225,8 @@ def compiled_policy(request: pytest.FixtureRequest) -> Iterable[setools.SELinuxP
     args = marker.args if marker else ()
     kwargs = marker.kwargs if marker else {}
 
-    source_file = args[0]
+    assert len(args) == 1
+    source_file = args[0]  # type: ignore
 
     with tempfile.NamedTemporaryFile("w") as fd:
         yield _do_compile(source_file, fd.name, mls=kwargs.get("mls", True),
@@ -240,8 +241,9 @@ def policy_pair(request: pytest.FixtureRequest) -> \
     args = marker.args if marker else ()
     kwargs = marker.kwargs if marker else {}
 
-    source_file_left = args[0]
-    source_file_right = args[1]
+    assert len(args) == 2
+    source_file_left = args[0]  # type: ignore
+    source_file_right = args[1]  # type: ignore
 
     with tempfile.NamedTemporaryFile("w") as fd_left:
         with tempfile.NamedTemporaryFile("w") as fd_right:
