@@ -107,11 +107,11 @@ cdef class Type(BaseType):
 
         stmt = f"type {self.name}"
         if count > 1:
-            stmt += f" alias {{ {' '.join(self._aliases)} }}"
+            stmt += f" alias {{ {' '.join(sorted(self._aliases))} }}"
         elif count == 1:
             stmt += f" alias {self._aliases[0]}"
-        for attr in self._attrs:
-            stmt += f", {attr}"
+        if self._attrs:
+            stmt += f", {', '.join(a.name for a in sorted(self._attrs))}"
         stmt += ";"
         return stmt
 
