@@ -115,7 +115,7 @@ class TestSELinuxPolicy:
 
     def test_permission_count(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """SELinuxPolicy: permission count"""
-        assert compiled_policy.permission_count == 29
+        assert compiled_policy.permission_count == 30
 
     def test_permissive_types_count(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """SELinuxPolicy: permissive types count"""

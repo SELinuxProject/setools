@@ -1581,12 +1581,12 @@ class TestPolicyDifference:
 
         # added rule with new type
         util.validate_rule(rules[0], TRT.allowxperm, "added_type", "added_type",
-                           tclass="infoflow7", perms=setools.IoctlSet([0x0009]), xperm="ioctl")
+                           tclass="infoflow7", perms=setools.XpermSet([0x0009]), xperm="ioctl")
 
         # added rule with existing types
         util.validate_rule(rules[1], TRT.allowxperm, "ax_added_rule_source",
                            "ax_added_rule_target", tclass="infoflow",
-                           perms=setools.IoctlSet([0x0002]), xperm="ioctl")
+                           perms=setools.XpermSet([0x0002]), xperm="ioctl")
 
     def test_removed_allowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed allowxperm rules."""
@@ -1596,11 +1596,11 @@ class TestPolicyDifference:
         # removed rule with existing types
         util.validate_rule(rules[0], TRT.allowxperm, "ax_removed_rule_source",
                            "ax_removed_rule_target", tclass="infoflow",
-                           perms=setools.IoctlSet([0x0002]), xperm="ioctl")
+                           perms=setools.XpermSet([0x0002]), xperm="ioctl")
 
         # removed rule with new type
         util.validate_rule(rules[1], TRT.allowxperm, "removed_type", "removed_type",
-                           tclass="infoflow7", perms=setools.IoctlSet([0x0009]), xperm="ioctl")
+                           tclass="infoflow7", perms=setools.XpermSet([0x0009]), xperm="ioctl")
 
     def test_modified_allowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified allowxperm rules."""
@@ -1613,9 +1613,9 @@ class TestPolicyDifference:
         assert "ax_modified_rule_add_perms" == rule.source
         assert "ax_modified_rule_add_perms" == rule.target
         assert "infoflow" == rule.tclass
-        assert setools.IoctlSet([0x000f]) == added_perms
+        assert setools.XpermSet([0x000f]) == added_perms
         assert not removed_perms
-        assert setools.IoctlSet([0x0004]) == matched_perms
+        assert setools.XpermSet([0x0004]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
@@ -1623,9 +1623,9 @@ class TestPolicyDifference:
         assert "ax_modified_rule_add_remove_perms" == rule.source
         assert "ax_modified_rule_add_remove_perms" == rule.target
         assert "infoflow2" == rule.tclass
-        assert setools.IoctlSet([0x0006]) == added_perms
-        assert setools.IoctlSet([0x0007]) == removed_perms
-        assert setools.IoctlSet([0x0008]) == matched_perms
+        assert setools.XpermSet([0x0006]) == added_perms
+        assert setools.XpermSet([0x0007]) == removed_perms
+        assert setools.XpermSet([0x0008]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
@@ -1634,8 +1634,8 @@ class TestPolicyDifference:
         assert "ax_modified_rule_remove_perms" == rule.target
         assert "infoflow" == rule.tclass
         assert not added_perms
-        assert setools.IoctlSet([0x0006]) == removed_perms
-        assert setools.IoctlSet([0x0005]) == matched_perms
+        assert setools.XpermSet([0x0006]) == removed_perms
+        assert setools.XpermSet([0x0005]) == matched_perms
 
     #
     # Auditallowxperm rules
@@ -1648,11 +1648,11 @@ class TestPolicyDifference:
         # added rule with existing types
         util.validate_rule(rules[0], TRT.auditallowxperm, "aax_added_rule_source",
                            "aax_added_rule_target", tclass="infoflow",
-                           perms=setools.IoctlSet([0x0002]), xperm="ioctl")
+                           perms=setools.XpermSet([0x0002]), xperm="ioctl")
 
         # added rule with new type
         util.validate_rule(rules[1], TRT.auditallowxperm, "added_type", "added_type",
-                           tclass="infoflow7", perms=setools.IoctlSet([0x0009]), xperm="ioctl")
+                           tclass="infoflow7", perms=setools.XpermSet([0x0009]), xperm="ioctl")
 
     def test_removed_auditallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed auditallowxperm rules."""
@@ -1662,11 +1662,11 @@ class TestPolicyDifference:
         # removed rule with existing types
         util.validate_rule(rules[0], TRT.auditallowxperm, "aax_removed_rule_source",
                            "aax_removed_rule_target", tclass="infoflow",
-                           perms=setools.IoctlSet([0x0002]), xperm="ioctl")
+                           perms=setools.XpermSet([0x0002]), xperm="ioctl")
 
         # removed rule with new type
         util.validate_rule(rules[1], TRT.auditallowxperm, "removed_type", "removed_type",
-                           tclass="infoflow7", perms=setools.IoctlSet([0x0009]), xperm="ioctl")
+                           tclass="infoflow7", perms=setools.XpermSet([0x0009]), xperm="ioctl")
 
     def test_modified_auditallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified auditallowxperm rules."""
@@ -1679,9 +1679,9 @@ class TestPolicyDifference:
         assert "aax_modified_rule_add_perms" == rule.source
         assert "aax_modified_rule_add_perms" == rule.target
         assert "infoflow" == rule.tclass
-        assert setools.IoctlSet([0x000f]) == added_perms
+        assert setools.XpermSet([0x000f]) == added_perms
         assert not removed_perms
-        assert setools.IoctlSet([0x0004]) == matched_perms
+        assert setools.XpermSet([0x0004]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
@@ -1689,9 +1689,9 @@ class TestPolicyDifference:
         assert "aax_modified_rule_add_remove_perms" == rule.source
         assert "aax_modified_rule_add_remove_perms" == rule.target
         assert "infoflow2" == rule.tclass
-        assert setools.IoctlSet([0x0006]) == added_perms
-        assert setools.IoctlSet([0x0007]) == removed_perms
-        assert setools.IoctlSet([0x0008]) == matched_perms
+        assert setools.XpermSet([0x0006]) == added_perms
+        assert setools.XpermSet([0x0007]) == removed_perms
+        assert setools.XpermSet([0x0008]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
@@ -1700,8 +1700,8 @@ class TestPolicyDifference:
         assert "aax_modified_rule_remove_perms" == rule.target
         assert "infoflow" == rule.tclass
         assert not added_perms
-        assert setools.IoctlSet([0x0006]) == removed_perms
-        assert setools.IoctlSet([0x0005]) == matched_perms
+        assert setools.XpermSet([0x0006]) == removed_perms
+        assert setools.XpermSet([0x0005]) == matched_perms
 
     #
     # Neverallowxperm rules
@@ -1715,11 +1715,11 @@ class TestPolicyDifference:
         #
         # # added rule with new type
         # util.validate_rule(rules[0], TRT.neverallowxperm, "added_type", "added_type",
-        #                    "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
+        #                    "infoflow7", setools.XpermSet([0x0009]), xperm="ioctl")
         #
         # # added rule with existing types
         # util.validate_rule(rules[1], TRT.neverallowxperm, "nax_added_rule_source",
-        #                    "nax_added_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+        #                    "nax_added_rule_target", "infoflow", setools.XpermSet([0x0002]),
         #                    xperm="ioctl")
 
     def test_removed_neverallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
@@ -1731,12 +1731,12 @@ class TestPolicyDifference:
         #
         # # removed rule with existing types
         # util.validate_rule(rules[0], TRT.neverallowxperm, "nax_removed_rule_source",
-        #                    "nax_removed_rule_target", "infoflow", setools.IoctlSet([0x0002]),
+        #                    "nax_removed_rule_target", "infoflow", setools.XpermSet([0x0002]),
         #                    xperm="ioctl")
         #
         # # removed rule with new type
         # util.validate_rule(rules[1], TRT.neverallowxperm, "removed_type", "removed_type",
-        #                    "infoflow7", setools.IoctlSet([0x0009]), xperm="ioctl")
+        #                    "infoflow7", setools.XpermSet([0x0009]), xperm="ioctl")
 
     def test_modified_neverallowxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified neverallowxperm rules."""
@@ -1751,9 +1751,9 @@ class TestPolicyDifference:
         # assert "nax_modified_rule_add_perms" == rule.source
         # assert "nax_modified_rule_add_perms" == rule.target
         # assert "infoflow" == rule.tclass
-        # assert setools.IoctlSet([0x000f]) == added_perms
+        # assert setools.XpermSet([0x000f]) == added_perms
         # assert not removed_perms
-        # assert setools.IoctlSet([0x0004]) == matched_perms
+        # assert setools.XpermSet([0x0004]) == matched_perms
         #
         # # add and remove permissions
         # rule, added_perms, removed_perms, matched_perms = l[1]
@@ -1761,9 +1761,9 @@ class TestPolicyDifference:
         # assert "nax_modified_rule_add_remove_perms" == rule.source
         # assert "nax_modified_rule_add_remove_perms" == rule.target
         # assert "infoflow2" == rule.tclass
-        # assert setools.IoctlSet([0x0006]) == added_perms
-        # assert setools.IoctlSet([0x0007]) == removed_perms
-        # assert setools.IoctlSet([0x0008]) == matched_perms
+        # assert setools.XpermSet([0x0006]) == added_perms
+        # assert setools.XpermSet([0x0007]) == removed_perms
+        # assert setools.XpermSet([0x0008]) == matched_perms
         #
         # # remove permissions
         # rule, added_perms, removed_perms, matched_perms = l[2]
@@ -1772,8 +1772,8 @@ class TestPolicyDifference:
         # assert "nax_modified_rule_remove_perms" == rule.target
         # assert "infoflow" == rule.tclass
         # assert not added_perms
-        # assert setools.IoctlSet([0x0006]) == removed_perms
-        # assert setools.IoctlSet([0x0005]) == matched_perms
+        # assert setools.XpermSet([0x0006]) == removed_perms
+        # assert setools.XpermSet([0x0005]) == matched_perms
 
     #
     # Dontauditxperm rules
@@ -1785,12 +1785,12 @@ class TestPolicyDifference:
 
         # added rule with new type
         util.validate_rule(rules[0], TRT.dontauditxperm, "added_type", "added_type",
-                           tclass="infoflow7", perms=setools.IoctlSet([0x0009]), xperm="ioctl")
+                           tclass="infoflow7", perms=setools.XpermSet([0x0009]), xperm="ioctl")
 
         # added rule with existing types
         util.validate_rule(rules[1], TRT.dontauditxperm, "dax_added_rule_source",
                            "dax_added_rule_target", tclass="infoflow",
-                           perms=setools.IoctlSet([0x0002]), xperm="ioctl")
+                           perms=setools.XpermSet([0x0002]), xperm="ioctl")
 
     def test_removed_dontauditxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: removed dontauditxperm rules."""
@@ -1800,11 +1800,11 @@ class TestPolicyDifference:
         # removed rule with existing types
         util.validate_rule(rules[0], TRT.dontauditxperm, "dax_removed_rule_source",
                            "dax_removed_rule_target", tclass="infoflow",
-                           perms=setools.IoctlSet([0x0002]), xperm="ioctl")
+                           perms=setools.XpermSet([0x0002]), xperm="ioctl")
 
         # removed rule with new type
         util.validate_rule(rules[1], TRT.dontauditxperm, "removed_type", "removed_type",
-                           tclass="infoflow7", perms=setools.IoctlSet([0x0009]), xperm="ioctl")
+                           tclass="infoflow7", perms=setools.XpermSet([0x0009]), xperm="ioctl")
 
     def test_modified_dontauditxperm_rules(self, analysis: setools.PolicyDifference) -> None:
         """Diff: modified dontauditxperm rules."""
@@ -1817,9 +1817,9 @@ class TestPolicyDifference:
         assert "dax_modified_rule_add_perms" == rule.source
         assert "dax_modified_rule_add_perms" == rule.target
         assert "infoflow" == rule.tclass
-        assert setools.IoctlSet([0x000f]) == added_perms
+        assert setools.XpermSet([0x000f]) == added_perms
         assert not removed_perms
-        assert setools.IoctlSet([0x0004]) == matched_perms
+        assert setools.XpermSet([0x0004]) == matched_perms
 
         # add and remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[1])
@@ -1827,9 +1827,9 @@ class TestPolicyDifference:
         assert "dax_modified_rule_add_remove_perms" == rule.source
         assert "dax_modified_rule_add_remove_perms" == rule.target
         assert "infoflow2" == rule.tclass
-        assert setools.IoctlSet([0x0006]) == added_perms
-        assert setools.IoctlSet([0x0007]) == removed_perms
-        assert setools.IoctlSet([0x0008]) == matched_perms
+        assert setools.XpermSet([0x0006]) == added_perms
+        assert setools.XpermSet([0x0007]) == removed_perms
+        assert setools.XpermSet([0x0008]) == matched_perms
 
         # remove permissions
         rule, added_perms, removed_perms, matched_perms = astuple(lst[2])
@@ -1838,8 +1838,8 @@ class TestPolicyDifference:
         assert "dax_modified_rule_remove_perms" == rule.target
         assert "infoflow" == rule.tclass
         assert not added_perms
-        assert setools.IoctlSet([0x0006]) == removed_perms
-        assert setools.IoctlSet([0x0005]) == matched_perms
+        assert setools.XpermSet([0x0006]) == removed_perms
+        assert setools.XpermSet([0x0005]) == matched_perms
 
     #
     # Ibendportcon statements

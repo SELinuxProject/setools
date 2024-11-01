@@ -25,7 +25,7 @@ class RuleTestCase:
     type_: type  # the rule's policyrep class
     tclass: str | None = None
     xperm: str | None = None
-    perms: set[str] | setools.IoctlSet | None = None
+    perms: set[str] | setools.XpermSet | None = None
     default: str | None = None
     filename: str | None = None
     conditional: str | None = None
@@ -57,11 +57,11 @@ rule_test_data = [
                  default="system", type_=setools.TERule, conditional="a_bool",
                  statement="type_change type31c type31b:infoflow2 system; [ a_bool ]:False"),
     RuleTestCase(setools.TERuletype.allowxperm, "type30", "type31a", tclass="infoflow",
-                 xperm="ioctl", perms=setools.IoctlSet((0x00ff,)), type_=setools.AVRuleXperm,
+                 xperm="ioctl", perms=setools.XpermSet((0x00ff,)), type_=setools.AVRuleXperm,
                  statement="allowxperm type30 type31a:infoflow ioctl 0x00ff;"),
     RuleTestCase(setools.TERuletype.auditallowxperm, "type31a", "type31b", tclass="infoflow",
-                 xperm="ioctl", perms=setools.IoctlSet((1, 2, 3)), type_=setools.AVRuleXperm,
-                 statement="auditallowxperm type31a type31b:infoflow ioctl 0x0001-0x0003;")]
+                 xperm="nlmsg", perms=setools.XpermSet((1, 2, 3)), type_=setools.AVRuleXperm,
+                 statement="auditallowxperm type31a type31b:infoflow nlmsg 0x0001-0x0003;")]
 
 
 @pytest.mark.obj_args("tests/library/policyrep/rules.conf")
@@ -213,5 +213,5 @@ class TestAVRuleXpermIssue74:
         # expect 2 rules:
         # allowxperm init_type_t init_type_t : unix_dgram_socket ioctl { 0x8910 };
         # allowxperm init_type_t init_type_t : unix_dgram_socket ioctl { 0x0-0xff };
-        assert setools.IoctlSet(range(0x100)) == rules[0].perms, f"{rules[0].perms}"
-        assert setools.IoctlSet([0x8910]) == rules[1].perms, f"{rules[1].perms}"
+        assert setools.XpermSet(range(0x100)) == rules[0].perms, f"{rules[0].perms}"
+        assert setools.XpermSet([0x8910]) == rules[1].perms, f"{rules[1].perms}"

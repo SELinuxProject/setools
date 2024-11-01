@@ -41,9 +41,9 @@ class ModifiedAVRuleXperm(DifferenceResult):
     """Difference details for a modified access vector rule."""
 
     rule: policyrep.AVRuleXperm
-    added_perms: policyrep.IoctlSet
-    removed_perms: policyrep.IoctlSet
-    matched_perms: policyrep.IoctlSet
+    added_perms: policyrep.XpermSet
+    removed_perms: policyrep.XpermSet
+    matched_perms: policyrep.XpermSet
 
 
 @dataclass(frozen=True, order=True)
@@ -365,9 +365,9 @@ def avx_diff_template(ruletype: policyrep.TERuletype) -> Callable[["TERulesDiffe
             if added_perms or removed_perms:
                 modified.append(
                     ModifiedAVRuleXperm(left_rule.origin,
-                                        policyrep.IoctlSet(added_perms),
-                                        policyrep.IoctlSet(removed_perms),
-                                        policyrep.IoctlSet(p[0] for p in matched_perms)))
+                                        policyrep.XpermSet(added_perms),
+                                        policyrep.XpermSet(removed_perms),
+                                        policyrep.XpermSet(p[0] for p in matched_perms)))
 
         setattr(self, f"added_{ruletype}s", set(a.origin for a in added))
         setattr(self, f"removed_{ruletype}s", set(r.origin for r in removed))

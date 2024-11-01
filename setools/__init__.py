@@ -26,7 +26,7 @@ from .policyrep import AnyConstraint, AnyDefault, AnyRBACRule, AnyTERule, AVRule
     IoctlSet, Iomemcon, IomemconRange, Ioportcon, IoportconRange, Level, LevelDecl, MLSRule, \
     Netifcon, Nodecon, ObjClass, Pcidevicecon, Pirqcon, PolicyCapability, Portcon, PortconRange, \
     Range, Role, RoleAllow, RoleTransition, Sensitivity, TERule, TruthTableRow, Type, \
-    TypeAttribute, User, Validatetrans
+    TypeAttribute, User, Validatetrans, XpermSet
 
 # Exceptions
 from . import exception
