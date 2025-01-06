@@ -44,6 +44,7 @@ from .commonquery import CommonQuery
 from .objclassquery import ObjClassQuery
 from .polcapquery import PolCapQuery
 from .rolequery import RoleQuery
+from .roletypesquery import RoleTypesQuery
 from .sensitivityquery import SensitivityQuery
 from .typequery import TypeQuery
 from .typeattrquery import TypeAttributeQuery

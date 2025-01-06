@@ -76,6 +76,8 @@ queries.add_argument("--polcap", help="Print policy capabilities.", dest="polcap
                      nargs='?', const=True, metavar="NAME")
 queries.add_argument("--portcon", help="Print portcon statements.", dest="portconquery",
                      nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
+queries.add_argument("--role_types", help="Print all roles associated with the given type.",
+                     dest="roletypesquery", nargs=1, metavar="TYPE")
 queries.add_argument("--sensitivity", help="Print MLS sensitivities.", dest="mlssensquery",
                      nargs='?', const=True, metavar="SENS")
 queries.add_argument("--typebounds", help="Print typebounds statements.", dest="typeboundsquery",
@@ -262,6 +264,12 @@ try:
             rq.name = args.rolequery
 
         components.append(("Roles", rq, lambda x: x.statement()))
+
+    if args.roletypesquery:
+        q = setools.RoleTypesQuery(p)
+        q.name = args.roletypesquery[0]
+
+        components.append(("Roles", q, lambda x: x.statement()))
 
     if args.mlssensquery or args.all:
         msq = setools.SensitivityQuery(p, alias_deref=True)
