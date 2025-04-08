@@ -97,7 +97,7 @@ setup(name='setools',
       # setup also requires libsepol and libselinux
       # C libraries and headers to compile.
       setup_requires=['setuptools', 'Cython>=0.29.14'],
-      install_requires=['setuptools'],
+      install_requires=[],
       extras_require={
           "analysis": ["networkx>=2.6", "pygraphviz"],
           "test": "tox"
