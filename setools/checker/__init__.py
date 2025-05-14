@@ -7,5 +7,6 @@ from . import assertrbac
 from . import assertte
 from . import emptyattr
 from . import roexec
+from . import rokmod
 
 from .checker import PolicyChecker
