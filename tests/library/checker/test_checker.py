@@ -55,7 +55,7 @@ class TestPolicyChecker:
             newcheck.run.return_value = []
             checker.checks.append(newcheck)
 
-            assert 4 == len(checker.checks)
+            assert 5 == len(checker.checks)
             result = checker.run(output=fd)
             assert 0 == result
             newcheck.run.assert_not_called()
@@ -74,7 +74,7 @@ class TestPolicyChecker:
             newcheck.run.return_value = list(range(13))
             checker.checks.append(newcheck)
 
-            assert 4 == len(checker.checks)
+            assert 5 == len(checker.checks)
 
             result = checker.run(output=fd)
             newcheck.run.assert_called()

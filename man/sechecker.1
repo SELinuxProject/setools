@@ -176,6 +176,24 @@ A space-separated list of types and type attributes.  Rules with these
 as the source will be ignored if they allow file write or append permissions
 on types determined executable.  This is optional.
 
+.SH "READ-ONLY KERNEL MODULES ASSERTION"
+This checks that all file types that are for kernel modules are read-only.
+The check_type is \fBro_kmods\fR.
+
+.PP
+Options:
+.IP "exempt_file = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  These
+will not be considered kernel modules.  This is optional.
+.IP "exempt_load_domain = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Rules with these
+as the source will be ignored if they allow kernel module loading permission.
+This is optional.
+.IP "exempt_write_domain = <type or type attribute>[ ....]"
+A space-separated list of types and type attributes.  Rules with these
+as the source will be ignored if they allow file write or append permissions
+on types determined to be kernel modules.  This is optional.
+
 .SH "CONFIGURATION EXAMPLES"
 
 .PP
