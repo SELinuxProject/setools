@@ -39,7 +39,7 @@ classifiers = ["Development Status :: 5 - Production/Stable",
 
 requires-python=">=3.10"
 # also requires libsepol.so and libselinux.so.
-dependencies = ["setuptools"]
+dependencies = []
 
 optional-dependencies.analysis = ["networkx>=2.6",
                                   "pygraphviz"]
