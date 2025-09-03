@@ -68,11 +68,11 @@ class PortconQuery(mixins.MatchContext, query.PolicyQuery):
         return self._ports
 
     @ports.setter
-    def ports(self, value: tuple[int, int] | None) -> None:
-        if value:
-            self._ports = policyrep.PortconRange(*value)
+    def ports(self, value: policyrep.PortconRange | tuple[int, int] | None) -> None:
+        if isinstance(value, policyrep.PortconRange):
+            self._ports = value
         else:
-            self._ports = None
+            self._ports = policyrep.PortconRange(*value) if value else None
 
     @property
     def protocol(self) -> policyrep.PortconProtocol | None:
