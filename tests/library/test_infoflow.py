@@ -292,7 +292,7 @@ class TestInfoFlowAnalysis:
     def test_set_exclude_invalid_type(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: set invalid excluded type."""
         with pytest.raises(setools.exception.InvalidType):
-            analysis.exclude = ["node1", "invalid_type"]  # type: ignore[list-item]
+            analysis.exclude = ["node1", "invalid_type"]
 
     def test_set_small_min_weight(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: set too small weight."""
@@ -332,7 +332,7 @@ class TestInfoFlowAnalysis:
 
     def test_all_paths_source_excluded(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: all paths with excluded source type."""
-        analysis.exclude = ["node1"]  # type: ignore[list-item]
+        analysis.exclude = ["node1"]
         analysis.min_weight = 1
         analysis.mode = setools.InfoFlowAnalysis.Mode.AllPaths
         analysis.source = "node1"
@@ -342,7 +342,7 @@ class TestInfoFlowAnalysis:
 
     def test_all_paths_target_excluded(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: all paths with excluded target type."""
-        analysis.exclude = ["node2"]  # type: ignore[list-item]
+        analysis.exclude = ["node2"]
         analysis.min_weight = 1
         analysis.mode = setools.InfoFlowAnalysis.Mode.AllPaths
         analysis.source = "node1"
@@ -372,7 +372,7 @@ class TestInfoFlowAnalysis:
 
     def test_all_shortest_paths_source_excluded(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: all shortest paths with excluded source type."""
-        analysis.exclude = ["node1"]  # type: ignore[list-item]
+        analysis.exclude = ["node1"]
         analysis.min_weight = 1
         analysis.mode = setools.InfoFlowAnalysis.Mode.ShortestPaths
         analysis.source = "node1"
@@ -382,7 +382,7 @@ class TestInfoFlowAnalysis:
 
     def test_all_shortest_paths_target_excluded(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: all shortest paths with excluded target type."""
-        analysis.exclude = ["node2"]  # type: ignore[list-item]
+        analysis.exclude = ["node2"]
         analysis.min_weight = 1
         analysis.mode = setools.InfoFlowAnalysis.Mode.ShortestPaths
         analysis.source = "node1"
@@ -414,7 +414,7 @@ class TestInfoFlowAnalysis:
 
     def test_infoflows_source_excluded(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: infoflows with excluded source type."""
-        analysis.exclude = ["node1"]  # type: ignore[list-item]
+        analysis.exclude = ["node1"]
         analysis.min_weight = 1
         analysis.mode = setools.InfoFlowAnalysis.Mode.FlowsOut
         analysis.source = "node1"
@@ -423,7 +423,7 @@ class TestInfoFlowAnalysis:
 
     def test_infoflows_source_disconnected(self, analysis: setools.InfoFlowAnalysis) -> None:
         """Information flow analysis: infoflows with disconnected source type."""
-        analysis.exclude = ["disconnected2"]  # type: ignore[list-item]
+        analysis.exclude = ["disconnected2"]
         analysis.min_weight = 1
         analysis.mode = setools.InfoFlowAnalysis.Mode.FlowsOut
         analysis.source = "disconnected1"

@@ -401,7 +401,7 @@ class TestDomainTransitionAnalysis:
         # removed after removing invalid domain transitions
 
         analysis.reverse = False
-        analysis.exclude = ["trans1"]  # type: ignore[list-item]
+        analysis.exclude = ["trans1"]
         analysis._build_subgraph()
 
         start = analysis.policy.lookup_type("start")
@@ -424,7 +424,7 @@ class TestDomainTransitionAnalysis:
         # removed after removing invalid domain transitions
 
         analysis.reverse = False
-        analysis.exclude = ["trans3_exec1"]  # type: ignore[list-item]
+        analysis.exclude = ["trans3_exec1"]
         analysis._build_subgraph()
 
         start = analysis.policy.lookup_type("start")
@@ -450,7 +450,7 @@ class TestDomainTransitionAnalysis:
         # removed after removing invalid domain transitions
 
         analysis.reverse = False
-        analysis.exclude = ["bothtrans200_exec"]  # type: ignore[list-item]
+        analysis.exclude = ["bothtrans200_exec"]
         analysis._build_subgraph()
 
         start = analysis.policy.lookup_type("start")
@@ -476,7 +476,7 @@ class TestDomainTransitionAnalysis:
         # removed after removing invalid domain transitions
 
         analysis.reverse = False
-        analysis.exclude = ["trans2_exec"]  # type: ignore[list-item]
+        analysis.exclude = ["trans2_exec"]
         analysis._build_subgraph()
 
         start = analysis.policy.lookup_type("start")
@@ -759,7 +759,7 @@ class TestDomainTransitionAnalysis:
         analysis.reverse = False
         analysis.exclude = []
         with pytest.raises(setools.exception.InvalidType):
-            analysis.exclude = ["trans1", "invalid_type"]  # type: ignore[list-item]
+            analysis.exclude = ["trans1", "invalid_type"]
 
     def test_all_paths_invalid_source(self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: all paths with invalid source type."""
@@ -788,7 +788,7 @@ class TestDomainTransitionAnalysis:
     def test_all_paths_source_excluded(self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: all paths with excluded source type."""
         analysis.reverse = False
-        analysis.exclude = ["trans1"]  # type: ignore[list-item]
+        analysis.exclude = ["trans1"]
         analysis.source = "trans1"
         analysis.target = "trans2"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.AllPaths
@@ -798,7 +798,7 @@ class TestDomainTransitionAnalysis:
     def test_all_paths_target_excluded(self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: all paths with excluded target type."""
         analysis.reverse = False
-        analysis.exclude = ["trans2"]  # type: ignore[list-item]
+        analysis.exclude = ["trans2"]
         analysis.source = "trans1"
         analysis.target = "trans2"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.AllPaths
@@ -820,7 +820,7 @@ class TestDomainTransitionAnalysis:
             self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: all paths with disconnected target type."""
         analysis.reverse = False
-        analysis.exclude = ["trans3"]  # type: ignore[list-item]
+        analysis.exclude = ["trans3"]
         analysis.source = "trans2"
         analysis.target = "trans5"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.AllPaths
@@ -831,7 +831,7 @@ class TestDomainTransitionAnalysis:
             self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: shortest path with disconnected target type."""
         analysis.reverse = False
-        analysis.exclude = ["trans3"]  # type: ignore[list-item]
+        analysis.exclude = ["trans3"]
         analysis.source = "trans2"
         analysis.target = "trans5"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.ShortestPaths
@@ -842,7 +842,7 @@ class TestDomainTransitionAnalysis:
             self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: all shortest paths with excluded source type."""
         analysis.reverse = False
-        analysis.exclude = ["trans1"]  # type: ignore[list-item]
+        analysis.exclude = ["trans1"]
         analysis.source = "trans1"
         analysis.target = "trans2"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.ShortestPaths
@@ -853,7 +853,7 @@ class TestDomainTransitionAnalysis:
             self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: all shortest paths with excluded target type."""
         analysis.reverse = False
-        analysis.exclude = ["trans2"]  # type: ignore[list-item]
+        analysis.exclude = ["trans2"]
         analysis.source = "trans1"
         analysis.target = "trans2"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.ShortestPaths
@@ -875,7 +875,7 @@ class TestDomainTransitionAnalysis:
             self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: all shortest paths with disconnected target type."""
         analysis.reverse = False
-        analysis.exclude = ["trans3"]  # type: ignore[list-item]
+        analysis.exclude = ["trans3"]
         analysis.source = "trans2"
         analysis.target = "trans5"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.ShortestPaths
@@ -885,7 +885,7 @@ class TestDomainTransitionAnalysis:
     def test_transitions_source_excluded(self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: transitions with excluded source type."""
         analysis.reverse = False
-        analysis.exclude = ["trans1"]  # type: ignore[list-item]
+        analysis.exclude = ["trans1"]
         analysis.mode = setools.DomainTransitionAnalysis.Mode.TransitionsOut
         analysis.source = "trans1"
         paths = list(analysis.results())
@@ -895,7 +895,7 @@ class TestDomainTransitionAnalysis:
             self, analysis: setools.DomainTransitionAnalysis) -> None:
         """DTA: transitions with disconnected source type."""
         analysis.reverse = False
-        analysis.exclude = ["trans3"]  # type: ignore[list-item]
+        analysis.exclude = ["trans3"]
         analysis.source = "trans5"
         analysis.mode = setools.DomainTransitionAnalysis.Mode.TransitionsOut
         paths = list(analysis.results())

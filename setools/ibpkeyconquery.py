@@ -63,11 +63,11 @@ class IbpkeyconQuery(mixins.MatchContext, query.PolicyQuery):
         return self._pkeys
 
     @pkeys.setter
-    def pkeys(self, value: tuple[int, int] | None) -> None:
-        if value:
-            self._pkeys = policyrep.IbpkeyconRange(*value)
+    def pkeys(self, value: policyrep.IbpkeyconRange | tuple[int, int] | None) -> None:
+        if isinstance(value, policyrep.IbpkeyconRange):
+            self._pkeys = value
         else:
-            self._pkeys = None
+            self._pkeys = policyrep.IbpkeyconRange(*value) if value else None
 
     @property
     def subnet_prefix(self) -> IPv6Address | None:

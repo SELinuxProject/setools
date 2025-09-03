@@ -175,8 +175,7 @@ try:
             terq.perms = args.perms.split(",")
 
         if args.xperms:
-            # https://github.com/python/mypy/issues/220
-            terq.xperms = setools.xperm_str_to_tuple_ranges(args.xperms)  # type: ignore
+            terq.xperms = setools.xperm_str_to_tuple_ranges(args.xperms)
 
         if args.boolean:
             if args.boolean_regex:
