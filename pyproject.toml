@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setools"
-version = "4.6.0.dev"
+version = "4.6.0"
 description="SELinux policy analysis tools."
 authors = [{name = "Chris PeBenito", email="pebenito@ieee.org"}]
 readme = {file = "README.md", content-type = "text/markdown"}
