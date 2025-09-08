@@ -1,3 +1,12 @@
+*setools-4.6.0 (09 Sep 2025)
+
+  * Add seinfo option to see roles allowed for a specified type.
+  * Add sechecker module for asserting kernel modules are read-only.
+  * Add support for the nlmsg extended permission.
+  * Significant code quality and unit testing improvements.
+  * Drop methods marked for deprecation.
+  * Refactor packaging to use pyproject.toml.
+
 *setools-4.5.1 (01 May 2024)
 
   * Correct annotations of NetworkX types to make it optional again.
