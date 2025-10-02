@@ -49,6 +49,16 @@ class MLSDisabled(PolicyrepException):
     pass
 
 
+class PlatformMismatch(ValueError, PolicyrepException):
+
+    """
+    Exception when the policy platform does not match the requested
+    platform.  For example a Xen policy is loaded, but a query
+    requiring SELinux is attempted.
+    """
+    pass
+
+
 #
 # Invalid component exceptions
 #
