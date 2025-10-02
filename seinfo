@@ -12,6 +12,7 @@ import logging
 import signal
 import ipaddress
 import warnings
+from pathlib import Path
 from typing import Callable, List, Tuple
 
 
@@ -101,6 +102,18 @@ xen.add_argument("--devicetreecon", help="Print all devicetreecon statements.",
 
 
 args = parser.parse_args()
+
+# Fix argument misparsing: when policy is None and a query option is a string,
+# check if the string is actually a policy file that is incorrectly consumed by the query option
+if not args.policy:
+    # Check all query options defined in the queries argument group
+    for action in queries._group_actions:
+        value = getattr(args, action.dest, None)
+        if isinstance(value, str) and Path(value).exists():
+            # This query argument consumed the policy path - fix it
+            args.policy = value
+            setattr(args, action.dest, True)
+            break
 
 if args.debug:
     logging.basicConfig(level=logging.DEBUG,
