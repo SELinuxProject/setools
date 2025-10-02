@@ -53,6 +53,8 @@ class IoportconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.xen
+
     _ports: policyrep.IoportconRange | None = None
     ports_subset: bool = False
     ports_overlap: bool = False

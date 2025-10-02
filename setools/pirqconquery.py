@@ -44,6 +44,8 @@ class PirqconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.xen
+
     _irq: int | None = None
 
     @property

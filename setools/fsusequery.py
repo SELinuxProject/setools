@@ -44,6 +44,8 @@ class FSUseQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     ruletype = CriteriaSetDescriptor[policyrep.FSUseRuletype](enum_class=policyrep.FSUseRuletype)
     fs = CriteriaDescriptor[str]("fs_regex")
     fs_regex: bool = False

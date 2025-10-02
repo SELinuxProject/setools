@@ -46,6 +46,8 @@ class GenfsconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     filetype: int | None = None
     fs = CriteriaDescriptor[str]("fs_regex")
     fs_regex: bool = False

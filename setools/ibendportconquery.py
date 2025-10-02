@@ -43,6 +43,8 @@ class IbendportconQuery(mixins.MatchContext, mixins.MatchName, query.PolicyQuery
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     _port: int | None = None
 
     @property

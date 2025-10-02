@@ -42,6 +42,8 @@ class InitialSIDQuery(mixins.MatchName, mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     def results(self) -> Iterable[policyrep.InitialSID]:
         """Generator which yields all matching initial SIDs."""
         self.log.info(f"Generating initial SID results from {self.policy}")

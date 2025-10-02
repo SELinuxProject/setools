@@ -164,6 +164,7 @@ def mock_policy(mock_type, mock_typeattr, mock_user, mock_role) -> setools.SELin
 
     policy = Mock(setools.SELinuxPolicy)
     policy.mls = False
+    policy.target_platform = setools.PolicyTarget.selinux
     policy.bools.return_value = (foo_bool, bar_bool)
     policy.categories.return_value = (foo_cat, bar_cat)
     policy.classes.return_value = (foo_class, bar_class)

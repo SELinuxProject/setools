@@ -44,6 +44,8 @@ class PcideviceconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.xen
+
     _device: int | None = None
 
     @property

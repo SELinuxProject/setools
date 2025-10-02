@@ -53,6 +53,8 @@ class IomemconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.xen
+
     _addr: policyrep.IomemconRange | None = None
     addr_subset: bool = False
     addr_overlap: bool = False
