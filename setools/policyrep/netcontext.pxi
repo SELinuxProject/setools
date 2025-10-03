@@ -17,16 +17,19 @@ class IbpkeyconRange:
 
     def __post_init__(self):
         if self.low < IbpkeyconRange.MIN or self.high < IbpkeyconRange.MIN:
-            raise ValueError(
-                f"Pkeys must be >= {IbpkeyconRange.MIN:#x}: {self.low:#x}-{self.high:#x}")
+            raise ValueError(f"Partition keys must be >= {IbpkeyconRange.MIN:0=#6x}: {self}")
 
         if self.low > IbpkeyconRange.MAX or self.high > IbpkeyconRange.MAX:
-            raise ValueError(
-                f"Pkeys must be <= {IbpkeyconRange.MAX:#x}: {self.low:#x}-{self.high:#x}")
+            raise ValueError(f"Partition keys must be <= {IbpkeyconRange.MAX:0=#6x}: {self}")
 
         if self.low > self.high:
-            raise ValueError(
-                f"The low pkey must be <= the high pkey: {self.low:#x}-{self.high:#x}")
+            raise ValueError(f"The low partition key must be <= the high partition key: {self}")
+
+    def __str__(self):
+        if self.low == self.high:
+            return f"{self.low:0=#6x}"
+        else:
+            return f"{self.low:0=#6x}-{self.high:0=#6x}"
 
 
 @dataclasses.dataclass(eq=True, order=True, frozen=True)
@@ -42,14 +45,19 @@ class PortconRange:
 
     def __post_init__(self):
         if self.low < PortconRange.MIN or self.high < PortconRange.MIN:
-            raise ValueError(f"Port numbers must be >= {PortconRange.MIN}: {self.low}-{self.high}")
+            raise ValueError(f"Port numbers must be >= {PortconRange.MIN}: {self}")
 
         if self.low > PortconRange.MAX or self.high > PortconRange.MAX:
-            raise ValueError(f"Port numbers must be <= {PortconRange.MAX}: {self.low}-{self.high}")
+            raise ValueError(f"Port numbers must be <= {PortconRange.MAX}: {self}")
 
         if self.low > self.high:
-            raise ValueError(
-                f"The low port must be <= the high port: {self.low}-{self.high}")
+            raise ValueError(f"The low port must be <= the high port: {self}")
+
+    def __str__(self):
+        if self.low == self.high:
+            return str(self.low)
+        else:
+            return f"{self.low}-{self.high}"
 
 
 #
@@ -140,10 +148,7 @@ cdef class Ibpkeycon(Ocontext):
         return str(self) < str(other)
 
     def statement(self):
-        if self.pkeys.low == self.pkeys.high:
-            return f"ibpkeycon {self.subnet_prefix} {self.pkeys.low:#x} {self.context}"
-        else:
-            return f"ibpkeycon {self.subnet_prefix} {self.pkeys.low:#x}-{self.pkeys.high:#x} {self.context}"
+        return f"ibpkeycon {self.subnet_prefix} {self.pkeys} {self.context}"
 
 
 cdef class Netifcon(Ocontext):
@@ -316,12 +321,7 @@ cdef class Portcon(Ocontext):
         return str(self) < str(other)
 
     def statement(self):
-        low, high = self.ports.low, self.ports.high
-
-        if low == high:
-            return f"portcon {self.protocol} {low} {self.context}"
-        else:
-            return f"portcon {self.protocol} {low}-{high} {self.context}"
+        return f"portcon {self.protocol} {self.ports} {self.context}"
 
 
 #

@@ -17,16 +17,19 @@ class IomemconRange:
 
     def __post_init__(self):
         if self.low < IomemconRange.MIN or self.high < IomemconRange.MIN:
-            raise ValueError(
-                f"Memory address must be >= {IomemconRange.MIN}: {self.low}-{self.high}")
+            raise ValueError(f"Memory address must be >= {IomemconRange.MIN:0=#6x}: {self}")
 
         if self.low > IomemconRange.MAX or self.high > IomemconRange.MAX:
-            raise ValueError(
-                f"Memory address must be <= {IomemconRange.MAX}: {self.low}-{self.high}")
+            raise ValueError(f"Memory address must be <= {IomemconRange.MAX:0=#6x}: {self}")
 
         if self.low > self.high:
-            raise ValueError(
-                f"The low mem addr must be smaller than the high mem addr: {self.low}-{self.high}")
+            raise ValueError(f"The low mem addr must be smaller than the high mem addr: {self}")
+
+    def __str__(self):
+        if self.low == self.high:
+            return f"{self.low:0=#6x}"
+        else:
+            return f"{self.low:0=#6x}-{self.high:0=#6x}"
 
 
 @dataclasses.dataclass(eq=True, order=True, frozen=True)
@@ -42,16 +45,20 @@ class IoportconRange:
 
     def __post_init__(self):
         if self.low < IoportconRange.MIN or self.high < IoportconRange.MIN:
-            raise ValueError(
-                f"Port numbers must be >= {IoportconRange.MIN}: {self.low}-{self.high}")
+            raise ValueError(f"Port numbers must be >= {IoportconRange.MIN:0=#6x}: {self}")
 
         if self.low > IoportconRange.MAX or self.high > IoportconRange.MAX:
-            raise ValueError(
-                f"Port numbers must be <= {IoportconRange.MAX}: {self.low}-{self.high}")
+            raise ValueError( f"Port numbers must be <= {IoportconRange.MAX:0=#6x}: {self}")
 
         if self.low > self.high:
-            raise ValueError("The low port must be smaller than the high port: "
-                f"{self.low}-{self.high}")
+            raise ValueError(f"The low port must be smaller than the high port: {self}")
+
+    def __str__(self):
+        if self.low == self.high:
+            return f"{self.low:0=#6x}"
+        else:
+            return f"{self.low:0=#6x}-{self.high:0=#6x}"
+
 
 #
 # Classes
@@ -93,12 +100,7 @@ cdef class Iomemcon(Ocontext):
         return i
 
     def statement(self):
-        low, high = self.addr.low, self.addr.high
-
-        if low == high:
-            return "iomemcon {low} {self.context1}"
-        else:
-            return "iomemcon {low}-{high} {self.context}"
+        return f"iomemcon {self.addr} {self.context}"
 
 
 cdef class Ioportcon(Ocontext):
@@ -118,12 +120,7 @@ cdef class Ioportcon(Ocontext):
         return i
 
     def statement(self):
-        low, high = self.ports.low, self.ports.high
-
-        if low == high:
-            return "ioportcon {low} {self.context}"
-        else:
-            return "ioportcon {low}-{high} {self.context}"
+        return f"ioportcon {self.ports} {self.context}"
 
 
 cdef class Pcidevicecon(Ocontext):
@@ -143,7 +140,7 @@ cdef class Pcidevicecon(Ocontext):
         return p
 
     def statement(self):
-        return f"pcidevicecon {self.device} {self.context}"
+        return f"pcidevicecon {self.device:0=#6x} {self.context}"
 
 
 cdef class Pirqcon(Ocontext):
