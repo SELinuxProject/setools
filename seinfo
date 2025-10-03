@@ -107,6 +107,13 @@ xen.add_argument("--devicetreecon", help="Print all devicetreecon statements.",
 
 args = parser.parse_args()
 
+# SELinux-specific args and Xen-specific args cannot be combined
+sel_args = ["/".join(a.option_strings) for a in selinux._group_actions if getattr(args, a.dest)]
+xen_args = ["/".join(a.option_strings) for a in xen._group_actions if getattr(args, a.dest)]
+if sel_args and xen_args:
+    parser.error(f"SELinux arguments ({', '.join(sel_args)}) cannot be combined with "
+                 f"Xen arguments ({', '.join(xen_args)}).")
+
 # Fix argument misparsing: when policy is None and a query option is a string,
 # check if the string is actually a policy file that is incorrectly consumed by the query option
 if not args.policy:
@@ -136,6 +143,14 @@ else:
 try:
     p = setools.SELinuxPolicy(args.policy)
     components: List[Tuple[str, setools.PolicyQuery, Callable]] = []
+    if p.target_platform == setools.PolicyTarget.selinux:
+        if xen_args:
+            raise RuntimeError(f"error: Xen queries specified ({', '.join(xen_args)}), but "
+                               f"{p} is an SELinux policy.")
+    elif p.target_platform == setools.PolicyTarget.xen:
+        if sel_args:
+            raise RuntimeError(f"error: SELinux queries specified ({', '.join(sel_args)}), but "
+                               f"{p} is a Xen policy.")
 
     if args.boolquery or args.all:
         bq = setools.BoolQuery(p)
