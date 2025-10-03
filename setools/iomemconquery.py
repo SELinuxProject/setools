@@ -66,11 +66,11 @@ class IomemconQuery(mixins.MatchContext, query.PolicyQuery):
         return self._addr
 
     @addr.setter
-    def addr(self, value: tuple[int, int] | None) -> None:
-        if value:
-            self._addr = policyrep.IomemconRange(*value)
+    def addr(self, value: policyrep.IomemconRange | tuple[int, int] | None) -> None:
+        if isinstance(value, policyrep.IomemconRange):
+            self._addr = value
         else:
-            self._addr = None
+            self._addr = policyrep.IomemconRange(*value) if value else None
 
     def results(self) -> Iterable[policyrep.Iomemcon]:
         """Generator which yields all matching iomemcons."""
