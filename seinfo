@@ -94,15 +94,15 @@ selinux.add_argument("--portcon", help="Print portcon statements.", dest="portco
 
 xen = parser.add_argument_group("Xen-specific Queries")
 xen.add_argument("--devicetreecon", help="Print all devicetreecon statements.",
-                 dest="devicetreeconquery", default=False, action="store_true")
+                 dest="devicetreeconquery", nargs='?', const=True, metavar="PATH")
 xen.add_argument("--iomemcon", help="Print all iomemcon statements.", dest="iomemconquery",
-                 default=False, action="store_true")
+                 nargs='?', const=True, metavar="ADDR[-ADDR]")
 xen.add_argument("--ioportcon", help="Print all ioportcon statements.", dest="ioportconquery",
-                 default=False, action="store_true")
+                 nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
 xen.add_argument("--pcidevicecon", help="Print all pcidevicecon statements.",
-                 dest="pcideviceconquery", default=False, action="store_true")
+                 dest="pcideviceconquery", nargs='?', const=True, metavar="DEVICE")
 xen.add_argument("--pirqcon", help="Print all pirqcon statements.", dest="pirqconquery",
-                 default=False, action="store_true")
+                 nargs='?', const=True, metavar="IRQ")
 
 
 args = parser.parse_args()
@@ -352,22 +352,57 @@ try:
     elif p.target_platform == setools.PolicyTarget.xen:
         if args.devicetreeconquery or args.all:
             dtq = setools.DevicetreeconQuery(p)
+            if isinstance(args.devicetreeconquery, str):
+                dtq.path = args.devicetreeconquery
+
             components.append(("Devicetreecon", dtq, lambda x: x.statement()))
 
         if args.iomemconquery or args.all:
             xiomq = setools.IomemconQuery(p)
+            if isinstance(args.iomemconquery, str):
+                try:
+                    ports = [int(i, base=16) for i in args.iomemconquery.split("-")]
+                except ValueError:
+                    parser.error("Enter an IO memory address or range, e.g. 0x22 or 0x6000-0x6020")
+
+                if len(ports) == 2:
+                    xiomq.addr = setools.IomemconRange(*ports)
+                elif len(ports) == 1:
+                    xiomq.addr = setools.IomemconRange(ports[0], ports[0])
+                else:
+                    parser.error("Enter an IO memory address or range, e.g. 0x22 or 0x6000-0x6020")
+
             components.append(("Iomemcon", xiomq, lambda x: x.statement()))
 
         if args.ioportconquery or args.all:
-            xiopq = setools.IoportconQuery(p)
+            xiopq = setools.IoportconQuery(p, ports_subset=True)
+            if isinstance(args.ioportconquery, str):
+                try:
+                    ports = [int(i, base=16) for i in args.ioportconquery.split("-")]
+                except ValueError:
+                    parser.error("Enter an IO port number or range, e.g. 0x22 or 0x6000-0x6020")
+
+                if len(ports) == 2:
+                    xiopq.ports = setools.IoportconRange(*ports)
+                elif len(ports) == 1:
+                    xiopq.ports = setools.IoportconRange(ports[0], ports[0])
+                else:
+                    parser.error("Enter an IO port number or range, e.g. 0x22 or 0x6000-0x6020")
+
             components.append(("Ioportcon", xiopq, lambda x: x.statement()))
 
         if args.pcideviceconquery or args.all:
             pcidq = setools.PcideviceconQuery(p)
+            if isinstance(args.pcideviceconquery, str):
+                pcidq.device = int(args.pcideviceconquery, base=16)
+
             components.append(("Pcidevicecon", pcidq, lambda x: x.statement()))
 
         if args.pirqconquery or args.all:
             pirqq = setools.PirqconQuery(p)
+            if isinstance(args.pirqconquery, str):
+                pirqq.irq = int(args.pirqconquery)
+
             components.append(("Pirqcon", pirqq, lambda x: x.statement()))
 
     if (not components or args.all) and not args.flat:
