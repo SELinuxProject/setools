@@ -93,16 +93,16 @@ selinux.add_argument("--portcon", help="Print portcon statements.", dest="portco
                      nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
 
 xen = parser.add_argument_group("Xen-specific Queries")
-xen.add_argument("--ioportcon", help="Print all ioportcon statements.", dest="ioportconquery",
-                 default=False, action="store_true")
+xen.add_argument("--devicetreecon", help="Print all devicetreecon statements.",
+                 dest="devicetreeconquery", default=False, action="store_true")
 xen.add_argument("--iomemcon", help="Print all iomemcon statements.", dest="iomemconquery",
+                 default=False, action="store_true")
+xen.add_argument("--ioportcon", help="Print all ioportcon statements.", dest="ioportconquery",
                  default=False, action="store_true")
 xen.add_argument("--pcidevicecon", help="Print all pcidevicecon statements.",
                  dest="pcideviceconquery", default=False, action="store_true")
 xen.add_argument("--pirqcon", help="Print all pirqcon statements.", dest="pirqconquery",
                  default=False, action="store_true")
-xen.add_argument("--devicetreecon", help="Print all devicetreecon statements.",
-                 dest="devicetreeconquery", default=False, action="store_true")
 
 
 args = parser.parse_args()
