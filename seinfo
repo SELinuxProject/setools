@@ -5,15 +5,17 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
 
-import setools
 import argparse
 import sys
 import logging
 import signal
 import ipaddress
 import warnings
+from itertools import chain
 from pathlib import Path
 from typing import Callable, List, Tuple
+
+import setools
 
 
 def expand_attr(attr):
@@ -57,26 +59,10 @@ queries.add_argument("--constrain", help="Print constraints.", dest="constraintq
                      nargs='?', const=True, metavar="CLASS")
 queries.add_argument("--default", help="Print default_* rules.", dest="defaultquery",
                      nargs='?', const=True, metavar="CLASS")
-queries.add_argument("--fs_use", help="Print fs_use statements.", dest="fsusequery",
-                     nargs='?', const=True, metavar="FS_TYPE")
-queries.add_argument("--genfscon", help="Print genfscon statements.", dest="genfsconquery",
-                     nargs='?', const=True, metavar="FS_TYPE")
-queries.add_argument("--ibpkeycon", help="Infiniband pkey statements.",
-                     dest="ibpkeyconquery", nargs='?', const=True, metavar="PKEY[-PKEY]")
-queries.add_argument("--ibendportcon", help="Infiniband endport statements.",
-                     dest="ibendportconquery", nargs='?', const=True, metavar="NAME")
-queries.add_argument("--initialsid", help="Print initial SIDs (contexts).", dest="initialsidquery",
-                     nargs='?', const=True, metavar="NAME")
-queries.add_argument("--netifcon", help="Print netifcon statements.", dest="netifconquery",
-                     nargs='?', const=True, metavar="DEVICE")
-queries.add_argument("--nodecon", help="Print nodecon statements.", dest="nodeconquery",
-                     nargs='?', const=True, metavar="ADDR")
 queries.add_argument("--permissive", help="Print permissive types.", dest="permissivequery",
                      nargs='?', const=True, metavar="TYPE")
 queries.add_argument("--polcap", help="Print policy capabilities.", dest="polcapquery",
                      nargs='?', const=True, metavar="NAME")
-queries.add_argument("--portcon", help="Print portcon statements.", dest="portconquery",
-                     nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
 queries.add_argument("--role_types", help="Print all roles associated with the given type.",
                      dest="roletypesquery", nargs=1, metavar="TYPE")
 queries.add_argument("--sensitivity", help="Print MLS sensitivities.", dest="mlssensquery",
@@ -88,7 +74,25 @@ queries.add_argument("--validatetrans", help="Print validatetrans.", dest="valid
 queries.add_argument("--all", help="Print all of the above.  On a Xen policy, the Xen components "
                      "will also be printed", dest="all", default=False, action="store_true")
 
-xen = parser.add_argument_group("Xen Component Queries")
+selinux = parser.add_argument_group("SELinux-specific Queries")
+selinux.add_argument("--fs_use", help="Print fs_use statements.", dest="fsusequery",
+                     nargs='?', const=True, metavar="FS_TYPE")
+selinux.add_argument("--genfscon", help="Print genfscon statements.", dest="genfsconquery",
+                     nargs='?', const=True, metavar="FS_TYPE")
+selinux.add_argument("--ibpkeycon", help="Infiniband pkey statements.",
+                     dest="ibpkeyconquery", nargs='?', const=True, metavar="PKEY[-PKEY]")
+selinux.add_argument("--ibendportcon", help="Infiniband endport statements.",
+                     dest="ibendportconquery", nargs='?', const=True, metavar="NAME")
+selinux.add_argument("--initialsid", help="Print initial SIDs (contexts).", dest="initialsidquery",
+                     nargs='?', const=True, metavar="NAME")
+selinux.add_argument("--netifcon", help="Print netifcon statements.", dest="netifconquery",
+                     nargs='?', const=True, metavar="DEVICE")
+selinux.add_argument("--nodecon", help="Print nodecon statements.", dest="nodeconquery",
+                     nargs='?', const=True, metavar="ADDR")
+selinux.add_argument("--portcon", help="Print portcon statements.", dest="portconquery",
+                     nargs='?', const=True, metavar="PORTNUM[-PORTNUM]")
+
+xen = parser.add_argument_group("Xen-specific Queries")
 xen.add_argument("--ioportcon", help="Print all ioportcon statements.", dest="ioportconquery",
                  default=False, action="store_true")
 xen.add_argument("--iomemcon", help="Print all iomemcon statements.", dest="iomemconquery",
@@ -107,7 +111,7 @@ args = parser.parse_args()
 # check if the string is actually a policy file that is incorrectly consumed by the query option
 if not args.policy:
     # Check all query options defined in the queries argument group
-    for action in queries._group_actions:
+    for action in chain(queries._group_actions, selinux._group_actions, xen._group_actions):
         value = getattr(args, action.dest, None)
         if isinstance(value, str) and Path(value).exists():
             # This query argument consumed the policy path - fix it
@@ -181,65 +185,6 @@ try:
 
         components.append(("Default rules", dq, lambda x: x.statement()))
 
-    if args.fsusequery or args.all:
-        fq: setools.FSUseQuery = setools.FSUseQuery(p)
-        if isinstance(args.fsusequery, str):
-            fq.fs = args.fsusequery
-
-        components.append(("Fs_use", fq, lambda x: x.statement()))
-
-    if args.genfsconquery or args.all:
-        gq: setools.GenfsconQuery = setools.GenfsconQuery(p)
-        if isinstance(args.genfsconquery, str):
-            gq.fs = args.genfsconquery
-
-        components.append(("Genfscon", gq, lambda x: x.statement()))
-
-    if args.ibendportconquery or args.all:
-        ibepq: setools.IbendportconQuery = setools.IbendportconQuery(p)
-        if isinstance(args.ibendportconquery, str):
-            ibepq.name = args.ibendportconquery
-
-        components.append(("Ibendportcon", ibepq, lambda x: x.statement()))
-
-    if args.ibpkeyconquery or args.all:
-        ibpkq = setools.IbpkeyconQuery(p)
-        if isinstance(args.ibpkeyconquery, str):
-            try:
-                pkeys = [int(i, 16) for i in args.ibpkeyconquery.split("-")]
-            except ValueError:
-                parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
-
-            if len(pkeys) == 2:
-                ibpkq.pkeys = setools.IbpkeyconRange(*pkeys)
-            elif len(pkeys) == 1:
-                ibpkq.pkeys = setools.IbpkeyconRange(pkeys[0], pkeys[0])
-            else:
-                parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
-
-        components.append(("Ibpkeycon", ibpkq, lambda x: x.statement()))
-
-    if args.initialsidquery or args.all:
-        isidq = setools.InitialSIDQuery(p)
-        if isinstance(args.initialsidquery, str):
-            isidq.name = args.initialsidquery
-
-        components.append(("Initial SIDs", isidq, lambda x: x.statement()))
-
-    if args.netifconquery or args.all:
-        netifq = setools.NetifconQuery(p)
-        if isinstance(args.netifconquery, str):
-            netifq.name = args.netifconquery
-
-        components.append(("Netifcon", netifq, lambda x: x.statement()))
-
-    if args.nodeconquery or args.all:
-        nodeq = setools.NodeconQuery(p)
-        if isinstance(args.nodeconquery, str):
-            nodeq.network = ipaddress.ip_network(args.nodeconquery)
-
-        components.append(("Nodecon", nodeq, lambda x: x.statement()))
-
     if args.permissivequery or args.all:
         permq = setools.TypeQuery(p, permissive=True, match_permissive=True)
         if isinstance(args.permissivequery, str):
@@ -253,23 +198,6 @@ try:
             capq.name = args.polcapquery
 
         components.append(("Polcap", capq, lambda x: x.statement()))
-
-    if args.portconquery or args.all:
-        pcq = setools.PortconQuery(p, ports_subset=True)
-        if isinstance(args.portconquery, str):
-            try:
-                ports = [int(i) for i in args.portconquery.split("-")]
-            except ValueError:
-                parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
-
-            if len(ports) == 2:
-                pcq.ports = setools.PortconRange(*ports)
-            elif len(ports) == 1:
-                pcq.ports = setools.PortconRange(ports[0], ports[0])
-            else:
-                parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
-
-        components.append(("Portcon", pcq, lambda x: x.statement()))
 
     if args.rolequery or args.all:
         rq = setools.RoleQuery(p)
@@ -329,14 +257,95 @@ try:
 
         components.append(("Validatetrans", vtq, lambda x: x.statement()))
 
-    if p.target_platform == setools.PolicyTarget.xen:
-        if args.ioportconquery or args.all:
-            xiopq = setools.IoportconQuery(p)
-            components.append(("Ioportcon", xiopq, lambda x: x.statement()))
+    if p.target_platform == setools.PolicyTarget.selinux:
+        if args.fsusequery or args.all:
+            fq: setools.FSUseQuery = setools.FSUseQuery(p)
+            if isinstance(args.fsusequery, str):
+                fq.fs = args.fsusequery
+
+            components.append(("Fs_use", fq, lambda x: x.statement()))
+
+        if args.genfsconquery or args.all:
+            gq: setools.GenfsconQuery = setools.GenfsconQuery(p)
+            if isinstance(args.genfsconquery, str):
+                gq.fs = args.genfsconquery
+
+            components.append(("Genfscon", gq, lambda x: x.statement()))
+
+        if args.ibendportconquery or args.all:
+            ibepq: setools.IbendportconQuery = setools.IbendportconQuery(p)
+            if isinstance(args.ibendportconquery, str):
+                ibepq.name = args.ibendportconquery
+
+            components.append(("Ibendportcon", ibepq, lambda x: x.statement()))
+
+        if args.ibpkeyconquery or args.all:
+            ibpkq = setools.IbpkeyconQuery(p)
+            if isinstance(args.ibpkeyconquery, str):
+                try:
+                    pkeys = [int(i, 16) for i in args.ibpkeyconquery.split("-")]
+                except ValueError:
+                    parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
+
+                if len(pkeys) == 2:
+                    ibpkq.pkeys = setools.IbpkeyconRange(*pkeys)
+                elif len(pkeys) == 1:
+                    ibpkq.pkeys = setools.IbpkeyconRange(pkeys[0], pkeys[0])
+                else:
+                    parser.error("Enter a pkey number or range, e.g. 0x22 or 0x6000-0x6020")
+
+            components.append(("Ibpkeycon", ibpkq, lambda x: x.statement()))
+
+        if args.initialsidquery or args.all:
+            isidq = setools.InitialSIDQuery(p)
+            if isinstance(args.initialsidquery, str):
+                isidq.name = args.initialsidquery
+
+            components.append(("Initial SIDs", isidq, lambda x: x.statement()))
+
+        if args.netifconquery or args.all:
+            netifq = setools.NetifconQuery(p)
+            if isinstance(args.netifconquery, str):
+                netifq.name = args.netifconquery
+
+            components.append(("Netifcon", netifq, lambda x: x.statement()))
+
+        if args.nodeconquery or args.all:
+            nodeq = setools.NodeconQuery(p)
+            if isinstance(args.nodeconquery, str):
+                nodeq.network = ipaddress.ip_network(args.nodeconquery)
+
+            components.append(("Nodecon", nodeq, lambda x: x.statement()))
+
+        if args.portconquery or args.all:
+            pcq = setools.PortconQuery(p, ports_subset=True)
+            if isinstance(args.portconquery, str):
+                try:
+                    ports = [int(i) for i in args.portconquery.split("-")]
+                except ValueError:
+                    parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
+
+                if len(ports) == 2:
+                    pcq.ports = setools.PortconRange(*ports)
+                elif len(ports) == 1:
+                    pcq.ports = setools.PortconRange(ports[0], ports[0])
+                else:
+                    parser.error("Enter a port number or range, e.g. 22 or 6000-6020")
+
+            components.append(("Portcon", pcq, lambda x: x.statement()))
+
+    elif p.target_platform == setools.PolicyTarget.xen:
+        if args.devicetreeconquery or args.all:
+            dtq = setools.DevicetreeconQuery(p)
+            components.append(("Devicetreecon", dtq, lambda x: x.statement()))
 
         if args.iomemconquery or args.all:
             xiomq = setools.IomemconQuery(p)
             components.append(("Iomemcon", xiomq, lambda x: x.statement()))
+
+        if args.ioportconquery or args.all:
+            xiopq = setools.IoportconQuery(p)
+            components.append(("Ioportcon", xiopq, lambda x: x.statement()))
 
         if args.pcideviceconquery or args.all:
             pcidq = setools.PcideviceconQuery(p)
@@ -345,10 +354,6 @@ try:
         if args.pirqconquery or args.all:
             pirqq = setools.PirqconQuery(p)
             components.append(("Pirqcon", pirqq, lambda x: x.statement()))
-
-        if args.devicetreeconquery or args.all:
-            dtq = setools.DevicetreeconQuery(p)
-            components.append(("Devicetreecon", dtq, lambda x: x.statement()))
 
     if (not components or args.all) and not args.flat:
         mls = "enabled" if p.mls else "disabled"
