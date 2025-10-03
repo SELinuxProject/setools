@@ -742,7 +742,7 @@ cdef class SELinuxPolicy:
             for version in range(max_ver, min_ver - 1, -1):
                 potential_policies.append(f"{base_policy_path}.{version}")
 
-        self.log.debug("Potential policies: {potential_policies}")
+        self.log.debug(f"Potential policies: {potential_policies}")
         for filename in potential_policies:
             try:
                 self._load_policy(filename)
