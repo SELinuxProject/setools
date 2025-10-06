@@ -41,7 +41,7 @@ jobs:
 
     # This should be the minimum required Python version to build refpolicy.
     - name: Set up Python ${{ matrix.build-opts.python }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.build-opts.python }}
 
