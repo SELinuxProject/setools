@@ -30,6 +30,7 @@ jobs:
           - {python: '3.10', tox: python3}
           - {python: '3.11', tox: python3}
           - {python: '3.12', tox: python3}
+          - {python: '3.13', tox: python3}
           - {python: '3.11', tox: pep8}
           - {python: '3.11', tox: lint}
           - {python: '3.11', tox: mypy}
