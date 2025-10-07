@@ -53,6 +53,8 @@ class IoportconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.xen
+
     _ports: policyrep.IoportconRange | None = None
     ports_subset: bool = False
     ports_overlap: bool = False
@@ -64,11 +66,11 @@ class IoportconQuery(mixins.MatchContext, query.PolicyQuery):
         return self._ports
 
     @ports.setter
-    def ports(self, value: tuple[int, int] | None) -> None:
-        if value:
-            self._ports = policyrep.IoportconRange(*value)
+    def ports(self, value: policyrep.IoportconRange | tuple[int, int] | None) -> None:
+        if isinstance(value, policyrep.IoportconRange):
+            self._ports = value
         else:
-            self._ports = None
+            self._ports = policyrep.IoportconRange(*value) if value else None
 
     def results(self) -> Iterable[policyrep.Ioportcon]:
         """Generator which yields all matching ioportcons."""

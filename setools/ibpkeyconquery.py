@@ -51,6 +51,8 @@ class IbpkeyconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     _subnet_prefix: IPv6Address | None = None
     _pkeys: policyrep.IbpkeyconRange | None = None
     pkeys_subset: bool = False

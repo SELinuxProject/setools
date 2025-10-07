@@ -7,14 +7,21 @@ from abc import ABC, abstractmethod
 import logging
 import typing
 
+from . import exception
+
 if typing.TYPE_CHECKING:
     from networkx import DiGraph
-    from .policyrep import SELinuxPolicy
+    from .policyrep import PolicyTarget, SELinuxPolicy
 
 
 class PolicyQuery(ABC):
 
     """Abstract base class for all SELinux policy analyses."""
+
+    # The platform required for this query, or None if any platform is allowed.
+    required_platform: "PolicyTarget | None" = None
+
+    _policy: "SELinuxPolicy"
 
     def __init__(self, policy: "SELinuxPolicy", **kwargs) -> None:
         self.policy: "SELinuxPolicy" = policy
@@ -31,6 +38,19 @@ class PolicyQuery(ABC):
                 raise ValueError(f"Keyword parameter {name} conflicts with a callable.")
 
             setattr(self, name, kwargs[name])
+
+    @property
+    def policy(self) -> "SELinuxPolicy":
+        return self._policy
+
+    @policy.setter
+    def policy(self, value: "SELinuxPolicy") -> None:
+        if self.required_platform and value.target_platform != self.required_platform:
+            raise exception.PlatformMismatch(
+                f"Policy {value} platform ({value.target_platform}) does not match required "
+                f"platform {self.required_platform} for {self.__class__.__name__}")
+
+        self._policy = value
 
     @abstractmethod
     def results(self) -> typing.Iterable:

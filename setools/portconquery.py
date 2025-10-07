@@ -56,6 +56,8 @@ class PortconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     _protocol: policyrep.PortconProtocol | None = None
     _ports: policyrep.PortconRange | None = None
     ports_subset: bool = False

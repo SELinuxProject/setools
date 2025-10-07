@@ -44,6 +44,8 @@ class DevicetreeconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.xen
+
     path: str | None = None
 
     def results(self) -> Iterable[policyrep.Devicetreecon]:

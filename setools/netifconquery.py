@@ -42,6 +42,8 @@ class NetifconQuery(mixins.MatchContext, mixins.MatchName, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     def results(self) -> Iterable[policyrep.Netifcon]:
         """Generator which yields all matching netifcons."""
         self.log.info(f"Generating netifcon results from {self.policy}")

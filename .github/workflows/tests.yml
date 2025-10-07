@@ -30,6 +30,7 @@ jobs:
           - {python: '3.10', tox: python3}
           - {python: '3.11', tox: python3}
           - {python: '3.12', tox: python3}
+          - {python: '3.13', tox: python3}
           - {python: '3.11', tox: pep8}
           - {python: '3.11', tox: lint}
           - {python: '3.11', tox: mypy}
@@ -41,7 +42,7 @@ jobs:
 
     # This should be the minimum required Python version to build refpolicy.
     - name: Set up Python ${{ matrix.build-opts.python }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.build-opts.python }}
 

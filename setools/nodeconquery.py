@@ -50,6 +50,8 @@ class NodeconQuery(mixins.MatchContext, query.PolicyQuery):
                     No effect if not using set operations.
     """
 
+    required_platform = policyrep.PolicyTarget.selinux
+
     _network: AnyIPNetwork | None = None
     network_overlap: bool = False
     _ip_version: policyrep.NodeconIPVersion | None = None
