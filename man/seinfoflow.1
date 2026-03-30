@@ -48,6 +48,12 @@ Specify the minimum permission weight to consider for the analysis (1-10). The d
 Specify the maximum number of information flows to output. The default is unlimited.
 .IP "-o OUTPUT_PATH"
 Generate a graphical representation of the analysis in PNG format at the specified path.
+.IP "-b <boolname>:true[,<boolname2>:false,...]"
+Specify boolean values to use in the analysis. Multiple booleans can be specified, separated by
+commas.  Alternatively, this option can be set with the special value "-b default" to use the
+default boolean values from the policy.  If this option is not specified, the analysis will
+include all possible infomation flows, including both "if" and "else" branches of boolean
+expressions.
 .IP EXCLUDE
 A space-separated list of types to exclude from the analysis.
 
