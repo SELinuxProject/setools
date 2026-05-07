@@ -44,6 +44,7 @@ dependencies = []
 optional-dependencies.analysis = ["networkx>=2.6",
                                   "pygraphviz"]
 optional-dependencies.gui = ["PyQt6"]
+optional-dependencies.mcp = ["mcp>=1.0"]
 optional-dependencies.test = ["tox"]
 
 [tool.setuptools]
@@ -54,7 +55,8 @@ script-files = ["apol",
                 "seinfoflow",
                 "sesearch",
                 "sedta",
-                "sechecker"]
+                "sechecker",
+                "setools-mcp"]
 
 [tool.setuptools.packages.find]
 include = ["setools*"]

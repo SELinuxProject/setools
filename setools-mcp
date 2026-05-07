@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-2.0-only
+
+from setools.mcp import SEToolsMCPServer
+import argparse
+import logging
+import sys
+import warnings
+
+parser = argparse.ArgumentParser(
+    description="SETools MCP server — exposes setools policy analysis as MCP tools.")
+parser.add_argument("--policy", metavar="PATH", help="Default SELinux policy file to analyze.")
+parser.add_argument("--transport", choices=["stdio", "sse"], default="stdio",
+                    help="MCP transport to use (default: stdio).")
+parser.add_argument("--host", default="127.0.0.1",
+                    help="Bind host for SSE transport (default: 127.0.0.1).")
+parser.add_argument("--port", type=int, default=8000,
+                    help="Bind port for SSE transport (default: 8000).")
+parser.add_argument("-v", "--verbose", action="store_true",
+                    help="Print extra informational messages")
+parser.add_argument("--debug", action="store_true", dest="debug", help="Enable debugging.")
+args = parser.parse_args()
+
+if args.debug:
+    logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s|%(levelname)s|%(name)s|%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
+elif args.verbose:
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("default")
+else:
+    logging.basicConfig(level=logging.WARNING, format='%(message)s')
+    if not sys.warnoptions:
+        warnings.simplefilter("ignore")
+
+try:
+    server = SEToolsMCPServer(default_policy=args.policy)
+    server.run(transport=args.transport, host=args.host, port=args.port)
+
+except AssertionError:
+    # Always provide a traceback for assertion errors
+    raise
+
+except Exception as err:
+    print(err)
+    sys.exit(1)
