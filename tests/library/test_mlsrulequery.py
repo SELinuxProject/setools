@@ -288,5 +288,5 @@ class TestMLSRuleQuery:
 
     def test_invalid_ruletype(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """MLS rule query with invalid rule type."""
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             q = MLSRuleQuery(compiled_policy, ruletype=["type_transition"])
