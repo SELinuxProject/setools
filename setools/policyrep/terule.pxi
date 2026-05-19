@@ -38,6 +38,7 @@ cdef class BaseTERule(PolicyRule):
     cdef:
         readonly ObjClass tclass
         str rule_string
+        str _xperm_type
         Conditional _conditional
         bint _conditional_block
 
@@ -96,6 +97,19 @@ cdef class BaseTERule(PolicyRule):
             return self._conditional_block
         else:
             return not self._conditional_block
+
+    @property
+    def extended(self):
+        """Whether the rule is an extended permission rule."""
+        return self._xperm_type is not None
+
+    @property
+    def xperm_type(self):
+        """The rule's extended permission type."""
+        if self._xperm_type is None:
+            raise RuleUseError(f"{self.ruletype} rules do not have an extended permission type.")
+        else:
+            return self._xperm_type
 
 
 cdef class AVRule(BaseTERule):
@@ -281,7 +295,6 @@ cdef class AVRuleXperm(BaseTERule):
 
     cdef:
         readonly XpermSet perms
-        readonly str xperm_type
 
     @staticmethod
     cdef inline AVRuleXperm factory(SELinuxPolicy policy, sepol.avtab_key_t *key,
@@ -334,8 +347,7 @@ cdef class AVRuleXperm(BaseTERule):
         r.target = type_or_attr_factory(policy, policy.type_value_to_datum(key.target_type - 1))
         r.tclass = ObjClass.factory(policy, policy.class_value_to_datum(key.target_class - 1))
         r.perms = XpermSet(perms)
-        r.extended = True
-        r.xperm_type = xperm_type
+        r._xperm_type = xperm_type
         r._conditional = conditional
         r._conditional_block = conditional_block
         r.origin = None
@@ -377,8 +389,7 @@ cdef class AVRuleXperm(BaseTERule):
                 r.target = t
                 r.tclass = self.tclass
                 r.perms = self.perms
-                r.extended = True
-                r.xperm_type = self.xperm_type
+                r._xperm_type = self._xperm_type
                 r._conditional = self._conditional
                 r._conditional_block = self._conditional_block
                 r.origin = self
