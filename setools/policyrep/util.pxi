@@ -36,10 +36,9 @@ class PolicyEnum(enum.Enum):
         """Look up an enumeration by name or value."""
 
         try:
-            return cls(value)
-        except ValueError:
             return cls[value]
-
+        except KeyError:
+            return cls(value)
 
 class WeakKeyDefaultDict(weakref.WeakKeyDictionary):
 

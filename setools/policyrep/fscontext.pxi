@@ -69,6 +69,21 @@ cdef class GenfsFiletype(int):
                          S_IFLNK: "-l",
                          S_IFSOCK: "-s"}
 
+    _sclass_to_stat = {"": 0,
+                       "dir": S_IFDIR,
+                       "file": S_IFREG,
+                       "lnk_file": S_IFLNK,
+                       "fifo_file": S_IFIFO,
+                       "sock_file": S_IFSOCK,
+                       "blk_file": S_IFBLK,
+                       "chr_file": S_IFCHR}
+
+    @classmethod
+    def from_class(cls, tclass: ObjClass | str) -> "GenfsFiletype":
+        """Create a GenfsFiletype from an object class."""
+        name = tclass if isinstance(tclass, str) else tclass.name
+        return cls(cls._sclass_to_stat[name])
+
     def __str__(self):
         return self._filetype_to_text[self]
 
@@ -83,15 +98,6 @@ cdef class Genfscon(Ocontext):
         readonly ObjClass tclass
         readonly str path
 
-    _sclass_to_stat = {0: 0,
-                       "dir": S_IFDIR,
-                       "file": S_IFREG,
-                       "lnk_file": S_IFLNK,
-                       "fifo_file": S_IFIFO,
-                       "sock_file": S_IFSOCK,
-                       "blk_file": S_IFBLK,
-                       "chr_file": S_IFCHR}
-
     @staticmethod
     cdef inline Genfscon factory(SELinuxPolicy policy, sepol.ocontext_t *symbol, fstype):
         """Factory function for creating Genfscon objects."""
@@ -104,7 +110,7 @@ cdef class Genfscon(Ocontext):
         if symbol.v.sclass:
             try:
                 g.tclass = ObjClass.factory(policy, policy.class_value_to_datum(symbol.v.sclass-1))
-                g.filetype = GenfsFiletype(Genfscon._sclass_to_stat[g.tclass.name])
+                g.filetype = GenfsFiletype.from_class(g.tclass)
             except KeyError as ex:
                 log = logging.getLogger(__name__)
                 log.warning("Genfscon {g.fs} {g.path} object class {g.tclass.name} does not match "

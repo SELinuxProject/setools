@@ -11,7 +11,7 @@ analysis.  Please consult the KNOWN-BUGS file prior to reporting bugs.
 SETools uses the Python setuptools build system to build, and install.
 As such it contains a setup.py script that will install the tools.
 
-To run SETools command line tools, the following packages are required:
+To run SETools basic command line tools, the following packages are required:
 
 * Python 3.10+
 * NetworkX 2.6+
@@ -23,6 +23,10 @@ To run SETools command line tools, the following packages are required:
 To run SETools graphical tools, the following packages are also required:
 
 * PyQt6
+
+To run SETools AI tools, the following packages are also required:
+
+* mcp
 
 To build SETools, the following development packages are required, in
 addition to the development packages from the above list:
@@ -157,6 +161,12 @@ sedta      | Perform domain transition analyses.
 seinfo     | List policy components.
 seinfoflow | Perform information flow analyses.
 sesearch   | Search rules (allow, type_transition, etc.)
+
+### AI tools
+
+Tool Name   | Use
+----------- | -------------------------------------------
+setools-mcp | A model context protocol server providing analysis tools to LLMs.
 
 ### Analysis Libraries
 

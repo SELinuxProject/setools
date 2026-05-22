@@ -60,7 +60,7 @@ class TestDefaultQuery:
 
     def test_invalid_ruletype(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Default query: invalid ruletype"""
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             q = setools.DefaultQuery(compiled_policy, ruletype=["INVALID"])
 
     def test_invalid_class(self, compiled_policy: setools.SELinuxPolicy) -> None:
@@ -70,10 +70,10 @@ class TestDefaultQuery:
 
     def test_invalid_default_value(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Default query: invalid default value"""
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             q = setools.DefaultQuery(compiled_policy, default="INVALID")
 
     def test_invalid_default_range(self, compiled_policy: setools.SELinuxPolicy) -> None:
         """Default query: invalid default range"""
-        with pytest.raises(KeyError):
+        with pytest.raises(ValueError):
             q = setools.DefaultQuery(compiled_policy, default_range="INVALID")
