@@ -14,11 +14,15 @@ As such it contains a setup.py script that will install the tools.
 To run SETools basic command line tools, the following packages are required:
 
 * Python 3.10+
-* NetworkX 2.6+
-* pygraphviz
 * setuptools
 * libselinux
-* libsepol 3.2+
+* libsepol 3.9+
+
+To run SETools graph-based analysis, domain transition and information flow,
+the following packages are also required:
+
+* NetworkX 2.6+
+* pygraphviz (optional, for graphical output)
 
 To run SETools graphical tools, the following packages are also required:
 
@@ -86,9 +90,7 @@ Unpack the official distribution or check out the git repository,
 and perform the following at the root:
 
 ```bash
-  $ python setup.py build_ext
-  $ python setup.py build
-  $ python setup.py install
+  $ sudo pip install --use-pep517 .
 ```
 
 This will put the applications in /usr/bin, data files in `/usr/share/setools`,
