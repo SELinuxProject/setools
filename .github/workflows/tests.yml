@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 env:
   # This should be the minimum version required to run setools:
-  SELINUX_USERSPACE_VERSION: main
+  SELINUX_USERSPACE_VERSION: libsepol-3.9
 
   # GitHub doesn't support building env
   # vars from others in this block.
