@@ -1,30 +1,19 @@
-name: Build tests
+name: Test SETools
 
-on: [push, pull_request]
-
-env:
-  # This should be the minimum version required to run setools:
-  SELINUX_USERSPACE_VERSION: libsepol-3.9
-
-  # GitHub doesn't support building env
-  # vars from others in this block.
-  USERSPACE_SRC: /tmp/selinux-src
-  #SEPOL_SRC: ${USERSPACE_SRC}/libsepol
-  SEPOL_SRC: /tmp/selinux-src/libsepol
-  #LIBSEPOLA: ${SEPOL_SRC}/src/libsepol.a
-  LIBSEPOLA: /tmp/selinux-src/libsepol/src/libsepol.a
-  #SELINUX_SRC: ${USERSPACE_SRC}/libselinux
-  SELINUX_SRC: /tmp/selinux-src/libselinux
-  #CHECKPOLICY_SRC: ${USERSPACE_SRC}/checkpolicy
-  CHECKPOLICY_SRC: /tmp/selinux-src/checkpolicy
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
-  build:
+  build_userspace:
+    uses: ./.github/workflows/build-userspace.yml
+    with:
+      # This should be the minimum version required to run setools:
+      version: "3.9"
+      python-version: "3.10"
+
+  test_setools:
+    needs: build_userspace
     runs-on: ubuntu-24.04
-
     strategy:
-      fail-fast: false
-
       matrix:
         # unit tests
         python:
@@ -45,58 +34,67 @@ jobs:
           - {python: '3.11', tox: install}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
-    # This should be the minimum required Python version to build refpolicy.
-    - name: Set up Python ${{ matrix.python }}
-      uses: actions/setup-python@v6
+    - name: Download userspace artifact
+      uses: actions/download-artifact@v7
+      id: dl-userspace
       with:
-        python-version: ${{ matrix.python }}
+        name: selinux
 
-    - name: Install dependencies
+    - name: Unpack userspace artifact
+      shell: bash
+      run: |
+        tar -C "${{ steps.dl-userspace.outputs.download-path }}" -zxvf selinux.tar.gz
+
+    - name: Build SETools
+      uses: ./.github/actions/build-setools
+      id: build-setools
+      with:
+        python: ${{ matrix.python }}
+        userspace-path: ${{ steps.dl-userspace.outputs.download-path }}
+
+    - name: Install unit test dependencies
+      shell: bash
       run: |
         sudo apt-get update -qq
         sudo apt-get install -qqy \
-            bison \
-            flex \
-            gettext \
-            libaudit-dev \
-            libbz2-dev \
-            libgraphviz-dev \
-            libpcre3-dev \
-            xvfb \
-            x11-xserver-utils
+            libegl1 \
+            libdbus-1-3 \
+            libopengl0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xinerama0 \
+            libxcb-xinput0 \
+            libxcb-xfixes0 \
+            libxkbcommon-x11-0 \
+            x11-utils \
+            x11-xserver-utils \
+            xvfb
 
+        # Use pip to ensure the packages go to the configured Python environment
         python -m pip install -U --user \
             tox
 
-    # This is a curated list of packages to get Qt to work with xvfb in
-    # GitHub actions.  https://github.com/tlambert03/setup-qt-libs
-    - name: Install Qt dependencies
-      uses: tlambert03/setup-qt-libs@v1
-
-    - name: Cache SELinux userspace
-      uses: actions/cache@v3
-      id: cache-userspace
-      with:
-        path: ${{ env.USERSPACE_SRC }}
-        key: ${{ runner.os }}-selinux-userspace-${{ env.SELINUX_USERSPACE_VERSION }}
-
-    - name: Build SELinux userspace
-      if: ${{ steps.cache-userspace.outputs.cache-hit != 'true' }}
+    - name: Run unit tests/linting
+      shell: bash
       run: |
-        # Download current SELinux userspace tools and libraries
-        git clone https://github.com/SELinuxProject/selinux.git ${{env.USERSPACE_SRC}} -b ${{env.SELINUX_USERSPACE_VERSION}}
-
-        # Compile SELinux userspace
-        make -C ${{env.SEPOL_SRC}}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${{env.SEPOL_SRC}}/include" LDFLAGS="-L${{env.SEPOL_SRC}}/src" -C ${{env.SELINUX_SRC}}
-        make CFLAGS="-O2 -pipe -fPIC -Wall -I${{env.SEPOL_SRC}}/include" -C ${{env.CHECKPOLICY_SRC}}
-
-    - name: Run test
-      run: |
-        # confirm python version
         python --version
+        sudo ln -s "${{steps.dl-userspace.outputs.download-path}}/usr/bin/checkpolicy" /usr/bin/checkpolicy
         python -m tox -e ${{ matrix.tox }}
       env:
-        LD_LIBRARY_PATH: "${{env.SEPOL_SRC}}/src:${{env.SELINUX_SRC}}/src:${LD_LIBRARY_PATH}"
+        CPPFLAGS: "-I${{steps.dl-userspace.outputs.download-path}}/usr/include"
+        LD_LIBRARY_PATH: "${{steps.dl-userspace.outputs.download-path}}/lib:${{steps.dl-userspace.outputs.download-path}}/usr/lib:${LD_LIBRARY_PATH}"
+        LDFLAGS: "-L${{steps.dl-userspace.outputs.download-path}}/lib -L${{steps.dl-userspace.outputs.download-path}}/usr/lib"
+
+    - name: Upload failed build directory artifact
+      if: ${{ failure() && runner.debug }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: failed-setools
+        path: |
+          ${{ github.workspace }}

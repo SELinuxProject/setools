@@ -1,0 +1,56 @@
+name: "Build SETools"
+description: "Set up Python, install all dependencies, and build SETools"
+
+inputs:
+  python:
+    description: "Python version to use"
+    required: true
+  userspace-path:
+    description: "Path to the userspace binaries root"
+    required: true
+
+outputs:
+  sdist-path:
+    description: "Path to the built source distribution"
+    value: ${{ steps.build-sdist.outputs.sdistpath }}
+  wheel-path:
+    description: "Path to the built wheel"
+    value: ${{ steps.build-wheel.outputs.wheelpath }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python ${{ inputs.python }}
+      uses: actions/setup-python@v6
+      with:
+        python-version: ${{ inputs.python }}
+
+    - name: Install build dependencies
+      shell: bash
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -qqy \
+            libgraphviz-dev \
+
+        # Use pip to ensure the packages go to the configured Python environment
+        python -m pip install -U --user \
+            cython \
+            setuptools \
+
+    - name: Build sdist
+      id: build-sdist
+      shell: bash
+      run: |
+        python setup.py sdist
+        echo "sdistpath=$(find dist -type f -name '*.tar.gz')" >> $GITHUB_OUTPUT
+
+    - name: Build wheel
+      shell: bash
+      id: build-wheel
+      run: |
+        pip wheel --no-deps .
+        echo "wheelpath=$(find . -type f -name '*.whl')" >> $GITHUB_OUTPUT
+      env:
+        CPPFLAGS: "-I${{inputs.userspace-path}}/usr/include"
+        LD_LIBRARY_PATH: "${{inputs.userspace-path}}/lib:${{inputs.userspace-path}}/usr/lib:${LD_LIBRARY_PATH}"
+        LDFLAGS: "-L${{inputs.userspace-path}}/lib -L${{inputs.userspace-path}}/usr/lib"
