@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import enum
 import ipaddress
 import itertools
 import json
@@ -30,9 +31,18 @@ __all__ = ("MCPEncoder",)
 
 TOOL_PREFIX: Final[str] = "setools_"
 
-_DIFF_COMPONENTS: Final[frozenset[str]] = frozenset(
-    {"te_rules", "rbac_rules", "types", "roles", "users", "portcons", "mls_rules"}
-)
+
+class DiffComponent(str, enum.Enum):
+
+    """Policy components that can be compared in a policy difference analysis."""
+
+    TE_RULES = "te_rules"
+    RBAC_RULES = "rbac_rules"
+    TYPES = "types"
+    ROLES = "roles"
+    USERS = "users"
+    PORTCONS = "portcons"
+    MLS_RULES = "mls_rules"
 
 
 class PolicyCache(dict):
@@ -1060,7 +1070,7 @@ class SEToolsMCPServer:
             list[str] | None,
             "Components to compare.  If omitted, defaults to: te_rules, rbac_rules, "
             "types, roles, users.  Available components: "
-            + ", ".join(sorted(_DIFF_COMPONENTS)),
+            + ", ".join(sorted(DiffComponent)),
         ] = None,
         max_per_component: Annotated[
             int,
@@ -1082,17 +1092,8 @@ class SEToolsMCPServer:
         right = SELinuxPolicy(right_policy)
         diff = PolicyDifference(left, right)
 
-        selected: set[str] = (
-            set(components)
-            if components
-            else {"te_rules", "rbac_rules", "types", "roles", "users"}
-        )
-        unknown = selected - _DIFF_COMPONENTS
-        if unknown:
-            raise ValueError(
-                f"Unknown component(s): {sorted(unknown)}.  "
-                f"Valid components: {sorted(_DIFF_COMPONENTS)}"
-            )
+        selected: set[DiffComponent] = {DiffComponent(c) for c in components} if components \
+            else {DiffComponent.TE_RULES}
 
         def _cap(items: Any, limit: int) -> tuple[list[Any], bool]:
             lst = sorted(items)
@@ -1102,7 +1103,7 @@ class SEToolsMCPServer:
         any_truncated = False
         differences: dict[str, Any] = {}
 
-        if "te_rules" in selected:
+        if DiffComponent.TE_RULES in selected:
             added, trunc_a = _cap(diff.added_allows, max_per_component)
             removed, trunc_r = _cap(diff.removed_allows, max_per_component)
             modified, trunc_m = _cap(diff.modified_allows, max_per_component)
@@ -1131,7 +1132,7 @@ class SEToolsMCPServer:
                 },
             }
 
-        if "types" in selected:
+        if DiffComponent.TYPES in selected:
             added, trunc_a = _cap(diff.added_types, max_per_component)
             removed, trunc_r = _cap(diff.removed_types, max_per_component)
             count += len(added) + len(removed)
@@ -1143,7 +1144,7 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        if "roles" in selected:
+        if DiffComponent.ROLES in selected:
             added, trunc_a = _cap(diff.added_roles, max_per_component)
             removed, trunc_r = _cap(diff.removed_roles, max_per_component)
             count += len(added) + len(removed)
@@ -1155,7 +1156,7 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        if "users" in selected:
+        if DiffComponent.USERS in selected:
             added, trunc_a = _cap(diff.added_users, max_per_component)
             removed, trunc_r = _cap(diff.removed_users, max_per_component)
             count += len(added) + len(removed)
@@ -1167,7 +1168,7 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        if "rbac_rules" in selected:
+        if DiffComponent.RBAC_RULES in selected:
             added_ra, trunc_a = _cap(diff.added_role_allows, max_per_component)
             removed_ra, trunc_r = _cap(diff.removed_role_allows, max_per_component)
             added_rt, trunc_at = _cap(diff.added_role_transitions, max_per_component)
@@ -1193,7 +1194,7 @@ class SEToolsMCPServer:
                 },
             }
 
-        if "mls_rules" in selected:
+        if DiffComponent.MLS_RULES in selected:
             added, trunc_a = _cap(diff.added_range_transitions, max_per_component)
             removed, trunc_r = _cap(diff.removed_range_transitions, max_per_component)
             count += len(added) + len(removed)
@@ -1209,7 +1210,7 @@ class SEToolsMCPServer:
                 },
             }
 
-        if "portcons" in selected:
+        if DiffComponent.PORTCONS in selected:
             added, trunc_a = _cap(diff.added_portcons, max_per_component)
             removed, trunc_r = _cap(diff.removed_portcons, max_per_component)
             count += len(added) + len(removed)
