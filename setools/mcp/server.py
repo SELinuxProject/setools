@@ -933,29 +933,22 @@ class SEToolsMCPServer:
         Each transition step contains the source and target domain, the
         allow/type_transition rules that permit the transition, the entrypoint
         executables, setexec rules, and dynamic transition rules.
+
+        If the required dependency (NetworkX) is not installed, this method will
+        raise a NameError.
         """
-        try:
-            dta_mode = DomainTransitionAnalysis.Mode[mode]
-        except KeyError as e:
-            valid = sorted(m.name for m in DomainTransitionAnalysis.Mode)
-            raise ValueError(f"Invalid mode {mode!r}.  Valid modes: {valid}") from e
-
-        policy = self._load_policy(policy_path)
-
-        analysis = DomainTransitionAnalysis(
-            policy,
-            source=source,
-            target=target,
-            mode=dta_mode,
-            reverse=reverse,
-            depth_limit=depth_limit,
-            exclude=exclude,
-        )
+        analysis = DomainTransitionAnalysis(self._load_policy(policy_path),
+                                            source=source,
+                                            target=target,
+                                            mode=DomainTransitionAnalysis.Mode.lookup(mode),
+                                            reverse=reverse,
+                                            depth_limit=depth_limit,
+                                            exclude=exclude)
 
         results: list[Any] = []
         truncated = False
 
-        if dta_mode in DomainTransitionAnalysis.TRANSITIVE_MODES:
+        if analysis.mode in DomainTransitionAnalysis.TRANSITIVE_MODES:
             for path in analysis.results():
                 if len(results) >= max_results:
                     truncated = True
@@ -1035,30 +1028,23 @@ class SEToolsMCPServer:
 
         Each step includes the source and target types, the combined flow weight,
         and the allow rules that create the flow.
+
+        If the required dependency (NetworkX) is not installed, this method will
+        raise a NameError.
         """
-        try:
-            ifa_mode = InfoFlowAnalysis.Mode[mode]
-        except KeyError as e:
-            valid = sorted(m.name for m in InfoFlowAnalysis.Mode)
-            raise ValueError(f"Invalid mode {mode!r}.  Valid modes: {valid}") from e
-
-        policy = self._load_policy(policy_path)
-        perm_map = PermissionMap(perm_map_path)
-
-        analysis = InfoFlowAnalysis(
-            policy,
-            perm_map,
-            source=source,
-            target=target,
-            mode=ifa_mode,
-            min_weight=min_weight,
-            depth_limit=depth_limit,
-            exclude=exclude)
+        analysis = InfoFlowAnalysis(self._load_policy(policy_path),
+                                    PermissionMap(perm_map_path),
+                                    source=source,
+                                    target=target,
+                                    mode=InfoFlowAnalysis.Mode.lookup(mode),
+                                    min_weight=min_weight,
+                                    depth_limit=depth_limit,
+                                    exclude=exclude)
 
         results: list[Any] = []
         truncated = False
 
-        if ifa_mode in InfoFlowAnalysis.TRANSITIVE_MODES:
+        if analysis.mode in InfoFlowAnalysis.TRANSITIVE_MODES:
             for path in analysis.results():
                 if len(results) >= max_results:
                     truncated = True
