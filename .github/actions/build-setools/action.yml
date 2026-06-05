@@ -28,6 +28,7 @@ runs:
     - name: Install build dependencies
       shell: bash
       run: |
+        echo "::group::Install build dependencies"
         sudo apt-get update -qq
         sudo apt-get install -qqy \
             libgraphviz-dev \
@@ -35,21 +36,26 @@ runs:
         # Use pip to ensure the packages go to the configured Python environment
         python -m pip install -U --user \
             cython \
-            setuptools \
+            setuptools
+        echo "::endgroup::"
 
     - name: Build sdist
       id: build-sdist
       shell: bash
       run: |
+        echo "::group::Build sdist"
         python setup.py sdist
         echo "sdistpath=$(find dist -type f -name '*.tar.gz')" >> $GITHUB_OUTPUT
+        echo "::endgroup::"
 
     - name: Build wheel
       shell: bash
       id: build-wheel
       run: |
+        echo "::group::Build wheel"
         pip wheel --no-deps .
         echo "wheelpath=$(find . -type f -name '*.whl')" >> $GITHUB_OUTPUT
+        echo "::endgroup::"
       env:
         CPPFLAGS: "-I${{inputs.userspace-path}}/usr/include"
         LD_LIBRARY_PATH: "${{inputs.userspace-path}}/lib:${{inputs.userspace-path}}/usr/lib:${LD_LIBRARY_PATH}"
