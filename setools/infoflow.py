@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
-import enum
 import itertools
 import logging
 from collections.abc import Iterable, Mapping
@@ -49,7 +48,7 @@ class InfoFlowAnalysis(query.DirectedGraphAnalysis):
 
     """
 
-    class Mode(enum.Enum):
+    class Mode(policyrep.PolicyEnum):
 
         """Information flow analysis modes"""
 

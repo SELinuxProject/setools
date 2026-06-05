@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 #
 
-import enum
 import itertools
 import logging
 from collections import defaultdict
@@ -126,7 +125,7 @@ class DomainTransitionAnalysis(query.DirectedGraphAnalysis):
                 (default is none)
     """
 
-    class Mode(enum.Enum):
+    class Mode(policyrep.PolicyEnum):
 
         """Domain transition analysis modes"""
 

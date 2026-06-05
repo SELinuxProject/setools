@@ -39,10 +39,10 @@ def mcp_server2(policy_pair: tuple) -> tuple[SEToolsMCPServer, str, str]:
     return mcp, left.path, right.path
 
 
-def assert_payload(payload: str, toplevel_key_count: int = 3) -> dict:
+def assert_payload(payload: str) -> dict:
     """Assert that the payload is valid JSON and contains expected top level keys."""
     data = json.loads(payload)
-    assert len(data) == toplevel_key_count, f"{data!r}"
+    assert len(data) == 3, f"{data!r}"
     assert "result" in data, f"{data!r}"
     assert "truncated" in data, f"{data!r}"
     assert isinstance(data["truncated"], bool), f"{data!r}"
@@ -69,8 +69,8 @@ class TestGetPolicyInfo:
 @pytest.mark.obj_args(XEN_POLICY, xen=True)
 class TestGetPolicyInfoXen:
     def test_xen_policy(self, mcp_server: SEToolsMCPServer) -> None:
-        result = assert_payload(mcp_server.setools_get_policy_info())
-        assert result["result"]["target_platform"] == "xen"
+        result = assert_payload(mcp_server.setools_get_policy_info())["result"]
+        assert result["target_platform"] == "xen"
 
 
 @pytest.mark.obj_args(SELINUX_POLICY)
@@ -540,22 +540,18 @@ class TestListDevicetreecons:
 class TestAnalyzeDTA:
     def test_transitions_out(self, mcp_server: SEToolsMCPServer) -> None:
         data = assert_payload(mcp_server.setools_analyze_dta(mode="TransitionsOut", source="start",
-                              max_results=5), 6)
-        assert data["mode"] == "TransitionsOut"
-        assert data["source"] == "start"
+                              max_results=5))
         assert data["count"] > 0
 
     def test_transitions_in(self, mcp_server: SEToolsMCPServer) -> None:
         data = assert_payload(mcp_server.setools_analyze_dta(mode="TransitionsIn", target="trans1",
-                              max_results=5), 6)
-        assert data["mode"] == "TransitionsIn"
-        assert data["target"] == "trans1"
+                              max_results=5))
         assert data["count"] > 0
 
     def test_shortest_paths(self, mcp_server: SEToolsMCPServer) -> None:
         # Find a target that kernel_t can reach
         data = assert_payload(mcp_server.setools_analyze_dta(mode="ShortestPaths", source="trans2",
-                              target="trans3", max_results=5), 6)
+                              target="trans3", max_results=5))
         assert data["count"] > 0
         assert isinstance(data["result"][0]["path"], list)
 
@@ -594,7 +590,7 @@ class TestDiffPolicies:
     def test_identical_policies(self, mcp_server2: tuple[SEToolsMCPServer, str, str]) -> None:
         server, left, _ = mcp_server2
         data = assert_payload(server.setools_diff_policies(
-            left, left, components=["types"],), toplevel_key_count=5)
+            left, left, components=["types"],))
         assert data["result"]["types"]["added"] == []
         assert data["result"]["types"]["removed"] == []
         assert data["count"] == 0
@@ -604,7 +600,7 @@ class TestDiffPolicies:
         # tests/library/mcp/diff_left.conf vs policy-full.33 differ in TE rules
         server, left, right = mcp_server2
         data = assert_payload(server.setools_diff_policies(
-            left, right, components=["te_rules", "types"]), toplevel_key_count=5)
+            left, right, components=["te_rules", "types"]))
         diffs = data["result"]
         # The two full policy files should differ in at least TE rules or types
         has_any_diff = (
@@ -627,7 +623,7 @@ class TestDiffPolicies:
                                           mcp_server2: tuple[SEToolsMCPServer, str, str]) -> None:
         server, left, right = mcp_server2
         data = assert_payload(server.setools_diff_policies(
-            left, right, components=["te_rules"]), toplevel_key_count=5)
+            left, right, components=["te_rules"]))
         te = data["result"]["te_rules"]
         for key in ("added_allows", "removed_allows", "modified_allows"):
             assert key in te
@@ -636,7 +632,7 @@ class TestDiffPolicies:
                                   mcp_server2: tuple[SEToolsMCPServer, str, str]) -> None:
         server, left, right = mcp_server2
         data = assert_payload(server.setools_diff_policies(
-            left, right, components=["rbac_rules"]), toplevel_key_count=5)
+            left, right, components=["rbac_rules"]))
         rbac = data["result"]["rbac_rules"]
         for key in ("added_role_allows", "removed_role_allows",
                     "added_role_transitions", "removed_role_transitions"):
@@ -646,7 +642,7 @@ class TestDiffPolicies:
                                  mcp_server2: tuple[SEToolsMCPServer, str, str]) -> None:
         server, left, right = mcp_server2
         data = assert_payload(server.setools_diff_policies(
-            left, right, components=["mls_rules"]), toplevel_key_count=5)
+            left, right, components=["mls_rules"]))
         mls = data["result"]["mls_rules"]
         for key in ("added_range_transitions", "removed_range_transitions"):
             assert key in mls
@@ -655,7 +651,7 @@ class TestDiffPolicies:
                                 mcp_server2: tuple[SEToolsMCPServer, str, str]) -> None:
         server, left, right = mcp_server2
         data = assert_payload(server.setools_diff_policies(
-            left, right, components=["portcons"]), toplevel_key_count=5)
+            left, right, components=["portcons"]))
         pc = data["result"]["portcons"]
         for key in ("added", "removed"):
             assert key in pc

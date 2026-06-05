@@ -57,7 +57,11 @@ jobs:
     - name: Install unit test dependencies
       shell: bash
       run: |
+        echo "::group::Update system packages from apt"
         sudo apt-get update -qq
+        echo "::endgroup::"
+
+        echo "::group::Install unit test dependencies from apt"
         sudo apt-get install -qqy \
             libegl1 \
             libdbus-1-3 \
@@ -75,10 +79,13 @@ jobs:
             x11-utils \
             x11-xserver-utils \
             xvfb
+        echo "::endgroup::"
 
         # Use pip to ensure the packages go to the configured Python environment
+        echo "::group::Install unit test dependencies from pip"
         python -m pip install -U --user \
             tox
+        echo "::endgroup::"
 
     - name: Run unit tests/linting
       shell: bash

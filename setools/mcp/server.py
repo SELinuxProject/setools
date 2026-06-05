@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import enum
 import ipaddress
 import itertools
 import json
@@ -30,9 +31,18 @@ __all__ = ("MCPEncoder",)
 
 TOOL_PREFIX: Final[str] = "setools_"
 
-_DIFF_COMPONENTS: Final[frozenset[str]] = frozenset(
-    {"te_rules", "rbac_rules", "types", "roles", "users", "portcons", "mls_rules"}
-)
+
+class DiffComponent(str, enum.Enum):
+
+    """Policy components that can be compared in a policy difference analysis."""
+
+    TE_RULES = "te_rules"
+    RBAC_RULES = "rbac_rules"
+    TYPES = "types"
+    ROLES = "roles"
+    USERS = "users"
+    PORTCONS = "portcons"
+    MLS_RULES = "mls_rules"
 
 
 class PolicyCache(dict):
@@ -98,11 +108,9 @@ class SEToolsMCPServer:
         results: list[Any] = list(itertools.islice(query.results(), 0, max_results+1))
         truncated: bool = len(results) > max_results
         returned_count = len(results) if not truncated else max_results
-        return json.dumps({"count": returned_count,
-                           "truncated": truncated,
-                           "result": results[:max_results]},
-                          cls=MCPEncoder,
-                          indent=2)
+        return SEToolsMCPServer._serialize_results(results[:max_results],
+                                                   returned_count,
+                                                   truncated)
 
     def _load_policy(self, policy: str | None = None) -> SELinuxPolicy:
         """
@@ -110,6 +118,15 @@ class SEToolsMCPServer:
         If *policy* is None, uses the server default or the running system policy.
         """
         return self._policy_cache[policy if policy else self.default_policy]
+
+    @staticmethod
+    def _serialize_results(result: Any, count: int, truncated: bool) -> str:
+        """Serialize results to JSON."""
+        return json.dumps({"count": count,
+                           "truncated": truncated,
+                           "result": result},
+                          cls=MCPEncoder,
+                          indent=2)
 
     #
     # MCP Tools
@@ -123,10 +140,7 @@ class SEToolsMCPServer:
         ] = None,
     ) -> str:
         """Return statistics and metadata about an SELinux policy."""
-        return json.dumps({"count": 1,
-                           "truncated": False,
-                           "result": self._load_policy(policy_path)},
-                          cls=MCPEncoder, indent=2)
+        return self._serialize_results(self._load_policy(policy_path), 1, False)
 
     def setools_search_te_rules(
         self,
@@ -933,29 +947,22 @@ class SEToolsMCPServer:
         Each transition step contains the source and target domain, the
         allow/type_transition rules that permit the transition, the entrypoint
         executables, setexec rules, and dynamic transition rules.
+
+        If the required dependency (NetworkX) is not installed, this method will
+        raise a NameError.
         """
-        try:
-            dta_mode = DomainTransitionAnalysis.Mode[mode]
-        except KeyError as e:
-            valid = sorted(m.name for m in DomainTransitionAnalysis.Mode)
-            raise ValueError(f"Invalid mode {mode!r}.  Valid modes: {valid}") from e
-
-        policy = self._load_policy(policy_path)
-
-        analysis = DomainTransitionAnalysis(
-            policy,
-            source=source,
-            target=target,
-            mode=dta_mode,
-            reverse=reverse,
-            depth_limit=depth_limit,
-            exclude=exclude,
-        )
+        analysis = DomainTransitionAnalysis(self._load_policy(policy_path),
+                                            source=source,
+                                            target=target,
+                                            mode=DomainTransitionAnalysis.Mode.lookup(mode),
+                                            reverse=reverse,
+                                            depth_limit=depth_limit,
+                                            exclude=exclude)
 
         results: list[Any] = []
         truncated = False
 
-        if dta_mode in DomainTransitionAnalysis.TRANSITIVE_MODES:
+        if analysis.mode in DomainTransitionAnalysis.TRANSITIVE_MODES:
             for path in analysis.results():
                 if len(results) >= max_results:
                     truncated = True
@@ -968,18 +975,7 @@ class SEToolsMCPServer:
                     break
                 results.append(transition)
 
-        return json.dumps(
-            {
-                "mode": mode,
-                "source": source,
-                "target": target,
-                "count": len(results),
-                "truncated": truncated,
-                "result": results,
-            },
-            cls=MCPEncoder,
-            indent=2,
-        )
+        return self._serialize_results(results, len(results), truncated)
 
     def setools_analyze_info_flow(
         self,
@@ -1035,30 +1031,23 @@ class SEToolsMCPServer:
 
         Each step includes the source and target types, the combined flow weight,
         and the allow rules that create the flow.
+
+        If the required dependency (NetworkX) is not installed, this method will
+        raise a NameError.
         """
-        try:
-            ifa_mode = InfoFlowAnalysis.Mode[mode]
-        except KeyError as e:
-            valid = sorted(m.name for m in InfoFlowAnalysis.Mode)
-            raise ValueError(f"Invalid mode {mode!r}.  Valid modes: {valid}") from e
-
-        policy = self._load_policy(policy_path)
-        perm_map = PermissionMap(perm_map_path)
-
-        analysis = InfoFlowAnalysis(
-            policy,
-            perm_map,
-            source=source,
-            target=target,
-            mode=ifa_mode,
-            min_weight=min_weight,
-            depth_limit=depth_limit,
-            exclude=exclude)
+        analysis = InfoFlowAnalysis(self._load_policy(policy_path),
+                                    PermissionMap(perm_map_path),
+                                    source=source,
+                                    target=target,
+                                    mode=InfoFlowAnalysis.Mode.lookup(mode),
+                                    min_weight=min_weight,
+                                    depth_limit=depth_limit,
+                                    exclude=exclude)
 
         results: list[Any] = []
         truncated = False
 
-        if ifa_mode in InfoFlowAnalysis.TRANSITIVE_MODES:
+        if analysis.mode in InfoFlowAnalysis.TRANSITIVE_MODES:
             for path in analysis.results():
                 if len(results) >= max_results:
                     truncated = True
@@ -1071,15 +1060,7 @@ class SEToolsMCPServer:
                     break
                 results.append(step)
 
-        return json.dumps(
-            {
-                "count": len(results),
-                "truncated": truncated,
-                "result": results,
-            },
-            cls=MCPEncoder,
-            indent=2,
-        )
+        return self._serialize_results(results, len(results), truncated)
 
     def setools_diff_policies(
         self,
@@ -1089,7 +1070,7 @@ class SEToolsMCPServer:
             list[str] | None,
             "Components to compare.  If omitted, defaults to: te_rules, rbac_rules, "
             "types, roles, users.  Available components: "
-            + ", ".join(sorted(_DIFF_COMPONENTS)),
+            + ", ".join(sorted(DiffComponent)),
         ] = None,
         max_per_component: Annotated[
             int,
@@ -1111,17 +1092,8 @@ class SEToolsMCPServer:
         right = SELinuxPolicy(right_policy)
         diff = PolicyDifference(left, right)
 
-        selected: set[str] = (
-            set(components)
-            if components
-            else {"te_rules", "rbac_rules", "types", "roles", "users"}
-        )
-        unknown = selected - _DIFF_COMPONENTS
-        if unknown:
-            raise ValueError(
-                f"Unknown component(s): {sorted(unknown)}.  "
-                f"Valid components: {sorted(_DIFF_COMPONENTS)}"
-            )
+        selected: set[DiffComponent] = {DiffComponent(c) for c in components} if components \
+            else {DiffComponent.TE_RULES}
 
         def _cap(items: Any, limit: int) -> tuple[list[Any], bool]:
             lst = sorted(items)
@@ -1131,7 +1103,7 @@ class SEToolsMCPServer:
         any_truncated = False
         differences: dict[str, Any] = {}
 
-        if "te_rules" in selected:
+        if DiffComponent.TE_RULES in selected:
             added, trunc_a = _cap(diff.added_allows, max_per_component)
             removed, trunc_r = _cap(diff.removed_allows, max_per_component)
             modified, trunc_m = _cap(diff.modified_allows, max_per_component)
@@ -1160,7 +1132,7 @@ class SEToolsMCPServer:
                 },
             }
 
-        if "types" in selected:
+        if DiffComponent.TYPES in selected:
             added, trunc_a = _cap(diff.added_types, max_per_component)
             removed, trunc_r = _cap(diff.removed_types, max_per_component)
             count += len(added) + len(removed)
@@ -1172,7 +1144,7 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        if "roles" in selected:
+        if DiffComponent.ROLES in selected:
             added, trunc_a = _cap(diff.added_roles, max_per_component)
             removed, trunc_r = _cap(diff.removed_roles, max_per_component)
             count += len(added) + len(removed)
@@ -1184,7 +1156,7 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        if "users" in selected:
+        if DiffComponent.USERS in selected:
             added, trunc_a = _cap(diff.added_users, max_per_component)
             removed, trunc_r = _cap(diff.removed_users, max_per_component)
             count += len(added) + len(removed)
@@ -1196,7 +1168,7 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        if "rbac_rules" in selected:
+        if DiffComponent.RBAC_RULES in selected:
             added_ra, trunc_a = _cap(diff.added_role_allows, max_per_component)
             removed_ra, trunc_r = _cap(diff.removed_role_allows, max_per_component)
             added_rt, trunc_at = _cap(diff.added_role_transitions, max_per_component)
@@ -1222,7 +1194,7 @@ class SEToolsMCPServer:
                 },
             }
 
-        if "mls_rules" in selected:
+        if DiffComponent.MLS_RULES in selected:
             added, trunc_a = _cap(diff.added_range_transitions, max_per_component)
             removed, trunc_r = _cap(diff.removed_range_transitions, max_per_component)
             count += len(added) + len(removed)
@@ -1238,7 +1210,7 @@ class SEToolsMCPServer:
                 },
             }
 
-        if "portcons" in selected:
+        if DiffComponent.PORTCONS in selected:
             added, trunc_a = _cap(diff.added_portcons, max_per_component)
             removed, trunc_r = _cap(diff.removed_portcons, max_per_component)
             count += len(added) + len(removed)
@@ -1250,14 +1222,4 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        return json.dumps(
-            {
-                "left_policy": left_policy,
-                "right_policy": right_policy,
-                "count": count,
-                "truncated": any_truncated,
-                "result": differences,
-            },
-            cls=MCPEncoder,
-            indent=2,
-        )
+        return self._serialize_results(differences, count, any_truncated)
