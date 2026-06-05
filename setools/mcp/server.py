@@ -98,11 +98,9 @@ class SEToolsMCPServer:
         results: list[Any] = list(itertools.islice(query.results(), 0, max_results+1))
         truncated: bool = len(results) > max_results
         returned_count = len(results) if not truncated else max_results
-        return json.dumps({"count": returned_count,
-                           "truncated": truncated,
-                           "result": results[:max_results]},
-                          cls=MCPEncoder,
-                          indent=2)
+        return SEToolsMCPServer._serialize_results(results[:max_results],
+                                                   returned_count,
+                                                   truncated)
 
     def _load_policy(self, policy: str | None = None) -> SELinuxPolicy:
         """
@@ -110,6 +108,15 @@ class SEToolsMCPServer:
         If *policy* is None, uses the server default or the running system policy.
         """
         return self._policy_cache[policy if policy else self.default_policy]
+
+    @staticmethod
+    def _serialize_results(result: Any, count: int, truncated: bool) -> str:
+        """Serialize results to JSON."""
+        return json.dumps({"count": count,
+                           "truncated": truncated,
+                           "result": result},
+                          cls=MCPEncoder,
+                          indent=2)
 
     #
     # MCP Tools
@@ -123,10 +130,7 @@ class SEToolsMCPServer:
         ] = None,
     ) -> str:
         """Return statistics and metadata about an SELinux policy."""
-        return json.dumps({"count": 1,
-                           "truncated": False,
-                           "result": self._load_policy(policy_path)},
-                          cls=MCPEncoder, indent=2)
+        return self._serialize_results(self._load_policy(policy_path), 1, False)
 
     def setools_search_te_rules(
         self,
@@ -961,18 +965,7 @@ class SEToolsMCPServer:
                     break
                 results.append(transition)
 
-        return json.dumps(
-            {
-                "mode": mode,
-                "source": source,
-                "target": target,
-                "count": len(results),
-                "truncated": truncated,
-                "result": results,
-            },
-            cls=MCPEncoder,
-            indent=2,
-        )
+        return self._serialize_results(results, len(results), truncated)
 
     def setools_analyze_info_flow(
         self,
@@ -1057,15 +1050,7 @@ class SEToolsMCPServer:
                     break
                 results.append(step)
 
-        return json.dumps(
-            {
-                "count": len(results),
-                "truncated": truncated,
-                "result": results,
-            },
-            cls=MCPEncoder,
-            indent=2,
-        )
+        return self._serialize_results(results, len(results), truncated)
 
     def setools_diff_policies(
         self,
@@ -1236,14 +1221,4 @@ class SEToolsMCPServer:
                 "removed_truncated": trunc_r,
             }
 
-        return json.dumps(
-            {
-                "left_policy": left_policy,
-                "right_policy": right_policy,
-                "count": count,
-                "truncated": any_truncated,
-                "result": differences,
-            },
-            cls=MCPEncoder,
-            indent=2,
-        )
+        return self._serialize_results(differences, count, any_truncated)
