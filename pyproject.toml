@@ -9,6 +9,8 @@ name = "setools"
 version = "4.7.0.dev"
 description="SELinux policy analysis tools."
 authors = [{name = "Chris PeBenito", email="pebenito@ieee.org"}]
+license = "LGPL-2.1-only AND GPL-2.0-only"
+license-files = ["COPYING*"]
 readme = {file = "README.md", content-type = "text/markdown"}
 urls.Homepage = "https://github.com/SELinuxProject/setools"
 urls.Repository = "https://github.com/SELinuxProject/setools.git"
@@ -26,13 +28,12 @@ keywords = ["SELinux",
             "apol"]
 
 # https://pypi.org/classifiers/
-classifiers = ["Development Status :: 5 - Production/Stable",
+classifiers = ["Development Status :: 6 - Mature",
                "Environment :: Console",
                "Environment :: X11 Applications :: Qt",
                "Intended Audience :: Information Technology",
-               "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
-               "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
                "Programming Language :: Cython",
+               "Programming Language :: Python :: 3 :: Only",
                "Topic :: Security",
                "Topic :: Utilities",
                "Typing :: Typed"]

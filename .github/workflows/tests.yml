@@ -9,6 +9,8 @@ jobs:
       # This should be the minimum version required to run setools:
       version: "3.9"
       python-version: "3.10"
+      # Not used in setools, but needed for the userspace build:
+      ruby-version: "3.3"
 
   test_setools:
     needs: build_userspace
