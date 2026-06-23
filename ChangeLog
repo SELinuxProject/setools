@@ -1,3 +1,9 @@
+*setools-4.7.0 (23 Jun 2026)
+
+  * Add MCP server to provide LLMs the ability to analyze policy.
+  * The source distribution is now a Python sdist and can be installed
+    using pip.
+
 *setools-4.6.0 (09 Sep 2025)
 
   * Add seinfo option to see roles allowed for a specified type.
