@@ -3,10 +3,34 @@
 import sys
 import os
 import glob
+import shutil
 from pathlib import Path
 
-from setuptools import Extension, setup
+from setuptools import Command, Extension, build_meta, setup
 from Cython.Build import cythonize
+
+
+class CleanCommand(Command):
+    """Extend clean --all to delete generated build artifacts."""
+
+    build_backend = build_meta
+    description = "clean build artifacts"
+    user_options = [('all', 'a', 'remove build artifacts and generated files')]
+    boolean_options = ['all']
+    all: bool
+
+    def initialize_options(self):
+        self.all = False
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        shutil.rmtree(Path('build'), ignore_errors=True)
+        shutil.rmtree(Path('dist'), ignore_errors=True)
+        shutil.rmtree(Path('setools.egg-info'), ignore_errors=True)
+        if self.all:
+            Path('setools/policyrep.c').unlink(missing_ok=True)
 
 
 # Library linkage
@@ -67,6 +91,7 @@ for lang in linguas:
 
 # see pyproject.toml for most package options.
 setup(data_files=installed_data,
+      cmdclass={'clean': CleanCommand},
       ext_modules=cythonize(ext_py_mods, include_path=['setools/policyrep'],
                             annotate=cython_annotate,
                             compiler_directives={"language_level": 3,
