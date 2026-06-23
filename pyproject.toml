@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "setools"
-version = "4.7.0.dev"
+version = "4.7.0"
 description="SELinux policy analysis tools."
 authors = [{name = "Chris PeBenito", email="pebenito@ieee.org"}]
 license = "LGPL-2.1-only AND GPL-2.0-only"
