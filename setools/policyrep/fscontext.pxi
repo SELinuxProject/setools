@@ -79,7 +79,7 @@ cdef class GenfsFiletype(int):
                        "chr_file": S_IFCHR}
 
     @classmethod
-    def from_class(cls, tclass: ObjClass | str) -> "GenfsFiletype":
+    def from_class(cls, tclass: ObjClass | str) -> GenfsFiletype:
         """Create a GenfsFiletype from an object class."""
         name = tclass if isinstance(tclass, str) else tclass.name
         return cls(cls._sclass_to_stat[name])
