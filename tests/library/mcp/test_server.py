@@ -6,9 +6,10 @@
 #
 # Xen-specific tools are tested in classes marked with the Xen policy.
 #
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,protected-access
 
 import json
+from types import SimpleNamespace
 
 import pytest
 
@@ -51,6 +52,60 @@ def assert_payload(payload: str) -> dict:
     assert isinstance(data["count"], int), f"{data!r}"
     assert data["count"] >= 0, f"{data!r}"
     return data
+
+
+@pytest.mark.obj_args(SELINUX_POLICY)
+class TestAuthProvider:
+    def test_no_auth_by_default(self, compiled_policy) -> None:
+        assert SEToolsMCPServer(compiled_policy.path).mcp.auth is None
+
+    def test_auth_provider_is_used(self, compiled_policy) -> None:
+        jwt = pytest.importorskip("fastmcp.server.auth.providers.jwt")
+        auth = jwt.JWTVerifier(jwks_uri="https://auth.example.com/jwks")
+
+        assert SEToolsMCPServer(compiled_policy.path, auth=auth).mcp.auth is auth
+
+
+@pytest.mark.obj_args(SELINUX_POLICY)
+class TestSessionCache:
+    def test_max_session_caches_must_be_positive(self, compiled_policy) -> None:
+        with pytest.raises(ValueError):
+            SEToolsMCPServer(compiled_policy.path, max_session_caches=0)
+
+    def test_policy_and_file_context_caches_are_isolated(
+        self, compiled_policy, monkeypatch
+    ) -> None:
+        session = SimpleNamespace(session_id="session-a")
+        monkeypatch.setattr("setools.mcp.server.get_context", lambda: session)
+        server = SEToolsMCPServer(compiled_policy.path)
+
+        policy_a = server._load_policy()
+        file_contexts_a = server._load_file_contexts(FILE_CONTEXTS)
+
+        session.session_id = "session-b"
+        policy_b = server._load_policy()
+        file_contexts_b = server._load_file_contexts(FILE_CONTEXTS)
+
+        assert policy_b is not policy_a
+        assert file_contexts_b is not file_contexts_a
+
+        session.session_id = "session-a"
+        assert server._load_policy() is policy_a
+        assert server._load_file_contexts(FILE_CONTEXTS) is file_contexts_a
+
+    def test_session_caches_are_bounded(self, compiled_policy, monkeypatch) -> None:
+        session = SimpleNamespace(session_id="session-a")
+        monkeypatch.setattr("setools.mcp.server.get_context", lambda: session)
+        server = SEToolsMCPServer(compiled_policy.path, max_session_caches=2)
+
+        cache_a = server._get_session_cache()
+        session.session_id = "session-b"
+        server._get_session_cache()
+        session.session_id = "session-c"
+        server._get_session_cache()
+
+        session.session_id = "session-a"
+        assert server._get_session_cache() is not cache_a
 
 
 @pytest.mark.obj_args(SELINUX_POLICY)

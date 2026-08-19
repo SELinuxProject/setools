@@ -1,0 +1,118 @@
+." SPDX-License-Identifier: LGPL-2.1-only
+.TH setools-mcp 1 2026-08-19 "SELinux Project" "SETools: SELinux Policy Analysis Tools"
+
+.SH NAME
+setools-mcp \- SELinux policy analysis server for Model Context Protocol clients
+
+.SH SYNOPSIS
+.B setools-mcp
+.RB [ \-\-policy PATH ]
+.RB [ \-v | \-\-verbose ]
+.RB [ \-\-debug ]
+.RI [ CONFIG ]
+
+.SH DESCRIPTION
+.B setools-mcp
+runs a Model Context Protocol (MCP) server exposing SETools SELinux policy analysis tools.
+The server communicates over the stdio transport when no configuration file is supplied.
+When a configuration file is supplied, it communicates over HTTP and uses the file's bind
+address, port, and authentication settings.
+
+Authentication applies only to the HTTP transport. The stdio transport relies on the security
+of the local execution environment.
+
+.SH CONFIGURATION
+.I CONFIG
+is an optional path to an INI-format configuration file parsed by
+.BR setools.mcp.config.MCPConfig .
+The file may contain a
+.B [server]
+section with
+.B host
+and
+.B port
+options, an
+.B [auth]
+section selecting an authentication method, and one section containing options for that method.
+
+The supported authentication methods are
+.BR none ,
+.BR jwt ,
+.BR static ,
+.BR debug ,
+.BR introspection ,
+.BR remote ,
+.BR oauth_proxy ,
+and
+.BR oidc_proxy .
+The full OAuth authorization-server implementation,
+.BR OAuthProvider ,
+is not supported by the configuration file.
+
+The
+.B remote
+and
+.B oauth_proxy
+methods require a nested token verifier selected with the
+.B token_verifier
+option. The verifier is configured in its corresponding section, such as
+.BR [jwt] .
+
+See
+.I docs/MCP-CONFIG.md
+and the example files in
+.I docs/
+for the complete option reference and provider-specific examples.
+
+.SH OPTIONS
+.TP
+.B "--policy PATH"
+Use PATH as the default SELinux policy file for analysis.
+.TP
+.IP CONFIG
+Load CONFIG as the MCP server configuration file. Supplying CONFIG selects the HTTP transport;
+omitting it selects stdio.
+.TP
+.BR \-v , \-\-verbose
+Print additional informational messages.
+.TP
+.B \-\-debug
+Enable debugging output and display Python warnings by default.
+.TP
+.BR \-h , \-\-help
+Display help information and exit.
+
+.SH EXAMPLES
+.nf
+Start the server over stdio without authentication:
+# setools-mcp
+
+Start an HTTP server using the JWT configuration example:
+# setools-mcp docs/mcp-auth-jwt.ini
+
+Start an HTTP server on the configured address with verbose logging:
+# setools-mcp -v /etc/setools/mcp.ini
+.fi
+
+.SH FILES
+.TP
+.I docs/MCP-CONFIG.md
+Configuration format and authentication option reference.
+.TP
+.I docs/mcp-auth-*.ini
+Example configuration files for each supported authentication method.
+
+.SH AUTHOR
+Chris PeBenito <pebenito@ieee.org>
+
+.SH BUGS
+Please report bugs via the SETools bug tracker:
+.UR https://github.com/SELinuxProject/setools/issues
+.UE
+
+.SH SEE ALSO
+.BR seinfo (1),
+.BR sesearch (1),
+.BR sediff (1),
+.BR sedta (1),
+.BR seinfoflow (1)

@@ -65,6 +65,11 @@ include = ["setools*"]
 [tool.setuptools.package-data]
 "*" = ["*.css", "*.html", "perm_map", "py.typed"]
 
+[tool.setuptools.data-files]
+"share/docs/setools" = ["docs/*"]
+"share/man/man1" = ["man/*.1"]
+"share/man/ru/man1" = ["man/ru/*.1"]
+
 [tool.setuptools.exclude-package-data]
 "*" = ["*.c", "*.pyi", "*.pyx"]
 

@@ -1,7 +1,5 @@
 # SPDX-License-Identifier: LGPL-2.1-only
 
-from __future__ import annotations
-
 import enum
 import ipaddress
 import itertools
@@ -11,6 +9,8 @@ from typing import Annotated, Any, Final, Literal
 
 try:
     from fastmcp import FastMCP
+    from fastmcp.server.auth import AuthProvider
+    from fastmcp.server.dependencies import get_context
 except ImportError as iex:
     logging.getLogger(__name__).debug(f"{iex.name} failed to import.")
 
@@ -27,11 +27,14 @@ from .. import (BoolQuery, BoundsQuery, BoundsRuletype, CategoryQuery, CommonQue
                 RoleTypesQuery, SELinuxPolicy, SensitivityQuery, TERuleQuery, TERuletype,
                 TypeAttributeQuery, TypeQuery, UserQuery)
 from .encoder import MCPEncoder
+from .session import SessionCache, SessionData
 
-__all__ = ("MCPEncoder",)
+__all__ = ("SEToolsMCPServer",)
 
 TOOL_PREFIX: Final[str] = "setools_tool_"
 PROMPT_PREFIX: Final[str] = "setools_prompt_"
+LOCAL_SESSION: Final[str] = "__local__"
+DEFAULT_MAX_SESSION_CACHES: Final[int] = 64
 
 
 class DiffComponent(str, enum.Enum):
@@ -47,39 +50,27 @@ class DiffComponent(str, enum.Enum):
     MLS_RULES = "mls_rules"
 
 
-class PolicyCache(dict):
-    """Simple cache for loaded policies"""
-    def __missing__(self, key: str | None) -> SELinuxPolicy:
-        self[key] = SELinuxPolicy(key)
-        return self[key]
-
-
-class FileContextsCache(dict):
-    """Simple cache for loaded file_contexts"""
-    def __missing__(self, key: str | None) -> FileContexts:
-        self[key] = FileContexts(None, key)
-        return self[key]
-
-
 class SEToolsMCPServer:
     """
     MCP server encapsulating all setools policy analysis tools.
 
-    All mutable state (policy cache, default policy path, FastMCP instance)
-    is held as instance attributes; there are no module-level globals.
+    Policy and file-context caches are isolated by MCP session. Direct method
+    calls outside an MCP request use a bounded local fallback cache.
     """
 
-    def __init__(self, default_policy: str | None = None) -> None:
+    def __init__(self, default_policy: str | None = None,
+                 auth: AuthProvider | None = None,
+                 max_session_caches: int = DEFAULT_MAX_SESSION_CACHES) -> None:
         self.log: logging.Logger = logging.getLogger(__name__)
         self.default_policy: str | None = default_policy
-        self._policy_cache: PolicyCache = PolicyCache()
-        self._fc_cache: FileContextsCache = FileContextsCache()
+        self._session_cache: SessionCache = SessionCache(max_session_caches)
 
         try:
-            # Init the policy cache.  Load the default policy as the None key and its path.
+            # Initialize the local fallback cache for direct calls and stdio startup.
             policy = self._load_policy()
-            # Use policy.path to handle the case where default_policy is None.
-            self._policy_cache[policy.path] = policy
+            session_cache = self._get_session_cache()
+            with session_cache.lock:
+                session_cache.policies[policy.path] = policy
             self.log.debug(f"Loaded default policy from {policy.path}")
         except (OSError, RuntimeError) as err:
             self.log.error(f"Failed to load default policy: {err}")
@@ -92,6 +83,7 @@ class SEToolsMCPServer:
                 "domain transition analysis, information flow analysis, policy diffing,"
                 "and file_context lookup."
             ),
+            auth=auth,
         )
 
         for name in dir(self):
@@ -131,17 +123,33 @@ class SEToolsMCPServer:
 
     def _load_file_contexts(self, fc_path: str | None = None) -> FileContexts:
         """
-        Return a (cached) FileContexts for file_contexts at path *fc_path*.
+        Return a session-cached FileContexts for file_contexts at path *fc_path*.
         If *fc_path* is None, uses the system default file_contexts.
         """
-        return self._fc_cache[fc_path]
+        session_cache = self._get_session_cache()
+        with session_cache.lock:
+            self.log.info(f"Loading file contexts from {fc_path}")
+            return session_cache.file_contexts[fc_path]
 
     def _load_policy(self, policy: str | None = None) -> SELinuxPolicy:
         """
-        Return a (cached) SELinuxPolicy for policy at path *policy*.
+        Return a session-cached SELinuxPolicy for policy at path *policy*.
         If *policy* is None, uses the server default or the running system policy.
         """
-        return self._policy_cache[policy if policy else self.default_policy]
+        session_cache = self._get_session_cache()
+        with session_cache.lock:
+            self.log.info(
+                f"Loading SELinux policy from {policy if policy else self.default_policy}")
+            return session_cache.policies[policy if policy else self.default_policy]
+
+    def _get_session_cache(self) -> SessionData:
+        """Return the cache owned by the active MCP session."""
+        try:
+            session_id = get_context().session_id
+        except RuntimeError:
+            session_id = LOCAL_SESSION
+
+        return self._session_cache.get(session_id)
 
     @staticmethod
     def _serialize_results(result: Any, count: int, truncated: bool) -> str:
@@ -1147,12 +1155,11 @@ class SEToolsMCPServer:
         returns the items that were added to the right policy, removed from the
         left policy, and (for TE allow rules) modified.
 
-        Policies are loaded fresh — not from the server cache — so this tool
-        can be used to compare any two policy files regardless of which policy
-        the server was started with.
+        Policies are loaded from the active session's cache so sessions never
+        share policy handles.
         """
-        left = SELinuxPolicy(left_policy)
-        right = SELinuxPolicy(right_policy)
+        left = self._load_policy(left_policy)
+        right = self._load_policy(right_policy)
         diff = PolicyDifference(left, right)
 
         selected: set[DiffComponent] = {DiffComponent(c) for c in components} if components \

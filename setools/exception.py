@@ -380,3 +380,30 @@ class AnalysisException(SEToolsException):
 
     """Base class for all analysis exceptions."""
     pass
+
+
+#
+# MCP server exceptions
+#
+class InvalidMCPConfig(ValueError, SEToolsException):
+
+    """Base class for invalid MCP server configurations."""
+    pass
+
+
+class InvalidMCPOption(InvalidMCPConfig):
+
+    """Exception for invalid, missing, or unknown MCP configuration options."""
+    pass
+
+
+class InvalidMCPAuthMethod(InvalidMCPConfig):
+
+    """Exception when an unknown MCP authentication method is requested."""
+    pass
+
+
+class InvalidMCPAuthOption(InvalidMCPOption):
+
+    """Exception for invalid, missing, or unknown MCP authentication options."""
+    pass
